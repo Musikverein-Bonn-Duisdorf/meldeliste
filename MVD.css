@@ -1,0 +1,35 @@
+h1 {
+    color: #003a99;
+}
+
+.list {
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.list th {
+    padding: 15px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #0858d8;
+    color: white;
+}
+
+.list td {
+    padding: 15px;
+}
+
+.list th, .list td {
+    border: 1px solid #ddd;
+}
+
+.list .right {
+    /* text-align: right; */
+}
+
+.list .left {
+    /* text-align: left; */
+}
+
+.list tr:nth-child(even){background-color: #dbe8ff;}
+.list tr:hover {background-color: #ccc;}

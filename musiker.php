@@ -4,10 +4,10 @@ include "header.php";
 
 <h1>Liste aller Musiker</h1>
 
-<table>
+<table class="list">
 <thead>
 <tr>
-<th>Index</th><th>Vorname</th><th>Nachname</th><th>Mitglied</th><th>Instrument</th><th>Stimme</th><th>getMail</th>
+<th>Vorname</th><th>Nachname</th><th>Stimme</th><th>Instrument</th><th>Mitglied</th><th>getMail</th>
 </tr>
 </thead>
 <tbody>

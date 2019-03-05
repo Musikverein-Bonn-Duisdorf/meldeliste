@@ -120,13 +120,12 @@ class User
     }
     public function printTableLine() {
         echo "<tr>\n";
-        echo "  <td>".$this->Index."</td>\n";
         echo "  <td>".$this->Vorname."</td>\n";
         echo "  <td>".$this->Nachname."</td>\n";
-        echo "  <td>".$this->Mitglied."</td>\n";
-        echo "  <td>".$this->Stimme.".</td>\n";
-        echo "  <td>".$this->iName."</td>\n";
-        echo "  <td>".$this->getMail."</td>\n";
+        echo "  <td class=\"right\">".$this->Stimme.".</td>\n";
+        echo "  <td class=\"left\">".$this->iName."</td>\n";
+        echo "  <td>".bool2string($this->Mitglied)."</td>\n";
+        echo "  <td>".bool2string($this->getMail)."</td>\n";
         echo "</tr>\n";
     }
 };
