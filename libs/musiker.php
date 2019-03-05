@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'Passhash' => null, 'Mitglied' => null, 'Instrument' => null, 'Stimme' => null, 'getMail' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'Passhash' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'getMail' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -10,6 +10,7 @@ class User
 	    case 'Passhash':
 	    case 'Mitglied':
 	    case 'Instrument':
+	    case 'iName':
 	    case 'Stimme':
 	    case 'getMail':
             return $this->_data[$key];
@@ -34,6 +35,9 @@ class User
             break;
 	    case 'Instrument':
             $this->_data['key'] = (bool) $val;
+            break;
+	    case 'iName':
+            $this->_data['key'] = trim($val);
             break;
 	    case 'getMail':
             $this->_data['key'] = (bool) $val;
@@ -103,7 +107,7 @@ class User
     }
     public static function &load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `MVD`.`User` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `MVD`.`User` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
         $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -120,8 +124,8 @@ class User
         echo "\t<td>".$this->Vorname."</td>\n";
         echo "\t<td>".$this->Nachname."</td>\n";
         echo "\t<td>".$this->Mitglied."</td>\n";
-        echo "\t<td>".$this->Instrument."</td>\n";
-        echo "\t<td>".$this->Stimme."</td>\n";
+        echo "\t<td>".$this->iName."</td>\n";
+        echo "\t<td>".$this->Stimme.".</td>\n";
         echo "\t<td>".$this->getMail."</td>\n";
         echo "</tr>\n";
     }
