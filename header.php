@@ -7,8 +7,7 @@
       ?>
       <!-- successfully included php libraries -->
       <?php
-          $conn=mysqli_connect($config['server'], $config['user'], $config['password']) or die (mysqli_error($conn));
-          mysqli_select_db($conn, $config['database']) or die(mysqli_error($conn));
+        mysqli_select_db($GLOBALS['conn'], $config['database']) or die(mysqli_error($conn));
       ?>
       <!-- successfully connected to MySQL database -->
       <meta charset="utf-8">
