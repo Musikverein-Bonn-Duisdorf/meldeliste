@@ -1,9 +1,6 @@
 <?php
 
-include "file1.php";
-include "file2.php";
-.
-.
-.
+include "config.php";
+include "common.php";
 
 ?>
