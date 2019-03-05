@@ -13,7 +13,7 @@ include "header.php";
 <tbody>
 
 <?php
-$sql = 'SELECT `Index` FROM `MVD`.`User`;';
+$sql = 'SELECT `Index` FROM `MVD`.`User` ORDER BY `Nachname`, `Vorname`;';
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new User;
