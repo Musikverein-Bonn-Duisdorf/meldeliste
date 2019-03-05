@@ -116,13 +116,13 @@ class User
     }
     public function printTableLine() {
         echo "<tr>\n";
-        echo "\t<td>".$this->Index."<td>\n";
-        echo "\t<td>".$this->Vorname."<td>\n";
-        echo "\t<td>".$this->Nachname."<td>\n";
-        echo "\t<td>".$this->Mitglied."<td>\n";
-        echo "\t<td>".$this->Instrument."<td>\n";
-        echo "\t<td>".$this->Stimme."<td>\n";
-        echo "\t<td>".$this->getMail."<td>\n";
+        echo "\t<td>".$this->Index."</td>\n";
+        echo "\t<td>".$this->Vorname."</td>\n";
+        echo "\t<td>".$this->Nachname."</td>\n";
+        echo "\t<td>".$this->Mitglied."</td>\n";
+        echo "\t<td>".$this->Instrument."</td>\n";
+        echo "\t<td>".$this->Stimme."</td>\n";
+        echo "\t<td>".$this->getMail."</td>\n";
         echo "</tr>\n";
     }
 };
