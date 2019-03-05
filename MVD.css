@@ -19,6 +19,10 @@ h1 {
     padding: 15px;
 }
 
+.list a {
+    text-decoration: none;
+}
+
 .list th, .list td {
     border: 1px solid #ddd;
 }

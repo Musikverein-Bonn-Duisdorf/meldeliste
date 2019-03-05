@@ -1,5 +1,11 @@
 <?php
 include "header.php";
+
+if(isset($_POST['insert'])) {
+    $n = new User;
+    $n->fill_from_array($_POST);
+    $n->save();
+}
 ?>
 
 <h1>Liste aller Musiker</h1>
@@ -7,7 +13,7 @@ include "header.php";
 <table class="list">
 <thead>
 <tr>
-<th>Vorname</th><th>Nachname</th><th>Stimme</th><th>Instrument</th><th>Mitglied</th><th>getMail</th>
+<th>Vorname</th><th>Nachname</th><th>Stimme</th><th>Instrument</th><th>Email</th><th>Mitglied</th><th>getMail</th>
 </tr>
 </thead>
 <tbody>
