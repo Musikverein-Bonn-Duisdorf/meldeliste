@@ -10,7 +10,10 @@ if(isset($_POST['insert'])) {
 
 <h1>Termin&uuml;bersicht</h1>
 
-<form method="get" action="new-termin.php">
+<form action="/MVD">
+    <button class="button" type="submit">Home</button>
+</form>
+<form action="new-termin.php">
     <button class="button" type="submit">neuen Termin anlegen</button>
 </form>
     <br />
