@@ -51,10 +51,14 @@ while($row = mysqli_fetch_array($dbr)) {
 
 <?php if($state == 3) { ?>
 <h1>Termin ausw&auml;hlen</h1>
+    <form action="" method="POST">
+    <button class="button" type="submit" name="termin">Es gibt noch keinen Termin</button>
+    </form>
 <?php } ?>
 
 <?php if($state == 4) { ?>
     <h1>Danke f&uuml;r deine Meldung</h1>
+    <meta http-equiv="refresh" content="3;public-entry.php" />
 <?php } ?>
 
 <?php
