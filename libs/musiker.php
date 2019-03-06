@@ -23,7 +23,7 @@ class User
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
-            $this->_data[$key] = $val;
+            $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
             $this->_data[$key] = trim($val);
