@@ -48,6 +48,15 @@ while($row = mysqli_fetch_array($dbr)) {
 </form>
 <?php } ?>
 
+
+<?php if($state == 3) { ?>
+<h1>Termin ausw&auml;hlen</h1>
+<?php } ?>
+
+<?php if($state == 4) { ?>
+    <h1>Danke f&uuml;r deine Meldung</h1>
+<?php } ?>
+
 <?php
 include "footer.php";
 ?>
