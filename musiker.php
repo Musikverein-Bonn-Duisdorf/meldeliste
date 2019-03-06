@@ -11,7 +11,7 @@ if(isset($_POST['insert'])) {
 <h1>Liste aller Musiker</h1>
 
 <form method="get" action="new-musiker.php">
-    <button type="submit">neuen Musiker anlegen</button>
+    <button class="button" type="submit">neuen Musiker anlegen</button>
 </form>
     <br />
 <table class="list">
