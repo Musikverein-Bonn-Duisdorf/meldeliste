@@ -1,4 +1,6 @@
 <?php
+session_start();
+$_SESSION['page']='musiker';
 include "header.php";
 
 if(isset($_POST['insert'])) {

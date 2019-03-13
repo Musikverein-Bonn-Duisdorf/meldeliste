@@ -1,4 +1,6 @@
 <?php
+session_start();
+$_SESSION['page']='home';
 include "header.php";
 ?>
 <ul>

@@ -11,4 +11,10 @@ function instrumentOption() {
         echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
     }
 }
+
+function getPage($string) {
+    if($string == $_SESSION['page']) {
+        echo ' w3-dark-gray';
+    }
+}
 ?>
