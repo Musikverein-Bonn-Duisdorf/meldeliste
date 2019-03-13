@@ -9,20 +9,13 @@ if(isset($_POST['insert'])) {
     $n->save();
 }
 ?>
-
-<h1>Termin&uuml;bersicht</h1>
-
-<form action="/MVD">
-    <button class="button" type="submit">Home</button>
-</form>
-<form action="new-termin.php">
-    <button class="button" type="submit">neuen Termin anlegen</button>
-</form>
-    <br />
-<table class="list">
+<div class="w3-container w3-dark-gray">
+<h2>Termin&uuml;bersicht</h2>
+</div>
+<table class="w3-table-all w3-hoverable">
 <thead>
 <tr>
-<th>Datum</th><th>Beginn</th><th>Ende</th><th>Name</th><th>Beschreibung</th><th>Ort1</th><th>Ort2</th><th>Ort3</th><th>Ort4</th><th>Auftritt</th><th>published</th>
+<th>Datum</th><th>Beginn</th><th>Ende</th><th>Name</th><th>Beschreibung</th><th>Ort1</th><th>Ort2</th><th>Ort3</th><th>Ort4</th><th>published</th>
 </tr>
 </thead>
 <tbody>
@@ -39,11 +32,11 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printTableLine();
 }
 ?>
-
 </tbody>
 </table>
-
-
+<form action="new-termin.php">
+    <button class="button" type="submit">neuen Termin anlegen</button>
+</form>
 <?php
 include "footer.php";
 ?>

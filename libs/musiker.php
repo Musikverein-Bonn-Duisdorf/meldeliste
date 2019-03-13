@@ -128,11 +128,16 @@ class User
         }
     }
     public function printTableLine() {
-        echo "<tr>\n";
+        if($this->Mitglied) {
+            echo "<tr class=\"w3-lime\">\n";            
+        }
+        else {
+            echo "<tr class=\"w3-khaki\">\n";            
+        }
         echo "  <td>".$this->Vorname."</td>\n";
         echo "  <td>".$this->Nachname."</td>\n";
-        echo "  <td class=\"right\">".$this->Stimme.".</td>\n";
-        echo "  <td class=\"left\">".$this->iName."</td>\n";
+        echo "  <td>".$this->Stimme.".</td>\n";
+        echo "  <td>".$this->iName."</td>\n";
         echo "  <td><a href=\"mailto:\"".$this->Email."\">".$this->Email."</a></td>\n";
         echo "  <td>".bool2string($this->Mitglied)."</td>\n";
         echo "  <td>".bool2string($this->getMail)."</td>\n";

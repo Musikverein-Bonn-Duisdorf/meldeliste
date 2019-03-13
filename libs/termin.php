@@ -145,7 +145,12 @@ class Termin
         }
     }
     public function printTableLine() {
-        echo "<tr>\n";
+        if($this->Auftritt) {
+            echo "<tr class=\"w3-lime\">\n";            
+        }
+        else {
+            echo "<tr class=\"w3-khaki\">\n";            
+        }
         echo "  <td>".$this->Datum."</td>\n";
         echo "  <td>".$this->Uhrzeit."</td>\n";
         echo "  <td>".$this->Uhrzeit2."</td>\n";
@@ -155,8 +160,21 @@ class Termin
         echo "  <td>".$this->Ort2."</td>\n";
         echo "  <td>".$this->Ort3."</td>\n";
         echo "  <td>".$this->Ort4."</td>\n";
-        echo "  <td>".bool2string($this->Auftritt)."</td>\n";
         echo "  <td>".bool2string($this->published)."</td>\n";
+        echo "</tr>\n";
+    }
+    public function printBasicTableLine() {
+        if($this->Auftritt) {
+            echo "<tr class=\"w3-lime\">\n";            
+        }
+        else {
+            echo "<tr class=\"w3-khaki\">\n";            
+        }
+        echo "  <td>".germanDate($this->Datum)."</td>\n";
+        echo "  <td>".$this->Uhrzeit."</td>\n";
+        echo "  <td>".$this->Uhrzeit2."</td>\n";
+        echo "  <td>".$this->Name."</td>\n";
+        echo "  <td>".$this->Ort1."</td>\n";
         echo "</tr>\n";
     }
 };

@@ -34,8 +34,6 @@ while($row = mysqli_fetch_array($dbr)) {
 <form action="new-musiker.php">
     <button class="button" type="submit">neuen Musiker anlegen</button>
 </form>
-    <br />
-
 <?php
 include "footer.php";
 ?>
