@@ -9,17 +9,10 @@ if(isset($_POST['insert'])) {
     $n->save();
 }
 ?>
-
-<h1>Liste aller Musiker</h1>
-
-<form action="/MVD">
-    <button class="button" type="submit">Home</button>
-</form>
-<form action="new-musiker.php">
-    <button class="button" type="submit">neuen Musiker anlegen</button>
-</form>
-    <br />
-<table class="list">
+<div class="w3-container w3-dark-gray">
+<h2>Liste aller Musiker</h2>
+</div>
+<table class="w3-table-all w3-hoverable">
 <thead>
 <tr>
 <th>Vorname</th><th>Nachname</th><th>Stimme</th><th>Instrument</th><th>Email</th><th>Mitglied</th><th>getMail</th>
@@ -36,9 +29,12 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printTableLine();
 }
 ?>
-
 </tbody>
 </table>
+<form action="new-musiker.php">
+    <button class="button" type="submit">neuen Musiker anlegen</button>
+</form>
+    <br />
 
 <?php
 include "footer.php";

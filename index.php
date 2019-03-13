@@ -3,12 +3,9 @@ session_start();
 $_SESSION['page']='home';
 include "header.php";
 ?>
-<ul>
-<li><a href="musiker.php">Musikerverwaltung</a></li>
-<li>Registerverwaltung</li>
-<li><a href="termine.php">Terminverwaltung</a></li>
-<li>Admin</li>
-</ul>
+<div class="w3-container w3-dark-gray">
+<h2>Home</h2>
+</div>
 
 <?php
 include "footer.php";
