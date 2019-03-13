@@ -151,7 +151,7 @@ class Termin
         else {
             echo "<tr class=\"w3-khaki\">\n";            
         }
-        echo "  <td>".$this->Datum."</td>\n";
+        echo "  <td>".germanDate($this->Datum, 0)."</td>\n";
         echo "  <td>".$this->Uhrzeit."</td>\n";
         echo "  <td>".$this->Uhrzeit2."</td>\n";
         echo "  <td>".$this->Name."</td>\n";
@@ -170,7 +170,7 @@ class Termin
         else {
             echo "<tr class=\"w3-khaki\">\n";            
         }
-        echo "  <td>".germanDate($this->Datum)."</td>\n";
+        echo "  <td>".germanDate($this->Datum, 1)."</td>\n";
         echo "  <td>".$this->Uhrzeit."</td>\n";
         echo "  <td>".$this->Uhrzeit2."</td>\n";
         echo "  <td>".$this->Name."</td>\n";

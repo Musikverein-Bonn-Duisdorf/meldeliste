@@ -12,7 +12,7 @@ include "header.php";
 <table class="w3-table-all w3-hoverable">
 <thead>
 <tr>
-<th>Datum</th><th>Beginn</th><th>Ende</th><th>Veranstaltung</th><th>Ort1</th>
+<th>Datum</th><th>Beginn</th><th>Ende</th><th>Veranstaltung</th><th>Ort</th>
 </tr>
 </thead>
 <tbody>
@@ -31,6 +31,10 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 </tbody>
 </table>
+
+<div class="w3-panel w3-dark-gray">
+<h2>Meine Meldungen</h2>
+</div>
 
 <?php
 include "footer.php";
