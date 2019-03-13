@@ -51,4 +51,25 @@ function germanDate($string, $monthLetters) {
     return $s;
 }
 
+function validateUser($login, $password) {
+    $_SESSION['userid'] = 0;
+    $sql = sprintf("SELECT * FROM `User` WHERE `login` = '%s';",
+    $login
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbr)) {
+        if(password_verify($password, $row['Passhash'])) {
+            $_SESSION['userid'] = $row['Index'];
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+function loggedIn() {
+    if($_SESSION['userid']) return true;
+    return false;
+}
+
 ?>

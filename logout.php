@@ -1,3 +1,7 @@
+<?php
+session_start();
+session_destroy();
+?>
 <!DOCTYPE html>
 <html lang="de">
   <head>
@@ -12,19 +16,16 @@
         mysqli_select_db($GLOBALS['conn'], $config['database']) or die(mysqli_error($conn));
       ?>
       <!-- successfully connected to MySQL database -->
-      <?php
-          if(!loggedIn()) {
-              ?>
-              <meta http-equiv="refresh" content="2; URL='login.php'" />
-              <?php
-              die("<div class=\"w3-panel w3-red\"><h2>Nicht eingeloggt...</h2></div>");
-          }
-      ?>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title><?php echo $commonStrings['WebSiteName']; ?></title>
   </head>
-  <body>
+<body>
+<div class="w3-container w3-teal">
+<h1><?php echo $commonStrings['WebSiteName']; ?></h1>
+</div>
+<meta http-equiv="refresh" content="3; URL='login.php'" />
+  <div class="w3-panel w3-mobile w3-center w3-green"><h2>Logout erfolgreich.</h2></div>
 <?php
-include "nav.php";
+include "footer.php";
 ?>

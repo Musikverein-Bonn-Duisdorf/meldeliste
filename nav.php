@@ -14,4 +14,5 @@
       <a href="#" class="w3-bar-item w3-button w3-mobile">Link 3</a>
     </div>
   </div>
+  <a href="logout.php" class="w3-bar-item w3-button w3-mobile">Logout</a>
 </div>
