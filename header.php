@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1">      
       <link rel="stylesheet" href="MVD.css">
+      <link rel="stylesheet" href="w3.css">
       <?php
           include 'include.php';
       ?>
@@ -15,3 +17,6 @@
       <title><?php echo $commonStrings['WebSiteName']; ?></title>
   </head>
   <body>
+<?php
+include "nav.php";
+?>
