@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'published' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'published' => null, 'Wert' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -16,6 +16,7 @@ class Termin
 	    case 'Ort4':
 	    case 'Beschreibung':
 	    case 'published':
+	    case 'Wert':
             return $this->_data[$key];
             break;
         default:
@@ -59,6 +60,9 @@ class Termin
             break;
 	    case 'published':
             $this->_data[$key] = (bool)$val;
+            break;
+	    case 'Wert':
+            $this->_data[$key] = (int)$val;
             break;
         default:
             break;
@@ -123,6 +127,13 @@ class Termin
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
+
+        $sql = sprintf('DELETE FROM `MVD`.`Meldungen` WHERE `Termin` = "%d";',
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if(!$dbr) return false;
+
         $this->_data['Index'] = null;
         return true;
     }
@@ -141,12 +152,24 @@ class Termin
         if(is_array($row)) {
             $obj = new self();
             $obj->fill_from_array($row);
-            return $obj;
         }
+        if(isset($_SESSION['userid'])) {
+            $sql = sprintf('SELECT `Wert` FROM `MVD`.`Meldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
+            $Index,
+            $_SESSION['userid']
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $row = mysqli_fetch_array($dbr);
+            if(is_array($row)) {
+                $obj->fill_from_array($row);
+                return $obj;
+            }
+        }
+        return $obj;
     }
     public function printTableLine() {
         if($this->Auftritt) {
-            echo "<tr class=\"w3-lime\">\n";            
+            echo "<tr class=\"w3-lime\">\n";
         }
         else {
             echo "<tr class=\"w3-khaki\">\n";            
@@ -164,7 +187,24 @@ class Termin
         echo "</tr>\n";
     }
     public function printBasicTableLine() {
-        if($this->Auftritt) {
+        if($this->Wert) {
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
+            switch($this->Wert) {
+            case 1:
+                echo "w3-highway-green";
+                break;
+            case 2:
+                echo "w3-highway-red";
+                break;
+            case 3:
+                echo "w3-highway-blue";
+                break;
+            default:
+                echo "w3-pale-yellow";
+            }
+            echo "\">\n";            
+        }
+        else if($this->Auftritt) {
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
@@ -174,12 +214,12 @@ class Termin
         echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
         ?>
-        <div class=\"w3-col l3 w3-container w3-mobile\">
+        <div class="w3-col l3 w3-row w3-mobile">
         <form action="" method="POST">
         <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
-        <button class="w3-btn w3-blue w3-green" type="submit" name="meldung" value="1">&#10004;</button>
-        <button class="w3-btn w3-blue w3-red" type="submit" name="meldung" value="2">&#10008;</button>
-        <button class="w3-btn w3-blue w3-blue" type="submit" name="meldung" value="3"><b>?</b></button>
+        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-right w3-green w3-center w3-col s4 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
+        <button class="w3-btn w3-blue w3-border w3-border-black w3-red w3-center w3-col s4 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
+        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-left w3-blue w3-center w3-col s4 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
         </form>
         </div>
         </div>

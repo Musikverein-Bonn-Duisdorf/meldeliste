@@ -2,6 +2,7 @@
 <html lang="de">
   <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">      
+      <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-highway.css">
       <link rel="stylesheet" href="styles/MVD.css">
       <link rel="stylesheet" href="styles/w3.css">
       <?php

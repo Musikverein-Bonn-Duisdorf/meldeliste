@@ -8,6 +8,17 @@ if(isset($_POST['insert'])) {
     $n->fill_from_array($_POST);
     $n->save();
 }
+if(isset($_POST['meldung'])) {
+    $m = new Meldung;
+    $m = $m->load_by_user_event($_SESSION['userid'], $_POST['Index']);
+    if($m->User < 1) {
+        $m = new Meldung;
+        $m->User = $_SESSION['userid'];
+        $m->Termin = $_POST['Index'];
+    }
+    $m->Wert = $_POST['meldung'];
+    $m->save();
+}
 ?>
 <div class="w3-container w3-dark-gray">
 <h2>Termin&uuml;bersicht</h2>
