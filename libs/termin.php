@@ -173,11 +173,20 @@ class Termin
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
-        echo "</div>";
         ?>
+        <div class=\"w3-col l3 w3-container w3-mobile\">
+        <form action="" method="POST">
+        <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
+        <button class="w3-btn w3-blue w3-mobile w3-green" type="submit" name="meldung" value="1">&#10004;</button>
+        <button class="w3-btn w3-blue w3-mobile w3-red" type="submit" name="meldung" value="2">&#10008;</button>
+        <button class="w3-btn w3-blue w3-mobile w3-blue" type="submit" name="meldung" value="3">?</button>
+        </form>
+        </div>
+        </div>
+
+
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
         <div class="w3-modal-content">
-
         <header class="w3-container w3-teal"> 
       <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
       class="w3-button w3-display-topright">&times;</span>
@@ -197,6 +206,12 @@ class Termin
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b><br><?php echo $this->Ort2; ?><br><?php echo $this->Ort3; ?><br><?php echo $this->Ort4; ?></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">Auftritt:</div><div class="w3-col l9"><b><?php echo bool2string($this->Auftritt); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">sichtbar:</div><div class="w3-col l9"><b><?php echo bool2string($this->published); ?></b></div>
     </div>
       <form class="w3-center w3-bar w3-mobile" action="new-termin.php" method="POST">
       <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
