@@ -196,16 +196,7 @@ class Termin
       <div class="w3-col l3">Beschreibung:</div><div class="w3-col l9"><b><?php echo $this->Beschreibung; ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">.</div><div class="w3-col l9"><b><?php echo $this->Ort2; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">.</div><div class="w3-col l9"><b><?php echo $this->Ort3; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">.</div><div class="w3-col l9"><b><?php echo $this->Ort4; ?></b></div>
+      <div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b><br><?php echo $this->Ort2; ?><br><?php echo $this->Ort3; ?><br><?php echo $this->Ort4; ?></div>
     </div>
       <form class="w3-center w3-bar w3-mobile" action="new-termin.php" method="POST">
       <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
