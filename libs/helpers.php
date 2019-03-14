@@ -77,4 +77,8 @@ function loggedIn() {
     return false;
 }
 
+function sql2time($time) {
+    return substr($time, 0, 5);
+}
+
 ?>
