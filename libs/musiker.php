@@ -1,12 +1,13 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'Passhash' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Nachname':
 	    case 'Vorname':
+        case 'login':
 	    case 'Passhash':
 	    case 'Mitglied':
 	    case 'Instrument':
@@ -29,6 +30,9 @@ class User
             $this->_data[$key] = trim($val);
             break;
 	    case 'Vorname':
+            $this->_data[$key] = trim($val);
+            break;
+	    case 'login':
             $this->_data[$key] = trim($val);
             break;
 	    case 'Passhash':
@@ -62,15 +66,20 @@ class User
             $this->insert();
         }
     }
+    public function passwd() {
+        $this->Passhash = password_hash("1949eV", PASSWORD_DEFAULT);
+        $this->update();
+    }
     public function is_valid() {
         if(!$this->Nachname) return false;
         if(!$this->Vorname) return false;
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `Passhash`, `Mitglied`, `Instrument`, `Stimme`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%d", "%d", "%d", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `login`, `Passhash`, `Mitglied`, `Instrument`, `Stimme`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%d", "%d", "%d", "%s", "%d");',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
         $this->Mitglied,
         $this->Instrument,
@@ -84,9 +93,10 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `MVD`.`User` SET `Nachname` = "%s", `Vorname` = "%s", `Passhash` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `MVD`.`User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
         $this->Mitglied,
         $this->Instrument,
@@ -159,6 +169,9 @@ class User
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $this->login; ?></b></div>
     </div>
       <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
       <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
