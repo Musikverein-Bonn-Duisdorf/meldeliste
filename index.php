@@ -1,13 +1,13 @@
 <?php
 session_start();
 $_SESSION['page']='home';
-include "header.php";
+include "common/header.php";
 ?>
 <div class="w3-container w3-dark-gray">
 <h2>Home</h2>
 </div>
 <div class="w3-panel w3-dark-gray">
-<h2>Bevorstehende Termine</h2>
+<h3>Bevorstehende Termine</h3>
 </div>
 <table class="w3-table-all w3-hoverable">
 <thead>
@@ -33,9 +33,9 @@ while($row = mysqli_fetch_array($dbr)) {
 </table>
 
 <div class="w3-panel w3-dark-gray">
-<h2>Meine Meldungen</h2>
+<h3>Meine Meldungen</h3>
 </div>
 
 <?php
-include "footer.php";
+include "common/footer.php";
 ?>

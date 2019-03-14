@@ -1,7 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='musiker';
-include "header.php";
+include "common/header.php";
 
 if(isset($_POST['insert'])) {
     $n = new User;
@@ -31,9 +31,6 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 </tbody>
 </table>
-<form action="new-musiker.php">
-    <button class="button" type="submit">neuen Musiker anlegen</button>
-</form>
 <?php
-include "footer.php";
+include "common/footer.php";
 ?>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='termine';
-include "header.php";
+include "common/header.php";
 
 if(isset($_POST['insert'])) {
     $n = new Termin;
@@ -34,9 +34,6 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 </tbody>
 </table>
-<form action="new-termin.php">
-    <button class="button" type="submit">neuen Termin anlegen</button>
-</form>
 <?php
-include "footer.php";
+include "common/footer.php";
 ?>
