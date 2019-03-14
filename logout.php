@@ -6,10 +6,10 @@ session_destroy();
 <html lang="de">
   <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">      
-      <link rel="stylesheet" href="MVD.css">
-      <link rel="stylesheet" href="w3.css">
+      <link rel="stylesheet" href="styles/MVD.css">
+      <link rel="stylesheet" href="styles/w3.css">
       <?php
-          include 'include.php';
+          include 'common/include.php';
       ?>
       <!-- successfully included php libraries -->
       <?php
@@ -27,5 +27,5 @@ session_destroy();
 <meta http-equiv="refresh" content="3; URL='login.php'" />
   <div class="w3-panel w3-mobile w3-center w3-green"><h2>Logout erfolgreich.</h2></div>
 <?php
-include "footer.php";
+include "common/footer.php";
 ?>
