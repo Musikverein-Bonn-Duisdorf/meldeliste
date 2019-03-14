@@ -217,9 +217,9 @@ class Termin
         <div class="w3-col l3 w3-row w3-mobile">
         <form action="" method="POST">
         <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
-        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-right w3-green w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
-        <button class="w3-btn w3-blue w3-border w3-border-black w3-red w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
-        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-left w3-blue w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
+        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-green w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
+        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-top w3-red w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
+        <button class="w3-btn w3-blue w3-border w3-border-black w3-margin-left w3-margin-top w3-blue w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
         </form>
         </div>
         </div>
