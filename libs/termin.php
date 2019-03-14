@@ -100,8 +100,8 @@ class Termin
     protected function update() {
         $sql = sprintf('UPDATE `MVD`.`Termine` SET `Datum` = "%s", `Uhrzeit` = "%s", `Uhrzeit2` = "%s", `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
-        $this->Uhrzeit == 'NULL' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
-        $this->Uhrzeit2 == 'NULL' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
+        $this->Uhrzeit == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit),
+        $this->Uhrzeit2 == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
         $this->Auftritt,
@@ -171,7 +171,7 @@ class Termin
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".$this->Uhrzeit." - ".$this->Uhrzeit2."</div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
         echo "</div>";
         ?>
@@ -187,10 +187,10 @@ class Termin
       <div class="w3-col l3">Datum:</div><div class="w3-col l9"><b><?php echo germanDate($this->Datum, 1); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Beginn:</div><div class="w3-col l9"><b><?php echo $this->Uhrzeit; ?></b></div>
+      <div class="w3-col l3">Beginn:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Ende:</div><div class="w3-col l9"><b><?php echo $this->Uhrzeit2; ?></b></div>
+      <div class="w3-col l3">Ende:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit2); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l3">Beschreibung:</div><div class="w3-col l9"><b><?php echo $this->Beschreibung; ?></b></div>
