@@ -4,11 +4,16 @@ function bool2string($val) {
     return "nein";
 }
 
-function instrumentOption() {
+function instrumentOption($val) {
     $sql = 'SELECT * FROM `MVD`.`Instrument` ORDER BY `Register`, `Name`;';
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     while($row = mysqli_fetch_array($dbr)) {
-        echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
     }
 }
 
