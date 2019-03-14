@@ -12,7 +12,7 @@ if(isset($_POST['id'])) {
 }
 ?>
 <div class="w3-container w3-dark-gray">
-  <h1>neuen Musiker anlegen</h1>
+  <h2>neuen Musiker anlegen</h2>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
@@ -24,6 +24,8 @@ if(isset($_POST['id'])) {
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\""; ?>>
     <label>Emailadresse</label>
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
+    <label>Loginname</label>
+    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\""; ?>>
     <label>Stimme</label>
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" type="number" name="Stimme" min="1" max="15" <?php if($fill) echo "value=\"".$n->Stimme."\""; else echo "value=\"1\""; ?>>
     <label>Instrument</label>
@@ -46,14 +48,17 @@ if(isset($_POST['id'])) {
       <label>Mailverteiler</label>
     </div>
     <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
-    <input class="w3-btn w3-blue w3-border w3-mobile w3-right" type="submit" name="insert" value="speichern">
+    <div class="w3-container w3-mobile">
+    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
     <?php
       if($fill) {
       ?>
-    <input class="w3-btn w3-blue w3-border w3-margin-right w3-mobile w3-right" type="submit" name="delete" value="löschen">
+    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
+    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Password generieren">
     <?php
 }
       ?>
+    </div>
   </form>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">

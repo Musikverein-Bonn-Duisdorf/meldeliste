@@ -13,6 +13,11 @@ if(isset($_POST['delete'])) {
     $n->fill_from_array($_POST);
     $n->delete();
 }
+if(isset($_POST['passwd'])) {
+    $n = new User;
+    $n->fill_from_array($_POST);
+    $n->passwd();
+}
 $sql = 'SELECT COUNT(`Index`) AS `Count` FROM `MVD`.`User`;';
 $dbr = mysqli_query($conn, $sql);
 $row = mysqli_fetch_array($dbr);

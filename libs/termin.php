@@ -165,17 +165,54 @@ class Termin
     }
     public function printBasicTableLine() {
         if($this->Auftritt) {
-            echo "<tr class=\"w3-lime\">\n";            
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
-            echo "<tr class=\"w3-khaki\">\n";            
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
-        echo "  <td>".germanDate($this->Datum, 1)."</td>\n";
-        echo "  <td>".$this->Uhrzeit."</td>\n";
-        echo "  <td>".$this->Uhrzeit2."</td>\n";
-        echo "  <td>".$this->Name."</td>\n";
-        echo "  <td>".$this->Ort1."</td>\n";
-        echo "</tr>\n";
+        echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".$this->Uhrzeit." - ".$this->Uhrzeit2."</div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
+        echo "</div>";
+        ?>
+        <div id="id<?php echo $this->Index; ?>" class="w3-modal">
+        <div class="w3-modal-content">
+
+        <header class="w3-container w3-teal"> 
+      <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
+      class="w3-button w3-display-topright">&times;</span>
+      <h2><?php echo $this->Name; ?></h2>
+    </header>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">Datum:</div><div class="w3-col l9"><b><?php echo germanDate($this->Datum, 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">Beginn:</div><div class="w3-col l9"><b><?php echo $this->Uhrzeit; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">Ende:</div><div class="w3-col l9"><b><?php echo $this->Uhrzeit2; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">Beschreibung:</div><div class="w3-col l9"><b><?php echo $this->Beschreibung; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">.</div><div class="w3-col l9"><b><?php echo $this->Ort2; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">.</div><div class="w3-col l9"><b><?php echo $this->Ort3; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l3">.</div><div class="w3-col l9"><b><?php echo $this->Ort4; ?></b></div>
+    </div>
+      <form class="w3-center w3-bar w3-mobile" action="new-termin.php" method="POST">
+      <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
+      </form>
+      </div>
+      </div>
+        <?php
     }
 };
 ?>
