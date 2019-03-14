@@ -127,21 +127,45 @@ class User
             return $obj;
         }
     }
+
     public function printTableLine() {
         if($this->Mitglied) {
-            echo "<tr class=\"w3-lime\">\n";            
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
-            echo "<tr class=\"w3-khaki\">\n";            
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
-        echo "  <td>".$this->Vorname."</td>\n";
-        echo "  <td>".$this->Nachname."</td>\n";
-        echo "  <td>".$this->Stimme.".</td>\n";
-        echo "  <td>".$this->iName."</td>\n";
-        echo "  <td><a href=\"mailto:\"".$this->Email."\">".$this->Email."</a></td>\n";
-        echo "  <td>".bool2string($this->Mitglied)."</td>\n";
-        echo "  <td>".bool2string($this->getMail)."</td>\n";
-        echo "</tr>\n";
+        echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\">".$this->Stimme.". ".$this->iName."</div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:\"".$this->Email."\">".$this->Email."</a></div>\n";
+        echo "</div>";
+        ?>
+        <div id="id<?php echo $this->Index; ?>" class="w3-modal">
+        <div class="w3-modal-content">
+
+        <header class="w3-container w3-teal"> 
+      <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
+      class="w3-button w3-display-topright">&times;</span>
+      <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>
+    </header>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $this->Stimme.". ".$this->iName; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($this->Mitglied); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">erhält Emails von der Meldeliste:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
+    </div>
+      <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
+      <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
+      </form>
+      </div>
+      </div>
+        <?php
     }
 };
 ?>

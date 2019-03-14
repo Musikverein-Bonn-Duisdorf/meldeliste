@@ -8,18 +8,19 @@ if(isset($_POST['insert'])) {
     $n->fill_from_array($_POST);
     $n->save();
 }
+if(isset($_POST['delete'])) {
+    $n = new User;
+    $n->fill_from_array($_POST);
+    $n->delete();
+}
+$sql = 'SELECT COUNT(`Index`) AS `Count` FROM `MVD`.`User`;';
+$dbr = mysqli_query($conn, $sql);
+$row = mysqli_fetch_array($dbr);
+$nMusiker = $row['Count'];
 ?>
 <div class="w3-container w3-dark-gray">
-<h2>Liste aller Musiker</h2>
+    <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
-<table class="w3-table-all w3-hoverable">
-<thead>
-<tr>
-<th>Vorname</th><th>Nachname</th><th>Stimme</th><th>Instrument</th><th>Email</th><th>Mitglied</th><th>getMail</th>
-</tr>
-</thead>
-<tbody>
-
 <?php
 $sql = 'SELECT `Index` FROM `MVD`.`User` ORDER BY `Nachname`, `Vorname`;';
 $dbr = mysqli_query($conn, $sql);
@@ -29,8 +30,6 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printTableLine();
 }
 ?>
-</tbody>
-</table>
 <?php
 include "common/footer.php";
 ?>
