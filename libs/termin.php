@@ -142,7 +142,7 @@ class Termin
                 $this->_data[$key] = $val;
         }
     }
-    public static function &load_by_id($Index) {
+    public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `MVD`.`Termine` WHERE `Index` = "%d";',
         $Index
@@ -150,8 +150,7 @@ class Termin
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
-            $obj = new self();
-            $obj->fill_from_array($row);
+            $this->fill_from_array($row);
         }
         if(isset($_SESSION['userid'])) {
             $sql = sprintf('SELECT `Wert` FROM `MVD`.`Meldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
@@ -161,11 +160,9 @@ class Termin
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             $row = mysqli_fetch_array($dbr);
             if(is_array($row)) {
-                $obj->fill_from_array($row);
-                return $obj;
+                $this->fill_from_array($row);
             }
         }
-        return $obj;
     }
     public function printTableLine() {
         if($this->Auftritt) {
@@ -259,6 +256,19 @@ class Termin
       </div>
       </div>
         <?php
+    }
+    public function printResponseLine() {
+        $sql = sprintf('SELECT * FROM `Meldungen` WHERE `Termin` = "%s";',
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbr)) {
+            $user = new User;
+            $user->load_by_id($row['User']);
+            $register = new Register;
+            $register->load_by_id($user->getRegister());
+            echo "user = ".$user->Vorname." register = ".$register->Name."<br>";
+        }
     }
 };
 ?>

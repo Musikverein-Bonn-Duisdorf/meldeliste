@@ -1,16 +1,11 @@
 <?php
 session_start();
-$_SESSION['page']='termine';
+$_SESSION['page']='meldungen';
 include "common/header.php";
 
-if(isset($_POST['insert'])) {
-    $n = new Termin;
-    $n->fill_from_array($_POST);
-    $n->save();
-}
 ?>
 <div class="w3-container w3-dark-gray">
-<h2>Termin&uuml;bersicht</h2>
+<h2>Rückmeldungen</h2>
 </div>
 <?php
 $now = date("Y-m-d");
@@ -20,8 +15,8 @@ $now
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
-    $M = $M->load_by_id($row['Index']);
-    $M->printBasicTableLine();
+    $M->load_by_id($row['Index']);
+    $M->printResponseLine();
 }
 ?>
 <?php

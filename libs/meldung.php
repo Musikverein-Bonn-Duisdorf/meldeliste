@@ -86,7 +86,7 @@ class Meldung
                 $this->_data[$key] = $val;
         }
     }
-    public static function &load_by_id($Index) {
+    public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `MVD`.`Meldungen` WHERE `Index` = "%d";',
         $Index
@@ -94,12 +94,10 @@ class Meldung
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
-            $obj = new self();
-            $obj->fill_from_array($row);
-            return $obj;
+            $this->fill_from_array($row);
         }
     }
-    public static function &load_by_user_event($user, $event) {
+    public function load_by_user_event($user, $event) {
         $sql = sprintf('SELECT * FROM `MVD`.`Meldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
         $user,
         $event
@@ -107,9 +105,7 @@ class Meldung
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
-            $obj = new self();
-            $obj->fill_from_array($row);
-            return $obj;
+            $this->fill_from_array($row);
         }
     }
 };
