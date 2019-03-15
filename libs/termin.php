@@ -258,17 +258,32 @@ class Termin
         <?php
     }
     public function printResponseLine() {
-        $sql = sprintf('SELECT * FROM `Meldungen` WHERE `Termin` = "%s";',
-        $this->Index
-        );
+        ?>
+        <div class="w3-container w3-mobile w3-lime">
+          <b><?php echo $this->Name; ?></b>
+        </div>
+        <?php
+        $sql = "SELECT * FROM `Register` ORDER BY `Sortierung`;";
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         while($row = mysqli_fetch_array($dbr)) {
-            $user = new User;
-            $user->load_by_id($row['User']);
-            $register = new Register;
-            $register->load_by_id($user->getRegister());
-            echo "user = ".$user->Vorname." register = ".$register->Name."<br>";
-        }
+        $sql = sprintf("SELECT * FROM `Meldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `Register`) `Register` ON `Register` = `rIndex`
+WHERE `Termin` = '%d'
+AND `rIndex` = '%d'
+ORDER BY `Sortierung`",
+            $this->Index,
+            $row['Index']
+            );
+        $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
+        $i=0;
+        while($row2 = mysqli_fetch_array($dbr2)) {
+        /* echo "user = ".$row2['Vorname']." register = ".$row2['rName']."<br>"; */
+        $i++;
+    }
+        echo "<div class=\"w3-container\">".$row['Name']." ".$i."</div>";
+    }
     }
 };
 ?>

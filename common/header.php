@@ -14,7 +14,7 @@
       ?>
       <!-- successfully connected to MySQL database -->
       <?php
-          $_SESSION['userid'] = 1;
+          /* $_SESSION['userid'] = 1; */
           if(!loggedIn()) {
               ?>
               <meta http-equiv="refresh" content="2; URL='login.php'" />
