@@ -109,6 +109,18 @@ class User
         if(!$dbr) return false;
         return true;
     }
+    public function getRegister() {
+        if(!$this->Instrument) return false;
+        $sql = sprintf('SELECT * FROM `Instrument` WHERE `Index` = "%d";',
+        $this->Instrument
+        );        
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = mysqli_fetch_array($dbr);
+        if(is_array($row)) {
+            return $row['Register'];
+        }
+        return 0;
+    }
     public function delete() {
         if(!$this->Index) return false;
         $sql = sprintf('DELETE FROM `MVD`.`User` WHERE `Index` = "%d";',
@@ -124,7 +136,7 @@ class User
                 $this->_data[$key] = $val;
         }
     }
-    public static function &load_by_id($Index) {
+    public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `MVD`.`User` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
         $Index
@@ -132,9 +144,7 @@ class User
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
-            $obj = new self();
-            $obj->fill_from_array($row);
-            return $obj;
+            $this->fill_from_array($row);
         }
     }
 

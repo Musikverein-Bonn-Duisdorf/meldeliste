@@ -4,7 +4,7 @@ $_SESSION['page']='home';
 include "common/header.php";
 if(isset($_POST['meldung'])) {
     $m = new Meldung;
-    $m = $m->load_by_user_event($_SESSION['userid'], $_POST['Index']);
+    $m->load_by_user_event($_SESSION['userid'], $_POST['Index']);
     if($m->User < 1) {
         $m = new Meldung;
         $m->User = $_SESSION['userid'];
@@ -28,7 +28,7 @@ $now
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
-    $M = $M->load_by_id($row['Index']);
+    $M->load_by_id($row['Index']);
     $M->printBasicTableLine();
 }
 ?>
