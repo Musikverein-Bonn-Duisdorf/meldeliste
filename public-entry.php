@@ -21,13 +21,6 @@ elseif(isset($_POST['confirm'])) {
 <div class="w3-container w3-dark-gray">
     <h2>Bitte eintragen...</h2>
 </div>
-
-<?php if($state > 1) { ?>
-    <form action="" method="POST">
-	<button class="button" type="submit">zur&uuml;ck</button>
-    </form>
-<?php } ?>
-
 <?php if($state == 1) { ?>
     <div class="w3-container w3-dark-gray">
 	<h3>1. Buchstabe des Nachnamens</h3>
@@ -36,7 +29,7 @@ elseif(isset($_POST['confirm'])) {
 	<?php
 	$letters = range('A', 'Z');
 	foreach ($letters as $letter) {
-	    echo "<button class=\"w3-button w3-col s3 w3-margin w3-red\" value=\"".$letter."\" name=\"letter\" type=\"submit\">".$letter."</button>";
+	    echo "<button class=\"w3-button w3-col s3 w3-margin w3-red\" value=\"".$letter."\" name=\"letter\" type=\"submit\"><b>".$letter."</b></button>";
 	}
 	?>
     </form>
@@ -72,6 +65,11 @@ elseif(isset($_POST['confirm'])) {
 	<h3>Danke f&uuml;r deine Meldung</h3>
     </div>
     <meta http-equiv="refresh" content="3;public-entry.php" />
+<?php } ?>
+<?php if($state > 1) { ?>
+    <form action="" method="POST">
+	<button class="button" type="submit">zur&uuml;ck</button>
+    </form>
 <?php } ?>
 
 <?php
