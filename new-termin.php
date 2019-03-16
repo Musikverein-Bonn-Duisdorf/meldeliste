@@ -5,7 +5,7 @@ include "common/header.php";
 $fill = false;
 if(isset($_POST['id'])) {
     $n = new Termin;
-    $n = $n->load_by_id($_POST['id']);
+    $n->load_by_id($_POST['id']);
     if($n->Index > 0) {
         $fill = true;
     }
