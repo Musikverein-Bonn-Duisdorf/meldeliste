@@ -7,7 +7,7 @@
     <a href="termine.php" class="w3-bar-item w3-button w3-mobile<?php getPage('termine');?>">Termine</a>
     <a href="meldungen.php" class="w3-bar-item w3-button w3-mobile<?php getPage('meldungen');?>">Meldungen</a>
     <a href="#" class="w3-bar-item w3-button w3-mobile<?php getPage('me');?>">Mein Profil</a>
-    <div class="w3-dropdown-hover w3-mobile">
+    <div class="w3-dropdown-hover">
 	<button class="w3-button w3-mobile w3-blue-gray">Admin</button>
 	<div class="w3-dropdown-content w3-bar-block w3-card-4 w3-gray w3-mobile">
 	    <a href="musiker.php" class="w3-bar-item w3-button w3-blue-gray w3-mobile<?php getPage('musiker');?>">Musikerliste</a>
