@@ -36,7 +36,7 @@ elseif(isset($_POST['confirm'])) {
 	<?php
 	$letters = range('A', 'Z');
 	foreach ($letters as $letter) {
-	    echo "<button class=\"w3-button w3-col s3\" value=\"".$letter."\" name=\"letter\" type=\"submit\">".$letter."</button>";
+	    echo "<button class=\"w3-button w3-col s4 w3-margin w3-red\" value=\"".$letter."\" name=\"letter\" type=\"submit\">".$letter."</button>";
 	}
 	?>
     </form>
