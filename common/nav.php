@@ -1,6 +1,6 @@
 <div class="w3-container <?php echo $titleColor; ?>">
     <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
-    <p><?php echo $_SESSION['username'] ?></p>
+    <p class="w3-right"><?php echo $_SESSION['username'] ?></p>
 </div>
 <div class="w3-bar w3-teal">
     <a href="/MVD" class="w3-bar-item w3-button w3-mobile<?php getPage('home');?>">Home</a>
