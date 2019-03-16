@@ -184,7 +184,6 @@ class Termin
         echo "</tr>\n";
     }
     public function printBasicTableLine() {
-	include "/MVD/common/common.php";
         if($this->Wert) {
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
             switch($this->Wert) {
@@ -215,9 +214,9 @@ class Termin
         <div class="w3-col l3 w3-row w3-mobile">
         <form action="" method="POST">
         <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
-        <button class="w3-btn w3-green <?php if($this->Wert > 1) echo $commonColors['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
-        <button class="w3-btn w3-red <?php if($this->Wert == 1 || $this->Wert == 3 ) echo $commonColors['Disabled']; ?> w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
-        <button class="w3-btn w3-blue <?php if($this->Wert == 1 || $this->Wert == 2 ) echo $commonColors['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
+        <button class="w3-btn w3-green <?php if($this->Wert > 1) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
+        <button class="w3-btn w3-red <?php if($this->Wert == 1 || $this->Wert == 3 ) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
+        <button class="w3-btn w3-blue <?php if($this->Wert == 1 || $this->Wert == 2 ) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
         </form>
         </div>
             </div>
