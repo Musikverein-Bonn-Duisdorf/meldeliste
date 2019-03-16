@@ -32,10 +32,6 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printBasicTableLine();
 }
 ?>
-<div class="w3-container w3-margin-top w3-dark-gray">
-<h3>Meine Meldungen</h3>
-</div>
-
 <?php
 include "common/footer.php";
 ?>
