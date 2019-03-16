@@ -214,76 +214,76 @@ class Termin
         <div class="w3-col l3 w3-row w3-mobile">
         <form action="" method="POST">
         <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
-        <button class="w3-btn<?php if($this->Wert > 1) echo " w3-opacity"; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-green w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
-        <button class="w3-btn<?php if($this->Wert == 1 || $this->Wert == 3 ) echo " w3-opacity"; ?> w3-border w3-border-black w3-margin-top w3-red w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
-        <button class="w3-btn<?php if($this->Wert == 1 || $this->Wert == 2 ) echo " w3-opacity"; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-blue w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
+        <button class="w3-btn w3-green<?php if($this->Wert > 1) echo " w3-light-gray"; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
+        <button class="w3-btn w3-red<?php if($this->Wert == 1 || $this->Wert == 3 ) echo " w3-light-gray"; ?> w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
+        <button class="w3-btn w3-blue<?php if($this->Wert == 1 || $this->Wert == 2 ) echo " w3-light-gray"; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
         </form>
         </div>
-        </div>
+            </div>
 
 
-        <div id="id<?php echo $this->Index; ?>" class="w3-modal">
-        <div class="w3-modal-content">
-        <header class="w3-container w3-teal"> 
-      <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
-      class="w3-button w3-display-topright">&times;</span>
-      <h2><?php echo $this->Name; ?></h2>
-    </header>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Datum:</div><div class="w3-col l9"><b><?php echo germanDate($this->Datum, 1); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Beginn:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Ende:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit2); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Beschreibung:</div><div class="w3-col l9"><b><?php echo $this->Beschreibung; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b><br><?php echo $this->Ort2; ?><br><?php echo $this->Ort3; ?><br><?php echo $this->Ort4; ?></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">Auftritt:</div><div class="w3-col l9"><b><?php echo bool2string($this->Auftritt); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l3">sichtbar:</div><div class="w3-col l9"><b><?php echo bool2string($this->published); ?></b></div>
-    </div>
-      <form class="w3-center w3-bar w3-mobile" action="new-termin.php" method="POST">
-      <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
-      </form>
-      </div>
-      </div>
+            <div id="id<?php echo $this->Index; ?>" class="w3-modal">
+		<div class="w3-modal-content">
+		    <header class="w3-container w3-teal"> 
+			<span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
+			      class="w3-button w3-display-topright">&times;</span>
+			<h2><?php echo $this->Name; ?></h2>
+		    </header>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">Datum:</div><div class="w3-col l9"><b><?php echo germanDate($this->Datum, 1); ?></b></div>
+		    </div>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">Beginn:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit); ?></b></div>
+		    </div>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">Ende:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit2); ?></b></div>
+		    </div>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">Beschreibung:</div><div class="w3-col l9"><b><?php echo $this->Beschreibung; ?></b></div>
+		    </div>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b><br><?php echo $this->Ort2; ?><br><?php echo $this->Ort3; ?><br><?php echo $this->Ort4; ?></div>
+		    </div>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">Auftritt:</div><div class="w3-col l9"><b><?php echo bool2string($this->Auftritt); ?></b></div>
+		    </div>
+		    <div class="w3-container w3-row w3-margin">
+			<div class="w3-col l3">sichtbar:</div><div class="w3-col l9"><b><?php echo bool2string($this->published); ?></b></div>
+		    </div>
+		    <form class="w3-center w3-bar w3-mobile" action="new-termin.php" method="POST">
+			<button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
+		    </form>
+		</div>
+	    </div>
         <?php
-    }
-    public function printResponseLine() {
+	}
+	public function printResponseLine() {
         ?>
-        <div class="w3-container w3-mobile w3-lime">
-          <b><?php echo $this->Name; ?></b>
-        </div>
-        <?php
-        $sql = "SELECT * FROM `Register` ORDER BY `Sortierung`;";
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        while($row = mysqli_fetch_array($dbr)) {
-        $sql = sprintf("SELECT * FROM `Meldungen`
+            <div class="w3-container w3-mobile w3-lime">
+		<b><?php echo $this->Name; ?></b>
+            </div>
+            <?php
+            $sql = "SELECT * FROM `Register` ORDER BY `Sortierung`;";
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            while($row = mysqli_fetch_array($dbr)) {
+		$sql = sprintf("SELECT * FROM `Meldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
 INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `Register`) `Register` ON `Register` = `rIndex`
 WHERE `Termin` = '%d'
 AND `rIndex` = '%d'
 ORDER BY `Sortierung`",
-            $this->Index,
-            $row['Index']
-            );
-        $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
-        $i=0;
-        while($row2 = mysqli_fetch_array($dbr2)) {
-        /* echo "user = ".$row2['Vorname']." register = ".$row2['rName']."<br>"; */
-        $i++;
-    }
-        echo "<div class=\"w3-container\">".$row['Name']." ".$i."</div>";
-    }
-    }
-};
-?>
+			       $this->Index,
+			       $row['Index']
+		);
+		$dbr2 = mysqli_query($GLOBALS['conn'], $sql);
+		$i=0;
+		while($row2 = mysqli_fetch_array($dbr2)) {
+		    /* echo "user = ".$row2['Vorname']." register = ".$row2['rName']."<br>"; */
+		    $i++;
+		}
+		echo "<div class=\"w3-container\">".$row['Name']." ".$i."</div>";
+	    }
+	    }
+	    };
+	    ?>
