@@ -8,6 +8,11 @@ if(isset($_POST['insert'])) {
     $n->fill_from_array($_POST);
     $n->save();
 }
+if(isset($_POST['delete'])) {
+    $n = new Termin;
+    $n->fill_from_array($_POST);
+    $n->delete();
+}
 if(isset($_POST['meldung'])) {
     $m = new Meldung;
     $m->load_by_user_event($_SESSION['userid'], $_POST['Index']);
@@ -21,12 +26,12 @@ if(isset($_POST['meldung'])) {
 }
 ?>
 <div class="w3-container w3-dark-gray">
-<h2>Termin&uuml;bersicht</h2>
+    <h2>Termin&uuml;bersicht</h2>
 </div>
 <?php
 $now = date("Y-m-d");
 $sql = sprintf('SELECT `Index` FROM `MVD`.`Termine` WHERE `Datum` > "%s" ORDER BY `Datum`, `Uhrzeit`;',
-$now
+	       $now
 );
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
