@@ -44,7 +44,7 @@ elseif(isset($_POST['confirm'])) {
 	$sql = sprintf('SELECT * FROM `User` WHERE `Nachname` LIKE "%s%%";', $_POST['letter']);
 	$dbr = mysqli_query($conn, $sql);
 	while($row = mysqli_fetch_array($dbr)) {
-	    echo "<button class=\"w3-btn w3-border w3-border-black w3-col s12 l4 m6 w3-red\" type=\"submit\" name=\"name\" value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</button>\n";
+	    echo "<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 w3-red\" type=\"submit\" name=\"name\" value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</button>\n";
 	}
 	?>
     </form>
@@ -67,8 +67,8 @@ elseif(isset($_POST['confirm'])) {
     <meta http-equiv="refresh" content="3;public-entry.php" />
 <?php } ?>
 <?php if($state > 1 && $state < 4) { ?>
-    <form action="" method="POST">
-	<button class="button" type="submit">zur&uuml;ck</button>
+    <form class="w3-container w3-row" action="" method="POST">
+	<button class="w3-btn w3-border w3-margin-top w3-border-black s12 m12 l12 w3-green" type="submit">zur&uuml;ck</button>
     </form>
 <?php } ?>
 
