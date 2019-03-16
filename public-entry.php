@@ -29,7 +29,7 @@ elseif(isset($_POST['confirm'])) {
 	<?php
 	$letters = range('A', 'Z');
 	foreach ($letters as $letter) {
-	    echo "<button class=\"w3-btn w3-border w3-col s3 w3-margin w3-red\" value=\"".$letter."\" name=\"letter\" type=\"submit\"><b>".$letter."</b></button>";
+	    echo "<button class=\"w3-btn w3-border w3-border-black w3-col s3 w3-margin w3-red\" value=\"".$letter."\" name=\"letter\" type=\"submit\"><b>".$letter."</b></button>";
 	}
 	?>
     </form>
@@ -66,7 +66,7 @@ elseif(isset($_POST['confirm'])) {
     </div>
     <meta http-equiv="refresh" content="3;public-entry.php" />
 <?php } ?>
-<?php if($state > 1) { ?>
+<?php if($state > 1 && $state < 4) { ?>
     <form action="" method="POST">
 	<button class="button" type="submit">zur&uuml;ck</button>
     </form>
