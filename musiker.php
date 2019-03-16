@@ -31,7 +31,7 @@ $sql = 'SELECT `Index` FROM `MVD`.`User` ORDER BY `Nachname`, `Vorname`;';
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new User;
-    $M = $M->load_by_id($row['Index']);
+    $M->load_by_id($row['Index']);
     $M->printTableLine();
 }
 ?>
