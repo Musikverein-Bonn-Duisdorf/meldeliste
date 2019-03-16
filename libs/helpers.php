@@ -59,12 +59,13 @@ function germanDate($string, $monthLetters) {
 function validateUser($login, $password) {
     $_SESSION['userid'] = 0;
     $sql = sprintf("SELECT * FROM `User` WHERE `login` = '%s';",
-    $login
+		   $login
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     while($row = mysqli_fetch_array($dbr)) {
         if(password_verify($password, $row['Passhash'])) {
             $_SESSION['userid'] = $row['Index'];
+            $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
             return true;
         }
         break;
