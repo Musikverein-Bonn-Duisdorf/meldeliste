@@ -184,6 +184,7 @@ class Termin
         echo "</tr>\n";
     }
     public function printBasicTableLine() {
+	include "../common/common.php";
         if($this->Wert) {
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
             switch($this->Wert) {
