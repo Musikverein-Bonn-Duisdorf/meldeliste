@@ -1,4 +1,4 @@
-<div class="w3-container w3-indigo">
+<div class="w3-container <?php echo $titleColor; ?>">
     <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
 </div>
 <div class="w3-bar w3-teal">
