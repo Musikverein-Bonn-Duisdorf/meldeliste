@@ -20,8 +20,8 @@ session_destroy();
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title><?php echo $commonStrings['WebSiteName']; ?></title>
   </head>
-<body>
-<div class="w3-container w3-teal">
+  <body>
+      <div class="w3-container <?php echo $commonColors['Title']; ?>">
 <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
 </div>
 <meta http-equiv="refresh" content="3; URL='login.php'" />
