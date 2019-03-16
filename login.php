@@ -20,7 +20,7 @@
       <title><?php echo $commonStrings['WebSiteName']; ?></title>
   </head>
 <body>
-  <div class="w3-container w3-teal">
+  <div class="w3-container <?php echo $titleColor; ?>">
     <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
   </div>
   <?php
