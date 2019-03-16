@@ -39,12 +39,12 @@ elseif(isset($_POST['confirm'])) {
     <div class="w3-container w3-dark-gray">
 	<h3>Name</h3>
     </div>
-    <form action="" method="POST">
+    <form class="w3-container w3-row" action="" method="POST">
 	<?php
 	$sql = sprintf('SELECT * FROM `User` WHERE `Nachname` LIKE "%s%%";', $_POST['letter']);
 	$dbr = mysqli_query($conn, $sql);
 	while($row = mysqli_fetch_array($dbr)) {
-	    echo "<button class=\"button\" type=\"submit\" name=\"name\" value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</button><br />\n";
+	    echo "<button class=\"w3-btn w3-border w3-border-black w3-col s12 l4 m6 w3-red\" type=\"submit\" name=\"name\" value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</button>\n";
 	}
 	?>
     </form>
