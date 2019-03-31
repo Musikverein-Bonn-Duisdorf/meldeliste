@@ -10,7 +10,7 @@
       ?>
       <!-- successfully included php libraries -->
       <?php
-        mysqli_select_db($GLOBALS['conn'], $config['database']) or die(mysqli_error($conn));
+        mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
       ?>
       <!-- successfully connected to MySQL database -->
       <?php
