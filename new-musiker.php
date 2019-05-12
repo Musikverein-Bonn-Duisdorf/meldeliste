@@ -26,8 +26,6 @@ if(isset($_POST['id'])) {
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
     <label>Loginname</label>
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\""; ?>>
-    <label>Stimme</label>
-    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" type="number" name="Stimme" min="1" max="15" <?php if($fill) echo "value=\"".$n->Stimme."\""; else echo "value=\"1\""; ?>>
     <label>Instrument</label>
     <select class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Instrument">
       <?php
