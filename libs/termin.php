@@ -17,55 +17,55 @@ class Termin
 	    case 'Beschreibung':
 	    case 'published':
 	    case 'Wert':
-            return $this->_data[$key];
-            break;
-        default:
-            break;
+		return $this->_data[$key];
+		break;
+            default:
+		break;
         }
     }
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
-            $this->_data[$key] = (int)$val;
-            break;
+		$this->_data[$key] = (int)$val;
+		break;
 	    case 'Datum':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Uhrzeit':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Uhrzeit2':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Name':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Beschreibung':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Auftritt':
-            $this->_data[$key] = (bool)$val;
-            break;
+		$this->_data[$key] = (bool)$val;
+		break;
 	    case 'Ort1':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Ort2':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Ort3':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'Ort4':
-            $this->_data[$key] = trim($val);
-            break;
+		$this->_data[$key] = trim($val);
+		break;
 	    case 'published':
-            $this->_data[$key] = (bool)$val;
-            break;
+		$this->_data[$key] = (bool)$val;
+		break;
 	    case 'Wert':
-            $this->_data[$key] = (int)$val;
-            break;
-        default:
-            break;
+		$this->_data[$key] = (int)$val;
+		break;
+            default:
+		break;
         }	
     }
     public function save() {
@@ -84,17 +84,17 @@ class Termin
     }
     protected function insert() {
         $sql = sprintf('INSERT INTO `MVD`.`Termine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Name`, `Beschreibung`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`) VALUES ("%s", %s, %s, "%s", "%s", "%d", "%s", "%s", "%s", "%s", "%d");',
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
-        $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
-        $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
-        $this->Auftritt,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort1),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
-        $this->published
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
+		       $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
+		       $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
+		       $this->Auftritt,
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort1),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
+		       $this->published
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
@@ -103,18 +103,18 @@ class Termin
     }
     protected function update() {
         $sql = sprintf('UPDATE `MVD`.`Termine` SET `Datum` = "%s", `Uhrzeit` = "%s", `Uhrzeit2` = "%s", `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
-        $this->Uhrzeit == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit),
-        $this->Uhrzeit2 == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
-        $this->Auftritt,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort1),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
-        $this->published,
-        $this->Index
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
+		       $this->Uhrzeit == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit),
+		       $this->Uhrzeit2 == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
+		       $this->Auftritt,
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort1),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
+		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
+		       $this->published,
+		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
@@ -123,13 +123,13 @@ class Termin
     public function delete() {
         if(!$this->Index) return false;
         $sql = sprintf('DELETE FROM `MVD`.`Termine` WHERE `Index` = "%d";',
-        $this->Index
+		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
 
         $sql = sprintf('DELETE FROM `MVD`.`Meldungen` WHERE `Termin` = "%d";',
-        $this->Index
+		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
@@ -139,13 +139,13 @@ class Termin
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            $this->_data[$key] = $val;
         }
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `MVD`.`Termine` WHERE `Index` = "%d";',
-        $Index
+		       $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $row = mysqli_fetch_array($dbr);
@@ -154,8 +154,8 @@ class Termin
         }
         if(isset($_SESSION['userid'])) {
             $sql = sprintf('SELECT `Wert` FROM `MVD`.`Meldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
-            $Index,
-            $_SESSION['userid']
+			   $Index,
+			   $_SESSION['userid']
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             $row = mysqli_fetch_array($dbr);
@@ -187,17 +187,17 @@ class Termin
         if($this->Wert) {
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
             switch($this->Wert) {
-            case 1:
-                echo "w3-highway-green";
-                break;
-            case 2:
-                echo "w3-highway-red";
-                break;
-            case 3:
-                echo "w3-highway-blue";
-                break;
-            default:
-                echo "w3-pale-yellow";
+		case 1:
+                    echo "w3-highway-green";
+                    break;
+		case 2:
+                    echo "w3-highway-red";
+                    break;
+		case 3:
+                    echo "w3-highway-blue";
+                    break;
+		default:
+                    echo "w3-pale-yellow";
             }
             echo "\">\n";            
         }
@@ -208,17 +208,22 @@ class Termin
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
+	if($this->Uhrzeit) {
+            echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
+	}
+	else {
+	    echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
+	}
         echo "  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
-        ?>
-        <div class="w3-col l3 w3-row w3-mobile">
-        <form action="" method="POST">
+?>
+<div class="w3-col l3 w3-row w3-mobile">
+    <form action="" method="POST">
         <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
         <button class="w3-btn w3-green <?php if($this->Wert > 1) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
         <button class="w3-btn w3-red <?php if($this->Wert == 1 || $this->Wert == 3 ) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
         <button class="w3-btn w3-blue <?php if($this->Wert == 1 || $this->Wert == 2 ) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
-        </form>
-        </div>
+    </form>
+</div>
             </div>
 
 

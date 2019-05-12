@@ -156,7 +156,7 @@ class User
             echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".$this->Stimme.". ".$this->iName."</div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:\"".$this->Email."\">".$this->Email."</a></div>\n";
         echo "</div>";
         ?>
@@ -169,7 +169,7 @@ class User
       <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>
     </header>
     <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $this->Stimme.". ".$this->iName; ?></b></div>
+      <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $this->iName; ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($this->Mitglied); ?></b></div>
