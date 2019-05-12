@@ -263,32 +263,84 @@ class Termin
         <?php
 	}
 	public function printResponseLine() {
-        ?>
-            <div class="w3-container w3-mobile w3-lime">
-		<b><?php echo $this->Name; ?></b>
-            </div>
-            <?php
-            $sql = "SELECT * FROM `Register` ORDER BY `Sortierung`;";
+        if($this->Auftritt) {
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+        }
+        else {
+            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+        }
+        echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
+        if($this->Auftritt) {
+            $sql = "SELECT * FROM `Register` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;";
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $sja=0;
+            $snein=0;
+            $svielleicht=0;
             while($row = mysqli_fetch_array($dbr)) {
-		$sql = sprintf("SELECT * FROM `Meldungen`
+                $sql = sprintf("SELECT * FROM `Meldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
 INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `Register`) `Register` ON `Register` = `rIndex`
 WHERE `Termin` = '%d'
 AND `rIndex` = '%d'
 ORDER BY `Sortierung`",
-			       $this->Index,
-			       $row['Index']
-		);
-		$dbr2 = mysqli_query($GLOBALS['conn'], $sql);
-		$i=0;
-		while($row2 = mysqli_fetch_array($dbr2)) {
-		    /* echo "user = ".$row2['Vorname']." register = ".$row2['rName']."<br>"; */
-		    $i++;
-		}
-		echo "<div class=\"w3-container\">".$row['Name']." ".$i."</div>";
-	    }
-	    }
-	    };
-	    ?>
+                $this->Index,
+                $row['Index']
+                );
+                $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
+                $ja=0;
+                $nein=0;
+                $vielleicht=0;
+                while($row2 = mysqli_fetch_array($dbr2)) {
+                    switch($row2['Wert']) {
+                    case 1:
+                        $ja++;
+                        $sja++;
+                        break;
+                    case 2:
+                        $nein++;
+                        $snein++;
+                        break;
+                    case 3:
+                        $vielleicht++;
+                        $svielleicht++;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                echo "<div class=\"w3-container\"><div class=\"w3-col l1 w3-padding-small w3-border-bottom w3-border-black\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+            }
+            echo "<div class=\"w3-container\"><div class=\"w3-col l1 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">? ".$svielleicht."</div></div>\n";
+        }
+        else {
+            $sql = sprintf("SELECT * FROM `Meldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `User`) `User` ON `User` = `uIndex`
+WHERE `Termin` = '%d'",
+            $this->Index
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $ja=0;
+            $nein=0;
+            $vielleicht=0;
+            while($row = mysqli_fetch_array($dbr)) {
+                switch($row['Wert']) {
+                case 1:
+                    $ja++;
+                    break;
+                case 2:
+                    $nein++;
+                    break;
+                case 3:
+                    $vielleicht++;
+                    break;
+                default:
+                    break;
+                }
+            }
+                echo "<div class=\"w3-container\"><div class=\"w3-col l1 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+        }
+        echo "</div>\n";
+    }
+};
+?>
