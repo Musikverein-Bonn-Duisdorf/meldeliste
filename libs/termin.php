@@ -309,9 +309,9 @@ ORDER BY `Sortierung`",
                         break;
                     }
                 }
-                echo "<div class=\"w3-container\"><div class=\"w3-col l1 w3-padding-small w3-border-bottom w3-border-black\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+                echo "<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
             }
-            echo "<div class=\"w3-container\"><div class=\"w3-col l1 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">? ".$svielleicht."</div></div>\n";
+            echo "<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$svielleicht."</div></div>\n";
         }
         else {
             $sql = sprintf("SELECT * FROM `Meldungen`
@@ -338,7 +338,7 @@ WHERE `Termin` = '%d'",
                     break;
                 }
             }
-                echo "<div class=\"w3-container\"><div class=\"w3-col l1 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+                echo "<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
         }
         echo "</div>\n";
     }
