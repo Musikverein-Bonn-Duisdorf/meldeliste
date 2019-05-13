@@ -16,7 +16,7 @@ $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);
-    $M->printResponseLine();
+    echo $M->printResponseLine();
 }
 ?>
 <?php
