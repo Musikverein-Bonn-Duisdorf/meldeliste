@@ -24,6 +24,9 @@ session_start();
 	    <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
 	</div>
 	<?php
+if(isset($_GET['alink'])) {
+    validateLink($_GET['alink']);
+}
 	if(isset($_POST['triggerlogin'])) {
             $r=validateUser($_POST['login'], $_POST['password']);
             if(!$r) {

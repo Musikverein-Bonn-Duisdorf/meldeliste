@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null, 'Admin' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -9,12 +9,14 @@ class User
 	    case 'Vorname':
         case 'login':
 	    case 'Passhash':
+	    case 'activeLink':
 	    case 'Mitglied':
 	    case 'Instrument':
 	    case 'iName':
 	    case 'Stimme':
 	    case 'Email':
 	    case 'getMail':
+	    case 'Admin':
             return $this->_data[$key];
             break;
         default:
@@ -38,6 +40,9 @@ class User
 	    case 'Passhash':
             $this->_data[$key] = $val;
             break;
+	    case 'activeLink':
+            $this->_data[$key] = $val;
+            break;
 	    case 'Mitglied':
             $this->_data[$key] = (bool) $val;
             break;
@@ -53,11 +58,15 @@ class User
 	    case 'getMail':
             $this->_data[$key] = (bool) $val;
             break;
+	    case 'Admin':
+            $this->_data[$key] = (bool) $val;
+            break;
         default:
             break;
         }	
     }
     public function save() {
+        if(!$this->activeLink) $this->generateLink();
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $this->update();	    
@@ -75,12 +84,16 @@ class User
         if(!$this->Vorname) return false;
         return true;
     }
+    protected function generateLink() {
+        $this->activeLink = uniqid();
+    }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `login`, `Passhash`, `Mitglied`, `Instrument`, `Stimme`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%d", "%d", "%d", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Stimme`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%d", "%d", "%d", "%s", "%d");',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
         $this->Mitglied,
         $this->Instrument,
         $this->Stimme,
@@ -93,11 +106,12 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `MVD`.`User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `MVD`.`User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
         $this->Mitglied,
         $this->Instrument,
         $this->Stimme,

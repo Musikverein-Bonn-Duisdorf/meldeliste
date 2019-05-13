@@ -184,92 +184,136 @@ class Termin
         echo "</tr>\n";
     }
     public function printBasicTableLine() {
+        $str="";
         if($this->Wert) {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
             switch($this->Wert) {
 		case 1:
-                    echo "w3-highway-green";
+                    $str=$str."w3-highway-green";
                     break;
 		case 2:
-                    echo "w3-highway-red";
+                    $str=$str."w3-highway-red";
                     break;
 		case 3:
-                    echo "w3-highway-blue";
+                    $str=$str."w3-highway-blue";
                     break;
 		default:
-                    echo "w3-pale-yellow";
+                    $str=$str."w3-pale-yellow";
             }
-            echo "\">\n";            
+            $str=$str."\">\n";            
         }
         else if($this->Auftritt) {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
-        echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
+        $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
 	if($this->Uhrzeit) {
-            echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
+            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
 	}
 	else {
-	    echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
+	    $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
 	}
-        echo "  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
-?>
-<div class="w3-col l3 w3-row w3-mobile">
-    <form action="" method="POST">
-        <input type="hidden" name="Index" value="<?php echo $this->Index; ?>">
-        <button class="w3-btn w3-green <?php if($this->Wert > 1) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="1">&#10004;</button>
-        <button class="w3-btn w3-red <?php if($this->Wert == 1 || $this->Wert == 3 ) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="2">&#10008;</button>
-        <button class="w3-btn w3-blue <?php if($this->Wert == 1 || $this->Wert == 2 ) echo $GLOBALS['commonColors']['Disabled']; ?> w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2" type="submit" name="meldung" value="3"><b>?</b></button>
-    </form>
-</div>
-            </div>
+        $str=$str."  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
+        $str=$str."<div class=\"w3-col l3 w3-row w3-mobile\">";
+        $str=$str."<form action=\"\" method=\"POST\">";
+        $str=$str."<input type=\"hidden\" name=\"Index\" value=\"".$this->Index."\">";
+        $str=$str."<button class=\"w3-btn w3-green ";
+        if($this->Wert > 1) {
+            $str=$str.$GLOBALS['commonColors']['Disabled'];
+        }
+        $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"1\">&#10004;</button>";
+        $str=$str."<button class=\"w3-btn w3-red ";
+        if($this->Wert == 1 || $this->Wert == 3 ) $str=$str.$GLOBALS['commonColors']['Disabled'];
+        $str=$str." w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"2\">&#10008;</button>";
+        $str=$str."<button class=\"w3-btn w3-blue ";
+        if($this->Wert == 1 || $this->Wert == 2 ) $str=$str.$GLOBALS['commonColors']['Disabled'];
+        $str=$str."w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"3\"><b>?</b></button>";
+        $str=$str."</form>";
+        $str=$str."</div>";
+        $str=$str."</div>";
 
-
-            <div id="id<?php echo $this->Index; ?>" class="w3-modal">
-		<div class="w3-modal-content">
-		    <header class="w3-container w3-teal"> 
-			<span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
-			      class="w3-button w3-display-topright">&times;</span>
-			<h2><?php echo $this->Name; ?></h2>
-		    </header>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">Datum:</div><div class="w3-col l9"><b><?php echo germanDate($this->Datum, 1); ?></b></div>
-		    </div>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">Beginn:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit); ?></b></div>
-		    </div>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">Ende:</div><div class="w3-col l9"><b><?php echo sql2time($this->Uhrzeit2); ?></b></div>
-		    </div>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">Beschreibung:</div><div class="w3-col l9"><b><?php echo $this->Beschreibung; ?></b></div>
-		    </div>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">Ort:</div><div class="w3-col l9"><b><?php echo $this->Ort1; ?></b><br><?php echo $this->Ort2; ?><br><?php echo $this->Ort3; ?><br><?php echo $this->Ort4; ?></div>
-		    </div>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">Auftritt:</div><div class="w3-col l9"><b><?php echo bool2string($this->Auftritt); ?></b></div>
-		    </div>
-		    <div class="w3-container w3-row w3-margin">
-			<div class="w3-col l3">sichtbar:</div><div class="w3-col l9"><b><?php echo bool2string($this->published); ?></b></div>
-		    </div>
-		    <form class="w3-center w3-bar w3-mobile" action="new-termin.php" method="POST">
-			<button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
-		    </form>
-		</div>
-	    </div>
-        <?php
+        $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
+		$str=$str."<div class=\"w3-modal-content\">";
+        $str=$str."<header class=\"w3-container w3-teal\">";
+        $str=$str."<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\""; 
+        $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
+        $str=$str."<h2>".$this->Name."</h2>";
+        $str=$str."</header>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">Datum:</div><div class=\"w3-col l9\"><b>".germanDate($this->Datum, 1)."</b></div>";
+        $str=$str."</div>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">Beginn:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>";
+        $str=$str."</div>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">Ende:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>";
+        $str=$str."</div>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">Beschreibung:</div><div class=\"w3-col l9\"><b>".$this->Beschreibung."</b></div>";
+        $str=$str."</div>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">Ort:</div><div class=\"w3-col l9\"><b>".$this->Ort1."</b><br>".$this->Ort2."<br>".$this->Ort3."<br>".$this->Ort4."</div>";
+        $str=$str."</div>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">Auftritt:</div><div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>";
+        $str=$str."</div>";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+        $str=$str."<div class=\"w3-col l3\">sichtbar:</div><div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>";
+        $str=$str."</div>";
+        $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">";
+        $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block w3-teal\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>";
+        $str=$str."</form>";
+		$str=$str."</div>";
+	    $str=$str."</div>";
+        return $str;
 	}
-	public function printResponseLine() {
-        if($this->Auftritt) {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+    public function printMailTableLine() {
+        $str="";
+        if($this->Wert) {
+            $str=$str."<div class=\"w3-row w3-padding w3-mobile w3-border-bottom w3-border-black ";
+            switch($this->Wert) {
+		case 1:
+                    $str=$str."w3-highway-green";
+                    break;
+		case 2:
+                    $str=$str."w3-highway-red";
+                    break;
+		case 3:
+                    $str=$str."w3-highway-blue";
+                    break;
+		default:
+                    $str=$str."w3-pale-yellow";
+            }
+            $str=$str."\">\n";            
+        }
+        else if($this->Auftritt) {
+            $str=$str."<div class=\"w3-row w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div class=\"w3-row w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
-        echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
+        $str=$str."  <div class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
+	if($this->Uhrzeit) {
+            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
+	}
+	else {
+	    $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
+	}
+        $str=$str."  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
+        $str=$str."</div>";
+        return $str;
+	}
+	public function printResponseLine() {
+        $str = "";
+        if($this->Auftritt) {
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+        }
+        else {
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+        }
+        $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
         if($this->Auftritt) {
             $sql = "SELECT * FROM `Register` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;";
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -309,9 +353,9 @@ ORDER BY `Sortierung`",
                         break;
                     }
                 }
-                echo "<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
             }
-            echo "<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$svielleicht."</div></div>\n";
+            $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$svielleicht."</div></div>\n";
         }
         else {
             $sql = sprintf("SELECT * FROM `Meldungen`
@@ -338,9 +382,10 @@ WHERE `Termin` = '%d'",
                     break;
                 }
             }
-                echo "<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
         }
-        echo "</div>\n";
+        $str=$str."</div>\n";
+        return $str;
     }
 };
 ?>

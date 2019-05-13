@@ -56,6 +56,19 @@ function germanDate($string, $monthLetters) {
     return $s;
 }
 
+function validateLink($hash) {
+    $_SESSION['userid'] = 0;
+    $sql = sprintf("SELECT * FROM `User` WHERE `activeLink` = '%s';", $hash);
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbr)) {
+        $_SESSION['userid'] = $row['Index'];
+        $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
+        $_SESSION['admin'] = (bool)$row['Admin'];
+        return true;
+        break;
+    }
+    return false;
+}
 function validateUser($login, $password) {
     $_SESSION['userid'] = 0;
     $sql = sprintf("SELECT * FROM `User` WHERE `login` = '%s';",
@@ -66,6 +79,7 @@ function validateUser($login, $password) {
         if(password_verify($password, $row['Passhash'])) {
             $_SESSION['userid'] = $row['Index'];
             $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
+            $_SESSION['admin'] = (bool)$row['Admin'];
             return true;
         }
         break;
