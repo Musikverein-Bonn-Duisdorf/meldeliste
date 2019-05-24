@@ -23,6 +23,7 @@ $dbr = mysqli_query($conn, $sql);
 $row = mysqli_fetch_array($dbr);
 $nMusiker = $row['Count'];
 ?>
+<?php if($_SESSION['admin']) {?>
 <div class="w3-container w3-dark-gray">
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
@@ -35,6 +36,11 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printTableLine();
 }
 ?>
+<?php }
+else {
+?>
+    <meta http-equiv="refresh" content="0; URL=index.php" />
 <?php
+}
 include "common/footer.php";
 ?>
