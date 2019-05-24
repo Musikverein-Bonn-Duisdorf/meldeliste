@@ -10,6 +10,15 @@ if(isset($_POST['id'])) {
         $fill = true;
     }
 }
+$edit = 1;
+if(isset($_POST['mode'])) {
+    if($_POST['mode'] == "useredit") {
+        $edit = 2;
+    }
+    if($_SESSION['admin']) {
+        $edit = 3;
+    }
+}
 ?>
 <div class="w3-container w3-dark-gray">
   <h2>neuen Musiker anlegen</h2>
@@ -24,8 +33,14 @@ if(isset($_POST['id'])) {
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\""; ?>>
     <label>Emailadresse</label>
     <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
-    <label>Loginname</label>
-    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\""; ?>>
+<?php
+if($edit != 2) {
+?>
+<label>Loginname</label>
+<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\""; ?>>
+<?php
+}
+?>
     <label>Instrument</label>
     <select class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Instrument">
       <?php
@@ -49,7 +64,7 @@ if(isset($_POST['id'])) {
     <div class="w3-container w3-mobile">
     <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
     <?php
-      if($fill) {
+      if($fill && $edit != 2) {
       ?>
     <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
     <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Password generieren">

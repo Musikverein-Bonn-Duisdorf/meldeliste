@@ -5,7 +5,13 @@
 <div class="w3-bar w3-teal">
     <a href="/MVD" class="w3-bar-item w3-button w3-mobile<?php getPage('home');?>">Home</a>
     <a href="termine.php" class="w3-bar-item w3-button w3-mobile<?php getPage('termine');?>">Termine</a>
-    <a href="#" class="w3-bar-item w3-button w3-mobile<?php getPage('me');?>">Mein Profil</a>
+    <form action="new-musiker.php" method="POST">
+      <button type="submit" class="w3-bar-item w3-button w3-mobile<?php getPage('me');?>">
+	Mein Profil
+      </button>
+      <input type="hidden" name="id" value="<?php echo $_SESSION['userid']; ?>" />
+      <input type="hidden" name="mode" value="useredit" />
+    </form>
 <?php if($_SESSION['admin']) {?>
     <div class="w3-dropdown-hover w3-mobile">
 	<button class="w3-button w3-mobile w3-blue-gray">Admin</button>
