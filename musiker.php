@@ -18,12 +18,12 @@ if(isset($_POST['passwd'])) {
     $n->fill_from_array($_POST);
     $n->passwd();
 }
+if($_SESSION['admin']) {
 $sql = 'SELECT COUNT(`Index`) AS `Count` FROM `MVD`.`User`;';
 $dbr = mysqli_query($conn, $sql);
 $row = mysqli_fetch_array($dbr);
 $nMusiker = $row['Count'];
 ?>
-<?php if($_SESSION['admin']) {?>
 <div class="w3-container w3-dark-gray">
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
