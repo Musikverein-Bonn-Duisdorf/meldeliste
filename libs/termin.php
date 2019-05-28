@@ -263,7 +263,9 @@ class Termin
         $str=$str."<div class=\"w3-col l3\">sichtbar:</div><div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>";
         $str=$str."</div>";
         $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">";
-        $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block w3-teal\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>";
+        if($_SESSION['admin']) {
+            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block w3-teal\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>";
+        }
         $str=$str."</form>";
 		$str=$str."</div>";
 	    $str=$str."</div>";
