@@ -65,7 +65,7 @@ class Usermail {
         $mail->IsHTML(true);
 
         $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
-
+        $style=file_get_contents("styles/w3.css");
         if($this->memberonly) {
             $sql = sprintf("SELECT * FROM `User` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1;");
         }
@@ -78,7 +78,7 @@ class Usermail {
             $anrede = "Hallo ".$row['Vorname'].",";
             $link= $GLOBALS['commonStrings']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
-            $mail->Body = "<html><head><style>".file_get_contents("styles/w3.css")."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile w3-green w3-content\" href=\"".$link."\">zur Meldeliste</a></body></html>";
+            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile w3-green w3-content\" href=\"".$link."\">zur Meldeliste</a></body></html>";
 
             $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
         
