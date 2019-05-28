@@ -310,12 +310,13 @@ class Termin
 	public function printResponseLine() {
         $str = "";
         if($this->Auftritt) {
-            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
-            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
-        $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
+        $str=$str."  <div class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
+        $who='';
         if($this->Auftritt) {
             $sql = "SELECT * FROM `Register` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;";
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -338,26 +339,31 @@ ORDER BY `Sortierung`",
                 $nein=0;
                 $vielleicht=0;
                 while($row2 = mysqli_fetch_array($dbr2)) {
+                    $antwort='';
                     switch($row2['Wert']) {
                     case 1:
                         $ja++;
                         $sja++;
+                        $antwort='ja';
                         break;
                     case 2:
                         $nein++;
                         $snein++;
+                        $antwort='nein';
                         break;
                     case 3:
                         $vielleicht++;
                         $svielleicht++;
+                        $antwort='vielleicht';
                         break;
                     default:
                         break;
                     }
+                    $who = $who."<div class=\"w3-container w3-mobile\"><div class=\"w3-mobile w3-col l3 m3 s3\">".$row2['rName']."</div><div class=\"w3-mobile w3-col l3 m3 s3\"><b>".$row2['Vorname']." ".$row2['Nachname']."</b></div><div class=\"w3-mobile w3-col l1 m1 s1\">".$antwort."</div></div>\n";
                 }
-                $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-padding-small w3-col l2 m3 s3 w3-light\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
             }
-            $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$svielleicht."</div></div>\n";
+            $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-col l2 m3 s3 w3-padding-small\"><b>Summe</b></div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center\">? ".$svielleicht."</div></div>\n";
         }
         else {
             $sql = sprintf("SELECT * FROM `Meldungen`
@@ -373,20 +379,37 @@ WHERE `Termin` = '%d'",
                 switch($row['Wert']) {
                 case 1:
                     $ja++;
+                    $antwort='ja';
                     break;
                 case 2:
                     $nein++;
+                    $antwort='nein';
                     break;
                 case 3:
                     $vielleicht++;
+                    $antwort='vielleicht';
                     break;
                 default:
                     break;
                 }
+                $who = $who."<div class=\"w3-container w3-mobile\"><div class=\"w3-mobile w3-col l3 m3 s3\"><b>".$row['Vorname']." ".$row['Nachname']."</b></div><div class=\"w3-mobile w3-col l1 m1 s1\">".$antwort."</div></div>\n";
             }
-                $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small w3-border-bottom w3-border-black\">Summe</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-border w3-border-black\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m3 s3 w3-padding-small\"><b>Summe</b></div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center\">? ".$vielleicht."</div></div>\n";
         }
         $str=$str."</div>\n";
+
+
+        $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
+		$str=$str."<div class=\"w3-modal-content\">";
+        $str=$str."<header class=\"w3-container w3-teal\">";
+        $str=$str."<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\""; 
+        $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
+        $str=$str."<h2>".$this->Name."</h2>";
+        $str=$str."</header>";
+        $str=$str.$who;
+		$str=$str."</div>";
+	    $str=$str."</div>";
+
         return $str;
     }
 };
