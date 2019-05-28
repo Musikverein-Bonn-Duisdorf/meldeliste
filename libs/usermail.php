@@ -7,12 +7,13 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 class Usermail {
-    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null);
+    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null, 'sendlink' => null);
     public function __get($key) {
         switch($key) {
         case 'User':
         case 'subject':
         case 'memberonly':
+        case 'sendlink':
         case 'Text':
             return $this->_data[$key];
             break;
@@ -32,6 +33,7 @@ class Usermail {
             $this->_data[$key] = $val;
             break;
         case 'memberonly':
+        case 'sendlink':
             $this->_data[$key] = (bool)$val;
             break;
         default:
@@ -43,6 +45,9 @@ class Usermail {
     }
     public function memberonly($val) {
         $this->memberonly = $val;
+    }
+    public function sendlink($val) {
+        $this->sendlink = $val;
     }
     public function send($text) {
         $mail = new PHPMailer(true);
@@ -71,8 +76,9 @@ class Usermail {
         $i=0;
         while($row = mysqli_fetch_array($dbr)) {
             $anrede = "Hallo ".$row['Vorname'].",";
+            $link= $GLOBALS['commonStrings']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
-            $mail->Body = "<html><head><style>".file_get_contents("styles/w3.css")."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div></body></html>";
+            $mail->Body = "<html><head><style>".file_get_contents("styles/w3.css")."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile w3-green\" href=\"".$link."\">zur Meldeliste</a></body></html>";
 
             $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
         
