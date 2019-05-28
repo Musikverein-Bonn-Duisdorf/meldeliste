@@ -24,6 +24,7 @@ if(isset($_POST['send'])) {
     $mail = new Usermail;
     $mail->subject($_POST['Betreff']);
     $mail->memberonly($memberonly);
+    $mail->sendlink(true);
     $mail->send($text);
 }
  ?>

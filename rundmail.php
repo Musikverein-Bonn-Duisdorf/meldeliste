@@ -47,7 +47,7 @@ $mail->addAddress("manuel.schedler@gmx.de", "Manuel Schedler (Schlagwerk)");
 
 echo $str;
 
-$mail->Send();
-$mail->clearAddresses();
+/* $mail->Send(); */
+/* $mail->clearAddresses(); */
 
 ?>
