@@ -1,9 +1,18 @@
 <?php
+include "PHPMailer-master/src/PHPMailer.php";
+include "PHPMailer-master/src/SMTP.php";
+include "PHPMailer-master/src/Exception.php";
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 class Usermail {
-    private $_data = array('User' => null, 'Text' => null);
+    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null);
     public function __get($key) {
         switch($key) {
         case 'User':
+        case 'subject':
+        case 'memberonly':
         case 'Text':
             return $this->_data[$key];
             break;
@@ -19,10 +28,58 @@ class Usermail {
         case 'Text':
             $this->_data[$key] = $val;
             break;
+        case 'subject':
+            $this->_data[$key] = $val;
+            break;
+        case 'memberonly':
+            $this->_data[$key] = (bool)$val;
+            break;
         default:
             break;
         }	
     }
-    public function send($key, $val) {
+    public function subject($subject) {
+        $this->subject = $subject;
+    }
+    public function memberonly($val) {
+        $this->memberonly = $val;
+    }
+    public function send($text) {
+        $mail = new PHPMailer(true);
+        $mail->IsSMTP();
+        $mail->CharSet = 'UTF-8';
+        
+        $mail->Host       = $GLOBALS['mailconfig']['server']; // SMTP server example
+        $mail->SMTPAuth   = true;                  // enable SMTP authentication
+        $mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
+        $mail->SMTPSecure = $GLOBALS['mailconfig']['secure'];
+        $mail->Port       = $GLOBALS['mailconfig']['port'];                    // set the SMTP port for the GMAIL server
+        $mail->Username   = $GLOBALS['mailconfig']['user']; // SMTP account username example
+        $mail->Password   = $GLOBALS['mailconfig']['password'];        // SMTP account password example
+        $mail->setFrom($GLOBALS['mailconfig']['from'], $GLOBALS['mailconfig']['fromName']);
+        $mail->IsHTML(true);
+
+        $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
+
+        if($this->memberonly) {
+            $sql = sprintf("SELECT * FROM `User` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1;");
+        }
+        else {
+            $sql = sprintf("SELECT * FROM `User` WHERE `getMail` = 1 AND `Email` != '';");            
+        }
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $i=0;
+        while($row = mysqli_fetch_array($dbr)) {
+            $anrede = "Hallo ".$row['Vorname'].",";
+
+            $mail->Body = "<html><head><style>".file_get_contents("styles/w3.css")."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div></body></html>";
+
+            $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
+        
+            $mail->Send();
+            $mail->clearAddresses();
+            $i++;
+        }
+        echo "<div class=\"w3-container w3-yellow w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
     }
 }

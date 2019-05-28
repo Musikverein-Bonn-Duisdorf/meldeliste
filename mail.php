@@ -1,42 +1,68 @@
 <?php
 session_start();
-$_SESSION['userid'] = 1;
+$_SESSION['page']='mail';
 include "common/header.php";
 
-include "PHPMailer-master/src/PHPMailer.php";
-include "PHPMailer-master/src/SMTP.php";
-include "PHPMailer-master/src/Exception.php";
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-$mail = new PHPMailer(true);
-$mail->IsSMTP();
-$mail->CharSet = 'UTF-8';
-
-$str="";
-$now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `MVD`.`Termine` WHERE `Datum` > "%s" ORDER BY `Datum`, `Uhrzeit`;', $now);
-$dbr = mysqli_query($conn, $sql);
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new Termin;
-    $M->load_by_id($row['Index']);
-    $str=$str.$M->printMailTableLine()."\n";
+$preview=false;
+$memberonly = false;
+if(isset($_POST['preview']) || isset($_POST['send'])) {
+    $preview=true;
+    if($_POST['gruss'] == 1) {
+        $gruss = "Viele Grüße\n".$_SESSION['Vorname'];
+    }
+    else {
+        $gruss = "Viele Grüße\nder Vorstand";
+    }
+    $text = $_POST['Text']."\n\n".$gruss;
+    $anrede = "Hallo {VORNAME},";
+    if($_POST['to'] == 'aktiv') {
+        $memberonly = true;
+    }
 }
 
-$mail->Host       = $GLOBALS['mailconfig']['server']; // SMTP server example
-$mail->SMTPAuth   = true;                  // enable SMTP authentication
-$mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
-$mail->SMTPSecure = $GLOBALS['mailconfig']['secure'];
-$mail->Port       = $GLOBALS['mailconfig']['port'];                    // set the SMTP port for the GMAIL server
-$mail->Username   = $GLOBALS['mailconfig']['user']; // SMTP account username example
-$mail->Password   = $GLOBALS['mailconfig']['password'];        // SMTP account password example
+if(isset($_POST['send'])) {
+    $mail = new Usermail;
+    $mail->subject($_POST['Betreff']);
+    $mail->memberonly($memberonly);
+    $mail->send($text);
+}
+ ?>
+<div class="w3-container w3-dark-gray">
+  <h2>Email versenden</h2>
+</div>
+<div class="w3-panel w3-mobile w3-center w3-col s1 m1 l4">
+</div>
+<div class="w3-panel w3-mobile w3-center w3-border w3-col s10 m10 l4">
+  <form class="w3-container w3-margin" action="mail.php" method="POST">
 
-$mail->setFrom($GLOBALS['mailconfig']['from'], $GLOBALS['mailconfig']['fromName']);
-$mail->Subject = "Testmail";
-$mail->Body = "<html><head><style>".file_get_contents("styles/w3.css")."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container w3-dark-gray w3-mobile w3-padding\"><h2>Termin&uuml;bersicht</h2></div>".$str."</body></html>";
-$mail->IsHTML(true);
-$mail->addAddress("manuel.schedler@gmx.de", "Manuel Schedler (Schlagwerk)");
-
-$mail->Send();
+      <label>Empfänger</label>
+    <div class="w3-mobile w3-margin-bottom w3-padding w3-border w3-light-gray">
+      <div class="w3-mobile">
+	<input class="w3-radio w3-mobile" type="radio" name="to" value="aktiv" <?php if($preview && $_POST['to'] == 'aktiv') echo "checked"; ?> />
+	<label>aktive Vereinsmitglieder</label>
+      <!-- </div> -->
+      <!-- <div class="w3-mobile"> -->
+	<input class="w3-radio w3-mobile" type="radio" name="to" value="all" <?php if(($preview && $_POST['to'] == 'all') || $preview==false) echo "checked"; ?> />
+	<label>alle Musiker</label>
+      </div>
+    </div>
+    
+    <label>Betreff</label>
+    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Betreff" placeholder="Hier Betreff einfügen" value="<?php if($preview) echo $_POST['Betreff']; ?>"/>
+    <label>Text</label>
+    <input class="w3-input w3-border w3-light-gray w3-mobile" name="anrede" value="Hallo {VORNAME}," disabled/>
+    <textarea rows="10" cols="50" class="w3-input w3-border w3-light-gray w3-mobile" name="Text" placeholder="Hier Emailtext einfügen"><?php if($preview) echo $_POST['Text']; ?></textarea>
+    <select class="w3-select w3-margin-bottom" name="gruss">
+      <option value="1" <?php if($preview && $_POST['gruss']==1) echo "selected"; ?>>Viele Grüße, <?php echo $_SESSION['Vorname']; ?></option>
+      <option value="2" <?php if($preview && $_POST['gruss']==2) echo "selected"; ?>>Viele Grüße, der Vorstand</option>
+    </select>
+    <button class="w3-btn w3-green w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
+    <?php if($preview) { ?>
+    <textarea rows="10" cols="50" class="w3-input w3-mobile w3-border" disabled><?php echo $anrede."\n\n".$text; ?></textarea>
+    <button class="w3-btn w3-green w3-margin-top w3-mobile" name="send">Senden</button>
+    <?php } ?>
+  </form>
+</div>
+<?php
+ include "common/footer.php";
 ?>

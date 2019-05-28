@@ -14,6 +14,7 @@ $mailconfig = array(
     'from' => "manuel.schedler@gmx.de",
     'fromName' => "Manuel Schedler",
     'secure' => "ssl",
+    'subjectprefix' => '[MVD] ',
 );
 
 $conn = mysqli_connect($sql['server'], $sql['user'], $sql['password']) or die (mysqli_error($conn));

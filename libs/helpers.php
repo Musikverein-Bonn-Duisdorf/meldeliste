@@ -62,6 +62,8 @@ function validateLink($hash) {
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     while($row = mysqli_fetch_array($dbr)) {
         $_SESSION['userid'] = $row['Index'];
+        $_SESSION['Vorname'] = $row['Vorname'];
+        $_SESSION['Nachname'] = $row['Nachname'];
         $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
         $_SESSION['admin'] = (bool)$row['Admin'];
         return true;
@@ -78,6 +80,8 @@ function validateUser($login, $password) {
     while($row = mysqli_fetch_array($dbr)) {
         if(password_verify($password, $row['Passhash'])) {
             $_SESSION['userid'] = $row['Index'];
+            $_SESSION['Vorname'] = $row['Vorname'];
+            $_SESSION['Nachname'] = $row['Nachname'];
             $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
             $_SESSION['admin'] = (bool)$row['Admin'];
             return true;

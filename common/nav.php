@@ -20,7 +20,7 @@
 	    <a href="musiker.php" class="w3-bar-item w3-button w3-blue-gray w3-mobile<?php getPage('musiker');?>">Musikerliste</a>
 	    <a href="new-musiker.php" class="w3-bar-item w3-button w3-blue-gray w3-mobile<?php getPage('newmusiker');?>">neuen Musiker anlegen</a>
 	    <a href="new-termin.php" class="w3-bar-item w3-button w3-blue-gray w3-mobile<?php getPage('newtermin');?>">neuen Termin erstellen</a>
-	    <a href="#" class="w3-bar-item w3-button w3-blue-gray w3-mobile<?php getPage('mail');?>">Email versenden</a>
+	    <a href="mail.php" class="w3-bar-item w3-button w3-blue-gray w3-mobile<?php getPage('mail');?>">Email versenden</a>
 	</div>
     </div>
 <?php } ?>
