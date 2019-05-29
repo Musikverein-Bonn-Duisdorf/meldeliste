@@ -365,10 +365,10 @@ ORDER BY `Sortierung`",
                     default:
                         break;
                     }
-                    $all = $ja+$nein+$vielleicht;
-                    $sall=$sall+$all;
                     $who = $who."<div class=\"w3-container w3-mobile\"><div class=\"w3-mobile w3-col l3 m3 s3\">".$row2['rName']."</div><div class=\"w3-mobile w3-col l3 m3 s3\"><b>".$row2['Vorname']." ".$row2['Nachname']."</b></div><div class=\"w3-mobile w3-col l1 m1 s1\">".$antwort."</div></div>\n";
                 }
+                $all = $ja+$nein+$vielleicht;
+                $sall=$sall+$all;
                 $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-padding-small w3-col l2 m3 s3 w3-light\">".$row['Name']." (".$all."/".$nReg.")</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
             }
             $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-col l2 m3 s3 w3-padding-small\"><b>Summe (".$sall."/".$snReg.")</b></div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center\">? ".$svielleicht."</div></div>\n";
