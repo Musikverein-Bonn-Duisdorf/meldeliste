@@ -33,6 +33,13 @@ class Register
                 $this->_data[$key] = $val;
         }
     }
+    public function members() {
+        $sql = sprintf('SELECT COUNT(`Index`) AS `cnt` FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `Instrument`.`iIndex` WHERE `Register` = "%d";',
+        $this->Index);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = mysqli_fetch_array($dbr);
+        return $row['cnt'];
+    }
     public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `MVD`.`Register` WHERE `Index` = "%d";',
