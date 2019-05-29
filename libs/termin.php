@@ -321,12 +321,15 @@ class Termin
             $sql = "SELECT * FROM `Register` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;";
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             $sja=0;
+            $sall=0;
+            $snReg=0;
             $snein=0;
             $svielleicht=0;
             while($row = mysqli_fetch_array($dbr)) {
                 $register = new Register();
                 $register->load_by_id($row['Index']);
                 $nReg = $register->members();
+                $snReg+=$nReg;
                 $sql = sprintf("SELECT * FROM `Meldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
@@ -362,11 +365,13 @@ ORDER BY `Sortierung`",
                     default:
                         break;
                     }
+                    $all = $ja+$nein+$vielleicht;
+                    $sall=$sall+$all;
                     $who = $who."<div class=\"w3-container w3-mobile\"><div class=\"w3-mobile w3-col l3 m3 s3\">".$row2['rName']."</div><div class=\"w3-mobile w3-col l3 m3 s3\"><b>".$row2['Vorname']." ".$row2['Nachname']."</b></div><div class=\"w3-mobile w3-col l1 m1 s1\">".$antwort."</div></div>\n";
                 }
-                $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-padding-small w3-col l2 m3 s3 w3-light\">".$row['Name']."</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-padding-small w3-col l2 m3 s3 w3-light\">".$row['Name']." (".$all."/".$nReg.")</div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
             }
-            $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-col l2 m3 s3 w3-padding-small\"><b>Summe</b></div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center\">? ".$svielleicht."</div></div>\n";
+            $str=$str."<div class=\"w3-container\"><div class=\"w3-hover-gray w3-col l2 m3 s3 w3-padding-small\"><b>Summe (".$sall."/".$snReg.")</b></div><div class=\"w3-green w3-padding-small w3-col l1 m3 s3 w3-center\">&#10004; ".$sja."</div><div class=\"w3-red w3-padding-small w3-col l1 m3 s3 w3-center\">&#10008; ".$snein."</div><div class=\"w3-blue w3-padding-small w3-col l1 m3 s3 w3-center\">? ".$svielleicht."</div></div>\n";
         }
         else {
             $sql = sprintf("SELECT * FROM `Meldungen`
