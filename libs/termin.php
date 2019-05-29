@@ -324,6 +324,9 @@ class Termin
             $snein=0;
             $svielleicht=0;
             while($row = mysqli_fetch_array($dbr)) {
+                $register = new Register();
+                $register->load_by_id($row['Index']);
+                $nReg = $register->members();
                 $sql = sprintf("SELECT * FROM `Meldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
