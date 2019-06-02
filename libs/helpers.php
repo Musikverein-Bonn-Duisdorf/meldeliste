@@ -66,6 +66,8 @@ function validateLink($hash) {
         $_SESSION['Nachname'] = $row['Nachname'];
         $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
         $_SESSION['admin'] = (bool)$row['Admin'];
+        $logentry = new Log;
+        $logentry->generate(5, 'Login (Link): '.$_SESSION['username']." (".$_SESSION['userid'].")");
         return true;
         break;
     }
@@ -84,6 +86,8 @@ function validateUser($login, $password) {
             $_SESSION['Nachname'] = $row['Nachname'];
             $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
             $_SESSION['admin'] = (bool)$row['Admin'];
+            $logentry = new Log;
+            $logentry->generate(5, 'Login (Password): '.$_SESSION['username']." (".$_SESSION['userid'].")");
             return true;
         }
         break;
@@ -92,6 +96,7 @@ function validateUser($login, $password) {
 }
 
 function loggedIn() {
+    if(!isset($_SESSION['userid'])) return false;
     if($_SESSION['userid']) return true;
     return false;
 }
