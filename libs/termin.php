@@ -193,7 +193,7 @@ class Termin
     public function printBasicTableLine() {
         $str="";
         if($this->Wert) {
-            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
+            $str=$str."<div id=\"entry".$this->Index."\" class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
             switch($this->Wert) {
 		case 1:
                     $str=$str."w3-highway-green";
@@ -224,7 +224,7 @@ class Termin
 	}
         $str=$str."  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
         $str=$str."<div class=\"w3-col l3 w3-row w3-mobile\">";
-        $str=$str."<form action=\"\" method=\"POST\">";
+        $str=$str."<form action=\"#entry".$this->Index."\" method=\"POST\">";
         $str=$str."<input type=\"hidden\" name=\"Index\" value=\"".$this->Index."\">";
         $str=$str."<button class=\"w3-btn w3-green ";
         if($this->Wert > 1) {
