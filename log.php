@@ -1,6 +1,6 @@
 <?php
 session_start();
-$_SESSION['page']='Log';
+$_SESSION['page']='log';
 include "common/header.php";
 $sql = sprintf('SELECT * FROM `User`;');
 $dbr = mysqli_query($conn, $sql);
