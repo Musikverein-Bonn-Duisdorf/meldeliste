@@ -81,7 +81,6 @@ class Usermail {
         else {
             $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;", $register);
         }
-echo $sql;
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $i=0;
         while($row = mysqli_fetch_array($dbr)) {
@@ -101,7 +100,7 @@ echo $sql;
         $logmessage = sprintf("Betreff: %s, nur Mitglieder: %s, Text: %s",
         $this->subject,
         bool2string($this->memberonly),
-        $this->Text
+        $text
         );
         $logentry->email($logmessage);
     }
