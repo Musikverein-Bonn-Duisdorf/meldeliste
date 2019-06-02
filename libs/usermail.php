@@ -88,6 +88,11 @@ class Usermail {
         }
         echo "<div class=\"w3-container w3-yellow w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
         $logentry = new Log;
-        $legentry->generate(5, "User: ".$_SESSION['username']." Email: ".$text);
+        $logmessage = sprintf("%Betreff: %s, nur Mitglieder: %s, Text: %s",
+        $this->subject,
+        bool2string($this->memberonly),
+        $this->Text
+        );
+        $legentry->email($logmessage);
     }
 }

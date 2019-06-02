@@ -36,6 +36,31 @@ class Log
 		break;
         }	
     }
+    public function fatal($Message) {
+        $this->generate(0, $Message);
+    }
+    public function error($Message) {
+        $this->generate(1, $Message);
+    }
+    public function warning($Message) {
+        $this->generate(2, $Message);
+    }
+    public function DBdelete($Message) {
+        $this->generate(3, $Message);
+    }
+    public function DBinsert($Message) {
+        $this->generate(4, $Message);
+    }
+    public function DBupdate($Message) {
+        $this->generate(5, $Message);
+    }
+    public function email($Message) {
+        $this->generate(6, $Message);
+    }
+    public function info($Message) {
+        $this->generate(7, $Message);
+    }
+
     public function generate($Type, $Message) {
        $this->Type = $Type;
        $this->Message = $Message;
@@ -105,37 +130,29 @@ class Log
             $this->fill_from_array($row);
         }
     }
-    protected function color() {
-	switch($this->Type) {
-	    case 1:
-		break;
-	    case 2:
-		break;
-	    case 3:
-		break;
-	    case 4:
-		break;
-	    case 5:
-		break;
-	    default:
-		break;
-	}
-    }
     public function printTableLine() {
         $User = new User;
         $User->load_by_id($this->User);
         switch($this->Type) {
-        case 5:
+        case 7:
             $color = "w3-light-green";
-            $type  = "SYSLOG";
+            $type  = "INFO";
+            break;
+        case 6:
+            $color = "w3-grey";
+            $type  = "EMAIL";
+            break;
+        case 5:
+            $color = "w3-khaki";
+            $type  = "DB UPDATE";
             break;
         case 4:
-            $color = "w3-khaki";
-            $type  = "DBCHANGE";
+            $color = "w3-lime";
+            $type  = "DB INSERT";
             break;
         case 3:
             $color = "w3-light-blue";
-            $type  = "INFO";
+            $type  = "DB DELETE";
             break;
         case 2:
             $color = "w3-blue";
