@@ -173,9 +173,9 @@ class Log
         }
 	echo "<div class=\"w3-row ".$color." w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
-	echo "  <div class=\"w3-col l1 w3-container\">".$type."</div>\n";
+	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$User->getName()."</div>\n";
-	echo "  <div class=\"w3-col l9 w3-container\">".$this->Message."</div>\n";
+	echo "  <div class=\"w3-col l9 w3-container\"><i>".$this->Message."</i></div>\n";
 	echo "</div>\n";
     }
 };
