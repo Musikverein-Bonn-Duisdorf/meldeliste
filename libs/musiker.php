@@ -69,10 +69,14 @@ class User
         if(!$this->activeLink) $this->generateLink();
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();	    
+            $this->update();
+            $logentry = new Log;
+            $logentry->generate(5, 'Update: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
         }
         else {
             $this->insert();
+            $logentry = new Log;
+            $logentry->generate(5, 'New: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
         }
     }
     public function passwd() {
@@ -88,7 +92,7 @@ class User
         $this->activeLink = uniqid();
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Stimme`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%d", "%d", "%d", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%d", "%d", "%d", "%s", "%d");',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
@@ -96,7 +100,6 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
         $this->Mitglied,
         $this->Instrument,
-        $this->Stimme,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         $this->getMail
         );
@@ -143,6 +146,8 @@ class User
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
         $this->_data['Index'] = null;
+        $logentry = new Log;
+        $logentry->generate(5, 'Delete: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
         return true;
     }
     public function fill_from_array($row) {
