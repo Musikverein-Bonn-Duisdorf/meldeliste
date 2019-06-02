@@ -44,6 +44,8 @@ if(isset($_POST['send'])) {
       <div class="w3-mobile">
 	<input class="w3-radio w3-mobile" type="radio" name="to" value="aktiv" <?php if($preview && $_POST['to'] == 'aktiv') echo "checked"; ?> />
 	<label>aktive Vereinsmitglieder</label>
+    </div>
+    <div class="w3-mobile">
 	<input class="w3-radio w3-mobile" type="radio" name="to" value="all" <?php if(($preview && $_POST['to'] == 'all') || $preview==false) echo "checked"; ?> />
 	<label>alle Musiker</label>	
       </div>
