@@ -122,8 +122,33 @@ class Log
 	}
     }
     public function printTableLine() {
-	echo "<div class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
-	echo "  <div class=\"w3-col l3 w3-container\">".$this->Message."</div>\n";
+        switch($this->Type) {
+        case 5:
+            $color = "w3-light-green";
+            break;
+        case 4:
+            $color = "w3-khaki";
+            break;
+        case 3:
+            $color = "w3-light-blue";
+            break;
+        case 2:
+            $color = "w3-blue";
+            break;
+        case 1:
+            $color = "w3-deep-orange";
+            break;
+        case 0:
+            $color = "w3-red";
+            break;
+        default:
+            $color = "w3-light-grey";
+            break;
+        }
+	echo "<div class=\"w3-row ".$color." w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
+	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
+	echo "  <div class=\"w3-col l1 w3-container\">".$this->Type."</div>\n";
+	echo "  <div class=\"w3-col l10 w3-container\">".$this->Message."</div>\n";
 	echo "</div>\n";
     }
 };

@@ -9,7 +9,7 @@ include "common/header.php";
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `MVD`.`Log` ORDER BY `Timestamp`;');
+$sql = sprintf('SELECT `Index` FROM `MVD`.`Log` ORDER BY `Timestamp` DESC;');
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Log;

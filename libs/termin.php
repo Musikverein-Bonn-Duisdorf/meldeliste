@@ -71,10 +71,15 @@ class Termin
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();	    
+            $this->update();
+            $logentry = new Log;
+            $logentry->generate(4, 'Update: '.$_SESSION['username']." Termin: ".$this->Index." ".$this->Datum." ".$this->Name);
+
         }
         else {
             $this->insert();
+            $logentry = new Log;
+            $logentry->generate(3, 'New: '.$_SESSION['username']." Termin: ".$this->Index." ".$this->Datum." ".$this->Name);
         }
     }
     public function is_valid() {
@@ -135,6 +140,8 @@ class Termin
         if(!$dbr) return false;
 
         $this->_data['Index'] = null;
+        $logentry = new Log;
+        $logentry->generate(3, 'Delete: '.$_SESSION['username']." Termin: ".$this->Index." ".$this->Datum." ".$this->Name);
         return true;
     }
     public function fill_from_array($row) {

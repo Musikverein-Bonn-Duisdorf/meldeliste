@@ -71,12 +71,12 @@ class User
         if($this->Index > 0) {
             $this->update();
             $logentry = new Log;
-            $logentry->generate(5, 'Update: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
+            $logentry->generate(4, 'Update: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
         }
         else {
             $this->insert();
             $logentry = new Log;
-            $logentry->generate(5, 'New: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
+            $logentry->generate(3, 'New: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
         }
     }
     public function passwd() {
@@ -147,7 +147,7 @@ class User
         if(!$dbr) return false;
         $this->_data['Index'] = null;
         $logentry = new Log;
-        $logentry->generate(5, 'Delete: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
+        $logentry->generate(3, 'Delete: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
         return true;
     }
     public function fill_from_array($row) {
