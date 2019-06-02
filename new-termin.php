@@ -41,6 +41,7 @@ if(isset($_POST['id'])) {
     <input class="w3-check" type="checkbox" name="published" value="1" <?php if($fill && (bool)$n->published) echo "checked"; ?>>
     <label>sichtbar</label>
     <div class="w3-container w3-mobile">
+    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
     <?php
       if($fill) {
       ?>
@@ -49,7 +50,6 @@ if(isset($_POST['id'])) {
           <?php
       }
 ?>
-    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
     </div>
 </form>
 </div>
