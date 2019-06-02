@@ -33,6 +33,17 @@ class Register
                 $this->_data[$key] = $val;
         }
     }
+    public function memberTable() {
+        echo "<div class=\"w3-container w3-teal w3-margin-top\"><h3>".$this->Name." (".$this->members().")</h3></div>";
+        $sql = sprintf('SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `Instrument`.`iIndex` WHERE `Register` = "%d";',
+        $this->Index);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbr)) {
+            $user = new User;
+            $user->load_by_id($row['Index']);
+            $user->printTableLine();
+        }
+    }
     public function members() {
         $sql = sprintf('SELECT COUNT(`Index`) AS `cnt` FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `Instrument`.`iIndex` WHERE `Register` = "%d";',
         $this->Index);
