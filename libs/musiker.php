@@ -192,7 +192,7 @@ class User
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:\"".$this->Email."\">".$this->Email."</a></div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
         echo "</div>";
         ?>
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
