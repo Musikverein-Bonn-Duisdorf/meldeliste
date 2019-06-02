@@ -1,6 +1,5 @@
 <?php
 session_start();
-session_destroy();
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -27,5 +26,8 @@ session_destroy();
 <meta http-equiv="refresh" content="3; URL='login.php'" />
   <div class="w3-panel w3-mobile w3-center w3-green"><h2>Logout erfolgreich.</h2></div>
 <?php
+$logentry = new Log;
+$logentry->generate(5, "Logout.");
+session_destroy();
 include "common/footer.php";
 ?>
