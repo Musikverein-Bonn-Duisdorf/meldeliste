@@ -17,7 +17,7 @@ if(isset($_POST['meldung'])) {
 <div class="w3-container w3-dark-gray">
 <h2>Home</h2>
 </div>
-<div class="w3-container w3-margin-top w3-dark-gray">
+<div class="w3-container w3-dark-gray">
 <h3>Bevorstehende Termine</h3>
 </div>
 <?php
