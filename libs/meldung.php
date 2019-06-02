@@ -1,4 +1,5 @@
 <?php
+include 'libs/log.php';
 class Meldung
 {
     private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Wert' => null, 'Timestamp' => null);
@@ -40,9 +41,13 @@ class Meldung
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $this->update();
+            $logentry = new Log;
+            $logentry->generate(5, 'Update: '.$_SESSION['username']." Termin: ".$this->Termin." Wert: ".$this->Wert);
         }
         else {
             $this->insert();
+            $logentry = new Log;
+            $logentry->generate(5, 'New: '.$_SESSION['username']." Termin: ".$this->Termin." Wert: ".$this->Wert);
         }
     }
     public function is_valid() {

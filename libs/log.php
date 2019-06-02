@@ -36,6 +36,13 @@ class Log
 		break;
         }	
     }
+    public function generate($Type, $Message) {
+       $this->Type = $Type;
+       $this->Message = $Message;
+       $this->User = $_SESSION['userid'];
+       $this->save();
+       $this->Index = NULL;
+    }
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
@@ -46,8 +53,8 @@ class Log
         }
     }
     public function is_valid() {
-        if(!$this->Nachname) return false;
-        if(!$this->Vorname) return false;
+        if(!$this->Type) return false;
+        if(!$this->Message) return false;
         return true;
     }
     protected function insert() {
