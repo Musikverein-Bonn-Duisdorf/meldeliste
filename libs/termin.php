@@ -251,7 +251,7 @@ class Termin
         $str=$str." w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"2\">&#10008;</button>";
         $str=$str."<button class=\"w3-btn w3-blue ";
         if($this->Wert == 1 || $this->Wert == 2 ) $str=$str.$GLOBALS['commonColors']['Disabled'];
-        $str=$str."w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"3\"><b>?</b></button>";
+        $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"3\"><b>?</b></button>";
         $str=$str."</form>";
         $str=$str."</div>";
         $str=$str."</div>";
