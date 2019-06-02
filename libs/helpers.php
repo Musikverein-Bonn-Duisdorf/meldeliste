@@ -17,6 +17,19 @@ function instrumentOption($val) {
     }
 }
 
+function RegisterOption($val) {
+    $sql = 'SELECT * FROM `MVD`.`Register` ORDER BY `Sortierung`;';
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+}
+
 function getPage($string) {
     if($string == $_SESSION['page']) {
         echo ' w3-dark-gray';

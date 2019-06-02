@@ -7,13 +7,14 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 class Usermail {
-    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null, 'sendlink' => null);
+    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null, 'sendlink' => null, 'register' => null);
     public function __get($key) {
         switch($key) {
         case 'User':
         case 'subject':
         case 'memberonly':
         case 'sendlink':
+        case 'register':
         case 'Text':
             return $this->_data[$key];
             break;
@@ -24,6 +25,7 @@ class Usermail {
     public function __set($key, $val) {
         switch($key) {
         case 'User':
+        case 'register':
             $this->_data[$key] = (int)$val;
             break;
         case 'Text':
@@ -46,6 +48,9 @@ class Usermail {
     public function memberonly($val) {
         $this->memberonly = $val;
     }
+    public function register($val) {
+        $this->register = $val;
+    }
     public function sendlink($val) {
         $this->sendlink = $val;
     }
@@ -66,12 +71,17 @@ class Usermail {
 
         $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
         $style=file_get_contents("styles/w3.css");
+        $register = '';
+        if($this->register > 0) {
+            $register = sprintf("AND `Register` = %d", $this->register);
+        }
         if($this->memberonly) {
-            $sql = sprintf("SELECT * FROM `User` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1;");
+            $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 %s;", $register);
         }
         else {
-            $sql = sprintf("SELECT * FROM `User` WHERE `getMail` = 1 AND `Email` != '';");            
+            $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;", $register);
         }
+echo $sql;
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $i=0;
         while($row = mysqli_fetch_array($dbr)) {
@@ -88,11 +98,11 @@ class Usermail {
         }
         echo "<div class=\"w3-container w3-yellow w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
         $logentry = new Log;
-        $logmessage = sprintf("%Betreff: %s, nur Mitglieder: %s, Text: %s",
+        $logmessage = sprintf("Betreff: %s, nur Mitglieder: %s, Text: %s",
         $this->subject,
         bool2string($this->memberonly),
         $this->Text
         );
-        $legentry->email($logmessage);
+        $logentry->email($logmessage);
     }
 }
