@@ -421,7 +421,9 @@ WHERE `Termin` = '%d'",
         $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
         $str=$str."<h2>".$this->Name."</h2>";
         $str=$str."</header>";
+        $str=$str."<div class=\"w3-container w3-margin-top w3-margin-bottom\">";
         $str=$str.$who;
+		$str=$str."</div>";
 		$str=$str."</div>";
 	    $str=$str."</div>";
 
