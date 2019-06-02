@@ -67,7 +67,7 @@ function validateLink($hash) {
         $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
         $_SESSION['admin'] = (bool)$row['Admin'];
         $logentry = new Log;
-        $logentry->generate(5, "Login via Link.");
+        $logentry->info("Login via Link.");
         return true;
         break;
     }
@@ -87,7 +87,7 @@ function validateUser($login, $password) {
             $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
             $_SESSION['admin'] = (bool)$row['Admin'];
             $logentry = new Log;
-            $logentry->generate(5, "Login via Password.");
+            $logentry->info("Login via Password.");
             return true;
         }
         break;

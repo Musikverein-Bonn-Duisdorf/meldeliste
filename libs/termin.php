@@ -68,18 +68,33 @@ class Termin
 		break;
         }	
     }
+    public function getVars() {
+        return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, sichtbar: %s",
+        $this->Index,
+	    $this->Datum,
+	    $this->Uhrzeit,
+	    $this->Uhrzeit2,
+	    $this->Name,
+	    bool2string($this->Auftritt),
+	    $this->Ort1,
+	    $this->Ort2,
+	    $this->Ort3,
+	    $this->Ort4,
+	    $this->Beschreibung,
+	    bool2string($this->published)
+        );
+    }
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $this->update();
             $logentry = new Log;
-            $logentry->generate(4, 'Update: '.$_SESSION['username']." Termin: ".$this->Index." ".$this->Datum." ".$this->Name);
-
+            $logentry->DBupdate($this->getVars());
         }
         else {
             $this->insert();
             $logentry = new Log;
-            $logentry->generate(3, 'New: '.$_SESSION['username']." Termin: ".$this->Index." ".$this->Datum." ".$this->Name);
+            $logentry->DBinsert($this->getVars());
         }
     }
     public function is_valid() {
@@ -141,7 +156,7 @@ class Termin
 
         $this->_data['Index'] = null;
         $logentry = new Log;
-        $logentry->generate(3, 'Delete: '.$_SESSION['username']." Termin: ".$this->Index." ".$this->Datum." ".$this->Name);
+        $logentry->DBdelete($this->getVars());
         return true;
     }
     public function fill_from_array($row) {

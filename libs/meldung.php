@@ -37,17 +37,25 @@ class Meldung
             break;
         }	
     }
+    public function getVars() {
+        return sprintf("Melde-ID: %d, Termin: %d, User: %d, Wert: %d",
+        $this->Index,
+        $this->Termin,
+        $this->User,
+        $this->Wert
+        );
+    }
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $this->update();
             $logentry = new Log;
-            $logentry->generate(5, 'Update: '.$_SESSION['username']." Termin: ".$this->Termin." Wert: ".$this->Wert);
+            $logentry->DBupdate($this->getVars());
         }
         else {
             $this->insert();
             $logentry = new Log;
-            $logentry->generate(5, 'New: '.$_SESSION['username']." Termin: ".$this->Termin." Wert: ".$this->Wert);
+            $logentry->DBinsert($this->getVars());
         }
     }
     public function is_valid() {
@@ -83,6 +91,8 @@ class Meldung
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
         $this->_data['Index'] = null;
         return true;
     }

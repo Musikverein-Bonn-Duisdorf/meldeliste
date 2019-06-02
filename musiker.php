@@ -5,16 +5,18 @@ include "common/header.php";
 
 if(isset($_POST['insert'])) {
     $n = new User;
+    $n->load_by_id($_POST['Index']);
     $n->fill_from_array($_POST);
     $n->save();
 }
 if(isset($_POST['delete'])) {
     $n = new User;
-    $n->fill_from_array($_POST);
+    $n->load_by_id($_POST['Index']);
     $n->delete();
 }
 if(isset($_POST['passwd'])) {
     $n = new User;
+    $n->load_by_id($_POST['Index']);
     $n->fill_from_array($_POST);
     $n->passwd();
 }

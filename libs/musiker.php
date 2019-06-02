@@ -65,18 +65,31 @@ class User
             break;
         }	
     }
+    public function getVars() {
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %d, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s",
+        $this->Index,
+        $this->Nachname,
+        $this->Vorname,
+        $this->login,
+        bool2string($this->Mitglied),
+        $this->iName,
+        $this->Email,
+        bool2string($this->getMail),
+        bool2string($this->Admim)
+        );
+    }
     public function save() {
-        if(!$this->activeLink) $this->generateLink();
+        if($this->activeLink == '') $this->generateLink();
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $this->update();
             $logentry = new Log;
-            $logentry->generate(4, 'Update: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
+            $logentry->DBupdate($this->getVars());
         }
         else {
             $this->insert();
             $logentry = new Log;
-            $logentry->generate(3, 'New: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
+            $logentry->DBinsert($this->getVars());
         }
     }
     public function passwd() {
@@ -150,7 +163,7 @@ class User
         if(!$dbr) return false;
         $this->_data['Index'] = null;
         $logentry = new Log;
-        $logentry->generate(3, 'Delete: '.$_SESSION['username']." User: ".$this->Index." ".$this->Vorname." ".$this->Nachname);
+        $logentry->DBdelete($this->getVars());
         return true;
     }
     public function fill_from_array($row) {

@@ -27,7 +27,7 @@ session_start();
   <div class="w3-panel w3-mobile w3-center w3-green"><h2>Logout erfolgreich.</h2></div>
 <?php
 $logentry = new Log;
-$logentry->generate(5, "Logout.");
+$logentry->info("Logout.");
 session_destroy();
 include "common/footer.php";
 ?>
