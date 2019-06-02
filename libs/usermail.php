@@ -87,5 +87,7 @@ class Usermail {
             $i++;
         }
         echo "<div class=\"w3-container w3-yellow w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
+        $logentry = new Log;
+        $legentry->generate(5, "User: ".$_SESSION['username']." Email: ".$text);
     }
 }
