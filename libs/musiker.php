@@ -210,7 +210,7 @@ class User
       <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($this->Mitglied); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">erhält Emails von der Meldeliste:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
+      <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
