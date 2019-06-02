@@ -126,6 +126,9 @@ class User
         if(!$dbr) return false;
         return true;
     }
+    public function getName() {
+        return $this->Vorname." ".$this->Nachname;
+    }
     public function getRegister() {
         if(!$this->Instrument) return false;
         $sql = sprintf('SELECT * FROM `Instrument` WHERE `Index` = "%d";',

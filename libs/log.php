@@ -122,33 +122,43 @@ class Log
 	}
     }
     public function printTableLine() {
+        $User = new User;
+        $User->load_by_id($this->User);
         switch($this->Type) {
         case 5:
             $color = "w3-light-green";
+            $type  = "SYSLOG";
             break;
         case 4:
             $color = "w3-khaki";
+            $type  = "DBCHANGE";
             break;
         case 3:
             $color = "w3-light-blue";
+            $type  = "INFO";
             break;
         case 2:
             $color = "w3-blue";
+            $type  = "WARNING";
             break;
         case 1:
             $color = "w3-deep-orange";
+            $type  = "ERROR";
             break;
         case 0:
             $color = "w3-red";
+            $type  = "FATAL";
             break;
         default:
             $color = "w3-light-grey";
+            $type  = "";
             break;
         }
 	echo "<div class=\"w3-row ".$color." w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
-	echo "  <div class=\"w3-col l1 w3-container\">".$this->Type."</div>\n";
-	echo "  <div class=\"w3-col l10 w3-container\">".$this->Message."</div>\n";
+	echo "  <div class=\"w3-col l1 w3-container\">".$type."</div>\n";
+	echo "  <div class=\"w3-col l1 w3-container\">".$User->getName()."</div>\n";
+	echo "  <div class=\"w3-col l9 w3-container\">".$this->Message."</div>\n";
 	echo "</div>\n";
     }
 };
