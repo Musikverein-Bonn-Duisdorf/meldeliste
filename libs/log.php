@@ -83,7 +83,7 @@ class Log
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`Log` (`User`, `Type`, `Message`) VALUES ("%d", "%d", "%s");',
+        $sql = sprintf('INSERT INTO `Log` (`User`, `Type`, `Message`) VALUES ("%d", "%d", "%s");',
 		       $this->User,
 		       $this->Type,
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Message)
@@ -94,7 +94,7 @@ class Log
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `MVD`.`Log` SET `User` = "%d", `Type` = "%d", `Message` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `Log` SET `User` = "%d", `Type` = "%d", `Message` = "%s" WHERE `Index` = "%d";',
 		       $this->User,
 		       $this->Type,
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Message),
@@ -106,7 +106,7 @@ class Log
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `MVD`.`Log` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `Log` WHERE `Index` = "%d";',
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -121,7 +121,7 @@ class Log
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `MVD`.`Log` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `Log` WHERE `Index` = "%d";',
 		       $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);

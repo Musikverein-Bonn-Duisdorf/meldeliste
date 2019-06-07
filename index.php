@@ -22,7 +22,7 @@ if(isset($_POST['meldung'])) {
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `MVD`.`Termine` WHERE `Datum` > "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT 5;',
+$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` > "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT 5;',
 $now
 );
 $dbr = mysqli_query($conn, $sql);

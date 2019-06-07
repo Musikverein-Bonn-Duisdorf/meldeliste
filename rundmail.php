@@ -22,7 +22,7 @@ $str = $str."</div>";
 $now = date("Y-m-d");
 $end = date("Y-m-d", time()+60*60*24*60);
 
-$sql = sprintf('SELECT `Index` FROM `MVD`.`Termine` WHERE `Datum` >= "%s" AND `Datum` <= "%s" ORDER BY `Datum`, `Uhrzeit`;', $now, $end);
+$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" AND `Datum` <= "%s" ORDER BY `Datum`, `Uhrzeit`;', $now, $end);
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;

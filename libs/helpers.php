@@ -5,7 +5,7 @@ function bool2string($val) {
 }
 
 function instrumentOption($val) {
-    $sql = 'SELECT * FROM `MVD`.`Instrument` ORDER BY `Register`, `Name`;';
+    $sql = 'SELECT * FROM `Instrument` ORDER BY `Register`, `Name`;';
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {
@@ -18,7 +18,7 @@ function instrumentOption($val) {
 }
 
 function RegisterOption($val) {
-    $sql = 'SELECT * FROM `MVD`.`Register` ORDER BY `Sortierung`;';
+    $sql = 'SELECT * FROM `Register` ORDER BY `Sortierung`;';
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {

@@ -28,7 +28,7 @@ else {
 }
 ?>
 <div class="w3-container w3-dark-gray">
-  <h2>neuen Musiker anlegen</h2>
+  <h2>Profil bearbeiten</h2>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>

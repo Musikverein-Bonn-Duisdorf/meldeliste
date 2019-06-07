@@ -21,7 +21,7 @@ if(isset($_POST['passwd'])) {
     $n->passwd();
 }
 if($_SESSION['admin']) {
-$sql = 'SELECT COUNT(`Index`) AS `Count` FROM `MVD`.`User`;';
+$sql = 'SELECT COUNT(`Index`) AS `Count` FROM `User`;';
 $dbr = mysqli_query($conn, $sql);
 $row = mysqli_fetch_array($dbr);
 $nMusiker = $row['Count'];
@@ -30,7 +30,7 @@ $nMusiker = $row['Count'];
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
 <?php
-$sql = 'SELECT `Index` FROM `MVD`.`User` ORDER BY `Nachname`, `Vorname`;';
+$sql = 'SELECT `Index` FROM `User` ORDER BY `Nachname`, `Vorname`;';
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new User;
