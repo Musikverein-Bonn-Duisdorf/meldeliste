@@ -8,7 +8,7 @@ if($_SESSION['admin']) {
     <h2>Registerübersicht</h2>
 </div>
 <?php
-$sql = 'SELECT `Index` FROM `MVD`.`Register` ORDER BY `Sortierung`;';
+$sql = 'SELECT `Index` FROM `Register` ORDER BY `Sortierung`;';
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Register;

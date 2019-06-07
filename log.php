@@ -10,7 +10,7 @@ $dbr = mysqli_query($conn, $sql);
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `MVD`.`Log` ORDER BY `Timestamp` DESC LIMIT 1000;');
+$sql = sprintf('SELECT `Index` FROM `Log` ORDER BY `Timestamp` DESC LIMIT 1000;');
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Log;

@@ -103,7 +103,7 @@ class Termin
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`Termine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Name`, `Beschreibung`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`) VALUES ("%s", %s, %s, "%s", "%s", "%d", "%s", "%s", "%s", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `Termine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Name`, `Beschreibung`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`) VALUES ("%s", %s, %s, "%s", "%s", "%d", "%s", "%s", "%s", "%s", "%d");',
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
 		       $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
 		       $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
@@ -122,7 +122,7 @@ class Termin
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `MVD`.`Termine` SET `Datum` = "%s", `Uhrzeit` = "%s", `Uhrzeit2` = "%s", `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `Termine` SET `Datum` = "%s", `Uhrzeit` = "%s", `Uhrzeit2` = "%s", `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
 		       $this->Uhrzeit == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit),
 		       $this->Uhrzeit2 == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2),
@@ -142,13 +142,13 @@ class Termin
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `MVD`.`Termine` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `Termine` WHERE `Index` = "%d";',
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return false;
 
-        $sql = sprintf('DELETE FROM `MVD`.`Meldungen` WHERE `Termin` = "%d";',
+        $sql = sprintf('DELETE FROM `Meldungen` WHERE `Termin` = "%d";',
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -166,7 +166,7 @@ class Termin
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `MVD`.`Termine` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `Termine` WHERE `Index` = "%d";',
 		       $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -175,7 +175,7 @@ class Termin
             $this->fill_from_array($row);
         }
         if(isset($_SESSION['userid'])) {
-            $sql = sprintf('SELECT `Wert` FROM `MVD`.`Meldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
+            $sql = sprintf('SELECT `Wert` FROM `Meldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
 			   $Index,
 			   $_SESSION['userid']
             );

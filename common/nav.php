@@ -3,7 +3,7 @@
 <p><?php echo $_SESSION['username'] ?></p>
 </div>
 <div class="w3-bar w3-teal">
-    <a href="/MVD" class="w3-bar-item w3-button w3-mobile<?php getPage('home');?>">Home</a>
+    <a href="<?php echo $GLOBALS['commonStrings']['WebSiteURL']; ?>" class="w3-bar-item w3-button w3-mobile<?php getPage('home');?>">Home</a>
     <a href="termine.php" class="w3-bar-item w3-button w3-mobile<?php getPage('termine');?>">Termine</a>
     <form action="new-musiker.php" method="POST">
       <button type="submit" class="w3-bar-item w3-button w3-mobile<?php getPage('me');?>">

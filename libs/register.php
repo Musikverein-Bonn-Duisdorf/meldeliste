@@ -53,7 +53,7 @@ class Register
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `MVD`.`Register` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `Register` WHERE `Index` = "%d";',
         $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);

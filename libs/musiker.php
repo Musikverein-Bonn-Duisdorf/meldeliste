@@ -105,7 +105,7 @@ class User
         $this->activeLink = uniqid();
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`User` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `User` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d");',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
@@ -122,7 +122,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `MVD`.`User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
@@ -156,7 +156,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `MVD`.`User` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `User` WHERE `Index` = "%d";',
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -173,7 +173,7 @@ class User
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `MVD`.`User` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
         $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);

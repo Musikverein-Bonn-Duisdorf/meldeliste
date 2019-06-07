@@ -65,7 +65,7 @@ class Meldung
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `MVD`.`Meldungen` (`Termin`, `User`, `Wert`) VALUES ("%s", "%s", "%s");',
+        $sql = sprintf('INSERT INTO `Meldungen` (`Termin`, `User`, `Wert`) VALUES ("%s", "%s", "%s");',
         $this->Termin,
         $this->User,
         $this->Wert
@@ -76,7 +76,7 @@ class Meldung
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `MVD`.`Meldungen` SET `Wert` = "%s", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `Meldungen` SET `Wert` = "%s", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
         $this->Wert,
         $this->Index
         );
@@ -86,7 +86,7 @@ class Meldung
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `MVD`.`Meldungen` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `Meldungen` WHERE `Index` = "%d";',
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -103,7 +103,7 @@ class Meldung
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `MVD`.`Meldungen` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `Meldungen` WHERE `Index` = "%d";',
         $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -113,7 +113,7 @@ class Meldung
         }
     }
     public function load_by_user_event($user, $event) {
-        $sql = sprintf('SELECT * FROM `MVD`.`Meldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
+        $sql = sprintf('SELECT * FROM `Meldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
         $user,
         $event
         );
