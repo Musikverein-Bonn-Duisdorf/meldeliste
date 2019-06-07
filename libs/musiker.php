@@ -66,7 +66,7 @@ class User
         }	
     }
     public function getVars() {
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %d, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s",
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s",
         $this->Index,
         $this->Nachname,
         $this->Vorname,
