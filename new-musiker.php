@@ -15,11 +15,12 @@ if(isset($_POST['mode'])) {
     if($_POST['mode'] == "useredit") {
         $edit = 2;
     }
-    if($_SESSION['admin']) {
-        $edit = 3;
-    }
+}
+if($_SESSION['admin']) {
+    $edit = 3;
 }
 
+$disabled = '';
 if($edit!=3) {
     $disabled = 'disabled';
 }
