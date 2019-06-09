@@ -46,13 +46,13 @@ if($edit != 2) {
 ?>
     <label>Loginname (optional)</label>
 <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
+<?php
+}
+?>
 <label>neues Passwort (optional)</label>
 <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
 <label>neues Passwort wiederholen (optional)</label>
 <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">
-<?php
-}
-?>
     <label>Instrument</label>
 <select class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
       <?php
