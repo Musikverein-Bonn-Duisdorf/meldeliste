@@ -42,6 +42,11 @@ class Usermail {
             break;
         }	
     }
+    public function singleUser($userIndex, $subject, $text) {
+        $this->User = $userIndex;
+        $this->subject = $subject;
+        $this->send($text);
+    }
     public function subject($subject) {
         $this->subject = $subject;
     }
@@ -72,14 +77,19 @@ class Usermail {
         $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
         $style=file_get_contents("styles/w3.css");
         $register = '';
-        if($this->register > 0) {
-            $register = sprintf("AND `Register` = %d", $this->register);
-        }
-        if($this->memberonly) {
-            $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 %s;", $register);
+        if($this->User > 0) {
+            $sql = sprintf("SELECT * FROM `User` WHERE `Index` = %d;", $this->User);
         }
         else {
-            $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;", $register);
+            if($this->register > 0) {
+                $register = sprintf("AND `Register` = %d", $this->register);
+            }
+            if($this->memberonly) {
+                $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 %s;", $register);
+            }
+            else {
+                $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;", $register);
+            }
         }
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         $i=0;

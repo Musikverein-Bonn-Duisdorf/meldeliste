@@ -29,4 +29,5 @@
     </div>
 <?php } ?>
     <a href="logout.php" class="w3-bar-item w3-button w3-gray w3-mobile">Logout</a>
+    <a href="<?php echo $commonStrings['MasterPage']; ?>" class="w3-bar-item w3-button w3-blue-gray w3-mobile">Vereinshomepage</a>
 </div>
