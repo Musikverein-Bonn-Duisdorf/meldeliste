@@ -8,6 +8,11 @@ if(isset($_POST['insert'])) {
     $n->load_by_id($_POST['Index']);
     $n->fill_from_array($_POST);
     $n->save();
+    if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
+        if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
+            $n->passwd($_POST['pw1']);
+        }
+    }
 }
 if(isset($_POST['delete'])) {
     $n = new User;
@@ -18,7 +23,7 @@ if(isset($_POST['passwd'])) {
     $n = new User;
     $n->load_by_id($_POST['Index']);
     $n->fill_from_array($_POST);
-    $n->passwd();
+    $n->passwd("");
 }
 if($_SESSION['admin']) {
 $sql = 'SELECT COUNT(`Index`) AS `Count` FROM `User`;';

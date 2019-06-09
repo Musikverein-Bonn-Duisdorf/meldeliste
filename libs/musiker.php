@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null, 'Admin' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -17,6 +17,7 @@ class User
 	    case 'Email':
 	    case 'getMail':
 	    case 'Admin':
+        case 'singleUsePW':
             return $this->_data[$key];
             break;
         default:
@@ -61,6 +62,9 @@ class User
 	    case 'Admin':
             $this->_data[$key] = (bool) $val;
             break;
+	    case 'singleUsePW':
+            $this->_data[$key] = (bool) $val;
+            break;
         default:
             break;
         }	
@@ -92,9 +96,21 @@ class User
             $logentry->DBinsert($this->getVars());
         }
     }
-    public function passwd() {
-        $this->Passhash = password_hash("1949eV", PASSWORD_DEFAULT);
+    public function passwd($password) {
+        $arbPW = false;
+        if($password == '') {
+            $password = uniqid();
+            $arbPW = true;
+        }
+        $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
         $this->update();
+        $mail = new Usermail;
+        if($arbPW) {
+            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n".$password);
+        }
+        else {
+            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']);
+        }
     }
     public function is_valid() {
         if(!$this->Nachname) return false;

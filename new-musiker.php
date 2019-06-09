@@ -44,8 +44,12 @@ else {
 <?php
 if($edit != 2) {
 ?>
-<label>Loginname</label>
+    <label>Loginname (optional)</label>
 <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
+<label>neues Passwort (optional)</label>
+<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
+<label>neues Passwort wiederholen (optional)</label>
+<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">
 <?php
 }
 ?>
@@ -75,7 +79,7 @@ if($edit != 2) {
       if($fill && $edit != 2) {
       ?>
     <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
-    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Password generieren">
+    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
     <?php
 }
       ?>
