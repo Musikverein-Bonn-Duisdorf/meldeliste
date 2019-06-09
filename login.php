@@ -24,9 +24,9 @@ session_start();
 	    <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
 	</div>
 	<?php
-if(isset($_GET['alink'])) {
-    validateLink($_GET['alink']);
-}
+    if(isset($_GET['alink'])) {
+            validateLink($_GET['alink']);
+    }
 	if(isset($_POST['triggerlogin'])) {
             $r=validateUser($_POST['login'], $_POST['password']);
             if(!$r) {
@@ -36,6 +36,14 @@ if(isset($_GET['alink'])) {
         }
 	}
         if(loggedIn()) {
+
+                if($_SESSION['singleUsePW']) {
+?>
+        <meta http-equiv="refresh" content="0; URL='changePW.php'" />
+<?php
+        die("<div class=\"w3-panel w3-red\"><h2>Passwort &auml;ndern...</h2></div>");
+    }
+            
         ?>
             <meta http-equiv="refresh" content="0; URL='index.php'" />
             <?php

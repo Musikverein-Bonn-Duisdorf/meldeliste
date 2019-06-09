@@ -99,6 +99,7 @@ function validateUser($login, $password) {
             $_SESSION['Nachname'] = $row['Nachname'];
             $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
             $_SESSION['admin'] = (bool)$row['Admin'];
+            $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
             $logentry = new Log;
             $logentry->info("Login via Password.");
             return true;

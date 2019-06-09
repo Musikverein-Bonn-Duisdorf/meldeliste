@@ -21,6 +21,12 @@
               <?php
               die("<div class=\"w3-panel w3-red\"><h2>Nicht eingeloggt...</h2></div>");
           }
+          if($_SESSION['singleUsePW']) {
+              ?>
+              <meta http-equiv="refresh" content="0; URL='changePW.php'" />
+              <?php
+              die("<div class=\"w3-panel w3-red\"><h2>Passwort &auml;ndern...</h2></div>");
+          }
       ?>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
