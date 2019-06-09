@@ -96,6 +96,11 @@ class User
             $logentry->DBinsert($this->getVars());
         }
     }
+    public function singleUsePW($val) {
+        $sql = sprintf('UPDATE `User` SET `singleUsePW` = %d WHERE `Index` = %d;', (bool)$val, $this->Index);
+        mysqli_query($GLOBALS['conn'], $sql);
+        $_SESSION['singleUsePW'] = (bool)$val;
+    }
     public function passwd($password) {
         $arbPW = false;
         if($password == '') {
@@ -106,9 +111,11 @@ class User
         $this->update();
         $mail = new Usermail;
         if($arbPW) {
+            $this->singleUsePW(1);
             $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n".$password);
         }
         else {
+            $this->singleUsePW(0);
             $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']);
         }
     }
