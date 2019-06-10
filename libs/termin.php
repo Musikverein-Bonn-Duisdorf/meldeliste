@@ -186,29 +186,33 @@ class Termin
             }
         }
     }
-    public function printTableLine() {
-        if($this->Auftritt) {
-            echo "<tr class=\"w3-lime\">\n";
-        }
-        else {
-            echo "<tr class=\"w3-khaki\">\n";            
-        }
-        echo "  <td>".germanDate($this->Datum, 0)."</td>\n";
-        echo "  <td>".$this->Uhrzeit."</td>\n";
-        echo "  <td>".$this->Uhrzeit2."</td>\n";
-        echo "  <td>".$this->Name."</td>\n";
-        echo "  <td>".$this->Beschreibung."</td>\n";
-        echo "  <td>".$this->Ort1."</td>\n";
-        echo "  <td>".$this->Ort2."</td>\n";
-        echo "  <td>".$this->Ort3."</td>\n";
-        echo "  <td>".$this->Ort4."</td>\n";
-        echo "  <td>".bool2string($this->published)."</td>\n";
-        echo "</tr>\n";
-    }
+    /* public function printTableLine() { */
+    /*     if($this->Auftritt) { */
+    /*         echo "<tr class=\"w3-lime\">\n"; */
+    /*     } */
+    /*     else { */
+    /*         echo "<tr class=\"w3-khaki\">\n";             */
+    /*     } */
+    /*     echo "  <td>".germanDate($this->Datum, 0)."</td>\n"; */
+    /*     echo "  <td>".$this->Uhrzeit."</td>\n"; */
+    /*     echo "  <td>".$this->Uhrzeit2."</td>\n"; */
+    /*     echo "  <td>".$this->Name."</td>\n"; */
+    /*     echo "  <td>".$this->Beschreibung."</td>\n"; */
+    /*     echo "  <td>".$this->Ort1."</td>\n"; */
+    /*     echo "  <td>".$this->Ort2."</td>\n"; */
+    /*     echo "  <td>".$this->Ort3."</td>\n"; */
+    /*     echo "  <td>".$this->Ort4."</td>\n"; */
+    /*     echo "  <td>".bool2string($this->published)."</td>\n"; */
+    /*     echo "</tr>\n"; */
+    /* } */
     public function printBasicTableLine() {
+        $opacity = "";
+        if(!$this->published) {
+            $opacity = "w3-opacity";
+        }
         $str="";
         if($this->Wert) {
-            $str=$str."<div id=\"entry".$this->Index."\" class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ";
+            $str=$str."<div id=\"entry".$this->Index."\" class=\"w3-row w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black ".$opacity." ";
             switch($this->Wert) {
 		case 1:
                     $str=$str."w3-highway-green";
@@ -222,13 +226,13 @@ class Termin
 		default:
                     $str=$str."w3-pale-yellow";
             }
-            $str=$str."\">\n";            
+            $str=$str."\">\n";
         }
         else if($this->Auftritt) {
-            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";
         }
         else {
-            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";            
         }
         $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
         if($this->Uhrzeit && ($this->Uhrzeit != $this->Uhrzeit2)) {
