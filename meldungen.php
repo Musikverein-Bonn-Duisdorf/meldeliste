@@ -9,7 +9,7 @@ include "common/header.php";
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` > "%s" ORDER BY `Datum`, `Uhrzeit`;',
+$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
 $now
 );
 $dbr = mysqli_query($conn, $sql);
