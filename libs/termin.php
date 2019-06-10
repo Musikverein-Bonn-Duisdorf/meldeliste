@@ -284,15 +284,11 @@ class Termin
         return $str;
 	}
 	public function printResponseLine() {
-        $str = "";
-        if($this->Auftritt) {
-            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";            
-        }
-        else {
-            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";            
-        }
-        $str=$str."  <div class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
-        $who='';
+        $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3></div>\n";
+        $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-border-bottom w3-border-black\">\n";
+        $whoYes = '';
+        $whoNo = '';
+        $whoMaybe = '';
         if($this->Auftritt) {
             $sql = "SELECT * FROM `Register` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;";
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -308,11 +304,11 @@ class Termin
                 $snReg+=$nReg;
                 $sql = sprintf("SELECT * FROM `Meldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
 INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `Register`) `Register` ON `Register` = `rIndex`
 WHERE `Termin` = '%d'
 AND `rIndex` = '%d'
-ORDER BY `Sortierung`",
+ORDER BY `Nachname`, `Vorname`",
                 $this->Index,
                 $row['Index']
                 );
@@ -327,32 +323,34 @@ ORDER BY `Sortierung`",
                         $ja++;
                         $sja++;
                         $antwort='ja';
+                        $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnYes']."\"><div class=\"w3-col l6 m6 s6\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l6 m6 s6\">".$row2['iName']."</div></div>\n";
                         break;
                     case 2:
                         $nein++;
                         $snein++;
                         $antwort='nein';
+                        $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnNo']."\"><div class=\"w3-col l6 m6 s6\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l6 m6 s6\">".$row2['iName']."</div></div>\n";
                         break;
                     case 3:
                         $vielleicht++;
                         $svielleicht++;
                         $antwort='vielleicht';
+                        $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnMaybe']."\"><div class=\"w3-col l6 m6 s6\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l6 m6 s6\">".$row2['iName']."</div></div>\n";
                         break;
                     default:
                         break;
                     }
-                    $who = $who."<div class=\"w3-container w3-mobile\"><div class=\"w3-mobile w3-col l3 m3 s3\">".$row2['rName']."</div><div class=\"w3-mobile w3-col l3 m3 s3\"><b>".$row2['Vorname']." ".$row2['Nachname']."</b></div><div class=\"w3-mobile w3-col l1 m1 s1\">".$antwort."</div></div>\n";
                 }
                 $all = $ja+$nein+$vielleicht;
                 $sall=$sall+$all;
-                $str=$str."<div class=\"w3-container\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-padding-small w3-col l2 m6 s6\">".$row['Name']." (".$all."/".$nReg.")</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-padding-small w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-padding-small w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-padding-small w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l9 m6 s6\">".$row['Name']." (".$all."/".$nReg.")</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
             }
-            $str=$str."<div class=\"w3-container\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l2 m6 s6 w3-padding-small\"><b>Summe (".$sall."/".$snReg.")</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-padding-small w3-col l1 m2 s2 w3-center\">&#10004; ".$sja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-padding-small w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-padding-small w3-col l1 m2 s2 w3-center\">? ".$svielleicht."</div></div>\n";
+            $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l9 m6 s6\"><b>Summe (".$sall."/".$snReg.")</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$sja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$svielleicht."</div></div>\n";
         }
         else {
             $sql = sprintf("SELECT * FROM `Meldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `User`) `User` ON `User` = `uIndex`
-WHERE `Termin` = '%d'",
+WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
             $this->Index
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -364,24 +362,25 @@ WHERE `Termin` = '%d'",
                 case 1:
                     $ja++;
                     $antwort='ja';
+                    $whoYes = $whoYes."<div class=\"w3-container ".$GLOBALS['commonColors']['AppmntBtnYes']."\"><div class=\"w3-row\"><div class=\"w3-col l12 m12 s12\">".$row['Vorname']." ".$row['Nachname']."</div></div></div>\n";
                     break;
                 case 2:
                     $nein++;
                     $antwort='nein';
+                    $whoNo = $whoNo."<div class=\"w3-container ".$GLOBALS['commonColors']['AppmntBtnNo']."\"><div class=\"w3-row\"><div class=\"w3-col l12 m12 s12\">".$row['Vorname']." ".$row['Nachname']."</div></div></div>\n";
                     break;
                 case 3:
                     $vielleicht++;
                     $antwort='vielleicht';
+                    $whoMaybe = $whoMaybe."<div class=\"w3-container ".$GLOBALS['commonColors']['AppmntBtnMaybe']."\"><div class=\"w3-row\"><div class=\"w3-col l12 m12 s12\">".$row['Vorname']." ".$row['Nachname']."</div></div></div>\n";
                     break;
                 default:
                     break;
                 }
-                $who = $who."<div class=\"w3-container w3-mobile\"><div class=\"w3-mobile w3-col l3 m3 s3\"><b>".$row['Vorname']." ".$row['Nachname']."</b></div><div class=\"w3-mobile w3-col l1 m1 s1\">".$antwort."</div></div>\n";
             }
-                $str=$str."<div class=\"w3-container\"><div class=\"w3-col l2 m6 s6 w3-padding-small\"><b>Summe</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-padding-small w3-col l1 m2 s2 w3-center\">&#10004; ".$ja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-padding-small w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-padding-small w3-col l1 m2 s2 w3-center\">? ".$vielleicht."</div></div>\n";
+                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$ja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$vielleicht."</div></div>\n";
         }
         $str=$str."</div>\n";
-
 
         $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
 		$str=$str."<div class=\"w3-modal-content\">";
@@ -390,8 +389,19 @@ WHERE `Termin` = '%d'",
         $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
         $str=$str."<h2>".$this->Name."</h2>";
         $str=$str."</header>";
-        $str=$str."<div class=\"w3-container w3-margin-top w3-margin-bottom\">";
-        $str=$str.$who;
+        $str = $str."<div class=\"w3-container w3-margin-top\"><b>Zusagen</b></div>\n";
+        $str = $str."<div class=\"w3-container\">";
+        $str=$str.$whoYes;
+        $str = $str."</div>";
+        $str = $str."<div class=\"w3-container w3-margin-top\"><b>Absagen</b></div>\n";
+        $str = $str."<div class=\"w3-container\">";
+        $str=$str.$whoNo;
+        $str = $str."</div>";
+        $str = $str."<div class=\"w3-container w3-margin-top\"><b>unsicher</b></div>\n";
+        $str = $str."<div class=\"w3-container\">";
+        $str=$str.$whoMaybe;
+        $str = $str."</div>";
+        $str=$str."<div class=\"w3-container w3-margin-bottom\"><br />";
 		$str=$str."</div>";
 		$str=$str."</div>";
 	    $str=$str."</div>";
