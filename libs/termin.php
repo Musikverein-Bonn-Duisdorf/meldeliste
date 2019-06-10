@@ -286,10 +286,10 @@ class Termin
 	public function printResponseLine() {
         $str = "";
         if($this->Auftritt) {
-            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         else {
-            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding ".$GLOBALS['commonColors']['AppmntNoConcert']." w3-mobile w3-border-bottom w3-border-black\">\n";            
+            $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-row w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         $str=$str."  <div class=\"w3-col l2 w3-container\"><b>".$this->Name."</b></div>\n";
         $who='';
