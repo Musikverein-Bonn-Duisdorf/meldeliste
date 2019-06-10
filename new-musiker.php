@@ -28,7 +28,7 @@ else {
     $disabled = '';
 }
 ?>
-<div class="w3-container w3-dark-gray">
+<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
   <h2>Profil bearbeiten</h2>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
@@ -36,25 +36,25 @@ else {
 <div class="w3-panel w3-mobile w3-center w3-border w3-col s6 l4">
   <form class="w3-container w3-margin" action="musiker.php" method="POST">
     <label>Vorname</label>
-    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".$n->Vorname."\" ".$disabled; ?>>
+    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".$n->Vorname."\" ".$disabled; ?>>
     <label>Nachname</label>
-    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\" ".$disabled; ?>>
+    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\" ".$disabled; ?>>
     <label>Emailadresse</label>
-    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
+    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
 <?php
 if($edit != 2) {
 ?>
     <label>Loginname (optional)</label>
-<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
+<input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
 <?php
 }
 ?>
 <label>neues Passwort (optional)</label>
-<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
+<input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
 <label>neues Passwort wiederholen (optional)</label>
-<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">
+<input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">
     <label>Instrument</label>
-<select class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
+<select class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
       <?php
   if($fill) {
     instrumentOption($n->Instrument);
@@ -74,12 +74,12 @@ if($edit != 2) {
     </div>
     <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
     <div class="w3-container w3-mobile">
-    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
+    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
     <?php
       if($fill && $edit != 2) {
       ?>
-    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
-    <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
+    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
+    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
     <?php
 }
       ?>

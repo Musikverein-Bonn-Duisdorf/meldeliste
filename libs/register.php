@@ -34,7 +34,7 @@ class Register
         }
     }
     public function memberTable() {
-        echo "<div class=\"w3-container w3-teal w3-margin-top\"><h3>".$this->Name." (".$this->members().")</h3></div>";
+        echo "<div class=\"w3-container ".$GLOBALS['commonColors']['titlebar']." w3-margin-top\"><h3>".$this->Name." (".$this->members().")</h3></div>";
         $sql = sprintf('SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `Instrument` = `Instrument`.`iIndex` WHERE `Register` = "%d" ORDER BY `Nachname`, `Vorname`;',
         $this->Index);
         $dbr = mysqli_query($GLOBALS['conn'], $sql);

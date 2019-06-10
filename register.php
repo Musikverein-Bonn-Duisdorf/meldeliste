@@ -4,7 +4,7 @@ $_SESSION['page']='register';
 include "common/header.php";
 if($_SESSION['admin']) {
 ?>
-<div class="w3-container w3-dark-gray">
+<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
     <h2>Registerübersicht</h2>
 </div>
 <?php

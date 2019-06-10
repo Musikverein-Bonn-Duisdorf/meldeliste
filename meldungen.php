@@ -4,7 +4,7 @@ $_SESSION['page']='meldungen';
 include "common/header.php";
 
 ?>
-<div class="w3-container w3-dark-gray">
+<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
 <h2>Rückmeldungen</h2>
 </div>
 <?php

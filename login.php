@@ -17,11 +17,11 @@ session_start();
 	<!-- successfully connected to MySQL database -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><?php echo $commonStrings['WebSiteName']; ?></title>
+	<title><?php echo $site['WebSiteName']; ?></title>
     </head>
-    <body>
+    <body class="<?php echo $GLOBALS['commonColors']['bgcolor']; ?>">
 	<div class="w3-container <?php echo $commonColors['Title']; ?>">
-	    <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
+	    <h1><?php echo $site['WebSiteName']; ?></h1>
 	</div>
 	<?php
     if(isset($_GET['alink'])) {
@@ -31,7 +31,7 @@ session_start();
             $r=validateUser($_POST['login'], $_POST['password']);
             if(!$r) {
 	?>
-	    <div class="w3-panel w3-red"><h2>Login fehlgeschlagen.</h2></div>
+	    <div class="w3-panel <?php echo $GLOBALS['commonColors']['notLoggedIn']; ?>"><h2>Login fehlgeschlagen.</h2></div>
 	<?php
         }
 	}
@@ -41,30 +41,30 @@ session_start();
 ?>
         <meta http-equiv="refresh" content="0; URL='changePW.php'" />
 <?php
-        die("<div class=\"w3-panel w3-red\"><h2>Passwort &auml;ndern...</h2></div>");
+        die("<div class=\"w3-panel ".$GLOBALS['commonColors']['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
     }
             
         ?>
             <meta http-equiv="refresh" content="0; URL='index.php'" />
             <?php
-            die("<div class=\"w3-panel w3-green\"><h2>Login erfolgreich.</h2></div>");
+            die("<div class=\"w3-panel ".$GLOBALS['commonColors']['success']."\"><h2>Login erfolgreich.</h2></div>");
 	    }
 	    ?>
 	    <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 	    </div>
 	    <div class="w3-panel w3-mobile w3-center w3-border w3-col s6 l4">
-		<div class="w3-panel w3-dark-gray w3-mobile">
+                 <div class="w3-panel <?php echo $GLOBALS['commonColors']['titlebar']; ?> w3-mobile">
 		    <h2>Login</h2>
 		</div>
 		<form class="w3-container" action="" method="POST">
 		    
 		    <label>Benutzer</label>
-		    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" type="text" name="login">
+		    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" type="text" name="login">
 		    
 		    <label>Passwort</label>
-		    <input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" type="password" name="password">
+		    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" type="password" name="password">
 		    
-		    <button class="w3-btn w3-blue w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
+		    <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
 		    
 		</form>
 	    </div>

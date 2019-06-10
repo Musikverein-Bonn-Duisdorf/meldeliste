@@ -210,10 +210,10 @@ class User
 
     public function printTableLine() {
         if($this->Mitglied) {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-pale-yellow w3-mobile w3-border-bottom w3-border-black\">\n";            
+            echo "<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['UserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
         }
         else {
-            echo "<div class=\"w3-row w3-hover-gray w3-padding w3-light-pale-green w3-mobile w3-border-bottom w3-border-black\">\n";            
+            echo "<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['UserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
@@ -223,7 +223,7 @@ class User
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
         <div class="w3-modal-content">
 
-        <header class="w3-container w3-teal"> 
+        <header class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>"> 
       <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
       class="w3-button w3-display-topright">&times;</span>
       <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>
@@ -244,7 +244,7 @@ class User
       <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $this->login; ?></b></div>
     </div>
       <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
-      <button class="w3-button w3-center w3-mobile w3-block w3-teal" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
+      <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['commonColors']['BtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
       </form>
       </div>
       </div>

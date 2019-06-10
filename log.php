@@ -5,7 +5,7 @@ include "common/header.php";
 $sql = sprintf('SELECT * FROM `User`;');
 $dbr = mysqli_query($conn, $sql);
 ?>
-<div class="w3-container w3-dark-gray">
+<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
 <h2>Log</h2>
 </div>
 <?php
