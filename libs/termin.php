@@ -122,10 +122,10 @@ class Termin
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `Termine` SET `Datum` = "%s", `Uhrzeit` = "%s", `Uhrzeit2` = "%s", `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `Termine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
-		       $this->Uhrzeit == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit),
-		       $this->Uhrzeit2 == 'NULL' ? 'NULL': mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2),
+		       $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
+		       $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
 		       $this->Auftritt,
@@ -216,12 +216,14 @@ class Termin
             $str=$str."<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";            
         }
         $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
-        if($this->Uhrzeit && ($this->Uhrzeit != $this->Uhrzeit2)) {
-            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit)." - ".sql2time($this->Uhrzeit2)."</div>\n";
-	}
-	else {
-	    $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
-	}
+        if($this->Uhrzeit) {
+            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit);
+            if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
+            $str=$str."</div>\n";
+        }
+        else {
+            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
+        }
         $str=$str."  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
         $str=$str."<div class=\"w3-col l3 w3-row w3-mobile\">";
         $str=$str."<form action=\"#entry".$this->Index."\" method=\"POST\">";
