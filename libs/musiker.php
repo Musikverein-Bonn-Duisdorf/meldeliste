@@ -99,7 +99,9 @@ class User
     public function singleUsePW($val) {
         $sql = sprintf('UPDATE `User` SET `singleUsePW` = %d WHERE `Index` = %d;', (bool)$val, $this->Index);
         mysqli_query($GLOBALS['conn'], $sql);
-        $_SESSION['singleUsePW'] = (bool)$val;
+        if($_SESSION['userid'] == $this->User) {
+            $_SESSION['singleUsePW'] = (bool)$val;
+        }
     }
     public function passwd($password) {
         $arbPW = false;
