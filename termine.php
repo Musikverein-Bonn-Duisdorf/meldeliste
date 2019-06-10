@@ -26,7 +26,7 @@ if(isset($_POST['meldung'])) {
 }
 ?>
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
-    <h2>Termin&uuml;bersicht</h2>
+<h2>Termin&uuml;bersicht</h2>
 </div>
 <?php
 $now = date("Y-m-d");
