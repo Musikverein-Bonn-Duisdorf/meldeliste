@@ -9,7 +9,7 @@ $user->passwd($_POST['pw1']);
 ?>
         <meta http-equiv="refresh" content="0; URL='index.php'" />
 <?php
-        die("<div class=\"w3-panel w3-red\"><h2>Passwort &auml;ndern...</h2></div>");
+        die("<div class=\"w3-panel ".$GLOBALS['commonColors']['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
                   }
  ?>
 <!DOCTYPE html>
@@ -22,13 +22,13 @@ $user->passwd($_POST['pw1']);
     <!-- successfully connected to MySQL database -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $commonStrings['WebSiteName']; ?></title>
+    <title><?php echo $site['WebSiteName']; ?></title>
   </head>
-  <body>
+  <body class="<?php echo $GLOBALS['commonColors']['bgcolor']; ?>">
     <div class="w3-container <?php echo $commonColors['Title']; ?>">
-      <h1><?php echo $commonStrings['WebSiteName']; ?></h1>
+      <h1><?php echo $site['WebSiteName']; ?></h1>
     </div>
-    <div class="w3-container w3-dark-gray">
+    <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
       <h2>Passwort ändern</h2>
     </div>
     <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
@@ -36,9 +36,9 @@ $user->passwd($_POST['pw1']);
     <div class="w3-panel w3-mobile w3-center w3-border w3-col s6 l4">
       <form class="w3-container w3-margin" action="" method="POST">
 	<label>neues Passwort</label>
-	<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
+	<input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
 	<label>neues Passwort wiederholen</label>
-	<input class="w3-input w3-border w3-light-gray w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">                                                                            	  <input class="w3-btn w3-blue w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
+	<input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">                                                                            	  <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
       </form>
     </div>
     <div class="w3-panel w3-mobile w3-center w3-col s3 l4">

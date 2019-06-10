@@ -5,6 +5,7 @@
       <link rel="stylesheet" href="styles/MVD.css">
       <link rel="stylesheet" href="styles/w3.css">
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
+      <link rel="stylesheet" href="styles/w3-colors-fashion.css">
       <?php
           include 'include.php';
       ?>
@@ -19,20 +20,20 @@
               ?>
               <meta http-equiv="refresh" content="2; URL='login.php'" />
               <?php
-              die("<div class=\"w3-panel w3-red\"><h2>Nicht eingeloggt...</h2></div>");
+              die("<div class=\"w3-panel ".$commonColors['notLoggedIn']."\"><h2>Nicht eingeloggt...</h2></div>");
           }
           if($_SESSION['singleUsePW']) {
               ?>
               <meta http-equiv="refresh" content="0; URL='changePW.php'" />
               <?php
-              die("<div class=\"w3-panel w3-red\"><h2>Passwort &auml;ndern...</h2></div>");
+              die("<div class=\"w3-panel ".$commonColors['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
           }
       ?>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title><?php echo $commonStrings['WebSiteName']; ?></title>
+      <title><?php echo $site['WebSiteName']; ?></title>
   </head>
-  <body>
+  <body class="<?php echo $GLOBALS['commonColors']['bgcolor']; ?>">
 <?php
 include "common/nav.php";
 ?>

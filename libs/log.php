@@ -135,43 +135,43 @@ class Log
         $User->load_by_id($this->User);
         switch($this->Type) {
         case 7:
-            $color = "w3-light-green";
+            $color = $GLOBALS['commonColors']['LogInfo'];
             $type  = "INFO";
             break;
         case 6:
-            $color = "w3-grey";
+            $color = $GLOBALS['commonColors']['LogEmail'];
             $type  = "EMAIL";
             break;
         case 5:
-            $color = "w3-khaki";
+            $color = $GLOBALS['commonColors']['LogDBUpdate'];
             $type  = "DB UPDATE";
             break;
         case 4:
-            $color = "w3-lime";
+            $color = $GLOBALS['commonColors']['LogDBInsert'];
             $type  = "DB INSERT";
             break;
         case 3:
-            $color = "w3-light-blue";
+            $color = $GLOBALS['commonColors']['LogDBDelete'];
             $type  = "DB DELETE";
             break;
         case 2:
-            $color = "w3-blue";
+            $color = $GLOBALS['commonColors']['LogWarning'];
             $type  = "WARNING";
             break;
         case 1:
-            $color = "w3-deep-orange";
+            $color = $GLOBALS['commonColors']['LogError'];
             $type  = "ERROR";
             break;
         case 0:
-            $color = "w3-red";
+            $color = $GLOBALS['commonColors']['LogFatal'];
             $type  = "FATAL";
             break;
         default:
-            $color = "w3-light-grey";
+            $color = $GLOBALS['commonColors']['LogDefault'];
             $type  = "";
             break;
         }
-	echo "<div class=\"w3-row ".$color." w3-hover-gray w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
+	echo "<div class=\"w3-row ".$color." ".$GLOBALS['commonColors']['Hover']." w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$User->getName()."</div>\n";

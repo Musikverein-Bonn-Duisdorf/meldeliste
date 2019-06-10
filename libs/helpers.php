@@ -32,7 +32,10 @@ function RegisterOption($val) {
 
 function getPage($string) {
     if($string == $_SESSION['page']) {
-        echo ' w3-dark-gray';
+        echo $GLOBALS['commonColors']['navactive'];
+    }
+    else {
+        echo $GLOBALS['commonColors']['navinactive'];
     }
 }
 
