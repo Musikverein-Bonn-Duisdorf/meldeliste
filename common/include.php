@@ -1,5 +1,6 @@
 <?php
 
+include "version.php";
 include "site.php";
 include "config.php";
 include "common.php";

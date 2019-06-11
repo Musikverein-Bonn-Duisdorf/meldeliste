@@ -273,11 +273,11 @@ class Termin
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
         $str=$str."<div class=\"w3-col l3\">Auftritt:</div><div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>";
         $str=$str."</div>";
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">";
-        $str=$str."<div class=\"w3-col l3\">sichtbar:</div><div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>";
-        $str=$str."</div>";
-        $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">";
         if($_SESSION['admin']) {
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+            $str=$str."<div class=\"w3-col l3\">sichtbar:</div><div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>";
+            $str=$str."</div>";
+            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">";
             $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['commonColors']['BtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>";
         }
         $str=$str."</form>";
@@ -286,7 +286,7 @@ class Termin
         return $str;
 	}
 	public function printResponseLine() {
-        $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3></div>\n";
+        $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3><p>".germanDate($this->Datum, 1)."</p></div>\n";
         $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-border-bottom w3-border-black\">\n";
         $whoYes = '';
         $whoNo = '';
