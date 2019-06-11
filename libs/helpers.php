@@ -29,13 +29,21 @@ function RegisterOption($val) {
         }
     }
 }
-
 function getPage($string) {
     if($string == $_SESSION['page']) {
         echo $GLOBALS['commonColors']['navactive'];
     }
     else {
         echo $GLOBALS['commonColors']['navinactive'];
+    }
+}
+
+function getAdminPage($string) {
+    if($string == $_SESSION['page']) {
+        echo $GLOBALS['commonColors']['navactive'];
+    }
+    else {
+        echo $GLOBALS['commonColors']['navadmin'];
     }
 }
 

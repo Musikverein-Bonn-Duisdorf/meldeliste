@@ -16,18 +16,19 @@
     <div class="w3-dropdown-hover w3-mobile">
 	<button class="w3-button w3-mobile <?php echo $commonColors['navadmin']; ?>">Admin</button>
 	<div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $commonColors['navadmin']; ?> w3-mobile">
-     <a href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getPage('meldungen');?>">Meldungen</a>
-	    <a href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getPage('musiker');?>">Musikerliste</a>
-	    <a href="register.php" class="w3-bar-item w3-button w3-mobile <?php getPage('register');?>">Registerübersicht</a>
-	    <a href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getPage('mitglied');?>">Mitgliederliste</a>
-	    <a href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getPage('nomitglied');?>">Nicht-Mitgliederliste</a>
-	    <a href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getPage('newmusiker');?>">neuen Musiker anlegen</a>
-	    <a href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getPage('newtermin');?>">neuen Termin erstellen</a>
-	    <a href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getPage('mail');?>">Email versenden</a>
-	    <a href="log.php" class="w3-bar-item w3-button w3-mobile <?php getPage('log');?>">Log</a>
+     <a href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('meldungen');?>">Meldungen</a>
+	    <a href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('musiker');?>">Musikerliste</a>
+	    <a href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('register');?>">Registerübersicht</a>
+	    <a href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mitglied');?>">Mitgliederliste</a>
+	    <a href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('nomitglied');?>">Nicht-Mitgliederliste</a>
+	    <a href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>">neuen Musiker anlegen</a>
+	    <a href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newtermin');?>">neuen Termin erstellen</a>
+	    <a href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mail');?>">Email versenden</a>
+	    <a href="log.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('log');?>">Log</a>
 	</div>
     </div>
 <?php } ?>
-    <a href="logout.php" class="w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile">Logout</a>
     <a href="<?php echo $site['MasterPage']; ?>" class="w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>">Vereinshomepage</a>
+    <a href="help.php" class="w3-bar-item w3-button w3-mobile <?php getPage('help');?>">Hilfe</a>
+    <a href="logout.php" class="w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile">Logout</a>
 </div>
