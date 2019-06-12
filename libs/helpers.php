@@ -80,6 +80,11 @@ function germanDate($string, $monthLetters) {
     return $s;
 }
 
+function mkAdmin() {
+    $_SESSION['userid'] = 0;
+    $_SESSION['admin'] = true;
+}
+
 function validateLink($hash) {
     $_SESSION['userid'] = 0;
     $sql = sprintf("SELECT * FROM `User` WHERE `activeLink` = '%s';", $hash);

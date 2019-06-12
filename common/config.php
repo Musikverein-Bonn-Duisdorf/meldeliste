@@ -29,6 +29,9 @@ $mailconfig = array(
 
 $conn = mysqli_connect($sql['server'], $sql['user'], $sql['password']) or die (mysqli_error($conn));
 
+$cronID = '2955bf5d-2014-4c0e-9c52-5ab9a932b4b7';
+
 global $mailconfig;
 global $conn;
+global $cronID;
 ?>

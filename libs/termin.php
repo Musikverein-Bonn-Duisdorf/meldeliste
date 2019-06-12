@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'published' => null, 'Wert' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'published' => null, 'Wert' => null, 'new' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -17,6 +17,7 @@ class Termin
 	    case 'Beschreibung':
 	    case 'published':
 	    case 'Wert':
+	    case 'new':
 		return $this->_data[$key];
 		break;
             default:
@@ -59,6 +60,9 @@ class Termin
 		$this->_data[$key] = trim($val);
 		break;
 	    case 'published':
+		$this->_data[$key] = (bool)$val;
+		break;
+	    case 'new':
 		$this->_data[$key] = (bool)$val;
 		break;
 	    case 'Wert':
@@ -122,7 +126,7 @@ class Termin
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `Termine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `Termine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `new` = "%d" WHERE `Index` = "%d";',
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
 		       $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
 		       $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
@@ -134,6 +138,7 @@ class Termin
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
 		       $this->published,
+		       $this->new,
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -186,6 +191,28 @@ class Termin
             }
         }
     }
+    public function setOld() {
+        $this->new = 0;
+        $this->save();
+    }
+    public function printMailLine() {
+        $str="";
+        $str=$str."<div class=\"w3-row ".$GLOBALS['commonColors']['MailnewAppmnt']." w3-mobile w3-border-black w3-padding\">";
+        $str=$str."\t<div class=\"w3-col l3 m3 s6\"><b>".$this->Name."</b></div>";
+        if($this->Uhrzeit) {
+            $str=$str."  <div class=\"w3-col l3 m3 s6\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit);
+            if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2)." Uhr";
+            $str=$str."</div>";
+        }
+        else {
+            $str=$str."  <div class=\"w3-col l3 m3 s6\">".germanDate($this->Datum, 1)."</div>";
+        }
+        $str=$str."\t<div class=\"w3-col l3 m3 s6\">".$this->Ort1."</div>";
+        $str=$str."\t<div class=\"w3-col l3 m3 s6\">".$this->Beschreibung."</div>";
+        $str=$str."</div>";
+
+        return $str;
+    }
     public function printBasicTableLine() {
         $opacity = "";
         if(!$this->published) {
@@ -219,7 +246,7 @@ class Termin
         if($this->Uhrzeit) {
             $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit);
             if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
-            $str=$str."</div>\n";
+            $str=$str." Uhr</div>\n";
         }
         else {
             $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
@@ -259,10 +286,10 @@ class Termin
         $str=$str."<div class=\"w3-col l3\">Datum:</div><div class=\"w3-col l9\"><b>".germanDate($this->Datum, 1)."</b></div>";
         $str=$str."</div>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
-        $str=$str."<div class=\"w3-col l3\">Beginn:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>";
+        $str=$str."<div class=\"w3-col l3\">Beginn:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)." Uhr</b></div>";
         $str=$str."</div>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
-        $str=$str."<div class=\"w3-col l3\">Ende:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>";
+        $str=$str."<div class=\"w3-col l3\">Ende:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)." Uhr</b></div>";
         $str=$str."</div>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
         $str=$str."<div class=\"w3-col l3\">Beschreibung:</div><div class=\"w3-col l9\"><b>".$this->Beschreibung."</b></div>";
@@ -276,6 +303,9 @@ class Termin
         if($_SESSION['admin']) {
             $str=$str."<div class=\"w3-container w3-row w3-margin\">";
             $str=$str."<div class=\"w3-col l3\">sichtbar:</div><div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>";
+            $str=$str."</div>";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+            $str=$str."<div class=\"w3-col l3\">neu:</div><div class=\"w3-col l9\"><b>".bool2string($this->new)."</b></div>";
             $str=$str."</div>";
             $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">";
             $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['commonColors']['BtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>";

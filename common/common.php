@@ -4,6 +4,7 @@ $commonStrings = array(
     'PWChangeSubject' => "neues Passwort wurde gespeichert",
     'newPWText' => "ein neues Passwort wurde erstellt. Beim nächsten Login wirst du aufgefordert, dieses zu ändern. Das Passwort lautet:",
     'PWChangeText' => "dein neues Passwort wurde gespeichert.",
+    'EmailGreeting' => "Viele Grüße\nDein Musikverein Bonn-Duisdorf",
 );
 $commonColors = array(
     'bgcolor' => "",
@@ -52,6 +53,8 @@ $commonColors = array(
 
     'UserMember' => "w3-light-blue",
     'UserNoMember' => "w3-white",
+
+    'MailnewAppmnt' => "w3-blue-gray",
 );
 
 global $commonStrings;
