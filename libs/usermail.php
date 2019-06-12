@@ -95,9 +95,9 @@ class Usermail {
         $i=0;
         while($row = mysqli_fetch_array($dbr)) {
             $anrede = "Hallo ".$row['Vorname'].",";
-            $link= $GLOBALS['commonStrings']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
+            $link= $GLOBALS['site']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
-            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>Musikverein Bonn-Duisdorf gegr. 1949 e.V.</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zur Meldeliste</a></body></html>";
+            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>".$GLOBALS['site']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zur Meldeliste</a></body></html>";
 
             $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
         

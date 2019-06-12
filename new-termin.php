@@ -46,6 +46,7 @@ if(isset($_POST['id'])) {
       if($fill) {
       ?>
     <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
+    <input type="hidden" name="new" <?php if($fill) echo "value=\"".$n->new."\""; ?>>
     <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
           <?php
       }
