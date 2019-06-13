@@ -14,7 +14,7 @@ $mailconfig = array(
     'from' => "meldeliste@musikverein-bonn-duisdorf.de",
     'fromName' => "Musikverein Duisdorf",
     'secure' => "tls",
-    'subjectprefix' => '[MVD] ',
+    'subjectprefix' => '[MVD-Meldeliste] ',
 );
 
 $conn = mysqli_connect($sql['server'], $sql['user'], $sql['password']) or die (mysqli_error($conn));
