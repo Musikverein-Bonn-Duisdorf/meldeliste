@@ -6,6 +6,9 @@
       <link rel="stylesheet" href="styles/w3.css">
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
       <link rel="stylesheet" href="styles/w3-colors-fashion.css">
+      <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
+      <link rel="apple-touch-icon" sizes="120x120"  href="{uploads_url}/designs/MVD-responsive/apple-touch-icon-120x120-precomposed.png" title="apple touch icon"/>
+      <link rel="apple-touch-icon" sizes="152x152"  href="{uploads_url}/designs/MVD-responsive/apple-touch-icon-152x152-precomposed.png" title="apple touch icon"/>
       <?php
           include 'include.php';
       ?>
