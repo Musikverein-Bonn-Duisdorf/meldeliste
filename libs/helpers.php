@@ -132,7 +132,9 @@ function loggedIn() {
 }
 
 function sql2time($time) {
-    return substr($time, 0, 5);
+    if($time) {
+        return substr($time, 0, 5)." Uhr";
+    }
 }
 
 function genitiv($string) {

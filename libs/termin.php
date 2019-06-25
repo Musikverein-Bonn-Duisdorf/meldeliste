@@ -201,7 +201,7 @@ class Termin
         $str=$str."\t<div class=\"w3-col l3 m3 s6\"><b>".$this->Name."</b></div>";
         if($this->Uhrzeit) {
             $str=$str."  <div class=\"w3-col l3 m3 s6\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit);
-            if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2)." Uhr";
+            if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
             $str=$str."</div>";
         }
         else {
@@ -246,7 +246,7 @@ class Termin
         if($this->Uhrzeit) {
             $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit);
             if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
-            $str=$str." Uhr</div>\n";
+            $str=$str."</div>\n";
         }
         else {
             $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1)."</div>\n";
@@ -286,10 +286,10 @@ class Termin
         $str=$str."<div class=\"w3-col l3\">Datum:</div><div class=\"w3-col l9\"><b>".germanDate($this->Datum, 1)."</b></div>";
         $str=$str."</div>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
-        $str=$str."<div class=\"w3-col l3\">Beginn:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)." Uhr</b></div>";
+        $str=$str."<div class=\"w3-col l3\">Beginn:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>";
         $str=$str."</div>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
-        $str=$str."<div class=\"w3-col l3\">Ende:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)." Uhr</b></div>";
+        $str=$str."<div class=\"w3-col l3\">Ende:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>";
         $str=$str."</div>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
         $str=$str."<div class=\"w3-col l3\">Beschreibung:</div><div class=\"w3-col l9\"><b>".$this->Beschreibung."</b></div>";
