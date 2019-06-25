@@ -244,7 +244,7 @@ class Termin
         }
         $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
         if($this->Uhrzeit) {
-            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2time($this->Uhrzeit);
+            $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2timeRaw($this->Uhrzeit);
             if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
             $str=$str."</div>\n";
         }
