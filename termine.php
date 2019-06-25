@@ -36,7 +36,7 @@ if($_SESSION['admin']) {
     );
 }
 else {
-    $sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" WHERE `published` = 1 ORDER BY `Datum`, `Uhrzeit`;',
+    $sql = sprintf('SELECT `Index` FROM `Termine` WHERE `published` = 1 AND `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
     $now
     );
 }
