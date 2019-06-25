@@ -7,10 +7,10 @@ session_start();
       <meta name="viewport" content="width=device-width, initial-scale=1">      
       <link rel="stylesheet" href="styles/MVD.css">
       <link rel="stylesheet" href="styles/w3.css">
-      <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
       <?php
           include 'common/include.php';
       ?>
+      <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
       <!-- successfully included php libraries -->
       <?php
         mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
