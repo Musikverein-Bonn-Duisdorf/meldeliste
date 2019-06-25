@@ -110,6 +110,7 @@ class User
             $arbPW = true;
         }
         $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
+        $this->generateLink();
         $this->update();
         $mail = new Usermail;
         if($arbPW) {
