@@ -30,9 +30,16 @@ if(isset($_POST['meldung'])) {
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
-	       $now
-);
+if($_SESSION['admin']) {
+    $sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+    $now
+    );
+}
+else {
+    $sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit` WHERE `published` = 1;',
+    $now
+    );
+}
 $dbr = mysqli_query($conn, $sql);
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
