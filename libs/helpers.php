@@ -135,4 +135,14 @@ function sql2time($time) {
     return substr($time, 0, 5);
 }
 
+function genitiv($string) {
+    $last = substr($string, -1);
+    if($last == "s" || $last == "x") {
+        return $string.'\'';
+    }
+    else {
+        return $string."s";
+    }
+}
+
 ?>

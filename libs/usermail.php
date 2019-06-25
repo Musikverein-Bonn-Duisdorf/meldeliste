@@ -97,7 +97,7 @@ class Usermail {
             $anrede = "Hallo ".$row['Vorname'].",";
             $link= $GLOBALS['site']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
-            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>".$GLOBALS['site']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zur Meldeliste</a></body></html>";
+            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>".$GLOBALS['site']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 
             $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
         
