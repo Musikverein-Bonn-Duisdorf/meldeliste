@@ -28,7 +28,7 @@
 	</div>
     </div>
 <?php } ?>
-    <a href="<?php echo $site['MasterPage']; ?>" class="w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>">Vereinshomepage</a>
+    <a href="<?php echo $site['MasterPage']; ?>" class="w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank">Vereinshomepage</a>
     <a href="help.php" class="w3-bar-item w3-button w3-mobile <?php getPage('help');?>">Hilfe</a>
     <a href="logout.php" class="w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile">Logout</a>
 </div>
