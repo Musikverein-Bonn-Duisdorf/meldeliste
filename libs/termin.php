@@ -309,6 +309,11 @@ class Termin
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
         $str=$str."<div class=\"w3-col l3\">Ort:</div><div class=\"w3-col l9\"><b>".$this->Ort1."</b><br>".$this->Ort2."<br>".$this->Ort3."<br>".$this->Ort4."</div>";
         $str=$str."</div>";
+        if($GLOBALS['googlemapsapi'] && ($this->Ort1 || $this->Ort2)) {
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">";
+            $str=$str."<div class=\"w3-col l3\">Karte:</div><div class=\"w3-col l9\"><iframe width=\"auto\" height=\"auto\" frameborder=\"0\" style=\"border:0\" src=\"https://www.google.com/maps/embed/v1/place?key=".$GLOBALS['googlemapsapi']."&q=".$this->Ort1."+".$this->Ort2."+".$this->Ort3."+".$this->Ort4."\" allowfullscreen></iframe></div>";
+            $str=$str."</div>";
+        }
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
         $str=$str."<div class=\"w3-col l3\">Auftritt:</div><div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>";
         $str=$str."</div>";
