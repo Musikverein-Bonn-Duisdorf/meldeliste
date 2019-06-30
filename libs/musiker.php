@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Stimme' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -13,7 +13,6 @@ class User
 	    case 'Mitglied':
 	    case 'Instrument':
 	    case 'iName':
-	    case 'Stimme':
 	    case 'Email':
 	    case 'getMail':
 	    case 'Admin':
@@ -148,7 +147,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Stimme` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
@@ -156,7 +155,6 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
         $this->Mitglied,
         $this->Instrument,
-        $this->Stimme,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         $this->getMail,
         $this->Index
