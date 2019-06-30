@@ -5,8 +5,11 @@ function bool2string($val) {
 }
 
 function instrumentOption($val) {
-    $sql = 'SELECT * FROM `Instrument` ORDER BY `Register`, `Name`;';
+    $sql = sprintf('SELECT * FROM `%sInstrument` ORDER BY `Register`, `Name`;',
+    $GLOBALS['dbprefix']
+    );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {
             echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
@@ -18,8 +21,11 @@ function instrumentOption($val) {
 }
 
 function RegisterOption($val) {
-    $sql = 'SELECT * FROM `Register` ORDER BY `Sortierung`;';
+    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
+    $GLOBALS['dbprefix']
+    );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {
             echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
@@ -99,8 +105,12 @@ function mkAdmin() {
 
 function validateLink($hash) {
     $_SESSION['userid'] = 0;
-    $sql = sprintf("SELECT * FROM `User` WHERE `activeLink` = '%s';", $hash);
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `activeLink` = '%s';",
+    $GLOBALS['dbprefix'],
+    $hash
+    );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
         $_SESSION['userid'] = $row['Index'];
         $_SESSION['Vorname'] = $row['Vorname'];
@@ -116,10 +126,12 @@ function validateLink($hash) {
 }
 function validateUser($login, $password) {
     $_SESSION['userid'] = 0;
-    $sql = sprintf("SELECT * FROM `User` WHERE `login` = '%s';",
-		   $login
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `login` = '%s';",
+    $GLOBALS['dbprefix'],
+    $login
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
         if(password_verify($password, $row['Passhash'])) {
             $_SESSION['userid'] = $row['Index'];
@@ -160,6 +172,12 @@ function genitiv($string) {
     }
     else {
         return $string."s";
+    }
+}
+
+function sqlerror() {
+    if(mysqli_errno($GLOBALS['conn'])) {
+        echo "<div class=\"w3-container ".$GLOBALS['commonColors']['SQLerror']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
     }
 }
 

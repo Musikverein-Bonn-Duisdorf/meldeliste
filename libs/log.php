@@ -83,33 +83,39 @@ class Log
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `Log` (`User`, `Type`, `Message`) VALUES ("%d", "%d", "%s");',
-		       $this->User,
-		       $this->Type,
-		       mysqli_real_escape_string($GLOBALS['conn'], $this->Message)
+        $sql = sprintf('INSERT INTO `%sLog` (`User`, `Type`, `Message`) VALUES ("%d", "%d", "%s");',
+        $GLOBALS['dbprefix'],
+        $this->User,
+        $this->Type,
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Message)
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `Log` SET `User` = "%d", `Type` = "%d", `Message` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sLog` SET `User` = "%d", `Type` = "%d", `Message` = "%s" WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
 		       $this->User,
 		       $this->Type,
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Message),
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         return true;
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `Log` WHERE `Index` = "%d";',
-		       $this->Index
+        $sql = sprintf('DELETE FROM `%sLog` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = null;
         return true;
@@ -121,10 +127,12 @@ class Log
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `Log` WHERE `Index` = "%d";',
-		       $Index
+        $sql = sprintf('SELECT * FROM `%sLog` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             $this->fill_from_array($row);

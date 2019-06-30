@@ -65,31 +65,37 @@ class Meldung
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `Meldungen` (`Termin`, `User`, `Wert`) VALUES ("%s", "%s", "%s");',
+        $sql = sprintf('INSERT INTO `%sMeldungen` (`Termin`, `User`, `Wert`) VALUES ("%s", "%s", "%s");',
+        $GLOBALS['dbprefix'],
         $this->Termin,
         $this->User,
         $this->Wert
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `Meldungen` SET `Wert` = "%s", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sMeldungen` SET `Wert` = "%s", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
         $this->Wert,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         return true;
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `Meldungen` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `%sMeldungen` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
@@ -103,21 +109,25 @@ class Meldung
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `Meldungen` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
         $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
     }
     public function load_by_user_event($user, $event) {
-        $sql = sprintf('SELECT * FROM `Meldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
+        $GLOBALS['dbprefix'],
         $user,
         $event
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             $this->fill_from_array($row);

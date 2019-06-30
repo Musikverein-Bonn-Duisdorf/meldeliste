@@ -81,6 +81,25 @@ class User
         bool2string($this->Admim)
         );
     }
+    public function getShort() {
+        if(strlen($this->Vorname) >=2) {
+            $short1 = substr($this->Vorname,0,2);
+            echo $short1;
+        }
+        else {
+            $short1 = $this->Vorname;
+        }
+        if(strlen($this->Nachname) >=2) {
+            $narray = explode(" ", $this->Nachname);
+            $short2 = substr($narray[sizeof($narray)-1],0,2);
+            echo $short2;
+        }
+        else {
+            $short2 = $this->Nachname;
+        }
+        echo $short1.$short2;
+        return $short1.$short2;
+    }
     public function save() {
         if($this->activeLink == '') $this->generateLink();
         if(!$this->is_valid()) return false;
@@ -96,8 +115,12 @@ class User
         }
     }
     public function singleUsePW($val) {
-        $sql = sprintf('UPDATE `User` SET `singleUsePW` = %d WHERE `Index` = %d;', (bool)$val, $this->Index);
+        $sql = sprintf('UPDATE `%sUser` SET `singleUsePW` = %d WHERE `Index` = %d;',
+        $GLOBALS['dbprefix'],
+        (bool)$val, $this->Index
+        );
         mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if($_SESSION['userid'] == $this->User) {
             $_SESSION['singleUsePW'] = (bool)$val;
         }
@@ -130,7 +153,8 @@ class User
         $this->activeLink = uniqid();
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `User` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d");',
+        $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
@@ -142,12 +166,14 @@ class User
         $this->getMail
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `User` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
@@ -160,6 +186,7 @@ class User
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         return true;
     }
@@ -168,10 +195,12 @@ class User
     }
     public function getRegister() {
         if(!$this->Instrument) return false;
-        $sql = sprintf('SELECT * FROM `Instrument` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
         $this->Instrument
         );        
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             return $row['Register'];
@@ -180,10 +209,12 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `User` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `%sUser` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = null;
         $logentry = new Log;
@@ -197,10 +228,14 @@ class User
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
         $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             $this->fill_from_array($row);

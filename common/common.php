@@ -55,6 +55,7 @@ $commonColors = array(
     'UserNoMember' => "w3-white",
 
     'MailnewAppmnt' => "w3-blue-gray",
+    'SQLerror' => "w3-red",
 );
 
 global $commonStrings;

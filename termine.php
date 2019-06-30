@@ -31,16 +31,19 @@ if(isset($_POST['meldung'])) {
 <?php
 $now = date("Y-m-d");
 if($_SESSION['admin']) {
-    $sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+    $GLOBALS['dbprefix'],
     $now
     );
 }
 else {
-    $sql = sprintf('SELECT `Index` FROM `Termine` WHERE `published` = 1 AND `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+    $GLOBALS['dbprefix'],
     $now
     );
 }
 $dbr = mysqli_query($conn, $sql);
+sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);
