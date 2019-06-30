@@ -68,12 +68,24 @@ function germanDate($string, $monthLetters) {
         "11" => "November",
         "12" => "Dezember"
     );
-    
+    $dows = array(
+        1 => 'Montag',
+        2 => 'Dienstag',
+        3 => 'Mittwoch',
+        4 => 'Donnerstag',
+        5 => 'Freitag',
+        6 => 'Samstag',
+        7 => 'Sonntag'
+);
     $y = substr($string, 0, 4);
     $m = substr($string, 5, 2);
     $d = substr($string, 8, 2);
+
+    $date = mktime(0,0,0, $m, $d, $y);
+    $dow = date("N", $date);
+
     if($monthLetters) {
-        $s = $d.". ".$months[$m]." ".$y;
+        $s = $dows[$dow].", ".$d.". ".$months[$m]." ".$y;
     } else {
         $s = $d.".".$m.".".$y;
     }
