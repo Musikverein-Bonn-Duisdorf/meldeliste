@@ -22,10 +22,12 @@ if(isset($_POST['meldung'])) {
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT 5;',
+$sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT 5;',
+$GLOBALS['dbprefix'],
 $now
 );
 $dbr = mysqli_query($conn, $sql);
+sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);

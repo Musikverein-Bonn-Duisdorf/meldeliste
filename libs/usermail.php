@@ -78,20 +78,31 @@ class Usermail {
         $style=file_get_contents("styles/w3.css");
         $register = '';
         if($this->User > 0) {
-            $sql = sprintf("SELECT * FROM `User` WHERE `Index` = %d;", $this->User);
+            $sql = sprintf("SELECT * FROM `%sUser` WHERE `Index` = %d;",
+            $GLOBALS['dbprefix'],
+            $this->User);
         }
         else {
             if($this->register > 0) {
                 $register = sprintf("AND `Register` = %d", $this->register);
             }
             if($this->memberonly) {
-                $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 %s;", $register);
+                $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 %s;",
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $register);
             }
             else {
-                $sql = sprintf("SELECT * FROM `User` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `Instrument`) `Instrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;", $register);
+                $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;",
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $register);
             }
         }
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $i=0;
         while($row = mysqli_fetch_array($dbr)) {
             $anrede = "Hallo ".$row['Vorname'].",";

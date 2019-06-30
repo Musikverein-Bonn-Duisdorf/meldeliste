@@ -107,7 +107,8 @@ class Termin
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `Termine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Name`, `Beschreibung`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`) VALUES ("%s", %s, %s, "%s", "%s", "%d", "%s", "%s", "%s", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Name`, `Beschreibung`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`) VALUES ("%s", %s, %s, "%s", "%s", "%d", "%s", "%s", "%s", "%s", "%d");',
+        $GLOBALS['dbprefix'],
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
 		       $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
 		       $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
@@ -121,12 +122,14 @@ class Termin
 		       $this->published
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `Termine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `new` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Name` = "%s", `Beschreibung` = "%s", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `new` = "%d" WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
 		       mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
 		       $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
 		       $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
@@ -142,21 +145,26 @@ class Termin
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         return true;
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `Termine` WHERE `Index` = "%d";',
-		       $this->Index
+        $sql = sprintf('DELETE FROM `%sTermine` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
 
-        $sql = sprintf('DELETE FROM `Meldungen` WHERE `Termin` = "%d";',
+        $sql = sprintf('DELETE FROM `%sMeldungen` WHERE `Termin` = "%d";',
+        $GLOBALS['dbprefix'],
 		       $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         if(!$dbr) return false;
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
@@ -171,20 +179,24 @@ class Termin
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `Termine` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sTermine` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
 		       $Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
         if(isset($_SESSION['userid'])) {
-            $sql = sprintf('SELECT `Wert` FROM `Meldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
-			   $Index,
-			   $_SESSION['userid']
+            $sql = sprintf('SELECT `Wert` FROM `%sMeldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
+            $GLOBALS['dbprefix'],
+            $Index,
+            $_SESSION['userid']
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
             $row = mysqli_fetch_array($dbr);
             if(is_array($row)) {
                 $this->fill_from_array($row);
@@ -322,8 +334,11 @@ class Termin
         $whoNo = '';
         $whoMaybe = '';
         if($this->Auftritt) {
-            $sql = "SELECT * FROM `Register` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;";
+            $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;",
+            $GLOBALS['dbprefix']
+            );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
             $sja=0;
             $sall=0;
             $snReg=0;
@@ -334,17 +349,25 @@ class Termin
                 $register->load_by_id($row['Index']);
                 $nReg = $register->members();
                 $snReg+=$nReg;
-                $sql = sprintf("SELECT * FROM `Meldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `User`) `User` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `Instrument`) `Instrument` ON `Instrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `Register`) `Register` ON `Register` = `rIndex`
+                $sql = sprintf("SELECT * FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
 WHERE `Termin` = '%d'
 AND `rIndex` = '%d'
 ORDER BY `Nachname`, `Vorname`",
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
                 $this->Index,
                 $row['Index']
                 );
                 $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
+                sqlerror();
                 $ja=0;
                 $nein=0;
                 $vielleicht=0;
@@ -380,12 +403,16 @@ ORDER BY `Nachname`, `Vorname`",
             $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\"><b>Summe</b></div><div class=\"w3-col l2 m2 s2\"><b>".$sall." / ".sprintf("%02d", $snReg)."</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$sja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$svielleicht."</div></div>\n";
         }
         else {
-            $sql = sprintf("SELECT * FROM `Meldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `User`) `User` ON `User` = `uIndex`
+            $sql = sprintf("SELECT * FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
 WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
             $this->Index
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
             $ja=0;
             $nein=0;
             $vielleicht=0;

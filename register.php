@@ -8,8 +8,11 @@ if($_SESSION['admin']) {
     <h2>Registerübersicht</h2>
 </div>
 <?php
-$sql = 'SELECT `Index` FROM `Register` ORDER BY `Sortierung`;';
+    $sql = sprintf('SELECT `Index` FROM `%sRegister` ORDER BY `Sortierung`;',
+        $GLOBALS['dbprefix']
+            );
 $dbr = mysqli_query($conn, $sql);
+sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Register;
     $M->load_by_id($row['Index']);

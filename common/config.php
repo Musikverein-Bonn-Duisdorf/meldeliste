@@ -6,6 +6,8 @@ $sql = array(
     'password' => "1949eV",
 );
 
+$dbprefix = "meldeliste_";
+
 $mailconfig = array(
     'server' => "smtp.ionos.de",
     'user' => "meldeliste@musikverein-bonn-duisdorf.de",
@@ -24,4 +26,5 @@ $cronID = '2955bf5d-2014-4c0e-9c52-5ab9a932b4b7';
 global $mailconfig;
 global $conn;
 global $cronID;
+global $dbprefix;
 ?>

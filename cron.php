@@ -14,8 +14,11 @@ switch($_GET['cmd']) {
 case "newAppmnts":
     $datetime = new DateTime('today');
     $today = $datetime->format('Y-m-d');
-    $sql = sprintf("SELECT * FROM `Termine` WHERE `new` = 1 AND `Datum` >= '%s';", $today);
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND `Datum` >= '%s';",
+    $GLOBALS['dbprefix'],
+    $today);
     $dbr = mysqli_query($conn, $sql);
+    sqlerror();
     $text = "bitte ";
     $Appmnts = '';
     $i=0;
@@ -41,8 +44,11 @@ case "tomorrow":
     $datetime = new DateTime('tomorrow');
     $tomorrow = $datetime->format('Y-m-d');
 
-    $sql = sprintf("SELECT * FROM `Termine` WHERE `published` = 1 AND `Datum` = '%s';", $tomorrow);
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `published` = 1 AND `Datum` = '%s';",
+    $GLOBALS['dbprefix'],
+    $tomorrow);
     $dbr = mysqli_query($conn, $sql);
+    sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
         $n = new Termin;
         $n->load_by_id($row['Index']);

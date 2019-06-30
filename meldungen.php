@@ -12,10 +12,12 @@ include "common/header.php";
                         <div class="w3-col l6 s12 m12">
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `Termine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+$sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+$GLOBALS['dbprefix'],
 $now
 );
 $dbr = mysqli_query($conn, $sql);
+sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);
