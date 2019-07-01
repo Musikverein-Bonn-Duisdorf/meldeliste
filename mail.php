@@ -95,7 +95,7 @@ else {
     <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
     <?php if($preview) { ?>
     <textarea rows="10" cols="50" class="w3-input w3-mobile w3-border" disabled><?php echo $anrede."\n\n".$text; ?></textarea>
-    <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-margin-top w3-mobile" name="send">Senden</button>
+        <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-margin-top w3-mobile" name="send">Senden (nur einmal klicken, es dauert ein paar Sekunden)</button>
     <?php } ?>
   </form>
 </div>
