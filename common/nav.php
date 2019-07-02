@@ -39,9 +39,9 @@
 	var x = document.getElementsByClassName('stdhide');
 	for(var i=0; i<x.length; i++) {
 	    if (x[i].className.indexOf("w3-show") == -1) {
-		x[i].className = x[i].className.replace("w3-hide", "w3-show");
+		x[i].className = x[i].className.replace("w3-hide-small", "w3-show");
 	    } else { 
-		x[i].className = x[i].className.replace("w3-show", "w3-hide");
+		x[i].className = x[i].className.replace("w3-show", "w3-hide-small");
 	    }
 	}
     }
