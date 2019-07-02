@@ -132,18 +132,20 @@ class User
             $password = uniqid();
             $arbPW = true;
         }
-        $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
-        $this->generateLink();
-        $mail = new Usermail;
-        if($arbPW) {
-            $this->singleUsePW(1);
-            $this->update();
-            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
-        }
-        else {
-            $this->singleUsePW(0);
-            $this->update();
-            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']."\n\nBenutzername: ".$this->login);
+        if($this->Index) {
+            $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
+            $this->generateLink();
+            $mail = new Usermail;
+            if($arbPW) {
+                $this->singleUsePW(1);
+                $this->update();
+                $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
+            }
+            else {
+                $this->singleUsePW(0);
+                $this->update();
+                $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']."\n\nBenutzername: ".$this->login);
+            }
         }
     }
     public function is_valid() {

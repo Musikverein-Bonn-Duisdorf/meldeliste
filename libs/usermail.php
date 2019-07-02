@@ -45,7 +45,9 @@ class Usermail {
     public function singleUser($userIndex, $subject, $text) {
         $this->User = $userIndex;
         $this->subject = $subject;
-        $this->send($text);
+        if($userIndex > 0) {
+            $this->send($text);
+        }
     }
     public function subject($subject) {
         $this->subject = $subject;

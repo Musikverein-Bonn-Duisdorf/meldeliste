@@ -16,8 +16,10 @@ include 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
 if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
     $user = new User;
-    $user->load_by_id($_SESSION['userid']);
-    $user->passwd($_POST['pw1']);
+    if($_SESSION['userid'] > 0) {
+        $user->load_by_id($_SESSION['userid']);
+        $user->passwd($_POST['pw1']);
+    }
 ?>
         <meta http-equiv="refresh" content="0; URL='index.php'" />
 <?php
