@@ -1,3 +1,7 @@
+<?php
+ session_start();
+include 'common/include.php';
+?>
 <!DOCTYPE html>
 <html lang="de">
   <head>
@@ -7,10 +11,6 @@
     <!-- successfully included php libraries -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<?php
- session_start();
-include 'common/include.php';
-?>
     <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
 <?php
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
