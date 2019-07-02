@@ -5,7 +5,7 @@
       <link rel="stylesheet" href="styles/MVD.css">
       <link rel="stylesheet" href="styles/w3.css">
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
-      <link rel="stylesheet" href="styles/w3-colors-fashion.css">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <?php
           include 'include.php';
       ?>
