@@ -1,5 +1,6 @@
 <div class="w3-container <?php echo $commonColors['Title']; ?>">
-<h1><?php echo $site['WebSiteName']; ?></h1>
+<h1 class="w3-hide-small"><?php echo $site['WebSiteName']; ?></h1>
+<h1 class="w3-hide-large w3-hide-medium"><?php echo $site['WebSiteNameShort']; ?></h1>
 <p><?php echo $_SESSION['username'] ?></p>
 </div>
 <div class="w3-bar <?php echo $commonColors['navbar']; ?>">
