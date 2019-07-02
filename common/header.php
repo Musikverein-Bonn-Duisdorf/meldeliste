@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <?php
+          session_start();
           include 'include.php';
       ?>
       <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
