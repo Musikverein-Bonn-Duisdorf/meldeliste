@@ -137,13 +137,14 @@ class User
         $mail = new Usermail;
         if($arbPW) {
             $this->singleUsePW(1);
-            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."Passwort: ".$password);
+            $this->update();
+            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
         }
         else {
             $this->singleUsePW(0);
+            $this->update();
             $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']."\n\nBenutzername: ".$this->login);
         }
-        $this->update();
     }
     public function is_valid() {
         if(!$this->Nachname) return false;
