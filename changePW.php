@@ -1,17 +1,3 @@
-<?php
- session_start();
-          include 'common/include.php';
-          mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
-    if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
-    $user = new User;
-    $user->load_by_id($_SESSION['userid']);
-$user->passwd($_POST['pw1']);
-?>
-        <meta http-equiv="refresh" content="0; URL='index.php'" />
-<?php
-        die("<div class=\"w3-panel ".$GLOBALS['commonColors']['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
-                  }
- ?>
 <!DOCTYPE html>
 <html lang="de">
   <head>
@@ -19,9 +5,25 @@ $user->passwd($_POST['pw1']);
     <link rel="stylesheet" href="styles/MVD.css">
     <link rel="stylesheet" href="styles/w3.css">
     <!-- successfully included php libraries -->
-    <!-- successfully connected to MySQL database -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<?php
+ session_start();
+include 'common/include.php';
+?>
+    <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
+<?php
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
+if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
+    $user = new User;
+    $user->load_by_id($_SESSION['userid']);
+    $user->passwd($_POST['pw1']);
+?>
+        <meta http-equiv="refresh" content="0; URL='index.php'" />
+<?php
+        die("<div class=\"w3-panel ".$GLOBALS['commonColors']['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
+                  }
+ ?>
     <title><?php echo $site['WebSiteName']; ?></title>
   </head>
   <body class="<?php echo $GLOBALS['commonColors']['bgcolor']; ?>">
