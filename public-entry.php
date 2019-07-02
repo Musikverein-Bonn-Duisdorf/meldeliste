@@ -8,18 +8,9 @@ $state = 1;
 if(isset($_POST['letter'])) {
     $state = 2;
 }
-elseif(isset($_POST['name'])) {
-    $state = 3;
-}
-elseif(isset($_POST['termin'])) {
-    $state = 4;
-}
-elseif(isset($_POST['confirm'])) {
-    $state = 5;
-}
 ?>
 <div class="w3-container w3-dark-gray">
-    <h2>Bitte eintragen...</h2>
+    <h2>Im Namen eines Anderen anmelden</h2>
 </div>
 <?php if($state == 1) { ?>
     <div class="w3-container w3-dark-gray">
@@ -29,7 +20,7 @@ elseif(isset($_POST['confirm'])) {
 	<?php
 	$letters = range('A', 'Z');
 	foreach ($letters as $letter) {
-	    echo "<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s3 l2 m2 w3-red\" value=\"".$letter."\" name=\"letter\" type=\"submit\"><b>".$letter."</b></button>";
+	    echo "<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s4 l2 m2 ".$GLOBALS['commonColors']['submit']."\" value=\"".$letter."\" name=\"letter\" type=\"submit\"><b>".$letter."</b></button>";
 	}
 	?>
     </form>
@@ -39,7 +30,7 @@ elseif(isset($_POST['confirm'])) {
     <div class="w3-container w3-dark-gray">
 	<h3>Name</h3>
     </div>
-    <form class="w3-container w3-row" action="" method="POST">
+    <form class="w3-container w3-row" action="termine.php" method="POST">
 	<?php
 	$sql = sprintf('SELECT * FROM `%sUser` WHERE `Nachname` LIKE "%s%%";',
     $GLOBALS['dbprefix'],
@@ -47,29 +38,13 @@ elseif(isset($_POST['confirm'])) {
 	$dbr = mysqli_query($conn, $sql);
     sqlerror();
 	while($row = mysqli_fetch_array($dbr)) {
-	    echo "<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 w3-red\" type=\"submit\" name=\"name\" value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</button>\n";
+	    echo "<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 ".$GLOBALS['commonColors']['submit']."\" type=\"submit\" name=\"proxy\" value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</button>\n";
 	}
 	?>
     </form>
 <?php } ?>
 
-
-<?php if($state == 3) { ?>
-    <div class="w3-container w3-dark-gray">
-	<h3>Termin ausw&auml;hlen</h3>
-    </div>
-    <form action="" method="POST">
-	<button class="button" type="submit" name="termin">Es gibt noch keinen Termin</button>
-    </form>
-<?php } ?>
-
-<?php if($state == 4) { ?>
-    <div class="w3-container w3-dark-gray">
-	<h3>Danke f&uuml;r deine Meldung</h3>
-    </div>
-    <meta http-equiv="refresh" content="3;public-entry.php" />
-<?php } ?>
-<?php if($state > 1 && $state < 4) { ?>
+<?php if($state > 1) { ?>
     <form class="w3-container w3-row" action="" method="POST">
 	<button class="w3-btn w3-border w3-margin-top w3-border-black s12 m12 l12 w3-green" type="submit">zur&uuml;ck</button>
     </form>

@@ -189,11 +189,17 @@ class Termin
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
-        if(isset($_SESSION['userid'])) {
+        if(isset($_POST['proxy'])) {
+            $user = $_POST['proxy'];
+        }
+        elseif(isset($_SESSION['userid'])) {
+            $user = $_SESSION['userid'];
+        }
+        if($user > 0) {
             $sql = sprintf('SELECT `Wert` FROM `%sMeldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
             $GLOBALS['dbprefix'],
             $Index,
-            $_SESSION['userid']
+            $user
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
@@ -267,6 +273,9 @@ class Termin
         $str=$str."<div class=\"w3-col l3 w3-row w3-mobile\">";
         $str=$str."<form action=\"#entry".$this->Index."\" method=\"POST\">";
         $str=$str."<input type=\"hidden\" name=\"Index\" value=\"".$this->Index."\">";
+        if(isset($_POST['proxy'])) {
+            $str=$str."<input type=\"hidden\" name=\"proxy\" value=\"".$_POST['proxy']."\">";
+        }
         $str=$str."<button class=\"w3-btn ";
         if($this->Wert > 1) {
             $str=$str.$GLOBALS['commonColors']['Disabled'];
