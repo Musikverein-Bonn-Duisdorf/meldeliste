@@ -117,11 +117,12 @@ class User
     public function singleUsePW($val) {
         $sql = sprintf('UPDATE `%sUser` SET `singleUsePW` = %d WHERE `Index` = %d;',
         $GLOBALS['dbprefix'],
-        (bool)$val, $this->Index
+        (bool)$val,
+        $this->Index
         );
         mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        if($_SESSION['userid'] == $this->User) {
+        if($_SESSION['userid'] == $this->Index) {
             $_SESSION['singleUsePW'] = (bool)$val;
         }
     }
@@ -133,16 +134,16 @@ class User
         }
         $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
         $this->generateLink();
-        $this->update();
         $mail = new Usermail;
         if($arbPW) {
             $this->singleUsePW(1);
-            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n".$password);
+            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
         }
         else {
             $this->singleUsePW(0);
-            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']);
+            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']."\n\nBenutzername: ".$this->login);
         }
+        $this->update();
     }
     public function is_valid() {
         if(!$this->Nachname) return false;
