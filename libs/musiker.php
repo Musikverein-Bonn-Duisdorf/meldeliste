@@ -137,7 +137,6 @@ class User
         }
         if($this->Index) {
             $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
-            $this->generateLink();
             $mail = new Usermail;
             if($arbPW) {
                 $this->singleUsePW(1);
@@ -145,6 +144,7 @@ class User
                 $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
             }
             else {
+                $this->generateLink();
                 $this->singleUsePW(0);
                 $this->update();
                 $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']."\n\nBenutzername: ".$this->login);
