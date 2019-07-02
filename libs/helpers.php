@@ -152,7 +152,7 @@ function validateUser($login, $password) {
 
 function loggedIn() {
     if(!isset($_SESSION['userid'])) return false;
-    if($_SESSION['userid']) return true;
+    if($_SESSION['userid'] > 0) return true;
     return false;
 }
 
