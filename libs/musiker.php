@@ -137,7 +137,7 @@ class User
         $mail = new Usermail;
         if($arbPW) {
             $this->singleUsePW(1);
-            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
+            $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."Passwort: ".$password);
         }
         else {
             $this->singleUsePW(0);
