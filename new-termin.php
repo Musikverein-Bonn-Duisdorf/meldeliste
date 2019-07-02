@@ -20,9 +20,9 @@ if(isset($_POST['id'])) {
 <form class="w3-container w3-margin" action="termine.php" method="POST">
     <label>Datum</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Datum" type="date" <?php if($fill) echo "value=\"".$n->Datum."\""; ?>>
-    <label>Beginn (optional)</label>
+    <label>Beginn (optional) <b onclick="clearInput('Uhrzeit')">&#10006;</b></label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Uhrzeit" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit."\""; ?>>
-    <label>Ende (optional)</label>
+    <label>Ende (optional) <b onclick="clearInput('Uhrzeit2')">&#10006;</b></label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Uhrzeit2" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit2."\""; ?>>
     <label>Veranstaltung</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Name" type="text" placeholder="Name" <?php if($fill) echo "value=\"".$n->Name."\""; ?>>
@@ -56,6 +56,15 @@ if(isset($_POST['id'])) {
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
+<script>
+function clearInput(name) {
+  var x = document.getElementsByName(name);
+  for(i=0; i<x.length; i++) {
+      x[i].value = '';
+  }
+}
+</script>
+      
 <?php
 include "common/footer.php";
 ?>
