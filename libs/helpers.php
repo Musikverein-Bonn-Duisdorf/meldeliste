@@ -145,7 +145,6 @@ function validateUser($login, $password) {
             $logentry->info("Login via Password.");
             return true;
         }
-        break;
     }
     return false;
 }
