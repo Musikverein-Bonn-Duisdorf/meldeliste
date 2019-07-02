@@ -127,6 +127,9 @@ class User
         }
     }
     public function passwd($password) {
+        if(!$this->login) {
+            return false;
+        }
         $arbPW = false;
         if($password == '') {
             $password = uniqid();
