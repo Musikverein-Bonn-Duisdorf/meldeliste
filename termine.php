@@ -2,6 +2,14 @@
 session_start();
 $_SESSION['page']='termine';
 include "common/header.php";
+if(isset($_POST['proxy'])) {
+    $user = $_POST['proxy'];
+    $proxy = new User;
+    $proxy->load_by_id($user);
+}
+else {
+    $user = $_SESSION['userid'];
+}
 
 if(isset($_POST['insert'])) {
     $n = new Termin;
@@ -15,20 +23,31 @@ if(isset($_POST['delete'])) {
 }
 if(isset($_POST['meldung'])) {
     $m = new Meldung;
-    $m->load_by_user_event($_SESSION['userid'], $_POST['Index']);
+
+$m->load_by_user_event($user, $_POST['Index']);
     if($m->User < 1) {
         $m = new Meldung;
-        $m->User = $_SESSION['userid'];
+        $m->User = $user;
         $m->Termin = $_POST['Index'];
     }
     $m->Wert = $_POST['meldung'];
     $m->save();
 }
 ?>
+<?php
+if(isset($_POST['proxy'])) {
+?>
+<div class="w3-container <?php echo $GLOBALS['commonColors']['proxy']; ?>">
+    <h2>Termin&uuml;bersicht <?php echo $proxy->getName();?></h2>
+</div>
+<?php
+} else {
+?>
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
 <h2>Termin&uuml;bersicht</h2>
 </div>
 <?php
+}
 $now = date("Y-m-d");
 if($_SESSION['admin']) {
     $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',

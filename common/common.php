@@ -20,6 +20,8 @@ $commonColors = array(
     'changePWMsg' => "w3-yellow",
     'mailSentMsg' => "w3-yellow",
 
+    'proxy' => "w3-yellow",
+
     'navbar' => "w3-teal",
     'navlogout' => "w3-teal",
     'navinactive' => "w3-teal",
