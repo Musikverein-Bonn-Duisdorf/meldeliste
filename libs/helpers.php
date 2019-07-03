@@ -181,4 +181,17 @@ function sqlerror() {
     }
 }
 
+function meldeWert($val) {
+    switch($val) {
+    case 1:
+        return "ja";
+    case 2:
+        return "nein";
+    case 3:
+        return "vielleicht";
+    default:
+        break;
+    }
+}
+
 ?>

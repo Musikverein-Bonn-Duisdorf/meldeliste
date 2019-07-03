@@ -38,11 +38,16 @@ class Meldung
         }	
     }
     public function getVars() {
-        return sprintf("Melde-ID: %d, Termin: %d, User: %d, Wert: %d",
+        $u = new User;
+        $u->load_by_id($this->User);
+        $t = new Termin;
+        $t->load_by_id($this->Termin);
+        return sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s",
         $this->Index,
         $this->Termin,
-        $this->User,
-        $this->Wert
+        $t->Name,
+        $u->getName(),
+        meldeWert($this->Wert)
         );
     }
     public function save() {
