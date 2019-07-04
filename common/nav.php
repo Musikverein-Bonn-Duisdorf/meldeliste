@@ -17,7 +17,7 @@
     </form>
 <?php if($_SESSION['admin']) {?>
     <div class="stdhide w3-hide-small w3-dropdown-hover w3-mobile">
-	<button class="w3-button w3-mobile <?php echo $commonColors['navadmin']; ?>">Admin</button>
+	<button class="w3-button w3-mobile w3-hide-small <?php echo $commonColors['navadmin']; ?>">Admin</button>
 	<div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $commonColors['navadmin']; ?> w3-mobile">
      <a href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('meldungen');?>">Meldungen</a>
      <a href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('public-entry');?>">im Auftrag melden</a>
