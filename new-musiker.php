@@ -65,10 +65,12 @@ if($edit != 2) {
 ?>
     </select>
     <div class="w3-container w3-mobile w3-left">
-             <input class="w3-check" type="checkbox" name="Mitglied" value="1" <?php if($fill && (bool)$n->Mitglied){ echo "checked ";} echo $disabled; ?>>
+      <input type="hidden" name="Mitglied" value="0">
+      <input class="w3-check" type="checkbox" name="Mitglied" value="1" <?php if($fill && (bool)$n->Mitglied){ echo "checked ";} echo $disabled; ?>>
       <label>Mitglied</label>
     </div>
     <div class="w3-container w3-mobile w3-margin-bottom w3-left">
+      <input type="hidden" name="getMail" value="0">
       <input class="w3-check" type="checkbox" name="getMail" value="1" <?php if($fill && (bool)$n->getMail) echo "checked "; ?>>
       <label>Mailverteiler</label>
     </div>
