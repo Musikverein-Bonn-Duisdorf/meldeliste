@@ -341,16 +341,32 @@ class Termin
 	    $str=$str."</div>";
         return $str;
 	}
+    public function printMyResponseLine() {
+        $u = new User;
+        $u->load_by_id($_SESSION['userid']);
+        return $this->getResponseLine($u->getRegister());
+    }
 	public function printResponseLine() {
+        return $this->getResponseLine(0);
+    }
+	public function getResponseLine($filterregister) {
         $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3><p>".germanDate($this->Datum, 1)."</p></div>\n";
         $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-border-bottom w3-border-black\">\n";
         $whoYes = '';
         $whoNo = '';
         $whoMaybe = '';
         if($this->Auftritt) {
-            $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;",
-            $GLOBALS['dbprefix']
-            );
+            if($filterregister) {
+                $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Index` = '%d' ORDER BY `Sortierung`;",
+                $GLOBALS['dbprefix'],
+                $filterregister
+                );
+            }
+            else {
+                $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'Dirigent' ORDER BY `Sortierung`;",
+                $GLOBALS['dbprefix']
+                );
+            }
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
             $sja=0;
@@ -412,9 +428,18 @@ ORDER BY `Nachname`, `Vorname`",
                 }
                 $all = $ja+$nein+$vielleicht;
                 $sall=$sall+$all;
-                $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\">".$row['Name']."</div><div class=\"w3-col l2 m2 s2\">".$all." / ".sprintf("%02d", $nReg)."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
+                if($filterregister) {
+                    $str=$str.$whoYes;
+                    $str=$str.$whoNo;
+                    $str=$str.$whoMaybe;
+                }
+                else {
+                    $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\">".$row['Name']."</div><div class=\"w3-col l2 m2 s2\">".$all." / ".sprintf("%02d", $nReg)."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div></div>\n";
+                }
             }
-            $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\"><b>Summe</b></div><div class=\"w3-col l2 m2 s2\"><b>".$sall." / ".sprintf("%02d", $snReg)."</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$sja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$svielleicht."</div></div>\n";
+            if(!$filterregister) {
+                $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\"><b>Summe</b></div><div class=\"w3-col l2 m2 s2\"><b>".$sall." / ".sprintf("%02d", $snReg)."</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$sja."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$svielleicht."</div></div>\n";
+            }
         }
         else {
             $sql = sprintf("SELECT * FROM `%sMeldungen`
