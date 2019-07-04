@@ -5,7 +5,7 @@ include "common/header.php";
 
 ?>
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
-<h2>Mein Regime... ster</h2>
+<h2>Mein Register</h2>
 </div>
       <div class="w3-row">
                <div class="w3-panel w3-col l3 w3-left"></div>
