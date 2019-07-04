@@ -160,26 +160,7 @@ class User
         $this->activeLink = uniqid();
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d");',
-        $GLOBALS['dbprefix'],
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
-        $this->Mitglied,
-        $this->Instrument,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
-        $this->getMail
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if(!$dbr) return false;
-        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
-        return true;
-    }
-    protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`, `Admin`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -190,6 +171,27 @@ class User
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         $this->getMail,
+        $this->Admin
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
+        return true;
+    }
+    protected function update() {
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d", `Admin` = "%d" WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
+        $this->Mitglied,
+        $this->Instrument,
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
+        $this->getMail,
+        $this->Admin,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -278,6 +280,15 @@ class User
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
     </div>
+      <?php
+      if($_SESSION['admin']) {
+      ?>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Admin:</div><div class="w3-col l6"><b><?php echo bool2string($this->Admin); ?></b></div>
+    </div>
+      <?php
+      }
+      ?>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
     </div>

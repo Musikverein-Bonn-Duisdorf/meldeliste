@@ -74,6 +74,17 @@ if($edit != 2) {
       <input class="w3-check" type="checkbox" name="getMail" value="1" <?php if($fill && (bool)$n->getMail) echo "checked "; ?>>
       <label>Mailverteiler</label>
     </div>
+    <?php
+      if($_SESSION['admin']) {
+      ?>
+    <div class="w3-container w3-mobile w3-margin-bottom w3-left">
+      <input type="hidden" name="Admin" value="0">
+      <input class="w3-check" type="checkbox" name="Admin" value="1" <?php if($fill && (bool)$n->Admin) echo "checked "; ?>>
+      <label>Admin</label>
+    </div>
+    <?php
+      }
+      ?>
     <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
     <div class="w3-container w3-mobile">
     <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
