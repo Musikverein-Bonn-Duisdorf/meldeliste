@@ -5,36 +5,36 @@
 </div>
 <div class="w3-bar <?php echo $commonColors['navbar']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
-  <a href="<?php echo $GLOBALS['site']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>">Home</a>
-  <a href="termine.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('termine');?>">Termine</a>
-  <a href="mein-register.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinregister');?>">Mein Register</a>
+  <a title="Home" alt="Home" href="<?php echo $GLOBALS['site']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="fas fa-home"></i></a>
+  <a title="Termine" alt="Termine" href="termine.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('termine');?>"><i class="far fa-calendar-alt"></i></a>
+  <a title="Mein Register" alt="Mein Register" href="mein-register.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinregister');?>"><i class="fas fa-users"></i></a>
     <form action="new-musiker.php" method="POST">
-      <button type="submit" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('me');?>">
-	Mein Profil
+      <button title="Mein Profil" alt="Mein Profil" type="submit" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('me');?>">
+	<i class="fas fa-user"></i>
       </button>
       <input type="hidden" name="id" value="<?php echo $_SESSION['userid']; ?>" />
       <input type="hidden" name="mode" value="useredit" />
     </form>
 <?php if($_SESSION['admin']) {?>
     <div class="stdhide w3-hide-small w3-dropdown-hover w3-mobile">
-	<button class="w3-button w3-mobile w3-hide-small <?php echo $commonColors['navadmin']; ?>">Admin</button>
+	<button title="Admin" alt="Admin" class="w3-button w3-mobile w3-hide-small <?php echo $commonColors['navadmin']; ?>">Admin</button>
 	<div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $commonColors['navadmin']; ?> w3-mobile">
-     <a href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('meldungen');?>">Meldungen</a>
-     <a href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('public-entry');?>">im Auftrag melden</a>
-	    <a href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('musiker');?>">Musikerliste</a>
-	    <a href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('register');?>">Registerübersicht</a>
-	    <a href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mitglied');?>">Mitgliederliste</a>
-	    <a href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('nomitglied');?>">Nicht-Mitgliederliste</a>
-	    <a href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>">neuen Musiker anlegen</a>
-	    <a href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newtermin');?>">neuen Termin erstellen</a>
-	    <a href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mail');?>">Email versenden</a>
-	    <a href="log.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('log');?>">Log</a>
+     <a title="Meldungen" alt="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('meldungen');?>">Meldungen</a>
+     <a title="im Auftrag melden" alt="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('public-entry');?>">im Auftrag melden</a>
+	    <a title="Musikerliste" alt="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('musiker');?>">Musikerliste</a>
+	    <a title="Registerübersicht" alt="Registerübersicht" href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('register');?>">Registerübersicht</a>
+	    <a title="Mitgliederliste" alt="Mitgliederliste" href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mitglied');?>">Mitgliederliste</a>
+	    <a title="Nicht-Mitgliederliste" alt="Nicht-Mitgliederliste" href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('nomitglied');?>">Nicht-Mitgliederliste</a>
+	    <a title="neuen Musiker anlegen" alt="neuen Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>">neuen Musiker anlegen</a>
+	    <a title="neuen Termin erstellen" alt="neuen Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newtermin');?>">neuen Termin erstellen</a>
+	    <a title="Email versenden" alt="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mail');?>">Email versenden</a>
+	    <a title="Logfile anschauen" alt="Logfile anschauen" href="log.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('log');?>">Log</a>
 	</div>
     </div>
 <?php } ?>
-    <a href="<?php echo $site['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank">Vereinshomepage</a>
-    <a href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>">Hilfe</a>
-    <a href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile">Logout</a>
+    <a title="Homepage des Musikvereins" alt="Homepage des Musikvereins" href="<?php echo $site['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank">Vereinshomepage</a>
+    <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-info"></i></a>
+    <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>
 
 <script type="text/javascript">
