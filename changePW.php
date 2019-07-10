@@ -6,14 +6,12 @@ include 'common/include.php';
 <html lang="de">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">      
-    <link rel="stylesheet" href="styles/MVD.css">
     <link rel="stylesheet" href="styles/w3.css">
     <!-- successfully included php libraries -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
 <?php
-mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
 if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
     $user = new User;
     if($_SESSION['userid'] > 0) {

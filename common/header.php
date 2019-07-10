@@ -2,7 +2,6 @@
 <html lang="de">
   <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">      
-      <link rel="stylesheet" href="styles/MVD.css">
       <link rel="stylesheet" href="styles/w3.css">
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

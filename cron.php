@@ -8,7 +8,6 @@ if(!isset($_GET['id'])) die("no ID specified\n");
 if(!$_GET['id']==$GLOBALS['cronID']) die("ID invalid\n");
 if(!isset($_GET['cmd'])) die("no command specified\n");
 mkAdmin();
-mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
 
 switch($_GET['cmd']) {
 case "newAppmnts":
