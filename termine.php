@@ -24,7 +24,7 @@ if(isset($_POST['delete'])) {
 if(isset($_POST['meldung'])) {
     $m = new Meldung;
 
-$m->load_by_user_event($user, $_POST['Index']);
+    $m->load_by_user_event($user, $_POST['Index']);
     if($m->User < 1) {
         $m = new Meldung;
         $m->User = $user;
@@ -34,6 +34,30 @@ $m->load_by_user_event($user, $_POST['Index']);
     $m->save();
 }
 ?>
+<script>
+    function melde(user, termin, wert) {
+	if (window.XMLHttpRequest) {
+	    // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+	    xmlhttp=new XMLHttpRequest();
+	}
+	else {
+	    // AJAX mit IE6, IE5
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xmlhttp.onreadystatechange=function() {
+	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+            var oldel = document.getElementById("entry"+termin);
+            var newel = document.createElement('div');
+            newel.innerHTML = xmlhttp.responseText;
+            oldel.parentNode.replaceChild(newel, oldel);
+	    }
+	}
+	var str = "melde.php?id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&user="+user+"&termin="+termin+"&wert="+wert;
+	xmlhttp.open("GET",str,true);
+	xmlhttp.send();
+    }
+</script>
+
 <?php
 if(isset($_POST['proxy'])) {
 ?>

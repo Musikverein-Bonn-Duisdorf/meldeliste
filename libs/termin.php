@@ -192,6 +192,9 @@ class Termin
         if(isset($_POST['proxy'])) {
             $user = $_POST['proxy'];
         }
+        elseif(isset($_GET['user'])) {
+            $user = $_GET['user'];
+        }
         elseif(isset($_SESSION['userid'])) {
             $user = $_SESSION['userid'];
         }
@@ -255,10 +258,10 @@ class Termin
             $str=$str."\">\n";
         }
         else if($this->Auftritt) {
-            $str=$str."<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";
+            $str=$str."<div id=\"entry".$this->Index."\" class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";
         }
         else {
-            $str=$str."<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";            
+            $str=$str."<div id=\"entry".$this->Index."\" class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";            
         }
         $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
         if($this->Uhrzeit) {
@@ -271,10 +274,17 @@ class Termin
         }
         $str=$str."  <div class=\"w3-col l3 w3-container\">".$this->Ort1."</div>\n";
         $str=$str."<div class=\"w3-col l3 w3-row w3-mobile\">";
-        $str=$str."<form action=\"#entry".$this->Index."\" method=\"POST\">";
+        /* $str=$str."<form action=\"#entry".$this->Index."\" method=\"POST\">"; */
         $str=$str."<input type=\"hidden\" name=\"Index\" value=\"".$this->Index."\">";
         if(isset($_POST['proxy'])) {
-            $str=$str."<input type=\"hidden\" name=\"proxy\" value=\"".$_POST['proxy']."\">";
+            /* $str=$str."<input type=\"hidden\" name=\"proxy\" value=\"".$_POST['proxy']."\">"; */
+            $user = $_POST['proxy'];
+        }
+        elseif(isset($_GET['user'])) {
+            $user = $_GET['user'];
+        }
+        else {
+            $user = $_SESSION['userid'];                
         }
         $str=$str."<button class=\"w3-btn ";
         if($this->Wert > 1) {
@@ -283,16 +293,16 @@ class Termin
         else {
             $str=$str.$GLOBALS['commonColors']['AppmntBtnYes'];
         }
-        $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"1\">&#10004;</button>";
+        $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-right w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"1\" onclick=\"melde(".$user.", ".$this->Index.", 1)\">&#10004;</button>";
         $str=$str."<button class=\"w3-btn ";
         if($this->Wert == 1 || $this->Wert == 3 ) $str=$str.$GLOBALS['commonColors']['Disabled'];
         else $str=$str.$GLOBALS['commonColors']['AppmntBtnNo'];
-        $str=$str." w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"2\">&#10008;</button>";
+        $str=$str." w3-border w3-border-black w3-margin-top w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"2\" onclick=\"melde(".$user.", ".$this->Index.", 2)\">&#10008;</button>";
         $str=$str."<button class=\"w3-btn ";
         if($this->Wert == 1 || $this->Wert == 2 ) $str=$str.$GLOBALS['commonColors']['Disabled'];
         else $str=$str.$GLOBALS['commonColors']['AppmntBtnMaybe'];
-        $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" type=\"submit\" name=\"meldung\" value=\"3\"><b>?</b></button>";
-        $str=$str."</form>";
+        $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"3\" onclick=\"melde(".$user.", ".$this->Index.", 3)\"><b>?</b></button>";
+        /* $str=$str."</form>"; */
         $str=$str."</div>";
         $str=$str."</div>";
 
