@@ -14,5 +14,9 @@ Release: <?php echo "<b>".$GLOBALS['version']['String']."</b> (".$GLOBALS['versi
 </div>
 
 <?php
+include "common/help.inc";
+?>
+
+<?php
 include "common/footer.php";
 ?>
