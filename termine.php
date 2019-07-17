@@ -48,9 +48,9 @@ if(isset($_POST['meldung'])) {
 	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
             var oldel = document.getElementById("entry"+termin);
             var newel = document.createElement('div');
-            newel.innerHTML = xmlhttp.responseText;
-            oldel.parentNode.replaceChild(newel, oldel);
-	    }
+            let doc = new DOMParser().parseFromString(xmlhttp.responseText, 'text/html');
+            let div = doc.body.firstChild;
+            oldel.parentNode.replaceChild(div, oldel);}
 	}
 	var str = "melde.php?id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&user="+user+"&termin="+termin+"&wert="+wert;
 	xmlhttp.open("GET",str,true);
