@@ -55,7 +55,7 @@ Element.prototype.appendAfter = function (element) {
         xmlhttp.send();
     }
     }
-var interval = setInterval(getLog, 1000);
+var interval = setInterval(getLog, 5000);
 
 </script>
 <?php
