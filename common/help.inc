@@ -1,15 +1,19 @@
 <div class="w3-container w3-margin-top"><p><b>Kurzanleitung:</b></p>
+<table>
+<tbody>
+<row>
+<td>
 <ul>
 	<li>
-		<p><i class="fas fa-home"> - Home</i></p>
+		<p><i class="fas fa-home"></i> - Home</p>
 		<p>Startseite der Meldeliste - hier werden die n&auml;chsten f&uuml;nf Termine angezeigt.</p>
 	</li>
 	<li>
-		<p><i class="fas fa-calendar-alt"> - Termine</i></p>
+		<p><i class="far fa-calendar-alt"></i> - Termine</p>
 		<p>Hier werde alle zuk&uuml;nftigen Termine angezeigt.</p>
 	</li>
 	<li>
-		<p><i class="fas fa-users"> - Mein Register</i></p>
+		<p><i class="fas fa-users"></i> - Mein Register</p>
 		<p>Anzeige der R&uuml;ckmeldungen des eigenen Registers:</p>
 		<ul>
 			<li><div class="w3-green">Gr&uuml;n:&nbsp;Kommt</div></li>
@@ -18,20 +22,24 @@
 		</ul>
 	</li>
 	<li>
-		<p><i class="fas fa-user"> - Mein Profil</i></p>
+		<p><i class="fas fa-user"></i> - Mein Profil</p>
 		<p>Anzeige der eigenen Profildaten</p>
 	</li>
 	<li>
-		<p><img src="https://www.musikverein-bonn-duisdorf.de/WappenICO.png" /><b> Vereinshomepage</b></p>
+		<p><img class="w3-gray" src="https://www.musikverein-bonn-duisdorf.de/WappenICO.png" /> - Vereinshomepage</p>
 		<p>&Ouml;ffnet die Vereinshomepage in einem eigenen Tab</p>
 	</li>
 	<li>
-		<p><i class="fas fa-info"> - Info/Hilfe</i></p>
+		<p><i class="fas fa-info"></i> - Info/Hilfe</p>
 		<p>Diese Seite</p>
 	</li>
 	<li>
-		<p><i class="fas fa-sign-out-alt"> - Ausloggen</i></p>
+		<p><i class="fas fa-sign-out-alt"></i> - Ausloggen</p>
 		<p>Beendet die aktuelle Sitzung</p>
 	</li>
 </ul>
+</td><td></td>
+</row>
+</tbody>
+</table>
 </div>
