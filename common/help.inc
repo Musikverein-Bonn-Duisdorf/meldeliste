@@ -26,11 +26,7 @@
 		<p>Anzeige der eigenen Profildaten</p>
 	</li>
 	<li>
-<<<<<<< HEAD
 		<p><img class="w3-gray" src="https://www.musikverein-bonn-duisdorf.de/WappenICO.png" /> - Vereinshomepage</p>
-=======
-		<p><img src="https://www.musikverein-bonn-duisdorf.de/WappenICO.png" /> <i class="fas"> - Vereinshomepage</i></p>
->>>>>>> c216372d669746956ac83b5bea5a9b5ddf7ddc25
 		<p>&Ouml;ffnet die Vereinshomepage in einem eigenen Tab</p>
 	</li>
 	<li>
