@@ -60,6 +60,9 @@ function string2Date($string) {
 }
 
 function germanDate($string, $monthLetters) {
+    if($string == '') {
+return;
+    }
     $months = array(
         "01" => "Januar",
         "02" => "Februar",
@@ -120,6 +123,7 @@ function validateLink($hash) {
         $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
         $logentry = new Log;
         $logentry->info("Login via Link.");
+        recordLogin();
         return true;
         break;
     }
@@ -143,10 +147,20 @@ function validateUser($login, $password) {
             $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
             $logentry = new Log;
             $logentry->info("Login via Password.");
+            recordLogin();
             return true;
         }
     }
     return false;
+}
+
+function recordLogin() {
+    $sql = sprintf("UPDATE `%sUser` SET `LastLogin` = CURRENT_TIMESTAMP() WHERE `Index` = %d;",
+    $GLOBALS['dbprefix'],
+    $_SESSION['userid']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
 }
 
 function loggedIn() {

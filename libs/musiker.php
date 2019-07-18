@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -17,6 +17,8 @@ class User
 	    case 'getMail':
 	    case 'Admin':
         case 'singleUsePW':
+        case 'RegisterLead':
+        case 'LastLogin':
             return $this->_data[$key];
             break;
         default:
@@ -64,12 +66,18 @@ class User
 	    case 'singleUsePW':
             $this->_data[$key] = (bool) $val;
             break;
+	    case 'RegisterLead':
+            $this->_data[$key] = (bool)$val;
+            break;
+	    case 'LastLogin':
+            $this->_data[$key] = trim($val);
+            break;
         default:
             break;
         }	
     }
     public function getVars() {
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s",
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
@@ -78,7 +86,9 @@ class User
         $this->iName,
         $this->Email,
         bool2string($this->getMail),
-        bool2string($this->Admim)
+        bool2string($this->Admim),
+        $this->RegisterLead,
+        $this->LastLogin
         );
     }
     public function getShort() {
@@ -160,27 +170,7 @@ class User
         $this->activeLink = uniqid();
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`, `Admin`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d");',
-        $GLOBALS['dbprefix'],
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
-        $this->Mitglied,
-        $this->Instrument,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
-        $this->getMail,
-        $this->Admin
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if(!$dbr) return false;
-        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
-        return true;
-    }
-    protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d", `Admin` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -192,6 +182,28 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         $this->getMail,
         $this->Admin,
+        $this->RegisterLead
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
+        return true;
+    }
+    protected function update() {
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
+        $this->Mitglied,
+        $this->Instrument,
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
+        $this->getMail,
+        $this->Admin,
+        $this->RegisterLead,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -261,6 +273,7 @@ class User
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
         echo "</div>";
         ?>
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
@@ -295,6 +308,20 @@ class User
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $this->login; ?></b></div>
     </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($this->LastLogin, 1); ?></b></div>
+    </div>
+      <?php
+      if($this->RegisterLead) {
+          $r = new Register;
+          $r->load_by_id($this->getRegister());
+      ?>
+          <div class="w3-container w3-row w3-margin">
+          <div class="w3-col l6">Registerführer:</div><div class="w3-col l6"><b><?php echo $r->Name; ?></b></div>
+          </div>
+      <?php
+      }
+      ?>
       <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
       <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['commonColors']['BtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
       </form>
