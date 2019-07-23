@@ -8,7 +8,7 @@ include "common/header.php";
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(*) AS `NumLogs` FROM  `%sLog` GROUP BY DATE(`Timestamp`) ORDER BY `LogDate`;',
+$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(*) AS `NumLogs` FROM  `%sLog` WHERE `Type` < 7 GROUP BY DATE(`Timestamp`) ORDER BY `LogDate`;',
 $GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);
