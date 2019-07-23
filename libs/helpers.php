@@ -63,7 +63,7 @@ function string2gDate($string) {
     $y = substr($string, 0, 4);
     $m = substr($string, 5, 2);
     $d = substr($string, 8, 2);
-    return "new Date(".$y.", ".$m.", ".$d.")";
+    return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
 }
 
 function germanDate($string, $monthLetters) {
