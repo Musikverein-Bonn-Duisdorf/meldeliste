@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -19,6 +19,7 @@ class User
         case 'singleUsePW':
         case 'RegisterLead':
         case 'LastLogin':
+        case 'Joined':
             return $this->_data[$key];
             break;
         default:
@@ -298,6 +299,9 @@ class User
       ?>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Admin:</div><div class="w3-col l6"><b><?php echo bool2string($this->Admin); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+          <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
     </div>
       <?php
       }
