@@ -59,6 +59,13 @@ function string2Date($string) {
     $d = substr($string, 8, 9);
 }
 
+function string2gDate($string) {
+    $y = substr($string, 0, 4);
+    $m = substr($string, 5, 2);
+    $d = substr($string, 8, 2);
+    return "new Date(".$y.", ".$m.", ".$d.")";
+}
+
 function germanDate($string, $monthLetters) {
     if($string == '') {
 return;
