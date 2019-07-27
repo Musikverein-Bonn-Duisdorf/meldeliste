@@ -27,10 +27,10 @@ class Termin
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
-		$this->_data[$key] = (int)$val;
+            $this->_data[$key] = (int)$val;
 		break;
 	    case 'Datum':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = trim($val);
 		break;
 	    case 'Uhrzeit':
 		$this->_data[$key] = trim($val);
@@ -39,25 +39,25 @@ class Termin
 		$this->_data[$key] = trim($val);
 		break;
 	    case 'Name':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
 	    case 'Beschreibung':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
 	    case 'Auftritt':
 		$this->_data[$key] = (bool)$val;
 		break;
 	    case 'Ort1':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
 	    case 'Ort2':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
 	    case 'Ort3':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
 	    case 'Ort4':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
 	    case 'published':
 		$this->_data[$key] = (bool)$val;
@@ -263,7 +263,7 @@ class Termin
         else {
             $str=$str."<div id=\"entry".$this->Index."\" class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['commonColors']['AppmntConcert']." w3-mobile w3-border-bottom w3-border-black ".$opacity." \">\n";            
         }
-        $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".htmlentities($this->Name)."</b></div>\n";
+        $str=$str."  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Name."</b></div>\n";
         if($this->Uhrzeit) {
             $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1).", ".sql2timeRaw($this->Uhrzeit);
             if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
@@ -311,7 +311,7 @@ class Termin
         $str=$str."<header class=\"w3-container ".$GLOBALS['commonColors']['titlebar']."\">";
         $str=$str."<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\""; 
         $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
-        $str=$str."<h2>".htmlentities($this->Name)."</h2>";
+        $str=$str."<h2>".$this->Name."</h2>";
         $str=$str."</header>";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">";
         $str=$str."<div class=\"w3-col l3\">Datum:</div><div class=\"w3-col l9\"><b>".germanDate($this->Datum, 1)."</b></div>";
