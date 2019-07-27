@@ -140,13 +140,13 @@ class Log
     }
     public function repair() {
         $str = htmlentities($this->Message);
-        $str = str_replace("&auml;", "&auml;", $str);
-        $str = str_replace("&uuml;", "&uuml;", $str);
-        $str = str_replace("&ouml;", "&ouml;", $str);
-        $str = html_entity_decode($str);
-        $str = str_replace("ä", "&auml;", $str);
-        $str = str_replace("ü", "&uuml;", $str);
-        $str = str_replace("ö", "&ouml;", $str);
+        /* $str = str_replace("&auml;", "&auml;", $str); */
+        /* $str = str_replace("&uuml;", "&uuml;", $str); */
+        /* $str = str_replace("&ouml;", "&ouml;", $str); */
+        /* $str = html_entity_decode($str); */
+        $str = str_replace("Ã¤", "&auml;", $str);
+        $str = str_replace("Ã¼", "&uuml;", $str);
+        $str = str_replace("Ã¶", "&ouml;", $str);
         $this->Message = $str;
         $this->save();
     }
