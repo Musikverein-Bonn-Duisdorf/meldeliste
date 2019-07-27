@@ -144,9 +144,9 @@ class Log
         $str = str_replace("&Atilde;&frac14;", "&uuml;", $str);
         $str = str_replace("&Atilde;&para;", "&ouml;", $str);
         $str = html_entity_decode($str);
-        $str = str_replace("ä", "&auml;", $str);
-        $str = str_replace("ü", "&uuml;", $str);
-        $str = str_replace("ö", "&ouml;", $str);
+        /* $str = str_replace("ä", "&auml;", $str); */
+        /* $str = str_replace("ü", "&uuml;", $str); */
+        /* $str = str_replace("ö", "&ouml;", $str); */
         $this->Message = $str;
         $this->save();
     }
