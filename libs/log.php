@@ -138,18 +138,18 @@ class Log
             $this->fill_from_array($row);
         }
     }
-    public function repair() {
-        $str = htmlentities($this->Message);
-        $str = str_replace("&Atilde;&curren;", "&auml;", $str);
-        $str = str_replace("&Atilde;&frac14;", "&uuml;", $str);
-        $str = str_replace("&Atilde;&para;", "&ouml;", $str);
-        $str = html_entity_decode($str);
-        /* $str = str_replace("ä", "&auml;", $str); */
-        /* $str = str_replace("ü", "&uuml;", $str); */
-        /* $str = str_replace("ö", "&ouml;", $str); */
-        $this->Message = $str;
-        $this->save();
-    }
+    /* public function repair() { */
+    /*     $str = htmlentities($this->Message); */
+    /*     $str = str_replace("&Atilde;&curren;", "&auml;", $str); */
+    /*     $str = str_replace("&Atilde;&frac14;", "&uuml;", $str); */
+    /*     $str = str_replace("&Atilde;&para;", "&ouml;", $str); */
+    /*     $str = html_entity_decode($str); */
+    /*     /\* $str = str_replace("ä", "&auml;", $str); *\/ */
+    /*     /\* $str = str_replace("ü", "&uuml;", $str); *\/ */
+    /*     /\* $str = str_replace("ö", "&ouml;", $str); *\/ */
+    /*     $this->Message = $str; */
+    /*     $this->save(); */
+    /* } */
     public function printTableLine() {
         $User = new User;
         $User->load_by_id($this->User);
