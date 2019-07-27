@@ -30,7 +30,7 @@ class Log
             $this->_data[$key] = (int)$val;
 		break;
 	    case 'Message':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = trim($val);
 		break;
             default:
 		break;
