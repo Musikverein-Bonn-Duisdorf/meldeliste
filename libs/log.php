@@ -138,6 +138,18 @@ class Log
             $this->fill_from_array($row);
         }
     }
+    public function repair() {
+        $str = htmlentities($this->Message);
+        $str = str_replace("&auml;", "&auml;", $str);
+        $str = str_replace("&uuml;", "&uuml;", $str);
+        $str = str_replace("&ouml;", "&ouml;", $str);
+        $str = html_entity_decode($str);
+        $str = str_replace("ä", "&auml;", $str);
+        $str = str_replace("ü", "&uuml;", $str);
+        $str = str_replace("ö", "&ouml;", $str);
+        $this->Message = $str;
+        $this->save();
+    }
     public function printTableLine() {
         $User = new User;
         $User->load_by_id($this->User);
@@ -183,7 +195,7 @@ class Log
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$User->getName()."</div>\n";
-	echo "  <div class=\"w3-col l9 w3-container\"><i>".$this->Message."</i></div>\n";
+	echo "  <div class=\"w3-col l9 w3-container\"><i>".htmlentities($this->Message)."</i></div>\n";
 	echo "</div>\n";
     }
 };
