@@ -32,10 +32,10 @@ class User
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
-            $this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
             break;
 	    case 'Vorname':
-            $this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
             break;
 	    case 'login':
             $this->_data[$key] = trim($val);
