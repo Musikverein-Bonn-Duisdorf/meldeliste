@@ -18,19 +18,19 @@ class Log
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
-		$this->_data[$key] = (int)$val;
+            $this->_data[$key] = (int)$val;
 		break;
 	    case 'User':
-		$this->_data[$key] = (int)$val;
+            $this->_data[$key] = (int)$val;
 		break;
 	    case 'Timestamp':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = trim($val);
 		break;
 	    case 'Type':
-		$this->_data[$key] = (int)$val;
+            $this->_data[$key] = (int)$val;
 		break;
 	    case 'Message':
-		$this->_data[$key] = trim($val);
+            $this->_data[$key] = htmlentities(trim($val));
 		break;
             default:
 		break;
@@ -146,7 +146,7 @@ class Log
         $str = html_entity_decode($str);
         $str = str_replace("ä", "&auml;", $str);
         $str = str_replace("ü", "&uuml;", $str);
-        $str = str_replace("o", "&ouml;", $str);
+        $str = str_replace("ö", "&ouml;", $str);
         $this->Message = $str;
         $this->save();
     }
@@ -195,7 +195,7 @@ class Log
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$User->getName()."</div>\n";
-	echo "  <div class=\"w3-col l9 w3-container\"><i>".htmlentities($this->Message)."</i></div>\n";
+	echo "  <div class=\"w3-col l9 w3-container\"><i>".$this->Message."</i></div>\n";
 	echo "</div>\n";
     }
 };
