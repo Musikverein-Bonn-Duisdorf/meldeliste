@@ -34,9 +34,10 @@ include "common/header.php";
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT 5;',
+$sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT %s;',
 $GLOBALS['dbprefix'],
-$now
+$now,
+$GLOBALS['options']['entriesMainPage'],
 );
 $dbr = mysqli_query($conn, $sql);
 sqlerror();

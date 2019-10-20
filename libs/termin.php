@@ -304,6 +304,16 @@ class Termin
         $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"3\" onclick=\"melde(".$user.", ".$this->Index.", 3)\"><b>?</b></button>";
         /* $str=$str."</form>"; */
         $str=$str."</div>";
+        if($this->Wert == 1 || $this->Wert == 3) {
+            if($GLOBALS['options']['showChildOption']) {
+                $str=$str."<div class=\"w3-col l1 w3-row w3-mobile\"><input type=\"number\" min=\"0\" placeholder=\"Kinder\" title=\"Kinder\" name=\"childs\"/>";
+                $str=$str."</div>";
+            }
+            if($GLOBALS['options']['showGuestOption']) {
+                $str=$str."<div class=\"w3-col l1 w3-row w3-mobile\"><input type=\"number\" min=\"0\" placeholder=\"G&auml;ste\" title=\"G&auml;ste\" name=\"guests\"/>";
+                $str=$str."</div>";
+            }
+        }
         $str=$str."</div>";
 
         $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
