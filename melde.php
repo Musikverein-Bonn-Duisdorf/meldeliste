@@ -3,9 +3,13 @@ session_start();
 include 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 if(!isset($_GET['id'])) {
-    die('invalid');
+    die('no ID specified');
 }
-if($_GET['id'] == $GLOBALS['cronID']) {
+if($_GET['id'] != $GLOBALS['cronID']) {
+    die('invalid ID');
+}
+switch($_GET['cmd']) {
+case "save":
     $m = new Meldung;
     $m->load_by_user_event($_GET['user'], $_GET['termin']);
     if($m->User < 1) {
@@ -14,9 +18,26 @@ if($_GET['id'] == $GLOBALS['cronID']) {
         $m->Termin = $_GET['termin'];
     }
     $m->Wert = $_GET['wert'];
+    $m->Children = $_GET['Children'];
+    $m->Guests = $_GET['Guests'];
     $m->save();
     $t = new Termin;
     $t->load_by_id($_GET['termin']);
     echo $t->printBasicTableLine();
+    break;
+case "status":
+    setlocale (LC_ALL, 'de_DE.UTF8');
+    $today = strftime('%A, %d. %B %Y um %H:%M Uhr');
+
+    $t = new Termin;
+    if($_GET['termin'] < 1) break;
+    $t->load_by_id($_GET["termin"]);
+    $body = "dies ist der Meldestand f&uuml;r ".$today.".\n";
+    $body = $body.$t->printMailResponse();
+    $mail = new Usermail;
+    $mail->singleUser($_GET['user'], $t->Name, $body);
+    break;
+default:
+    break;
 }
 ?>

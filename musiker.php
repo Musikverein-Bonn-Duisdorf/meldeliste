@@ -28,7 +28,11 @@ if(isset($_POST['passwd'])) {
     }
 }
 if($_SESSION['admin']) {
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser`;',
+    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins";',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($conn, $sql);
@@ -40,7 +44,11 @@ $nMusiker = $row['Count'];
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
 <?php
-$sql = sprintf('SELECT `Index` FROM `%sUser` ORDER BY `Nachname`, `Vorname`;',
+$sql = sprintf('SELECT `Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" ORDER BY `Nachname`, `Vorname`;',
+$GLOBALS['dbprefix'],
+$GLOBALS['dbprefix'],
+$GLOBALS['dbprefix'],
+$GLOBALS['dbprefix'],
 $GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);
