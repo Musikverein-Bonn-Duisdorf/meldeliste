@@ -78,6 +78,7 @@ class Usermail {
 
         $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
         $style=file_get_contents("styles/w3.css");
+        $style=$style.file_get_contents("styles/w3-colors-highway.css");
         $register = '';
         if($this->User > 0) {
             $sql = sprintf("SELECT * FROM `%sUser` WHERE `Index` = %d;",
@@ -110,21 +111,22 @@ class Usermail {
             $anrede = "Hallo ".$row['Vorname'].",";
             $link= $GLOBALS['site']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
-            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container w3-indigo w3-mobile\"><h1>".$GLOBALS['site']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
+            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['commonColors']['Title']." w3-mobile\"><h1>".$GLOBALS['site']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 
             $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
         
             $mail->Send();
             $mail->clearAddresses();
+            $logentry = new Log;
+            $logmessage = sprintf("An: %s %s, Betreff: %s, Text: %s",
+            $row['Vorname'],
+            $row['Nachname'],
+            $this->subject,
+            $text
+            );
+            $logentry->email($logmessage);
             $i++;
         }
         echo "<div class=\"w3-container ".$GLOBALS['commonColors']['mailSentMsg']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
-        $logentry = new Log;
-        $logmessage = sprintf("Betreff: %s, nur Mitglieder: %s, Text: %s",
-        $this->subject,
-        bool2string($this->memberonly),
-        $text
-        );
-        $logentry->email($logmessage);
     }
 }

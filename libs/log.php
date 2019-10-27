@@ -194,7 +194,14 @@ class Log
 	echo "<div id=\"".$this->Index."\" class=\"w3-row ".$color." ".$GLOBALS['commonColors']['Hover']." w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
-	echo "  <div class=\"w3-col l1 w3-container\">".$User->getName()."</div>\n";
+    echo "  <div class=\"w3-col l1 w3-container\">";
+    if($User->Index) {
+        echo $User->getName();
+    }
+    else {
+        echo "<b>SYSTEM</b>";
+    }
+    echo "</div>\n";
 	echo "  <div class=\"w3-col l9 w3-container\"><i>".$this->Message."</i></div>\n";
 	echo "</div>\n";
     }

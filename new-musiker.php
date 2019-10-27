@@ -44,15 +44,19 @@ else {
 <?php
 if($edit != 2) {
 ?>
-    <label>Loginname (optional)</label>
+    <label class="w3-text-gray">Loginname (optional)</label>
 <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
 <?php
 }
+if($n->login || $edit == 3) {
 ?>
-<label>neues Passwort (optional)</label>
+<label class="w3-text-gray">neues Passwort (optional)</label>
 <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
-<label>neues Passwort wiederholen (optional)</label>
+<label class="w3-text-gray">neues Passwort wiederholen (optional)</label>
 <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">
+<?php
+}
+?>
     <label>Instrument</label>
 <select class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
       <?php
@@ -82,12 +86,14 @@ if($edit != 2) {
       <input class="w3-check" type="checkbox" name="Admin" value="1" <?php if($fill && (bool)$n->Admin) echo "checked "; ?>>
       <label>Admin</label>
     </div>
+<?php   if($GLOBALS['options']['showRegisterLead']) { ?>
     <div class="w3-container w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="RegisterLead" value="0">
       <input class="w3-check" type="checkbox" name="RegisterLead" value="1" <?php if($fill && (bool)$n->RegisterLead) echo "checked "; ?>>
       <label>Registerführer</label>
     </div>
     <?php
+      }
       }
       ?>
     <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>

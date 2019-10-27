@@ -35,7 +35,20 @@ if(isset($_POST['meldung'])) {
 }
 ?>
 <script>
-    function melde(user, termin, wert) {
+function getStatus(user, termin) {
+	if (window.XMLHttpRequest) {
+	    // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+	    xmlhttp=new XMLHttpRequest();
+	}
+	else {
+	    // AJAX mit IE6, IE5
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	var str = "melde.php?cmd=status&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&user="+user+"&termin="+termin;
+	xmlhttp.open("GET",str,true);
+	xmlhttp.send();    
+}
+function melde(user, termin, wert, Children, Guests) {
 	if (window.XMLHttpRequest) {
 	    // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	    xmlhttp=new XMLHttpRequest();
@@ -48,11 +61,19 @@ if(isset($_POST['meldung'])) {
 	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
             var oldel = document.getElementById("entry"+termin);
             var newel = document.createElement('div');
-            let doc = new DOMParser().parseFromString(xmlhttp.responseText, 'text/html');
-            let div = doc.body.firstChild;
-            oldel.parentNode.replaceChild(div, oldel);}
+            newel.innerHTML = xmlhttp.responseText;
+            oldel.parentNode.replaceChild(newel, oldel);
+	    }
 	}
-	var str = "melde.php?id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&user="+user+"&termin="+termin+"&wert="+wert;
+    if(Children == -1) {
+        var ChildInput = document.getElementById("Children"+termin);
+        Children = ChildInput.value;
+    }
+    if(Guests == -1) {
+        var GuestInput = document.getElementById("Guests"+termin);
+        Guests = GuestInput.value;
+    }
+	var str = "melde.php?cmd=save&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&user="+user+"&termin="+termin+"&wert="+wert+"&Children="+Children+"&Guests="+Guests;
 	xmlhttp.open("GET",str,true);
 	xmlhttp.send();
     }

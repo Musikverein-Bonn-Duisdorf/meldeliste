@@ -78,6 +78,16 @@ class User
         }	
     }
     public function getVars() {
+        if(!$this->iName) {
+            $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Index` = %d;',
+            $GLOBALS['dbprefix'],
+            $this->Instrument
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            $row = mysqli_fetch_array($dbr);
+            $this->iName = $row['Name'];
+        }
         return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
         $this->Index,
         $this->Vorname,
@@ -226,6 +236,21 @@ class User
         $row = mysqli_fetch_array($dbr);
         if(is_array($row)) {
             return $row['Register'];
+        }
+        return 0;
+    }
+    public function getRegisterName() {
+        $register = $this->getRegister();
+        if($register < 1) return '';
+        $sql = sprintf('SELECT * FROM `%sRegister` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $register
+        );        
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        if(is_array($row)) {
+            return $row['Name'];
         }
         return 0;
     }

@@ -8,7 +8,7 @@ if($_SESSION['admin']) {
     <h2>Registerübersicht</h2>
 </div>
 <?php
-    $sql = sprintf('SELECT `Index` FROM `%sRegister` ORDER BY `Sortierung`;',
+    $sql = sprintf('SELECT `Index` FROM `%sRegister` WHERE `Name` != "keins" ORDER BY `Sortierung`;',
         $GLOBALS['dbprefix']
             );
 $dbr = mysqli_query($conn, $sql);

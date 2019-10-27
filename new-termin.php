@@ -24,6 +24,30 @@ if(isset($_POST['id'])) {
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Uhrzeit" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit."\""; ?>>
     <label>Ende (optional) <b onclick="clearInput('Uhrzeit2')">&#10006;</b></label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Uhrzeit2" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit2."\""; ?>>
+<?php
+if($GLOBALS['options']['showVehicle'] || $GLOBALS['options']['showTravelTime']) {
+?>
+    <label>Abfahrt</label>
+<?php
+}
+if($GLOBALS['options']['showVehicle']) {
+?>
+<select class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Vehicle">
+      <?php
+  if($fill) {
+    VehicleOption($n->Vehicle);
+  }
+  else {
+    VehicleOption(0);
+  }
+?>
+    </select>
+<?php
+}
+if($GLOBALS['options']['showTravelTime']) {
+?>
+<input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Abfahrt" type="time" <?php if($fill) echo "value=\"".$n->Abfahrt."\""; ?>>
+<?php } ?>
     <label>Veranstaltung</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Name" type="text" placeholder="Name" <?php if($fill) echo "value=\"".$n->Name."\""; ?>>
     <label>Beschreibung</label>

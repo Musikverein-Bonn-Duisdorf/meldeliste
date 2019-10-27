@@ -1,4 +1,16 @@
 <?php
+function loadconfig() {
+    $sql = sprintf('SELECT * FROM `%sconfig`;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $optionsDB = array();
+    while($row = mysqli_fetch_array($dbr)) {
+        $optionsDB += [$row['Parameter'] => $row['Value']];
+    }
+    return $optionsDB;
+}
 function bool2string($val) {
     if($val) return "ja";
     return "nein";
@@ -6,6 +18,22 @@ function bool2string($val) {
 
 function instrumentOption($val) {
     $sql = sprintf('SELECT * FROM `%sInstrument` ORDER BY `Register`, `Name`;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+}
+
+function VehicleOption($val) {
+    $sql = sprintf('SELECT * FROM `%svehicle`;',
     $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -111,6 +139,7 @@ return;
 function mkAdmin() {
     $_SESSION['userid'] = 0;
     $_SESSION['admin'] = true;
+    $_SESSION['username'] = 'SYSTEM';
 }
 
 function validateLink($hash) {

@@ -2,7 +2,7 @@
 include 'libs/log.php';
 class Meldung
 {
-    private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Wert' => null, 'Timestamp' => null);
+    private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Wert' => null, 'Timestamp' => null, 'Children' => null, 'Guests' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -10,6 +10,8 @@ class Meldung
 	    case 'User':
 	    case 'Wert':
 	    case 'Timestamp':
+	    case 'Children':
+        case 'Guests':
             return $this->_data[$key];
             break;
         default:
@@ -28,6 +30,8 @@ class Meldung
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Wert':
+	    case 'Children':
+	    case 'Guests':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Timestamp':
@@ -42,13 +46,20 @@ class Meldung
         $u->load_by_id($this->User);
         $t = new Termin;
         $t->load_by_id($this->Termin);
-        return sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s",
+        $str = sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s",
         $this->Index,
         $this->Termin,
         $t->Name,
         $u->getName(),
         meldeWert($this->Wert)
         );
+        if($GLOBALS['options']['showChildOption']) {
+            $str=$str.", Kinder: ".$this->Children;
+        }
+        if($GLOBALS['options']['showGuestOption']) {
+            $str=$str.", G&auml;ste: ".$this->Guests;
+        }
+        return $str;
     }
     public function save() {
         if(!$this->is_valid()) return false;
@@ -70,11 +81,13 @@ class Meldung
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sMeldungen` (`Termin`, `User`, `Wert`) VALUES ("%s", "%s", "%s");',
+        $sql = sprintf('INSERT INTO `%sMeldungen` (`Termin`, `User`, `Wert`, `Children`, `Guests`) VALUES ("%s", "%s", "%s", "%d", "%d");',
         $GLOBALS['dbprefix'],
         $this->Termin,
         $this->User,
-        $this->Wert
+        $this->Wert,
+        $this->Children,
+        $this->Guests
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -83,9 +96,11 @@ class Meldung
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sMeldungen` SET `Wert` = "%s", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sMeldungen` SET `Wert` = "%s", `Children` = "%d", `Guests` = "%d", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Wert,
+        $this->Children,
+        $this->Guests,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
