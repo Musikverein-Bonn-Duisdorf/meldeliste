@@ -2,6 +2,7 @@
 session_start();
 $_SESSION['page']='evaluate';
 include "common/header.php";
+requireAdmin();
 ?>
 <div id="header" class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
 <h2>Datenauswertung</h2>

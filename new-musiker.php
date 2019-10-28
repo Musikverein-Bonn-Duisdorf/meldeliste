@@ -86,7 +86,7 @@ if($n->login || $edit == 3) {
       <input class="w3-check" type="checkbox" name="Admin" value="1" <?php if($fill && (bool)$n->Admin) echo "checked "; ?>>
       <label>Admin</label>
     </div>
-<?php   if($GLOBALS['options']['showRegisterLead']) { ?>
+<?php   if($GLOBALS['optionsDB']['showRegisterLead']) { ?>
     <div class="w3-container w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="RegisterLead" value="0">
       <input class="w3-check" type="checkbox" name="RegisterLead" value="1" <?php if($fill && (bool)$n->RegisterLead) echo "checked "; ?>>

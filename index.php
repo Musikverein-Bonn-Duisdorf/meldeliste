@@ -55,11 +55,11 @@ function melde(user, termin, wert, Children, Guests) {
 </div>
 <?php
 $now = date("Y-m-d");
-if($GLOBALS['options']['entriesMainPage'] > 0) {
+if($GLOBALS['optionsDB']['entriesMainPage'] > 0) {
 $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT %s;',
 $GLOBALS['dbprefix'],
 $now,
-$GLOBALS['options']['entriesMainPage']
+$GLOBALS['optionsDB']['entriesMainPage']
 );
 }
 else {

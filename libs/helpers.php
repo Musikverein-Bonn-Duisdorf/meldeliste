@@ -11,6 +11,9 @@ function loadconfig() {
     }
     return $optionsDB;
 }
+function requireAdmin() {
+    if(!$_SESSION['admin']) die("Admin permissions required.");
+}
 function bool2string($val) {
     if($val) return "ja";
     return "nein";

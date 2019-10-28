@@ -10,7 +10,7 @@
 	  <?php
           include 'include.php';
       ?>
-      <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
+      <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
       <!-- successfully included php libraries -->
       <?php
         mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
@@ -33,9 +33,9 @@
       ?>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title><?php echo $site['WebSiteName']; ?></title>
+      <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>
-  <body class="<?php echo $GLOBALS['commonColors']['bgcolor']; ?>">
+  <body class="<?php echo $GLOBALS['optionsDB']['ColorBackground']; ?>">
 <?php
 include "common/nav.php";
 ?>

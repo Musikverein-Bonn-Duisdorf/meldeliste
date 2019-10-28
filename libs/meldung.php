@@ -53,10 +53,10 @@ class Meldung
         $u->getName(),
         meldeWert($this->Wert)
         );
-        if($GLOBALS['options']['showChildOption']) {
+        if($GLOBALS['optionsDB']['showChildOption']) {
             $str=$str.", Kinder: ".$this->Children;
         }
-        if($GLOBALS['options']['showGuestOption']) {
+        if($GLOBALS['optionsDB']['showGuestOption']) {
             $str=$str.", G&auml;ste: ".$this->Guests;
         }
         return $str;

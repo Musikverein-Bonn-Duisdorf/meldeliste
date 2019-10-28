@@ -254,7 +254,7 @@ class Termin
         $wertval = array('Zusagen', 'Absagen', 'unsicher');
         $colorval = array($GLOBALS['commonColors']['AppmntYes'], $GLOBALS['commonColors']['AppmntNo'], $GLOBALS['commonColors']['AppmntMaybe']);
         $colsize=4;
-        if($GLOBALS['options']['showChildOption'] || $GLOBALS['options']['showGuestOption']) {
+        if($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption']) {
             $colsize=3;
         }
         $str="<div class=\"w3-container ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3></div>";
@@ -293,7 +293,7 @@ class Termin
                 $str=$str."\t<div class=\"w3-container w3-border-bottom w3-border-black w3-mobile ".$colorval[$wert-1]."\">";
                 $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\">".$row['Vorname']." ".$row['Nachname']."</div>";
                 $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\">".$row['iName']."</div>";
-                if($GLOBALS['options']['showChildOption'] || $GLOBALS['options']['showGuestOption']) {
+                if($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption']) {
                     $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\">1 + ".$row['Children']." + ".$row['Guests']."</div>";
                 }
                 $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\">".$row['Timestamp']."</div>";
@@ -303,7 +303,7 @@ class Termin
         $str=$str."\t<div class=\"w3-row w3-container ".$GLOBALS['commonColors']['AppmntYes']." w3-border-bottom w3-border-black w3-mobile w3-margin-top\">";
         $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\"><b>".Summe."</b></div>";
         $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\"><b>&nbsp;</b></div>";
-        if($GLOBALS['options']['showChildOption'] || $GLOBALS['options']['showGuestOption']) {
+        if($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption']) {
             $str=$str."\t\t<div class=\"w3-col l".(2*$colsize)." m".(2*$colsize)." s".(2*$colsize)."\"><b>".$sumJa." + ".$sumJaC." K + ".$sumJaG." G = ".($sumJa+$sumJaC+$sumJaG)."</b></div>";
             $str=$str."\t</div>";
             $str=$str."\t<div class=\"w3-row w3-container ".$GLOBALS['commonColors']['AppmntMaybe']." w3-border-bottom w3-border-black w3-mobile\">";
@@ -353,21 +353,21 @@ class Termin
         else {
             $str=$str."  <div class=\"w3-col l3 w3-container\">".germanDate($this->Datum, 1);
         }
-        if($GLOBALS['options']['showTravelTime'] || $GLOBALS['options']['showVehicle']) {
+        if($GLOBALS['optionsDB']['showTravelTime'] || $GLOBALS['optionsDB']['showVehicle']) {
             if($this->Abfahrt || $this->vName) {
                 $str=$str." (";
             }
         }
-        if($this->Abfahrt && $GLOBALS['options']['showTravelTime']) {
+        if($this->Abfahrt && $GLOBALS['optionsDB']['showTravelTime']) {
             $str=$str.sql2timeRaw($this->Abfahrt);
         }
-        if($this->Abfahrt && $GLOBALS['options']['showTravelTime'] && $GLOBALS['options']['showVehicle']) {
+        if($this->Abfahrt && $GLOBALS['optionsDB']['showTravelTime'] && $GLOBALS['optionsDB']['showVehicle']) {
             $str=$str." ";
         }
-        if($GLOBALS['options']['showVehicle']) {
+        if($GLOBALS['optionsDB']['showVehicle']) {
             $str=$str.$this->vName;
         }
-        if($GLOBALS['options']['showTravelTime'] || $GLOBALS['options']['showVehicle']) {
+        if($GLOBALS['optionsDB']['showTravelTime'] || $GLOBALS['optionsDB']['showVehicle']) {
             if($this->Abfahrt || $this->vName) {
                 $str=$str.")";
             }
@@ -408,12 +408,12 @@ class Termin
         if($_SESSION['admin']) {
             $str=$str."<button class=\"w3-btn ".$GLOBALS['commonColors']['submit']." w3-border w3-border-black w3-col l1 m12 s12 w3-row w3-margin-top\" onclick=\"getStatus(".$user.", ".$this->Index.")\">Status per Mail</button>";
         }
-        if(($GLOBALS['options']['showGuestOption'] || $GLOBALS['options']['showChildOption']) && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == "Bus") {
-            if($GLOBALS['options']['showChildOption']) {
+        if(($GLOBALS['optionsDB']['showGuestOption'] || $GLOBALS['optionsDB']['showChildOption']) && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == "Bus") {
+            if($GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-hide-small w3-hide-medium w3-col l9\">&nbsp;</div><div class=\"w3-col l1 m6 s6 w3-row w3-container w3-margin-top\">Kinder</div><div class=\"w3-col l1 m6 s6 w3-row w3-container w3-margin-top\"><input style=\"width: 5em\" type=\"number\" name=\"Children\" id=\"Children".$this->Index."\" min=\"0\" value=\"".$this->Children."\" default=\"0\" title=\"Kinder\"\"/>";
                 $str=$str."</div>";
             }
-            if($GLOBALS['options']['showGuestOption']) {
+            if($GLOBALS['optionsDB']['showGuestOption']) {
                 $str=$str."<div class=\"w3-hide-small w3-hide-medium w3-col l9\">&nbsp;</div><div class=\"w3-col l1 m6 s6 w3-row w3-container w3-margin-top\">G&auml;ste</div><div class=\"w3-col l1 m6 s6 w3-row w3-container w3-margin-top\"><input style=\"width: 5em\" type=\"number\" name=\"Guests\" id=\"Guests".$this->Index."\" min=\"0\" value=\"".$this->Guests."\" default=\"0\" title=\"G&auml;ste\"/>";
                 $str=$str."</div>";
             }
@@ -439,12 +439,12 @@ class Termin
             $str=$str."<div class=\"w3-col l3\">Ende:</div><div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>";
             $str=$str."</div>";
         }
-        if($this->Abfahrt && $GLOBALS['options']['showTravelTime']) {
+        if($this->Abfahrt && $GLOBALS['optionsDB']['showTravelTime']) {
             $str=$str."<div class=\"w3-container w3-row w3-margin\">";
             $str=$str."<div class=\"w3-col l3\">Abfahrt:</div><div class=\"w3-col l9\"><b>".sql2time($this->Abfahrt)."</b></div>";
             $str=$str."</div>";
         }
-        if($GLOBALS['options']['showVehicle']) {
+        if($GLOBALS['optionsDB']['showVehicle']) {
             $str=$str."<div class=\"w3-container w3-row w3-margin\">";
             $str=$str."<div class=\"w3-col l3\">Anfahrt mit:</div><div class=\"w3-col l9\"><b>".$this->vName."</b></div>";
             $str=$str."</div>";
@@ -488,7 +488,7 @@ class Termin
     }
     public function getResponseLine($filterregister) {
         if($this->vName == "Bus") {
-            $cols = (int)$GLOBALS['options']['showChildOption']+(int)$GLOBALS['options']['showGuestOption']+2;
+            $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
             $bus=true;
         }
         else {
@@ -521,7 +521,7 @@ class Termin
                 );
             }
             else {
-                if($GLOBALS['options']['showConductor']) {
+                if($GLOBALS['optionsDB']['showConductor']) {
                     $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
                     $GLOBALS['dbprefix']
                     );
@@ -581,7 +581,7 @@ ORDER BY `Nachname`, `Vorname`",
                         $antwort='ja';
                         $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
                         $actcol=2;
-                        if($GLOBALS['options']['showChildOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                             $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Children'] > 0) {
                                 $whoYes=$whoYes."+ ".$row2['Children'];
@@ -589,7 +589,7 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoYes=$whoYes."</div>";
                             $actcol++;
                         }
-                        if($GLOBALS['options']['showGuestOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                             $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Guests'] > 0) {
                                 $whoYes=$whoYes."+ ".$row2['Guests'];
@@ -604,11 +604,11 @@ ORDER BY `Nachname`, `Vorname`",
                         $antwort='nein';
                         $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnNo']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
                         $actcol=2;
-                        if($GLOBALS['options']['showChildOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                             $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
                             $actcol++;
                         }
-                        if($GLOBALS['options']['showGuestOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                             $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
                         }
                         $whoNo=$whoNo."</div>\n";
@@ -621,7 +621,7 @@ ORDER BY `Nachname`, `Vorname`",
                         $antwort='vielleicht';
                         $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
                         $actcol=2;
-                        if($GLOBALS['options']['showChildOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Children'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row2['Children'];
@@ -629,7 +629,7 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
-                        if($GLOBALS['options']['showGuestOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Guests'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row2['Guests'];
@@ -654,14 +654,14 @@ ORDER BY `Nachname`, `Vorname`",
                 }
             }
             if(!$filterregister) {
-            if($bus && $GLOBALS['options']['showChildOption']) {
+            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div></div>\n";
             }
-            if($bus && $GLOBALS['options']['showGuestOption']) {
+            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div></div>\n";
             }
             $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\"><b>Summe</b></div><div class=\"w3-col l2 m2 s2\"><b>".$sall;
-            if($bus && ($GLOBALS['options']['showChildOption'] || $GLOBALS['options']['showGuestOption'])) {
+            if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
                 $str=$str."+".($childrenYes+$childrenMaybe+$guestsYes+$guestsMaybe);
             }
             $str=$str." / ".sprintf("%02d", $snReg)."</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($sja+$childrenYes+$guestsYes)."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($svielleicht+$childrenMaybe+$guestsMaybe)."</div></div>\n";
@@ -694,7 +694,7 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
                     $antwort='ja';
                     $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                     $actcol=2;
-                    if($GLOBALS['options']['showChildOption'] && $bus) {
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                         $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                         if($row['Children'] > 0) {
                             $whoYes=$whoYes."+ ".$row['Children'];
@@ -702,7 +702,7 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
                         $whoYes=$whoYes."</div>";
                         $actcol++;
                     }
-                    if($GLOBALS['options']['showGuestOption'] && $bus) {
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                         $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                         if($row['Guests'] > 0) {
                             $whoYes=$whoYes."+ ".$row['Guests'];
@@ -717,11 +717,11 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
                     $antwort='nein';
                         $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnNo']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                         $actcol=2;
-                        if($GLOBALS['options']['showChildOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                             $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
                             $actcol++;
                         }
-                        if($GLOBALS['options']['showGuestOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                             $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
                         }
                         $whoNo=$whoNo."</div>\n";
@@ -734,7 +734,7 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
                     $guestsMaybe+=$row['Guests'];
                         $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                         $actcol=2;
-                        if($GLOBALS['options']['showChildOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row['Children'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row['Children'];
@@ -742,7 +742,7 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
-                        if($GLOBALS['options']['showGuestOption'] && $bus) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row['Guests'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row['Guests'];
@@ -756,10 +756,10 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
                     break;
                 }
             }
-            if($bus && $GLOBALS['options']['showChildOption']) {
+            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div></div>\n";
             }
-            if($bus && $GLOBALS['options']['showGuestOption']) {
+            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div></div>\n";
             }
             $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($ja+$childrenYes+$guestsYes)."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($vielleicht+$childrenMaybe+$guestsMaybe)."</div></div>\n";
@@ -776,11 +776,11 @@ WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
 
         $str = $str."<div class=\"w3-container w3-margin-top\"><div class=\"w3-row\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\"><b>Zusagen</b></div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
         $actcol=2;
-        if($GLOBALS['options']['showChildOption'] && $bus) {
+        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
             $str=$str."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">Kinder</div>";
             $actcol++;
         }
-        if($GLOBALS['options']['showGuestOption'] && $bus) {
+        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
             $str=$str."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">G&auml;ste</div>";
         }
         $str=$str."</div></div>\n";
