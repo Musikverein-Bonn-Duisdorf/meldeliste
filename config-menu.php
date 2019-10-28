@@ -2,6 +2,7 @@
 session_start();
 $_SESSION['page']='config';
 include "common/header.php";
+requireAdmin();
 $fill = false;
 if(isset($_POST['save'])) {
     $sql = sprintf('SELECT * FROM `%sconfig`;',
@@ -26,12 +27,18 @@ if(isset($_POST['save'])) {
             );            
             $dbr2 = mysqli_query($conn, $sql);
             sqlerror();
-break;
+            break;
+        case "bool":
+        case "uint":
+        case "int":
+        case "time":
+        case "string":
+        case "color":
         default:
             if(isset($_POST[$row['Parameter']])) {
                 $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
                 $GLOBALS['dbprefix'],
-                $_POST[$row['Parameter']],
+                mysqli_real_escape_string($conn, $_POST[$row['Parameter']]),
                 $row['Parameter']
                 );
                 if($_POST[$row['Parameter']] == $row['Value']) break;
@@ -43,6 +50,21 @@ break;
     }
 }
 ?>
+<script>
+function savePara(Parameter, Value) {
+	if (window.XMLHttpRequest) {
+	    // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+	    xmlhttp=new XMLHttpRequest();
+	}
+	else {
+	    // AJAX mit IE6, IE5
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	var str = "savePara.php?cmd=change&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&para="+Parameter+"&value="+Value;
+	xmlhttp.open("GET",str,true);
+	xmlhttp.send();    
+}
+</script>
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
     <h2>globale Einstellungen</h2>
 </div>
@@ -53,7 +75,7 @@ break;
     <div class="w3-col l4 w3-center"><b>Wert</b></div>
 </div>
 <?php
-    $sql = sprintf('SELECT * FROM `%sconfig`;',
+    $sql = sprintf('SELECT * FROM `%sconfig` ORDER BY `Parameter`;',
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($conn, $sql);
@@ -91,6 +113,30 @@ while($row = mysqli_fetch_array($dbr)) {
     case 'time':
         echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"time\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
         break;
+    case 'int':
+        echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"number\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
+        break;
+    case 'uint':
+        echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"number\" min=\"0\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
+        break;
+    case 'string':
+        echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"text\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
+        break;
+    case 'color':
+        $colors=array("", "w3-red", "w3-pink", "w3-purple", "w3-deep-purple", "w3-indigo", "w3-blue", "w3-light-blue", "w3-aqua", "w3-cyan", "w3-teal", "w3-green", "w3-light-green", "w3-lime", "w3-sand", "w3-khaki", "w3-yellow", "w3-amber", "w3-orange", "w3-deep-orange", "w3-blue-gray", "w3-brown", "w3-light-gray", "w3-gray", "w3-dark-gray", "w3-pale-red", "w3-pale-yellow", "w3-pale-green", "w3-pale-blue", "w3-highway-brown", "w3-highway-red", "w3-highway-orange", "w3-highway-schoolbus", "w3-highway-yellow", "w3-highway-green", "w3-highway-blue");
+        echo "<div class=\"w3-col l4 m4 s12 w3-center w3-dropdown-hover\"><button class=\"w3-button w3-gray\">Farbauswahl</button>";
+        echo "<div class=\"w3-dropdown-content w3-row w3-center w3-border w3-border-black\">";
+        for($i=0; $i<count($colors); $i++) {
+            if($colors[$i] == $row['Value']) {
+                echo "<div class=\"w3-btn w3-col l2 m2 s2 ".$colors[$i]." w3-padding w3-margin-right w3-center w3-border w3-border-black\"><b>".$colors[$i]."</b></div>";
+            }
+            else {
+                echo "<div class=\"w3-btn w3-col l2 m2 s2 ".$colors[$i]." w3-padding w3-margin-right w3-center\" onclick=\"savePara('".$row['Parameter']."', '".$colors[$i]."')\">".$colors[$i]."</div>";
+            }
+        }
+        echo "</div>\n";
+        echo "</div>\n";
+        break;
     default:
         echo "<div class=\"w3-col l4 w3-center\">kein Typ spezifiziert.</div>\n";
         break;
@@ -100,14 +146,6 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="save" value="speichern">
     </form>
-<script>
-function clearInput(name) {
-  var x = document.getElementsByName(name);
-  for(i=0; i<x.length; i++) {
-      x[i].value = '';
-  }
-}
-</script>
       
 <?php
 include "common/footer.php";

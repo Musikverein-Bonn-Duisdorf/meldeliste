@@ -24,7 +24,7 @@ Release: <?php echo "<b>".$GLOBALS['version']['String']."</b> (".$GLOBALS['versi
 		<p>Startseite der Meldeliste - hier werden die n&auml;chsten Termine angezeigt.</p>
 	</li>
 <?php
-if($GLOBALS['options']['showAppmntPage']) {
+if($GLOBALS['optionsDB']['showAppmntPage']) {
     ?>
 	<li>
 		<p><i class="far fa-calendar-alt"></i> - Termine</p>

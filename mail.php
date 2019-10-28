@@ -2,6 +2,7 @@
 session_start();
 $_SESSION['page']='mail';
 include "common/header.php";
+requireAdmin();
 
 $preview=false;
 $memberonly = false;

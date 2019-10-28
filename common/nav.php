@@ -1,12 +1,12 @@
-<div class="w3-container <?php echo $commonColors['Title']; ?>">
-<h1 class="w3-hide-small"><?php echo $site['WebSiteName']; ?></h1>
-<h1 class="w3-hide-large w3-hide-medium"><?php echo $site['WebSiteNameShort']; ?></h1>
+<div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
+<h1 class="w3-hide-small"><?php echo $optionsDB['WebSiteName']; ?></h1>
+<h1 class="w3-hide-large w3-hide-medium"><?php echo $optionsDB['WebSiteNameShort']; ?></h1>
 <p><?php echo $_SESSION['username'] ?></p>
 </div>
 <div class="w3-bar <?php echo $commonColors['navbar']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
-  <a title="Home" alt="Home" href="<?php echo $GLOBALS['site']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="fas fa-home"></i></a>
-<?php if($GLOBALS['options']['showAppmntPage']) { ?>
+  <a title="Home" alt="Home" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="fas fa-home"></i></a>
+<?php if($GLOBALS['optionsDB']['showAppmntPage']) { ?>
      <a title="Termine" alt="Termine" href="termine.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('termine');?>"><i class="far fa-calendar-alt"></i></a>
 <?php } ?>
   <a title="Mein Register" alt="Mein Register" href="mein-register.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinregister');?>"><i class="fas fa-users"></i></a>
@@ -25,10 +25,10 @@
     <a title="im Auftrag melden" alt="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('public-entry');?>">im Auftrag melden</a>
     <a title="Musikerliste" alt="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('musiker');?>">Musikerliste</a>
     <a title="Registerübersicht" alt="Registerübersicht" href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('register');?>">Registerübersicht</a>
-<?php if($GLOBALS['options']['showMembers']) { ?>
+<?php if($GLOBALS['optionsDB']['showMembers']) { ?>
 <a title="Mitgliederliste" alt="Mitgliederliste" href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mitglied');?>">Mitgliederliste</a>
 <?php } ?>
-<?php if($GLOBALS['options']['showNonMembers']) { ?>
+<?php if($GLOBALS['optionsDB']['showNonMembers']) { ?>
          <a title="Nicht-Mitgliederliste" alt="Nicht-Mitgliederliste" href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('nomitglied');?>">Nicht-Mitgliederliste</a>
 <?php } ?>
          <a title="neuen Musiker anlegen" alt="neuen Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>">neuen Musiker anlegen</a>
@@ -39,7 +39,7 @@
 	</div>
     </div>
 <?php } ?>
-    <a title="Homepage des Musikvereins" alt="Homepage des Musikvereins" href="<?php echo $site['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank"><img src="<?php echo $site['favicon']; ?>" /> Vereinshomepage</a>
+    <a title="Homepage des Vereins" alt="Homepage des Vereins" href="<?php echo $optionsDB['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank"><img src="<?php echo $optionsDB['favicon']; ?>" /> Vereinshomepage</a>
     <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-info"></i></a>
     <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>

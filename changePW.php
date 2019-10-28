@@ -25,11 +25,11 @@ if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
         die("<div class=\"w3-panel ".$GLOBALS['commonColors']['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
                   }
  ?>
-    <title><?php echo $site['WebSiteName']; ?></title>
+    <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>
-  <body class="<?php echo $GLOBALS['commonColors']['bgcolor']; ?>">
-    <div class="w3-container <?php echo $commonColors['Title']; ?>">
-      <h1><?php echo $site['WebSiteName']; ?></h1>
+  <body class="<?php echo $GLOBALS['optionsDB']['ColorBackground']; ?>">
+    <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
+      <h1><?php echo $optionsDB['WebSiteName']; ?></h1>
     </div>
     <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
       <h2>Passwort ändern</h2>

@@ -2,6 +2,7 @@
 session_start();
 $_SESSION['page']='mitglied';
 include "common/header.php";
+requireAdmin();
 
 if($_SESSION['admin']) {
     $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0;',

@@ -2,6 +2,7 @@
 session_start();
 $_SESSION['page']='log';
 include "common/header.php";
+requireAdmin();
 /* $sql = sprintf('SELECT * FROM `User`;'); */
 /* $dbr = mysqli_query($conn, $sql); */
 /* sqlerror(); */

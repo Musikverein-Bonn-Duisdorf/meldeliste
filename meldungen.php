@@ -2,6 +2,7 @@
 session_start();
 $_SESSION['page']='meldungen';
 include "common/header.php";
+requireAdmin();
 
 ?>
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
