@@ -304,7 +304,7 @@ class User
         echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "</div>";
+        echo "</div>\n";
         ?>
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
         <div class="w3-modal-content">
