@@ -68,8 +68,17 @@ function savePara(Parameter, Value) {
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
     <h2>globale Einstellungen</h2>
 </div>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['Warning']; ?>">
-<p class="w3-center w3-large"><i class="fas fa-exclamation-triangle"></i><b> Achtung, &Auml;nderungen dieser Einstellungen wirken sich auf alle Nutzer aus. </b><i class="fas fa-exclamation-triangle"></i></p>
+<div class="w3-container w3-card w3-margin w3-padding <?php echo $GLOBALS['commonColors']['Warning']; ?>">
+  <div class="w3-col l3 m3 s2 w3-center">
+    <i class="fas fa-exclamation-triangle"></i>
+</div>
+  <div class="w3-col l6 m6 s8 w3-center">
+<b> Achtung, &Auml;nderungen dieser Einstellungen wirken sich auf alle Nutzer aus. </b>
+</div>
+
+  <div class="w3-col l3 m3 s2 w3-center">
+    <i class="fas fa-exclamation-triangle"></i>
+</div>
 </div>
 <form action="config-menu.php" method="POST">
 <div class="w3-container w3-padding w3-border-bottom w3-border-black">
@@ -153,7 +162,7 @@ while($row = mysqli_fetch_array($dbr)) {
     echo "</div>";
 }
 ?>
-<input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="save" value="speichern">
+<button class="w3-btn w3-padding <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="save" value="speichern" >speichern</button>
     </form>
       
 <?php
