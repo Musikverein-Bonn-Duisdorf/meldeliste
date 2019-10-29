@@ -48,7 +48,7 @@ if($edit != 2) {
 <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
 <?php
 }
-if($n->login || $edit == 3) {
+if($fill && ($n->login || $edit == 3)) {
 ?>
 <label class="w3-text-gray">neues Passwort (optional)</label>
 <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
