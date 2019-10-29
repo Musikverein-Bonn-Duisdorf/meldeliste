@@ -1,4 +1,4 @@
-['optionsDB']['ColorBackground']<?php
+<?php
 session_start();
 ?>
 <!DOCTYPE html>
