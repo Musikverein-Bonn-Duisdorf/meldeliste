@@ -109,7 +109,7 @@ class Usermail {
         $i=0;
         while($row = mysqli_fetch_array($dbr)) {
             $anrede = "Hallo ".$row['Vorname'].",";
-            $link= $GLOBALS['site']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
+            $link= $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
             $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 

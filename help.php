@@ -10,7 +10,7 @@ include "common/header.php";
 Release: <?php echo "<b>".$GLOBALS['version']['String']."</b> (".$GLOBALS['version']['Date'].")"; ?>
 </div>
 <div class="w3-container w3-margin-top">
-<a href="mailto:<?php echo $GLOBALS['site']['AdminEmail']; ?>">Nachricht an Admin</a>
+<a href="mailto:<?php echo $GLOBALS['optionsDB']['AdminEmail']; ?>">Nachricht an Admin</a>
 </div>
 
 <div class="w3-container w3-margin-top"><p><b>Kurzanleitung:</b></p>
