@@ -68,6 +68,9 @@ function savePara(Parameter, Value) {
 <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
     <h2>globale Einstellungen</h2>
 </div>
+<div class="w3-container <?php echo $GLOBALS['commonColors']['Warning']; ?>">
+<p class="w3-center w3-large"><i class="fas fa-exclamation-triangle"></i><b> Achtung, &Auml;nderungen dieser Einstellungen wirken sich auf alle Nutzer aus. </b><i class="fas fa-exclamation-triangle"></i></p>
+</div>
 <form action="config-menu.php" method="POST">
 <div class="w3-container w3-padding w3-border-bottom w3-border-black">
     <div class="w3-col l3"><b>Parameter</b></div>
