@@ -65,7 +65,7 @@ function savePara(Parameter, Value) {
 	xmlhttp.send();    
 }
 </script>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>globale Einstellungen</h2>
 </div>
 <div class="w3-container w3-card w3-margin w3-padding <?php echo $GLOBALS['commonColors']['Warning']; ?>">
@@ -93,7 +93,7 @@ function savePara(Parameter, Value) {
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
-    echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black\">\n";
+    echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['commonColors']['Hover']."\">\n";
     echo "<div class=\"w3-col l3 m3 s12\"><b>".$row['Parameter']."</b></div><div class=\"w3-col l5 m5 s12\">".$row['Description']."</div>\n";
     switch($row['Type']) {
     case 'bool':
@@ -142,7 +142,7 @@ while($row = mysqli_fetch_array($dbr)) {
         break;
     case 'color':
         $colors=array("", "w3-red", "w3-pink", "w3-purple", "w3-deep-purple", "w3-indigo", "w3-blue", "w3-light-blue", "w3-aqua", "w3-cyan", "w3-teal", "w3-green", "w3-light-green", "w3-lime", "w3-sand", "w3-khaki", "w3-yellow", "w3-amber", "w3-orange", "w3-deep-orange", "w3-blue-gray", "w3-brown", "w3-light-gray", "w3-gray", "w3-dark-gray", "w3-pale-red", "w3-pale-yellow", "w3-pale-green", "w3-pale-blue", "w3-highway-brown", "w3-highway-red", "w3-highway-orange", "w3-highway-schoolbus", "w3-highway-yellow", "w3-highway-green", "w3-highway-blue");
-        echo "<div class=\"w3-col l4 m4 s12 w3-center w3-dropdown-hover\"><button class=\"w3-button w3-gray\">Farbauswahl</button>";
+        echo "<div class=\"w3-col l4 m4 s12 w3-center w3-dropdown-hover\"><button class=\"w3-button ".$GLOBALS['commonColors']['BtnEdit']."\">Farbauswahl</button>";
         echo "<div class=\"w3-dropdown-content w3-row w3-center w3-border w3-border-black\">";
         for($i=0; $i<count($colors); $i++) {
             if($colors[$i] == $row['Value']) {

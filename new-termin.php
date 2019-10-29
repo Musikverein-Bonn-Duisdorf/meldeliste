@@ -12,7 +12,7 @@ if(isset($_POST['id'])) {
     }
 }
 ?>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>neuen Termin erstellen</h2>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">

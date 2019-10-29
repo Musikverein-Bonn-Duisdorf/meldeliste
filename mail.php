@@ -36,7 +36,7 @@ if(isset($_POST['send'])) {
     $mail->send($text);
 }
 ?>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Email versenden</h2>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s1 m1 l4">

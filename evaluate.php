@@ -4,7 +4,7 @@ $_SESSION['page']='evaluate';
 include "common/header.php";
 requireAdmin();
 ?>
-<div id="header" class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Datenauswertung</h2>
 </div>
 <?php

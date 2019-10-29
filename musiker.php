@@ -48,7 +48,7 @@ sqlerror();
 $row = mysqli_fetch_array($dbr);
 $nMusiker = $row['Count'];
 ?>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
 <?php
