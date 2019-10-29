@@ -7,7 +7,7 @@ requireAdmin();
 /* $dbr = mysqli_query($conn, $sql); */
 /* sqlerror(); */
 ?>
-<div id="header" class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Log</h2>
 </div>
 <?php

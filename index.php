@@ -47,10 +47,10 @@ function melde(user, termin, wert, Children, Guests) {
 	xmlhttp.send();
     }
 </script>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar'] ;?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
 <h2>Home</h2>
 </div>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar'] ;?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
 <h3>Bevorstehende Termine</h3>
 </div>
 <?php

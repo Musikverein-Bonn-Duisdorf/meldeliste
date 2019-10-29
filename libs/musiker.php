@@ -309,7 +309,7 @@ class User
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
         <div class="w3-modal-content">
 
-        <header class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>"> 
+        <header class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>"> 
       <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
       class="w3-button w3-display-topright">&times;</span>
       <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>

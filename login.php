@@ -50,7 +50,7 @@ session_start();
 	    <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 	    </div>
 	    <div class="w3-panel w3-mobile w3-center w3-border w3-col s6 l4">
-                 <div class="w3-panel <?php echo $GLOBALS['commonColors']['titlebar']; ?> w3-mobile">
+                 <div class="w3-panel <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?> w3-mobile">
 		    <h2>Login</h2>
 		</div>
 		<form class="w3-container" action="" method="POST">

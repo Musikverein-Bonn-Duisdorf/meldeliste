@@ -31,7 +31,7 @@ if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
     <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
       <h1><?php echo $optionsDB['WebSiteName']; ?></h1>
     </div>
-    <div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+    <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <h2>Passwort ändern</h2>
     </div>
     <div class="w3-panel w3-mobile w3-center w3-col s3 l4">

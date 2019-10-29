@@ -257,7 +257,7 @@ class Termin
         if($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption']) {
             $colsize=3;
         }
-        $str="<div class=\"w3-container ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3></div>";
+        $str="<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\"><h3>".$this->Name."</h3></div>";
         $sumJa=0;
         $sumJaG=0;
         $sumJaC=0;
@@ -423,7 +423,7 @@ class Termin
 
         $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
         $str=$str."<div class=\"w3-modal-content\">";
-        $str=$str."<header class=\"w3-container ".$GLOBALS['commonColors']['titlebar']."\">";
+        $str=$str."<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">";
         $str=$str."<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\""; 
         $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
         $str=$str."<h2>".$this->Name."</h2>";
@@ -508,7 +508,7 @@ class Termin
             break;
         }
 
-        $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['commonColors']['titlebar']."\"><h3>".$this->Name."</h3><p>".germanDate($this->Datum, 1)."</p></div>\n";
+        $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['optionsDB']['colorTitleBar']."\"><h3>".$this->Name."</h3><p>".germanDate($this->Datum, 1)."</p></div>\n";
         $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-border-bottom w3-border-black\">\n";
         $whoYes = '';
         $whoNo = '';
@@ -766,7 +766,7 @@ ORDER BY `Nachname`, `Vorname`",
 
         $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
         $str=$str."<div class=\"w3-modal-content\">";
-        $str=$str."<header class=\"w3-container ".$GLOBALS['commonColors']['titlebar']."\">";
+        $str=$str."<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">";
         $str=$str."<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\""; 
         $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
         $str=$str."<h2>".$this->Name."</h2>";

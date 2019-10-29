@@ -4,7 +4,7 @@ $_SESSION['page']='meinregister';
 include "common/header.php";
 
 ?>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Mein Register</h2>
 </div>
       <div class="w3-row">
