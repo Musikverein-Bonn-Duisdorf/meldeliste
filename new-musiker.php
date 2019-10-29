@@ -104,6 +104,7 @@ if($n->login || $edit == 3) {
       ?>
     <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
     <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
+    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="newmail" value="Email mit Link senden">
     <?php
 }
       ?>

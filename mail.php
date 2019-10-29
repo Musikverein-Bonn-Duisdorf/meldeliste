@@ -16,7 +16,7 @@ if(isset($_POST['preview']) || isset($_POST['send'])) {
         $gruss = "Viele Grüße\nder Vorstand";
     }
     elseif($_POST['gruss'] == 3) {
-        $gruss = "Viele Grüße\n".$GLOBALS['commonStrings']['MailGreetings'];
+        $gruss = "Viele Grüße\n".$GLOBALS['optionsDB']['MailGreetings'];
     }
     $text = $_POST['Text']."\n\n".$gruss;
     $anrede = "Hallo {VORNAME},";
@@ -91,7 +91,7 @@ else {
     <select class="w3-select w3-margin-bottom" name="gruss">
       <option value="1" <?php if($preview && $_POST['gruss']==1) echo "selected"; ?>>Viele Grüße, <?php echo $_SESSION['Vorname']; ?></option>
       <option value="2" <?php if($preview && $_POST['gruss']==2) echo "selected"; ?>>Viele Grüße, der Vorstand</option>
-      <option value="3" <?php if($preview && $_POST['gruss']==3) echo "selected"; ?>>Viele Grüße, <?php echo $GLOBALS['commonStrings']['MailGreetings']; ?></option>
+      <option value="3" <?php if($preview && $_POST['gruss']==3) echo "selected"; ?>>Viele Grüße, <?php echo $GLOBALS['optionsDB']['MailGreetings']; ?></option>
     </select>
     <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
     <?php if($preview) { ?>

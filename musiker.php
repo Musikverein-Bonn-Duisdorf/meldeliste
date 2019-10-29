@@ -27,6 +27,14 @@ if(isset($_POST['passwd'])) {
         $n->passwd("");
     }
 }
+if(isset($_POST['newmail'])) {
+    $n = new User;
+    $n->load_by_id($_POST['Index']);
+    $n->fill_from_array($_POST);
+    if($_POST['Index'] > 0) {
+        $n->newmail("");
+    }
+}
 if($_SESSION['admin']) {
     $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins";',
     $GLOBALS['dbprefix'],

@@ -35,7 +35,7 @@ case "newAppmnts":
     if($i) {
         $mail = new Usermail;
         $mail->subject("neue Termine");
-        $mail->send($text.$Appmnts."\n".$GLOBALS['commonStrings']['MailGreetings']);
+        $mail->send($text.$Appmnts."\n".$GLOBALS['optionsDB']['MailGreetings']);
     }
     break;
 case "tomorrow":
@@ -117,7 +117,7 @@ case "reminder":
             else {
                 $body = "Es fehlen noch ".$missing." R&uuml;ckmeldungen von dir.\n\n";
             }
-            $mail->singleUser($u->Index, $GLOBALS['commonStrings']['MailReminderSubject'], $GLOBALS['commonStrings']['MailReminderBody']."\n".$body.$GLOBALS['commonStrings']['MailGreetings']);
+            $mail->singleUser($u->Index, $GLOBALS['commonStrings']['MailReminderSubject'], $GLOBALS['commonStrings']['MailReminderBody']."\n".$body.$GLOBALS['optionsDB']['MailGreetings']);
         }
     }
     break;

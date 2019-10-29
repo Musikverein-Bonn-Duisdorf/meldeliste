@@ -147,6 +147,10 @@ class User
             $_SESSION['singleUsePW'] = (bool)$val;
         }
     }
+    public function newmail() {
+        $mail = new Usermail;
+        $mail->singleUser($this->Index, $GLOBALS['optionsDB']['newMailSubject'], $GLOBALS['optionsDB']['newMailText']."\n".$GLOBALS['optionsDB']['MailGreetings']);
+    }
     public function passwd($password) {
         if(!$this->login) {
             return false;
