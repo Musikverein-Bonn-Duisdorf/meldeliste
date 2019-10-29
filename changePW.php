@@ -11,7 +11,7 @@ include 'common/include.php';
     <!-- successfully included php libraries -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
+    <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
 <?php
 if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
     $user = new User;

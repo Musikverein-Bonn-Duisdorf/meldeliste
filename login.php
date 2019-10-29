@@ -10,7 +10,7 @@ session_start();
 	<?php
         include 'common/include.php';
 	?>
-    <link rel="icon" href="<?php echo $GLOBALS['site']['favicon']; ?>" type="image/x-icon">
+    <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
 	<!-- successfully included php libraries -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
