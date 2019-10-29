@@ -5,7 +5,7 @@ include "common/header.php";
 requireAdmin();
 
 ?>
-<div class="w3-container <?php echo $GLOBALS['commonColors']['titlebar']; ?>">
+<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Rückmeldungen</h2>
 </div>
       <div class="w3-row">

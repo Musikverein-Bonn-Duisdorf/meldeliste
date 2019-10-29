@@ -576,12 +576,11 @@ ORDER BY `Nachname`, `Vorname`",
                     case 1:
                         $ja++;
                         $sja++;
-                        $childrenYes+=$row2['Children'];
-                        $guestsYes+=$row2['Guests'];
                         $antwort='ja';
                         $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
                         $actcol=2;
-                        if(($GLOBALS['optionsDB']['showChildOption'] && $bus) || $row2['Children']) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $childrenYes+=$row2['Children'];
                             $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Children'] > 0) {
                                 $whoYes=$whoYes."+ ".$row2['Children'];
@@ -589,7 +588,8 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoYes=$whoYes."</div>";
                             $actcol++;
                         }
-                        if(($GLOBALS['optionsDB']['showGuestOption'] && $bus) || $row2['Guests']) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $guestsYes+=$row2['Guests'];
                             $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Guests'] > 0) {
                                 $whoYes=$whoYes."+ ".$row2['Guests'];
@@ -616,12 +616,11 @@ ORDER BY `Nachname`, `Vorname`",
                     case 3:
                         $vielleicht++;
                         $svielleicht++;
-                        $childrenMaybe+=$row2['Children'];
-                        $guestsMaybe+=$row2['Guests'];
                         $antwort='vielleicht';
                         $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
                         $actcol=2;
-                        if(($GLOBALS['optionsDB']['showChildOption'] && $bus) || $row2['Children']) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $childrenMaybe+=$row2['Children'];
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Children'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row2['Children'];
@@ -629,7 +628,8 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
-                        if(($GLOBALS['optionsDB']['showGuestOption'] && $bus) || $row2['Guests']) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $guestsMaybe+=$row2['Guests'];
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Guests'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row2['Guests'];
@@ -654,14 +654,14 @@ ORDER BY `Nachname`, `Vorname`",
                 }
             }
             if(!$filterregister) {
-                if(($bus && $GLOBALS['optionsDB']['showChildOption']) || $childrenYes || $childrenMaybe) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div></div>\n";
+                if($bus && $GLOBALS['optionsDB']['showChildOption']) {
+                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div></div>\n";
             }
-                if(($bus && $GLOBALS['optionsDB']['showGuestOption']) || $guestsYes || $guestsMaybe) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div></div>\n";
+                if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
+                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div></div>\n";
             }
             $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['commonColors']['Hover']." w3-col l7 m4 s4\"><b>Summe</b></div><div class=\"w3-col l2 m2 s2\"><b>".$sall;
-            if(($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) || $childrenYes || $childrenMaybe || $guestsYes || $guestsMaybe) {
+            if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
                 $str=$str."+".($childrenYes+$childrenMaybe+$guestsYes+$guestsMaybe);
             }
             $str=$str." / ".sprintf("%02d", $snReg)."</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($sja+$childrenYes+$guestsYes)."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($svielleicht+$childrenMaybe+$guestsMaybe)."</div></div>\n";
@@ -687,12 +687,11 @@ ORDER BY `Nachname`, `Vorname`",
                 switch($row['Wert']) {
                 case 1:
                     $ja++;
-                    $childrenYes+=$row['Children'];
-                    $guestsYes+=$row['Guests'];
                     $antwort='ja';
                     $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                     $actcol=2;
-                    if(($GLOBALS['optionsDB']['showChildOption'] && $bus) || $row['Children']) {
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                        $childrenYes+=$row['Children'];
                         $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                         if($row['Children'] > 0) {
                             $whoYes=$whoYes."+ ".$row['Children'];
@@ -700,7 +699,8 @@ ORDER BY `Nachname`, `Vorname`",
                         $whoYes=$whoYes."</div>";
                         $actcol++;
                     }
-                    if(($GLOBALS['optionsDB']['showGuestOption'] && $bus) || $row['Guests']) {
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                        $guestsYes+=$row['Guests'];
                         $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                         if($row['Guests'] > 0) {
                             $whoYes=$whoYes."+ ".$row['Guests'];
@@ -732,7 +732,7 @@ ORDER BY `Nachname`, `Vorname`",
                     $guestsMaybe+=$row['Guests'];
                         $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['commonColors']['AppmntBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div><div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                         $actcol=2;
-                        if(($GLOBALS['optionsDB']['showChildOption'] && $bus) || $row['Children']) {
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row['Children'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row['Children'];
@@ -740,7 +740,7 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
-                        if(($GLOBALS['optionsDB']['showGuestOption'] && $bus) || $row['Guests']) {
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row['Guests'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row['Guests'];
@@ -754,10 +754,10 @@ ORDER BY `Nachname`, `Vorname`",
                     break;
                 }
             }
-            if(($bus && $GLOBALS['optionsDB']['showChildOption']) || $childrenYes || $childrenMaybe) {
+            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div></div>\n";
             }
-            if(($bus && $GLOBALS['optionsDB']['showGuestOption']) || $guestsYes || $guestsMaybe) {
+            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div></div>\n";
             }
             $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div><div class=\"".$GLOBALS['commonColors']['AppmntBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($ja+$childrenYes+$guestsYes)."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div><div class=\"".$GLOBALS['commonColors']['AppmntBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($vielleicht+$childrenMaybe+$guestsMaybe)."</div></div>\n";
