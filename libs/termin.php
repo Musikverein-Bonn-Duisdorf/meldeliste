@@ -312,6 +312,15 @@ class Termin
             $str=$str."\t\t<div class=\"w3-col l".(2*$colsize)." m".(2*$colsize)." s".(2*$colsize)."\"><b>".$sumV." + ".$sumVC." K + ".$sumVG." G = ".($sumV+$sumVC+$sumVG)."</b></div>";
             $str=$str."\t</div>";
         }
+        else {
+            $str=$str."\t\t<div class=\"w3-col l".(2*$colsize)." m".(2*$colsize)." s".(2*$colsize)."\"><b>".$sumJa."</b></div>";
+            $str=$str."\t</div>";
+            $str=$str."\t<div class=\"w3-row w3-container ".$GLOBALS['commonColors']['AppmntMaybe']." w3-border-bottom w3-border-black w3-mobile\">";
+            $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\">&nbsp;</div>";
+            $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\"><b>&nbsp;</b></div>";
+            $str=$str."\t\t<div class=\"w3-col l".(2*$colsize)." m".(2*$colsize)." s".(2*$colsize)."\"><b>".$sumV."</b></div>";
+            $str=$str."\t</div>";
+        }
         $str=$str."\t</div>";
         $str=$str."</div>";
         return $str;
