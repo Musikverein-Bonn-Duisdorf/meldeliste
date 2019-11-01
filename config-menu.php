@@ -68,7 +68,7 @@ function savePara(Parameter, Value) {
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>globale Einstellungen</h2>
 </div>
-<div class="w3-container w3-card w3-margin w3-padding <?php echo $GLOBALS['commonColors']['Warning']; ?>">
+<div class="w3-container w3-card w3-margin w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
 </div>

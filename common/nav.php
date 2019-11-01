@@ -39,7 +39,7 @@
 	</div>
     </div>
 <?php } ?>
-    <a title="Homepage des Vereins" alt="Homepage des Vereins" href="<?php echo $optionsDB['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank"><img src="<?php echo $optionsDB['favicon']; ?>" /> Vereinshomepage</a>
+    <a title="Homepage des Vereins" alt="Homepage des Vereins" href="<?php echo $optionsDB['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $commonColors['navmainpage']; ?>" target="_blank"><img src="<?php echo $optionsDB['MasterPageIcon']; ?>" /> Vereinshomepage</a>
     <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-info"></i></a>
     <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $commonColors['navlogout']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>
