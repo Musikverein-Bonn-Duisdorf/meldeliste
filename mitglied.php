@@ -17,7 +17,7 @@ $nMusiker = $row['Count'];
     <h2>Liste aller aktiven Mitglieder (<?php echo $nMusiker; ?>)</h2>
 </div>
 <?php
-$sql = sprintf('SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;',
+$sql = sprintf('SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
 $GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);

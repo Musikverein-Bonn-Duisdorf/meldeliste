@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -20,6 +20,7 @@ class User
         case 'RegisterLead':
         case 'LastLogin':
         case 'Joined':
+        case 'Deleted':
             return $this->_data[$key];
             break;
         default:
@@ -59,15 +60,10 @@ class User
             $this->_data[$key] = trim($val);
             break;
 	    case 'getMail':
-            $this->_data[$key] = (bool) $val;
-            break;
 	    case 'Admin':
-            $this->_data[$key] = (bool) $val;
-            break;
 	    case 'singleUsePW':
-            $this->_data[$key] = (bool) $val;
-            break;
 	    case 'RegisterLead':
+	    case 'Deleted':
             $this->_data[$key] = (bool)$val;
             break;
 	    case 'LastLogin':
@@ -260,7 +256,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `%sUser` WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1 WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
