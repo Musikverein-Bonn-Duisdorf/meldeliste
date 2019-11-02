@@ -28,13 +28,13 @@ else {
     $disabled = '';
 }
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+<div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Profil bearbeiten</h2>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
-<div class="w3-panel w3-mobile w3-center w3-border w3-col s6 l4">
-  <form class="w3-container w3-margin" action="musiker.php" method="POST">
+<div class="w3-card <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile w3-center w3-border w3-padding w3-col s6 l4">
+  <form action="musiker.php" method="POST">
     <label>Vorname</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".$n->Vorname."\" ".$disabled; ?>>
     <label>Nachname</label>
@@ -68,7 +68,7 @@ if($fill && ($n->login || $edit == 3)) {
   }
 ?>
     </select>
-    <div class="w3-container w3-mobile w3-margin-bottom w3-left">
+    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="getMail" value="0">
       <input class="w3-check" type="checkbox" name="getMail" value="1" <?php if($fill && (bool)$n->getMail) echo "checked "; ?>>
       <label>Mailverteiler</label>
@@ -76,18 +76,18 @@ if($fill && ($n->login || $edit == 3)) {
     <?php
       if($_SESSION['admin']) {
       ?>
-    <div class="w3-container w3-mobile w3-left">
+    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="Mitglied" value="0">
       <input class="w3-check" type="checkbox" name="Mitglied" value="1" <?php if($fill && (bool)$n->Mitglied){ echo "checked ";} ?>>
       <label>Mitglied</label>
     </div>
-    <div class="w3-container w3-mobile w3-margin-bottom w3-left">
+    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="Admin" value="0">
       <input class="w3-check" type="checkbox" name="Admin" value="1" <?php if($fill && (bool)$n->Admin) echo "checked "; ?>>
       <label>Admin</label>
     </div>
 <?php   if($GLOBALS['optionsDB']['showRegisterLead']) { ?>
-    <div class="w3-container w3-mobile w3-margin-bottom w3-left">
+    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="RegisterLead" value="0">
       <input class="w3-check" type="checkbox" name="RegisterLead" value="1" <?php if($fill && (bool)$n->RegisterLead) echo "checked "; ?>>
       <label>Registerführer</label>
@@ -97,22 +97,47 @@ if($fill && ($n->login || $edit == 3)) {
       }
       ?>
     <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
-    <div class="w3-container w3-mobile">
-    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="insert" value="speichern">
+    <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="insert" value="speichern">
     <?php
       if($fill && $edit != 2) {
       ?>
-    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="delete" value="löschen">
-    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
-    <input class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-margin w3-mobile" type="submit" name="newmail" value="Email mit Link senden">
+    <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
+    <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="newmail" value="Email mit Link senden">
     <?php
 }
       ?>
-    </div>
   </form>
+<button class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
+
+<div id="delmodal" class="w3-modal">
+  <div class="w3-modal-content w3-card">
+    <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+      <span onclick="document.getElementById('delmodal').style.display='none'" 
+      class="w3-button w3-display-topright">&times;</span>
+<h2>L&ouml;schen best&auml;tigen</h2>
+</header>
+    <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo $n->Vorname." ".$n->Nachname; ?></b> l&ouml;schen wollen?</div>
+<div class="w3-container w3-mobile">
+<form action="musiker.php" method="POST">
+  <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
+				     <div class="w3-row">
+				     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+				       <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
+	 <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+</div>
+	 </form>
+				     <div class="w3-row">
+	 <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+	   <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='none'">nein</button>
+				     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+	 </div>
+	 </div>
+	   </div>
+	   </div>
+	 <div class="w3-row">&nbsp;</div>
 <?php
 include "common/footer.php";
 ?>

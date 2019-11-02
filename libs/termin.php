@@ -414,7 +414,7 @@ class Termin
         $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"3\" onclick=\"melde(".$user.", ".$this->Index.", 3, ".(int)$this->Children.", ".(int)$this->Guests.")\"><b>?</b></button>";
         /* $str=$str."</form>"; */
         $str=$str."</div>";
-        if($_SESSION['admin']) {
+        if($_SESSION['admin'] && $GLOBALS['optionsDB']['statusPerMail']) {
             $str=$str."<button class=\"w3-btn ".$GLOBALS['commonColors']['submit']." w3-border w3-border-black w3-col l1 m12 s12 w3-row w3-margin-top\" onclick=\"getStatus(".$user.", ".$this->Index.")\">Status per Mail</button>";
         }
         if(($GLOBALS['optionsDB']['showGuestOption'] || $GLOBALS['optionsDB']['showChildOption']) && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == "Bus") {
