@@ -1,7 +1,9 @@
 <?php
 session_start();
 $_SESSION['page']='home';
+$_SESSION['adminpage']=true;
 include "common/header.php";
+requireAdmin();
 
 $state = 1;
 
