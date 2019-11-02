@@ -81,7 +81,7 @@ class Usermail {
         $style=$style.file_get_contents("styles/w3-colors-highway.css");
         $register = '';
         if($this->User > 0) {
-            $sql = sprintf("SELECT * FROM `%sUser` WHERE `Index` = %d;",
+            $sql = sprintf("SELECT * FROM `%sUser` WHERE `Index` = %d AND `Deleted` != 1;",
             $GLOBALS['dbprefix'],
             $this->User);
         }
@@ -90,14 +90,14 @@ class Usermail {
                 $register = sprintf("AND `Register` = %d", $this->register);
             }
             if($this->memberonly) {
-                $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 %s;",
+                $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1 %s;",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $register);
             }
             else {
-                $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' %s;",
+                $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1 %s;",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
