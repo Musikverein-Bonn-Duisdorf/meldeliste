@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='meinregister';
+$_SESSION['adminpage']=false;
 include "common/header.php";
 
 ?>

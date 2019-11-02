@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='help';
+$_SESSION['adminpage']=false;
 include "common/header.php";
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">

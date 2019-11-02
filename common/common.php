@@ -2,7 +2,7 @@
 $commonStrings = array(
     'newPWSubject' => "neues Passwort wurde generiert",
     'PWChangeSubject' => "neues Passwort wurde gespeichert",
-    'newPWText' => "ein neues Passwort wurde erstellt. Beim nächsten Login wirst du aufgefordert, dieses zu ändern.\nDu kannst dich nun unter\n\n<a href=\"".$GLOBALS['site']['WebSiteURL']."\">".$GLOBALS['site']['WebSiteURL']."</a>\n\neinloggen.\n\n",
+    'newPWText' => "ein neues Passwort wurde erstellt. Beim nächsten Login wirst du aufgefordert, dieses zu ändern.\nDu kannst dich nun unter\n\n<a href=\"".$GLOBALS['optionsDB']['WebSiteURL']."\">".$GLOBALS['optionsDB']['WebSiteURL']."</a>\n\neinloggen.\n\n",
     'PWChangeText' => "dein neues Passwort wurde gespeichert. Damit ist auch der alte Login-Link ungültig. Bitte nutze ab sofort den Link unter dieser Email.",
     'MailGreetings' => "Dein Musikverein Bonn-Duisdorf",
 );
