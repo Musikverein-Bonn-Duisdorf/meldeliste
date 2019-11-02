@@ -68,7 +68,7 @@ function RegisterOption($val) {
 }
 function getPage($string) {
     if($string == $_SESSION['page']) {
-        echo $GLOBALS['commonColors']['navactive'];
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
     }
     else {
         echo $GLOBALS['commonColors']['navinactive'];
@@ -76,8 +76,8 @@ function getPage($string) {
 }
 
 function getAdminPage($string) {
-    if($string == $_SESSION['page']) {
-        echo $GLOBALS['commonColors']['navactive'];
+    if($string == $_SESSION['page'] && $_SESSION['adminpage']) {
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
     }
     else {
         echo $GLOBALS['commonColors']['navadmin'];

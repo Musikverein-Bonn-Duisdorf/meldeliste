@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='newtermin';
+$_SESSION['adminpage']=true;
 include "common/header.php";
 requireAdmin();
 $fill = false;
