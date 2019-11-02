@@ -73,7 +73,7 @@ function savePara(Parameter, Value) {
     <i class="fas fa-exclamation-triangle"></i>
 </div>
   <div class="w3-col l6 m6 s8 w3-center">
-<b> Achtung, &Auml;nderungen dieser Einstellungen wirken sich auf alle Nutzer aus. </b>
+<b>Achtung, &Auml;nderungen dieser Einstellungen wirken sich auf alle Nutzer aus.</b>
 </div>
 
   <div class="w3-col l3 m3 s2 w3-center">
