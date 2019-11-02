@@ -594,6 +594,9 @@ ORDER BY `Nachname`, `Vorname`",
                             if($row2['Children'] > 0) {
                                 $whoYes=$whoYes."+ ".$row2['Children'];
                             }
+                            else {
+                                $whoYes=$whoYes."&nbsp;";
+                            }
                             $whoYes=$whoYes."</div>";
                             $actcol++;
                         }
@@ -602,6 +605,9 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Guests'] > 0) {
                                 $whoYes=$whoYes."+ ".$row2['Guests'];
+                            }
+                            else {
+                                $whoYes=$whoYes."&nbsp;";
                             }
                             $whoYes=$whoYes."</div>";
                         }
@@ -634,6 +640,9 @@ ORDER BY `Nachname`, `Vorname`",
                             if($row2['Children'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row2['Children'];
                             }
+                            else {
+                                $whoMaybe=$whoMaybe."&nbsp;";
+                            }
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
@@ -642,6 +651,9 @@ ORDER BY `Nachname`, `Vorname`",
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             if($row2['Guests'] > 0) {
                                 $whoMaybe=$whoMaybe."+ ".$row2['Guests'];
+                            }
+                            else {
+                                $whoMaybe=$whoMaybe."&nbsp;";
                             }
                             $whoMaybe=$whoMaybe."</div>";
                         }
