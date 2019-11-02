@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='nomitglied';
+$_SESSION['adminpage']=true;
 include "common/header.php";
 
 if($_SESSION['admin']) {

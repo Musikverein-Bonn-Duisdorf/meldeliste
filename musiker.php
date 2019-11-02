@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='musiker';
+$_SESSION['adminpage']=true;
 include "common/header.php";
 
 if(isset($_POST['insert'])) {

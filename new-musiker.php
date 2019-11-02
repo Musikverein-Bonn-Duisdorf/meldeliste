@@ -1,6 +1,13 @@
 <?php
 session_start();
-$_SESSION['page']='newmusiker';
+if(isset($_POST['id']) && $_SESSION['userid'] == $_POST['id']) {
+    $_SESSION['page']='me';
+    $_SESSION['adminpage']=false;
+}
+else {
+    $_SESSION['page']='newmusiker';
+    $_SESSION['adminpage']=true;
+}
 include "common/header.php";
 $fill = false;
 if(isset($_POST['id'])) {

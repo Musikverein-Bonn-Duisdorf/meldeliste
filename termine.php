@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='termine';
+$_SESSION['adminpage']=false;
 include "common/header.php";
 if(isset($_POST['proxy'])) {
     $user = $_POST['proxy'];

@@ -1,6 +1,7 @@
 <?php
 session_start();
 $_SESSION['page']='log';
+$_SESSION['adminpage']=true;
 include "common/header.php";
 requireAdmin();
 /* $sql = sprintf('SELECT * FROM `User`;'); */
