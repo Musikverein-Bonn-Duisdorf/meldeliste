@@ -14,7 +14,7 @@ $row = mysqli_fetch_array($dbr);
 $nMusiker = $row['Count'];
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<h2>Liste aller Musiker, die kein Vereinsmitglied sind (<?php echo $nMusiker; ?>)</h2>
+<h2>Liste aller Musiker, die keine Vereinsmitglieder sind (<?php echo $nMusiker; ?>)</h2>
 </div>
 <?php
 $sql = sprintf('SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 0  AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
