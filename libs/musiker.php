@@ -263,9 +263,9 @@ class User
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-        $this->_data['Index'] = null;
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
+        $this->_data['Index'] = null;
         return true;
     }
     public function fill_from_array($row) {
