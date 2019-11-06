@@ -28,7 +28,7 @@ session_start();
             $r=validateUser($_POST['login'], $_POST['password']);
             if(!$r) {
 	?>
-	    <div class="w3-panel <?php echo $GLOBALS['commonColors']['notLoggedIn']; ?>"><h2>Login fehlgeschlagen.</h2></div>
+	    <div class="w3-panel <?php echo $GLOBALS['optionsDB']['colorLogError']; ?>"><h2>Login fehlgeschlagen.</h2></div>
 	<?php
         }
 	}
@@ -38,13 +38,13 @@ session_start();
 ?>
         <meta http-equiv="refresh" content="0; URL='changePW.php'" />
 <?php
-        die("<div class=\"w3-panel ".$GLOBALS['commonColors']['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
+        die("<div class=\"w3-panel ".$GLOBALS['optionsDB']['colorLogWarning']."\"><h2>Passwort &auml;ndern...</h2></div>");
     }
             
         ?>
             <meta http-equiv="refresh" content="0; URL='index.php'" />
             <?php
-            die("<div class=\"w3-panel ".$GLOBALS['commonColors']['success']."\"><h2>Login erfolgreich.</h2></div>");
+            die("<div class=\"w3-panel ".$GLOBALS['optionsDB']['colorSuccess']."\"><h2>Login erfolgreich.</h2></div>");
 	    }
 	    ?>
 	    <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
@@ -56,12 +56,12 @@ session_start();
 		<form class="w3-container" action="" method="POST">
 		    
 		    <label>Benutzer</label>
-		    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" type="text" name="login">
+		    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" type="text" name="login">
 		    
 		    <label>Passwort</label>
-		    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" type="password" name="password">
+		    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" type="password" name="password">
 		    
-		    <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
+		    <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
 		    
 		</form>
 	    </div>

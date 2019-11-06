@@ -45,7 +45,7 @@ if(isset($_POST['send'])) {
 <div class="w3-panel w3-mobile w3-center w3-border w3-col s10 m10 l4">
   <form name="mailform" class="w3-container w3-margin" action="mail.php" method="POST">
     <label>Empfänger</label>
-    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?>">
+    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
       <div class="w3-mobile">
 	<input class="w3-radio w3-mobile" type="radio" name="to" value="aktiv" <?php if($preview && $_POST['to'] == 'aktiv') echo "checked"; ?> />
 	<label>aktive Vereinsmitglieder</label>
@@ -56,7 +56,7 @@ if(isset($_POST['send'])) {
       </div>
     </div>
     <label>Register</label>
-    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?>">
+    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
     <input class="w3-check" type="checkbox" name="allReg" <?php if(!$preview || ($preview && isset($_POST['allReg']))) echo "checked"; ?>>
     <label>alle Register</label>
     <select id="register" class="w3-select w3-margin-top" name="register">
@@ -85,19 +85,19 @@ else {
 </script>
     
     <label>Betreff</label>
-    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-margin-bottom w3-mobile" name="Betreff" placeholder="Hier Betreff einfügen" value="<?php if($preview) echo $_POST['Betreff']; ?>"/>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Betreff" placeholder="Hier Betreff einfügen" value="<?php if($preview) echo $_POST['Betreff']; ?>"/>
     <label>Text</label>
-    <input class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-mobile" name="anrede" value="Hallo {VORNAME}," disabled/>
-    <textarea rows="10" cols="50" class="w3-input w3-border <?php echo $GLOBALS['commonColors']['inputs']; ?> w3-mobile" name="Text" placeholder="Hier Emailtext einfügen"><?php if($preview) echo $_POST['Text']; ?></textarea>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile" name="anrede" value="Hallo {VORNAME}," disabled/>
+    <textarea rows="10" cols="50" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile" name="Text" placeholder="Hier Emailtext einfügen"><?php if($preview) echo $_POST['Text']; ?></textarea>
     <select class="w3-select w3-margin-bottom" name="gruss">
       <option value="1" <?php if($preview && $_POST['gruss']==1) echo "selected"; ?>>Viele Grüße, <?php echo $_SESSION['Vorname']; ?></option>
       <option value="2" <?php if($preview && $_POST['gruss']==2) echo "selected"; ?>>Viele Grüße, der Vorstand</option>
       <option value="3" <?php if($preview && $_POST['gruss']==3) echo "selected"; ?>>Viele Grüße, <?php echo $GLOBALS['optionsDB']['MailGreetings']; ?></option>
     </select>
-    <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
+    <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
     <?php if($preview) { ?>
     <textarea rows="10" cols="50" class="w3-input w3-mobile w3-border" disabled><?php echo $anrede."\n\n".$text; ?></textarea>
-        <button class="w3-btn <?php echo $GLOBALS['commonColors']['submit']; ?> w3-margin-top w3-mobile" name="send">Senden (nur einmal klicken, es dauert ein paar Sekunden)</button>
+        <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send">Senden (nur einmal klicken, es dauert ein paar Sekunden)</button>
     <?php } ?>
   </form>
 </div>
