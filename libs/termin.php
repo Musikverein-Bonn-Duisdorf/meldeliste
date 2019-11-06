@@ -453,7 +453,7 @@ class Termin
         return $str;
     }
     protected function makeButtons($N, $indent, $val) {
-        $symbols = array("&#10004;", "&#10008;", "?");
+        $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
         $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
         
         $str="";
