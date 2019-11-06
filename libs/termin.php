@@ -526,6 +526,7 @@ class Termin
         $main->class="w3-border-black";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
+        if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
         $str=$str.$main->open();
 
         $indent++;
