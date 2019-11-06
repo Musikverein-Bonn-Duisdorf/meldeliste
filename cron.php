@@ -117,7 +117,7 @@ case "reminder":
             else {
                 $body = "Es fehlen noch ".$missing." R&uuml;ckmeldungen von dir.\n\n";
             }
-            $mail->singleUser($u->Index, $GLOBALS['commonStrings']['MailReminderSubject'], $GLOBALS['commonStrings']['MailReminderBody']."\n".$body.$GLOBALS['optionsDB']['MailGreetings']);
+            $mail->singleUser($u->Index, $GLOBALS['optionsDB']['SubjectReminder'], $body.$GLOBALS['optionsDB']['MailGreetings']);
         }
     }
     break;

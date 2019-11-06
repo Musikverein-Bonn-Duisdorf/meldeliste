@@ -138,60 +138,48 @@ class Log
             $this->fill_from_array($row);
         }
     }
-    /* public function repair() { */
-    /*     $str = htmlentities($this->Message); */
-    /*     $str = str_replace("&Atilde;&curren;", "&auml;", $str); */
-    /*     $str = str_replace("&Atilde;&frac14;", "&uuml;", $str); */
-    /*     $str = str_replace("&Atilde;&para;", "&ouml;", $str); */
-    /*     $str = html_entity_decode($str); */
-    /*     /\* $str = str_replace("ä", "&auml;", $str); *\/ */
-    /*     /\* $str = str_replace("ü", "&uuml;", $str); *\/ */
-    /*     /\* $str = str_replace("ö", "&ouml;", $str); *\/ */
-    /*     $this->Message = $str; */
-    /*     $this->save(); */
-    /* } */
     public function printTableLine() {
         $User = new User;
         $User->load_by_id($this->User);
         switch($this->Type) {
         case 7:
-            $color = $GLOBALS['commonColors']['LogInfo'];
+            $color = $GLOBALS['optionsDB']['colorLogInfo'];
             $type  = "INFO";
             break;
         case 6:
-            $color = $GLOBALS['commonColors']['LogEmail'];
+            $color = $GLOBALS['optionsDB']['colorLogEmail'];
             $type  = "EMAIL";
             break;
         case 5:
-            $color = $GLOBALS['commonColors']['LogDBUpdate'];
+            $color = $GLOBALS['optionsDB']['colorLogDBUpdate'];
             $type  = "DB UPDATE";
             break;
         case 4:
-            $color = $GLOBALS['commonColors']['LogDBInsert'];
+            $color = $GLOBALS['optionsDB']['colorLogDBInsert'];
             $type  = "DB INSERT";
             break;
         case 3:
-            $color = $GLOBALS['commonColors']['LogDBDelete'];
+            $color = $GLOBALS['optionsDB']['colorLogDBDelete'];
             $type  = "DB DELETE";
             break;
         case 2:
-            $color = $GLOBALS['commonColors']['LogWarning'];
+            $color = $GLOBALS['optionsDB']['colorLogWarning'];
             $type  = "WARNING";
             break;
         case 1:
-            $color = $GLOBALS['commonColors']['LogError'];
+            $color = $GLOBALS['optionsDB']['colorLogError'];
             $type  = "ERROR";
             break;
         case 0:
-            $color = $GLOBALS['commonColors']['LogFatal'];
+            $color = $GLOBALS['optionsDB']['colorLogFatal'];
             $type  = "FATAL";
             break;
         default:
-            $color = $GLOBALS['commonColors']['LogDefault'];
+            $color = $GLOBALS['optionsDB']['colorLogDefault'];
             $type  = "";
             break;
         }
-	echo "<div id=\"".$this->Index."\" class=\"w3-row ".$color." ".$GLOBALS['commonColors']['Hover']." w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
+	echo "<div id=\"".$this->Index."\" class=\"w3-row ".$color." ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
 	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
 	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
     echo "  <div class=\"w3-col l1 w3-container\">";
