@@ -38,15 +38,21 @@ if($GLOBALS['optionsDB']['showAppmntPage']) {
 		<p><i class="fas fa-users"></i> - Mein Register</p>
 		<p>Anzeige der R&uuml;ckmeldungen des eigenen Registers:</p>
 		<ul>
-			<li><div class="w3-green">Gr&uuml;n:&nbsp;Komme</div></li>
-			<li><div class="w3-red">Rot:&nbsp;&nbsp;&nbsp;Komme nicht</div></li>
-			<li><div class="w3-blue">Blau:&nbsp;Noch unsicher</div></li>
+			<li><div class="w3-highway-green">Gr&uuml;n:&nbsp;Komme</div></li>
+			<li><div class="w3-highway-red">Rot:&nbsp;&nbsp;Komme nicht</div></li>
+			<li><div class="w3-highway-blue">Blau:&nbsp;Noch unsicher</div></li>
 		</ul>
 	</li>
 	<li>
 		<p><i class="fas fa-user"></i> - Mein Profil</p>
 		<p>Anzeige der eigenen Profildaten</p>
 	</li>
+<?php if($_SESSION['admin']) {?>
+	<li>
+		<p><i class="fas fa-wrench"></i> - Adminpage</p>
+		<p>Einstellungen &auml;ndern</p>
+	</li>
+<?php } ?>
 	<li>
 		<p>Vereinshomepage</p>
 		<p>&Ouml;ffnet die Vereinshomepage in einem eigenen Tab</p>
@@ -65,7 +71,8 @@ if($GLOBALS['optionsDB']['showAppmntPage']) {
 </tbody>
 </table>
 </div>
-
+<?php if($_SESSION['admin']) {?>
+<?php } ?>
 <?php
 include "common/footer.php";
 ?>
