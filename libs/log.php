@@ -82,6 +82,17 @@ class Log
         if(!$this->Message) return false;
         return true;
     }
+    public function getLast() {
+        $sql = sprintf('SELECT * FROM `%sLog` ORDER BY `Timestamp` DESC LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        if(is_array($row)) {
+            $this->fill_from_array($row);
+        }        
+    }
     protected function insert() {
         $sql = sprintf('INSERT INTO `%sLog` (`User`, `Type`, `Message`) VALUES ("%d", "%d", "%s");',
         $GLOBALS['dbprefix'],
@@ -89,6 +100,9 @@ class Log
         $this->Type,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Message)
         );
+        $last = new Log;
+        $last->getLast();
+        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message)) return true;
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
