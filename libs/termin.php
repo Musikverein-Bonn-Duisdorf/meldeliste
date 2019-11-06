@@ -467,7 +467,7 @@ class Termin
             $btn->class="w3-border-black";
             $btn->class="w3-margin-left";
             $btn->class="w3-margin-top";
-            $btn->class="w3-margin-right";
+            /* $btn->class="w3-margin-right"; */
             $btn->class="w3-center";
             $btn->class="w3-col s3 m3 l2";
             $btn->body=$symbols[$i-1];
