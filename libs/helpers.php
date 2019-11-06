@@ -71,7 +71,7 @@ function getPage($string) {
         echo $GLOBALS['optionsDB']['colorTitleBar'];
     }
     else {
-        echo $GLOBALS['commonColors']['navinactive'];
+        echo $GLOBALS['optionsDB']['colorNav'];
     }
 }
 
@@ -80,7 +80,7 @@ function getAdminPage($string) {
         echo $GLOBALS['optionsDB']['colorTitleBar'];
     }
     else {
-        echo $GLOBALS['commonColors']['navadmin'];
+        echo $GLOBALS['optionsDB']['colorNavAdmin'];
     }
 }
 
@@ -230,7 +230,9 @@ function genitiv($string) {
 
 function sqlerror() {
     if(mysqli_errno($GLOBALS['conn'])) {
-        echo "<div class=\"w3-container ".$GLOBALS['commonColors']['SQLerror']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
+        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
+        $logentry = new Log;
+        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
     }
 }
 

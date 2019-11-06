@@ -21,7 +21,7 @@ session_start();
 <h1><?php echo $optionsDB['WebSiteName']; ?></h1>
 </div>
 <meta http-equiv="refresh" content="3; URL='login.php'" />
-  <div class="w3-panel w3-mobile w3-center <?php echo $GLOBALS['commonColors']['success']; ?>"><h2>Logout erfolgreich.</h2></div>
+  <div class="w3-panel w3-mobile w3-center <?php echo $GLOBALS['optionsDB']['colorSuccess']; ?>"><h2>Logout erfolgreich.</h2></div>
 <?php
     if($_SESSION['userid']) {
         $logentry = new Log;
