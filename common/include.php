@@ -1,12 +1,11 @@
 <?php
 
-include "version.php";
 include "config.php";
-include "libs/div.php";
 include "libs/helpers.php";
 $optionsDB = loadconfig();
 global $optionsDB;
-include "common.php";
+include "version.php";
+include "libs/div.php";
 include "libs/musiker.php";
 include "libs/termin.php";
 include "libs/shift.php";
