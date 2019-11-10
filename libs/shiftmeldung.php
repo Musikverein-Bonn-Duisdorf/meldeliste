@@ -72,7 +72,7 @@ class Shiftmeldung
         $GLOBALS['dbprefix'],
         $this->Shift,
         $this->User,
-        $this->Wert,
+        $this->Wert
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
