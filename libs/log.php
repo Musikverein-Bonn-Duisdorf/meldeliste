@@ -84,7 +84,7 @@ class Log
     }
     public function getLast() {
         $sql = sprintf('SELECT * FROM `%sLog` ORDER BY `Timestamp` DESC LIMIT 1;',
-        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix']
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
