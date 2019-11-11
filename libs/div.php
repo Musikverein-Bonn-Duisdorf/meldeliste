@@ -59,6 +59,19 @@ class div
             break;
         }	
     }
+    public function col($sizeL, $sizeM, $sizeS) {
+        $str="w3-col";
+        if($sizeL) {
+            $str=$str." l".$sizeL;
+        }
+        if($sizeM) {
+            $str=$str." m".$sizeL;
+        }
+        if($sizeS) {
+            $str=$str." s".$sizeL;
+        }
+        $this->class=$str;
+    }
     public function bold() {
         $this->bold=true;
     }
