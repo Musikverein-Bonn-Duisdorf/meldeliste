@@ -63,7 +63,7 @@ session_start();
 		    
 		    <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
 		    
-		</form>
+		</form><p><a href="https://www.musikverein-bonn-duisdorf.de">Zur Vereinshomepage</a></p>
 	    </div>
 	    <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 	    </div>
