@@ -38,9 +38,9 @@ if($GLOBALS['optionsDB']['showAppmntPage']) {
 		<p><i class="fas fa-users"></i> - Mein Register</p>
 		<p>Anzeige der R&uuml;ckmeldungen des eigenen Registers:</p>
 		<ul>
-			<li><div class="<?php echo $GLOBALS['optionsDB']['colorBtnYes']; ?>">Komme</div></li>
-			<li><div class="<?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?>">Komme nicht</div></li>
-			<li><div class="<?php echo $GLOBALS['optionsDB']['colorBtnMaybe']; ?>">Noch unsicher</div></li>
+			<li><div class="<?php echo $GLOBALS['optionsDB']['colorAppmntYes']; ?>">Komme</div></li>
+			<li><div class="<?php echo $GLOBALS['optionsDB']['colorAppmntNo']; ?>">Komme nicht</div></li>
+			<li><div class="<?php echo $GLOBALS['optionsDB']['colorAppmntMaybe']; ?>">Noch unsicher</div></li>
 		</ul>
 	</li>
 	<li>
