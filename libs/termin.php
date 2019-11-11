@@ -574,7 +574,7 @@ class Termin
         $main = new div;
         $main->indent = $indent;
         $main->id="entry".$this->Index;
-        $main->class="w3-row w3-mobile w3-border-bottom w3-border-black";
+        $main->class="w3-row w3-mobile w3-card w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
         if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
@@ -592,7 +592,7 @@ class Termin
         $nameDiv = new div;
         $nameDiv->indent = $indent;
         $nameDiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
-        $nameDiv->class="w3-container";
+        /* $nameDiv->class="w3-container"; */
         $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
         $nameDiv->body=$this->Name;
@@ -601,14 +601,14 @@ class Termin
         $startDiv = new div;
         $startDiv->indent=$indent;
         $startDiv->col(3, 0, 0);
-        $startDiv->class="w3-container";
+        /* $startDiv->class="w3-container"; */
         $startDiv->body=$this->makeTimeInfo();
         $str=$str.$startDiv->print();
 
         $ortDiv = new div;
         $ortDiv->indent=$indent;
         $ortDiv->col(3, 0, 0);
-        $ortDiv->class="w3-container";
+        /* $ortDiv->class="w3-container"; */
         $ortDiv->body=$this->Ort1;
         $str=$str.$ortDiv->print();
 
@@ -746,7 +746,7 @@ class Termin
                 
                 $shiftmain = new div;
                 $shiftmain->indent=$indent;
-                $shiftmain->class="w3-container broder-top w3-border-black w3-padding";
+                $shiftmain->class="w3-container w3-border-top w3-border-black w3-padding";
                 $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
                 $shiftmain->class=$this->getLineColor($m->Wert);
                 $str=$str.$shiftmain->open();
@@ -760,7 +760,7 @@ class Termin
 
                 $shiftName = new div;
                 $shiftName->indent=$indent;
-                $shiftName->class="w3-container w3-margin-top";
+                $shiftName->class="w3-margin-top";
                 $shiftName->col(3, 0, 0);
                 $shiftName->bold();
                 $shiftName->body=$s->Name;
@@ -768,7 +768,7 @@ class Termin
 
                 $shiftTime = new div;
                 $shiftTime->indent=$indent;
-                $shiftTime->class="w3-container w3-margin-top";
+                $shiftTime->class="w3-margin-top";
                 $shiftTime->col(3, 0, 0);
                 $shiftTime->body=$s->getTime();
                 $str=$str.$shiftTime->print();
@@ -778,7 +778,7 @@ class Termin
                 $btnDiv->col(2, 0, 0);
                 $str=$str.$btnDiv->open();
                 $indent++;
-                $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $s->Wert);
+                $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert);
                 $str=$str.$btnDiv->close();
                 $str=$str.$shiftmain->close();
                 $indent--;
