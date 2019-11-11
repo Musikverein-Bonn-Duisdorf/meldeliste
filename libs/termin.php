@@ -172,12 +172,16 @@ class Termin
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        $no=0;
+        $no=false;
+        $maybe=false;
         while($row = mysqli_fetch_array($dbr)) {
             if($row['Wert'] == 1) return 1;
-            if($row['Wert'] == 2) $no=2;
+            if($row['Wert'] == 2) $no=true;
+            if($row['Wert'] == 3) $maybe=true;
         }
-        return $no;
+        if($maybe) return 3;
+        if($no) return 2;
+        return 0;
     }
     protected function update() {
         $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `new` = "%d" WHERE `Index` = "%d";',
@@ -487,6 +491,41 @@ class Termin
         }
         return $str;
     }
+    protected function makeShiftButtons($N, $indent, $shift, $val) {
+        $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
+        $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
+        
+        $str="";
+        for($i=1; $i<=$N; $i++) {
+            $btn = new div;
+            $btn->indent = $indent;
+            $btn->tag="button";
+
+            $btn->class="w3-btn";
+            $btn->class="w3-border";
+            $btn->class="w3-border-black";
+            $btn->class="w3-margin-left";
+            $btn->class="w3-margin-top";
+            /* $btn->class="w3-margin-right"; */
+            $btn->class="w3-center";
+            $btn->class="w3-col s3 m3 l2";
+            $btn->body=$symbols[$i-1];
+
+            if($val && $val != $i) {
+                $btn->class=$GLOBALS['optionsDB']['colorDisabled'];
+            }
+            else {
+                $btn->class=$colors[$i-1];
+            }
+            if($val != $i) {
+                $btn->onclick="meldeShift('".$GLOBALS['cronID']."', ".$this->getUser().", ".$shift.", ".$this->Index.", ".$i.")";
+                $btn->name="meldungShift";
+                $btn->value=$i;
+            }
+            $str=$str.$btn->print();
+        }
+        return $str;
+    }
     protected function statusMailBtn($indent) {
         $user=$this->getUser();
         $str="";
@@ -512,6 +551,21 @@ class Termin
         $str=$str.$admStatusDiv->print();
         return $str;
     }
+    public function getLineColor($val) {
+        $c="";
+        switch($val) {
+        case 1:
+            $c=$GLOBALS['optionsDB']['colorAppmntYes'];
+            break;
+        case 2:
+            $c=$GLOBALS['optionsDB']['colorAppmntNo'];
+            break;
+        case 3:
+            $c=$GLOBALS['optionsDB']['colorAppmntMaybe'];
+            break;
+        }
+        return $c;
+    }
     public function printBasicTableLine() {
         $user=$this->getUser();
         $str="";
@@ -520,10 +574,7 @@ class Termin
         $main = new div;
         $main->indent = $indent;
         $main->id="entry".$this->Index;
-        $main->class="w3-row";
-        $main->class="w3-mobile";
-        $main->class="w3-border-bottom";
-        $main->class="w3-border-black";
+        $main->class="w3-row w3-mobile w3-border-bottom w3-border-black";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
         if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
@@ -532,8 +583,7 @@ class Termin
         $indent++;
         $mainline = new div;
         $mainline->indent = $indent;
-        $mainline->class="w3-row";
-        $mainline->class="w3-padding";
+        $mainline->class="w3-row w3-padding";
         $mainline->class=$this->lineHover();
         $mainline->class=$this->globalShiftColor();
         $str=$str.$mainline->open();
@@ -542,22 +592,22 @@ class Termin
         $nameDiv = new div;
         $nameDiv->indent = $indent;
         $nameDiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
-        $nameDiv->class="w3-col l3";
         $nameDiv->class="w3-container";
+        $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
         $nameDiv->body=$this->Name;
         $str=$str.$nameDiv->print();
 
         $startDiv = new div;
         $startDiv->indent=$indent;
-        $startDiv->class="w3-col l3";
+        $startDiv->col(3, 0, 0);
         $startDiv->class="w3-container";
         $startDiv->body=$this->makeTimeInfo();
         $str=$str.$startDiv->print();
 
         $ortDiv = new div;
         $ortDiv->indent=$indent;
-        $ortDiv->class="w3-col l3";
+        $ortDiv->col(3, 0, 0);
         $ortDiv->class="w3-container";
         $ortDiv->body=$this->Ort1;
         $str=$str.$ortDiv->print();
@@ -565,8 +615,7 @@ class Termin
         $btnDiv = new Div;
         $btnDiv->indent = $indent;
         $btnDiv->class="w3-col l2";
-        $btnDiv->class="w3-row";
-        $btnDiv->class="w3-mobile";
+        $btnDiv->class="w3-row w3-mobile";
         
         if($this->Shifts) {
             $str=$str.$btnDiv->print();
@@ -581,37 +630,33 @@ class Termin
         $str=$str.$this->statusMailBtn($indent);
         $str=$str.$mainline->close();
         $indent--;
+        $indent--;
         
         if(($GLOBALS['optionsDB']['showGuestOption'] || $GLOBALS['optionsDB']['showChildOption']) && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == "Bus") {
             $guestChildLine = new div;
             $guestChildLine->indent = $indent;
-            $guestChildLine->class="w3-row";
-            $guestChildLine->class="w3-padding";
+            $guestChildLine->class="w3-row w3-padding";
             $str=$str.$guestChildLine->open();
             $indent++;
 
             if($GLOBALS['optionsDB']['showChildOption']) {
                 $emptyDiv = new div;
                 $emptyDiv->indent=$indent;
-                $emptyDiv->class="w3-col l9";
+                $emptyDiv->col(9, 0, 0);
                 $emptyDiv->class="w3-container";
                 $str=$str.$emptyDiv->print();
 
                 $childDiv = new div;
                 $childDiv->indent=$indent;
-                $childDiv->class="w3-col l1 m6 s6";
-                $childDiv->class="w3-row";
-                $childDiv->class="w3-margin-top";
-                $childDiv->class="w3-container";
+                $childDiv->col(1, 6, 6);
+                $childDiv->class="w3-row w3-margin-top w3-container";
                 $childDiv->body="Kinder";
                 $str=$str.$childDiv->print();
 
                 $childInDiv = new div;
                 $childInDiv->indent=$indent;
-                $childInDiv->class="w3-col l1 m6 s6";
-                $childInDiv->class="w3-row";
-                $childInDiv->class="w3-margin-top";
-                $childInDiv->class="w3-container";
+                $childInDiv->col(1, 6, 6);
+                $childInDiv->class="w3-row w3-margin-top w3-container";
                 $childInDiv->type="number";
                 $childInDiv->tag="input";
                 $childInDiv->style="width: 5em";
@@ -625,33 +670,28 @@ class Termin
 
                 $childSpacerDiv = new div;
                 $childSpacerDiv->indent=$indent;
-                $childSpacerDiv->class="w3-col l1 m6 s6";
-                $childSpacerDiv->class="w3-hide-small";
-                $childSpacerDiv->class="w3-hide-medium";
+                $childSpacerDiv->col(1, 6, 6);
+                $childSpacerDiv->class="w3-hide-small w3-hide-medium";
                 $str=$str.$childSpacerDiv->print();
             }
             if($GLOBALS['optionsDB']['showGuestOption']) {
                 $emptyDiv = new div;
                 $emptyDiv->indent=$indent;
-                $emptyDiv->class="w3-col l9";
+                $emptyDiv->col(9, 0, 0);
                 $emptyDiv->class="w3-container";
                 $str=$str.$emptyDiv->print();
 
                 $guestDiv = new div;
                 $guestDiv->indent=$indent;
-                $guestDiv->class="w3-col l1 m6 s6";
-                $guestDiv->class="w3-row";
-                $guestDiv->class="w3-margin-top";
-                $guestDiv->class="w3-container";
+                $guestDiv->col(1, 6, 6);
+                $guestDiv->class="w3-row w3-margin-top w3-container";
                 $guestDiv->body="G&auml;ste";
                 $str=$str.$guestDiv->print();
 
                 $guestInDiv = new div;
                 $guestInDiv->indent=$indent;
-                $guestInDiv->class="w3-col l1 m6 s6";
-                $guestInDiv->class="w3-row";
-                $guestInDiv->class="w3-margin-top";
-                $guestInDiv->class="w3-container";
+                $guestInDiv->col(1, 6, 6);
+                $guestInDiv->class="w3-row w3-margin-top w3-container";
                 $guestInDiv->type="number";
                 $guestInDiv->tag="input";
                 $guestInDiv->style="width: 5em";
@@ -665,27 +705,21 @@ class Termin
 
                 $guestSpacerDiv = new div;
                 $guestSpacerDiv->indent=$indent;
-                $guestSpacerDiv->class="w3-col l1 m6 s6";
-                $guestSpacerDiv->class="w3-hide-small";
-                $guestSpacerDiv->class="w3-hide-medium";
+                $guestSpacerDiv->col(1, 6, 6);
+                $guestSpacerDiv->class="w3-hide-small w3-hide-medium";
                 $str=$str.$guestSpacerDiv->print();
             }
             $emptyDiv = new div;
             $emptyDiv->indent=$indent;
-            $emptyDiv->class="w3-col l9";
-            $emptyDiv->class="w3-hide-small";
-            $emptyDiv->class="w3-hide-medium";
+            $emptyDiv->col(9, 0, 0);
+            $emptyDiv->class="w3-hide-small w3-hide-medium";
             $str=$str.$emptyDiv->print();
             
             $saveBtn = new div;
             $saveBtn->indent=$indent;
             $saveBtn->tag="button";
-            $saveBtn->class="w3-btn";
-            $saveBtn->class="w3-col l2 m12 s12";
-            $saveBtn->class="w3-row";
-            $saveBtn->class="w3-border";
-            $saveBtn->class="w3-border-black";
-            $saveBtn->class="w3-margin-top";
+            $saveBtn->class="w3-btn w3-row w3-border w3-border-black w3-margin-top";
+            $saveBtn->col(2, 12, 12);
             $saveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
             $saveBtn->name="meldungGC";
             $saveBtn->onclick="melde('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
@@ -695,12 +729,12 @@ class Termin
 
             $SpacerDiv = new div;
             $SpacerDiv->indent=$indent;
-            $SpacerDiv->class="w3-col l1 m6 s6";
-            $SpacerDiv->class="w3-hide-small";
-            $SpacerDiv->class="w3-hide-medium";
+            $SpacerDiv->col(1, 6, 6);
+            $SpacerDiv->class="w3-hide-small, w3-hide-medium";
             $str=$str.$SpacerDiv->print();
 
             $str=$str.$guestChildLine->close();
+            $indent--;
         }
         if($this->Shifts) {
             $shifts = $this->getShifts();
@@ -709,25 +743,46 @@ class Termin
                 $s->load_by_id($shifts[$i]);
                 $m = new Shiftmeldung;
                 $m->load_by_user_event($user, $s->Index);
-                $str=$str."<div class=\"w3-container border-top w3-border-black ".$GLOBALS['optionsDB']['HoverEffect']." ";
-                if($m->Wert == 1) $str=$str.$GLOBALS['optionsDB']['colorAppmntYes'];
-                if($m->Wert == 2) $str=$str.$GLOBALS['optionsDB']['colorAppmntNo'];
-                $str=$str."\">";
-                $str=$str."\t\t\t<div class=\"w3-col l3 w3-margin-top w3-hide-small w3-hide-medium\">&nbsp;";
-                $str=$str."\t\t\t</div>\n";
-                $str=$str."\t\t\t<div class=\"w3-col l3 w3-container w3-margin-top\"><b>".$s->Name."</b>";
-                $str=$str."\t\t\t</div>\n";
-                $str=$str."\t\t\t<div class=\"w3-col l3 w3-container w3-margin-top\">".sql2timeRaw($s->Start)." - ".sql2time($s->End);
-                $str=$str."\t\t\t</div>\n";
-                $str=$str."\t\t\t<div class=\"w3-col l3\">";
-                $str=$str."<button class=\"w3-btn ";
-                $str=$str.$GLOBALS['optionsDB']['colorBtnYes'];
-                $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-bottom w3-margin-right w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"1\" onclick=\"meldeShift('".$GLOBALS['cronID']."', ".$user.", ".$s->Index.", ".$this->Index.", 1)\">&#10004;</button>\n";
-                $str=$str."<button class=\"w3-btn ";
-                $str=$str.$GLOBALS['optionsDB']['colorBtnNo'];
-                $str=$str." w3-border w3-border-black w3-margin-left w3-margin-top w3-margin-bottom w3-margin-right w3-center w3-col s3 m3 l2\" name=\"meldung\" value=\"2\" onclick=\"meldeShift('".$GLOBALS['cronID']."', ".$user.", ".$s->Index.", ".$this->Index.", 2)\">&#10008;</button>\n";
-                $str=$str."\t\t\t</div>\n";
-                $str=$str."\t\t</div>\n";
+                
+                $shiftmain = new div;
+                $shiftmain->indent=$indent;
+                $shiftmain->class="w3-container broder-top w3-border-black w3-padding";
+                $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
+                $shiftmain->class=$this->getLineColor($m->Wert);
+                $str=$str.$shiftmain->open();
+                $indent++;
+
+                $shiftSpacer = new div;
+                $shiftSpacer->indent=$indent;
+                $shiftSpacer->class="w3-margin-top w3-hide-small s3-hide-medium";
+                $shiftSpacer->col(3, 0, 0);
+                $str=$str.$shiftSpacer->print();
+
+                $shiftName = new div;
+                $shiftName->indent=$indent;
+                $shiftName->class="w3-container w3-margin-top";
+                $shiftName->col(3, 0, 0);
+                $shiftName->bold();
+                $shiftName->body=$s->Name;
+                $str=$str.$shiftName->print();
+
+                $shiftTime = new div;
+                $shiftTime->indent=$indent;
+                $shiftTime->class="w3-container w3-margin-top";
+                $shiftTime->col(3, 0, 0);
+                $shiftTime->body=$s->getTime();
+                $str=$str.$shiftTime->print();
+                
+                $btnDiv = new div;
+                $btnDiv->indent=$indent;
+                $btnDiv->col(2, 0, 0);
+                $str=$str.$btnDiv->open();
+                $indent++;
+                $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $s->Wert);
+                $str=$str.$btnDiv->close();
+                $str=$str.$shiftmain->close();
+                $indent--;
+                $indent--;
             }
         }
         $str=$str.$main->close();
@@ -789,7 +844,7 @@ class Termin
         }
         $str=$str."\t\t</form>\n";
         $str=$str."\t</div>\n";
-        $str=$str."\t</div> <! -- Woher -->";
+        $str=$str."\t</div> <! -- Woher -->\n";
         return $str;
     }
     public function printMyResponseLine() {

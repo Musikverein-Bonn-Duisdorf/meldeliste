@@ -52,6 +52,15 @@ class Shift
         $this->Bedarf
         );
     }
+    public function getTime() {
+        if($this->End) {
+            $str=sql2timeRaw($this->Start)." - ".sql2time($this->End);
+        }
+        else {
+            $str=sql2time($this->Start);
+        }
+        return $str;
+    }
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
