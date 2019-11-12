@@ -61,6 +61,37 @@ class Shift
         }
         return $str;
     }
+    public function getMeldungen() {
+        $sql = sprintf('SELECT * FROM `%sSchichtmeldung` WHERE `Shift` = %d;',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $meldungen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($meldungen, $row['Index']);
+        }
+        return $meldungen;
+    }
+    public function getMeldungenVal($val) {
+        $r = 0;
+        $meldungen = $this->getMeldungen();
+        for($i=0; $i<=count($meldungen); $i++) {
+            $m = new Shiftmeldung;
+            $m->load_by_id($meldungen[$i]);
+            if($m->Wert == $val) $r++;
+        }
+        return $r;
+    }
+    public function getResponseString() {
+        $str=$this->getMeldungenVal(1);
+        /* if($this->getMeldungenVal(3)) { */
+        /*     $str=$str." + ".$this->getMeldungenVal(3); */
+        /* } */
+        $str=$str." / ".$this->Bedarf;
+        return $str;
+    }
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {

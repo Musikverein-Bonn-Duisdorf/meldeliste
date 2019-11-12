@@ -776,8 +776,16 @@ class Termin
                 $indent++;
                 $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert);
                 $str=$str.$btnDiv->close();
-                $str=$str.$shiftmain->close();
                 $indent--;
+                
+                $valdiv = new div;
+                $valdiv->indent=$indent;
+                $valdiv->class="w3-center w3-padding";
+                $valdiv->col(1, 0, 0);
+                $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
+                $str=$str.$valdiv->print();
+                
+                $str=$str.$shiftmain->close();
                 $indent--;
             }
         }
