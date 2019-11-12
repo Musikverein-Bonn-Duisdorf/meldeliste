@@ -34,14 +34,15 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->load_by_id($row['Index']);
     echo $M->printBasicTableLine();
 }
-
-$more = new div;
-$more->tag="a";
-$more->class="w3-btn w3-padding w3-margin w3-mobile w3-border w3-border-black";
-$more->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-$more->href="termine.php";
-$more->body="mehr Termine";
-echo $more->print();
+if($GLOBALS['optionsDB']['showAppmntPage']) {
+    $more = new div;
+    $more->tag="a";
+    $more->class="w3-btn w3-mobile w3-border w3-border-black";
+    $more->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+    $more->href="termine.php";
+    $more->body="mehr Termine";
+    echo $more->print();
+}
 ?>
 <?php
 include "common/footer.php";
