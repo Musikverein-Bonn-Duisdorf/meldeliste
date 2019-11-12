@@ -8,10 +8,7 @@ include "common/header.php";
 <script src="js/melde.js"></script>
 <script src="js/meldeshift.js"></script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-<h2>Home</h2>
-</div>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-<h3>Bevorstehende Termine</h3>
+<h2>Bevorstehende Termine</h2>
 </div>
 <?php
 $now = date("Y-m-d");
