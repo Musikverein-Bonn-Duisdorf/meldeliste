@@ -471,7 +471,6 @@ class Termin
             $btn->class="w3-border-black";
             $btn->class="w3-margin-left";
             $btn->class="w3-margin-top";
-            /* $btn->class="w3-margin-right"; */
             $btn->class="w3-center";
             $btn->class="w3-col s3 m3 l2";
             $btn->body=$symbols[$i-1];
@@ -506,7 +505,6 @@ class Termin
             $btn->class="w3-border-black";
             $btn->class="w3-margin-left";
             $btn->class="w3-margin-top";
-            /* $btn->class="w3-margin-right"; */
             $btn->class="w3-center";
             $btn->class="w3-col s3 m3 l2";
             $btn->body=$symbols[$i-1];
@@ -574,7 +572,7 @@ class Termin
         $main = new div;
         $main->indent = $indent;
         $main->id="entry".$this->Index;
-        $main->class="w3-row w3-mobile w3-card w3-margin";
+        $main->class="w3-card w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
         if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
@@ -592,7 +590,6 @@ class Termin
         $nameDiv = new div;
         $nameDiv->indent = $indent;
         $nameDiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
-        /* $nameDiv->class="w3-container"; */
         $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
         $nameDiv->body=$this->Name;
@@ -601,14 +598,12 @@ class Termin
         $startDiv = new div;
         $startDiv->indent=$indent;
         $startDiv->col(3, 0, 0);
-        /* $startDiv->class="w3-container"; */
         $startDiv->body=$this->makeTimeInfo();
         $str=$str.$startDiv->print();
 
         $ortDiv = new div;
         $ortDiv->indent=$indent;
         $ortDiv->col(3, 0, 0);
-        /* $ortDiv->class="w3-container"; */
         $ortDiv->body=$this->Ort1;
         $str=$str.$ortDiv->print();
 
@@ -754,7 +749,7 @@ class Termin
 
                 $shiftSpacer = new div;
                 $shiftSpacer->indent=$indent;
-                $shiftSpacer->class="w3-margin-top w3-hide-small s3-hide-medium";
+                $shiftSpacer->class="w3-margin-top w3-hide-small w3-hide-medium";
                 $shiftSpacer->col(3, 0, 0);
                 $str=$str.$shiftSpacer->print();
 
