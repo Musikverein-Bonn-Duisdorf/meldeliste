@@ -69,7 +69,7 @@ case "reminder":
         echo "Reminder not activated.\n";
         break;
     }
-    if(!checkCronDate($v)) { 
+    if(!checkCronDate($GLOBALS['optionsDB']['cronSendReminderDays'])) { 
         break;
     }
     $time = date("H:i");
