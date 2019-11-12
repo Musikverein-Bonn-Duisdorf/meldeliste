@@ -40,6 +40,11 @@ $para=array(
     'SubjectReminder',
     'SubjectPW',
     'MailGreetings',
+    'cronSendnewAppmnts',
+    'cronSendnewAppmntsDays',
+    'cronSendnewAppmntsTime',
+    'cronSendTomorrow',
+    'cronSendTomorrowTime',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -71,6 +76,11 @@ $desc=array(
     "Betreff der Erinnerungsmail",
     "Betreff der Email mit neuem Passwort",
     "Gru&szlig;formel unter System-Emails",
+    "Sende Nachricht, wenn neue Termine erstellt wurden.",
+    "Sende Nachricht, wenn neue Termine erstellt wurden an folgenden Tagen.",
+    "Sende Nachricht, wenn neue Termine erstellt zu folgender Uhrzeit.",
+    "Sende Nachricht, wenn Termin am folgenden Tag ansteht.",
+    "Sende Nachricht, wenn Termin am folgenden Tag ansteht zu folgender Uhrzeit.",
 );
 $value=array(
     "w3-opacity",
@@ -102,6 +112,11 @@ $value=array(
     "Erinnerung",
     "neues Passwort",
     "Dein Musikverein Bonn-Duisdorf",
+    0,
+    "64",
+    "14:00",
+    0,
+    "14:00",
 );
 $type=array(
     "string",
@@ -133,6 +148,11 @@ $type=array(
     "string",
     "string",
     "string",
+    "bool",
+    "days",
+    "time",
+    "bool",
+    "time",
 );
 
          $N = count($para);

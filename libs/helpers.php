@@ -249,4 +249,24 @@ function meldeWert($val) {
     }
 }
 
+function bin2date($v) {
+    $c=array(false, false, false, false, false, false, false);
+    for($i=7; $i>=1; $i--) {
+        if($v/2**($i-1)>=1) {
+            $c[$i-1]=true;
+            $v=$v-2**($i-1);
+        }
+    }
+    return $c;
+}
+
+function checkCronDate($v) {
+    $c = bin2date($v);
+    $dow = intval(date("N"));
+    if($c[$dow-1] == false) { 
+        return false;
+    }
+    return true;
+}
+
 ?>
