@@ -59,8 +59,8 @@ if(loggedIn()) {
 	<label>Passwort</label>
 	<input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" type="password" name="password" />
 	
-	<button class="w3-btn w3-row <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
-	<a class="w3-btn w3-row w3-margin-top w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-mobile" href="<?php echo $optionsDB['MasterPage']; ?>">Vereinshomepage</a>
+	<button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-mobile" type="submit" name="triggerlogin">Login</button>
+	<a class="w3-btn w3-margin-top w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-mobile" href="<?php echo $optionsDB['MasterPage']; ?>">Vereinshomepage</a>
       </form>
     </div>
     <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
