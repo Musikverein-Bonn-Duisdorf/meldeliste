@@ -137,7 +137,7 @@ class Termin
         return true;
     }
     public function getShifts() {
-        $sql = sprintf("SELECT * FROM `%sSchichten` WHERE `Termin` = %d ORDER BY `Start`;",
+        $sql = sprintf("SELECT * FROM `%sSchichten` WHERE `Termin` = %d ORDER BY `Name`, `Start`;",
             $GLOBALS['dbprefix'],
             $this->Index
             );
