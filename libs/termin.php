@@ -504,7 +504,7 @@ class Termin
             $btn->class="w3-border";
             $btn->class="w3-border-black";
             $btn->class="w3-margin-left";
-            $btn->class="w3-margin-top";
+            /* $btn->class="w3-margin-top"; */
             $btn->class="w3-center";
             $btn->class="w3-col s3 m3 l3";
             $btn->body=$symbols[$i-1];
@@ -572,7 +572,7 @@ class Termin
         $main = new div;
         $main->indent = $indent;
         $main->id="entry".$this->Index;
-        $main->class="w3-card w3-margin";
+        $main->class="w3-card-4 w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
         if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
@@ -749,13 +749,13 @@ class Termin
 
                 $shiftSpacer = new div;
                 $shiftSpacer->indent=$indent;
-                $shiftSpacer->class="w3-margin-top w3-hide-small w3-hide-medium";
+                $shiftSpacer->class="w3-hide-small w3-hide-medium";
                 $shiftSpacer->col(3, 0, 0);
                 $str=$str.$shiftSpacer->print();
 
                 $shiftName = new div;
                 $shiftName->indent=$indent;
-                $shiftName->class="w3-margin-top";
+                /* $shiftName->class="w3-margin-top"; */
                 $shiftName->col(3, 0, 0);
                 $shiftName->bold();
                 $shiftName->body=$s->Name;
@@ -763,7 +763,7 @@ class Termin
 
                 $shiftTime = new div;
                 $shiftTime->indent=$indent;
-                $shiftTime->class="w3-margin-top";
+                /* $shiftTime->class="w3-margin-top"; */
                 $shiftTime->col(3, 0, 0);
                 $shiftTime->body=$s->getTime();
                 $str=$str.$shiftTime->print();

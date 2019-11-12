@@ -57,7 +57,7 @@ class Shift
             $str=sql2timeRaw($this->Start)." - ".sql2time($this->End);
         }
         else {
-            $str=sql2time($this->Start);
+            $str="ab ".sql2time($this->Start);
         }
         return $str;
     }
