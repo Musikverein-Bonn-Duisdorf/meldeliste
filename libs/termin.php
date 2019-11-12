@@ -741,7 +741,7 @@ class Termin
                 
                 $shiftmain = new div;
                 $shiftmain->indent=$indent;
-                $shiftmain->class="w3-container w3-border-top w3-border-black w3-padding";
+                $shiftmain->class="w3-container w3-border-top w3-border-white w3-padding";
                 $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
                 $shiftmain->class=$this->getLineColor($m->Wert);
                 $str=$str.$shiftmain->open();
