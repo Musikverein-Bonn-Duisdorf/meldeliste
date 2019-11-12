@@ -102,7 +102,7 @@ class Log
         );
         $last = new Log;
         $last->getLast();
-        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message)) return true;
+        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message) && $this->User == $last->User) return true;
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
