@@ -16,7 +16,7 @@ if(isset($_POST['letter'])) {
 </div>
 <?php if($state == 1) { ?>
     <div class="w3-container w3-dark-gray">
-	<h3>1. Buchstabe des Nachnamens</h3>
+	<h3>Erster Buchstabe des Nachnamens</h3>
     </div>
     <form class="w3-container w3-row" action="" method="POST">
 	<?php
