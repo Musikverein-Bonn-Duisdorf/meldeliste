@@ -470,7 +470,7 @@ class Termin
             $btn->class="w3-border";
             $btn->class="w3-border-black";
             $btn->class="w3-margin-left";
-            $btn->class="w3-margin-top";
+            /* $btn->class="w3-margin-top"; */
             $btn->class="w3-center";
             $btn->class="w3-col s3 m3 l3";
             $btn->body=$symbols[$i-1];
@@ -592,7 +592,7 @@ class Termin
         $nameDiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
         $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
-        $nameDiv->body=$this->Name;
+        $nameDiv->body="<i class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
         $str=$str.$nameDiv->print();
 
         $startDiv = new div;
@@ -603,6 +603,7 @@ class Termin
 
         $ortDiv = new div;
         $ortDiv->indent=$indent;
+        $ortDiv->class="w3-margin-bottom";
         $ortDiv->col(3, 0, 0);
         $ortDiv->body=$this->Ort1;
         $str=$str.$ortDiv->print();
@@ -763,7 +764,7 @@ class Termin
 
                 $shiftTime = new div;
                 $shiftTime->indent=$indent;
-                /* $shiftTime->class="w3-margin-top"; */
+                $shiftTime->class="w3-margin-bottom";
                 $shiftTime->col(3, 0, 0);
                 $shiftTime->body=$s->getTime();
                 $str=$str.$shiftTime->print();
