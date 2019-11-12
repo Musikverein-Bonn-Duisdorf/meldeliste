@@ -113,9 +113,10 @@ class Usermail {
 
             $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 
-            $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
-        
-            $mail->Send();
+            if($row['Email']) {
+                $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
+                $mail->Send();
+            }
             $mail->clearAddresses();
             $logentry = new Log;
             $logmessage = sprintf("An: %s %s, Betreff: %s, Text: %s",

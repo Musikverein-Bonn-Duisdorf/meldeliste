@@ -79,7 +79,7 @@ case "reminder":
     }
     $datetime = new DateTime('today');
     $today = $datetime->format('Y-m-d');
-    $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s';",
+    $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s' AND `Shifts` = 0;",
     $GLOBALS['dbprefix'],
     $today
     );
@@ -98,7 +98,7 @@ case "reminder":
         $u = new User;
         $u->load_by_id($user['Index']);
         if($u->getRegisterName() == 'keins') continue;
-        $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d';",
+        $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d' AND `Shifts` = 0;",
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $today,
