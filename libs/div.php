@@ -1,7 +1,7 @@
 <?php
 class div
 {
-    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'default' => null, 'emptyBody' => false);
+    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'default' => null, 'emptyBody' => false, 'href' => null);
     public function __get($key) {
         switch($key) {
 	    case 'indent':
@@ -16,6 +16,7 @@ class div
         case 'value':
         case 'type':
         case 'min':
+        case 'href':
         case 'default':
         case 'emptyBody':
             return $this->_data[$key];
@@ -47,6 +48,7 @@ class div
         case 'tag':
         case 'value':
         case 'type':
+        case 'href':
         case 'min':
         case 'default':
             $this->_data[$key] = trim($val);
@@ -104,6 +106,9 @@ class div
         }
         if($this->default != null) {
             $str=$str." default=\"".$this->default."\"";
+        }
+        if($this->href != null) {
+            $str=$str." href=\"".$this->href."\"";
         }
         $str=$str.">\n";
         if($this->body) {
