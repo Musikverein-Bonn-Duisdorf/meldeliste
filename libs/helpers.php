@@ -1,7 +1,7 @@
 <?php
 function loadconfig() {
     $sql = sprintf('SELECT * FROM `%sconfig`;',
-    $GLOBALS['dbprefix']
+		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
@@ -21,7 +21,7 @@ function bool2string($val) {
 
 function instrumentOption($val) {
     $sql = sprintf('SELECT * FROM `%sInstrument` ORDER BY `Register`, `Name`;',
-    $GLOBALS['dbprefix']
+		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
@@ -37,7 +37,7 @@ function instrumentOption($val) {
 
 function VehicleOption($val) {
     $sql = sprintf('SELECT * FROM `%svehicle`;',
-    $GLOBALS['dbprefix']
+		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
@@ -53,7 +53,7 @@ function VehicleOption($val) {
 
 function RegisterOption($val) {
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
-    $GLOBALS['dbprefix']
+		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
@@ -99,7 +99,7 @@ function string2gDate($string) {
 
 function germanDate($string, $monthLetters) {
     if($string == '') {
-return;
+	return;
     }
     $months = array(
         "01" => "Januar",
@@ -123,7 +123,7 @@ return;
         5 => 'Freitag',
         6 => 'Samstag',
         7 => 'Sonntag'
-);
+    );
     $y = substr($string, 0, 4);
     $m = substr($string, 5, 2);
     $d = substr($string, 8, 2);
@@ -148,8 +148,8 @@ function mkAdmin() {
 function validateLink($hash) {
     $_SESSION['userid'] = 0;
     $sql = sprintf("SELECT * FROM `%sUser` WHERE `activeLink` = '%s';",
-    $GLOBALS['dbprefix'],
-    $hash
+		   $GLOBALS['dbprefix'],
+		   $hash
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
@@ -171,8 +171,8 @@ function validateLink($hash) {
 function validateUser($login, $password) {
     $_SESSION['userid'] = 0;
     $sql = sprintf("SELECT * FROM `%sUser` WHERE `login` = '%s';",
-    $GLOBALS['dbprefix'],
-    $login
+		   $GLOBALS['dbprefix'],
+		   $login
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
@@ -195,16 +195,20 @@ function validateUser($login, $password) {
 
 function recordLogin() {
     $sql = sprintf("UPDATE `%sUser` SET `LastLogin` = CURRENT_TIMESTAMP() WHERE `Index` = %d;",
-    $GLOBALS['dbprefix'],
-    $_SESSION['userid']
+		   $GLOBALS['dbprefix'],
+		   $_SESSION['userid']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
 }
 
 function loggedIn() {
-    if(!isset($_SESSION['userid'])) return false;
+    if(!isset($_SESSION['userid'])) {
+	session_destroy();
+	return false;
+    }
     if($_SESSION['userid'] > 0) return true;
+    session_destroy();
     return false;
 }
 
@@ -238,14 +242,14 @@ function sqlerror() {
 
 function meldeWert($val) {
     switch($val) {
-    case 1:
-        return "ja";
-    case 2:
-        return "nein";
-    case 3:
-        return "vielleicht";
-    default:
-        break;
+	case 1:
+            return "ja";
+	case 2:
+            return "nein";
+	case 3:
+            return "vielleicht";
+	default:
+            break;
     }
 }
 
