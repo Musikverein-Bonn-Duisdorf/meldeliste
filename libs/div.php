@@ -67,10 +67,10 @@ class div
             $str=$str." l".$sizeL;
         }
         if($sizeM) {
-            $str=$str." m".$sizeL;
+            $str=$str." m".$sizeM;
         }
         if($sizeS) {
-            $str=$str." s".$sizeL;
+            $str=$str." s".$sizeS;
         }
         $this->class=$str;
     }
