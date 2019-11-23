@@ -111,11 +111,12 @@ class Usermail {
             $anrede = "Hallo ".$row['Vorname'].",";
             $link= $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
-            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['commonColors']['submit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
+            $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 
-            $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
-        
-            $mail->Send();
+            if($row['Email']) {
+                $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
+                $mail->Send();
+            }
             $mail->clearAddresses();
             $logentry = new Log;
             $logmessage = sprintf("An: %s %s, Betreff: %s, Text: %s",
@@ -127,6 +128,6 @@ class Usermail {
             $logentry->email($logmessage);
             $i++;
         }
-        echo "<div class=\"w3-container ".$GLOBALS['commonColors']['mailSentMsg']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
+        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
     }
 }

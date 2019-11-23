@@ -10,6 +10,11 @@ mkAdmin();
 
 switch($_GET['cmd']) {
 case "newAppmnts":
+    echo "newAppmnts...\n";
+    if($GLOBALS['optionsDB']['cronSendnewAppmnts'] == 0) {
+        echo "Tomorrow not activated.\n";
+        break;
+    }
     $datetime = new DateTime('today');
     $today = $datetime->format('Y-m-d');
     $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND `Datum` >= '%s';",
@@ -28,9 +33,9 @@ case "newAppmnts":
         $i++;
     }
     if($i>1)
-        $text = $text."folgende Termine vormerken.\n";
+        $text = $text."bitte folgende Termine vormerken.\n";
     else {
-        $text = $text."folgenden Termin vormerken.\n";
+        $text = $text."bitte folgenden Termin vormerken.\n";
     }
     if($i) {
         $mail = new Usermail;
@@ -39,6 +44,11 @@ case "newAppmnts":
     }
     break;
 case "tomorrow":
+    echo "tomorrow...\n";
+    if($GLOBALS['optionsDB']['cronSendTomorrow'] == 0) {
+        echo "Tomorrow not activated.\n";
+        break;
+    }
     $datetime = new DateTime('tomorrow');
     $tomorrow = $datetime->format('Y-m-d');
 
@@ -55,21 +65,11 @@ case "tomorrow":
     break;
 case "reminder":
     echo "reminder...\n";
-    if($GLOBALS['optionsDB']['cronSendReminder'] == 0) {#
+    if($GLOBALS['optionsDB']['cronSendReminder'] == 0) {
         echo "Reminder not activated.\n";
         break;
     }
-    $v = $GLOBALS['optionsDB']['cronSendReminderDays'];
-    $c=array(false, false, false, false, false, false, false);
-    for($i=7; $i>=1; $i--) {
-        if($v/2**($i-1)>=1) {
-            $c[$i-1]=true;
-            $v=$v-2**($i-1);
-        }
-    }
-    $dow = intval(date("N"));
-    if($c[$dow-1] == false) { 
-        echo "No reminder today ".$dow.".\n";
+    if(!checkCronDate($GLOBALS['optionsDB']['cronSendReminderDays'])) { 
         break;
     }
     $time = date("H:i");
@@ -79,7 +79,7 @@ case "reminder":
     }
     $datetime = new DateTime('today');
     $today = $datetime->format('Y-m-d');
-    $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s';",
+    $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s' AND `Shifts` = 0;",
     $GLOBALS['dbprefix'],
     $today
     );
@@ -98,7 +98,7 @@ case "reminder":
         $u = new User;
         $u->load_by_id($user['Index']);
         if($u->getRegisterName() == 'keins') continue;
-        $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d';",
+        $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d' AND `Shifts` = 0;",
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $today,
@@ -117,7 +117,7 @@ case "reminder":
             else {
                 $body = "Es fehlen noch ".$missing." R&uuml;ckmeldungen von dir.\n\n";
             }
-            $mail->singleUser($u->Index, $GLOBALS['commonStrings']['MailReminderSubject'], $GLOBALS['commonStrings']['MailReminderBody']."\n".$body.$GLOBALS['optionsDB']['MailGreetings']);
+            $mail->singleUser($u->Index, $GLOBALS['optionsDB']['SubjectReminder'], $body.$GLOBALS['optionsDB']['MailGreetings']);
         }
     }
     break;
