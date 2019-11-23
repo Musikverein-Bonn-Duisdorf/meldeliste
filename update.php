@@ -158,7 +158,7 @@ $type=array(
     "days",
     "time",
     "bool",
-    "text"
+    "text",
     "bool",
     "time",
 );
