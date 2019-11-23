@@ -12,6 +12,7 @@ include "common/header.php";
 </div>
 <?php
 $now = date("Y-m-d");
+$published="";
 if(!$_SESSION['admin']) {
     $published=" AND `published` > 0";
 }
