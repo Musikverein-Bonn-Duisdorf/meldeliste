@@ -8,21 +8,27 @@ include "common/header.php";
 <script src="js/melde.js"></script>
 <script src="js/meldeshift.js"></script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-<h2>Bevorstehende Termine</h2>
+    <h2>Bevorstehende Termine</h2>
 </div>
 <?php
 $now = date("Y-m-d");
+if(!$_SESSION['admin']) {
+    $published=" AND `published` > 0";
+}
 if($GLOBALS['optionsDB']['entriesMainPage'] > 0) {
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit` LIMIT %s;',
-    $GLOBALS['dbprefix'],
-    $now,
-    $GLOBALS['optionsDB']['entriesMainPage']
+    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s"%s ORDER BY `Datum`, `Uhrzeit` LIMIT %s;',
+		   $GLOBALS['dbprefix'],
+		   $now,
+		   $published,
+		   $GLOBALS['optionsDB']['entriesMainPage']
     );
 }
 else {
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND `published` > 0 ORDER BY `Datum`, `Uhrzeit`;',
-    $GLOBALS['dbprefix'],
-    $now);
+    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s"%s ORDER BY `Datum`, `Uhrzeit`;',
+		   $GLOBALS['dbprefix'],
+		   $now,
+		   $published
+    );
 }
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
