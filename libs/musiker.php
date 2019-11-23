@@ -93,8 +93,8 @@ class User
         $this->iName,
         $this->Email,
         bool2string($this->getMail),
-        bool2string($this->Admim),
-        $this->RegisterLead,
+        bool2string($this->Admin),
+        bool2string($this->RegisterLead),
         $this->LastLogin
         );
     }
@@ -162,13 +162,13 @@ class User
             if($arbPW) {
                 $this->singleUsePW(1);
                 $this->update();
-                $mail->singleUser($this->Index, $GLOBALS['commonStrings']['newPWSubject'], $GLOBALS['commonStrings']['newPWText']."\n\nBenutzername: ".$this->login."\nPasswort: ".$password);
+                $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "ein neues Passwort wurde erstellt. Beim n&auml;chsten Login wirst du aufgefordert, dieses zu &auml;ndern.\nDu kannst dich nun unter\n\n<a href=\"".$GLOBALS['optionsDB']['WebSiteURL']."\">".$GLOBALS['optionsDB']['WebSiteURL']."</a>\n\neinloggen.\nBenutzername: ".$this->login."\nPasswort: ".$password);
             }
             else {
                 $this->generateLink();
                 $this->singleUsePW(0);
                 $this->update();
-                $mail->singleUser($this->Index, $GLOBALS['commonStrings']['PWChangeSubject'], $GLOBALS['commonStrings']['PWChangeText']."\n\nBenutzername: ".$this->login);
+                $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "dein neues Passwort wurde gespeichert. Damit ist auch der alte Login-Link ungültig. Bitte nutze ab sofort den Link unter dieser Email.\n\nBenutzername: ".$this->login);
             }
         }
     }
@@ -263,9 +263,9 @@ class User
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-        $this->_data['Index'] = null;
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
+        $this->_data['Index'] = null;
         return true;
     }
     public function fill_from_array($row) {
@@ -291,10 +291,10 @@ class User
 
     public function printTableLine() {
         if($this->Mitglied) {
-            echo "<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
+            echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
         }
         else {
-            echo "<div class=\"w3-row ".$GLOBALS['commonColors']['Hover']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";            
+            echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
         echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
@@ -352,7 +352,7 @@ class User
       }
       ?>
       <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
-      <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['commonColors']['BtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
+      <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
       </form>
       </div>
       </div>

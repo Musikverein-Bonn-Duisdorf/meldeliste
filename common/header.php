@@ -22,13 +22,13 @@
               ?>
               <meta http-equiv="refresh" content="2; URL='login.php'" />
               <?php
-              die("<div class=\"w3-panel ".$commonColors['notLoggedIn']."\"><h2>Nicht eingeloggt...</h2></div>");
+              die("<div class=\"w3-panel ".$optionsDB['colorLogWarning']."\"><h2>Nicht eingeloggt...</h2></div>");
           }
           if($_SESSION['singleUsePW']) {
               ?>
               <meta http-equiv="refresh" content="0; URL='changePW.php'" />
               <?php
-              die("<div class=\"w3-panel ".$commonColors['changePWMsg']."\"><h2>Passwort &auml;ndern...</h2></div>");
+              die("<div class=\"w3-panel ".$optionsDB['colorLogWarning']."\"><h2>Passwort &auml;ndern...</h2></div>");
           }
       ?>
       <meta charset="utf-8">
