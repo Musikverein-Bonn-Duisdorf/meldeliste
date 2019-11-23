@@ -6,7 +6,7 @@ include "common/header.php";
 requireAdmin();
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-<h2>Updater</h2>
+    <h2>Updater</h2>
 </div>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>"></div>
 <?php
@@ -43,6 +43,8 @@ $para=array(
     'cronSendnewAppmnts',
     'cronSendnewAppmntsDays',
     'cronSendnewAppmntsTime',
+    'cronSendnewAppmntsInMail',
+    'cronSendnewAppmntsText',
     'cronSendTomorrow',
     'cronSendTomorrowTime',
 );
@@ -79,6 +81,8 @@ $desc=array(
     "Sende Nachricht, wenn neue Termine erstellt wurden.",
     "Sende Nachricht, wenn neue Termine erstellt wurden an folgenden Tagen.",
     "Sende Nachricht, wenn neue Termine erstellt zu folgender Uhrzeit.",
+    "Zeige neue Termine in der Email.",
+    "Text der Email mit neuen Terminen.",
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht.",
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht zu folgender Uhrzeit.",
 );
@@ -115,6 +119,8 @@ $value=array(
     0,
     "64",
     "14:00",
+    1,
+    "bitte folgende neue Termine vormerken",
     0,
     "14:00",
 );
@@ -152,33 +158,35 @@ $type=array(
     "days",
     "time",
     "bool",
+    "text"
+    "bool",
     "time",
 );
 
-         $N = count($para);
-         for($i=0; $i<$N; $i++) {
-             $sql = sprintf("SELECT * FROM `%sconfig` WHERE `Parameter` = '%s';",
-             $GLOBALS['dbprefix'],
-             $para[$i]
-             );
-             $dbr = mysqli_query($GLOBALS['conn'], $sql);
-             sqlerror();
-             $row = mysqli_fetch_array($dbr);
-             if($row['Parameter'] != $para[$i]) {
-                 $sql = sprintf("INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '%s', '%s', '%s');",
-                 $GLOBALS['dbprefix'],
-                 $para[$i],
-                 $value[$i],
-                 $type[$i],
-                 $desc[$i]
-                 );
-                 echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
-                 mysqli_query($GLOBALS['conn'], $sql);
-             }
-             else {
-                 echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogInfo']."\"><div class=\"w3-col l2 m2 s2\">Skip</div><div class=\"w3-col l10 m10 s10\">".$para[$i]."</div></div>";
-             }
-         }
+$N = count($para);
+for($i=0; $i<$N; $i++) {
+    $sql = sprintf("SELECT * FROM `%sconfig` WHERE `Parameter` = '%s';",
+		   $GLOBALS['dbprefix'],
+		   $para[$i]
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $row = mysqli_fetch_array($dbr);
+    if($row['Parameter'] != $para[$i]) {
+        $sql = sprintf("INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '%s', '%s', '%s');",
+                       $GLOBALS['dbprefix'],
+                       $para[$i],
+                       $value[$i],
+                       $type[$i],
+                       $desc[$i]
+        );
+        echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
+        mysqli_query($GLOBALS['conn'], $sql);
+    }
+    else {
+        echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogInfo']."\"><div class=\"w3-col l2 m2 s2\">Skip</div><div class=\"w3-col l10 m10 s10\">".$para[$i]."</div></div>";
+    }
+}
 ?>
 
 <?php
