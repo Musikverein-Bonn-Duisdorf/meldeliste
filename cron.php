@@ -36,7 +36,7 @@ switch($_GET['cmd']) {
 	if($i) {
             $mail = new Usermail;
             $mail->subject("neue Termine");
-            $mail->send($GLOBALS['optionsDB']['cronSendnewAppmntsText'].$Appmnts."\n".$GLOBALS['optionsDB']['MailGreetings']);
+            $mail->send($GLOBALS['optionsDB']['cronSendnewAppmntsText'].$Appmnts."\n\n".$GLOBALS['optionsDB']['MailGreetings']);
 	}
 	break;
     case "tomorrow":
