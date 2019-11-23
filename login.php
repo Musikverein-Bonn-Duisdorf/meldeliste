@@ -16,7 +16,7 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>
-  <body class="<?php echo $GLOBALS['optionsDB']['ColorBackground']; ?>">
+  <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?>">
     <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
       <h1><?php echo $optionsDB['WebSiteName']; ?></h1>
     </div>
