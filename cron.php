@@ -91,30 +91,30 @@ switch($_GET['cmd']) {
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
 	while($user = mysqli_fetch_array($dbr)) {
-            $u = new User;
-            $u->load_by_id($user['Index']);
-            if($u->getRegisterName() == 'keins') continue;
-            $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d' AND `Shifts` = 0;",
-			   $GLOBALS['dbprefix'],
-			   $GLOBALS['dbprefix'],
-			   $today,
-			   $user['Index']
-            );
-            $dbr2 = mysqli_query($conn, $sql);
-            sqlerror();
-            $row2 = mysqli_fetch_array($dbr2);
-            $missing = $Nappmnts - $row2['cnt'];
-            echo $u->getName()." (".$u->getRegisterName().") ".$row2['cnt']."/".$Nappmnts.", missing: ".$missing."<br />\n";
-            if($missing > 0) {
-		$mail = new Usermail;
-		if($missing == 1) {
-                    $body = "Es fehlt noch eine R&uuml;ckmeldung von dir.\n\n";
-		}
-		else {
-                    $body = "Es fehlen noch ".$missing." R&uuml;ckmeldungen von dir.\n\n";
-		}
-		$mail->singleUser($u->Index, $GLOBALS['optionsDB']['SubjectReminder'], $body.$GLOBALS['optionsDB']['MailGreetings']);
+        $u = new User;
+        $u->load_by_id($user['Index']);
+        if($u->getRegisterName() == 'keins') continue;
+        $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published`, `Shifts` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d' AND `Shifts` = 0;",
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $today,
+        $user['Index']
+        );
+        $dbr2 = mysqli_query($conn, $sql);
+        sqlerror();
+        $row2 = mysqli_fetch_array($dbr2);
+        $missing = $Nappmnts - $row2['cnt'];
+        echo $u->getName()." (".$u->getRegisterName().") ".$row2['cnt']."/".$Nappmnts.", missing: ".$missing."<br />\n";
+        if($missing > 0) {
+            $mail = new Usermail;
+            if($missing == 1) {
+                $body = "Es fehlt noch eine R&uuml;ckmeldung von dir.\n\n";
             }
+            else {
+                $body = "Es fehlen noch ".$missing." R&uuml;ckmeldungen von dir.\n\n";
+            }
+            $mail->singleUser($u->Index, $GLOBALS['optionsDB']['SubjectReminder'], $body.$GLOBALS['optionsDB']['MailGreetings']);
+        }
 	}
 	break;
     default:
