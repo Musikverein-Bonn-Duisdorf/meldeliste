@@ -22,6 +22,7 @@ switch($_GET['cmd']) {
 		       $today);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
+    if(!$dbr) break;
 	$Appmnts = '';
 	$i=0;
 	while($row = mysqli_fetch_array($dbr)) {
@@ -53,6 +54,7 @@ switch($_GET['cmd']) {
 		       $tomorrow);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
+    if(!$dbr) break;
 	while($row = mysqli_fetch_array($dbr)) {
             $n = new Termin;
             $n->load_by_id($row['Index']);
@@ -81,6 +83,7 @@ switch($_GET['cmd']) {
 	);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
+    if(!$dbr) break;
 	$row = mysqli_fetch_array($dbr);
 	$Nappmnts = $row['cnt'];
 
@@ -90,6 +93,7 @@ switch($_GET['cmd']) {
 	);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
+    if(!$dbr) break;
 	while($user = mysqli_fetch_array($dbr)) {
         $u = new User;
         $u->load_by_id($user['Index']);
@@ -101,6 +105,7 @@ switch($_GET['cmd']) {
         $user['Index']
         );
         $dbr2 = mysqli_query($conn, $sql);
+        if(!$dbr2) continue;
         sqlerror();
         $row2 = mysqli_fetch_array($dbr2);
         $missing = $Nappmnts - $row2['cnt'];
