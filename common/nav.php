@@ -1,7 +1,10 @@
 <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
 <h1 class="w3-hide-small"><?php echo $optionsDB['WebSiteName']; ?></h1>
 <h1 class="w3-hide-large w3-hide-medium"><?php echo $optionsDB['WebSiteNameShort']; ?></h1>
-<p><?php echo $_SESSION['username'] ?></p>
+<p><?php
+echo $_SESSION['username'];
+    if($_SESSION['admin']) echo " (Admin)";
+?></p>
 </div>
 <div class="w3-bar <?php echo $optionsDB['colorNav']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
