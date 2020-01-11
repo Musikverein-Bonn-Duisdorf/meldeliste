@@ -473,15 +473,26 @@ class Termin
         for($i=1; $i<=$N; $i++) {
             $btn = new div;
             $btn->indent = $indent;
+            $btn->class="w3-col s3 m3 l3";
+            $btn->class="w3-margin-left";
+            if($this->open == false) {
+                if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
+                    if($i != 2) {
+                        $str=$str.$btn->print();
+                        continue;
+                    }
+                }
+                else {
+                    $str=$str.$btn->print();
+                    continue;
+                }
+            }
             $btn->tag="button";
-
             $btn->class="w3-btn";
             $btn->class="w3-border";
             $btn->class="w3-border-black";
-            $btn->class="w3-margin-left";
             /* $btn->class="w3-margin-top"; */
             $btn->class="w3-center";
-            $btn->class="w3-col s3 m3 l3";
             $btn->body=$symbols[$i-1];
 
             if($val && $val != $i) {
@@ -510,12 +521,24 @@ class Termin
             $btn->tag="button";
 
             $btn->class="w3-btn";
+            $btn->class="w3-col s3 m3 l3";
+            $btn->class="w3-margin-left";
+            if($this->open == false) {
+                if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
+                    if($i != 2) {
+                        $str=$str.$btn->print();
+                        continue;
+                    }
+                }
+                else {
+                    $str=$str.$btn->print();
+                    continue;
+                }
+            }
             $btn->class="w3-border";
             $btn->class="w3-border-black";
-            $btn->class="w3-margin-left";
             /* $btn->class="w3-margin-top"; */
             $btn->class="w3-center";
-            $btn->class="w3-col s3 m3 l3";
             $btn->body=$symbols[$i-1];
 
             if($val && $val != $i) {
@@ -621,17 +644,15 @@ class Termin
         $btnDiv->indent = $indent;
         $btnDiv->class="w3-col l2";
         $btnDiv->class="w3-row w3-mobile";
-        if($this->open) {
-            if($this->Shifts) {
-                $str=$str.$btnDiv->print();
-            }
-            else {
-                $str=$str.$btnDiv->open();
-                $indent++;
-                $str=$str.$this->makeButtons(3, $indent, $this->Wert);
-                $indent--;
-                $str=$str.$btnDiv->close();
-            }
+        if($this->Shifts) {
+            $str=$str.$btnDiv->print();
+        }
+        else {
+            $str=$str.$btnDiv->open();
+            $indent++;
+            $str=$str.$this->makeButtons(3, $indent, $this->Wert);
+            $indent--;
+            $str=$str.$btnDiv->close();
         }
         $str=$str.$this->statusMailBtn($indent);
         $str=$str.$mainline->close();
