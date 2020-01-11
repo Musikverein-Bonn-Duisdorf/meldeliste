@@ -475,7 +475,7 @@ class Termin
             $btn->indent = $indent;
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if(!$this->open && !SESSION['admin']) {
+            if($this->open == false && SESSION['admin'] == false) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -520,7 +520,6 @@ class Termin
             $btn->indent = $indent;
             $btn->tag="button";
 
-            $btn->class="w3-btn";
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
             if(!$this->open && !SESSION['admin']) {
@@ -535,6 +534,7 @@ class Termin
                     continue;
                 }
             }
+            $btn->class="w3-btn";
             $btn->class="w3-border";
             $btn->class="w3-border-black";
             /* $btn->class="w3-margin-top"; */
