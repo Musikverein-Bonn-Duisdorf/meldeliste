@@ -73,11 +73,12 @@ if($GLOBALS['optionsDB']['showTravelTime']) {
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
     <input class="w3-check" type="checkbox" name="published" value="1" <?php if($fill && (bool)$n->published) echo "checked"; ?>>
     <label>sichtbar</label>
-</div>
+    </div>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
+    <input type="hidden" name="open" value="0">
     <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo "checked"; ?>>
     <label>Anmeldung offen</label>
-</div>
+    </div>
     <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="insert" value="speichern">
     <?php
       if($fill) {

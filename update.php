@@ -47,6 +47,7 @@ $para=array(
     'cronSendnewAppmntsText',
     'cronSendTomorrow',
     'cronSendTomorrowTime',
+    'AppmntAlwaysDecline',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -85,6 +86,7 @@ $desc=array(
     "Text der Email mit neuen Terminen.",
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht.",
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht zu folgender Uhrzeit.",
+    "Man kann sich auch von bereits geschlossenen Anmeldungen abmelden.",
 );
 $value=array(
     "w3-opacity",
@@ -123,6 +125,7 @@ $value=array(
     "bitte folgende neue Termine vormerken",
     0,
     "14:00",
+    1,
 );
 $type=array(
     "string",
@@ -161,6 +164,7 @@ $type=array(
     "text",
     "bool",
     "time",
+    "bool",
 );
 
 $N = count($para);
