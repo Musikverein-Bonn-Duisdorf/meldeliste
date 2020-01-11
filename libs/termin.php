@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -19,6 +19,7 @@ class Termin
 	    case 'Beschreibung':
         case 'Shifts':
 	    case 'published':
+	    case 'open':
 	    case 'Wert':
 	    case 'Children':
 	    case 'Guests':
@@ -57,6 +58,7 @@ class Termin
 	    case 'Auftritt':
 	    case 'Shifts':
 	    case 'published':
+	    case 'open':
 	    case 'new':
             $this->_data[$key] = (bool)$val;
             break;
@@ -75,7 +77,7 @@ class Termin
             $row = mysqli_fetch_array($dbr);
             $this->vName = $row['Name'];
         }
-        return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Abfahrt: %s, mit: %s, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, Schichten: %s, sichtbar: %s",
+        return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Abfahrt: %s, mit: %s, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, Schichten: %s, sichtbar: %s, offen: %s",
         $this->Index,
         $this->Datum,
         $this->Uhrzeit,
@@ -90,7 +92,8 @@ class Termin
         $this->Ort4,
         $this->Beschreibung,
         bool2string($this->Shifts),
-        bool2string($this->published)
+        bool2string($this->published),
+        bool2string($this->open)
         );
     }
     public function save() {
@@ -113,7 +116,7 @@ class Termin
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`) VALUES ("%s", %s, %s, %s, "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`) VALUES ("%s", %s, %s, %s, "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
@@ -128,7 +131,8 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
-        $this->published
+        $this->published,
+        $this->open
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -184,7 +188,7 @@ class Termin
         return 0;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `new` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
@@ -200,6 +204,7 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
         $this->published,
+        $this->open,
         $this->new,
         $this->Index
         );
@@ -243,6 +248,10 @@ class Termin
 
         $this->_data['Index'] = null;
         return true;
+    }
+    public function close() {
+        $this->open = 0;
+        $this->save();
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
@@ -612,16 +621,17 @@ class Termin
         $btnDiv->indent = $indent;
         $btnDiv->class="w3-col l2";
         $btnDiv->class="w3-row w3-mobile";
-        
-        if($this->Shifts) {
-            $str=$str.$btnDiv->print();
-        }
-        else {
-            $str=$str.$btnDiv->open();
-            $indent++;
-            $str=$str.$this->makeButtons(3, $indent, $this->Wert);
-            $indent--;
-            $str=$str.$btnDiv->close();
+        if($this->open) {
+            if($this->Shifts) {
+                $str=$str.$btnDiv->print();
+            }
+            else {
+                $str=$str.$btnDiv->open();
+                $indent++;
+                $str=$str.$this->makeButtons(3, $indent, $this->Wert);
+                $indent--;
+                $str=$str.$btnDiv->close();
+            }
         }
         $str=$str.$this->statusMailBtn($indent);
         $str=$str.$mainline->close();
