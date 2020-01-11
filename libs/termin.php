@@ -475,7 +475,7 @@ class Termin
             $btn->indent = $indent;
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if($this->open == false) {
+            if(!$this->open && !SESSION['admin']) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -523,7 +523,7 @@ class Termin
             $btn->class="w3-btn";
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if($this->open == false) {
+            if(!$this->open && !SESSION['admin']) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -870,6 +870,9 @@ class Termin
         if($_SESSION['admin']) {
             $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."\t\t\t<div class=\"w3-col l3\">sichtbar:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>\n";
+            $str=$str."\t\t</div>\n";
+            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."\t\t\t<div class=\"w3-col l3\">Anmeldung offen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->open)."</b></div>\n";
             $str=$str."\t\t</div>\n";
             $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."\t\t\t<div class=\"w3-col l3\">neu:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->new)."</b></div>\n";
