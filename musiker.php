@@ -52,6 +52,10 @@ $nMusiker = $row['Count'];
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
+<div>
+<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterMusiker()">
+</div>
+<div id="Liste">
 <?php
 $sql = sprintf('SELECT `Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
 $GLOBALS['dbprefix'],
@@ -68,6 +72,28 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printTableLine();
 }
 ?>
+</div>
+<script>
+function filterMusiker() {
+  var input, filter, table, tr, td, i;
+  input = document.getElementById("filterString");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("Liste");
+  tr = table.getElementsByTagName("div");
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("div")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+</script>
+
 <?php }
 else {
 ?>
