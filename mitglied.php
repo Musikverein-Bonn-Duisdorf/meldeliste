@@ -17,6 +17,10 @@ $nMusiker = $row['Count'];
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Liste aller aktiven Mitglieder (<?php echo $nMusiker; ?>)</h2>
 </div>
+<div>
+<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterMusiker()">
+</div>
+<div id="Liste">
 <?php
 $sql = sprintf('SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
 $GLOBALS['dbprefix']
@@ -29,6 +33,8 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->printTableLine();
 }
 ?>
+</div>
+<script src="js/filterMusiker.js"></script>
 <?php }
 else {
 ?>
