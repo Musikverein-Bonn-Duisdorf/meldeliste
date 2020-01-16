@@ -10,7 +10,7 @@ requireAdmin();
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(CASE WHEN `Type` = 0 THEN 1 END) AS `NumLogs0`, COUNT(CASE WHEN `Type` = 1 THEN 1 END) AS `NumLogs1`, COUNT(CASE WHEN `Type` = 2 THEN 1 END) AS `NumLogs2`, COUNT(CASE WHEN `Type` = 3 THEN 1 END) AS `NumLogs3`, COUNT(CASE WHEN `Type` = 4 THEN 1 END) AS `NumLogs4`, COUNT(CASE WHEN `Type` = 5 THEN 1 END) AS `NumLogs5`, COUNT(CASE WHEN `Type` = 6 THEN 1 END) AS `NumLogs6`, COUNT(CASE WHEN `Type` = 7 THEN 1 END) AS `NumLogs7` FROM  `%sLog` WHERE `Type` < 6 GROUP BY DATE(`Timestamp`) ORDER BY `LogDate`;',
+$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(CASE WHEN `Type` = 0 THEN 1 END) AS `NumLogs0`, COUNT(CASE WHEN `Type` = 1 THEN 1 END) AS `NumLogs1`, COUNT(CASE WHEN `Type` = 2 THEN 1 END) AS `NumLogs2`, COUNT(CASE WHEN `Type` = 3 THEN 1 END) AS `NumLogs3`, COUNT(CASE WHEN `Type` = 4 THEN 1 END) AS `NumLogs4`, COUNT(CASE WHEN `Type` = 5 THEN 1 END) AS `NumLogs5`, COUNT(CASE WHEN `Type` = 6 THEN 1 END) AS `NumLogs6`, COUNT(CASE WHEN `Type` = 7 THEN 1 END) AS `NumLogs7` FROM  `%sLog` GROUP BY DATE(`Timestamp`) ORDER BY `LogDate` DESC;',
 $GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);
