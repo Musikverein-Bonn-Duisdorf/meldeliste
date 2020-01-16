@@ -24,7 +24,7 @@ $plotline = $plotline."]";
 ?>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-    google.charts.load('current', {packages: ['corechart', 'line']});
+    google.charts.load('current', {packages: ['corechart', 'line'], 'language': 'de'});
 google.charts.setOnLoadCallback(drawBasic);
 
 function drawBasic() {
