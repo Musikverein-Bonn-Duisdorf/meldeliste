@@ -22,15 +22,22 @@ Release: <?php echo "<b>".$GLOBALS['version']['String']."</b> (".$GLOBALS['versi
 <ul>
 	<li>
 		<p><i class="fas fa-home"></i> - Home</p>
-		<p>Startseite der Meldeliste - hier werden die n&auml;chsten Termine angezeigt.</p>
+		<p>Startseite der Meldeliste - hier werden die n&auml;chsten Termine angezeigt.<br>
+		Mit folgenden Buttons können die Meldungen gesetzt werden:</p>
+		<table>
+		<tr><td width=20px></td><td class="s3 m3 l3 w3-margin-left w3-border w3-border-black w3-center w3-green" style="width:100px"><b>&#10004;</b></td><td>Komme</td></tr>
+		<tr><td width=20px></td><td class="s3 m3 l3 w3-margin-left w3-border w3-border-black w3-center w3-red" style="width:100px"><b>&#10008;</b></td><td>Komme nicht</td></tr>
+		<tr><td width=20px></td><td class="s3 m3 l3 w3-margin-left w3-border w3-border-black w3-center w3-blue" style="width:100px"><b>?&nbsp;</b></td><td>Bin noch unsicher</td></tr>
+		</table>
 	</li>
-<?php
-if($GLOBALS['optionsDB']['showAppmntPage']) {
+	<p>Eine große Planungshilfe wäre es, wenn Zu- und Absagen wie auch "unsicher"-Meldungen möglichst <b>vollständig</b> eingetragen werden.</p>
+<?php if($GLOBALS['optionsDB']['showAppmntPage']) {
     ?>
 	<li>
 		<p><i class="far fa-calendar-alt"></i> - Termine</p>
 		<p>Hier werde alle zuk&uuml;nftigen Termine angezeigt.</p>
 	</li>
+	<p>(Auch hier können die Medldungen gesetzt werden.)</p>
     <?php
 }
 ?>
