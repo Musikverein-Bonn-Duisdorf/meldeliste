@@ -5,7 +5,7 @@ $_SESSION['adminpage']=true;
 include "common/header.php";
 
 if($_SESSION['admin']) {
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 0 AND `Instrument` > 0;',
+    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 0 AND `Instrument` > 0 AND `Deleted` != 1;',
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($conn, $sql);

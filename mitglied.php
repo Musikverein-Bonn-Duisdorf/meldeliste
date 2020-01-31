@@ -6,7 +6,7 @@ include "common/header.php";
 requireAdmin();
 
 if($_SESSION['admin']) {
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0;',
+    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1;',
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($conn, $sql);
