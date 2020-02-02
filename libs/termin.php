@@ -891,7 +891,112 @@ class Termin
         return $this->getResponseLine($u->getRegister());
     }
     public function printResponseLine() {
+        if($this->Shifts) return $this->printShiftResponseLine();
         return $this->getResponseLine(0);
+    }
+    public function printShiftResponseLine() {
+        $str="";
+        $indent=1;
+
+        $maindiv = new div;
+        $maindiv->indent=$indent;
+        $maindiv->class="w3-container w3-margin-top w3-border-top w3-border-black w3-center";
+        $maindiv->class=$GLOBALS['optionsDB']['colorTitleBar'];
+        $maindiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
+        $str=$str.$maindiv->open();
+        $indent++;
+        
+        $mainheader = new div;
+        $mainheader->tag="h3";
+        $mainheader->body=$this->Name;
+        $mainheader->indent=$indent;
+        $str=$str.$mainheader->print();
+
+        $mainheader = new div;
+        $mainheader->tag="p";
+        $mainheader->body=germanDate($this->Datum, 1);
+        $mainheader->indent=$indent;
+        $str=$str.$mainheader->print();
+
+        $str=$str.$maindiv->close();
+        $indent--;
+
+        $content = new div;
+        $content->indent=$indent;
+        $content->class="w3-container w3-border-bottom w3-border-black";
+        $content->onclick="document.getElementById('id".$this->Index."').style.display='block'";
+        $str=$str.$content->open();
+        $indent++;
+        
+        $shifts = $this->getShifts();
+        for($i=0; $i<count($shifts); $i++) {
+            $s = new Shift;
+            $s->load_by_id($shifts[$i]);
+            $shift = new div;
+            $shift->class="w3-row";
+            $shift->open();
+            
+            $shiftname = new div;
+            $shiftname->classs="w3-col l3 m3 s3";
+            $shiftname->body=$s->Name;
+            $shiftname->bold();
+            $str=$str.$shiftname->print();
+
+            $shifttime = new div;
+            $shifttime->classs="w3-col l3 m3 s3";
+            $shifttime->body=$s->getTime();
+            $str=$str.$shifttime->print();
+
+            $shift->close();
+}
+                
+        $str=$str.$content->close();
+        $indent--;
+
+        $modal = new div;
+        $modal->indent=$indent;
+        $modal->id="id".$this->Index;
+        $modal->class="w3-modal";
+        $str=$str.$modal->open();
+        $indent++;
+        
+        $modalcontent = new div;
+        $modalcontent->indent=$indent;
+        $modalcontent->class="w3-modal-content";
+        $str=$str.$modalcontent->open();
+        $indent++;
+
+        $modalheader = new div;
+        $modalheader->tag="header";
+        $modalheader->class="w3-container";
+        $modalheader->class=$GLOBALS['optionsDB']['colorTitleBar'];
+        $modalheader->indent=$indent;
+        $str=$str.$modalheader->open();
+
+        $modalclose = new div;
+        $modalclose->tag="span";
+        $modalclose->class="w3-button w3-display-topright";
+        $modalclose->onclick="document.getElementById('id".$this->Index."').style.display='none'";
+        $modalclose->body="&times;";
+        $indent++;
+        $modalclose->indent=$indent;
+        $str=$str.$modalclose->print();
+
+        $modaltitle = new div;
+        $modaltitle->tag="h2";
+        $modaltitle->body=$this->Name;
+        $modaltitle->indent=$indent;
+        $str=$str.$modaltitle->print();
+
+        $str=$str.$modalheader->close();
+        $indent--;
+
+        $str=$str.$modalcontent->close();
+        $indent--;
+        $str=$str.$modal->close();
+        $indent--;
+
+        return $str;
     }
     public function getResponseLine($filterregister) {
         if($this->vName == "Bus") {
