@@ -54,15 +54,15 @@ class Shift
     }
     public function getTime() {
         if($this->End) {
-            $str=sql2timeRaw($this->Start)." - ".sql2time($this->End);
+            $str=sql2timeRaw($this->Start)." - ".sql2timeRaw($this->End);
         }
         else {
-            $str="ab ".sql2time($this->Start);
+            $str="ab ".sql2timeRaw($this->Start);
         }
         return $str;
     }
     public function getMeldungen() {
-        $sql = sprintf('SELECT * FROM `%sSchichtmeldung` WHERE `Shift` = %d;',
+        $sql = sprintf('SELECT * FROM `%sSchichtmeldung` WHERE `Shift` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -74,10 +74,24 @@ class Shift
         }
         return $meldungen;
     }
+    public function getMeldungenUser($val) {
+        $user = array();
+        $meldungen = $this->getMeldungen();
+        for($i=0; $i<count($meldungen); $i++) {
+            $m = new Shiftmeldung;
+            $m->load_by_id($meldungen[$i]);
+            if($m->Wert == $val) {
+                $u = new User;
+                $u->load_by_id($m->User);
+                array_push($user, $u->getName());
+            }
+        }
+        return $user;
+    }
     public function getMeldungenVal($val) {
         $r = 0;
         $meldungen = $this->getMeldungen();
-        for($i=0; $i<=count($meldungen); $i++) {
+        for($i=0; $i<count($meldungen); $i++) {
             $m = new Shiftmeldung;
             $m->load_by_id($meldungen[$i]);
             if($m->Wert == $val) $r++;
@@ -86,9 +100,6 @@ class Shift
     }
     public function getResponseString() {
         $str=$this->getMeldungenVal(1);
-        /* if($this->getMeldungenVal(3)) { */
-        /*     $str=$str." + ".$this->getMeldungenVal(3); */
-        /* } */
         $str=$str." / ".$this->Bedarf;
         return $str;
     }

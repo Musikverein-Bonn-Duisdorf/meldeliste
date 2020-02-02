@@ -40,7 +40,7 @@ class div
             }
             break;
 	    case 'body':
-            $this->_data[$key] = $this->_data[$key].trim($val);
+            $this->_data[$key] = $this->_data[$key].$val;
             break;
         case 'onclick':
 	    case 'id':
