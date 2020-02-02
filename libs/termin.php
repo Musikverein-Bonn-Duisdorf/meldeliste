@@ -902,7 +902,6 @@ class Termin
         $maindiv->indent=$indent;
         $maindiv->class="w3-container w3-margin-top w3-border-top w3-border-black w3-center";
         $maindiv->class=$GLOBALS['optionsDB']['colorTitleBar'];
-        $maindiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
         $str=$str.$maindiv->open();
         $indent++;
         
@@ -924,7 +923,6 @@ class Termin
         $content = new div;
         $content->indent=$indent;
         $content->class="w3-container w3-border-bottom w3-border-black";
-        $content->onclick="document.getElementById('id".$this->Index."').style.display='block'";
         $str=$str.$content->open();
         $indent++;
         
@@ -933,67 +931,174 @@ class Termin
             $s = new Shift;
             $s->load_by_id($shifts[$i]);
             $shift = new div;
-            $shift->class="w3-row";
-            $shift->open();
+            $shift->indent=$indent;
+            $shift->onclick="document.getElementById('ids".$s->Index."').style.display='block'";
+            $shift->class="w3-row w3-border-bottom w3-border-black";
+            $str=$str.$shift->open();
+            $indent++;
             
             $shiftname = new div;
-            $shiftname->classs="w3-col l3 m3 s3";
+            $shiftname->indent=$indent;
+            $shiftname->class="w3-col l4 m4 s4";
             $shiftname->body=$s->Name;
             $shiftname->bold();
             $str=$str.$shiftname->print();
 
             $shifttime = new div;
-            $shifttime->classs="w3-col l3 m3 s3";
+            $shifttime->indent=$indent;
+            $shifttime->class="w3-col l4 m4 s4";
             $shifttime->body=$s->getTime();
             $str=$str.$shifttime->print();
 
-            $shift->close();
-}
+            $shiftbedarf = new div;
+            $shiftbedarf->indent=$indent;
+            $shiftbedarf->class="w3-col l1 m4 s4 w3-center";
+            $shiftbedarf->body="<i class=\"fas fa-user-friends\"></i> ";
+            $shiftbedarf->body=$s->Bedarf;
+            $str=$str.$shiftbedarf->print();
+
+            $shiftresponseY = new div;
+            $shiftresponseY->indent=$indent;
+            $shiftresponseY->class="w3-col l1 m4 s4 w3-center";
+            $shiftresponseY->class=$GLOBALS['optionsDB']['colorBtnYes'];
+            $shiftresponseY->body="&#10004; ";
+            $shiftresponseY->body=$s->getMeldungenVal(1);
+            $str=$str.$shiftresponseY->print();
+
+            $shiftresponseN = new div;
+            $shiftresponseN->indent=$indent;
+            $shiftresponseN->class="w3-col l1 m4 s4 w3-center";
+            $shiftresponseN->class=$GLOBALS['optionsDB']['colorBtnNo'];
+            $shiftresponseN->body="&#10008; ";
+            $shiftresponseN->body=$s->getMeldungenVal(3);
+            $str=$str.$shiftresponseN->print();
+
+            $shiftresponseM = new div;
+            $shiftresponseM->indent=$indent;
+            $shiftresponseM->class="w3-col l1 m4 s4 w3-center";
+            $shiftresponseM->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
+            $shiftresponseM->body="? ";
+            $shiftresponseM->body=$s->getMeldungenVal(2);
+            $str=$str.$shiftresponseM->print();
+
+            $str=$str.$shift->close();
+            $indent--;
+
+            $modal = new div;
+            $modal->indent=$indent;
+            $modal->id="ids".$s->Index;
+            $modal->class="w3-modal";
+            $str=$str.$modal->open();
+            $indent++;
+        
+            $modalcontent = new div;
+            $modalcontent->indent=$indent;
+            $modalcontent->class="w3-modal-content";
+            $str=$str.$modalcontent->open();
+            $indent++;
+
+            $modalheader = new div;
+            $modalheader->tag="header";
+            $modalheader->class="w3-container";
+            $modalheader->class=$GLOBALS['optionsDB']['colorTitleBar'];
+            $modalheader->indent=$indent;
+            $str=$str.$modalheader->open();
+
+            $modalclose = new div;
+            $modalclose->tag="span";
+            $modalclose->class="w3-button w3-display-topright";
+            $modalclose->onclick="document.getElementById('ids".$s->Index."').style.display='none'";
+            $modalclose->body="&times;";
+            $indent++;
+            $modalclose->indent=$indent;
+            $str=$str.$modalclose->print();
+
+            $modaltitle = new div;
+            $modaltitle->tag="h2";
+            $modaltitle->body=$this->Name." - ".$s->Name." ".$s->getTime();
+            $modaltitle->indent=$indent;
+            $str=$str.$modaltitle->print();
+
+            $str=$str.$modalheader->close();
+            $indent--;
+
+            $modalbody = new div;
+            $modalbody->indent = $indent;
+            $modalbody->class="w3-container";
+            $str=$str.$modalbody->open();
+            $indent++;
+            
+            $modalY = new div;
+            $modalY->indent=$indent;
+            $modalY->class="w3-row w3-margin-top";
+            $modalY->bold();
+            $modalY->body="Zusagen";
+            $str=$str.$modalY->open();
+            $indent++;
+            
+            $u = $s->getMeldungenUser(1);
+            for($j=0; $j<count($u); $j++) {
+                $udiv = new div;
+                $udiv->indent=$indent;
+                $udiv->class="w3-row";
+                $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
+                $udiv->body=$u[$j];
+                $str=$str.$udiv->print();
+            }
+            $str=$str.$modalY->close();
+            $indent--;
+
+            $modalM = new div;
+            $modalM->indent=$indent;
+            $modalM->class="w3-row w3-margin-top";
+            $modalM->bold();
+            $modalM->body="unsicher";
+            $str=$str.$modalM->open();
+            $indent++;
+            
+            $u = $s->getMeldungenUser(3);
+            for($j=0; $j<count($u); $j++) {
+                $udiv = new div;
+                $udiv->indent=$indent;
+                $udiv->class="w3-row";
+                $udiv->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
+                $udiv->body=$u[$j];
+                $str=$str.$udiv->print();
+            }
+            $str=$str.$modalM->close();
+            $indent--;
+
+            $modalN = new div;
+            $modalN->indent=$indent;
+            $modalN->class="w3-row w3-margin-top";
+            $modalN->bold();
+            $modalN->body="Absagen";
+            $str=$str.$modalN->open();
+            $indent++;
+            
+            $u = $s->getMeldungenUser(2);
+            for($j=0; $j<count($u); $j++) {
+                $udiv = new div;
+                $udiv->indent=$indent;
+                $udiv->class="w3-row";
+                $udiv->class=$GLOBALS['optionsDB']['colorBtnNo'];
+                $udiv->body=$u[$j];
+                $str=$str.$udiv->print();
+            }
+            $str=$str.$modalN->close();
+            $indent--;
+
+            $str=$str.$modalbody->close();
+            $indent--;
+            
+            $str=$str.$modalcontent->close();
+            $indent--;
+            $str=$str.$modal->close();
+            $indent--;
+
+        }
                 
         $str=$str.$content->close();
-        $indent--;
-
-        $modal = new div;
-        $modal->indent=$indent;
-        $modal->id="id".$this->Index;
-        $modal->class="w3-modal";
-        $str=$str.$modal->open();
-        $indent++;
-        
-        $modalcontent = new div;
-        $modalcontent->indent=$indent;
-        $modalcontent->class="w3-modal-content";
-        $str=$str.$modalcontent->open();
-        $indent++;
-
-        $modalheader = new div;
-        $modalheader->tag="header";
-        $modalheader->class="w3-container";
-        $modalheader->class=$GLOBALS['optionsDB']['colorTitleBar'];
-        $modalheader->indent=$indent;
-        $str=$str.$modalheader->open();
-
-        $modalclose = new div;
-        $modalclose->tag="span";
-        $modalclose->class="w3-button w3-display-topright";
-        $modalclose->onclick="document.getElementById('id".$this->Index."').style.display='none'";
-        $modalclose->body="&times;";
-        $indent++;
-        $modalclose->indent=$indent;
-        $str=$str.$modalclose->print();
-
-        $modaltitle = new div;
-        $modaltitle->tag="h2";
-        $modaltitle->body=$this->Name;
-        $modaltitle->indent=$indent;
-        $str=$str.$modaltitle->print();
-
-        $str=$str.$modalheader->close();
-        $indent--;
-
-        $str=$str.$modalcontent->close();
-        $indent--;
-        $str=$str.$modal->close();
         $indent--;
 
         return $str;
