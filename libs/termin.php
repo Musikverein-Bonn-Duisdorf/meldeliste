@@ -886,6 +886,7 @@ class Termin
         return $str;
     }
     public function printMyResponseLine() {
+        if($this->Shifts) return $this->printShiftResponseLine();
         $u = new User;
         $u->load_by_id($_SESSION['userid']);
         return $this->getResponseLine($u->getRegister());
