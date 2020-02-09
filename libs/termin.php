@@ -970,7 +970,7 @@ class Termin
             $shiftresponseN->class="w3-col l1 m4 s4 w3-center";
             $shiftresponseN->class=$GLOBALS['optionsDB']['colorBtnNo'];
             $shiftresponseN->body="&#10008; ";
-            $shiftresponseN->body=$s->getMeldungenVal(3);
+            $shiftresponseN->body=$s->getMeldungenVal(2);
             $str=$str.$shiftresponseN->print();
 
             $shiftresponseM = new div;
@@ -978,7 +978,7 @@ class Termin
             $shiftresponseM->class="w3-col l1 m4 s4 w3-center";
             $shiftresponseM->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
             $shiftresponseM->body="? ";
-            $shiftresponseM->body=$s->getMeldungenVal(2);
+            $shiftresponseM->body=$s->getMeldungenVal(3);
             $str=$str.$shiftresponseM->print();
 
             $str=$str.$shift->close();
