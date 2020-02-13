@@ -66,6 +66,55 @@ function drawBasic() {
      </script>
                                      
   <div id="chart_div"></div>
+
+
+<?php
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Datum` < CURRENT_TIMESTAMP ORDER BY `Datum`;",
+    $GLOBALS['dbprefix']
+    );
+$dbr = mysqli_query($GLOBALS['conn'], $sql);
+sqlerror();
+while($row = mysqli_fetch_array($dbr)) {
+    $t = new Termin;
+    $t->load_by_id($row['Index']);
+    $str=$str."[".string2gDate($t->Datum).", ".$t->getMeldungRatio()."],\n";
+}
+    ?>
+
+    <script>
+
+google.charts.load('current', {packages: ['corechart'], 'language': 'de'});
+google.charts.setOnLoadCallback(drawBasic);
+
+function drawBasic() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Datum');
+    data.addColumn('number', 'Rate');
+    
+    data.addRows(<?php echo "[".$str."]"; ?>);
+
+    var options = {
+        hAxis: {
+            title: 'Datum'
+        },
+        vAxis: {
+            title: 'Antwortrate / %'
+        },
+        height: 450,
+        timeline: {
+          groupByRowLabel: true
+        },
+        legend: 'none'
+    };
+
+    var chart = new google.visualization.ScatterChart(document.getElementById('chart_rate'));
+
+    chart.draw(data, options);
+}
+
+     </script>
+<div id="chart_rate"></div>
+
 <?php
 include "common/footer.php";
 ?>

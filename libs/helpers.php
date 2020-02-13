@@ -212,6 +212,27 @@ function loggedIn() {
     return false;
 }
 
+function getActiveUsers($date) {
+    $users = array();
+    if($date) {
+        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL);',
+        $GLOBALS['dbprefix'],
+        $date
+        );
+    }
+    else {
+        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0;',
+        $GLOBALS['dbprefix']
+        );
+    }
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        array_push($users, $row['Index']);
+    }
+    return $users;
+}
+
 function sql2time($time) {
     if($time != '') {
         return sql2timeRaw($time)." Uhr";
