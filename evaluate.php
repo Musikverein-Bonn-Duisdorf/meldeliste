@@ -69,7 +69,7 @@ function drawBasic() {
 
 
 <?php
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Datum` < CURRENT_TIMESTAMP ORDER BY `Datum`;",
+    $sql = sprintf("SELECT * FROM `%sTermine` ORDER BY `Datum`;",
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
