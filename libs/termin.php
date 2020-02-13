@@ -291,6 +291,35 @@ class Termin
         $this->new = 0;
         $this->save();
     }
+    public function getMeldungen() {
+        $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `Termin` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $meldungen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($meldungen, $row['Index']);
+        }
+        return $meldungen;
+    }
+    public function getMeldungenVal($val) {
+        $r = 0;
+        $meldungen = $this->getMeldungen();
+        for($i=0; $i<count($meldungen); $i++) {
+            $m = new Meldung;
+            $m->load_by_id($meldungen[$i]);
+            if($m->Wert == $val) $r++;
+        }
+        return $r;
+    }
+    public function getMeldungRatio() {
+        $Nusers = count(getActiveUsers(NULL));
+        $meldungen=count($this->getMeldungen());
+        $ratio=doubleval($meldungen)/intval($Nusers);
+        return $ratio;
+    }
     public function printMailLine() {
         $str="";
         $str=$str."<div class=\"w3-row ";

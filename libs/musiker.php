@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -21,6 +21,7 @@ class User
         case 'LastLogin':
         case 'Joined':
         case 'Deleted':
+        case 'DeletedOn':
             return $this->_data[$key];
             break;
         default:
@@ -30,6 +31,7 @@ class User
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
+	    case 'Instrument':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
@@ -38,9 +40,6 @@ class User
 	    case 'Vorname':
             $this->_data[$key] = htmlentities(trim($val));
             break;
-	    case 'login':
-            $this->_data[$key] = trim($val);
-            break;
 	    case 'Passhash':
             $this->_data[$key] = $val;
             break;
@@ -48,17 +47,6 @@ class User
             $this->_data[$key] = $val;
             break;
 	    case 'Mitglied':
-            $this->_data[$key] = (bool) $val;
-            break;
-	    case 'Instrument':
-            $this->_data[$key] = (int) $val;
-            break;
-	    case 'iName':
-            $this->_data[$key] = trim($val);
-            break;
-	    case 'Email':
-            $this->_data[$key] = trim($val);
-            break;
 	    case 'getMail':
 	    case 'Admin':
 	    case 'singleUsePW':
@@ -66,7 +54,11 @@ class User
 	    case 'Deleted':
             $this->_data[$key] = (bool)$val;
             break;
+	    case 'login':
+	    case 'iName':
+	    case 'Email':
 	    case 'LastLogin':
+	    case 'DeletedOn':
             $this->_data[$key] = trim($val);
             break;
         default:
@@ -256,7 +248,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1 WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
