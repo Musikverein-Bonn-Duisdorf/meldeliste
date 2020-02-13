@@ -217,11 +217,16 @@ function getActiveUsers($date) {
     if($date) {
         $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Ìndex` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL) AND `iName` != "Admin";',
         $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $date,
         $date
         );
     }
     else {
-        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Ìndex` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin";',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix']
         );
     }
