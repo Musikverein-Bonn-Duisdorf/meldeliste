@@ -77,7 +77,7 @@ sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $t = new Termin;
     $t->load_by_id($row['Index']);
-    $str=$str."[".string2gDate($t->Datum).", ".$t->getMeldungRatio()."],\n";
+    $str=$str."[".string2gDate($t->Datum).", ".($t->getMeldungRatio()*100)."],\n";
 }
     ?>
 
