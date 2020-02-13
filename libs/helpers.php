@@ -215,7 +215,7 @@ function loggedIn() {
 function getActiveUsers($date) {
     $users = array();
     if($date) {
-        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL);',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Ìndex` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL) AND `iName` != "Admin";',
         $GLOBALS['dbprefix'],
         $date
         );
