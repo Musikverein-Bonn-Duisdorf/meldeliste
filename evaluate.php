@@ -69,7 +69,7 @@ function drawBasic() {
 
 
 <?php
-    $sql = sprintf("SELECT * FROM `%sTermine` ORDER BY `Datum`;",
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 ORDER BY `Datum`;",
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -98,7 +98,9 @@ function drawBasic() {
             title: 'Datum'
         },
         vAxis: {
-            title: 'Antwortrate / %'
+          title: 'Antwortrate / %',
+          minValue: 0,
+          maxValue: 100,
         },
         height: 450,
         timeline: {
