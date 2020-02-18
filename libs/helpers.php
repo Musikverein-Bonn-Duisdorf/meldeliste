@@ -214,20 +214,28 @@ function loggedIn() {
 
 function getActiveUsers($date) {
     $users = array();
+    if($GLOBALS['optionsDB']['showConductor']) {
+        $dirigent = '';
+    }
+    else {
+        $dirigent = 'AND `iName` != "Dirigent"';
+    }
     if($date) {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL) AND `iName` != "Admin" ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $date,
-        $date
+        $date,
+        $dirigent
         );
     }
     else {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin" ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix']
+        $GLOBALS['dbprefix'],
+        $dirigent
         );
     }
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
