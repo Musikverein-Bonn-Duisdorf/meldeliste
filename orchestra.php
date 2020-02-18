@@ -11,9 +11,6 @@ requireAdmin();
 <svg width="1500" height="1000">
 <?php
 $registerColor = ["#ff0000", "#00ff00", "#0000ff", "#afafaf", "#0ff0f0", "#0fa0a0", "#a00f00", "#ff00ff", "#f00000", "#00f000", "#0000f0"];
-$registerArcMin$registerArcMin = [0, 0, 180, 0, 0, 35, 180, 0, 25, 0, 77];
-$register['ArcMax'] = [0, 90, 90, 90, 90, 160, 135, 90, 90, 45, 135];
-
 
 $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
 $GLOBALS['dbprefix']
