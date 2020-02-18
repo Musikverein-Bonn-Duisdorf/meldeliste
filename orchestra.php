@@ -6,20 +6,41 @@ include "common/header.php";
 requireAdmin();
 ?>
 <div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<h2>Datenauswertung</h2>
-</div>
-<svg width="1500" height="1000">
+    <h2>Datenauswertung</h2>
+    </div>
+    <svg width="1500" height="1000">
 <?php
 
-$sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
-$GLOBALS['dbprefix']
-);
+    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
+    $GLOBALS['dbprefix']
+    );
 $dbregister = mysqli_query($GLOBALS['conn'], $sql);
 sqlerror();
 $k=0;
 $i=0;
 $j=0;
+$lastrow=0;
+$lmaxradius = array();
+$rmaxradius = array();
+array_push($lmaxradius, 0);
+array_push($rmaxradius, 0);
 while($register = mysqli_fetch_array($dbregister)) {
+    if($lastrow != $register['Row']) {
+        array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+75);
+        array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+75);
+    }
+    $lastrow = $register['Row'];
+    if($register['Row'] > 0) {
+        if($register['ArcMin'] < 90) {
+            $radius = $lmaxradius[$register['Row']-1]+75;
+        }
+        else {
+            $radius = $rmaxradius[$register['Row']-1]+75;
+        }
+    }
+    if($radius<125) {
+        $radius = 125;
+    }
     $r = new Register;
     $r->load_by_id($register['Index']);
     
@@ -43,41 +64,50 @@ while($register = mysqli_fetch_array($dbregister)) {
                 $arc=0;
             }
             else {
-            $radius = $register['Row']*75+50*$j+125;
-            $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*50/(2*pi()*$radius)*360;
-            if($register['ArcMin'] < $register['ArcMax']) {
-                if($arc+20/(2*pi()*$radius)*360 >=$register['ArcMax']) {
-                    $j++;
-                    $radius = $register['Row']*75+50*$j+125;
-                    $k=0;
+                $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40/(2*pi()*$radius)*360;
+                if($register['ArcMin'] < $register['ArcMax']) {
+                    if($arc+20/(2*pi()*$radius)*360 >=$register['ArcMax']) {
+                        $j++;
+                        $radius += 50;
+                        $k=0;
+                    }
                 }
-            }
-            elseif($register['ArcMin'] > $register['ArcMax']) {
-                if($arc-20/(2*pi()*$radius)*360 <=$register['ArcMax']) {
-                    $j++;
-                    $radius = $register['Row']*75+50*$j+125;
-                    $k=0;
+                elseif($register['ArcMin'] > $register['ArcMax']) {
+                    if($arc-20/(2*pi()*$radius)*360 <=$register['ArcMax']) {
+                        $j++;
+                        $radius += 50;
+                        $k=0;
+                    }
                 }
-            }
-            $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*50/(2*pi()*$radius)*360;
-            }
-            $x = 750-$radius*cos($arc/180*pi());
-            $y = 50+$radius*sin($arc/180*pi());
-            echo "<!-- ".$radius." ".$arc." -->";
+                if($register['ArcMin'] < 90) {
+                    if($radius > $lmaxradius[$register['Row']]) {
+                        $lmaxradius[$register['Row']] = $radius;
+                    }
+                }
+                else {
+                    if($radius > $rmaxradius[$register['Row']]) {
+                        $rmaxradius[$register['Row']] = $radius;
+                    }
+                }
+                $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40/(2*pi()*$radius)*360;
+                }
+                $x = 750-$radius*cos($arc/180*pi());
+                $y = 50+$radius*sin($arc/180*pi());
+                echo "<!-- ".$radius." ".$arc." -->";
             
-            echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"20\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
-            echo "<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"10\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
+                echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
+                echo "<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"10\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
 
-            $k++;
+                $k++;
+            }
         }
+        $k=0;
+        $j=0;
+        $i++;
     }
-    $k=0;
-    $j=0;
-    $i++;
-}
 
 ?>
-</svg>
+    </svg>
 <?php
-include "common/footer.php";
+    include "common/footer.php";
 ?>
