@@ -8,7 +8,7 @@ requireAdmin();
 <div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Datenauswertung</h2>
     </div>
-    <svg width="1500" height="1000">
+    <svg width="1000" height="600">
 <?php
 
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
@@ -26,20 +26,20 @@ array_push($lmaxradius, 0);
 array_push($rmaxradius, 0);
 while($register = mysqli_fetch_array($dbregister)) {
     if($lastrow != $register['Row']) {
-        array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+75);
-        array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+75);
+        array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+60);
+        array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+60);
     }
     $lastrow = $register['Row'];
     if($register['Row'] > 0) {
         if($register['ArcMin'] < 90) {
-            $radius = $lmaxradius[$register['Row']-1]+75;
+            $radius = $lmaxradius[$register['Row']-1]+60;
         }
         else {
-            $radius = $rmaxradius[$register['Row']-1]+75;
+            $radius = $rmaxradius[$register['Row']-1]+60;
         }
     }
-    if($radius<125) {
-        $radius = 125;
+    if($radius<150) {
+        $radius = 150;
     }
     $r = new Register;
     $r->load_by_id($register['Index']);
@@ -68,14 +68,14 @@ while($register = mysqli_fetch_array($dbregister)) {
                 if($register['ArcMin'] < $register['ArcMax']) {
                     if($arc+20/(2*pi()*$radius)*360 >=$register['ArcMax']) {
                         $j++;
-                        $radius += 50;
+                        $radius += 40;
                         $k=0;
                     }
                 }
                 elseif($register['ArcMin'] > $register['ArcMax']) {
                     if($arc-20/(2*pi()*$radius)*360 <=$register['ArcMax']) {
                         $j++;
-                        $radius += 50;
+                        $radius += 40;
                         $k=0;
                     }
                 }
@@ -91,8 +91,8 @@ while($register = mysqli_fetch_array($dbregister)) {
                 }
                 $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40/(2*pi()*$radius)*360;
                 }
-                $x = 750-$radius*cos($arc/180*pi());
-                $y = 50+$radius*sin($arc/180*pi());
+                $x = 500-$radius*cos($arc/180*pi());
+                $y = 40+$radius*sin($arc/180*pi());
                 echo "<!-- ".$radius." ".$arc." -->";
             
                 echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
