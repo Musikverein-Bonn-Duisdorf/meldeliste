@@ -304,6 +304,31 @@ class Termin
         }
         return $meldungen;
     }
+    public function getMeldungUsers() {
+        $users = array();
+        $meldungen = $this->getMeldungen();
+        for($i=1; $i<=count($meldungen); $i++) {
+            $m = new Meldung;
+            $m->load_by_id($meldungen[$i]);
+            array_push($users, $m->User);
+        }
+        return $users;
+    }
+    public function getMissingUsers() {
+        $users = getActiveUsers(null);
+        $gemeldet = $this->getMeldungUsers();
+        for($i=1; $i<=count($gemeldet); $i++) {
+            $u = array_search($gemeldet[$i], $users);
+            if($u) {
+                unset($users[$u]);
+            }
+        }
+        $r = array();
+        foreach($users as &$element) {
+            array_push($r, $element);
+        }
+        return $r;
+    }
     public function getMeldungenVal($val) {
         $r = 0;
         $meldungen = $this->getMeldungen();
@@ -1450,6 +1475,20 @@ ORDER BY `Nachname`, `Vorname`",
         $str = $str."<div class=\"w3-container\">";
         $str=$str.$whoNo;
         $str = $str."</div>";
+
+        if($_SESSION['admin']) {
+            $str = $str."<div>";        
+            $str = $str."<div class=\"w3-container w3-margin-top\"><b>noch nicht gemeldet</b></div>\n";
+            $str = $str."<form class=\"w3-container w3-row\" action=\"termine.php\" method=\"POST\">";
+            foreach($this->getMissingUsers() as &$missing) {
+                $u = new User;
+                $u->load_by_id($missing);
+                $str=$str."<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 ".$GLOBALS['optionsDB']['colorBtnSubmit']."\" type=\"submit\" name=\"proxy\" value=\"".$u->Index."\">".$u->getName()."</button>\n";
+            }
+            $str = $str."</form>";
+            $str = $str."</div>";
+        }
+
         $str=$str."<div class=\"w3-container w3-margin-bottom\"><br />";
         $str=$str."</div>";
         $str=$str."</div>";

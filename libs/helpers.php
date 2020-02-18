@@ -215,7 +215,7 @@ function loggedIn() {
 function getActiveUsers($date) {
     $users = array();
     if($date) {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL) AND `iName` != "Admin";',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` == NULL) AND `iName` != "Admin" ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
@@ -224,7 +224,7 @@ function getActiveUsers($date) {
         );
     }
     else {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin";',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin" ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix']
