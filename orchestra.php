@@ -12,7 +12,7 @@ requireAdmin();
 <?php
 
     $termin = new Termin;
-$termin->load_by_id(60);
+$termin->load_by_id(47);
     
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
     $GLOBALS['dbprefix']
@@ -25,6 +25,7 @@ $j=0;
 $lastrow=0;
 $lmaxradius = array();
 $rmaxradius = array();
+$radius=0;
 array_push($lmaxradius, 0);
 array_push($rmaxradius, 0);
 while($register = mysqli_fetch_array($dbregister)) {
@@ -99,16 +100,16 @@ while($register = mysqli_fetch_array($dbregister)) {
                 $m = $termin->getMeldungenByUser($u->Index);
                 if(count($m)) {
                     $meldung = new Meldung;
-                    $meldung->load_by_id($m);
+                    $meldung->load_by_id($m[0]);
                     switch($meldung->Wert) {
                     case 1:
-                        $color = "#00ff00";
+                        $color = "#4CAF50";
                         break;
                     case 2:
-                        $color = "#ff0000";
+                        $color = "#f44336";
                         break;
                     case 3:
-                        $color = "#0000ff";
+                        $color = "#2196F3";
                         break;
                     }
                 }
