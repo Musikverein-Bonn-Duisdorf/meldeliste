@@ -1498,6 +1498,8 @@ ORDER BY `Nachname`, `Vorname`",
                 $str=$str."<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 ".$GLOBALS['optionsDB']['colorBtnSubmit']."\" type=\"submit\" name=\"proxy\" value=\"".$u->Index."\">".$u->getName()."</button>\n";
             }
             $str = $str."</form>";
+            $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
+            $str = $str.printOrchestra($this->Index);
             $str = $str."</div>";
         }
 
