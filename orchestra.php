@@ -10,10 +10,9 @@ requireAdmin();
 </div>
 <svg width="1500" height="1000">
 <?php
-    $registerRow = [0, 1, 1, 2, 4, 5, 4, 3, 6, 6, 6];
 $registerColor = ["#ff0000", "#00ff00", "#0000ff", "#afafaf", "#0ff0f0", "#0fa0a0", "#a00f00", "#ff00ff", "#f00000", "#00f000", "#0000f0"];
-$registerArcMin = [0, 0, 180, 0, 0, 35, 180, 0, 25, 0, 77];
-$registerArcMax = [0, 90, 90, 90, 90, 160, 135, 90, 90, 45, 135];
+$registerArcMin$registerArcMin = [0, 0, 180, 0, 0, 35, 180, 0, 25, 0, 77];
+$register['ArcMax'] = [0, 90, 90, 90, 90, 160, 135, 90, 90, 45, 135];
 
 
 $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
@@ -43,28 +42,28 @@ while($register = mysqli_fetch_array($dbregister)) {
         while($user = mysqli_fetch_array($dbuser)) {
             $u = new User;
             $u->load_by_id($user['Index']);
-            if($registerRow[$i]==0) {
+            if($register['Row']==0) {
                 $radius=0;
                 $arc=0;
             }
             else {
-            $radius = $registerRow[$i]*75+50*$j+100;
-            $arc = $registerArcMin[$i]+$k*($registerArcMax[$i]-$registerArcMin[$i])/abs($registerArcMax[$i]-$registerArcMin[$i])*50/(2*pi()*$radius)*360;
-            if($registerArcMin[$i] < $registerArcMax[$i]) {
-                if($arc+20/(2*pi()*$radius)*360 >=$registerArcMax[$i]) {
+            $radius = $register['Row']*75+50*$j+125;
+            $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*50/(2*pi()*$radius)*360;
+            if($register['ArcMin'] < $register['ArcMax']) {
+                if($arc+20/(2*pi()*$radius)*360 >=$register['ArcMax']) {
                     $j++;
-                    $radius = $registerRow[$i]*75+50*$j+100;
+                    $radius = $register['Row']*75+50*$j+125;
                     $k=0;
                 }
             }
-            elseif($registerArcMin[$i] > $registerArcMax[$i]) {
-                if($arc-20/(2*pi()*$radius)*360 <=$registerArcMax[$i]) {
+            elseif($register['ArcMin'] > $register['ArcMax']) {
+                if($arc-20/(2*pi()*$radius)*360 <=$register['ArcMax']) {
                     $j++;
-                    $radius = $registerRow[$i]*75+50*$j+100;
+                    $radius = $register['Row']*75+50*$j+125;
                     $k=0;
                 }
             }
-            $arc = $registerArcMin[$i]+$k*($registerArcMax[$i]-$registerArcMin[$i])/abs($registerArcMax[$i]-$registerArcMin[$i])*50/(2*pi()*$radius)*360;
+            $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*50/(2*pi()*$radius)*360;
             }
             $x = 750-$radius*cos($arc/180*pi());
             $y = 50+$radius*sin($arc/180*pi());
