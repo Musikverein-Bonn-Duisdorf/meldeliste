@@ -107,7 +107,7 @@ while($register = mysqli_fetch_array($dbregister)) {
                     case 2:
                         $color = "#ff0000";
                         break;
-                    case 2:
+                    case 3:
                         $color = "#0000ff";
                         break;
                     }
