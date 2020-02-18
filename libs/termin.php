@@ -291,6 +291,20 @@ class Termin
         $this->new = 0;
         $this->save();
     }
+    public function getMeldungenByUser($user) {
+        $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `Termin` = "%d" AND `User` = %d;',
+        $GLOBALS['dbprefix'],
+        $this->Index,
+        $user
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $meldungen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($meldungen, $row['Index']);
+        }
+        return $meldungen;
+    }
     public function getMeldungen() {
         $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `Termin` = "%d";',
         $GLOBALS['dbprefix'],
