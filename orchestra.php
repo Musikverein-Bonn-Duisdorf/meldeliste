@@ -11,6 +11,9 @@ requireAdmin();
     <svg width="1000" height="600">
 <?php
 
+    $termin = new Termin;
+$termin->load_by_id(60);
+    
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
     $GLOBALS['dbprefix']
     );
@@ -93,9 +96,28 @@ while($register = mysqli_fetch_array($dbregister)) {
                 }
                 $x = 500-$radius*cos($arc/180*pi());
                 $y = 40+$radius*sin($arc/180*pi());
-                echo "<!-- ".$radius." ".$arc." -->";
-            
-                echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
+                $m = $termin->getMeldungenByUser($u->Index);
+                if(count($m)) {
+                    $meldung = new Meldung;
+                    $meldung->load_by_id($m);
+                    switch($meldung->Wert) {
+                    case 1:
+                        $color = "#00ff00";
+                        break;
+                    case 2:
+                        $color = "#ff0000";
+                        break;
+                    case 2:
+                        $color = "#0000ff";
+                        break;
+                    }
+                }
+                else {
+                    $color = "#ffffff";
+                }
+                
+                echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$color."\" />\n";
+                /* echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n"; */
                 echo "<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"10\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
 
                 $k++;
