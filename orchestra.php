@@ -10,7 +10,6 @@ requireAdmin();
 </div>
 <svg width="1500" height="1000">
 <?php
-$registerColor = ["#ff0000", "#00ff00", "#0000ff", "#afafaf", "#0ff0f0", "#0fa0a0", "#a00f00", "#ff00ff", "#f00000", "#00f000", "#0000f0"];
 
 $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
 $GLOBALS['dbprefix']
@@ -31,7 +30,7 @@ while($register = mysqli_fetch_array($dbregister)) {
     $dbinstrument = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     while($instrument = mysqli_fetch_array($dbinstrument)) {
-        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = %d ORDER BY `Nachname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = %d AND `Deleted` = 0 ORDER BY `Nachname`;',
         $GLOBALS['dbprefix'],
         $instrument['Index']
         );
@@ -66,7 +65,7 @@ while($register = mysqli_fetch_array($dbregister)) {
             $y = 50+$radius*sin($arc/180*pi());
             echo "<!-- ".$radius." ".$arc." -->";
             
-            echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"20\" stroke=\"black\" stroke-width=\"2\" fill=\"".$registerColor[$i]."\" />\n";
+            echo "<circle cx=\"".$x."\" cy=\"".$y."\" r=\"20\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
             echo "<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"10\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
 
             $k++;
