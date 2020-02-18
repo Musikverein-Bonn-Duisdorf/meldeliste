@@ -107,7 +107,7 @@ class User
             if(substr($narray[sizeof($narray)-1],1,1)=="&") {
                 $end = strpos($narray[sizeof($narray)-1], ";");
             }
-            $short2 = substr($narray[sizeof($narray)-1],0,2);
+            $short2 = substr($narray[sizeof($narray)-1],0,$end);
         }
         else {
             $short2 = $this->Nachname;
