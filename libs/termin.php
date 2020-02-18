@@ -307,7 +307,7 @@ class Termin
     public function getMeldungUsers() {
         $users = array();
         $meldungen = $this->getMeldungen();
-        for($i=1; $i<=count($meldungen); $i++) {
+        for($i=0; $i<count($meldungen); $i++) {
             $m = new Meldung;
             $m->load_by_id($meldungen[$i]);
             array_push($users, $m->User);
@@ -317,7 +317,7 @@ class Termin
     public function getMissingUsers() {
         $users = getActiveUsers(null);
         $gemeldet = $this->getMeldungUsers();
-        for($i=1; $i<=count($gemeldet); $i++) {
+        for($i=0; $i<count($gemeldet); $i++) {
             $u = array_search($gemeldet[$i], $users);
             if($u) {
                 unset($users[$u]);
