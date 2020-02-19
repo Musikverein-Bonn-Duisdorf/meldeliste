@@ -313,8 +313,10 @@ function printOrchestra($tid, $scale) {
     $rowdistance=60*$scale;
     $minrowdistance=150*$scale;
     $str="<svg width=\"".$width."\" height=\"".$height."\">";
-    $termin = new Termin;
-    $termin->load_by_id($tid);
+    if($tid) {
+        $termin = new Termin;
+        $termin->load_by_id($tid);
+    }
     
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
     $GLOBALS['dbprefix']
@@ -399,28 +401,32 @@ while($register = mysqli_fetch_array($dbregister)) {
                 }
                 $x = $width/2-$radius*cos($arc/180*pi());
                 $y = 40*$scale+$radius*sin($arc/180*pi());
-                $m = $termin->getMeldungenByUser($u->Index);
-                if(count($m)) {
-                    $meldung = new Meldung;
-                    $meldung->load_by_id($m[0]);
-                    switch($meldung->Wert) {
-                    case 1:
-                        $color = "#4CAF50";
-                        break;
-                    case 2:
-                        $color = "#f44336";
-                        break;
-                    case 3:
-                        $color = "#2196F3";
-                        break;
+                if($tid) {
+                    $m = $termin->getMeldungenByUser($u->Index);
+                    if(count($m)) {
+                        $meldung = new Meldung;
+                        $meldung->load_by_id($m[0]);
+                        switch($meldung->Wert) {
+                        case 1:
+                            $color = "#4CAF50";
+                            break;
+                        case 2:
+                            $color = "#f44336";
+                            break;
+                        case 3:
+                            $color = "#2196F3";
+                            break;
+                        }
                     }
+                    else {
+                        $color = "#ffffff";
+                    }
+                
+                    $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
                 }
                 else {
-                    $color = "#ffffff";
+                    $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
                 }
-                
-                $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
-                /* $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n"; */
                 $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
 
                 $k++;
