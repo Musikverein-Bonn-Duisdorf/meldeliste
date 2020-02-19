@@ -1,11 +1,16 @@
 <?php
 class Register
 {
-    private $_data = array('Index' => null, 'Name' => null);
+    private $_data = array('Index' => null, 'Name' => null, 'Sortierung' => null, 'Row' => null, 'ArcMin' => null, 'ArcMax' => null, 'Color' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Name':
+	    case 'Sortierung':
+	    case 'Row':
+	    case 'ArcMin':
+	    case 'ArcMax':
+	    case 'Color':
             return $this->_data[$key];
             break;
         default:
@@ -14,10 +19,17 @@ class Register
     }
     public function __set($key, $val) {
         switch($key) {
+	    case 'ArcMin':
+	    case 'ArcMax':
+            $this->_data[$key] = $val;
+            break;
 	    case 'Index':
+	    case 'Sortierung':
+	    case 'Row':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Name':
+	    case 'Color':
             $this->_data[$key] = trim($val);
             break;
         default:
