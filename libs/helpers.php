@@ -409,15 +409,17 @@ while($register = mysqli_fetch_array($dbregister)) {
                         switch($meldung->Wert) {
                         case 1:
                             $color = "#4CAF50";
+                            $opacity = 1;
                             break;
                         case 2:
                             $color = "#f42316";
+                            $opacity = 0.3;
                             break;
                         case 3:
                             $color = "#2196F3";
+                            $opacity = 0.6;
                             break;
                         }
-                        $opacity = 1;
                     }
                     else {
                         $color = "#ffffff";
