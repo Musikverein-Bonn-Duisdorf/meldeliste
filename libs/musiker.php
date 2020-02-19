@@ -252,7 +252,7 @@ class User
         return 0;
     }
     public function getMeldeQuote() {
-        $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sTermine` WHERE `Datum` >= "%s";',
+        $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sTermine` WHERE `Datum` >= "%s" AND `Datum` <= CURRENT_TIMESTAMP;',
         $GLOBALS['dbprefix'],
         $this->Joined
         );        
@@ -261,15 +261,23 @@ class User
         $row = mysqli_fetch_array($dbr);
         $termine = $row['CNT'];
 
-        $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sMeldungen` WHERE `User` = "%d";',
+        $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum` FROM `%sTermine`) `%sTermine` ON `tIndex` = `Termin` WHERE `User` = "%d" AND `Datum` >= "%s" AND `Datum` <= CURRENT_TIMESTAMP;',
         $GLOBALS['dbprefix'],
-        $this->Index
-        );        
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $this->Index,
+        $this->Joined
+        );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $row = mysqli_fetch_array($dbr);
         $meldungen = $row['CNT'];
-        $r = sprintf("%.3f", $meldungen/$termine);
+        if($termine > 0) {
+            $r = sprintf("%.3f", $meldungen/$termine);
+        }
+        else {
+            $r=0;
+        }
         return $r;
     }
     public function delete() {
