@@ -1490,13 +1490,15 @@ ORDER BY `Nachname`, `Vorname`",
 
         if($_SESSION['admin']) {
             $str = $str."<div>";
-            $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
-            $str = $str."<div class=\"w3-container w3-hide-small\">\n";
-            $str = $str.printOrchestra($this->Index, 1);
-            $str = $str."</div>";
-            $str = $str."<div class=\"w3-container w3-hide-large w3-hide-medium\">\n";
-            $str = $str.printOrchestra($this->Index, 0.4);
-            $str = $str."</div>";
+            if($GLOBALS['optionsDB']['showOrchestraView']) {
+                $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
+                $str = $str."<div class=\"w3-container w3-hide-small\">\n";
+                $str = $str.printOrchestra($this->Index, 1);
+                $str = $str."</div>";
+                $str = $str."<div class=\"w3-container w3-hide-large w3-hide-medium\">\n";
+                $str = $str.printOrchestra($this->Index, 0.4);
+                $str = $str."</div>";
+            }
             $str = $str."<div class=\"w3-container w3-margin-top\"><b>noch nicht gemeldet</b></div>\n";
             $str = $str."<form class=\"w3-container w3-row\" action=\"termine.php\" method=\"POST\">";
             foreach($this->getMissingUsers() as &$missing) {

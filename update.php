@@ -48,6 +48,7 @@ $para=array(
     'cronSendTomorrow',
     'cronSendTomorrowTime',
     'AppmntAlwaysDecline',
+    'showOrchestraView',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -87,6 +88,7 @@ $desc=array(
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht.",
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht zu folgender Uhrzeit.",
     "Man kann sich auch von bereits geschlossenen Anmeldungen abmelden.",
+    "Zeige einen Sitzplan des Orchesters in allen Meldungen",
 );
 $value=array(
     "w3-opacity",
@@ -126,6 +128,7 @@ $value=array(
     0,
     "14:00",
     1,
+    1,
 );
 $type=array(
     "string",
@@ -164,6 +167,7 @@ $type=array(
     "text",
     "bool",
     "time",
+    "bool",
     "bool",
 );
 

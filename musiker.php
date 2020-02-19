@@ -52,6 +52,13 @@ $nMusiker = $row['Count'];
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
 </div>
+
+<?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
+<div class="w3-center w3-container">
+<?php echo printOrchestra(0, 1); ?>
+</div>
+<?php } ?>
+
 <div>
 <input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterMusiker()">
 </div>
