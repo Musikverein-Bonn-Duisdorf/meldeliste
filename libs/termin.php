@@ -1489,7 +1489,14 @@ ORDER BY `Nachname`, `Vorname`",
         $str = $str."</div>";
 
         if($_SESSION['admin']) {
-            $str = $str."<div>";        
+            $str = $str."<div>";
+            $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
+            $str = $str."<div class=\"w3-container w3-hide-small\">\n";
+            $str = $str.printOrchestra($this->Index, 1);
+            $str = $str."</div>";
+            $str = $str."<div class=\"w3-container w3-hide-large w3-hide-medium\">\n";
+            $str = $str.printOrchestra($this->Index, 0.4);
+            $str = $str."</div>";
             $str = $str."<div class=\"w3-container w3-margin-top\"><b>noch nicht gemeldet</b></div>\n";
             $str = $str."<form class=\"w3-container w3-row\" action=\"termine.php\" method=\"POST\">";
             foreach($this->getMissingUsers() as &$missing) {
@@ -1498,8 +1505,6 @@ ORDER BY `Nachname`, `Vorname`",
                 $str=$str."<button class=\"w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 ".$GLOBALS['optionsDB']['colorBtnSubmit']."\" type=\"submit\" name=\"proxy\" value=\"".$u->Index."\">".$u->getName()."</button>\n";
             }
             $str = $str."</form>";
-            $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
-            $str = $str.printOrchestra($this->Index);
             $str = $str."</div>";
         }
 
