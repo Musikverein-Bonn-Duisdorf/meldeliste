@@ -413,7 +413,7 @@ while($register = mysqli_fetch_array($dbregister)) {
                             break;
                         case 2:
                             $color = "#f42316";
-                            $opacity = 0.3;
+                            $opacity = 0.5;
                             break;
                         case 3:
                             $color = "#2196F3";
@@ -423,7 +423,7 @@ while($register = mysqli_fetch_array($dbregister)) {
                     }
                     else {
                         $color = "#ffffff";
-                        $opacity = 0.3;
+                        $opacity = 0.5;
                     }
                     $str=$str."<circle opacity=\"".$opacity."\" cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
                     $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
