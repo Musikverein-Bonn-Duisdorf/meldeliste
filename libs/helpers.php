@@ -411,7 +411,7 @@ while($register = mysqli_fetch_array($dbregister)) {
                             $color = "#4CAF50";
                             break;
                         case 2:
-                            $color = "#f44336";
+                            $color = "#f42316";
                             break;
                         case 3:
                             $color = "#2196F3";
@@ -425,7 +425,7 @@ while($register = mysqli_fetch_array($dbregister)) {
                     $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
                 }
                 else {
-                    $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"18\" stroke=\"black\" stroke-width=\"2\" fill=\"".$register['Color']."\" />\n";
+                    $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$register['Color']."\" />\n";
                 }
                 $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
 
