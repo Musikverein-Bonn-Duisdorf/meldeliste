@@ -8,6 +8,13 @@ if($_SESSION['admin']) {
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Registerübersicht</h2>
 </div>
+
+<?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
+<div class="w3-center w3-container">
+<?php echo printOrchestra(0, 1); ?>
+</div>
+<?php } ?>
+
 <?php
     $sql = sprintf('SELECT `Index` FROM `%sRegister` WHERE `Name` != "keins" ORDER BY `Sortierung`;',
         $GLOBALS['dbprefix']
