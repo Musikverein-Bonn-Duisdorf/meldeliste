@@ -251,6 +251,27 @@ class User
         }
         return 0;
     }
+    public function getMeldeQuote() {
+        $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sTermine` WHERE `Datum` >= "%s";',
+        $GLOBALS['dbprefix'],
+        $this->Joined
+        );        
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        $termine = $row['CNT'];
+
+        $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sMeldungen` WHERE `User` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );        
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        $meldungen = $row['CNT'];
+        $r = sprintf("%.3f", $meldungen/$termine);
+        return $r;
+    }
     public function delete() {
         if(!$this->Index) return false;
         $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
@@ -336,6 +357,9 @@ class User
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($this->LastLogin, 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Meldequote:</div><div class="w3-col l6"><b><?php echo $this->getMeldeQuote()*100; ?> %</b></div>
     </div>
       <?php
       if($this->RegisterLead) {
