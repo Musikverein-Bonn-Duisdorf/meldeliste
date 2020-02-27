@@ -68,10 +68,10 @@ if($fill && ($n->login || $edit == 3)) {
 <select class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
       <?php
   if($fill) {
-    instrumentOption($n->Instrument);
+      echo instrumentOption($n->Instrument);
   }
   else {
-    instrumentOption(0);
+      echo instrumentOption(0);
   }
 ?>
     </select>

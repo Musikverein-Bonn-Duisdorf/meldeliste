@@ -20,19 +20,24 @@ function bool2string($val) {
 }
 
 function instrumentOption($val) {
-    $sql = sprintf('SELECT * FROM `%sInstrument` ORDER BY `Register`, `Name`;',
-		   $GLOBALS['dbprefix']
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {
-            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
         }
         else {
-            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
         }
     }
+    return $str;
 }
 
 function VehicleOption($val) {
