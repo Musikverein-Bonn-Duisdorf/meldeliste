@@ -622,6 +622,52 @@ class Termin
         }
         return $str;
     }
+    protected function makeExtShiftButtons($N, $indent, $shift, $val) {
+        $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
+        $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
+        
+        $str="";
+        for($i=1; $i<=$N; $i++) {
+            $btn = new div;
+            $btn->indent = $indent;
+
+            $btn->class="w3-col s3 m3 l3";
+            $btn->class="w3-margin-left";
+            if(!$this->open && !$_SESSION['admin']) {
+                if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
+                    if($i != 2) {
+                        $str=$str.$btn->print();
+                        continue;
+                    }
+                }
+                else {
+                    $str=$str.$btn->print();
+                    continue;
+                }
+            }
+            $btn->tag="button";
+            $btn->class="w3-btn";
+            $btn->class="w3-border";
+            $btn->class="w3-border-black";
+            /* $btn->class="w3-margin-top"; */
+            $btn->class="w3-center";
+            $btn->body=$symbols[$i-1];
+
+            if($val && $val != $i) {
+                $btn->class=$GLOBALS['optionsDB']['colorDisabled'];
+            }
+            else {
+                $btn->class=$colors[$i-1];
+            }
+            if($val != $i) {
+                $btn->onclick="meldeExtShift('".$GLOBALS['cronID']."', ".$this->getUser().", ".$shift.", ".$this->Index.", ".$i.")";
+                $btn->name="meldungExtShift";
+                $btn->value=$i;
+            }
+            $str=$str.$btn->print();
+        }
+        return $str;
+    }
     protected function statusMailBtn($indent) {
         $user=$this->getUser();
         $str="";
@@ -839,7 +885,7 @@ class Termin
                 
                 $shiftmain = new div;
                 $shiftmain->indent=$indent;
-                $shiftmain->class="w3-container w3-border-top w3-border-white w3-padding";
+                $shiftmain->class="w3-border-top w3-border-white w3-padding w3-row";
                 $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
                 $shiftmain->class=$this->getLineColor($m->Wert);
                 $str=$str.$shiftmain->open();
@@ -853,7 +899,6 @@ class Termin
 
                 $shiftName = new div;
                 $shiftName->indent=$indent;
-                /* $shiftName->class="w3-margin-top"; */
                 $shiftName->col(3, 0, 0);
                 $shiftName->bold();
                 $shiftName->body=$s->Name;
@@ -881,7 +926,39 @@ class Termin
                 $valdiv->col(1, 0, 0);
                 $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
                 $str=$str.$valdiv->print();
+                $str=$str.$shiftSpacer->print();
                 
+                $extStr = new div;
+                $extStr->indent=$indent;
+                $extStr->tag="input";
+                $extStr->class="w3-input";
+                $extStr->class=$GLOBALS['optionsDB']['colorInputBackground'];
+                $extStr->name="Name";
+                $extStr->type="text";
+                /* $extStr->style="display: none;"; */
+                $extStr->col(3, 0, 0);
+                $str=$str.$extStr->print();
+
+                $extInstr = new div;
+                $extInstr->indent=$indent;
+                $extInstr->tag="select";
+                $extInstr->class="w3-input";
+                $extInstr->class=$GLOBALS['optionsDB']['colorInputBackground'];
+                $extInstr->name="Instrument";
+                $extInstr->body=instrumentOption(0);
+                /* $extInstr->style="display: none;"; */
+                $extInstr->col(3, 0, 0);
+                $str=$str.$extInstr->print();
+
+                $btnDiv = new div;
+                $btnDiv->indent=$indent;
+                $btnDiv->col(2, 0, 0);
+                $str=$str.$btnDiv->open();
+                $indent++;
+                $str=$str.$this->makeExtShiftButtons(3, $indent, $s->Index, 3);
+                $str=$str.$btnDiv->close();
+                $indent--;
+
                 $str=$str.$shiftmain->close();
                 $indent--;
             }

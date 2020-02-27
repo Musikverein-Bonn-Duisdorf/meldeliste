@@ -1,17 +1,17 @@
 <?php
 /* include 'libs/log.php'; */
-class Meldung
+class ExternMeldung
 {
-    private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Wert' => null, 'Timestamp' => null, 'Children' => null, 'Guests' => null);
+    private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Name' => null, 'Instrument' => null, 'Wert' => null, 'Timestamp' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Termin':
 	    case 'User':
+	    case 'Name':
+	    case 'Instrument':
 	    case 'Wert':
 	    case 'Timestamp':
-	    case 'Children':
-        case 'Guests':
             return $this->_data[$key];
             break;
         default:
@@ -21,19 +21,13 @@ class Meldung
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
-            $this->_data[$key] = (int)$val;
-            break;
 	    case 'Termin':
-            $this->_data[$key] = (int)$val;
-            break;
 	    case 'User':
-            $this->_data[$key] = (int)$val;
-            break;
+	    case 'Instrument':
 	    case 'Wert':
-	    case 'Children':
-	    case 'Guests':
             $this->_data[$key] = (int)$val;
             break;
+	    case 'Name':
 	    case 'Timestamp':
             $this->_data[$key] = trim($val);
             break;
@@ -42,23 +36,21 @@ class Meldung
         }	
     }
     public function getVars() {
-        $u = new User;
-        $u->load_by_id($this->User);
         $t = new Termin;
         $t->load_by_id($this->Termin);
-        $str = sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s",
+        $i = new Instrument;
+        $i->load_by_id($this->Instrument);
+        $u = new User;
+        $u->load_by_id($this->User);
+        $str = sprintf("extMelde-ID: %d, eingetragen von: %s, Termin: %d (%s), Name: %s, Instrument: %s, Wert: %s",
         $this->Index,
+        $u->getName(),
         $this->Termin,
         $t->Name,
-        $u->getName(),
+        $this->Name,
+        $i->Name,
         meldeWert($this->Wert)
         );
-        if($GLOBALS['optionsDB']['showChildOption']) {
-            $str=$str.", Kinder: ".$this->Children;
-        }
-        if($GLOBALS['optionsDB']['showGuestOption']) {
-            $str=$str.", G&auml;ste: ".$this->Guests;
-        }
         return $str;
     }
     public function save() {
@@ -75,19 +67,20 @@ class Meldung
         }
     }
     public function is_valid() {
-        if(!$this->User) return false;
+        if(!$this->Name) return false;
         if(!$this->Termin) return false;
         if(!$this->Wert) return false;
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sMeldungen` (`Termin`, `User`, `Wert`, `Children`, `Guests`) VALUES ("%s", "%s", "%s", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sexternMeldungen` (`Termin`, `User`, `Name`, `Instrument`, `Wert`, `Timestamp`) VALUES ("%d", "%s", "%d", "%d", "%s");',
         $GLOBALS['dbprefix'],
         $this->Termin,
         $this->User,
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
+        $this->Instrument,
         $this->Wert,
-        $this->Children,
-        $this->Guests
+        $this->Timestamp
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -96,11 +89,14 @@ class Meldung
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sMeldungen` SET `Wert` = "%s", `Children` = "%d", `Guests` = "%d", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sexternMeldungen` SET `Termin` = "%d", `User` = "%d", `Name` = "%s", `Instrument` = "%d", `Wert` = "%d", `Timestamp` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
+        $this->Termin,
+        $this->User,
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
+        $this->Instrument,
         $this->Wert,
-        $this->Children,
-        $this->Guests,
+        $this->Timestamp,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -110,7 +106,7 @@ class Meldung
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('DELETE FROM `%sMeldungen` WHERE `Index` = "%d";',
+        $sql = sprintf('DELETE FROM `%sexternMeldungen` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -141,16 +137,16 @@ class Meldung
         }
     }
     public function load_by_user_event($user, $event) {
-        $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
+        $r = array();
+        $sql = sprintf('SELECT * FROM `%sexternMeldungen` WHERE `User` = "%d" AND `Termin` = "%d";',
         $GLOBALS['dbprefix'],
         $user,
         $event
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        $row = mysqli_fetch_array($dbr);
-        if(is_array($row)) {
-            $this->fill_from_array($row);
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($r, $row['Index']);
         }
     }
 };
