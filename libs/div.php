@@ -1,7 +1,7 @@
 <?php
 class div
 {
-    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'default' => null, 'emptyBody' => false, 'href' => null);
+    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null);
     public function __get($key) {
         switch($key) {
 	    case 'indent':
@@ -19,6 +19,9 @@ class div
         case 'href':
         case 'default':
         case 'emptyBody':
+        case 'action':
+        case 'method':
+        case 'placeholder':
             return $this->_data[$key];
             break;
         default:
@@ -51,6 +54,9 @@ class div
         case 'href':
         case 'min':
         case 'default':
+        case 'action':
+        case 'method':
+        case 'placeholder':
             $this->_data[$key] = trim($val);
             break;
 	    case 'bold':
@@ -109,6 +115,15 @@ class div
         }
         if($this->href != null) {
             $str=$str." href=\"".$this->href."\"";
+        }
+        if($this->action != null) {
+            $str=$str." action=\"".$this->action."\"";
+        }
+        if($this->method != null) {
+            $str=$str." method=\"".$this->method."\"";
+        }
+        if($this->placeholder != null) {
+            $str=$str." placeholder=\"".$this->placeholder."\"";
         }
         $str=$str.">\n";
         if($this->body) {

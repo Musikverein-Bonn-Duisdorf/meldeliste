@@ -137,7 +137,7 @@ class Shift
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sSchichen` SET `Termin` = "%d", `Name` = "%s", `Start` = "%s", `End` = "%s", `Bedarf` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sSchichten` SET `Termin` = "%d", `Name` = "%s", `Start` = "%s", `End` = "%s", `Bedarf` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Termin,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
