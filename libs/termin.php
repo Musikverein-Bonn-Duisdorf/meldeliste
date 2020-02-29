@@ -382,6 +382,131 @@ class Termin
 
         return $str;
     }
+    public function shiftEditLine($shift) {
+        $indent=1;
+        $str="";
+        $s= new Shift;
+        $s->load_by_id($shift);
+        $shiftmain = new div;
+        $shiftmain->tag = "form";
+        $shiftmain->action="edit-shifts.php";
+        $shiftmain->method="POST";
+        $shiftmain->indent=$indent;
+        $shiftmain->class="w3-border-top w3-border-white w3-padding w3-row";
+        $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
+        $shiftmain->class=$GLOBALS['optionsDB']['colorInputBackground'];
+        $str=$str.$shiftmain->open();
+        $indent++;
+
+        $shiftName = new div;
+        $shiftName->indent=$indent;
+        $shiftName->col(3, 0, 0);
+        $shiftName->tag="input";
+        $shiftName->type="text";
+        $shiftName->placeholder="Bezeichnung";
+        $shiftName->name="Name";
+        $shiftName->class="w3-input w3-border";
+        $shiftName->value=$s->Name;
+        $str=$str.$shiftName->print();
+
+        $shiftTimeStartStr = new div;
+        $shiftTimeStartStr->indent=$indent;
+        $shiftTimeStartStr->col(1, 6, 6);
+        $shiftTimeStartStr->class="w3-center";
+        $shiftTimeStartStr->body="Start";
+        $str=$str.$shiftTimeStartStr->print();
+
+        $shiftTimeStart = new div;
+        $shiftTimeStart->tag="input";
+        $shiftTimeStart->type="time";
+        $shiftTimeStart->name="Start";
+        $shiftTimeStart->indent=$indent;
+        $shiftTimeStart->class="w3-input w3-border";
+        $shiftTimeStart->col(1, 0, 0);
+        $shiftTimeStart->value=$s->Start;
+        $str=$str.$shiftTimeStart->print();
+
+        $shiftTimeEndStr = new div;
+        $shiftTimeEndStr->indent=$indent;
+        $shiftTimeEndStr->col(1, 6, 6);
+        $shiftTimeEndStr->class="w3-center";
+        $shiftTimeEndStr->body="Ende";
+        $str=$str.$shiftTimeEndStr->print();
+
+        $shiftTimeEnd = new div;
+        $shiftTimeEnd->tag="input";
+        $shiftTimeEnd->type="time";
+        $shiftTimeEnd->name="End";
+        $shiftTimeEnd->indent=$indent;
+        $shiftTimeEnd->class="w3-input w3-border";
+        $shiftTimeEnd->col(1, 0, 0);
+        $shiftTimeEnd->value=$s->End;
+        $str=$str.$shiftTimeEnd->print();
+
+        $shiftBedarfStr = new div;
+        $shiftBedarfStr->indent=$indent;
+        $shiftBedarfStr->col(1, 6, 6);
+        $shiftBedarfStr->class="w3-center";
+        $shiftBedarfStr->body="Bedarf";
+        $str=$str.$shiftBedarfStr->print();
+
+        $shiftBedarf = new div;
+        $shiftBedarf->tag="input";
+        $shiftBedarf->type="number";
+        $shiftBedarf->name="Bedarf";
+        $shiftBedarf->min="0";
+        $shiftBedarf->indent=$indent;
+        $shiftBedarf->class="w3-input w3-border";
+        $shiftBedarf->col(1, 0, 0);
+        $shiftBedarf->value=$s->Bedarf;
+        $str=$str.$shiftBedarf->print();
+
+        $hidden = new div;
+        $hidden->indent=$indent;
+        $hidden->tag = "input";
+        $hidden->type = "hidden";
+        $hidden->name="Termin";
+        $hidden->value=$this->Index;
+
+        $str=$str.$hidden->print();
+        $btnDiv = new div;
+        $btnDiv->indent=$indent;
+        $btnDiv->tag="button";
+        $btnDiv->type="submit";
+        $btnDiv->name="save";
+        $btnDiv->body="<i class=\"fas fa-save\"></i>";
+        $btnDiv->value=$s->Index;
+        $btnDiv->class="w3-button w3-center w3-mobile w3-block";
+        $btnDiv->class=$GLOBALS['optionsDB']['colorBtnEdit'];
+        $btnDiv->col(1, 0, 0);
+        $str=$str.$btnDiv->print();
+
+        if($s->Index) {
+            $btnDiv = new div;
+            $btnDiv->indent=$indent;
+            $btnDiv->tag="button";
+            $btnDiv->type="submit";
+            $btnDiv->name="delete";
+            $btnDiv->body="<i class=\"fas fa-trash-alt\"></i>";
+            $btnDiv->value=$s->Index;
+            $btnDiv->class="w3-button w3-center w3-mobile w3-block";
+            $btnDiv->class=$GLOBALS['optionsDB']['colorBtnEdit'];
+            $btnDiv->col(1, 0, 0);
+            $str=$str.$btnDiv->print();
+        }
+
+            $str=$str.$shiftmain->close();
+        $indent--;
+        return $str;
+    }
+    public function printShiftEdit() {
+        $str='';
+        $indent = 1;
+        foreach($this->getShifts() as &$shift) {
+            $str=$str.$this->ShiftEditLine($shift);
+        }
+        return $str;
+    }
     public function printMailResponse() {
         $wertval = array('Zusagen', 'Absagen', 'unsicher');
         $colorval = array($GLOBALS['optionsDB']['colorAppmntYes'], $GLOBALS['optionsDB']['colorAppmntNo'], $GLOBALS['optionsDB']['colorAppmntMaybe']);
@@ -920,44 +1045,44 @@ class Termin
                 $str=$str.$btnDiv->close();
                 $indent--;
                 
-                $valdiv = new div;
-                $valdiv->indent=$indent;
-                $valdiv->class="w3-center w3-padding";
-                $valdiv->col(1, 0, 0);
-                $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
-                $str=$str.$valdiv->print();
-                $str=$str.$shiftSpacer->print();
+                /* $valdiv = new div; */
+                /* $valdiv->indent=$indent; */
+                /* $valdiv->class="w3-center w3-padding"; */
+                /* $valdiv->col(1, 0, 0); */
+                /* $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString(); */
+                /* $str=$str.$valdiv->print(); */
+                /* $str=$str.$shiftSpacer->print(); */
                 
-                $extStr = new div;
-                $extStr->indent=$indent;
-                $extStr->tag="input";
-                $extStr->class="w3-input";
-                $extStr->class=$GLOBALS['optionsDB']['colorInputBackground'];
-                $extStr->name="Name";
-                $extStr->type="text";
-                /* $extStr->style="display: none;"; */
-                $extStr->col(3, 0, 0);
-                $str=$str.$extStr->print();
+                /* $extStr = new div; */
+                /* $extStr->indent=$indent; */
+                /* $extStr->tag="input"; */
+                /* $extStr->class="w3-input"; */
+                /* $extStr->class=$GLOBALS['optionsDB']['colorInputBackground']; */
+                /* $extStr->name="Name"; */
+                /* $extStr->type="text"; */
+                /* /\* $extStr->style="display: none;"; *\/ */
+                /* $extStr->col(3, 0, 0); */
+                /* $str=$str.$extStr->print(); */
 
-                $extInstr = new div;
-                $extInstr->indent=$indent;
-                $extInstr->tag="select";
-                $extInstr->class="w3-input";
-                $extInstr->class=$GLOBALS['optionsDB']['colorInputBackground'];
-                $extInstr->name="Instrument";
-                $extInstr->body=instrumentOption(0);
-                /* $extInstr->style="display: none;"; */
-                $extInstr->col(3, 0, 0);
-                $str=$str.$extInstr->print();
+                /* $extInstr = new div; */
+                /* $extInstr->indent=$indent; */
+                /* $extInstr->tag="select"; */
+                /* $extInstr->class="w3-input"; */
+                /* $extInstr->class=$GLOBALS['optionsDB']['colorInputBackground']; */
+                /* $extInstr->name="Instrument"; */
+                /* $extInstr->body=instrumentOption(0); */
+                /* /\* $extInstr->style="display: none;"; *\/ */
+                /* $extInstr->col(3, 0, 0); */
+                /* $str=$str.$extInstr->print(); */
 
-                $btnDiv = new div;
-                $btnDiv->indent=$indent;
-                $btnDiv->col(2, 0, 0);
-                $str=$str.$btnDiv->open();
-                $indent++;
-                $str=$str.$this->makeExtShiftButtons(3, $indent, $s->Index, 3);
-                $str=$str.$btnDiv->close();
-                $indent--;
+                /* $btnDiv = new div; */
+                /* $btnDiv->indent=$indent; */
+                /* $btnDiv->col(2, 0, 0); */
+                /* $str=$str.$btnDiv->open(); */
+                /* $indent++; */
+                /* $str=$str.$this->makeExtShiftButtons(3, $indent, $s->Index, 3); */
+                /* $str=$str.$btnDiv->close(); */
+                /* $indent--; */
 
                 $str=$str.$shiftmain->close();
                 $indent--;
@@ -1022,8 +1147,15 @@ class Termin
             $str=$str."\t\t</div>\n";
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
+            $str=$str."\t\t</form>\n";
         }
-        $str=$str."\t\t</form>\n";
+        if($_SESSION['admin']) {
+        if($this->Shifts) {
+            $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
+            $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
+            $str=$str."\t\t</form>\n";
+            }
+        }
         $str=$str."\t</div>\n";
         $str=$str."\t</div> <! -- Woher -->\n";
         return $str;
