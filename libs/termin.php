@@ -1045,12 +1045,13 @@ class Termin
                 $str=$str.$btnDiv->close();
                 $indent--;
                 
-                /* $valdiv = new div; */
-                /* $valdiv->indent=$indent; */
-                /* $valdiv->class="w3-center w3-padding"; */
-                /* $valdiv->col(1, 0, 0); */
-                /* $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString(); */
-                /* $str=$str.$valdiv->print(); */
+                $valdiv = new div;
+                $valdiv->indent=$indent;
+                $valdiv->class="w3-center w3-padding";
+                $valdiv->col(1, 0, 0);
+                $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
+                $str=$str.$valdiv->print();
+
                 /* $str=$str.$shiftSpacer->print(); */
                 
                 /* $extStr = new div; */
