@@ -230,7 +230,7 @@ class Termin
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         while($row = mysqli_fetch_array($dbr)) {
-            $n = new Schicht;
+            $n = new Shift;
             $n->load_by_id($row['Index']);
             $n->delete();
         }
@@ -398,9 +398,16 @@ class Termin
         $str=$str.$shiftmain->open();
         $indent++;
 
+        $shiftNameStr = new div;
+        $shiftNameStr->indent=$indent;
+        $shiftNameStr->col(1, 6, 6);
+        $shiftNameStr->class="w3-padding";
+        $shiftNameStr->body="Bezeichnung:";
+        $str=$str.$shiftNameStr->print();
+
         $shiftName = new div;
         $shiftName->indent=$indent;
-        $shiftName->col(3, 0, 0);
+        $shiftName->col(2, 0, 0);
         $shiftName->tag="input";
         $shiftName->type="text";
         $shiftName->placeholder="Bezeichnung";
@@ -412,8 +419,8 @@ class Termin
         $shiftTimeStartStr = new div;
         $shiftTimeStartStr->indent=$indent;
         $shiftTimeStartStr->col(1, 6, 6);
-        $shiftTimeStartStr->class="w3-center";
-        $shiftTimeStartStr->body="Start";
+        $shiftTimeStartStr->class="w3-padding";
+        $shiftTimeStartStr->body="Beginn:";
         $str=$str.$shiftTimeStartStr->print();
 
         $shiftTimeStart = new div;
@@ -429,8 +436,8 @@ class Termin
         $shiftTimeEndStr = new div;
         $shiftTimeEndStr->indent=$indent;
         $shiftTimeEndStr->col(1, 6, 6);
-        $shiftTimeEndStr->class="w3-center";
-        $shiftTimeEndStr->body="Ende";
+        $shiftTimeEndStr->class="w3-padding";
+        $shiftTimeEndStr->body="Ende (optional):";
         $str=$str.$shiftTimeEndStr->print();
 
         $shiftTimeEnd = new div;
@@ -446,8 +453,8 @@ class Termin
         $shiftBedarfStr = new div;
         $shiftBedarfStr->indent=$indent;
         $shiftBedarfStr->col(1, 6, 6);
-        $shiftBedarfStr->class="w3-center";
-        $shiftBedarfStr->body="Bedarf";
+        $shiftBedarfStr->class="w3-padding";
+        $shiftBedarfStr->body="Bedarf:";
         $str=$str.$shiftBedarfStr->print();
 
         $shiftBedarf = new div;
@@ -469,6 +476,14 @@ class Termin
         $hidden->value=$this->Index;
 
         $str=$str.$hidden->print();
+
+        $btncntr = new div;
+        $btncntr->indent=$indent;
+        $btncntr->class="w3-row w3-mobile w3-container";
+        $btncntr->col(2, 12, 12);
+        $str=$str.$btncntr->open();
+        $indent++;
+        
         $btnDiv = new div;
         $btnDiv->indent=$indent;
         $btnDiv->tag="button";
@@ -476,27 +491,155 @@ class Termin
         $btnDiv->name="save";
         $btnDiv->body="<i class=\"fas fa-save\"></i>";
         $btnDiv->value=$s->Index;
-        $btnDiv->class="w3-button w3-center w3-mobile w3-block";
+        $btnDiv->class="w3-button w3-center w3-border w3-border-black";
         $btnDiv->class=$GLOBALS['optionsDB']['colorBtnEdit'];
-        $btnDiv->col(1, 0, 0);
+        $btnDiv->col(5, 5, 5);
         $str=$str.$btnDiv->print();
-
+        $btnSpacer = new div;
+        $btnSpacer->indent=$indent;
+        $btnSpacer->col(1,1,1);
+        $str=$str.$btnSpacer->print();
+        
         if($s->Index) {
             $btnDiv = new div;
             $btnDiv->indent=$indent;
-            $btnDiv->tag="button";
-            $btnDiv->type="submit";
-            $btnDiv->name="delete";
+            $btnDiv->onclick="document.getElementById('delmodal".$s->Index."').style.display='block'";
             $btnDiv->body="<i class=\"fas fa-trash-alt\"></i>";
-            $btnDiv->value=$s->Index;
-            $btnDiv->class="w3-button w3-center w3-mobile w3-block";
+            $btnDiv->class="w3-button w3-center w3-border w3-border-black w3-hover";
             $btnDiv->class=$GLOBALS['optionsDB']['colorBtnEdit'];
-            $btnDiv->col(1, 0, 0);
+            $btnDiv->col(5, 5, 5);
             $str=$str.$btnDiv->print();
         }
-
-            $str=$str.$shiftmain->close();
+        $str=$str.$btncntr->close();
         $indent--;
+
+        $str=$str.$shiftmain->close();
+        $indent--;
+        
+        if($s->Index) {
+            $divModal = new div;
+            $divModal->id="delmodal".$s->Index;
+            $divModal->class="w3-modal";
+            $divModal->indent=$indent;
+            $str=$str.$divModal->open();
+            $indent++;
+        
+            $divCard = new div;
+            $divCard->indent=$indent;
+            $divCard->class="w3-modal-content w3-card";
+            $str=$str.$divCard->open();
+            $indent++;
+        
+            $divHeader = new div;
+            $divHeader->indent=$indent;
+            $divHeader->tag="header";
+            $divHeader->class="w3-container w3-row";
+            $divHeader->class=$GLOBALS['optionsDB']['colorTitleBar'];
+            $str=$str.$divHeader->open();
+            $indent++;
+        
+            $divSpan = new div;
+            $divSpan->indent=$indent;
+            $divSpan->onclick="document.getElementById('delmodal".$s->Index."').style.display='none'";
+            $divSpan->class="w3-button w3-display-topright";
+            $str=$str.$divSpan->print();
+
+            $divH = new div;
+            $divH->indent=$indent;
+            $divH->tag="h2";
+            $divH->body="L&ouml;schen best&auml;tigen";
+            $str=$str.$divH->print();
+            
+            $str=$str.$divHeader->close();
+            $indent--;
+        
+            $divBody = new div;
+            $divBody->indent=$indent;
+            $divBody->class="w3-container w3-row w3-center w3-padding w3-margin w3-card";
+            $divBody->class=$GLOBALS['optionsDB']['colorWarning'];
+            $divBody->body="Sind Sie sicher, dass sie <b>".$s->Name." ".$s->getTime()."</b> l&ouml;schen wollen?<br />Alle Meldungen zu dieser Schicht werden ebenfalls gel&ouml;scht.";
+            $str=$str.$divBody->print();
+
+            $divForm1 = new div;
+            $divForm1->indent=$indent;
+            $divForm1->class="w3-container w3-mobile";
+            $str=$str.$divForm1->open();
+            $indent++;
+        
+            $divForm = new div;
+            $divForm->tag="form";
+            $divForm->indent=$indent;
+            $divForm->action="edit-shifts.php";
+            $divForm->method="POST";
+            $str=$str.$divForm->open();
+            $indent++;
+            
+            $divHiddenIndex = new div;
+            $divHiddenIndex->indent=$indent;
+            $divHiddenIndex->tag="input";
+            $divHiddenIndex->type="hidden";
+            $divHiddenIndex->name="Termin";
+            $divHiddenIndex->value=$this->Index;
+            $str=$str.$divHiddenIndex->print();
+
+            $divRow = new div;
+            $divRow->indent=$indent;
+            $divRow->class="w3-row";
+            $str=$str.$divRow->open();
+            $indent++;
+            
+            $divSpacer = new div;
+            $divSpacer->indent=$indent;
+            $divSpacer->class="w3-center";
+            $divSpacer->col(4, 4, 2);
+            $str=$str.$divSpacer->print();
+
+            $divBtnYes = new div;
+            $divBtnYes->indent=$indent;
+            $divBtnYes->tag="button";
+            $divBtnYes->type="submit";
+            $divBtnYes->name="delete";
+            $divBtnYes->value=$s->Index;
+            $divBtnYes->class="w3-btn w3-center w3-border w3-margin-bottom w3-mobile";
+            $divBtnYes->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $divBtnYes->body="ja";
+            $divBtnYes->col(4, 4, 8);
+            $str=$str.$divBtnYes->print();
+            
+            $str=$str.$divSpacer->print();
+            
+            $str=$str.$divRow->close();
+            $indent--;
+            
+            $str=$str.$divForm->close();
+            $indent--;
+            
+            $str=$str.$divRow->open();
+            $indent++;
+            $str=$str.$divSpacer->print();
+            
+            $divBtnNo = new div;
+            $divBtnNo->indent=$indent;
+            $divBtnNo->tag="button";
+            $divBtnNo->onclick="document.getElementById('delmodal".$s->Index."').style.display='none'";
+            $divBtnNo->class="w3-btn w3-center w3-border w3-margin-bottom w3-mobile";
+            $divBtnNo->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $divBtnNo->body="nein";
+            $divBtnNo->col(4, 4, 8);
+            $str=$str.$divBtnNo->print();
+            
+            $str=$str.$divSpacer->print();
+            $str=$str.$divRow->close();
+            $indent--;
+            
+            $str=$str.$divForm1->close();
+            $indent--;
+            $str=$str.$divCard->close();
+            $indent--;
+            $str=$str.$divModal->close();
+            $indent--;
+        }
+        
         return $str;
     }
     public function printShiftEdit() {
@@ -879,7 +1022,7 @@ class Termin
 
         $btnDiv = new Div;
         $btnDiv->indent = $indent;
-        $btnDiv->class="w3-col l2";
+        $btnDiv->col(2, 0, 0);
         $btnDiv->class="w3-row w3-mobile";
         if($this->Shifts) {
             $str=$str.$btnDiv->print();

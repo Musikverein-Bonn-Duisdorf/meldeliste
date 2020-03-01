@@ -13,7 +13,7 @@ requireAdmin();
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `%sLog` ORDER BY `Timestamp` DESC LIMIT 1000;',
+$sql = sprintf('SELECT `Index` FROM `%sLog` ORDER BY `Index` DESC LIMIT 1000;',
 $GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);
