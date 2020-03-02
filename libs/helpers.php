@@ -380,7 +380,7 @@ while($register = mysqli_fetch_array($dbregister)) {
         else {
             $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 ORDER BY `Nachname`;',
             $GLOBALS['dbprefix'],
-            $instrument['Index'],
+            $instrument['Index']
             );
         }
         $dbuser = mysqli_query($GLOBALS['conn'], $sql);
