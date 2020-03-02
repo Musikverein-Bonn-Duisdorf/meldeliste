@@ -1,8 +1,8 @@
 <?php
 
 $version = array(
-    'String' => "v2.5",
-    'Date' => "16. Januar 2020",
+    'String' => "v2.7",
+    'Date' => "2. M&auml;rz 2020",
 );
 
 global $version;
