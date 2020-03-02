@@ -2,13 +2,14 @@
 /* include 'libs/log.php'; */
 class Meldung
 {
-    private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Wert' => null, 'Timestamp' => null, 'Children' => null, 'Guests' => null);
+    private $_data = array('Index' => null, 'Termin' => null, 'User' => null, 'Wert' => null, 'Instrument' => 0, 'Timestamp' => null, 'Children' => null, 'Guests' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Termin':
 	    case 'User':
 	    case 'Wert':
+	    case 'Instrument':
 	    case 'Timestamp':
 	    case 'Children':
         case 'Guests':
@@ -21,15 +22,10 @@ class Meldung
     public function __set($key, $val) {
         switch($key) {
 	    case 'Index':
-            $this->_data[$key] = (int)$val;
-            break;
 	    case 'Termin':
-            $this->_data[$key] = (int)$val;
-            break;
 	    case 'User':
-            $this->_data[$key] = (int)$val;
-            break;
 	    case 'Wert':
+	    case 'Instrument':
 	    case 'Children':
 	    case 'Guests':
             $this->_data[$key] = (int)$val;
@@ -46,12 +42,17 @@ class Meldung
         $u->load_by_id($this->User);
         $t = new Termin;
         $t->load_by_id($this->Termin);
-        $str = sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s",
+        $instrument = $this->Instrument;
+        if($instrument == 0) $instrument = $u->Instrument;
+        $instr = new Instrument;
+        $instr->load_by_id($instrument);
+        $str = sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s, Instrument: %s",
         $this->Index,
         $this->Termin,
         $t->Name,
         $u->getName(),
-        meldeWert($this->Wert)
+        meldeWert($this->Wert),
+        $instr->Name
         );
         if($GLOBALS['optionsDB']['showChildOption']) {
             $str=$str.", Kinder: ".$this->Children;
@@ -64,14 +65,14 @@ class Meldung
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
             $logentry->DBupdate($this->getVars());
+            $this->update();
         }
         else {
-            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
+            $this->insert();
         }
     }
     public function is_valid() {
@@ -81,11 +82,12 @@ class Meldung
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sMeldungen` (`Termin`, `User`, `Wert`, `Children`, `Guests`) VALUES ("%s", "%s", "%s", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sMeldungen` (`Termin`, `User`, `Wert`, `Instrument`, `Children`, `Guests`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         $this->Termin,
         $this->User,
         $this->Wert,
+        $this->Instrument,
         $this->Children,
         $this->Guests
         );
@@ -96,9 +98,10 @@ class Meldung
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sMeldungen` SET `Wert` = "%s", `Children` = "%d", `Guests` = "%d", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sMeldungen` SET `Wert` = "%d", `Instrument` = "%d", `Children` = "%d", `Guests` = "%d", `Timestamp` = DEFAULT WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Wert,
+        $this->Instrument,
         $this->Children,
         $this->Guests,
         $this->Index

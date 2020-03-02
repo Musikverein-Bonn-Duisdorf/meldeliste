@@ -38,6 +38,7 @@ if(isset($_POST['meldung'])) {
 <script src="js/getStatus.js"></script>
 <script src="js/melde.js"></script>
 <script src="js/meldeshift.js"></script>
+<script src="js/changeInstrument.js"></script>
 
 <?php
 if(isset($_POST['proxy'])) {

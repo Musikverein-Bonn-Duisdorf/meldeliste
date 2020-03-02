@@ -222,6 +222,11 @@ class User
     public function getName() {
         return $this->Vorname." ".$this->Nachname;
     }
+    public function getInstrument() {
+        $i = new Instrument;
+        $i->load_by_id($this->Instrument);
+        return $i->Name;
+    }
     public function getRegister() {
         if(!$this->Instrument) return false;
         $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Index` = "%d";',

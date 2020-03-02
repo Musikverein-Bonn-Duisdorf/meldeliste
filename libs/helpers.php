@@ -321,6 +321,7 @@ function printOrchestra($tid, $scale) {
     if($tid) {
         $termin = new Termin;
         $termin->load_by_id($tid);
+        $meldungen = $termin->getMeldungUsers();
     }
     
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
@@ -364,12 +365,34 @@ while($register = mysqli_fetch_array($dbregister)) {
     $dbinstrument = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     while($instrument = mysqli_fetch_array($dbinstrument)) {
-        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = %d AND `Deleted` = 0 ORDER BY `Nachname`;',
-        $GLOBALS['dbprefix'],
-        $instrument['Index']
-        );
+        if($tid) {
+            $sql = sprintf('SELECT `Index`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
+            $GLOBALS['dbprefix'],
+            $instrument['Index'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $instrument['Index']
+            );
+        }
+        else {
+            $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 ORDER BY `Nachname`;',
+            $GLOBALS['dbprefix'],
+            $instrument['Index'],
+            );
+        }
         $dbuser = mysqli_query($GLOBALS['conn'], $sql);
         while($user = mysqli_fetch_array($dbuser)) {
+            if($tid) {
+                $s = array_search($user['Index'], $meldungen);
+                if(!$user['Meldung'] && $s !== false) {
+                    $m = new Meldung;
+                    $m->load_by_user_event($user['Index'], $tid);
+                    unset($meldungen[$s]);
+                    if($m->Instrument) continue;
+                }
+            }
             $u = new User;
             $u->load_by_id($user['Index']);
             if($register['Row']==0) {

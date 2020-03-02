@@ -99,14 +99,14 @@ class Termin
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
             $logentry->DBupdate($this->getVars());
+            $this->update();
         }
         else {
-            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
+            $this->insert();
         }
     }
     public function is_valid() {
@@ -1279,6 +1279,23 @@ class Termin
         $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
         $str=$str."\t\t\t<div class=\"w3-col l3\">Schichten zu besetzen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Shifts)."</b></div>\n";
         $str=$str."\t\t</div>\n";
+        if($this->Auftritt) {
+            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
+
+            $u = new User;
+            $u->load_by_id($this->getUser());
+            $instrument = instrumentOption($u->Instrument);
+
+            $m = new Meldung;
+            $m->load_by_user_event($this->getUser(), $this->Index);
+            if($m->Index) {
+                if($m->Instrument) $instrument = $m->Instrument;
+            }
+
+            $str=$str."\t\t\t<div class=\"w3-col l3\">Instrument f&uuml;r diesen Auftritt:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
+            $str=$str."\t\t\t<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument('".$GLOBALS['cronID']."', ".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
+            $str=$str."\t\t</div>\n";
+        }
         if($_SESSION['admin']) {
             $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."\t\t\t<div class=\"w3-col l3\">sichtbar:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>\n";
@@ -1292,12 +1309,10 @@ class Termin
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
             $str=$str."\t\t</form>\n";
-        }
-        if($_SESSION['admin']) {
-        if($this->Shifts) {
-            $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
-            $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
-            $str=$str."\t\t</form>\n";
+            if($this->Shifts) {
+                $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
+                $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
+                $str=$str."\t\t</form>\n";
             }
         }
         $str=$str."\t</div>\n";
@@ -1585,13 +1600,22 @@ class Termin
                 $register->load_by_id($row['Index']);
                 $nReg = $register->members();
                 $snReg+=$nReg;
-                $sql = sprintf("SELECT * FROM `%sMeldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex`
+                $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rName` FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
 INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
-WHERE `Termin` = '%d'
-AND `rIndex` = '%d'
-ORDER BY `Nachname`, `Vorname`",
+WHERE `Termin` = '%d' AND `rIndex` = '%d' AND `%sMeldungen`.`Instrument` = '0')
+
+UNION
+
+(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rName` FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+WHERE `Termin` = '%d' AND `rIndex` = '%d' AND `%sMeldungen`.`Instrument` != '0')
+
+ORDER BY `Nachname`, `Vorname`;",
+                $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
@@ -1600,7 +1624,19 @@ ORDER BY `Nachname`, `Vorname`",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $this->Index,
-                $row['Index']
+                $row['Index'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $this->Index,
+                $row['Index'],
+                $GLOBALS['dbprefix']
                 );
                 $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
                 sqlerror();
