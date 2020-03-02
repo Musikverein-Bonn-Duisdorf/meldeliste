@@ -1284,7 +1284,7 @@ class Termin
 
             $u = new User;
             $u->load_by_id($this->getUser());
-            $instrument = instrumentOption($u->Instrument);
+            $instrument = $u->Instrument;
 
             $m = new Meldung;
             $m->load_by_user_event($this->getUser(), $this->Index);
