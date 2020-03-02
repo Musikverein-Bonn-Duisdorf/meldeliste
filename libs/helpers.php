@@ -366,12 +366,13 @@ while($register = mysqli_fetch_array($dbregister)) {
     sqlerror();
     while($instrument = mysqli_fetch_array($dbinstrument)) {
         if($tid) {
-            $sql = sprintf('SELECT `Index`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
+            $sql = sprintf('SELECT `Index`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Termin`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `Termin` = "%d" AND `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
             $GLOBALS['dbprefix'],
             $instrument['Index'],
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
+            $tid,
             $GLOBALS['dbprefix'],
             $instrument['Index']
             );
