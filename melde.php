@@ -25,6 +25,15 @@ case "save":
     $t->load_by_id($_GET['termin']);
     echo $t->printBasicTableLine();
     break;
+case "instrument":
+    $m = new Meldung;
+    $m->load_by_user_event($_GET['user'], $_GET['termin']);
+    if($m->User < 1) {
+        break;
+    }
+    $m->Instrument = $_GET['instrument'];
+    $m->save();
+    break;
 case "status":
     setlocale (LC_ALL, 'de_DE.UTF8');
     $today = strftime('%A, %d. %B %Y um %H:%M Uhr');
