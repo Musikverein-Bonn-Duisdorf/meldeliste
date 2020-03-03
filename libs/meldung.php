@@ -65,14 +65,14 @@ class Meldung
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
+            $this->update();
             $logentry = new Log;
             $logentry->DBupdate($this->getVars());
-            $this->update();
         }
         else {
+            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->insert();
         }
     }
     public function is_valid() {
