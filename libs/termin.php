@@ -305,6 +305,33 @@ class Termin
         }
         return $meldungen;
     }
+    public function getExtMeldungenByUser($user) {
+        $sql = sprintf('SELECT * FROM `%sexternMeldungen` WHERE `Termin` = "%d" AND `User` = %d;',
+        $GLOBALS['dbprefix'],
+        $this->Index,
+        $user
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $meldungen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($meldungen, $row['Index']);
+        }
+        return $meldungen;
+    }
+    public function getExtMeldungen() {
+        $sql = sprintf('SELECT * FROM `%sexternMeldungen` WHERE `Termin` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $meldungen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($meldungen, $row['Index']);
+        }
+        return $meldungen;
+    }
     public function getMeldungen() {
         $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `Termin` = "%d";',
         $GLOBALS['dbprefix'],
@@ -1305,6 +1332,9 @@ class Termin
             $str=$str."\t\t</div>\n";
             $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."\t\t\t<div class=\"w3-col l3\">neu:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->new)."</b></div>\n";
+            $str=$str."\t\t</div>\n";
+            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."\t\t\t<div class=\"w3-col l3\">ID:</div>\n<div class=\"w3-col l9\"><b>".$this->Index."</b></div>\n";
             $str=$str."\t\t</div>\n";
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
