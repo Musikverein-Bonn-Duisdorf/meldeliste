@@ -85,8 +85,8 @@ class Termin
         $this->Uhrzeit,
         $this->Uhrzeit2,
         $this->Abfahrt,
-        $this->Capacity,
         $this->vName,
+        $this->Capacity,
         $this->Name,
         bool2string($this->Auftritt),
         $this->Ort1,
@@ -220,6 +220,8 @@ class Termin
     }
     public function delete() {
         if(!$this->Index) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
 
         $sql = sprintf('DELETE FROM `%sMeldungen` WHERE `Termin` = "%d";',
         $GLOBALS['dbprefix'],
@@ -247,10 +249,7 @@ class Termin
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-                
-        $logentry = new Log;
-        $logentry->DBdelete($this->getVars());
-
+        
         $this->_data['Index'] = null;
         return true;
     }
