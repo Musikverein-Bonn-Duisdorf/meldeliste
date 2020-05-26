@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -9,6 +9,7 @@ class Termin
 	    case 'Uhrzeit':
 	    case 'Uhrzeit2':
 	    case 'Abfahrt':
+        case 'Capacity':
 	    case 'Vehicle':
 	    case 'Name':
 	    case 'Auftritt':
@@ -38,6 +39,7 @@ class Termin
 	    case 'Wert':
 	    case 'Children':
 	    case 'Guests':
+        case 'Capacity':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Datum':
@@ -77,12 +79,13 @@ class Termin
             $row = mysqli_fetch_array($dbr);
             $this->vName = $row['Name'];
         }
-        return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Abfahrt: %s, mit: %s, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, Schichten: %s, sichtbar: %s, offen: %s",
+        return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Abfahrt: %s, mit: %s, max. Teilnehmer: %d, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, Schichten: %s, sichtbar: %s, offen: %s",
         $this->Index,
         $this->Datum,
         $this->Uhrzeit,
         $this->Uhrzeit2,
         $this->Abfahrt,
+        $this->Capacity,
         $this->vName,
         $this->Name,
         bool2string($this->Auftritt),
@@ -116,12 +119,13 @@ class Termin
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`) VALUES ("%s", %s, %s, %s, "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`) VALUES ("%s", %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
         $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
         $this->Abfahrt == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Abfahrt)."\"",
+        $this->Capacity,
         $this->Vehicle,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
@@ -188,12 +192,13 @@ class Termin
         return 0;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
         $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
         $this->Abfahrt == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Abfahrt)."\"",
+        $this->Capacity,
         $this->Vehicle,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
@@ -970,10 +975,10 @@ class Termin
         $admStatusDiv->indent = $indent;
         $admStatusDiv->class="w3-col l1 m12 s12";
         $admStatusDiv->class="w3-row";
-        $admStatusDiv->class="w3-margin-top";
         $admStatusDiv->class="w3-mobile";
         if($_SESSION['admin'] && $GLOBALS['optionsDB']['statusPerMail']) {
             $admStatusDiv->tag="button";
+            $admStatusDiv->class="w3-margin-top";
             $admStatusDiv->class="w3-btn";
             $admStatusDiv->class="w3-border";
             $admStatusDiv->class="w3-border-black";
@@ -984,6 +989,11 @@ class Termin
         else {
             $admStatusDiv->class="w3-hide-small";
             $admStatusDiv->class="w3-hide-medium";
+            $admStatusDiv->class="w3-center";
+            $admStatusDiv->class="w3-padding";
+            if($this->Capacity) {
+                $admStatusDiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$this->getResponseString();
+            }
         }
         $str=$str.$admStatusDiv->print();
         return $str;
@@ -1057,7 +1067,21 @@ class Termin
         else {
             $str=$str.$btnDiv->open();
             $indent++;
-            $str=$str.$this->makeButtons(3, $indent, $this->Wert);
+            if($this->Capacity) {
+                if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || $_SESSION['admin']) {
+                    $str=$str.$this->makeButtons(2, $indent, $this->Wert);
+                }
+                else {
+                    $closed = new div;
+            $closed->class="w3-col s9 m9 l9";
+            $closed->class="w3-margin-left w3-center w3-padding";
+            $closed->body="Alle Pl&auml;tze belegt";
+            $str=$str.$closed->print();
+                }
+            }
+            else {
+                $str=$str.$this->makeButtons(3, $indent, $this->Wert);
+            }
             $indent--;
             $str=$str.$btnDiv->close();
         }
@@ -1300,6 +1324,11 @@ class Termin
             $str=$str."\t\t\t<div class=\"w3-col l3\">Karte:</div>\n<div class=\"w3-col l9\"><iframe width=\"auto\" height=\"auto\" frameborder=\"0\" style=\"border:0\" src=\"https://www.google.com/maps/embed/v1/place?key=".$GLOBALS['googlemapsapi']."&q=".$this->Ort1."+".$this->Ort2."+".$this->Ort3."+".$this->Ort4."\" allowfullscreen></iframe></div>\n";
             $str=$str."\t\t</div>\n";
         }
+        if($this->Capacity) {
+            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."\t\t\t<div class=\"w3-col l3\">Pl&auml;tze:</div>\n<div class=\"w3-col l9\"><b>".$this->Capacity."</b></div>\n";
+            $str=$str."\t\t</div>\n";
+        }
         $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
         $str=$str."\t\t\t<div class=\"w3-col l3\">Auftritt:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>\n";
         $str=$str."\t\t</div>\n";
@@ -1347,6 +1376,11 @@ class Termin
         }
         $str=$str."\t</div>\n";
         $str=$str."\t</div> <! -- Woher -->\n";
+        return $str;
+    }
+    public function getResponseString() {
+        $str=$this->getMeldungenVal(1);
+        $str=$str." / ".$this->Capacity;
         return $str;
     }
     public function printMyResponseLine() {
