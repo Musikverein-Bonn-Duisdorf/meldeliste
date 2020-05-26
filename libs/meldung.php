@@ -113,6 +113,8 @@ class Meldung
     }
     public function delete() {
         if(!$this->Index) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
         $sql = sprintf('DELETE FROM `%sMeldungen` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
@@ -120,8 +122,6 @@ class Meldung
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-        $logentry = new Log;
-        $logentry->DBdelete($this->getVars());
         $this->_data['Index'] = null;
         return true;
     }

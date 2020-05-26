@@ -153,6 +153,8 @@ class Shift
     }
     public function delete() {
         if(!$this->Index) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
 
         $sql = sprintf('SELECT * FROM `%sSchichtmeldung` WHERE `Shift` = "%d";',
         $GLOBALS['dbprefix'],
@@ -173,8 +175,6 @@ class Shift
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-        $logentry = new Log;
-        $logentry->DBdelete($this->getVars());
         $this->_data['Index'] = null;
 
         return true;
