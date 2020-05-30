@@ -47,7 +47,33 @@ echo $_SESSION['username'];
     <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-info"></i></a>
     <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $optionsDB['colorNav']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>
+        <?php
+        if($optionsDB['MessageOfTheDayShort']) {
+        ?>
+<div class="w3-container w3-card w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
+  <div class="w3-col l3 m3 s2 w3-center">
+    <i class="fas fa-exclamation-triangle"></i>
+</div>
+  <div class="w3-col l6 m6 s8 w3-center">
+<?php echo $optionsDB['MessageOfTheDayShort']; ?>
+</div>
 
+  <div class="w3-col l3 m3 s2 w3-center">
+    <i class="fas fa-exclamation-triangle"></i>
+</div>
+</div>
+        <div id="MessageOfTheDay" class="w3-modal">
+  <div class="w3-modal-content">
+        <div class="w3-container">
+        <?php echo $optionsDB['MessageOfTheDay']; ?>
+        <button class="w3-btn w3-blue w3-padding w3-center" onclick="document.getElementById('MessageOfTheDay').style.display='none'"
+      class="w3-button w3-display-topright">Verstanden</button>
+    </div>
+  </div>
+</div>
+        <?php
+        }
+        ?>
 <script type="text/javascript">
     function showAll() {
 	var x = document.getElementsByClassName('stdhide');
@@ -59,4 +85,9 @@ echo $_SESSION['username'];
 	    }
 	}
     }
+<?php if(!isset($_SESSION['MessageOfTheDay'])){
+        $_SESSION['MessageOfTheDay']=true;
+?>
+document.getElementById('MessageOfTheDay').style.display='block';
+<?php } ?>
 </script>
