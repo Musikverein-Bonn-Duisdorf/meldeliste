@@ -66,8 +66,8 @@ echo $_SESSION['username'];
   <div class="w3-modal-content">
         <div class="w3-container">
         <?php echo $optionsDB['MessageOfTheDay']; ?>
-        <button class="w3-btn w3-blue w3-padding w3-center" onclick="document.getElementById('MessageOfTheDay').style.display='none'"
-      class="w3-button w3-display-topright">Verstanden</button>
+        <div class="w3-center"><button class="w3-btn w3-blue w3-padding w3-center" onclick="document.getElementById('MessageOfTheDay').style.display='none'">Verstanden</button></div>
+        <div class="w3-container">&nbsp;</div>
     </div>
   </div>
 </div>
