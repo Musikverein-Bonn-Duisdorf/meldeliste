@@ -986,12 +986,14 @@ class Termin
             $admStatusDiv->body="Status per Mail";
         }
         else {
-            $admStatusDiv->class="w3-hide-small";
-            $admStatusDiv->class="w3-hide-medium";
             $admStatusDiv->class="w3-center";
             $admStatusDiv->class="w3-padding";
             if($this->Capacity) {
                 $admStatusDiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$this->getResponseString();
+            }
+            else {
+                $admStatusDiv->class="w3-hide-small";
+                $admStatusDiv->class="w3-hide-medium";
             }
         }
         $str=$str.$admStatusDiv->print();
