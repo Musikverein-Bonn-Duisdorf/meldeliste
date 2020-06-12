@@ -96,7 +96,8 @@ else {
     </select>
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
     <?php if($preview) { ?>
-    <textarea rows="10" cols="50" class="w3-input w3-mobile w3-border" disabled><?php echo $anrede."\n\n".$text; ?></textarea>
+                         <div class="w3-container w3-mobile w3-border w3-border-black w3-left-align w3-margin-bottom"><b>Betreff:</b> <?php echo $_POST['Betreff']; ?></div>
+                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />\n\n".nl2br($text); ?></p></div></div>
         <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send">Senden (nur einmal klicken, es dauert ein paar Sekunden)</button>
     <?php } ?>
   </form>
