@@ -37,12 +37,14 @@ class Shiftmeldung
         $s->load_by_id($this->Shift);
         $t = new Termin;
         $t->load_by_id($s->Termin);
-        $str = sprintf("Melde-ID: %d, Termin: %d (%s), Schicht: %d (%s), User: %s, Wert: %s",
+        $str = sprintf("Melde-ID: %d, Termin: (%d) %s, Schicht: (%d) %s %s %s, User: %s, Wert: %s",
         $this->Index,
         $t->Index,
         $t->Name,
         $s->Index,
         $s->Name,
+        $t->Datum,
+        $s->Start,
         $u->getName(),
         meldeWert($this->Wert)
         );
