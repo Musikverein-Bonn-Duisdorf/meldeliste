@@ -46,10 +46,12 @@ class Meldung
         if($instrument == 0) $instrument = $u->Instrument;
         $instr = new Instrument;
         $instr->load_by_id($instrument);
-        $str = sprintf("Melde-ID: %d, Termin: %d (%s), User: %s, Wert: %s, Instrument: %s",
+        $str = sprintf("Melde-ID: %d, Termin: (%d) %s %s %s, User: %s, Wert: %s, Instrument: %s",
         $this->Index,
         $this->Termin,
         $t->Name,
+        $t->Datum,
+        $t->Uhrzeit,
         $u->getName(),
         meldeWert($this->Wert),
         $instr->Name
