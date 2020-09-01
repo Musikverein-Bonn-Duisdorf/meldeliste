@@ -69,7 +69,7 @@ function drawBasic() {
 
 
 <?php
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 ORDER BY `Datum`;",
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 AND `Datum` BETWEEN NOW() - INTERVAL 365 DAY AND NOW() ORDER BY `Datum`;",
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -77,7 +77,12 @@ sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $t = new Termin;
     $t->load_by_id($row['Index']);
-    $str=$str."[".string2gDate($t->Datum).", ".($t->getMeldungRatio()*100)."],\n";
+    /* $str=$str."[".string2gDate($t->Datum).", ".($t->getMeldungRatio()*100)."],\n"; */
+    $yes = $t->getMeldungenVal(1);
+    $no = $t->getMeldungenVal(2);
+    $maybe = $t->getMeldungenVal(3);
+    $all = $yes + $no + $maybe;
+    $str=$str."[".string2gDate($t->Datum).", ".$yes.", ".$no.", ".$maybe."],\n";
 }
     ?>
 
@@ -89,7 +94,9 @@ google.charts.setOnLoadCallback(drawBasic);
 function drawBasic() {
     var data = new google.visualization.DataTable();
     data.addColumn('date', 'Datum');
-    data.addColumn('number', 'Rate');
+    data.addColumn('number', 'ja');
+    data.addColumn('number', 'nein');
+    data.addColumn('number', 'vielleicht');
     
     data.addRows(<?php echo "[".$str."]"; ?>);
 
@@ -106,10 +113,14 @@ function drawBasic() {
         timeline: {
           groupByRowLabel: true
         },
-        legend: 'none'
+        bar: {
+          groupWidth: '100%',
+        },
+        legend: 'true',
+        isStacked: true
     };
 
-    var chart = new google.visualization.ScatterChart(document.getElementById('chart_rate'));
+    var chart = new google.visualization.ColumnChart(document.getElementById('chart_rate'));
 
     chart.draw(data, options);
 }
