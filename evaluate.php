@@ -69,7 +69,7 @@ function drawBasic() {
 
 
 <?php
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 AND `Datum` BETWEEN NOW() - INTERVAL 365 DAY AND NOW() ORDER BY `Datum`;",
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 AND `Datum` > NOW() - INTERVAL 365 DAY ORDER BY `Datum`;",
     $GLOBALS['dbprefix']
     );
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -105,9 +105,9 @@ function drawBasic() {
             title: 'Datum'
         },
         vAxis: {
-          title: 'Antwortrate / %',
+          title: 'Meldungen',
           minValue: 0,
-          maxValue: 100,
+          /* maxValue: 100, */
         },
         height: 450,
         timeline: {
