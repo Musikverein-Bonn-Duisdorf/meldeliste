@@ -74,6 +74,7 @@ function drawBasic() {
     );
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
 sqlerror();
+$str = "";
 while($row = mysqli_fetch_array($dbr)) {
     $t = new Termin;
     $t->load_by_id($row['Index']);
@@ -110,11 +111,11 @@ function drawBasic() {
           /* maxValue: 100, */
         },
         height: 450,
-        timeline: {
-          groupByRowLabel: true
-        },
+        /* timeline: { */
+        /*   groupByRowLabel: true */
+        /* }, */
         bar: {
-          groupWidth: '100%',
+          groupWidth: '50%',
         },
         legend: 'true',
         isStacked: true
