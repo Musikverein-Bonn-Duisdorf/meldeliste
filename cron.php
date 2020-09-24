@@ -12,8 +12,16 @@ switch($_GET['cmd']) {
     case "newAppmnts":
 	echo "newAppmnts...\n";
 	if($GLOBALS['optionsDB']['cronSendnewAppmnts'] == 0) {
-            echo "new Appmnts not activated.\n";
-            break;
+        echo "new Appmnts not activated.\n";
+        break;
+	}
+	if(!checkCronDate($GLOBALS['optionsDB']['cronSendnewAppmntsDays'])) { 
+        break;
+	}
+	$time = date("H:i");
+	if($time != $GLOBALS['optionsDB']['cronSendnewAppmntsTime']) {
+        echo "No reminder at ".$time.".\n";
+        break;
 	}
 	$datetime = new DateTime('today');
 	$today = $datetime->format('Y-m-d');
