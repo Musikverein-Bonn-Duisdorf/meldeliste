@@ -9,85 +9,87 @@ if(!isset($_GET['cmd'])) die("no command specified\n");
 mkAdmin();
 
 switch($_GET['cmd']) {
-    case "newAppmnts":
-	echo "newAppmnts...\n";
-	if($GLOBALS['optionsDB']['cronSendnewAppmnts'] == 0) {
+case "newAppmnts":
+    echo "newAppmnts...\n";
+    if($GLOBALS['optionsDB']['cronSendnewAppmnts'] == 0) {
         echo "new Appmnts not activated.\n";
         break;
-	}
-	if(!checkCronDate($GLOBALS['optionsDB']['cronSendnewAppmntsDays'])) { 
+    }
+    if(!checkCronDate($GLOBALS['optionsDB']['cronSendnewAppmntsDays'])) { 
+        echo "No sendnewAppmnts today\n";
         break;
-	}
-	$time = date("H:i");
-	if($time != $GLOBALS['optionsDB']['cronSendnewAppmntsTime']) {
-        echo "No reminder at ".$time.".\n";
+    }
+    $time = date("H:i");
+    if($time != $GLOBALS['optionsDB']['cronSendnewAppmntsTime']) {
+        echo "No sendnewAppmnts at ".$time.".\n";
         break;
-	}
-	$datetime = new DateTime('today');
-	$today = $datetime->format('Y-m-d');
-	$sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND `published` > 0 AND `Datum` >= '%s';",
-		       $GLOBALS['dbprefix'],
-		       $today);
-	$dbr = mysqli_query($conn, $sql);
-	sqlerror();
+    }
+    $datetime = new DateTime('today');
+    $today = $datetime->format('Y-m-d');
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND `published` > 0 AND `Datum` >= '%s';",
+    $GLOBALS['dbprefix'],
+    $today);
+    $dbr = mysqli_query($conn, $sql);
+    sqlerror();
     if(!$dbr) break;
-	$Appmnts = '';
-	$i=0;
+    $Appmnts = '';
+    $i=0;
 	while($row = mysqli_fetch_array($dbr)) {
-            $n = new Termin;
-            $n->load_by_id($row['Index']);
+        $n = new Termin;
+        $n->load_by_id($row['Index']);
 	    if($GLOBALS['optionsDB']['cronSendnewAppmntsInMail']) {
-		$Appmnts = $Appmnts.$n->printMailLine()."\n";
+            $Appmnts = $Appmnts.$n->printMailLine()."\n";
 	    }
-            $n->setOld();
-            $i++;
+        $n->setOld();
+        $i++;
 	}
+    echo $i." new Appointments identified\n";
 	if($i) {
-            $mail = new Usermail;
-            $mail->subject("neue Termine");
-            $mail->send($GLOBALS['optionsDB']['cronSendnewAppmntsText'].$Appmnts."\n\n".$GLOBALS['optionsDB']['MailGreetings']);
+        $mail = new Usermail;
+        $mail->subject("neue Termine");
+        $mail->send($GLOBALS['optionsDB']['cronSendnewAppmntsText'].$Appmnts."\n\n".$GLOBALS['optionsDB']['MailGreetings']);
 	}
 	break;
-    case "tomorrow":
+case "tomorrow":
 	echo "tomorrow...\n";
 	if($GLOBALS['optionsDB']['cronSendTomorrow'] == 0) {
-            echo "Tomorrow not activated.\n";
-            break;
+        echo "Tomorrow not activated.\n";
+        break;
 	}
 	$datetime = new DateTime('tomorrow');
 	$tomorrow = $datetime->format('Y-m-d');
 
 	$sql = sprintf("SELECT * FROM `%sTermine` WHERE `published` = 1 AND `Datum` = '%s';",
-		       $GLOBALS['dbprefix'],
-		       $tomorrow);
+    $GLOBALS['dbprefix'],
+    $tomorrow);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
     if(!$dbr) break;
 	while($row = mysqli_fetch_array($dbr)) {
-            $n = new Termin;
-            $n->load_by_id($row['Index']);
-            echo $n->printBasicTableLine()."\n";
+        $n = new Termin;
+        $n->load_by_id($row['Index']);
+        echo $n->printBasicTableLine()."\n";
 	}
 	break;
-    case "reminder":
+case "reminder":
 	echo "reminder...\n";
 	if($GLOBALS['optionsDB']['cronSendReminder'] == 0) {
-            echo "Reminder not activated.\n";
-            break;
+        echo "Reminder not activated.\n";
+        break;
 	}
 	if(!checkCronDate($GLOBALS['optionsDB']['cronSendReminderDays'])) { 
-            break;
+        break;
 	}
 	$time = date("H:i");
 	if($time != $GLOBALS['optionsDB']['cronSendReminderTime']) {
-            echo "No reminder at ".$time.".\n";
-            break;
+        echo "No reminder at ".$time.".\n";
+        break;
 	}
 	$datetime = new DateTime('today');
 	$today = $datetime->format('Y-m-d');
 	$sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s' AND `Shifts` = 0;",
-		       $GLOBALS['dbprefix'],
-		       $today
+    $GLOBALS['dbprefix'],
+    $today
 	);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
@@ -97,7 +99,7 @@ switch($_GET['cmd']) {
 
 	
 	$sql = sprintf("SELECT * FROM `%sUser` WHERE `getMail` = 1;",
-		       $GLOBALS['dbprefix']
+    $GLOBALS['dbprefix']
 	);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
@@ -130,7 +132,7 @@ switch($_GET['cmd']) {
         }
 	}
 	break;
-    default:
+default:
 	die("command invalid\n");
 	break;
 }
