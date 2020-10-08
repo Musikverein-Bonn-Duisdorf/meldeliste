@@ -1228,7 +1228,9 @@ class Termin
                 $shiftTime->indent=$indent;
                 $shiftTime->class="w3-margin-bottom";
                 $shiftTime->col(3, 0, 0);
-                $shiftTime->body=$s->getTime();
+                if($s->Start != $s->End) {
+                    $shiftTime->body=$s->getTime();
+                }
                 $str=$str.$shiftTime->print();
                 
                 $btnDiv = new div;
@@ -1236,7 +1238,22 @@ class Termin
                 $btnDiv->col(2, 0, 0);
                 $str=$str.$btnDiv->open();
                 $indent++;
-                $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert);
+                if($s->Bedarf) {
+                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || $_SESSION['admin']) {
+                        $str=$str.$this->makeShiftButtons(2, $indent, $s->Index, $m->Wert);
+                    }
+                    else {
+                        $closed = new div;
+                        $closed->class="w3-col s9 m9 l9";
+                        $closed->class="w3-margin-left w3-center w3-padding";
+                        $closed->body="Alle Pl&auml;tze belegt";
+                        $str=$str.$closed->print();
+                    }
+                }
+                else {
+                    $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert);
+                }
+                /* $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert); */
                 $str=$str.$btnDiv->close();
                 $indent--;
                 
@@ -1244,7 +1261,9 @@ class Termin
                 $valdiv->indent=$indent;
                 $valdiv->class="w3-center w3-padding";
                 $valdiv->col(1, 0, 0);
-                $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
+                if($s->Bedarf) {
+                    $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
+                }
                 $str=$str.$valdiv->print();
 
                 /* $str=$str.$shiftSpacer->print(); */
