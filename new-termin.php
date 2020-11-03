@@ -12,6 +12,14 @@ if(isset($_POST['id'])) {
         $fill = true;
     }
 }
+if(isset($_POST['copy'])) {
+    $n = new Termin;
+    $n->load_by_id($_POST['copy']);
+    if($n->Index > 0) {
+        $fill = true;
+    }
+    $n->Index=NULL;
+}
 ?>
 <div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>neuen Termin erstellen</h2>
