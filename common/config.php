@@ -1,31 +1,31 @@
 <?php
 $sql = array(
-    'server' => "manuelschedler.de",
-    'user' => "MVD",
-    'database' => "MVD",
-    'password' => "1949eV",
+    'server' => "myserver.com",
+    'user' => "username",
+    'database' => "database",
+    'password' => "password",
 );
 
 $dbprefix = "meldeliste_";
 
 $mailconfig = array(
-    'server' => "smtp.ionos.de",
-    'user' => "meldeliste@musikverein-bonn-duisdorf.de",
-    'password' => "Schnurzel357",
+    'server' => "smtp.myprovider.com",
+    'user' => "email@myserver.com",
+    'password' => "password",
     'port' => 587,
-    'from' => "meldeliste@musikverein-bonn-duisdorf.de",
-    'fromName' => "Musikverein Duisdorf",
+    'from' => "frommail@myserver.com",
+    'fromName' => "My Organization",
     'secure' => "tls",
-    'subjectprefix' => '[MVD-Meldeliste] ',
+    'subjectprefix' => '[My Organization] ',
 );
 
 $conn = mysqli_connect($sql['server'], $sql['user'], $sql['password']) or die (mysqli_error($conn));
 global $conn;
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($conn));
 
-$cronID = '2955bf5d-2014-4c0e-9c52-5ab9a932b4b7';
+$cronID = 'xxxx-xxxx-xxxx-xxxx';
 
-$googlemapsapi = "AIzaSyDUGmxw5Z7xlPHOtxZyGns028rKUGLtLFA";
+$googlemapsapi = "xxxx-xxxx-xxxx-xxxx";
 
 global $mailconfig;
 global $cronID;
