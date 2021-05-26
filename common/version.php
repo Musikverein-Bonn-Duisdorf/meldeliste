@@ -1,7 +1,7 @@
 <?php
 $version = array(
-	 'String' => "2020-11-06-198c7",
-	 'Date' => "2020-11-06",
+	 'String' => "2021-05-26-198c7",
+	 'Date' => "2021-05-26",
 );
 
 global $version;
