@@ -34,7 +34,7 @@ if(isset($_POST['letter'])) {
     </div>
     <form class="w3-container w3-row" action="termine.php" method="POST">
 	<?php
-	$sql = sprintf('SELECT * FROM `%sUser` WHERE `Nachname` LIKE "%s%%";',
+	$sql = sprintf('SELECT * FROM `%sUser` WHERE `Nachname` LIKE "%s%%" AND `Deleted` = 0;',
     $GLOBALS['dbprefix'],
     $_POST['letter']);
 	$dbr = mysqli_query($conn, $sql);
