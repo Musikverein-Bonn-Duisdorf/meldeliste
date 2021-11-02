@@ -1042,7 +1042,12 @@ class Termin
         //$nameDiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
         $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
-        $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
+        if($GLOBALS['optionsDB']['showAddToCalendarButton']) {
+            $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
+        }
+        else {
+            $nameDiv->body="<i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
+        }
         $str=$str.$nameDiv->print();
 
         $startDiv = new div;

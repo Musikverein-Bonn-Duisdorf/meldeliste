@@ -51,6 +51,7 @@ $para=array(
     'showOrchestraView',
     'MessageOfTheDay',
     'MessageOfTheDayShort',
+    'showAddToCalendarButton',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -93,6 +94,7 @@ $desc=array(
     "Zeige einen Sitzplan des Orchesters in allen Meldungen",
     "Nachricht, die jedem Nutzen ein Einloggen angezeigt wird.",
     "Zusammenfassung der Nachricht, die jedem Nutzen ein Einloggen angezeigt wird.",
+    "Zeige Button zum Erstellen von Kalendereinträgen",
 );
 $value=array(
     "w3-opacity",
@@ -135,6 +137,7 @@ $value=array(
     1,
     "",
     "",
+    0,
 );
 $type=array(
     "string",
@@ -177,6 +180,7 @@ $type=array(
     "bool",
     "text",
     "text",
+    "bool",
 );
 
 $N = count($para);
