@@ -3,6 +3,14 @@ session_start();
 $_SESSION['page']='home';
 $_SESSION['adminpage']=false;
 include "common/header.php";
+if(isset($_POST['proxy'])) {
+    $user = $_POST['proxy'];
+    $proxy = new User;
+    $proxy->load_by_id($user);
+}
+else {
+    $user = $_SESSION['userid'];
+}
 ?>
 <script src="js/getStatus.js"></script>
 <script src="js/melde.js"></script>
@@ -12,23 +20,17 @@ include "common/header.php";
 </div>
 <?php
 $now = date("Y-m-d");
-$published="";
-if(!$_SESSION['admin']) {
-    $published=" AND `published` > 0";
-}
 if($GLOBALS['optionsDB']['entriesMainPage'] > 0) {
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s"%s ORDER BY `Datum`, `Uhrzeit` LIMIT %s;',
+    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit` LIMIT %s;',
 		   $GLOBALS['dbprefix'],
 		   $now,
-		   $published,
 		   $GLOBALS['optionsDB']['entriesMainPage']
     );
 }
 else {
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s"%s ORDER BY `Datum`, `Uhrzeit`;',
+    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
 		   $GLOBALS['dbprefix'],
 		   $now,
-		   $published
     );
 }
 $dbr = mysqli_query($conn, $sql);
@@ -36,7 +38,16 @@ sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);
-    echo $M->printBasicTableLine();
+    $meldung = $M->getMeldungenByUser($user);
+    if($M->published > 0) {        
+        echo $M->printBasicTableLine();
+    }
+    elseif($_SESSION['admin']) {
+        echo $M->printBasicTableLine();
+    }
+    elseif($meldung) {
+        echo $M->printBasicTableLine();        
+    }
 }
 if($GLOBALS['optionsDB']['showAppmntPage']) {
     $more = new div;
