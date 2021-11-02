@@ -55,24 +55,26 @@ if(isset($_POST['proxy'])) {
 <?php
 }
 $now = date("Y-m-d");
-if($_SESSION['admin']) {
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
-    $GLOBALS['dbprefix'],
-    $now
-    );
-}
-else {
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
-    $GLOBALS['dbprefix'],
-    $now
-    );
-}
+$sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
+$GLOBALS['dbprefix'],
+$now
+);
+
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);
-    echo $M->printBasicTableLine();
+    $meldung = $M->getMeldungenByUser($user);
+    if($M->published > 0) {        
+        echo $M->printBasicTableLine();
+    }
+    elseif($_SESSION['admin']) {
+        echo $M->printBasicTableLine();
+    }
+    elseif($meldung) {
+        echo $M->printBasicTableLine();        
+    }
 }
 ?>
 <?php
