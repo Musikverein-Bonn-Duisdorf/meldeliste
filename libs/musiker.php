@@ -377,6 +377,9 @@ class User
       <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">zweite Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email2; ?>"><?php echo $this->Email2; ?></a></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $this->login; ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
