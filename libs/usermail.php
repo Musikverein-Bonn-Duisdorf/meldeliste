@@ -115,6 +115,9 @@ class Usermail {
 
             if($row['Email']) {
                 $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
+                if($row['Email2']) {
+                    $mail->addAddress($row['Email2'], $row['Vorname']." ".$row['Nachname']);
+                }
                 $mail->Send();
             }
             $mail->clearAddresses();
