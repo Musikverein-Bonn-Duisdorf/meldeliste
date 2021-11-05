@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -14,6 +14,7 @@ class User
 	    case 'Instrument':
 	    case 'iName':
 	    case 'Email':
+	    case 'Email2':
 	    case 'getMail':
 	    case 'Admin':
         case 'singleUsePW':
@@ -57,6 +58,7 @@ class User
 	    case 'login':
 	    case 'iName':
 	    case 'Email':
+	    case 'Email2':
 	    case 'LastLogin':
 	    case 'DeletedOn':
             $this->_data[$key] = trim($val);
@@ -76,7 +78,7 @@ class User
             $row = mysqli_fetch_array($dbr);
             $this->iName = $row['Name'];
         }
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
@@ -84,6 +86,7 @@ class User
         bool2string($this->Mitglied),
         $this->iName,
         $this->Email,
+        $this->Email2,
         bool2string($this->getMail),
         bool2string($this->Admin),
         bool2string($this->RegisterLead),
@@ -181,7 +184,7 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -191,6 +194,7 @@ class User
         $this->Mitglied,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
         $this->getMail,
         $this->Admin,
         $this->RegisterLead
@@ -202,7 +206,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -212,6 +216,7 @@ class User
         $this->Mitglied,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
         $this->getMail,
         $this->Admin,
         $this->RegisterLead,
