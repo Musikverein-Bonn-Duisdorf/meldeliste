@@ -117,36 +117,39 @@ if($fill && ($n->login || $edit == 3)) {
 <?php if($fill) { ?>
 <button class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
 <?php } ?>
+<?php if($fill) { ?>
+         <div class="w3-row"><a href="<?php echo $n->getLink(); ?>"><?php echo $n->getLink(); ?></a></div>
+<?php } ?>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
-
-<div id="delmodal" class="w3-modal">
-  <div class="w3-modal-content w3-card">
+<?php if($fill) { ?>
+    <div id="delmodal" class="w3-modal">
+    <div class="w3-modal-content w3-card">
     <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-      <span onclick="document.getElementById('delmodal').style.display='none'" 
-      class="w3-button w3-display-topright">&times;</span>
-<h2>L&ouml;schen best&auml;tigen</h2>
-</header>
+    <span onclick="document.getElementById('delmodal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+    <h2>L&ouml;schen best&auml;tigen</h2>
+    </header>
     <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo $n->Vorname." ".$n->Nachname; ?></b> l&ouml;schen wollen?</div>
-<div class="w3-container w3-mobile">
-<form action="musiker.php" method="POST">
-  <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
-				     <div class="w3-row">
-				     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-				       <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
-	 <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-</div>
-	 </form>
-				     <div class="w3-row">
-	 <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-	   <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='none'">nein</button>
-				     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-	 </div>
-	 </div>
-	   </div>
-	   </div>
-	 <div class="w3-row">&nbsp;</div>
+    <div class="w3-container w3-mobile">
+    <form action="musiker.php" method="POST">
+    <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
+    <div class="w3-row">
+    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+    <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
+    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+    </div>
+    </form>
+    <div class="w3-row">
+    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+    <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='none'">nein</button>
+    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
+    </div>
+    </div>
+    </div>
+    </div>
+<?php } ?>>
+    <div class="w3-row">&nbsp;</div>
 <?php
 include "common/footer.php";
 ?>
