@@ -177,6 +177,9 @@ class User
     protected function generateLink() {
         $this->activeLink = uniqid();
     }
+    public function getLink() {
+        return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
+    }
     protected function insert() {
         $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
