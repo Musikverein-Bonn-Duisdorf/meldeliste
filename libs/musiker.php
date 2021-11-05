@@ -345,6 +345,9 @@ class User
       <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>
     </header>
     <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">userID:</div><div class="w3-col l6"><b><?php echo $this->Index; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $this->iName; ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">

@@ -110,6 +110,7 @@ class Termin
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
             $this->insert();
+            $this->makeAlwaysYes();
         }
     }
     public function is_valid() {
@@ -173,6 +174,20 @@ class Termin
             $str=$str.$this->Ort4;
         }
         return $str;
+    }
+    protected function makeAlwaysYes() {
+        $users = explode(",", $GLOBALS['optionsDB']['alwaysYesNewAppmnts']);
+        foreach($users as $user) {
+            $m = new Meldung;
+            $m->load_by_user_event(intval($user), $this->Index);
+            if($m->User < 1) {
+                $m = new Meldung;
+                $m->User = intval($user);
+                $m->Termin = $this->Index;
+                $m->Wert = 1;
+                $m->save();
+            }
+        }
     }
     protected function getUser() {
         if(isset($_POST['proxy'])) {

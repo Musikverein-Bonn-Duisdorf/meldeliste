@@ -52,6 +52,7 @@ $para=array(
     'MessageOfTheDay',
     'MessageOfTheDayShort',
     'showAddToCalendarButton',
+    'alwaysYesNewAppmnts',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -95,6 +96,7 @@ $desc=array(
     "Nachricht, die jedem Nutzen ein Einloggen angezeigt wird.",
     "Zusammenfassung der Nachricht, die jedem Nutzen ein Einloggen angezeigt wird.",
     "Zeige Button zum Erstellen von Kalendereinträgen",
+    "Nutzer, die automatisch in neue Termine mit Ja eingetragen werden (userID durch Komma getrennt)",
 );
 $value=array(
     "w3-opacity",
@@ -138,6 +140,7 @@ $value=array(
     "",
     "",
     0,
+    "",
 );
 $type=array(
     "string",
@@ -181,6 +184,7 @@ $type=array(
     "text",
     "text",
     "bool",
+    "string",
 );
 
 $N = count($para);
