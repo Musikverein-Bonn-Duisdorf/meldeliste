@@ -25,12 +25,12 @@ if(isset($_POST['appID'])) {
     }
 
 $ics = new ICS(array(
-  'timezone' => $n->Ort,
-  'location' => $n->Ort,
-  'description' => $n->Name,
+  'timezone' => 'Europe/Berlin',
+  'location' => $n->getOrt(),
+  'description' => $n->Beschreibung,
   'dtstart' => $begin,
   'dtend' => $end,
-  'summary' => $n->Beschreibung
+  'summary' => $n->Name
 ));
 
 echo $ics->to_string();

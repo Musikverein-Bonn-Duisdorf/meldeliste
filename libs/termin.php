@@ -157,6 +157,23 @@ class Termin
             }
             return $shifts;
     }
+    public function getOrt() {
+        $str="";
+        if($this->Ort1) $str=$str.$this->Ort1;
+        if($this->Ort2) {
+            if($str) $str=$str.", ";
+            $str=$str.$this->Ort2;
+        }
+        if($this->Ort3) {
+            if($str) $str=$str.", ";
+            $str=$str.$this->Ort3;
+        }
+        if($this->Ort4) {
+            if($str) $str=$str.", ";
+            $str=$str.$this->Ort4;
+        }
+        return $str;
+    }
     protected function getUser() {
         if(isset($_POST['proxy'])) {
             $user = $_POST['proxy'];
@@ -831,6 +848,9 @@ class Termin
         return $str;
     }
     protected function makeButtons($N, $indent, $val) {
+        return $this->makeButtonsUser($N, $indent, $val, $this->getUser());
+    }
+    protected function makeButtonsUser($N, $indent, $val, $user) {
         $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
         $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
         
@@ -867,7 +887,52 @@ class Termin
                 $btn->class=$colors[$i-1];
             }
             if($val != $i) {
-                $btn->onclick="melde('".$GLOBALS['cronID']."', ".$this->getUser().", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
+                $btn->onclick="melde('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
+                $btn->name="meldung";
+                $btn->value=$i;
+            }
+            $str=$str.$btn->print();
+        }
+        return $str;
+    }
+    protected function makeTrackButtonsUser($N, $indent, $val, $user) {
+        $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
+        $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
+        
+        $str="";
+        for($i=1; $i<=$N; $i++) {
+            $btn = new div;
+            $btn->indent = $indent;
+            $btn->class="w3-col s3 m3 l3";
+            $btn->class="w3-margin-left";
+            if($this->open == false && $_SESSION['admin'] == false) {
+                if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
+                    if($i != 2) {
+                        $str=$str.$btn->print();
+                        continue;
+                    }
+                }
+                else {
+                    $str=$str.$btn->print();
+                    continue;
+                }
+            }
+            $btn->tag="button";
+            $btn->class="w3-btn";
+            $btn->class="w3-border";
+            $btn->class="w3-border-black";
+            /* $btn->class="w3-margin-top"; */
+            $btn->class="w3-center";
+            $btn->body=$symbols[$i-1];
+
+            if($val && $val != $i) {
+                $btn->class=$GLOBALS['optionsDB']['colorDisabled'];
+            }
+            else {
+                $btn->class=$colors[$i-1];
+            }
+            if($val != $i) {
+                $btn->onclick="track('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
                 $btn->name="meldung";
                 $btn->value=$i;
             }
@@ -1043,10 +1108,10 @@ class Termin
         $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
         if($GLOBALS['optionsDB']['showAddToCalendarButton']) {
-            $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
+            $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" style=\"font-size: 30px;\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
         }
         else {
-            $nameDiv->body="<i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
+            $nameDiv->body="<i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
         }
         $str=$str.$nameDiv->print();
 
@@ -1271,39 +1336,6 @@ class Termin
                 }
                 $str=$str.$valdiv->print();
 
-                /* $str=$str.$shiftSpacer->print(); */
-                
-                /* $extStr = new div; */
-                /* $extStr->indent=$indent; */
-                /* $extStr->tag="input"; */
-                /* $extStr->class="w3-input"; */
-                /* $extStr->class=$GLOBALS['optionsDB']['colorInputBackground']; */
-                /* $extStr->name="Name"; */
-                /* $extStr->type="text"; */
-                /* /\* $extStr->style="display: none;"; *\/ */
-                /* $extStr->col(3, 0, 0); */
-                /* $str=$str.$extStr->print(); */
-
-                /* $extInstr = new div; */
-                /* $extInstr->indent=$indent; */
-                /* $extInstr->tag="select"; */
-                /* $extInstr->class="w3-input"; */
-                /* $extInstr->class=$GLOBALS['optionsDB']['colorInputBackground']; */
-                /* $extInstr->name="Instrument"; */
-                /* $extInstr->body=instrumentOption(0); */
-                /* /\* $extInstr->style="display: none;"; *\/ */
-                /* $extInstr->col(3, 0, 0); */
-                /* $str=$str.$extInstr->print(); */
-
-                /* $btnDiv = new div; */
-                /* $btnDiv->indent=$indent; */
-                /* $btnDiv->col(2, 0, 0); */
-                /* $str=$str.$btnDiv->open(); */
-                /* $indent++; */
-                /* $str=$str.$this->makeExtShiftButtons(3, $indent, $s->Index, 3); */
-                /* $str=$str.$btnDiv->close(); */
-                /* $indent--; */
-
                 $str=$str.$shiftmain->close();
                 $indent--;
             }
@@ -1393,6 +1425,9 @@ class Termin
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"copy\" value=\"".$this->Index."\">kopieren</button>\n";
+            $str=$str."\t\t</form>\n";
+            $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"tracking.php\" method=\"POST\">\n";
+            $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Anwesenheitsliste</button>\n";
             $str=$str."\t\t</form>\n";
             if($this->Shifts) {
                 $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
@@ -1997,6 +2032,283 @@ ORDER BY `Nachname`, `Vorname`;",
         $str=$str."</div>";
         $str=$str."</div>";
 
+        return $str;
+    }
+
+    public function TrackingUser($user) {
+        $u = new User;
+        $u->load_by_id($user);
+        $meldungen = $this->getMeldungenByUser($user);
+        if($meldungen) {
+            $m = new Meldung;
+            $m->load_by_id($meldungen[0]);
+            $this->Wert = $m->Wert;
+        }
+        else {
+            $this->Wert = NULL;
+        }
+        $str="";
+        $indent=0;
+        
+        $main = new div;
+        $main->indent = $indent;
+        $main->id="entry".$user;
+        $main->class="w3-card-4 w3-margin";
+        $main->class=$this->mainColor();
+        $main->class=$this->mainHover();
+        if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
+        $str=$str.$main->open();
+
+        $indent++;
+        $mainline = new div;
+        $mainline->indent = $indent;
+        $mainline->class="w3-row w3-padding";
+        $mainline->class=$this->lineHover();
+        $mainline->class=$this->globalShiftColor();
+        $str=$str.$mainline->open();
+
+        $indent++;
+        $nameDiv = new div;
+        $nameDiv->indent = $indent;
+        $nameDiv->col(3, 0, 0);
+        $nameDiv->bold();
+        $nameDiv->body=$u->getName();
+        $str=$str.$nameDiv->print();
+
+        $startDiv = new div;
+        $startDiv->indent=$indent;
+        $startDiv->col(3, 0, 0);
+        $startDiv->body=$u->getInstrument();
+        $str=$str.$startDiv->print();
+
+        $ortDiv = new div;
+        $ortDiv->indent=$indent;
+        $ortDiv->class="w3-margin-bottom";
+        $ortDiv->col(3, 0, 0);
+        $ortDiv->body=germanDate($u->LastLogin, 1);
+        $str=$str.$ortDiv->print();
+
+        $btnDiv = new Div;
+        $btnDiv->indent = $indent;
+        $btnDiv->col(2, 0, 0);
+        $btnDiv->class="w3-row w3-mobile";
+        if($this->Shifts) {
+            $str=$str.$btnDiv->print();
+        }
+        else {
+            $str=$str.$btnDiv->open();
+            $indent++;
+            $str=$str.$this->makeTrackButtonsUser(3, $indent, $this->Wert, $user);
+            $indent--;
+            $str=$str.$btnDiv->close();
+        }
+        $str=$str.$this->statusMailBtn($indent);
+        $str=$str.$mainline->close();
+        $indent--;
+        $indent--;
+        
+        if(($GLOBALS['optionsDB']['showGuestOption'] || $GLOBALS['optionsDB']['showChildOption']) && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == "Bus") {
+            $guestChildLine = new div;
+            $guestChildLine->indent = $indent;
+            $guestChildLine->class="w3-row w3-padding";
+            $str=$str.$guestChildLine->open();
+            $indent++;
+
+            if($GLOBALS['optionsDB']['showChildOption']) {
+                $emptyDiv = new div;
+                $emptyDiv->indent=$indent;
+                $emptyDiv->col(9, 0, 0);
+                $emptyDiv->class="w3-container";
+                $str=$str.$emptyDiv->print();
+
+                $childDiv = new div;
+                $childDiv->indent=$indent;
+                $childDiv->col(1, 6, 6);
+                $childDiv->class="w3-row w3-margin-top w3-container";
+                $childDiv->body="Kinder";
+                $str=$str.$childDiv->print();
+
+                $childInDiv = new div;
+                $childInDiv->indent=$indent;
+                $childInDiv->col(1, 6, 6);
+                $childInDiv->class="w3-row w3-margin-top w3-container";
+                $childInDiv->type="number";
+                $childInDiv->tag="input";
+                $childInDiv->style="width: 5em";
+                $childInDiv->min=0;
+                $childInDiv->defaultt=0;
+                $childInDiv->value=$this->Children;
+                $childInDiv->id="Children".$this->Index;
+                $childInDiv->name="Children";
+                $childInDiv->emptyBody=true;
+                $str=$str.$childInDiv->print();
+
+                $childSpacerDiv = new div;
+                $childSpacerDiv->indent=$indent;
+                $childSpacerDiv->col(1, 6, 6);
+                $childSpacerDiv->class="w3-hide-small w3-hide-medium";
+                $str=$str.$childSpacerDiv->print();
+            }
+            if($GLOBALS['optionsDB']['showGuestOption']) {
+                $emptyDiv = new div;
+                $emptyDiv->indent=$indent;
+                $emptyDiv->col(9, 0, 0);
+                $emptyDiv->class="w3-container";
+                $str=$str.$emptyDiv->print();
+
+                $guestDiv = new div;
+                $guestDiv->indent=$indent;
+                $guestDiv->col(1, 6, 6);
+                $guestDiv->class="w3-row w3-margin-top w3-container";
+                $guestDiv->body="G&auml;ste";
+                $str=$str.$guestDiv->print();
+
+                $guestInDiv = new div;
+                $guestInDiv->indent=$indent;
+                $guestInDiv->col(1, 6, 6);
+                $guestInDiv->class="w3-row w3-margin-top w3-container";
+                $guestInDiv->type="number";
+                $guestInDiv->tag="input";
+                $guestInDiv->style="width: 5em";
+                $guestInDiv->min=0;
+                $guestInDiv->default=0;
+                $guestInDiv->value=$this->Guests;
+                $guestInDiv->id="Guests".$this->Index;
+                $guestInDiv->name="Guests";
+                $guestInDiv->emptyBody=true;
+                $str=$str.$guestInDiv->print();
+
+                $guestSpacerDiv = new div;
+                $guestSpacerDiv->indent=$indent;
+                $guestSpacerDiv->col(1, 6, 6);
+                $guestSpacerDiv->class="w3-hide-small w3-hide-medium";
+                $str=$str.$guestSpacerDiv->print();
+            }
+            $emptyDiv = new div;
+            $emptyDiv->indent=$indent;
+            $emptyDiv->col(9, 0, 0);
+            $emptyDiv->class="w3-hide-small w3-hide-medium";
+            $str=$str.$emptyDiv->print();
+            
+            $saveBtn = new div;
+            $saveBtn->indent=$indent;
+            $saveBtn->tag="button";
+            $saveBtn->class="w3-btn w3-row w3-border w3-border-black w3-margin-top";
+            $saveBtn->col(2, 12, 12);
+            $saveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $saveBtn->name="meldungGC";
+            $saveBtn->onclick="track('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
+            $saveBtn->bold();
+            $saveBtn->body="speichern";
+            $str=$str.$saveBtn->print();
+
+            $SpacerDiv = new div;
+            $SpacerDiv->indent=$indent;
+            $SpacerDiv->col(1, 6, 6);
+            $SpacerDiv->class="w3-hide-small, w3-hide-medium";
+            $str=$str.$SpacerDiv->print();
+
+            $str=$str.$guestChildLine->close();
+            $indent--;
+        }
+        if($this->Shifts) {
+            $shifts = $this->getShifts();
+            for($i=0; $i<count($shifts); $i++) {
+                $s = new Shift;
+                $s->load_by_id($shifts[$i]);
+                $m = new Shiftmeldung;
+                $m->load_by_user_event($user, $s->Index);
+                
+                $shiftmain = new div;
+                $shiftmain->indent=$indent;
+                $shiftmain->class="w3-border-top w3-border-white w3-padding w3-row";
+                $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
+                $shiftmain->class=$this->getLineColor($m->Wert);
+                $str=$str.$shiftmain->open();
+                $indent++;
+
+                $shiftSpacer = new div;
+                $shiftSpacer->indent=$indent;
+                $shiftSpacer->class="w3-hide-small w3-hide-medium";
+                $shiftSpacer->col(3, 0, 0);
+                $str=$str.$shiftSpacer->print();
+
+                $shiftName = new div;
+                $shiftName->indent=$indent;
+                $shiftName->col(3, 0, 0);
+                $shiftName->bold();
+                $shiftName->body=$s->Name;
+                $str=$str.$shiftName->print();
+
+                $shiftTime = new div;
+                $shiftTime->indent=$indent;
+                $shiftTime->class="w3-margin-bottom";
+                $shiftTime->col(3, 0, 0);
+                if($s->Start != $s->End) {
+                    $shiftTime->body=$s->getTime();
+                }
+                $str=$str.$shiftTime->print();
+                
+                $btnDiv = new div;
+                $btnDiv->indent=$indent;
+                $btnDiv->col(2, 0, 0);
+                $str=$str.$btnDiv->open();
+                $indent++;
+                if($s->Bedarf) {
+                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || $_SESSION['admin']) {
+                        $str=$str.$this->makeShiftButtons(2, $indent, $s->Index, $m->Wert);
+                    }
+                    else {
+                        $closed = new div;
+                        $closed->class="w3-col s9 m9 l9";
+                        $closed->class="w3-margin-left w3-center w3-padding";
+                        $closed->body="Alle Pl&auml;tze belegt";
+                        $str=$str.$closed->print();
+                    }
+                }
+                else {
+                    $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert);
+                }
+                $str=$str.$btnDiv->close();
+                $indent--;
+                
+                $valdiv = new div;
+                $valdiv->indent=$indent;
+                $valdiv->class="w3-center w3-padding";
+                $valdiv->col(1, 0, 0);
+                if($s->Bedarf) {
+                    $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
+                }
+                $str=$str.$valdiv->print();
+
+                $str=$str.$shiftmain->close();
+                $indent--;
+            }
+        }
+        $str=$str.$main->close();
+
+        $str=$str."\t</div>\n";
+        $str=$str."\t</div> <! -- Woher -->\n";
+        return $str;
+    }
+    public function TrackingTable() {
+        $sql = sprintf('SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != "keins" ORDER BY `Sortierung`;',
+        $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $str = "";
+        while($row = mysqli_fetch_array($dbr)) {
+            $M = new Register;
+            $M->load_by_id($row['Index']);
+
+            $str=$str."<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']." w3-margin-top\"><h3>".$M->Name." (".$M->members().")</h3></div>";
+
+            $members = $M->getMembers();
+            foreach($members as &$member) {
+                $str=$str.$this->TrackingUser($member);
+            }
+        }
         return $str;
     }
 };

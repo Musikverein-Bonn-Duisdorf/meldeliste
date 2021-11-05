@@ -60,7 +60,7 @@ class Register
             $user->printTableLine();
         }
     }
-    public function members() {
+    public function getMembers() {
         $sql = sprintf('SELECT `Index`, `Deleted` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Deleted` != 1 AND `Register` = "%d";',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
@@ -69,10 +69,15 @@ class Register
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $cnt=0;
+        $members = array();
         while ($row = mysqli_fetch_array($dbr)) {
+            array_push($members, $row['Index']);
             $cnt++;
         }
-        return $cnt;
+        return $members;
+    }
+    public function members() {
+        return sizeof($this->getMembers());
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
