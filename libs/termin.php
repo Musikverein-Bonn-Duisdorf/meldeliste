@@ -1979,19 +1979,22 @@ ORDER BY `Nachname`, `Vorname`;",
         $str=$str."<h2>".$this->Name."</h2>";
         $str=$str."</header>";
 
-        if($_SESSION['admin']) {
+        /* if($_SESSION['admin']) { */
             $str = $str."<div>";
             if($GLOBALS['optionsDB']['showOrchestraView']) {
                 $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
-                $str = $str."<div class=\"w3-container w3-hide-small\">\n";
+                $str = $str."<div class=\"w3-container w3-hide-small w3-hide-medium\">\n";
                 $str = $str.printOrchestra($this->Index, 1);
+                $str = $str."</div>";
+                $str = $str."<div class=\"w3-container w3-hide-small w3-hide-large\">\n";
+                $str = $str.printOrchestra($this->Index, 0.6);
                 $str = $str."</div>";
                 $str = $str."<div class=\"w3-container w3-hide-large w3-hide-medium\">\n";
                 $str = $str.printOrchestra($this->Index, 0.4);
                 $str = $str."</div>";
             }
             $str = $str."</div>";
-        }
+        /* } */
         
         $str = $str."<div class=\"w3-container w3-margin-top\"><div class=\"w3-row\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\"><b>Zusagen</b></div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
         $actcol=2;
