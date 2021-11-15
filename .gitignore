@@ -1,2 +1,5 @@
 *~
 common/config.php
+uploads/*
+!uploads/README
+

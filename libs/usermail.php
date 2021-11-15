@@ -7,7 +7,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 class Usermail {
-    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null, 'sendlink' => null, 'register' => null);
+    private $_data = array('User' => null, 'Text' => null, 'subject' => null, 'memberonly' => null, 'sendlink' => null, 'register' => null, 'attachments' => false);
     public function __get($key) {
         switch($key) {
         case 'User':
@@ -16,6 +16,7 @@ class Usermail {
         case 'sendlink':
         case 'register':
         case 'Text':
+        case 'attachments':
             return $this->_data[$key];
             break;
         default:
@@ -29,13 +30,12 @@ class Usermail {
             $this->_data[$key] = (int)$val;
             break;
         case 'Text':
-            $this->_data[$key] = $val;
-            break;
         case 'subject':
             $this->_data[$key] = $val;
             break;
         case 'memberonly':
         case 'sendlink':
+        case 'attachments':
             $this->_data[$key] = (bool)$val;
             break;
         default:
@@ -75,6 +75,14 @@ class Usermail {
         $mail->Password   = $GLOBALS['mailconfig']['password'];        // SMTP account password example
         $mail->setFrom($GLOBALS['mailconfig']['from'], $GLOBALS['mailconfig']['fromName']);
         $mail->IsHTML(true);
+
+        if($this->attachments) {
+            $files = scandir("uploads/");
+            foreach($files as $file) {
+                if($file == "." || $file == ".." || $file == "README") continue;
+                $mail->addAttachment("uploads/".$file);
+            }
+        }
 
         $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
         $style=file_get_contents("styles/w3.css");
