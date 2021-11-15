@@ -30,7 +30,8 @@ for ($i=0; $i < $filecount; $i++) {
     // if everything is ok, try to upload file
     } else {
         if (move_uploaded_file($tmpfile, $target_file)) {
-            echo "<div class=\"w3-row w3-green w3-col l6 w3-padding\">".$file." </div><i class=\"w3-text-red fas fa-times w3-col l1 w3-padding\"></i>";
+            $hash = md5_file($target_file);
+            echo "<div class=\"w3-row\" id=\"".$hash."\"><div class=\"w3-green w3-col l6 w3-padding\">".$file."</div><button class=\"w3-text-red fas fa-times w3-col l1 w3-padding\" onclick=\"delFile('".$hash."')\"></button><div class=\"w3-col l5 w3-padding\">&nbsp;</div></div>\n";
         } else {
             echo "<div class=\"w3-row w3-red\">Sorry, there was an error uploading your file.</div>";
         }
