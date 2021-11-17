@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DATE=`date +"%Y-%m-%d"`
-HASH=`find . -not -path ./.git* -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | tail -n 1 | cut -d " " -f 1`
+HASH=`find . -not -path "./.git*" -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | tail -n 1 | cut -d " " -f 1`
 SHORTHASH=`echo ${HASH: -5}`
 VERSION="$DATE-$SHORTHASH"
 
