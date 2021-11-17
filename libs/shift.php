@@ -53,6 +53,7 @@ class Shift
         );
     }
     public function getTime() {
+        if($this->Start == "00:00:00" && $this->End == "00:00:00") return "&nbsp;";
         if($this->End) {
             $str=sql2timeRaw($this->Start)." - ".sql2timeRaw($this->End);
         }
