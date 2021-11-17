@@ -176,6 +176,7 @@ class Termin
         return $str;
     }
     protected function makeAlwaysYes() {
+        if(!$this->Shifts) return;
         $users = explode(",", $GLOBALS['optionsDB']['alwaysYesNewAppmnts']);
         foreach($users as $user) {
             $m = new Meldung;
