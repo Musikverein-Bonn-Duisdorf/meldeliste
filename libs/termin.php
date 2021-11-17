@@ -1536,14 +1536,14 @@ class Termin
 
             $shiftbedarf = new div;
             $shiftbedarf->indent=$indent;
-            $shiftbedarf->class="w3-col l1 m4 s4 w3-center";
+            $shiftbedarf->class="w3-col l1 m3 s3 w3-center";
             $shiftbedarf->body="<i class=\"fas fa-user-friends\"></i> ";
             $shiftbedarf->body=$s->Bedarf;
             $str=$str.$shiftbedarf->print();
 
             $shiftresponseY = new div;
             $shiftresponseY->indent=$indent;
-            $shiftresponseY->class="w3-col l1 m4 s4 w3-center";
+            $shiftresponseY->class="w3-col l1 m3 s3 w3-center";
             $shiftresponseY->class=$GLOBALS['optionsDB']['colorBtnYes'];
             $shiftresponseY->body="&#10004; ";
             $shiftresponseY->body=$s->getMeldungenVal(1);
@@ -1551,7 +1551,7 @@ class Termin
 
             $shiftresponseN = new div;
             $shiftresponseN->indent=$indent;
-            $shiftresponseN->class="w3-col l1 m4 s4 w3-center";
+            $shiftresponseN->class="w3-col l1 m3 s3 w3-center";
             $shiftresponseN->class=$GLOBALS['optionsDB']['colorBtnNo'];
             $shiftresponseN->body="&#10008; ";
             $shiftresponseN->body=$s->getMeldungenVal(2);
@@ -1559,7 +1559,7 @@ class Termin
 
             $shiftresponseM = new div;
             $shiftresponseM->indent=$indent;
-            $shiftresponseM->class="w3-col l1 m4 s4 w3-center";
+            $shiftresponseM->class="w3-col l1 m3 s3 w3-center";
             $shiftresponseM->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
             $shiftresponseM->body="? ";
             $shiftresponseM->body=$s->getMeldungenVal(3);
