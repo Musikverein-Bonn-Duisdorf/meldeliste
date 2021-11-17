@@ -764,8 +764,8 @@ class Termin
                 $str=$str."\t</div>";
             }
         }
-        $str=$str."\t<div class=\"w3-row w3-container ".$GLOBALS['optionsDB']['colorAppmntYes']." w3-border-bottom w3-border-black w3-mobile w3-margin-top\">";
-        $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\"><b>".Summe."</b></div>";
+        $str=$str."\t<div class=\"w3-row w3-container ".$GLOBALS['optionsDB']['colorAppmntYes']." w3-mobile w3-margin-top\">";
+        $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\"><b>Summe</b></div>";
         $str=$str."\t\t<div class=\"w3-col l".$colsize." m".$colsize." s".$colsize."\"><b>&nbsp;</b></div>";
         if($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption']) {
             $str=$str."\t\t<div class=\"w3-col l".(2*$colsize)." m".(2*$colsize)." s".(2*$colsize)."\"><b>".$sumJa." + ".$sumJaC." K + ".$sumJaG." G = ".($sumJa+$sumJaC+$sumJaG)."</b></div>";
@@ -1474,21 +1474,29 @@ class Termin
         $str="";
         $indent=1;
 
+        $containerdiv = new div;
+        $containerdiv->indent=$indent;
+        $containerdiv->class="w3-margin-top w3-border w3-border-black";
+        $containerdiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
+        $str=$str.$containerdiv->open();
+        $indent++;
+        
         $maindiv = new div;
         $maindiv->indent=$indent;
-        $maindiv->class="w3-container w3-margin-top w3-border-top w3-border-black w3-center";
-        $maindiv->class=$GLOBALS['optionsDB']['colorTitleBar'];
+        $maindiv->class="w3-container w3-center";
         $str=$str.$maindiv->open();
         $indent++;
         
         $mainheader = new div;
         $mainheader->tag="h3";
+        $mainheader->class="w3-left";
         $mainheader->body=$this->Name;
         $mainheader->indent=$indent;
         $str=$str.$mainheader->print();
 
         $mainheader = new div;
         $mainheader->tag="p";
+        $mainheader->class="w3-right";
         $mainheader->body=germanDate($this->Datum, 1);
         $mainheader->indent=$indent;
         $str=$str.$mainheader->print();
@@ -1498,7 +1506,7 @@ class Termin
 
         $content = new div;
         $content->indent=$indent;
-        $content->class="w3-container w3-border-bottom w3-border-black";
+        $content->class="w3-container w3-margin-bottom";
         $str=$str.$content->open();
         $indent++;
         
@@ -1676,6 +1684,8 @@ class Termin
                 
         $str=$str.$content->close();
         $indent--;
+        $str=$str.$containerdiv->close();
+        $indent--;
 
         return $str;
     }
@@ -1701,8 +1711,8 @@ class Termin
             break;
         }
 
-        $str = "<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-top w3-border-top w3-border-black w3-center ".$GLOBALS['optionsDB']['colorTitleBar']."\"><h3>".$this->Name."</h3><p>".germanDate($this->Datum, 1)."</p></div>\n";
-        $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-border-bottom w3-border-black\">\n";
+        $str = "<div class=\"w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".germanDate($this->Datum, 1)."</p></div>\n";
+        $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-bottom\">\n";
         $whoYes = '';
         $whoNo = '';
         $whoMaybe = '';
@@ -1985,7 +1995,7 @@ ORDER BY `Nachname`, `Vorname`;",
             }
             $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($ja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($vielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
         }
-        $str=$str."</div>\n";
+        $str=$str."</div></div>\n";
 
         $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
         $str=$str."<div class=\"w3-modal-content\">";
