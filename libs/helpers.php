@@ -102,7 +102,15 @@ function string2gDate($string) {
     return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
 }
 
+function germanDateSpan($string1, $string2) {
+    return germanDates($string1, true, true)." - ".germanDates($string2, true, true);
+}
+
 function germanDate($string, $monthLetters) {
+    return germanDates($string, $monthLetters, false);
+}
+
+function germanDates($string, $monthLetters, $short) {
     if($string == '') {
 	return;
     }
@@ -129,6 +137,32 @@ function germanDate($string, $monthLetters) {
         6 => 'Samstag',
         7 => 'Sonntag'
     );
+
+    if($short) {
+        $months = array(
+            "01" => "Jan",
+            "02" => "Feb",
+            "03" => "Mär",
+            "04" => "Apr",
+            "05" => "Mai",
+            "06" => "Jun",
+            "07" => "Jul",
+            "08" => "Aug",
+            "09" => "Sep",
+            "10" => "Okt",
+            "11" => "Nov",
+            "12" => "Dez"
+        );
+        $dows = array(
+            1 => 'Mo',
+            2 => 'Di',
+            3 => 'Mi',
+            4 => 'Do',
+            5 => 'Fr',
+            6 => 'Sa',
+            7 => 'So'
+        );
+    }
     $y = substr($string, 0, 4);
     $m = substr($string, 5, 2);
     $d = substr($string, 8, 2);

@@ -1,11 +1,12 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Datum':
+	    case 'EndDatum':
 	    case 'Uhrzeit':
 	    case 'Uhrzeit2':
 	    case 'Abfahrt':
@@ -43,6 +44,7 @@ class Termin
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Datum':
+	    case 'EndDatum':
 	    case 'Uhrzeit':
 	    case 'Uhrzeit2':
 	    case 'Abfahrt':
@@ -81,7 +83,7 @@ class Termin
         }
         return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Abfahrt: %s, mit: %s, max. Teilnehmer: %d, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, Schichten: %s, sichtbar: %s, offen: %s",
         $this->Index,
-        $this->Datum,
+        $this->getDate(),
         $this->Uhrzeit,
         $this->Uhrzeit2,
         $this->Abfahrt,
@@ -120,9 +122,16 @@ class Termin
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`) VALUES ("%s", %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d");',
+        if($this->EndDatum) {
+            $end = "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->EndDatum)."\"";
+        }
+        else {
+            $end = "NULL";
+        }
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
+        $end,
         $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
         $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
         $this->Abfahrt == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Abfahrt)."\"",
@@ -175,6 +184,14 @@ class Termin
         }
         return $str;
     }
+    public function getDate() {
+        if(!$this->EndDatum) return $this->Datum;
+        return "(".$this->Datum." - ".$this->EndDatum.")";
+    }
+    public function getGermanDate() {
+        if(!$this->EndDatum) return germanDate($this->Datum, 1);
+        return germanDateSpan($this->Datum, $this->EndDatum);
+    }
     protected function makeAlwaysYes() {
         if($this->Shifts) return;
         $users = explode(",", $GLOBALS['optionsDB']['alwaysYesNewAppmnts']);
@@ -225,9 +242,16 @@ class Termin
         return 0;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d" WHERE `Index` = "%d";',
+        if($this->EndDatum) {
+            $end = "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->EndDatum)."\"";
+        }
+        else {
+            $end = "NULL";
+        }
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
+        $end,
         $this->Uhrzeit == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit)."\"",
         $this->Uhrzeit2 == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Uhrzeit2)."\"",
         $this->Abfahrt == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Abfahrt)."\"",
@@ -836,11 +860,11 @@ class Termin
     protected function makeTimeInfo() {
         $str="";
         if($this->Uhrzeit) {
-            $str=$str.germanDate($this->Datum, 1).", ".sql2timeRaw($this->Uhrzeit);
+            $str=$str.$this->getGermanDate().", ".sql2timeRaw($this->Uhrzeit);
             if($this->Uhrzeit2) $str=$str." - ".sql2time($this->Uhrzeit2);
         }
         else {
-            $str=$str.germanDate($this->Datum, 1);
+            $str=$str.$this->getGermanDate();
         }
         if($GLOBALS['optionsDB']['showTravelTime'] || $GLOBALS['optionsDB']['showVehicle']) {
             if($this->Abfahrt || $this->vName) {
@@ -1366,7 +1390,7 @@ class Termin
         $str=$str."\t\t\t<h2>".$this->Name."</h2>\n";
         $str=$str."\t\t</header>\n";
         $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Datum:</div>\n<div class=\"w3-col l9\"><b>".germanDate($this->Datum, 1)."</b></div>\n";
+        $str=$str."\t\t\t<div class=\"w3-col l3\">Datum:</div>\n<div class=\"w3-col l9\"><b>".$this->getGermanDate()."</b></div>\n";
         $str=$str."\t\t</div>\n";
         $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
         $str=$str."\t\t\t<div class=\"w3-col l3\">Beginn:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>\n";
@@ -1476,7 +1500,7 @@ class Termin
 
         $containerdiv = new div;
         $containerdiv->indent=$indent;
-        $containerdiv->class="w3-margin-top w3-border w3-border-black";
+        $containerdiv->class="w3-margin-top w3-border w3-border-black w3-card";
         $containerdiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
         $str=$str.$containerdiv->open();
         $indent++;
@@ -1497,7 +1521,7 @@ class Termin
         $mainheader = new div;
         $mainheader->tag="p";
         $mainheader->class="w3-right";
-        $mainheader->body=germanDate($this->Datum, 1);
+        $mainheader->body=$this->getGermanDate();
         $mainheader->indent=$indent;
         $str=$str.$mainheader->print();
 
@@ -1711,7 +1735,7 @@ class Termin
             break;
         }
 
-        $str = "<div class=\"w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".germanDate($this->Datum, 1)."</p></div>\n";
+        $str = "<div class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
         $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-bottom\">\n";
         $whoYes = '';
         $whoNo = '';

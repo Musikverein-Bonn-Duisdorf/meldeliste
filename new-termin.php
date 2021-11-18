@@ -28,8 +28,22 @@ if(isset($_POST['copy'])) {
 </div>
 <div class="w3-card <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile w3-center w3-border w3-padding w3-col s6 l4">
 <form action="termine.php" method="POST">
-    <label>Datum</label>
+  <label>Datum (mehrtägig <input id="endcheck" type="checkbox" <?php if($fill && $n->EndDatum) echo "checked"; ?> onclick="endToggle();"></input>)</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Datum" type="date" <?php if($fill) echo "value=\"".$n->Datum."\""; ?>>
+<script type="text/javascript">
+            function endToggle() {
+                if(document.getElementById("endcheck").checked) {
+                    document.getElementById("endlabel").style.display="block";
+                    document.getElementById("endinput").style.display="block";
+                }
+                else {
+                    document.getElementById("endlabel").style.display="none";
+                    document.getElementById("endinput").style.display="none";
+                }
+            }
+            </script>
+    <label id="endlabel" <?php if($fill && $n->EndDatum) echo "style=\"display: block;\""; else echo "style=\"display: none;\""; ?>>Enddatum</label>
+    <input id="endinput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="EndDatum" type="date" <?php if($fill) echo "value=\"".$n->EndDatum."\""; ?> <?php if($fill && $n->EndDatum) echo "style=\"display: block;\""; else echo "style=\"display: none;\""; ?>>
     <label>Beginn (optional) <b onclick="clearInput('Uhrzeit')">&#10006;</b></label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Uhrzeit" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit."\""; ?>>
     <label>Ende (optional) <b onclick="clearInput('Uhrzeit2')">&#10006;</b></label>
