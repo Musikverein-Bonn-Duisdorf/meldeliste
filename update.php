@@ -220,7 +220,7 @@ echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$G
 mysqli_query($GLOBALS['conn'], $sql);
 
 
-$sql = sprintf("ALTER TABLE `%s_Termine` ADD `EndDatum` DATE NULL AFTER `Datum`;",
+$sql = sprintf("ALTER TABLE `%sTermine` ADD `EndDatum` DATE NULL AFTER `Datum`;",
 $GLOBALS['dbprefix']
 );
 echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
