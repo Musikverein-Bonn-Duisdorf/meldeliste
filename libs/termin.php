@@ -1396,7 +1396,7 @@ class Termin
                 $indent++;
                 if($s->Bedarf) {
                     if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || $_SESSION['admin']) {
-                        $str=$str.$this->makeShiftButtonsUser(2, $user, $indent, $s->Index, $m->Wert);
+                        $str=$str.$this->makeShiftButtonsUser(2, $indent, $s->Index, $m->Wert, $user);
                     }
                     else {
                         $closed = new div;
@@ -1407,7 +1407,7 @@ class Termin
                     }
                 }
                 else {
-                    $str=$str.$this->makeShiftButtonsUser(3, $user, $indent, $s->Index, $m->Wert);
+                    $str=$str.$this->makeShiftButtonsUser(3, $indent, $s->Index, $m->Wert, $user);
                 }
                 /* $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert); */
                 $str=$str.$btnDiv->close();
