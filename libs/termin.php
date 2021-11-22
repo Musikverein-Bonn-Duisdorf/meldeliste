@@ -1027,50 +1027,7 @@ class Termin
         return $str;
     }
     protected function makeShiftButtons($N, $indent, $shift, $val) {
-        $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
-        $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
-        
-        $str="";
-        for($i=1; $i<=$N; $i++) {
-            $btn = new div;
-            $btn->indent = $indent;
-
-            $btn->class="w3-col s3 m3 l3";
-            $btn->class="w3-margin-left";
-            if(!$this->open && !$_SESSION['admin']) {
-                if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
-                    if($i != 2) {
-                        $str=$str.$btn->print();
-                        continue;
-                    }
-                }
-                else {
-                    $str=$str.$btn->print();
-                    continue;
-                }
-            }
-            $btn->tag="button";
-            $btn->class="w3-btn";
-            $btn->class="w3-border";
-            $btn->class="w3-border-black";
-            /* $btn->class="w3-margin-top"; */
-            $btn->class="w3-center";
-            $btn->body=$symbols[$i-1];
-
-            if($val && $val != $i) {
-                $btn->class=$GLOBALS['optionsDB']['colorDisabled'];
-            }
-            else {
-                $btn->class=$colors[$i-1];
-            }
-            if($val != $i) {
-                $btn->onclick="meldeShift('".$GLOBALS['cronID']."', ".$this->getUser().", ".$shift.", ".$this->Index.", ".$i.")";
-                $btn->name="meldungShift";
-                $btn->value=$i;
-            }
-            $str=$str.$btn->print();
-        }
-        return $str;
+        return makeShiftButtonsUser($N, $indent, $shift, $val, $this->User);
     }
     protected function makeExtShiftButtons($N, $indent, $shift, $val) {
         $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
@@ -1172,7 +1129,7 @@ class Termin
         
         $main = new div;
         $main->indent = $indent;
-        $main->id="entry".$this->Index;
+        $main->id="entry".$this->Index."_user".$user;
         $main->class="w3-card-4 w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
@@ -2151,7 +2108,7 @@ ORDER BY `Nachname`, `Vorname`;",
         
         $main = new div;
         $main->indent = $indent;
-        $main->id="entry".$user;
+        $main->id="entry".$this->Index."_user".$user;
         $main->class="w3-card-4 w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
@@ -2355,7 +2312,7 @@ ORDER BY `Nachname`, `Vorname`;",
                 $indent++;
                 if($s->Bedarf) {
                     if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || $_SESSION['admin']) {
-                        $str=$str.$this->makeShiftButtons(2, $indent, $s->Index, $m->Wert);
+                        $str=$str.$this->makeShiftButtonsUser(2, $indent, $s->Index, $m->Wert, $user);
                     }
                     else {
                         $closed = new div;
@@ -2366,7 +2323,7 @@ ORDER BY `Nachname`, `Vorname`;",
                     }
                 }
                 else {
-                    $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert);
+                    $str=$str.$this->makeShiftButtonsUser(3, $indent, $s->Index, $m->Wert, $user);
                 }
                 $str=$str.$btnDiv->close();
                 $indent--;
