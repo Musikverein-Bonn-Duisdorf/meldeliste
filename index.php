@@ -12,9 +12,9 @@ else {
     $user = $_SESSION['userid'];
 }
 ?>
-<script src="js/getStatus.js?v1"></script>
-<script src="js/melde.js?v1"></script>
-<script src="js/meldeshift.js?v1"></script>
+<script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/meldeshift.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
     <h2>Bevorstehende Termine</h2>
 </div>
