@@ -35,10 +35,10 @@ if(isset($_POST['meldung'])) {
     $m->save();
 }
 ?>
-<script src="js/getStatus.js"></script>
-<script src="js/melde.js"></script>
-<script src="js/meldeshift.js"></script>
-<script src="js/changeInstrument.js"></script>
+<script src="js/getStatus.js?v1"></script>
+<script src="js/melde.js?v1"></script>
+<script src="js/meldeshift.js?v1"></script>
+<script src="js/changeInstrument.js?v1"></script>
 
 <?php
 if(isset($_POST['proxy'])) {
