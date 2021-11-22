@@ -33,7 +33,7 @@ while($row = mysqli_fetch_array($dbr)) {
 }
 ?>
 </div>
-<script src="js/filterMusiker.js"></script>
+<script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php }
 else {
 ?>

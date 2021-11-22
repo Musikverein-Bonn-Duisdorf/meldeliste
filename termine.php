@@ -35,10 +35,10 @@ if(isset($_POST['meldung'])) {
     $m->save();
 }
 ?>
-<script src="js/getStatus.js?v1"></script>
-<script src="js/melde.js?v1"></script>
-<script src="js/meldeshift.js?v1"></script>
-<script src="js/changeInstrument.js?v1"></script>
+<script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/meldeshift.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/changeInstrument.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
 <?php
 if(isset($_POST['proxy'])) {
