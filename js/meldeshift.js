@@ -9,7 +9,7 @@ function meldeShift(cronID, user, shift, termin, wert) {
     }
     xmlhttp.onreadystatechange=function() {
 	if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-            var oldel = document.getElementById("entry"+termin);
+            var oldel = document.getElementById("entry"+termin+"_user"+user);
             var newel = document.createElement('div');
             newel.innerHTML = xmlhttp.responseText;
             oldel.parentNode.replaceChild(newel, oldel);
