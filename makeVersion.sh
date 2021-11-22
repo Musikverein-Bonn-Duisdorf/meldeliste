@@ -15,6 +15,7 @@ cat > common/version.php <<EOF
 \$version = array(
 	 'String' => "$VERSION",
 	 'Date' => "$DATE",
+	 'Hash' => "$HASH"
 );
 
 global \$version;
