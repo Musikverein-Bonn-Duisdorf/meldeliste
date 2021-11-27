@@ -4,6 +4,8 @@ $_SESSION['page']='update';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 requireAdmin();
+$logentry = new Log;
+$logentry->info("Updating server to version ".$GLOBALS['version']['String']);
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
     <h2>Updater</h2>
@@ -218,6 +220,7 @@ $GLOBALS['dbprefix']
 );
 echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
 mysqli_query($GLOBALS['conn'], $sql);
+sqlerror();
 
 
 $sql = sprintf("ALTER TABLE `%sTermine` ADD `EndDatum` DATE NULL AFTER `Datum`;",
@@ -225,8 +228,7 @@ $GLOBALS['dbprefix']
 );
 echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
 mysqli_query($GLOBALS['conn'], $sql);
-
-
+sqlerror();
 ?>
 
 <?php
