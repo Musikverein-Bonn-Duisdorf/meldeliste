@@ -8,6 +8,23 @@ requireAdmin();
 $preview=false;
 $memberonly = false;
 $register = 0;
+$termin = 0;
+if(isset($_POST['termin'])) {
+    $termin = $_POST['termin'];
+}
+if(isset($_POST['termin']) && isset($_POST['send'])) {
+    $mail = new Usermail;
+    $mail->attachments = true;
+    $mail->subject($_POST['Betreff']);
+    $mail->termin($termin);
+    $mail->sendlink(true);
+    $mail->send($text);
+    $files = scandir("uploads/");
+    foreach($files as $file) {
+        if($file == "." || $file == ".." || $file == "README") continue;
+        unlink("uploads/".$file);
+    }
+}
 if(isset($_POST['preview']) || isset($_POST['send'])) {
     $preview=true;
     if($_POST['gruss'] == 1) {
@@ -28,7 +45,7 @@ if(isset($_POST['preview']) || isset($_POST['send'])) {
 	$register = $_POST['register'];
     }
 }
-if(isset($_POST['send'])) {
+if(isset($_POST['send']) && $termin == 0) {
     $mail = new Usermail;
     $mail->attachments = true;
     $mail->subject($_POST['Betreff']);
@@ -51,6 +68,14 @@ if(isset($_POST['send'])) {
 <div class="w3-panel w3-mobile w3-center w3-border w3-col s10 m10 l4">
   <form name="mailform" class="w3-container w3-margin" action="mail.php" method="POST" enctype="multipart/form-data">
     <label>Empfänger</label>
+    <?php
+         if($termin) {
+    ?>
+    <input type="hidden" name="termin" value="<?php echo $termin; ?>" />
+    <?php
+         }
+         else {
+    ?>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
       <div class="w3-mobile">
 	<input class="w3-radio w3-mobile" type="radio" name="to" value="aktiv" <?php if($preview && $_POST['to'] == 'aktiv') echo "checked"; ?> />
@@ -89,7 +114,7 @@ else {
 	}
     };
 </script>
-    
+<?php } ?>
     <label>Betreff</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Betreff" placeholder="Hier Betreff einfügen" value="<?php if($preview) echo $_POST['Betreff']; ?>"/>
     
