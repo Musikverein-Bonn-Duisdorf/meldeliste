@@ -7,6 +7,7 @@ global $optionsDB;
 include "version.php";
 include "libs/log.php";
 include "libs/div.php";
+include "libs/SQLtable.php";
 include "libs/musiker.php";
 include "libs/termin.php";
 include "libs/shift.php";
