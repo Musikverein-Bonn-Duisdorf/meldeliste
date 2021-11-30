@@ -4,14 +4,25 @@ $_SESSION['page']='update';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 requireAdmin();
+
+$oldversion = "NULL";
+
 $logentry = new Log;
-$logentry->info("Updating server to version ".$GLOBALS['version']['String']);
+$logentry->info("Updating server from version ".$oldversion." to ".$GLOBALS['version']['String']);
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
     <h2>Updater</h2>
 </div>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>"></div>
+<div class="w3-container w3-padding <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
+         Updating from version <b><?php echo $oldversion; ?></b> to <b><?php echo $GLOBALS['version']['String']; ?></b>...
+</div>
 <?php
+
+$InfoTable = new SQLtable("Info");
+$InfoTable->createString();
+$InfoTable->createColumnString("Parameter", "TEXT", "NULL");
+$InfoTable->createColumnString("Value", "TEXT", "NULL");
+
 $para=array(
     "styleAppmntUnpublished",
     'colorLogDefault', 
@@ -215,20 +226,20 @@ for($i=0; $i<$N; $i++) {
 }
 
 
-$sql = sprintf("ALTER TABLE `%sUser` ADD `Email2` TEXT NOT NULL AFTER `Email`;",
-$GLOBALS['dbprefix']
-);
-echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
-mysqli_query($GLOBALS['conn'], $sql);
-sqlerror();
+/* $sql = sprintf("ALTER TABLE `%sUser` ADD `Email2` TEXT NOT NULL AFTER `Email`;", */
+/* $GLOBALS['dbprefix'] */
+/* ); */
+/* echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>"; */
+/* mysqli_query($GLOBALS['conn'], $sql); */
+/* sqlerror(); */
 
 
-$sql = sprintf("ALTER TABLE `%sTermine` ADD `EndDatum` DATE NULL AFTER `Datum`;",
-$GLOBALS['dbprefix']
-);
-echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
-mysqli_query($GLOBALS['conn'], $sql);
-sqlerror();
+/* $sql = sprintf("ALTER TABLE `%sTermine` ADD `EndDatum` DATE NULL AFTER `Datum`;", */
+/* $GLOBALS['dbprefix'] */
+/* ); */
+/* echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>"; */
+/* mysqli_query($GLOBALS['conn'], $sql); */
+/* sqlerror(); */
 ?>
 
 <?php
