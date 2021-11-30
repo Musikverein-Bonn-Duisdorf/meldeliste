@@ -12,19 +12,6 @@ $termin = 0;
 if(isset($_POST['termin'])) {
     $termin = $_POST['termin'];
 }
-if(isset($_POST['termin']) && isset($_POST['send'])) {
-    $mail = new Usermail;
-    $mail->attachments = true;
-    $mail->subject($_POST['Betreff']);
-    $mail->termin($termin);
-    $mail->sendlink(true);
-    $mail->send($text);
-    $files = scandir("uploads/");
-    foreach($files as $file) {
-        if($file == "." || $file == ".." || $file == "README") continue;
-        unlink("uploads/".$file);
-    }
-}
 if(isset($_POST['preview']) || isset($_POST['send'])) {
     $preview=true;
     if($_POST['gruss'] == 1) {
@@ -38,11 +25,11 @@ if(isset($_POST['preview']) || isset($_POST['send'])) {
     }
     $text = $_POST['Text']."\n\n".$gruss;
     $anrede = "Hallo {VORNAME},";
-    if($_POST['to'] == 'aktiv') {
+    if(isset($_POST['to']) && $_POST['to'] == 'aktiv') {
         $memberonly = true;
     }
-    if(!isset($_POST['allReg'])) {
-	$register = $_POST['register'];
+    if(!isset($_POST['allReg']) && $termin == 0) {
+        $register = $_POST['register'];
     }
 }
 if(isset($_POST['send']) && $termin == 0) {
@@ -51,6 +38,19 @@ if(isset($_POST['send']) && $termin == 0) {
     $mail->subject($_POST['Betreff']);
     $mail->memberonly($memberonly);
     $mail->register($register);
+    $mail->sendlink(true);
+    $mail->send($text);
+    $files = scandir("uploads/");
+    foreach($files as $file) {
+        if($file == "." || $file == ".." || $file == "README") continue;
+        unlink("uploads/".$file);
+    }
+}
+if(isset($_POST['termin']) && isset($_POST['send'])) {
+    $mail = new Usermail;
+    $mail->attachments = true;
+    $mail->subject($_POST['Betreff']);
+    $mail->termin($termin);
     $mail->sendlink(true);
     $mail->send($text);
     $files = scandir("uploads/");
@@ -70,7 +70,10 @@ if(isset($_POST['send']) && $termin == 0) {
     <label>Empfänger</label>
     <?php
          if($termin) {
+             $t=new Termin;
+             $t->load_by_id($termin);
     ?>
+             <div class="w3-mobile w3-margin-bottom w3-padding">Alle Teilnehmer von <?php echo $t->Name." (".$t->getGermanDate().")" ?></div>
     <input type="hidden" name="termin" value="<?php echo $termin; ?>" />
     <?php
          }
