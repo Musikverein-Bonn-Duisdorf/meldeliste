@@ -32,9 +32,18 @@ Release: <?php echo "<b>".$GLOBALS['version']['String']."</b> (".$GLOBALS['versi
     ?>
 	<li>
 		<p><i class="far fa-calendar-alt"></i> - Termine</p>
-		<p>Hier werde alle zuk&uuml;nftigen Termine angezeigt.</p>
+		<p>Hier werde alle zuk&uuml;nftigen Termine angezeigt.<br />(Auch hier können die Meldungen gesetzt werden.)</p>
+		<ul>
+			<li>
+				<p><i class="fa fa-info-circle"></i></p></li>
+				<p>Details des Termins anzeigen</p>
+			<li>
+				<p><i class="fa fa-calendar-plus"></i></p>
+				<p>Den einzelnen Termin dem persönlichen Kalender hinzufügen (z.B. Google Calendar oder Outlook).
+				<br />Auf das Kalendersymbol mit dem Plus-Zeichen neben der Terminbezeichnung klicken, die Datei öffnen und importieren</p>
+			</li>
+		</ul>
 	</li>
-	<p>(Auch hier können die Meldungen gesetzt werden.)</p>
     <?php
 }
 ?>
