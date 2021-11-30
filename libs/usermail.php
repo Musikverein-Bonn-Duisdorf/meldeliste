@@ -106,7 +106,6 @@ class Usermail {
                 $GLOBALS['dbprefix'],
                 $this->termin
                 );
-                echo $sql;
             }
             else {
                 if($this->register > 0) {
