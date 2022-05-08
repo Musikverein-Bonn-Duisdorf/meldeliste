@@ -50,7 +50,7 @@ echo $_SESSION['username'];
     <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $optionsDB['colorNav']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>
         <?php
-        if($optionsDB['MessageOfTheDayShort']) {
+        if($optionsDB['showMessageOfTheDay']) {
         ?>
 <div class="w3-container w3-card w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
