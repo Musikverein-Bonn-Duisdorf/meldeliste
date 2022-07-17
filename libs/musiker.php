@@ -231,6 +231,7 @@ class User
         return $this->Vorname." ".$this->Nachname;
     }
     public function getInstrument() {
+        if(!$this->Instrument) return "";
         $i = new Instrument;
         $i->load_by_id($this->Instrument);
         return $i->Name;
