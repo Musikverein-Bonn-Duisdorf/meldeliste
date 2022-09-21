@@ -328,6 +328,19 @@ class User
         }
     }
 
+    public function getLastVisit() {
+        $sql = sprintf('SELECT `Datum` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum` FROM `%sTermine` WHERE `DATUM` <= CURRENT_DATE() ORDER BY `Datum` DESC) `%sTermine` ON `Termin` = `tIndex` WHERE `Wert` = "1" AND `User` = "%d" ORDER BY `Datum` DESC LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        return $row['Datum'];
+    }
+
     public function printTableLine() {
         if($this->Mitglied) {
             echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
@@ -336,9 +349,10 @@ class User
             echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".$this->iName."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->getLastVisit(), 1)."</div>\n";
         echo "</div>\n";
         ?>
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
@@ -384,6 +398,9 @@ class User
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($this->LastLogin, 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Letzte Anwesenheit:</div><div class="w3-col l6"><b><?php echo germanDate($this->getLastVisit(), 1); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Meldequote:</div><div class="w3-col l6"><b><?php echo $this->getMeldeQuote()*100; ?> %</b></div>
