@@ -78,7 +78,7 @@ class User
             $row = mysqli_fetch_array($dbr);
             $this->iName = $row['Name'];
         }
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Instrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
