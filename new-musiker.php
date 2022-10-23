@@ -149,7 +149,7 @@ if($fill && ($n->login || $edit == 3)) {
     </div>
     </div>
     </div>
-<?php } ?>>
+<?php } ?>
     <div class="w3-row">&nbsp;</div>
 <?php
 include "common/footer.php";
