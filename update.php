@@ -54,6 +54,8 @@ $para=array(
     'showAddToCalendarButton',
     'alwaysYesNewAppmnts',
     'showMessageOfTheDay',
+    'orgName',
+    'orgNameShort',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -99,6 +101,8 @@ $desc=array(
     "Zeige Button zum Erstellen von Kalendereinträgen",
     "Nutzer, die automatisch in neue Termine mit Ja eingetragen werden (userID durch Komma getrennt)",
     "Zeige Nachricht, die jedem Nutzen beim Einloggen angezeigt wird.",
+    "Vereinsname",
+    "Vereinsname (kurz)",
 );
 $value=array(
     "w3-opacity",
@@ -143,7 +147,9 @@ $value=array(
     "",
     0,
     "",
-    0
+    0,
+    "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
+    "Musikverein Duisdorf",
 );
 $type=array(
     "string",
@@ -189,6 +195,8 @@ $type=array(
     "bool",
     "string",
     "bool",
+    "string",
+    "string",
 );
 
 $N = count($para);

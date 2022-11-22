@@ -14,6 +14,7 @@ include "libs/meldung.php";
 include "libs/externmeldung.php";
 include "libs/shiftmeldung.php";
 include "libs/instrument.php";
+include "libs/instruments.php";
 include "libs/register.php";
 include "libs/usermail.php";
 include "libs/ics.php";
