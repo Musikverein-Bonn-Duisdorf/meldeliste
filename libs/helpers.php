@@ -22,6 +22,27 @@ function bool2string($val) {
 function instrumentOption($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY `rSort`, `Sortierung`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+    return $str;
+}
+
+function instrumentOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
     $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
@@ -506,5 +527,19 @@ while($register = mysqli_fetch_array($dbregister)) {
 
     $str=$str."</svg>";
     return $str;
+}
+
+function mkPrize($val) {
+    return sprintf("%.2f &euro;", $val);
+}
+
+function getOwner($index) {
+    if($index == 0) {
+        return $GLOBALS['optionsDB']['orgNameShort'];
+    }
+    
+    $user = new User;
+    $user->load_by_id($index);
+    return $user->getName();
 }
 ?>
