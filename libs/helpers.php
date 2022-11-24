@@ -128,6 +128,8 @@ function germanDateSpan($string1, $string2) {
 }
 
 function germanDate($string, $monthLetters) {
+    if($string == '') return;
+    if($string == null) return;
     return germanDates($string, $monthLetters, false);
 }
 
@@ -530,7 +532,9 @@ while($register = mysqli_fetch_array($dbregister)) {
 }
 
 function mkPrize($val) {
-    return sprintf("%.2f &euro;", $val);
+    if($val) {
+        return sprintf("%.2f &euro;", $val);
+    }
 }
 
 function getOwner($index) {
