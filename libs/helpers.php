@@ -61,6 +61,25 @@ function instrumentOptionAll($val) {
     return $str;
 }
 
+function UserOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">".$GLOBALS['optionsDB']['orgNameShort']."</option>\n";
+    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Vorname']." ".$row['Nachname']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</option>\n";
+        }
+    }
+    return $str;
+}
+
 function VehicleOption($val) {
     $sql = sprintf('SELECT * FROM `%svehicle`;',
 		   $GLOBALS['dbprefix']
@@ -465,7 +484,7 @@ while($register = mysqli_fetch_array($dbregister)) {
                         $radius += 40*$scale;
                         $k=0;
                     }
-                }
+               }
                 elseif($register['ArcMin'] > $register['ArcMax']) {
                     if($arc-20*$scale/(2*pi()*$radius)*360 <=$register['ArcMax']) {
                         $j++;
@@ -545,5 +564,16 @@ function getOwner($index) {
     $user = new User;
     $user->load_by_id($index);
     return $user->getName();
+}
+
+function getNextRegNumber() {
+    $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+
+    $row = mysqli_fetch_array($dbr);
+    return $row['RegNumber']+1;
 }
 ?>

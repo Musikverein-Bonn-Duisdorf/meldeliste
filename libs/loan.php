@@ -40,6 +40,83 @@ class Loan
         return true;
     }
 
+    public function getVars() {
+        $Instrument = new Instruments;
+        $Instrument->load_by_id($this->Instrument);
+        
+        return sprintf("Loan-ID: %d, Instrument: %d (%s), StartDate: %s, EndDate: %s, ContractFile: %s",
+        $this->Index,
+        $this->Instrument,
+        $Instrument->getInstrumentName(),
+        germanDate($this->StartDate,0),
+        germanDate($this->EndDate,0),
+        $Instrument->ContractFile
+        );
+    }
+
+    public function save() {
+        if(!$this->is_valid()) return false;
+        if($this->Index > 0) {
+            $this->update();
+            $logentry = new Log;
+            $logentry->DBupdate($this->getVars());
+        }
+        else {
+            $this->insert();
+            $logentry = new Log;
+            $logentry->DBinsert($this->getVars());
+        }
+    }
+
+    protected function insert() {
+        $sql = sprintf('INSERT INTO `%sLoans` (`User`, `Instrument`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", "%s", "%s", "%s");',
+        $GLOBALS['dbprefix'],
+        $this->User,
+        $this->Instrument,
+        $this->StartDate,
+        $this->EndDate,
+        $this->ContractFile
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
+        return true;
+    }
+    
+    protected function update() {
+        $sql = sprintf('UPDATE `%sLoans` SET `User` = "%d", `Instrument` = "%d", `StartDate` = "%s", `EndDate` = "%s", `ContractFile` = "%s" WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->User,
+        $this->Instrument,
+        $this->StartDate,
+        $this->EndDate,
+        $this->ContractFile,
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        return true;
+    }
+
+    public function delete() {
+        if(!$this->Index) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
+
+        $sql = sprintf('DELETE FROM `%sLoans` WHERE `Index` = "%d" LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        
+        $this->_data['Index'] = null;
+        return true;
+    }
+
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
                 $this->_data[$key] = $val;
