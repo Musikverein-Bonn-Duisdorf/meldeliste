@@ -658,7 +658,14 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
             $now = date_create(date("Y-m-d"));
             $age = date_diff($purchase, $now);
             $years = $age->format("%y");
-            return $this->PurchasePrize*pow(0.95,$years);
+            if($years < 1) return $this->PurchasePrize;
+            if($years < 2) return $this->PurchasePrize*0.9;
+            if($years < 3) return $this->PurchasePrize*0.8;
+            if($years < 4) return $this->PurchasePrize*0.7;
+            if($years < 15) return $this->PurchasePrize*0.6;
+            if($years < 20) return $this->PurchasePrize*0.5;
+            if($years < 25) return $this->PurchasePrize*0.4;
+            return 0;
         }
     }
 };
