@@ -551,7 +551,7 @@ while($register = mysqli_fetch_array($dbregister)) {
 }
 
 function mkPrize($val) {
-    if($val) {
+    if((float)$val != 0) {
         return sprintf("%.2f &euro;", $val);
     }
 }
