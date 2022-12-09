@@ -478,99 +478,98 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
-        $loans = $this->getLoans();
-        if($loans) {
-            $indent--;
-            $modalrow = new div;
-            $modalrow->indent=$indent;
-            $modalrow->class="w3-padding w3-margin-bottom";
-            $modalrow->class=$GLOBALS['optionsDB']['colorInputBackground'];
-            $modalrow->body="<b>Leihhistorie:</b>";
-            $str=$str.$modalrow->open();
+        $indent--;
+        $modalrow = new div;
+        $modalrow->indent=$indent;
+        $modalrow->class="w3-padding w3-margin-bottom";
+        $modalrow->class=$GLOBALS['optionsDB']['colorInputBackground'];
+        $modalrow->body="<b>Leihhistorie:</b>";
+        $str=$str.$modalrow->open();
 
-            $indent++;
+        $indent++;
+        $modalrow2 = new div;
+        $modalrow2->indent=$indent;
+        $modalrow2->class="w3-row w3-center w3-padding w3-border-bottom";
+        $str=$str.$modalrow2->open();
+        $indent++;
+        $content = new div;
+        $content->indent=$indent;
+        $content->col(2,4,4);
+        $content->class="w3-border-right";
+        $content->body="<b>an</b>";
+        $str=$str.$content->print();
+        $content = new div;
+        $content->indent=$indent;
+        $content->col(2,4,4);
+        $content->class="w3-border-right";
+        $content->body="<b>von</b>";
+        $str=$str.$content->print();
+        $content = new div;
+        $content->indent=$indent;
+        $content->col(2,4,4);
+        $content->class="w3-border-right";
+        $content->body="<b>bis</b>";
+        $str=$str.$content->print();
+        $str=$str.$modalrow2->close();
+
+        // --> new Loan
+        if(isAdmin()) {
+            $indent--;
             $modalrow2 = new div;
             $modalrow2->indent=$indent;
-            $modalrow2->class="w3-row w3-center w3-padding w3-border-bottom";
+            $modalrow2->class="w3-row w3-center w3-padding";
+            $modalrow2->tag="form";
+            $modalrow2->action="";
+            $modalrow2->method="POST";
             $str=$str.$modalrow2->open();
             $indent++;
             $content = new div;
             $content->indent=$indent;
-            $content->col(2,4,4);
-            $content->class="w3-border-right";
-            $content->body="<b>an</b>";
+            $content->tag="input";
+            $content->name = "Instrument";
+            $content->type = "hidden";
+            $content->value = $this->Index;
             $str=$str.$content->print();
             $content = new div;
             $content->indent=$indent;
             $content->col(2,4,4);
-            $content->class="w3-border-right";
-            $content->body="<b>von</b>";
+            $content->class="w3-border-right w3-input";
+            $content->tag="select";
+            $content->name = "User";
+            $content->body=UserOptionAll(0);
             $str=$str.$content->print();
             $content = new div;
             $content->indent=$indent;
             $content->col(2,4,4);
-            $content->class="w3-border-right";
-            $content->body="<b>bis</b>";
+            $content->class="w3-border-right w3-input";
+            $content->tag = "input";
+            $content->type = "date";
+            $content->name = "StartDate";
+            $str=$str.$content->print();
+            $content = new div;
+            $content->indent=$indent;
+            $content->col(2,4,4);
+            $content->class="w3-border-right w3-input";
+            $content->tag = "input";
+            $content->type = "date";
+            $content->name = "EndDate";
+            $str=$str.$content->print();
+            $content = new div;
+            $content->indent=$indent;
+            $content->col(2,4,4);
+            $content->class="w3-border-right w3-input";
+            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $content->tag = "input";
+            $content->type = "submit";
+            $content->name = "newLoan";
+            $content->value = "eintragen";
             $str=$str.$content->print();
             $str=$str.$modalrow2->close();
-
-            // --> new Loan
-            if(isAdmin()) {
-                $indent--;
-                $modalrow2 = new div;
-                $modalrow2->indent=$indent;
-                $modalrow2->class="w3-row w3-center w3-padding";
-                $modalrow2->tag="form";
-                $modalrow2->action="";
-                $modalrow2->method="POST";
-                $str=$str.$modalrow2->open();
-                $indent++;
-                $content = new div;
-                $content->indent=$indent;
-                $content->tag="input";
-                $content->name = "Instrument";
-                $content->type = "hidden";
-                $content->value = $this->Index;
-                $str=$str.$content->print();
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right w3-input";
-                $content->tag="select";
-                $content->name = "User";
-                $content->body=UserOptionAll(0);
-                $str=$str.$content->print();
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right w3-input";
-                $content->tag = "input";
-                $content->type = "date";
-                $content->name = "StartDate";
-                $str=$str.$content->print();
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right w3-input";
-                $content->tag = "input";
-                $content->type = "date";
-                $content->name = "EndDate";
-                $str=$str.$content->print();
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right w3-input";
-                $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-                $content->tag = "input";
-                $content->type = "submit";
-                $content->name = "newLoan";
-                $content->value = "eintragen";
-                $str=$str.$content->print();
-                $str=$str.$modalrow2->close();
-            }
-            // <-- new Loan
+        }
+        // <-- new Loan
             
-            for($i=0; $i<count($loans); $i++) {           
+        $loans = $this->getLoans();
+        for($i=0; $i<count($loans); $i++) {           
                 $L = new Loan;
                 $L->load_by_id($loans[$i]);
                 $indent--;
@@ -624,9 +623,8 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
                 $str=$str.$content->print();
                 $str=$str.$modalrow2->close();
             }
-            $str=$str.$modalrow->close();            
-            $indent--;
-        }
+    $str=$str.$modalrow->close();            
+    $indent--;
         if(isAdmin()) {
             $indent--;
             $modalrow = new div;
@@ -707,7 +705,17 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
     public function getActiveLoan() {
         $loans = $this->getLoans();
         if($loans) {
-            return $loans[0];
+            $l = new Loan;
+            $l->load_by_id($loans[0]);
+            
+            if($l->EndDate) {
+                $end = new DateTime($l->EndDate);
+                $now = new DateTime(date("Y-m-d"));
+                if($end > $now) return $loans[0];
+            }
+            else {
+                return $loans[0];
+            }
         }
     }
 
