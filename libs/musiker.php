@@ -1,12 +1,13 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Nachname':
 	    case 'Vorname':
+        case 'RefID':
         case 'login':
 	    case 'Passhash':
 	    case 'activeLink':
@@ -33,6 +34,7 @@ class User
         switch($key) {
 	    case 'Index':
 	    case 'Instrument':
+        case 'RefID':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
@@ -76,12 +78,15 @@ class User
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
             $row = mysqli_fetch_array($dbr);
-            $this->iName = $row['Name'];
+            if($row) {
+                $this->iName = $row['Name'];
+            }
         }
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Instrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, RefID: %d, Login: %s, Mitglied: %s, Instrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
+        $this->RefID,
         $this->login,
         bool2string($this->Mitglied),
         $this->iName,
@@ -184,10 +189,11 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%d", "%s", "%s", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", "%s", "%d", "%s", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mkNULL($this->RefID),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
@@ -206,10 +212,11 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mkNULL($this->RefID),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
@@ -339,7 +346,9 @@ class User
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $row = mysqli_fetch_array($dbr);
-        return $row['Datum'];
+        if($row) {
+            return $row['Datum'];
+        }
     }
 
     public function getLoans() {

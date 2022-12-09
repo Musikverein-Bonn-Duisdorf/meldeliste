@@ -580,4 +580,9 @@ function getNextRegNumber() {
 function isAdmin() {
     return $_SESSION['admin'];
 }
+
+function mkNULL($str) {
+    if($str) return $str;
+    return "NULL";
+}
 ?>
