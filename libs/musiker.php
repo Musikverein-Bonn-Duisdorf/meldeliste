@@ -238,7 +238,7 @@ class User
         return $this->Vorname." ".$this->Nachname;
     }
     public function getInstrument() {
-        if(!$this->Instrument) return "";
+        if(!$this->Instrument || $this->Instrument == 0) return "";
         $i = new Instrument;
         $i->load_by_id($this->Instrument);
         return $i->Name;
@@ -322,9 +322,7 @@ class User
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
+        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $Index
         );
@@ -334,6 +332,7 @@ class User
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
+        $this->iName = $this->getInstrument();
     }
 
     public function getLastVisit() {
