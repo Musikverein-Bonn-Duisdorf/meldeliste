@@ -342,6 +342,38 @@ class User
         return $row['Datum'];
     }
 
+    public function getLoans() {
+        $sql = sprintf('SELECT `Index` FROM `%sLoans` WHERE `User` = %d AND `EndDate` IS NULL;',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $loans = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($loans, $row['Index']);
+        }
+        return $loans;
+    }
+
+    public function getInstruments() {
+        $sql = sprintf('SELECT `Index` FROM `%sInstruments` WHERE `Owner` = %d',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $instruments = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($instruments, $row['Index']);
+        }
+        return $instruments;
+    }
+
+    public function hasInstruments() {
+        return count($this->getLoans()) + count($this->getInstruments());
+    }
+    
     public function printTableLine() {
         if($this->Mitglied) {
             echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";

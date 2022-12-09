@@ -576,4 +576,8 @@ function getNextRegNumber() {
     $row = mysqli_fetch_array($dbr);
     return $row['RegNumber']+1;
 }
+
+function isAdmin() {
+    return $_SESSION['admin'];
+}
 ?>

@@ -142,6 +142,5 @@ class Loan
         $u->load_by_id($this->User);
         return $u->getName();
     }
-    
 };
 ?>
