@@ -595,6 +595,20 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
                 $str=$str.$content->print();
                 
                 if($L->EndDate == null && isAdmin()) {
+                    $form = new div;
+                    $form->indent=$indent;
+                    $form->tag="form";
+                    $form->action="";
+                    $form->method="POST";
+                    $str=$str.$form->open();
+                    
+                    $content = new div;
+                    $content->indent=$indent;
+                    $content->tag = "input";
+                    $content->type = "hidden";
+                    $content->name = "Index";
+                    $content->value = $L->Index;
+                    $str=$str.$content->print();
                     $content = new div;
                     $content->indent=$indent;
                     $content->col(2,4,4);
@@ -610,8 +624,11 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
                     $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
                     $content->tag = "input";
                     $content->type = "submit";
-                    $content->name = "save";
+                    $content->name = "endLoan";
                     $content->value = "eintragen";
+                    $str=$str.$content->print();
+
+                    $str=$str.$form->close();
                 }
                 else {
                     $content = new div;
@@ -619,8 +636,8 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
                     $content->col(2,4,4);
                     $content->class="w3-border-right";
                     $content->body=germanDate($L->EndDate,0);
+                    $str=$str.$content->print();
                 }
-                $str=$str.$content->print();
                 $str=$str.$modalrow2->close();
             }
     $str=$str.$modalrow->close();            
