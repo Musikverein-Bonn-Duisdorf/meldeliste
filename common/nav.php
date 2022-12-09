@@ -13,6 +13,12 @@
   <a title="Termine" alt="Termine" href="termine.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('termine');?>"><i class="far fa-calendar-alt"></i></a>
   <?php } ?>
   <a title="Mein Register" alt="Mein Register" href="mein-register.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinregister');?>"><i class="fas fa-users"></i></a>
+<?php
+$u = new User;
+$u->load_by_id($_SESSION['userid']);
+if($u->hasInstruments()) { ?>
+  <a title="Instrumente" alt="Meine Instrumente" href="myinstruments.php" class="w3-bar-item w3-button w3-mobile <?php getPage('myinstruments');?>"><i class="fas fa-drum"></i></a>
+<?php } ?>
   <form action="new-musiker.php" method="POST">
     <button title="Mein Profil" alt="Mein Profil" type="submit" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('me');?>">
       <i class="fas fa-user"></i>
