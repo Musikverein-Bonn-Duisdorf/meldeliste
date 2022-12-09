@@ -220,14 +220,14 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right";
-        $field->col(2,4,4);
+        $field->col(1,4,4);
         $field->body=$row['iName'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right";
-        $field->col(2,4,4);
+        $field->col(1,4,4);
         $field->body=$row['Vendor'];
         $str=$str.$field->print();
 
@@ -262,14 +262,14 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->col(2,1,1);
         $field->body=getOwner($row['Owner']);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center";
-        $field->col(1,4,4);
+        $field->col(2,4,4);
         $field->body=$this->getActiveLoanName();
         $str=$str.$field->print();
 
