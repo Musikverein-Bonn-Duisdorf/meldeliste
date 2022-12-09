@@ -587,7 +587,7 @@ function mkNULL($str) {
 }
 
 function mkNULLstr($str) {
-    if($str) return \""\".$str.\""\";
+    if($str) return "\"".$str."\"";
     return "NULL";
 }
 ?>
