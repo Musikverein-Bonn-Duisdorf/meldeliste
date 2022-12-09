@@ -88,13 +88,13 @@ class Instruments
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", "%s", "%f", "%s", "%d", "%s");',
+        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", %s, "%f", "%s", "%d", "%s");',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
         mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
-        $this->PurchaseDate,
+        mkNULLstr($this->PurchaseDate),
         $this->PurchasePrize,
         $this->Owner,
         $this->Insurance,
@@ -108,13 +108,13 @@ class Instruments
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sInstrument` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `SerialNr` = "%s", `PurchaseDate` = "%s", `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sInstrument` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
         mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
-        $this->PurchaseDate,
+        mkNULLstr($this->PurchaseDate),
         $this->PurchasePrize,
         $this->Owner,
         $this->Insurance,
