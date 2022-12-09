@@ -88,14 +88,14 @@ class Instruments
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", %s, "%f", "%s", "%d", "%s");',
+        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", %s, "%s", "%s", "%d", "%s");',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
         mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
         mkNULLstr($this->PurchaseDate),
-        $this->PurchasePrize,
+        mkEmpty($this->PurchasePrize),
         $this->Owner,
         $this->Insurance,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Comment)
@@ -115,7 +115,7 @@ class Instruments
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
         mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
         mkNULLstr($this->PurchaseDate),
-        $this->PurchasePrize,
+        mkEmpty($this->PurchasePrize),
         $this->Owner,
         $this->Insurance,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Comment),
@@ -665,7 +665,7 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
             if($years < 15) return $this->PurchasePrize*0.6;
             if($years < 20) return $this->PurchasePrize*0.5;
             if($years < 25) return $this->PurchasePrize*0.4;
-            return 0;
+            return "";
         }
     }
 };

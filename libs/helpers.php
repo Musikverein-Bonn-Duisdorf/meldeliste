@@ -590,4 +590,9 @@ function mkNULLstr($str) {
     if($str) return "\"".$str."\"";
     return "NULL";
 }
+
+function mkEmpty($str) {
+    if($str) return $str;
+    return "";
+}
 ?>
