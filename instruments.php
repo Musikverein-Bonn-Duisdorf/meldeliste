@@ -9,6 +9,12 @@ if(isset($_POST['newLoan'])) {
     $n->fill_from_array($_POST);
     $n->save();
 }
+if(isset($_POST['endLoan'])) {
+    $n = new Loan;
+    $n->load_by_id($_POST['Index']);
+    $n->EndDate = $_POST['EndDate'];
+    $n->save();
+}
 if(isset($_POST['insert'])) {
     $n = new Instruments;
     $n->fill_from_array($_POST);
