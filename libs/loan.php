@@ -69,12 +69,12 @@ class Loan
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sLoans` (`User`, `Instrument`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", "%s", "%s", "%s");',
+        $sql = sprintf('INSERT INTO `%sLoans` (`User`, `Instrument`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", %s, %s, "%s");',
         $GLOBALS['dbprefix'],
         $this->User,
         $this->Instrument,
-        $this->StartDate,
-        $this->EndDate,
+        mkNULLstr($this->StartDate),
+        mkNULLstr($this->EndDate),
         $this->ContractFile
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -85,12 +85,12 @@ class Loan
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sLoans` SET `User` = "%d", `Instrument` = "%d", `StartDate` = "%s", `EndDate` = "%s", `ContractFile` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sLoans` SET `User` = "%d", `Instrument` = "%d", `StartDate` = %s, `EndDate` = %s, `ContractFile` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->User,
         $this->Instrument,
-        $this->StartDate,
-        $this->EndDate,
+        mkNULLstr($this->StartDate),
+        mkNULLstr($this->EndDate),
         $this->ContractFile,
         $this->Index
         );
