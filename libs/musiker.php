@@ -303,7 +303,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gel&ouml;schter", `Nachname` = "Benutzer" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gel&ouml;schter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0 WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
