@@ -512,7 +512,64 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
             $content->class="w3-border-right";
             $content->body="<b>bis</b>";
             $str=$str.$content->print();
-            $str=$str.$modalrow2->close();            
+            $str=$str.$modalrow2->close();
+
+            // --> new Loan
+            if(isAdmin()) {
+                $indent--;
+                $modalrow2 = new div;
+                $modalrow2->indent=$indent;
+                $modalrow2->class="w3-row w3-center w3-padding";
+                $modalrow2->tag="form";
+                $modalrow2->action="";
+                $modalrow2->method="POST";
+                $str=$str.$modalrow2->open();
+                $indent++;
+                $content = new div;
+                $content->indent=$indent;
+                $content->tag="input";
+                $content->name = "Instrument";
+                $content->type = "hidden";
+                $content->value = $this->Index;
+                $str=$str.$content->print();
+                $content = new div;
+                $content->indent=$indent;
+                $content->col(2,4,4);
+                $content->class="w3-border-right w3-input";
+                $content->tag="select";
+                $content->name = "User";
+                $content->body=UserOptionAll(0);
+                $str=$str.$content->print();
+                $content = new div;
+                $content->indent=$indent;
+                $content->col(2,4,4);
+                $content->class="w3-border-right w3-input";
+                $content->tag = "input";
+                $content->type = "date";
+                $content->name = "StartDate";
+                $str=$str.$content->print();
+                $content = new div;
+                $content->indent=$indent;
+                $content->col(2,4,4);
+                $content->class="w3-border-right w3-input";
+                $content->tag = "input";
+                $content->type = "date";
+                $content->name = "EndDate";
+                $str=$str.$content->print();
+                $content = new div;
+                $content->indent=$indent;
+                $content->col(2,4,4);
+                $content->class="w3-border-right w3-input";
+                $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+                $content->tag = "input";
+                $content->type = "submit";
+                $content->name = "newLoan";
+                $content->value = "eintragen";
+                $str=$str.$content->print();
+                $str=$str.$modalrow2->close();
+            }
+            // <-- new Loan
+            
             for($i=0; $i<count($loans); $i++) {           
                 $L = new Loan;
                 $L->load_by_id($loans[$i]);
@@ -537,13 +594,35 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
                 $content->class="w3-border-right";
                 $content->body=germanDate($L->StartDate,0);
                 $str=$str.$content->print();
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right";
-                $content->body=germanDate($L->EndDate,0);
+                
+                if($L->EndDate == null && isAdmin()) {
+                    $content = new div;
+                    $content->indent=$indent;
+                    $content->col(2,4,4);
+                    $content->class="w3-border-right w3-input";
+                    $content->tag = "input";
+                    $content->type = "date";
+                    $content->name = "EndDate";
+                    $str=$str.$content->print();
+                    $content = new div;
+                    $content->indent=$indent;
+                    $content->col(2,4,4);
+                    $content->class="w3-border-right w3-input";
+                    $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+                    $content->tag = "input";
+                    $content->type = "submit";
+                    $content->name = "save";
+                    $content->value = "eintragen";
+                }
+                else {
+                    $content = new div;
+                    $content->indent=$indent;
+                    $content->col(2,4,4);
+                    $content->class="w3-border-right";
+                    $content->body=germanDate($L->EndDate,0);
+                }
                 $str=$str.$content->print();
-                $str=$str.$modalrow2->close();            
+                $str=$str.$modalrow2->close();
             }
             $str=$str.$modalrow->close();            
             $indent--;

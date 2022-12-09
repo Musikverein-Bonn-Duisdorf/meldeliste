@@ -4,6 +4,11 @@ $_SESSION['page']='instruments';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 
+if(isset($_POST['newLoan'])) {
+    $n = new Loan;
+    $n->fill_from_array($_POST);
+    $n->save();
+}
 if(isset($_POST['insert'])) {
     $n = new Instruments;
     $n->fill_from_array($_POST);
