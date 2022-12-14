@@ -315,8 +315,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->body="<h2>".$row['iName']."</h2>";
         $str=$str.$content->print();
         $str=$str.$header->close();
-        
+
         $indent--;
+        $detailform = new div;
+        $detailform->indent = $indent;
+        $detailform->tag="form";
+        $detailform->action="";
+        $detailform->method="POST";
+        $str=$str.$detailform->open();
+        
+        $indent++;
         $modalrow = new div;
         $modalrow->indent=$indent;
         $modalrow->class="w3-row w3-padding";
@@ -330,7 +338,11 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=$this->RegNumber;
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="number";
+        $content->name="RegNumber";
+        $content->value=$this->RegNumber;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -348,7 +360,11 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=$this->Vendor;
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="text";
+        $content->name="Vendor";
+        $content->value=$this->Vendor;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -366,7 +382,11 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=$this->SerialNr;
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="text";
+        $content->name="SerialNr";
+        $content->value=$this->SerialNr;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -384,7 +404,11 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=germanDate($this->PurchaseDate,1);
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="date";
+        $content->name="PurchaseDate";
+        $content->value=$this->PurchaseDate;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -402,7 +426,11 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=mkPrize($this->PurchasePrize);
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="number";
+        $content->name="PurchasePrize";
+        $content->value=$this->PurchasePrize;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -423,7 +451,7 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->body=mkPrize($this->getCurrentValue($row['PurchasePrize']));
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
-
+        
         $indent--;
         $modalrow = new div;
         $modalrow->indent=$indent;
@@ -438,7 +466,10 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=getOwner($row['Owner']);
+        $content->class="w3-input";
+        $content->tag="select";
+        $content->name="Owner";
+        $content->body=userOptionAll($this->Owner);
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -456,7 +487,9 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=bool2string($this->Insurance);
+        $content->tag="input";
+        $content->type="checkbox";
+        $content->value=$this->Insurance;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -474,10 +507,17 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->body=$this->Comment;
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="text";
+        $content->name="Comment";
+        $content->value=$this->Comment;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
-
+        
+        $str=$str.$detailform->close();
+        $indent--;
+        
         $indent--;
         $modalrow = new div;
         $modalrow->indent=$indent;
