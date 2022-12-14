@@ -426,7 +426,7 @@ class User
           <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Vereins-ID:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
+      <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
     </div>
       <?php
       }
