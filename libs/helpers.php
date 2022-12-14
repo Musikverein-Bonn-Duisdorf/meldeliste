@@ -1,149 +1,37 @@
 <?php
-function loadconfig() {
-    $sql = sprintf('SELECT * FROM `%sconfig`;',
-		   $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    $optionsDB = array();
-    while($row = mysqli_fetch_array($dbr)) {
-        $optionsDB += [$row['Parameter'] => $row['Value']];
+function bin2date($v) {
+    $c=array(false, false, false, false, false, false, false);
+    for($i=7; $i>=1; $i--) {
+        if($v/2**($i-1)>=1) {
+            $c[$i-1]=true;
+            $v=$v-2**($i-1);
+        }
     }
-    return $optionsDB;
+    return $c;
 }
-function requireAdmin() {
-    if(!$_SESSION['admin']) die("Admin permissions required.");
-}
+
 function bool2string($val) {
     if($val) return "ja";
     return "nein";
 }
 
-function instrumentOption($val) {
-    $str='';
-    $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY `rSort`, `Sortierung`;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
+function checkCronDate($v) {
+    $c = bin2date($v);
+    $dow = intval(date("N"));
+    if($c[$dow-1] == false) { 
+        return false;
     }
-    return $str;
+    return true;
 }
 
-function instrumentOptionAll($val) {
-    $str='';
-    $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
-    }
-    return $str;
-}
-
-function UserOptionAll($val) {
-    $str='';
-    $str=$str."<option value=\"0\">".$GLOBALS['optionsDB']['orgNameShort']."</option>\n";
-    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;',
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Vorname']." ".$row['Nachname']."</option>\n";
-        }
-        else {
-            $str=$str."<option value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</option>\n";
-        }
-    }
-    return $str;
-}
-
-function VehicleOption($val) {
-    $sql = sprintf('SELECT * FROM `%svehicle`;',
-		   $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
-    }
-}
-
-function RegisterOption($val) {
-    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
-		   $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
-    }
-}
-function getPage($string) {
-    if($string == $_SESSION['page']) {
-        echo $GLOBALS['optionsDB']['colorTitleBar'];
+function genitiv($string) {
+    $last = substr($string, -1);
+    if($last == "s" || $last == "x") {
+        return $string.'\'';
     }
     else {
-        echo $GLOBALS['optionsDB']['colorNav'];
+        return $string."s";
     }
-}
-
-function getAdminPage($string) {
-    if($string == $_SESSION['page'] && $_SESSION['adminpage']) {
-        echo $GLOBALS['optionsDB']['colorTitleBar'];
-    }
-    else {
-        echo $GLOBALS['optionsDB']['colorNavAdmin'];
-    }
-}
-
-function string2Date($string) {
-    $y = substr($string, 0, 3);
-    $m = substr($string, 5, 6);
-    $d = substr($string, 8, 9);
-}
-
-function string2gDate($string) {
-    $y = substr($string, 0, 4);
-    $m = substr($string, 5, 2);
-    $d = substr($string, 8, 2);
-    return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
-}
-
-function germanDateSpan($string1, $string2) {
-    return germanDates($string1, true, true)." - ".germanDates($string2, true, true);
 }
 
 function germanDate($string, $monthLetters) {
@@ -220,77 +108,8 @@ function germanDates($string, $monthLetters, $short) {
     return $s;
 }
 
-function mkAdmin() {
-    $_SESSION['userid'] = 0;
-    $_SESSION['admin'] = true;
-    $_SESSION['username'] = 'SYSTEM';
-}
-
-function validateLink($hash) {
-    $_SESSION['userid'] = 0;
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `activeLink` = '%s';",
-		   $GLOBALS['dbprefix'],
-		   $hash
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        $_SESSION['userid'] = $row['Index'];
-        $_SESSION['Vorname'] = $row['Vorname'];
-        $_SESSION['Nachname'] = $row['Nachname'];
-        $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
-        $_SESSION['admin'] = (bool)$row['Admin'];
-        $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
-        $logentry = new Log;
-        $logentry->info("Login via Link.");
-        recordLogin();
-        return true;
-        break;
-    }
-    return false;
-}
-function validateUser($login, $password) {
-    $_SESSION['userid'] = 0;
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `login` = '%s';",
-		   $GLOBALS['dbprefix'],
-		   $login
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if(password_verify($password, $row['Passhash'])) {
-            $_SESSION['userid'] = $row['Index'];
-            $_SESSION['Vorname'] = $row['Vorname'];
-            $_SESSION['Nachname'] = $row['Nachname'];
-            $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
-            $_SESSION['admin'] = (bool)$row['Admin'];
-            $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
-            $logentry = new Log;
-            $logentry->info("Login via Password.");
-            recordLogin();
-            return true;
-        }
-    }
-    return false;
-}
-
-function recordLogin() {
-    $sql = sprintf("UPDATE `%sUser` SET `LastLogin` = CURRENT_TIMESTAMP() WHERE `Index` = %d;",
-		   $GLOBALS['dbprefix'],
-		   $_SESSION['userid']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-}
-
-function loggedIn() {
-    if(!isset($_SESSION['userid'])) {
-	session_destroy();
-	return false;
-    }
-    if($_SESSION['userid'] > 0) return true;
-    session_destroy();
-    return false;
+function germanDateSpan($string1, $string2) {
+    return germanDates($string1, true, true)." - ".germanDates($string2, true, true);
 }
 
 function getActiveUsers($date) {
@@ -327,32 +146,112 @@ function getActiveUsers($date) {
     return $users;
 }
 
-function sql2time($time) {
-    if($time != '') {
-        return sql2timeRaw($time)." Uhr";
-    }
-}
-
-function sql2timeRaw($time) {
-    return substr($time, 0, 5);
-}
-
-function genitiv($string) {
-    $last = substr($string, -1);
-    if($last == "s" || $last == "x") {
-        return $string.'\'';
+function getAdminPage($string) {
+    if($string == $_SESSION['page'] && $_SESSION['adminpage']) {
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
     }
     else {
-        return $string."s";
+        echo $GLOBALS['optionsDB']['colorNavAdmin'];
     }
 }
 
-function sqlerror() {
-    if(mysqli_errno($GLOBALS['conn'])) {
-        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
-        $logentry = new Log;
-        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
+function getNextRegNumber() {
+    $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+
+    $row = mysqli_fetch_array($dbr);
+    return $row['RegNumber']+1;
+}
+
+function getOwner($index) {
+    if($index == 0) {
+        return $GLOBALS['optionsDB']['orgNameShort'];
     }
+    
+    $user = new User;
+    $user->load_by_id($index);
+    return $user->getName();
+}
+
+function getPage($string) {
+    if($string == $_SESSION['page']) {
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
+    }
+    else {
+        echo $GLOBALS['optionsDB']['colorNav'];
+    }
+}
+
+function instrumentOption($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY `rSort`, `Sortierung`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+    return $str;
+}
+
+function instrumentOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+    return $str;
+}
+
+function isAdmin() {
+    return $_SESSION['admin'];
+}
+
+function loadconfig() {
+    $sql = sprintf('SELECT * FROM `%sconfig`;',
+		   $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $optionsDB = array();
+    while($row = mysqli_fetch_array($dbr)) {
+        $optionsDB += [$row['Parameter'] => $row['Value']];
+    }
+    return $optionsDB;
+}
+
+function loggedIn() {
+    if(!isset($_SESSION['userid'])) {
+	session_destroy();
+	return false;
+    }
+    if($_SESSION['userid'] > 0) return true;
+    session_destroy();
+    return false;
 }
 
 function meldeWert($val) {
@@ -368,24 +267,31 @@ function meldeWert($val) {
     }
 }
 
-function bin2date($v) {
-    $c=array(false, false, false, false, false, false, false);
-    for($i=7; $i>=1; $i--) {
-        if($v/2**($i-1)>=1) {
-            $c[$i-1]=true;
-            $v=$v-2**($i-1);
-        }
-    }
-    return $c;
+function mkAdmin() {
+    $_SESSION['userid'] = 0;
+    $_SESSION['admin'] = true;
+    $_SESSION['username'] = 'SYSTEM';
 }
 
-function checkCronDate($v) {
-    $c = bin2date($v);
-    $dow = intval(date("N"));
-    if($c[$dow-1] == false) { 
-        return false;
+function mkEmpty($str) {
+    if($str) return $str;
+    return "";
+}
+
+function mkNULL($str) {
+    if($str) return $str;
+    return "NULL";
+}
+
+function mkNULLstr($str) {
+    if($str) return "\"".$str."\"";
+    return "NULL";
+}
+
+function mkPrize($val) {
+    if((float)$val != 0) {
+        return sprintf("%.2f &euro;", $val);
     }
-    return true;
 }
 
 function printOrchestra($tid, $scale) {
@@ -550,49 +456,146 @@ while($register = mysqli_fetch_array($dbregister)) {
     return $str;
 }
 
-function mkPrize($val) {
-    if((float)$val != 0) {
-        return sprintf("%.2f &euro;", $val);
+function recordLogin() {
+    $sql = sprintf("UPDATE `%sUser` SET `LastLogin` = CURRENT_TIMESTAMP() WHERE `Index` = %d;",
+		   $GLOBALS['dbprefix'],
+		   $_SESSION['userid']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+}
+
+function RegisterOption($val) {
+    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
+		   $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
     }
 }
 
-function getOwner($index) {
-    if($index == 0) {
-        return $GLOBALS['optionsDB']['orgNameShort'];
-    }
-    
-    $user = new User;
-    $user->load_by_id($index);
-    return $user->getName();
+function requireAdmin() {
+    if(!$_SESSION['admin']) die("Admin permissions required.");
 }
 
-function getNextRegNumber() {
-    $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
+function sql2time($time) {
+    if($time != '') {
+        return sql2timeRaw($time)." Uhr";
+    }
+}
+
+function sql2timeRaw($time) {
+    return substr($time, 0, 5);
+}
+
+function sqlerror() {
+    if(mysqli_errno($GLOBALS['conn'])) {
+        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
+        $logentry = new Log;
+        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
+    }
+}
+
+function string2gDate($string) {
+    $y = substr($string, 0, 4);
+    $m = substr($string, 5, 2);
+    $d = substr($string, 8, 2);
+    return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
+}
+
+function string2Date($string) {
+    $y = substr($string, 0, 3);
+    $m = substr($string, 5, 6);
+    $d = substr($string, 8, 9);
+}
+
+function UserOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">".$GLOBALS['optionsDB']['orgNameShort']."</option>\n";
+    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;',
     $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
-
-    $row = mysqli_fetch_array($dbr);
-    return $row['RegNumber']+1;
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Vorname']." ".$row['Nachname']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</option>\n";
+        }
+    }
+    return $str;
 }
 
-function isAdmin() {
-    return $_SESSION['admin'];
+function validateLink($hash) {
+    $_SESSION['userid'] = 0;
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `activeLink` = '%s';",
+		   $GLOBALS['dbprefix'],
+		   $hash
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        $_SESSION['userid'] = $row['Index'];
+        $_SESSION['Vorname'] = $row['Vorname'];
+        $_SESSION['Nachname'] = $row['Nachname'];
+        $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
+        $_SESSION['admin'] = (bool)$row['Admin'];
+        $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
+        $logentry = new Log;
+        $logentry->info("Login via Link.");
+        recordLogin();
+        return true;
+        break;
+    }
+    return false;
+}
+function validateUser($login, $password) {
+    $_SESSION['userid'] = 0;
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `login` = '%s';",
+		   $GLOBALS['dbprefix'],
+		   $login
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if(password_verify($password, $row['Passhash'])) {
+            $_SESSION['userid'] = $row['Index'];
+            $_SESSION['Vorname'] = $row['Vorname'];
+            $_SESSION['Nachname'] = $row['Nachname'];
+            $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
+            $_SESSION['admin'] = (bool)$row['Admin'];
+            $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
+            $logentry = new Log;
+            $logentry->info("Login via Password.");
+            recordLogin();
+            return true;
+        }
+    }
+    return false;
 }
 
-function mkNULL($str) {
-    if($str) return $str;
-    return "NULL";
-}
-
-function mkNULLstr($str) {
-    if($str) return "\"".$str."\"";
-    return "NULL";
-}
-
-function mkEmpty($str) {
-    if($str) return $str;
-    return "";
+function VehicleOption($val) {
+    $sql = sprintf('SELECT * FROM `%svehicle`;',
+		   $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
 }
 ?>
