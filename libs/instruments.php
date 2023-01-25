@@ -108,7 +108,7 @@ class Instruments
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sInstrument` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sInstruments` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
         $this->Instrument,
@@ -344,6 +344,15 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->name="RegNumber";
         $content->value=$this->RegNumber;
         $str=$str.$content->print();
+
+        $content = new div;
+        $content->indent=$indent;
+        $content->tag="input";
+        $content->type="hidden";
+        $content->name="Index";
+        $content->value=$this->Index;
+        $str=$str.$content->print();
+
         $str=$str.$modalrow->close();
 
         $indent--;
@@ -489,6 +498,7 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->col(4,6,6);
         $content->tag="input";
         $content->type="checkbox";
+        $content->name="Insurance";
         $content->value=$this->Insurance;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
@@ -514,9 +524,88 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->value=$this->Comment;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
-        
+
+        if(isAdmin()) {
+            $indent--;
+            $modalrow = new div;
+            $modalrow->indent=$indent;
+            $modalrow->class="w3-row w3-padding";
+            $str=$str.$modalrow->open();
+            $indent++;
+            $content = new div;
+            $content->indent=$indent;
+            $content->tag="button";
+            $content->type="submit";
+            $content->name="update";
+            $content->value="update";
+            $content->class="w3-button";
+            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $content->col(2,6,6);
+            $content->body="speichern";
+            $str=$str.$content->print();        
+            $str=$str.$modalrow->close();
+        }
+
         $str=$str.$detailform->close();
         $indent--;
+
+        if(isAdmin()) {
+            $indent--;
+            $modalrow = new div;
+            $modalrow->indent=$indent;
+            $modalrow->class="w3-row w3-padding";
+            $str=$str.$modalrow->open();
+            $indent++;
+            $content = new div;
+            $content->indent=$indent;
+            $content->tag="button";
+            $content->class="w3-button";
+            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $content->onclick="document.getElementById('del".$this->Index."').style.display='block'";
+            $content->col(2,6,6);
+            $content->body="l&ouml;schen";
+            $str=$str.$content->print();        
+            $str=$str.$modalrow->close();
+
+            $indent--;
+            $modalrow = new div;
+            $modalrow->indent=$indent;
+            $modalrow->class="w3-row w3-padding";
+            $modalrow->class=$GLOBALS['optionsDB']['colorWarning'];
+            $modalrow->style="display: none;";
+            $modalrow->id="del".$this->Index;
+            $modalrow->tag="form";
+            $modalrow->action="";
+            $modalrow->method="POST";
+            $str=$str.$modalrow->open();
+            $indent++;
+            $content = new div;
+            $content->indent=$indent;
+            $content->class="w3-padding";
+            $content->col(4,6,6);
+            $content->body="Diesen Eintrag wirklich l&ouml;schen?";
+            $str=$str.$content->print();        
+            $content = new div;
+            $content->indent=$indent;
+            $content->tag="button";
+            $content->class="w3-button";
+            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $content->type="submit";
+            $content->name="delete";
+            $content->value="delete";
+            $content->col(2,6,6);
+            $content->body="Ja";
+            $str=$str.$content->print();        
+            $hidden = new div;
+            $hidden->indent=$indent;
+            $hidden->tag="input";
+            $hidden->type="hidden";
+            $hidden->name="Index";
+            $hidden->value=$this->Index;
+            $str=$str.$hidden->print();
+            $str=$str.$modalrow->close();
+
+        }
         
         $indent--;
         $modalrow = new div;
@@ -680,64 +769,8 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
                 }
                 $str=$str.$modalrow2->close();
             }
-    $str=$str.$modalrow->close();            
-    $indent--;
-        if(isAdmin()) {
-            $indent--;
-            $modalrow = new div;
-            $modalrow->indent=$indent;
-            $modalrow->class="w3-row w3-padding";
-            $str=$str.$modalrow->open();
-            $indent++;
-            $content = new div;
-            $content->indent=$indent;
-            $content->tag="button";
-            $content->class="w3-button";
-            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->onclick="document.getElementById('del".$this->Index."').style.display='block'";
-            $content->col(2,6,6);
-            $content->body="l&ouml;schen";
-            $str=$str.$content->print();        
-            $str=$str.$modalrow->close();
-
-            $indent--;
-            $modalrow = new div;
-            $modalrow->indent=$indent;
-            $modalrow->class="w3-row w3-padding";
-            $modalrow->class=$GLOBALS['optionsDB']['colorWarning'];
-            $modalrow->style="display: none;";
-            $modalrow->id="del".$this->Index;
-            $modalrow->tag="form";
-            $modalrow->action="";
-            $modalrow->method="POST";
-            $str=$str.$modalrow->open();
-            $indent++;
-            $content = new div;
-            $content->indent=$indent;
-            $content->class="w3-padding";
-            $content->col(4,6,6);
-            $content->body="Diesen Eintrag wirklich l&ouml;schen?";
-            $str=$str.$content->print();        
-            $content = new div;
-            $content->indent=$indent;
-            $content->tag="button";
-            $content->class="w3-button";
-            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->type="submit";
-            $content->name="delete";
-            $content->value="delete";
-            $content->col(2,6,6);
-            $content->body="Ja";
-            $str=$str.$content->print();        
-            $hidden = new div;
-            $hidden->indent=$indent;
-            $hidden->tag="input";
-            $hidden->type="hidden";
-            $hidden->name="Index";
-            $hidden->value=$this->Index;
-            $str=$str.$hidden->print();
-            $str=$str.$modalrow->close();
-        }
+        $str=$str.$modalrow->close();            
+        $indent--;
         $str=$str.$modalcontent->close();
         $str=$str.$modal->close();
         
