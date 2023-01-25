@@ -500,6 +500,7 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->type="checkbox";
         $content->name="Insurance";
         $content->value=$this->Insurance;
+        $content->checked=$this->Insurance;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
