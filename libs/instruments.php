@@ -1,7 +1,7 @@
 <?php
 class Instruments
 {
-    private $_data = array('Index' => null, 'RegNumber' => null, 'Instrument' => null, 'Vendor' => null, 'SerialNr' => null, 'PurchasePrize' => null, 'PurchaseDate' => null, 'Owner' => null, 'Insurance' => null, 'Comment' => null);
+    private $_data = array('Index' => null, 'RegNumber' => null, 'Instrument' => null, 'Vendor' => null, 'Model' => null, 'SerialNr' => null, 'PurchasePrize' => null, 'PurchaseDate' => null, 'Owner' => null, 'Insurance' => null, 'Comment' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -9,6 +9,7 @@ class Instruments
 	    case 'Instrument':
 	    case 'Vendor':
 	    case 'SerialNr':
+	    case 'Model':
 	    case 'PurchasePrize':
 	    case 'PurchaseDate':
 	    case 'Owner':
@@ -36,6 +37,7 @@ class Instruments
             $this->_data[$key] = (int)$val;
             break;
 	    case 'SerialNr':
+	    case 'Model':
 	    case 'Comment':
             $this->_data[$key] = trim($val);
             break;
@@ -59,11 +61,12 @@ class Instruments
         $row = mysqli_fetch_array($dbr);
         $Instrument = $row['Name'];
 
-        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %d, Hersteller: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
+        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %d, Hersteller: %s, Model: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
         $this->Index,
         $Instrument,
         $this->RegNumber,
         $this->Vendor,
+        $this->Model,
         $this->SerialNr,
         germanDate($this->PurchaseDate,0),
         mkPrize($this->PurchasePrize),
@@ -88,11 +91,12 @@ class Instruments
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", %s, "%s", "%s", "%d", "%s");',
+        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `Model`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", "%s", %s, "%s", "%s", "%d", "%s");',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Model),
         mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
         mkNULLstr($this->PurchaseDate),
         mkEmpty($this->PurchasePrize),
@@ -108,11 +112,12 @@ class Instruments
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sInstruments` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sInstruments` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `Model` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Model),
         mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
         mkNULLstr($this->PurchaseDate),
         mkEmpty($this->PurchasePrize),
@@ -235,6 +240,13 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
         $field->col(1,1,1);
+        $field->body=$row['Model'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
+        $field->col(1,1,1);
         $field->body=$row['SerialNr'];
         $str=$str.$field->print();
 
@@ -269,8 +281,8 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center";
-        $field->col(2,4,4);
-        $field->body=$this->getActiveLoanName();
+        $field->col(1,1,1);
+        $field->body=$this->getActiveLoanNameShort();
         $str=$str.$field->print();
 
         $field = new div;
@@ -374,6 +386,28 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content->type="text";
         $content->name="Vendor";
         $content->value=$this->Vendor;
+        $str=$str.$content->print();
+        $str=$str.$modalrow->close();
+
+        $indent--;
+        $modalrow = new div;
+        $modalrow->indent=$indent;
+        $modalrow->class="w3-row w3-padding";
+        $str=$str.$modalrow->open();
+        $indent++;
+        $content = new div;
+        $content->indent=$indent;
+        $content->col(2,6,6);
+        $content->body="<b>Modell:</b>";
+        $str=$str.$content->print();
+        $content = new div;
+        $content->indent=$indent;
+        $content->col(4,6,6);
+        $content->class="w3-input";
+        $content->tag="input";
+        $content->type="text";
+        $content->name="Model";
+        $content->value=$this->Model;
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -818,6 +852,17 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
             $u = new User;
             $u->load_by_id($L->User);
             return $u->getName();
+        }
+    }
+
+    public function getActiveLoanNameShort() {
+        $loan = $this->getActiveLoan();
+        if($loan) {
+            $L = new Loan;
+            $L->load_by_id($loan);
+            $u = new User;
+            $u->load_by_id($L->User);
+            return $u->getShort();
         }
     }
 
