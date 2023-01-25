@@ -69,6 +69,10 @@ if($_SESSION['admin']) {
       <input name="Vendor" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
+      <div class="w3-col l4 m6 s6"><b>Modell</b></div>
+      <input name="Model" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+    </div>
+    <div class="w3-row w3-padding">
       <div class="w3-col l4 m6 s6"><b>Seriennummer</b></div>
       <input name="SerialNr" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
@@ -103,12 +107,13 @@ if($_SESSION['admin']) {
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Inventarnummer</b></div>
   <div class="w3-col l1 m2 s2 w3-center w3-border-right"><b>Instrument</b></div>
   <div class="w3-col l1 m2 s2 w3-center w3-border-right"><b>Hersteller</b></div>
+  <div class="w3-col l1 m2 s2 w3-center w3-border-right"><b>Modell</b></div>
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Seriennummer</b></div>
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Kaufdatum</b></div>
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Kaufpreis</b></div>
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Zeitwert</b></div>
   <div class="w3-col l2 m1 s1 w3-center w3-border-right"><b>Besitzer</b></div>
-  <div class="w3-col l3 m2 s2 w3-center w3-border-right"><b>ausgeliehen an</b></div>
+  <div class="w3-col l2 m2 s2 w3-center w3-border-right"><b>ausgeliehen an</b></div>
 </div>
 <div id="Liste">
 <?php
