@@ -211,7 +211,7 @@ class Instruments
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
         }
         $line->class=$GLOBALS['optionsDB']['HoverEffect'];
-$line->class="w3-mobile w3-border-bottom w3-border-black";
+        $line->class="w3-mobile w3-border-bottom w3-border-black";
         $str=$str.$line->open();
         
         $indent++;
@@ -293,7 +293,6 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $str=$str.$field->print();
 
         $str=$str.$line->close();
-        
         $indent--;
         $modal = new div;
         $modal->indent=$indent;
@@ -350,11 +349,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="number";
-        $content->name="RegNumber";
-        $content->value=$this->RegNumber;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="number";
+            $content->name="RegNumber";
+            $content->value=$this->RegNumber;
+        }
+        else {
+            $content->body=$this->RegNumber;
+        }
         $str=$str.$content->print();
 
         $content = new div;
@@ -381,11 +385,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="text";
-        $content->name="Vendor";
-        $content->value=$this->Vendor;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="text";
+            $content->name="Vendor";
+            $content->value=$this->Vendor;
+        }
+        else {
+            $content->body=$this->Vendor;
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -403,11 +412,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="text";
-        $content->name="Model";
-        $content->value=$this->Model;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="text";
+            $content->name="Model";
+            $content->value=$this->Model;
+        }
+        else {
+            $content->body=$this->Model;
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -425,11 +439,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="text";
-        $content->name="SerialNr";
-        $content->value=$this->SerialNr;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="text";
+            $content->name="SerialNr";
+            $content->value=$this->SerialNr;
+        }
+        else {
+            $content->body=$this->SerialNr;
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -447,11 +466,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="date";
-        $content->name="PurchaseDate";
-        $content->value=$this->PurchaseDate;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="date";
+            $content->name="PurchaseDate";
+            $content->value=$this->PurchaseDate;
+        }
+        else {
+            $content->body=$this->PurchaseDate;
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -469,11 +493,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="number";
-        $content->name="PurchasePrize";
-        $content->value=$this->PurchasePrize;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="number";
+            $content->name="PurchasePrize";
+            $content->value=$this->PurchasePrize;
+        }
+        else {
+            $content->body=mkPrize($this->PurchasePrize);
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -509,10 +538,15 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="select";
-        $content->name="Owner";
-        $content->body=userOptionAll($this->Owner);
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="select";
+            $content->name="Owner";
+            $content->body=userOptionAll($this->Owner);
+        }
+        else {
+            $content->body=getOwner($this->Owner);
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -530,11 +564,23 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->tag="input";
-        $content->type="checkbox";
-        $content->name="Insurance";
-        $content->value=$this->Insurance;
-        $content->checked=$this->Insurance;
+        if(isAdmin()) {
+            $hidden = new div;
+            $hidden->tag="input";
+            $hidden->type="hidden";
+            $hidden->name="Insurance";
+            $hidden->value=0;
+            $str=$str.$hidden->print();
+            
+            $content->tag="input";
+            $content->type="checkbox";
+            $content->name="Insurance";
+            $content->value=1;
+            $content->checked=$this->Insurance;
+        }
+        else {
+            $content->body=bool2string($this->Insurance);
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
@@ -552,11 +598,16 @@ $line->class="w3-mobile w3-border-bottom w3-border-black";
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        $content->class="w3-input";
-        $content->tag="input";
-        $content->type="text";
-        $content->name="Comment";
-        $content->value=$this->Comment;
+        if(isAdmin()) {
+            $content->class="w3-input";
+            $content->tag="input";
+            $content->type="text";
+            $content->name="Comment";
+            $content->value=$this->Comment;
+        }
+        else {
+            $content->body=$this->Comment;
+        }
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
