@@ -497,6 +497,7 @@ class Instruments
             $content->class="w3-input";
             $content->tag="input";
             $content->type="number";
+            $content->step="0.01";
             $content->name="PurchasePrize";
             $content->value=$this->PurchasePrize;
         }
