@@ -16,6 +16,7 @@ class div
         case 'value':
         case 'type':
         case 'min':
+        case 'step':
         case 'href':
         case 'default':
         case 'emptyBody':
@@ -111,6 +112,9 @@ class div
         }
         if($this->min != null) {
             $str=$str." min=\"".$this->min."\"";
+        }
+        if($this->step != null) {
+            $str=$str." step=\"".$this->step."\"";
         }
         if($this->default != null) {
             $str=$str." default=\"".$this->default."\"";
