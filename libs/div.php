@@ -1,7 +1,7 @@
 <?php
 class div
 {
-    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null, 'checked' => null);
+    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'step' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null, 'checked' => null);
     public function __get($key) {
         switch($key) {
 	    case 'indent':
@@ -55,6 +55,7 @@ class div
         case 'type':
         case 'href':
         case 'min':
+        case 'step':
         case 'default':
         case 'action':
         case 'method':
