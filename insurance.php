@@ -4,7 +4,7 @@ $_SESSION['page']='insurance';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sInstruments` WHERE `Insurance` = 1;',
+    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sInstruments` WHERE `Insurance` = "1";',
     $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($conn, $sql);
