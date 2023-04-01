@@ -1021,7 +1021,7 @@ class Instruments
             if($years < 4) return $this->PurchasePrize*0.7;
             if($years < 15) return $this->PurchasePrize*0.6;
             if($years < 20) return $this->PurchasePrize*0.5;
-            if($years < 25) return $this->PurchasePrize*0.4;
+            else return $this->PurchasePrize*0.4;
             return "";
         }
     }
