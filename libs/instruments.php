@@ -864,6 +864,88 @@ class Instruments
         return $str;
     }
 
+        public function printInsuranceLine() {
+        $sql = sprintf('SELECT * FROM `%sInstruments` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+
+        $str="";
+
+        $indent=0;
+        $line = new div;
+        $line->indent=$indent;
+        $line->class="w3-row w3-padding";
+        $line->onclick="document.getElementById('".$this->Index."').style.display='block'";
+        if($this->Insurance) {
+            /* $line->class=$GLOBALS['optionsDB']['colorUserMember']; */
+        }
+        $line->class=$GLOBALS['optionsDB']['HoverEffect'];
+        $line->class="w3-mobile w3-border-bottom w3-border-black";
+        $str=$str.$line->open();
+        
+        $indent++;
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
+        $field->col(1,1,1);
+        $field->body=$row['RegNumber'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right";
+        $field->col(2,4,4);
+        $field->body=$row['iName'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right";
+        $field->col(2,4,4);
+        $field->body=$row['Vendor'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
+        $field->col(2,1,1);
+        $field->body=$row['Model'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
+        $field->col(2,1,1);
+        $field->body=$row['SerialNr'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
+        $field->col(1,3,3);
+        $field->body=mkPrize($this->getCurrentValue($row['PurchasePrize']));
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
+        $field->col(2,1,1);
+        $field->body=getOwner($row['Owner']);
+        $str=$str.$field->print();
+
+        $str=$str.$line->close();
+        
+        return $str;
+    }
+
     public function getLoans() {
         $sql = sprintf('SELECT `Index` FROM `%sLoans` WHERE `Instrument` = "%d" ORDER BY `StartDate` DESC;',
         $GLOBALS['dbprefix'],
