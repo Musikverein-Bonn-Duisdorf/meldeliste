@@ -29,7 +29,6 @@ function filterCustomerData(&$str) {
         $str = "'$str";
     }
     if(strstr($str, '"')) $str = '"' . str_replace('"', '""', $str) . '"';
-    htmlspecialchars_decode($str);
 }
 
 
