@@ -1025,5 +1025,21 @@ class Instruments
             return "";
         }
     }
+
+    public function getCsvLine() {
+        $sql = sprintf('SELECT * FROM `%sInstruments` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        
+        return array("Instrument" => $row['iName'], "Hersteller" => $row['Vendor'], "Modell" => $row['Model'], "Seriennummer" => $row['SerialNr'], "Zeitwert" => $this->getCurrentValue(), "Besitzer" => getOwner($row['Owner']));
+    }
 };
 ?>

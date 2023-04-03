@@ -39,11 +39,13 @@ include "common/header.php";
     );
     $dbr = mysqli_query($conn, $sql);
     sqlerror();
+
     while($row = mysqli_fetch_array($dbr)) {
         $M = new Instruments;
         $M->load_by_id($row['Index']);
         echo $M->printInsuranceLine();
     }
+
 ?>
 </div>
 <script src="js/filterInstruments.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
