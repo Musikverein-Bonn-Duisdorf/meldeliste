@@ -34,7 +34,7 @@ function filterCustomerData(&$str) {
 
 $file_name = "Instrumentenversicherung_MVD_".date("d.m.Y").".xls";
 header("Content-Disposition: attachment; filename=\"$file_name\"");
-header("Content-Type: application/vnd.ms-excel");
+header("Content-Type: application/vnd.ms-excel; charset=utf-8");
 
 //To define column name in first row.
 $column_names = false;
