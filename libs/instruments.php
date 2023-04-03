@@ -1039,7 +1039,7 @@ class Instruments
         sqlerror();
         $row = mysqli_fetch_array($dbr);
         
-        return array("Instrument" => $row['iName'], "Hersteller" => $row['Vendor'], "Modell" => $row['Model'], "Seriennummer" => $row['SerialNr'], "Zeitwert" => $this->getCurrentValue(), "Besitzer" => getOwner($row['Owner']));
+        return array("Instrument" => html_entity_decode($row['iName']), "Hersteller" => html_entity_decode($row['Vendor']), "Modell" => html_entity_decode($row['Model']), "Seriennummer" => html_entity_decode($row['SerialNr']), "Zeitwert" => $this->getCurrentValue(), "Besitzer" => html_entity_decode(getOwner($row['Owner'])));
     }
 };
 ?>
