@@ -837,7 +837,6 @@ class Termin
         else {
             return $GLOBALS['optionsDB']['colorAppmntNoConcert'];
         }
-        if($this->Shifts) return null;
         echo "$this->Shifts == 0";
         switch($this->Wert) {
         case 1:
