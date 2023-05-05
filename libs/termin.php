@@ -814,6 +814,7 @@ class Termin
         return $str;
     }
     protected function globalShiftColor() {
+        echo '$this->getShiftsStatus() == '.$this->getShiftsStatus();
         switch($this->getShiftsStatus()) {
         case 1:
             return $GLOBALS['optionsDB']['colorAppmntYes'];
