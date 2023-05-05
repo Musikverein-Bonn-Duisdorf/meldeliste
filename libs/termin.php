@@ -824,9 +824,18 @@ class Termin
         case 3:
             return $GLOBALS['optionsDB']['colorAppmntMaybe'];
             break;
-        }            
+        }
+        return null;
     }
     protected function mainColor() {
+        $c = $this->globalShiftColor();
+        if($c) return;
+        if($this->Auftritt) {
+            return $GLOBALS['optionsDB']['colorAppmntConcert'];
+        }
+        else {
+            return $GLOBALS['optionsDB']['colorAppmntNoConcert'];
+        }
         switch($this->Wert) {
         case 1:
             return $GLOBALS['optionsDB']['colorAppmntYes'];
@@ -837,14 +846,6 @@ class Termin
         case 3:
             return $GLOBALS['optionsDB']['colorAppmntMaybe'];
             break;
-        }
-        $c = $this->globalShiftColor();
-        if($c) return;
-        if($this->Auftritt) {
-            return $GLOBALS['optionsDB']['colorAppmntConcert'];
-        }
-        else {
-            return $GLOBALS['optionsDB']['colorAppmntNoConcert'];
         }
     }
     protected function mainHover() {
