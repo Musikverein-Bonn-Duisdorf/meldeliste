@@ -829,6 +829,7 @@ class Termin
     }
     protected function mainColor() {
         $c = $this->globalShiftColor();
+        echo "$this->globalShiftColor(); == ".$c;
         if($c) return;
         if($this->Auftritt) {
             return $GLOBALS['optionsDB']['colorAppmntConcert'];
@@ -837,8 +838,10 @@ class Termin
             return $GLOBALS['optionsDB']['colorAppmntNoConcert'];
         }
         if($this->Shifts) return null;
+        echo "$this->Shifts == 0";
         switch($this->Wert) {
         case 1:
+            echo "$this->Wert == 1";
             return $GLOBALS['optionsDB']['colorAppmntYes'];
             break;
         case 2:
