@@ -825,6 +825,8 @@ class Termin
         case 3:
             return $GLOBALS['optionsDB']['colorAppmntMaybe'];
             break;
+        default:
+            return null;
         }
         return null;
     }
