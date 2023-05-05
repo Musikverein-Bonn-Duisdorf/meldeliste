@@ -832,7 +832,7 @@ class Termin
     protected function mainColor() {
         $c = $this->globalShiftColor();
         if($c) return;
-        if(!$this->Shifts)) {
+        if(!$this->Shifts) {
         switch($this->Wert) {
         case 1:
             return $GLOBALS['optionsDB']['colorAppmntYes'];
