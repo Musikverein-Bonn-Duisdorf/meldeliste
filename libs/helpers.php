@@ -330,12 +330,13 @@ function printOrchestra($tid, $scale) {
     $aInstrument = array();
     $aUser = array();
     if($tid) {
-        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` INNER JOIN (SELECT `Index` AS `iIndex`, `Sortierung` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `uInstrument` WHERE `Termin` = 42 ORDER BY `Sortierung`, `Nachname`;",
+        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` INNER JOIN (SELECT `Index` AS `iIndex`, `Sortierung` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `uInstrument` WHERE `Termin` = %d ORDER BY `Sortierung`, `Nachname`;",
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix']                       
+                       $GLOBALS['dbprefix'],
+                       $tid                      
         );
         $dbMeldungen = mysqli_query($GLOBALS['conn'], $sql);
         while($row = mysqli_fetch_array($dbMeldungen)) {
@@ -475,6 +476,10 @@ function printOrchestra($tid, $scale) {
                         case 3:
                             $color = "#2196F3";
                             $opacity = 0.6;
+                            break;
+                        default:
+                            $color = "#ffffff";
+                            $opacity = 0.5;
                             break;
                         }
                     }
