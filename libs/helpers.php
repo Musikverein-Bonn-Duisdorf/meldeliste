@@ -185,6 +185,31 @@ function getPage($string) {
     }
 }
 
+function getShort($Vorname, $Nachname) {
+    if(strlen($Vorname) >=2) {
+        $end=2;
+        if(substr($Vorname,1,1)=="&") {
+            $end = strpos($Vorname, ";");
+        }
+        $short1 = substr($Vorname,0,$end);
+    }
+    else {
+        $short1 = $Vorname;
+    }
+    if(strlen($Nachname) >=2) {
+        $narray = explode(" ", $Nachname);
+        $end=2;
+        if(substr($narray[sizeof($narray)-1],1,1)=="&") {
+            $end = strpos($narray[sizeof($narray)-1], ";");
+        }
+        $short2 = substr($narray[sizeof($narray)-1],0,$end);
+    }
+    else {
+        $short2 = $Nachname;
+    }
+    return $short1.$short2;
+}
+
 function instrumentOption($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
@@ -307,113 +332,112 @@ function printOrchestra($tid, $scale) {
     }
     
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
-    $GLOBALS['dbprefix']
+                   $GLOBALS['dbprefix']
     );
-$dbregister = mysqli_query($GLOBALS['conn'], $sql);
-sqlerror();
-$k=0;
-$i=0;
-$j=0;
-$lastrow=0;
-$lmaxradius = array();
-$rmaxradius = array();
-$radius=0;
-array_push($lmaxradius, 0);
-array_push($rmaxradius, 0);
-while($register = mysqli_fetch_array($dbregister)) {
-    if($lastrow != $register['Row']) {
-        array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+$rowdistance);
-        array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+$rowdistance);
-    }
-    $lastrow = $register['Row'];
-    if($register['Row'] > 0) {
-        if($register['ArcMin'] < 90) {
-            $radius = $lmaxradius[$register['Row']-1]+$rowdistance;
-        }
-        else {
-            $radius = $rmaxradius[$register['Row']-1]+$rowdistance;
-        }
-    }
-    if($radius<$minrowdistance) {
-        $radius = $minrowdistance;
-    }
-    $r = new Register;
-    $r->load_by_id($register['Index']);
-    
-    $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Register` = %d ORDER BY `Sortierung`;',
-    $GLOBALS['dbprefix'],
-    $r->Index
-    );
-    $dbinstrument = mysqli_query($GLOBALS['conn'], $sql);
+    $dbregister = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
-    while($instrument = mysqli_fetch_array($dbinstrument)) {
-        if($tid) {
-            $sql = sprintf('SELECT `Index`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Termin`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `Termin` = "%d" AND `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
-            $GLOBALS['dbprefix'],
-            $instrument['Index'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $tid,
-            $GLOBALS['dbprefix'],
-            $instrument['Index']
-            );
+    $k=0;
+    $i=0;
+    $j=0;
+    $lastrow=0;
+    $lmaxradius = array();
+    $rmaxradius = array();
+    $radius=0;
+    array_push($lmaxradius, 0);
+    array_push($rmaxradius, 0);
+    while($register = mysqli_fetch_array($dbregister)) {
+        if($lastrow != $register['Row']) {
+            array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+$rowdistance);
+            array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+$rowdistance);
         }
-        else {
-            $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 ORDER BY `Nachname`;',
-            $GLOBALS['dbprefix'],
-            $instrument['Index']
-            );
-        }
-        $dbuser = mysqli_query($GLOBALS['conn'], $sql);
-        while($user = mysqli_fetch_array($dbuser)) {
-            if($tid) {
-                $s = array_search($user['Index'], $meldungen);
-                if(!$user['Meldung'] && $s !== false) {
-                    $m = new Meldung;
-                    $m->load_by_user_event($user['Index'], $tid);
-                    unset($meldungen[$s]);
-                    if($m->Instrument) continue;
-                }
-            }
-            $u = new User;
-            $u->load_by_id($user['Index']);
-            if($register['Row']==0) {
-                $radius=0;
-                $arc=0;
+        $lastrow = $register['Row'];
+        if($register['Row'] > 0) {
+            if($register['ArcMin'] < 90) {
+                $radius = $lmaxradius[$register['Row']-1]+$rowdistance;
             }
             else {
-                $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
-                if($register['ArcMin'] < $register['ArcMax']) {
-                    if($arc+20*$scale/(2*pi()*$radius)*360 >=$register['ArcMax']) {
-                        $j++;
-                        $radius += 40*$scale;
-                        $k=0;
-                    }
-               }
-                elseif($register['ArcMin'] > $register['ArcMax']) {
-                    if($arc-20*$scale/(2*pi()*$radius)*360 <=$register['ArcMax']) {
-                        $j++;
-                        $radius += 40*$scale;
-                        $k=0;
+                $radius = $rmaxradius[$register['Row']-1]+$rowdistance;
+            }
+        }
+        if($radius<$minrowdistance) {
+            $radius = $minrowdistance;
+        }
+        $r = new Register;
+        $r->load_by_id($register['Index']);
+    
+        $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Register` = %d ORDER BY `Sortierung`;',
+                       $GLOBALS['dbprefix'],
+                       $r->Index
+        );
+        $dbinstrument = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        while($instrument = mysqli_fetch_array($dbinstrument)) {
+            if($tid) {
+                $sql = sprintf('SELECT `Index`, `Vorname`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Vorname`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Termin`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `Termin` = "%d" AND `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
+                               $GLOBALS['dbprefix'],
+                               $instrument['Index'],
+                               $GLOBALS['dbprefix'],
+                               $GLOBALS['dbprefix'],
+                               $GLOBALS['dbprefix'],
+                               $tid,
+                               $GLOBALS['dbprefix'],
+                               $instrument['Index']
+                );
+            }
+            else {
+                $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 ORDER BY `Nachname`;',
+                               $GLOBALS['dbprefix'],
+                               $instrument['Index']
+                );
+            }
+            $dbuser = mysqli_query($GLOBALS['conn'], $sql);
+            while($user = mysqli_fetch_array($dbuser)) {
+                if($tid) {
+                    $s = array_search($user['Index'], $meldungen);
+                    if(!$user['Meldung'] && $s !== false) {
+                        $m = new Meldung;
+                        $m->load_by_user_event($user['Index'], $tid);
+                        unset($meldungen[$s]);
+                        if($m->Instrument) continue;
                     }
                 }
-                if($register['ArcMin'] < 90) {
-                    if($radius > $lmaxradius[$register['Row']]) {
-                        $lmaxradius[$register['Row']] = $radius;
-                    }
+                $short=getShort($user['Vorname'], $user['Nachname']);
+                if($register['Row']==0) {
+                    $radius=0;
+                    $arc=0;
                 }
                 else {
-                    if($radius > $rmaxradius[$register['Row']]) {
-                        $rmaxradius[$register['Row']] = $radius;
+                    $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
+                    if($register['ArcMin'] < $register['ArcMax']) {
+                        if($arc+20*$scale/(2*pi()*$radius)*360 >=$register['ArcMax']) {
+                            $j++;
+                            $radius += 40*$scale;
+                            $k=0;
+                        }
                     }
-                }
-                $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
+                    elseif($register['ArcMin'] > $register['ArcMax']) {
+                        if($arc-20*$scale/(2*pi()*$radius)*360 <=$register['ArcMax']) {
+                            $j++;
+                            $radius += 40*$scale;
+                            $k=0;
+                        }
+                    }
+                    if($register['ArcMin'] < 90) {
+                        if($radius > $lmaxradius[$register['Row']]) {
+                            $lmaxradius[$register['Row']] = $radius;
+                        }
+                    }
+                    else {
+                        if($radius > $rmaxradius[$register['Row']]) {
+                            $rmaxradius[$register['Row']] = $radius;
+                        }
+                    }
+                    $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
                 }
                 $x = $width/2-$radius*cos($arc/180*pi());
                 $y = 40*$scale+$radius*sin($arc/180*pi());
                 if($tid) {
-                    $m = $termin->getMeldungenByUser($u->Index);
+                    $m = $termin->getMeldungenByUser($user['Index']);
                     if(count($m)) {
                         $meldung = new Meldung;
                         $meldung->load_by_id($m[0]);
@@ -437,11 +461,11 @@ while($register = mysqli_fetch_array($dbregister)) {
                         $opacity = 0.5;
                     }
                     $str=$str."<circle opacity=\"".$opacity."\" cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
-                    $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
+                    $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$short."</text>\n";
                 }
                 else {
                     $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$register['Color']."\" />\n";
-                    $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
+                    $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$short."</text>\n";
                 }
 
                 $k++;
