@@ -342,20 +342,20 @@ function printOrchestra($tid, $scale) {
         while($row = mysqli_fetch_array($dbMeldungen)) {
             $aMeldungen[] = $row;
         }
-        $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;",
-                       $GLOBALS['dbprefix']
-        );
-        $dbUser = mysqli_query($GLOBALS['conn'], $sql);
-        while($row = mysqli_fetch_array($dbUser)) {
-            $aUser[] = $row;
-        }
-        $sql = sprintf("SELECT * FROM `%sInstrument`;",
-                       $GLOBALS['dbprefix']
-        );
-        $dbInstrument = mysqli_query($GLOBALS['conn'], $sql);
-        while($row = mysqli_fetch_array($dbInstrument)) {
-            $aInstrument[] = $row;
-        }
+    }
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;",
+                   $GLOBALS['dbprefix']
+    );
+    $dbUser = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbUser)) {
+        $aUser[] = $row;
+    }
+    $sql = sprintf("SELECT * FROM `%sInstrument`;",
+                   $GLOBALS['dbprefix']
+    );
+    $dbInstrument = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbInstrument)) {
+        $aInstrument[] = $row;
     }
     
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
