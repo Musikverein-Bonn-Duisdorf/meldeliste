@@ -325,10 +325,36 @@ function printOrchestra($tid, $scale) {
     $rowdistance=60*$scale;
     $minrowdistance=150*$scale;
     $str="<svg width=\"".$width."\" height=\"".$height."\">";
+
+    $aMeldungen = array();
+    $aInstrument = array();
+    $aUser = array();
     if($tid) {
-        $termin = new Termin;
-        $termin->load_by_id($tid);
-        $meldungen = $termin->getMeldungUsers();
+        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` INNER JOIN (SELECT `Index` AS `iIndex`, `Sortierung` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `uInstrument` WHERE `Termin` = 42 ORDER BY `Sortierung`, `Nachname`;",
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix']                       
+        );
+        $dbMeldungen = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbMeldungen)) {
+            $aMeldungen[] = $row;
+        }
+        $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;",
+                       $GLOBALS['dbprefix']
+        );
+        $dbUser = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbUser)) {
+            $aUser[] = $row;
+        }
+        $sql = sprintf("SELECT * FROM `%sInstrument`;",
+                       $GLOBALS['dbprefix']
+        );
+        $dbInstrument = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbInstrument)) {
+            $aInstrument[] = $row;
+        }
     }
     
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
@@ -362,45 +388,44 @@ function printOrchestra($tid, $scale) {
         if($radius<$minrowdistance) {
             $radius = $minrowdistance;
         }
-        $r = new Register;
-        $r->load_by_id($register['Index']);
-    
-        $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Register` = %d ORDER BY `Sortierung`;',
-                       $GLOBALS['dbprefix'],
-                       $r->Index
-        );
-        $dbinstrument = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        while($instrument = mysqli_fetch_array($dbinstrument)) {
-            if($tid) {
-                $sql = sprintf('SELECT `Index`, `Vorname`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Vorname`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Termin`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `Termin` = "%d" AND `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
-                               $GLOBALS['dbprefix'],
-                               $instrument['Index'],
-                               $GLOBALS['dbprefix'],
-                               $GLOBALS['dbprefix'],
-                               $GLOBALS['dbprefix'],
-                               $tid,
-                               $GLOBALS['dbprefix'],
-                               $instrument['Index']
-                );
+
+        $registerInstruments = array();
+        $sorting = array();
+        for($idx = 0; $idx < count($aInstrument); $idx++) {
+            if($aInstrument[$idx]['Register'] == $register['Index']) {
+                $registerInstruments[] = $idx;
+                $sorting[] = (int)$aInstrument[$idx]['Sortierung'];
             }
-            else {
-                $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 ORDER BY `Nachname`;',
-                               $GLOBALS['dbprefix'],
-                               $instrument['Index']
-                );
-            }
-            $dbuser = mysqli_query($GLOBALS['conn'], $sql);
-            while($user = mysqli_fetch_array($dbuser)) {
+        }
+        asort($sorting);
+        $sortedInstruments = array();
+        $keys = array_keys($sorting);
+        for($idx = 0; $idx < count($registerInstruments); $idx++) {
+            $sortedInstruments[] = $aInstrument[$registerInstruments[$keys[$idx]]]['Index'];
+        }
+
+        foreach($sortedInstruments as $instrument) {
+            foreach($aUser AS $user) {
+                // while($user = mysqli_fetch_array($dbuser)) {
+                $match = null;
                 if($tid) {
-                    $s = array_search($user['Index'], $meldungen);
-                    if(!$user['Meldung'] && $s !== false) {
-                        $m = new Meldung;
-                        $m->load_by_user_event($user['Index'], $tid);
-                        unset($meldungen[$s]);
-                        if($m->Instrument) continue;
+                    $skip = false;
+                    foreach($aMeldungen AS $meldung) {
+                        if($meldung['User'] != $user['Index']) continue;
+                        if($meldung['Instrument'] == $instrument) {
+                            $instr = $meldung['Instrument'];
+                        }
+                        else {
+                            $instr = $meldung['uInstrument'];
+                        }
+                        if($instr != $instrument) $skip=true;
+                        $match = $meldung['Wert'];
+                        break;
                     }
                 }
+                if($user['Instrument'] != $instrument) continue;
+                if($skip) continue;
+                
                 $short=getShort($user['Vorname'], $user['Nachname']);
                 if($register['Row']==0) {
                     $radius=0;
@@ -437,11 +462,8 @@ function printOrchestra($tid, $scale) {
                 $x = $width/2-$radius*cos($arc/180*pi());
                 $y = 40*$scale+$radius*sin($arc/180*pi());
                 if($tid) {
-                    $m = $termin->getMeldungenByUser($user['Index']);
-                    if(count($m)) {
-                        $meldung = new Meldung;
-                        $meldung->load_by_id($m[0]);
-                        switch($meldung->Wert) {
+                    if($match) {
+                        switch($match) {
                         case 1:
                             $color = "#4CAF50";
                             $opacity = 1;
