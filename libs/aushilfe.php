@@ -34,6 +34,7 @@ class Aushilfe
     }
 
     public function getVars() {
+        this->getInstrumentName();
         return sprintf("Aushilfen-ID: %d, Name: %s, Instrument: %s",
         $this->Index,
         $this->getName(),
@@ -102,7 +103,8 @@ class Aushilfe
         if(!$this->Instrument || $this->Instrument == 0) return "";
         $i = new Instrument;
         $i->load_by_id($this->Instrument);
-        return $i->Name;
+        $this->iName = $i->Name;
+        return $this->iName;
     }
 };
 ?>
