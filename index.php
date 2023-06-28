@@ -11,6 +11,11 @@ if(isset($_POST['proxy'])) {
 else {
     $user = $_SESSION['userid'];
 }
+if(isset($_POST['insertAushilfe'])) {
+        $aushilfe = new Aushilfe;
+        $aushilfe->fill_from_array($_POST);
+        $aushilfe->save();
+}
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>

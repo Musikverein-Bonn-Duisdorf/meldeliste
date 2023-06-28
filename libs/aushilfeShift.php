@@ -1,13 +1,13 @@
 <?php
-class Aushilfe
+class AushilfeShift
 {
-    private $_data = array('Index' => null, 'Name' => null, 'Termin' => null, 'Instrument' => null, 'iName' => null);
+    private $_data = array('Index' => null, 'Name' => null, 'Shift' => null, 'Instrument' => null, 'iName' => null);
 
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Name':
-	    case 'Termin':
+	    case 'Shift':
 	    case 'Instrument':
 	    case 'iName':
             return $this->_data[$key];
@@ -21,7 +21,7 @@ class Aushilfe
         switch($key) {
 	    case 'Index':
 	    case 'Instrument':
-	    case 'Termin':
+	    case 'Shift':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Name':
@@ -34,7 +34,7 @@ class Aushilfe
     }
 
     public function getVars() {
-        return sprintf("Aushilfen-ID: %d, Name: %s, Instrument: %s",
+        return sprintf("AushilfenShift-ID: %d, Name: %s, Instrument: %s",
         $this->Index,
         $this->getName(),
         $this->iName,
@@ -57,15 +57,15 @@ class Aushilfe
 
     public function is_valid() {
         if(!$this->Name) return false;
-        if(!$this->Termin) return false;
+        if(!$this->Shift) return false;
         return true;
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sAushilfen` (`Name`, `Termin`, `Instrument`) VALUES ("%s", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sAushilfenShift` (`Name`, `Shift`, `Instrument`) VALUES ("%s", "%d", "%d");',
                        $GLOBALS['dbprefix'],
                        mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
-                       $this->Termin,
+                       $this->Shift,
                        $this->Instrument
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -77,7 +77,7 @@ class Aushilfe
     
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `%sAushilfen` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sAushilfenShift` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $Index
         );
