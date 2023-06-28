@@ -75,6 +75,23 @@ class Shift
         }
         return $meldungen;
     }
+    public function getAushilfen() {
+        $sql = sprintf('SELECT * FROM `%sAushilfenShift` WHERE `Shift` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $aushilfen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($aushilfen, $row['Index']);
+        }
+        return $aushilfen;
+    }
+    public function getAushilfenVal() {
+        $meldungen = $this->getAushilfen();
+        return count($meldungen);
+    }
     public function getMeldungenUser($val) {
         $user = array();
         $meldungen = $this->getMeldungen();
@@ -89,6 +106,16 @@ class Shift
         }
         return $user;
     }
+    public function getMeldungenAushilfenShift() {
+        $user = array();
+        $meldungen = $this->getAushilfen();
+        for($i=0; $i<count($meldungen); $i++) {
+            $m = new AushilfeShift;
+            $m->load_by_id($meldungen[$i]);
+            array_push($user, $m->getName());
+        }
+        return $user;
+    }
     public function getMeldungenVal($val) {
         $r = 0;
         $meldungen = $this->getMeldungen();
@@ -99,6 +126,7 @@ class Shift
         }
         return $r;
     }
+    
     public function getResponseString() {
         $str=$this->getMeldungenVal(1);
         $str=$str." / ".$this->Bedarf;

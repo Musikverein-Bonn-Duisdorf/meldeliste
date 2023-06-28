@@ -1470,6 +1470,53 @@ class Termin
             $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."\t\t\t<div class=\"w3-col l3\">ID:</div>\n<div class=\"w3-col l9\"><b>".$this->Index."</b></div>\n";
             $str=$str."\t\t</div>\n";
+
+            // { Aushilfen
+            $div = new div;
+            $div->tag="form";
+            $div->method="POST";
+            $div->action="";
+            $div->class="w3-container w3-row w3-margin";
+            $str.=$div->open();
+            $aushilfe = new div;
+            $aushilfe->class="w3-col l3";
+            $aushilfe->body="Aushilfen:";
+            $str.=$aushilfe->print();
+
+            $aushilfe = new div;
+            $aushilfe->class="w3-col l3 w3-input w3-border";
+            $aushilfe->class=$GLOBALS['optionsDB']['colorInputBackground'];
+            $aushilfe->type="text";
+            $aushilfe->tag="input";
+            $aushilfe->name="Name";
+            $str.=$aushilfe->print();
+
+            $aushilfe = new div;
+            $aushilfe->tag="input";
+            $aushilfe->type="hidden";
+            $aushilfe->name="Termin";
+            $aushilfe->value=$this->Index;
+            $str.=$aushilfe->print();
+
+            $aushilfe = new div;
+            $aushilfe->tag="select";
+            $aushilfe->class="w3-col l4 w3-input";
+            $aushilfe->name="Instrument";
+            $aushilfe->body=instrumentOption(0);
+            $str.=$aushilfe->print();
+
+            $aushilfe = new div;
+            $aushilfe->class="w3-col l2 w3-btn";
+            $aushilfe->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $aushilfe->tag="input";
+            $aushilfe->type="submit";
+            $aushilfe->name="insertAushilfe";
+            $aushilfe->value="eintragen";
+            $str.=$aushilfe->print();
+
+            $str.=$div->close();
+            // } Aushilfen
+            
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"copy\" value=\"".$this->Index."\">kopieren</button>\n";
@@ -1581,7 +1628,7 @@ class Termin
             $shiftresponseY->class="w3-col l1 m2 s2 w3-center";
             $shiftresponseY->class=$GLOBALS['optionsDB']['colorBtnYes'];
             $shiftresponseY->body="&#10004; ";
-            $shiftresponseY->body=$s->getMeldungenVal(1);
+            $shiftresponseY->body=$s->getMeldungenVal(1)+$s->getAushilfenVal();
             $str=$str.$shiftresponseY->print();
 
             $shiftresponseN = new div;
@@ -1664,6 +1711,15 @@ class Termin
                 $udiv->body=$u[$j];
                 $str=$str.$udiv->print();
             }
+            $u = $s->getMeldungenAushilfenShift();
+            for($j=0; $j<count($u); $j++) {
+                $udiv = new div;
+                $udiv->indent=$indent;
+                $udiv->class="w3-row";
+                $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
+                $udiv->body=$u[$j];
+                $str=$str.$udiv->print();
+            }
             $str=$str.$modalY->close();
             $indent--;
 
@@ -1724,6 +1780,38 @@ class Termin
 
         return $str;
     }
+
+    public function getAushilfenRegister($filterregister) {
+        $sql = sprintf("SELECT * FROM `%sAushilfen` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Termin` = \"%d\" AND `Register` = \"%d\";",
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $this->Index,
+                       $filterregister
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $aushilfen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            $aushilfen[] = $row;
+        }
+        return $aushilfen;
+    }
+
+    public function getAushilfen() {
+        $sql = sprintf("SELECT * FROM `%sAushilfen` WHERE `Termin` = %d",
+                       $GLOBALS['dbprefix'],
+                       $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $aushilfen = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            $aushilfen[] = $row;
+        }
+        return $aushilfen;
+    }
+
     public function getResponseLine($filterregister) {
         $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
@@ -1794,12 +1882,15 @@ ORDER BY `Nachname`, `Vorname`;",
         $whoYes = '';
         $whoNo = '';
         $whoMaybe = '';
+
+        $aushilfen=array();
         if($this->Auftritt) {
             if($filterregister) {
                 $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'keins' AND `Index` = '%d' ORDER BY `Sortierung`;",
                 $GLOBALS['dbprefix'],
                 $filterregister
                 );
+                $aushilfen = $this->getAushilfenRegister($filterregister);
             }
             else { // $filterregister
                 if($GLOBALS['optionsDB']['showConductor']) {
@@ -1827,6 +1918,7 @@ ORDER BY `Nachname`, `Vorname`;",
             while($row = mysqli_fetch_array($dbr)) {
                 $register = new Register();
                 $register->load_by_id($row['Index']);
+                $aushilfen = $this->getAushilfenRegister($row['Index']);
                 $nReg = $register->members();
                 $snReg+=$nReg;
                 $ja=0;
@@ -1918,6 +2010,18 @@ ORDER BY `Nachname`, `Vorname`;",
                         break;
                     }
                 }
+
+                // { Aushilfen
+                foreach($aushilfen as &$aushilfe) {
+                    $A = new Aushilfe;
+                    $A->load_by_id($aushilfe['Index']);
+                    $ja++;
+                    $sja++;
+                    $antwort='ja';
+                    $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$A->getName()."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$A->getInstrumentName()."</div>";
+                    $whoYes=$whoYes."</div>\n";
+                }
+                // } Aushilfen
                 $all = $ja+$nein+$vielleicht;
                 $sall=$sall+$all;
                 if($filterregister) {
@@ -2027,6 +2131,18 @@ ORDER BY `Nachname`, `Vorname`;",
                     break;
                 }
             }
+            // { Aushilfen
+            $aushilfen = $this->getAushilfen();
+            foreach($aushilfen as &$aushilfe) {
+                $A = new Aushilfe;
+                $A->load_by_id($aushilfe['Index']);
+                $ja++;
+                $antwort='ja';
+                $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$A->getName()."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
+                $whoYes=$whoYes."</div>\n";
+            }
+            // } Aushilfen
+
             if($bus && $GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
             }
@@ -2074,6 +2190,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $str=$str."</div>\n</div>\n";
 
         $str = $str."<div class=\"w3-container\">";
+        
         $str=$str.$whoYes;
         $str = $str."</div>";
         $str = $str."<div class=\"w3-container w3-margin-top\"><b>unsicher</b></div>\n";

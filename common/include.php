@@ -20,5 +20,6 @@ include "libs/register.php";
 include "libs/usermail.php";
 include "libs/ics.php";
 include "libs/aushilfe.php";
+include "libs/aushilfeShift.php";
 
 ?>

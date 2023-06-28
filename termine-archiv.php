@@ -34,6 +34,11 @@ if(isset($_POST['meldung'])) {
     $m->Wert = $_POST['meldung'];
     $m->save();
 }
+if(isset($_POST['insertAushilfe'])) {
+        $aushilfe = new Aushilfe;
+        $aushilfe->fill_from_array($_POST);
+        $aushilfe->save();
+}
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
