@@ -1471,51 +1471,53 @@ class Termin
             $str=$str."\t\t\t<div class=\"w3-col l3\">ID:</div>\n<div class=\"w3-col l9\"><b>".$this->Index."</b></div>\n";
             $str=$str."\t\t</div>\n";
 
-            // { Aushilfen
-            $div = new div;
-            $div->tag="form";
-            $div->method="POST";
-            $div->action="";
-            $div->class="w3-container w3-row w3-margin";
-            $str.=$div->open();
-            $aushilfe = new div;
-            $aushilfe->class="w3-col l3";
-            $aushilfe->body="Aushilfen:";
-            $str.=$aushilfe->print();
+            if(!$this->Shifts) {
+                // { Aushilfen
+                $div = new div;
+                $div->tag="form";
+                $div->method="POST";
+                $div->action="";
+                $div->class="w3-container w3-row w3-margin";
+                $str.=$div->open();
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l3";
+                $aushilfe->body="Aushilfen:";
+                $str.=$aushilfe->print();
 
-            $aushilfe = new div;
-            $aushilfe->class="w3-col l3 w3-input w3-border";
-            $aushilfe->class=$GLOBALS['optionsDB']['colorInputBackground'];
-            $aushilfe->type="text";
-            $aushilfe->tag="input";
-            $aushilfe->name="Name";
-            $str.=$aushilfe->print();
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l3 w3-input w3-border";
+                $aushilfe->class=$GLOBALS['optionsDB']['colorInputBackground'];
+                $aushilfe->type="text";
+                $aushilfe->tag="input";
+                $aushilfe->name="Name";
+                $str.=$aushilfe->print();
 
-            $aushilfe = new div;
-            $aushilfe->tag="input";
-            $aushilfe->type="hidden";
-            $aushilfe->name="Termin";
-            $aushilfe->value=$this->Index;
-            $str.=$aushilfe->print();
+                $aushilfe = new div;
+                $aushilfe->tag="input";
+                $aushilfe->type="hidden";
+                $aushilfe->name="Termin";
+                $aushilfe->value=$this->Index;
+                $str.=$aushilfe->print();
 
-            $aushilfe = new div;
-            $aushilfe->tag="select";
-            $aushilfe->class="w3-col l4 w3-input";
-            $aushilfe->name="Instrument";
-            $aushilfe->body=instrumentOption(0);
-            $str.=$aushilfe->print();
+                $aushilfe = new div;
+                $aushilfe->tag="select";
+                $aushilfe->class="w3-col l4 w3-input";
+                $aushilfe->name="Instrument";
+                $aushilfe->body=instrumentOption(0);
+                $str.=$aushilfe->print();
 
-            $aushilfe = new div;
-            $aushilfe->class="w3-col l2 w3-btn";
-            $aushilfe->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $aushilfe->tag="input";
-            $aushilfe->type="submit";
-            $aushilfe->name="insertAushilfe";
-            $aushilfe->value="eintragen";
-            $str.=$aushilfe->print();
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l2 w3-btn";
+                $aushilfe->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+                $aushilfe->tag="input";
+                $aushilfe->type="submit";
+                $aushilfe->name="insertAushilfe";
+                $aushilfe->value="eintragen";
+                $str.=$aushilfe->print();
 
-            $str.=$div->close();
-            // } Aushilfen
+                $str.=$div->close();
+                // } Aushilfen
+            }
             
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
