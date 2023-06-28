@@ -1,112 +1,42 @@
 <?php
-function loadconfig() {
-    $sql = sprintf('SELECT * FROM `%sconfig`;',
-		   $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    $optionsDB = array();
-    while($row = mysqli_fetch_array($dbr)) {
-        $optionsDB += [$row['Parameter'] => $row['Value']];
+function bin2date($v) {
+    $c=array(false, false, false, false, false, false, false);
+    for($i=7; $i>=1; $i--) {
+        if($v/2**($i-1)>=1) {
+            $c[$i-1]=true;
+            $v=$v-2**($i-1);
+        }
     }
-    return $optionsDB;
+    return $c;
 }
-function requireAdmin() {
-    if(!$_SESSION['admin']) die("Admin permissions required.");
-}
+
 function bool2string($val) {
     if($val) return "ja";
     return "nein";
 }
 
-function instrumentOption($val) {
-    $str='';
-    $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
+function checkCronDate($v) {
+    $c = bin2date($v);
+    $dow = intval(date("N"));
+    if($c[$dow-1] == false) { 
+        return false;
     }
-    return $str;
+    return true;
 }
 
-function VehicleOption($val) {
-    $sql = sprintf('SELECT * FROM `%svehicle`;',
-		   $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
-    }
-}
-
-function RegisterOption($val) {
-    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
-		   $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if($val == $row['Index']) {
-            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
-        }
-        else {
-            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
-        }
-    }
-}
-function getPage($string) {
-    if($string == $_SESSION['page']) {
-        echo $GLOBALS['optionsDB']['colorTitleBar'];
+function genitiv($string) {
+    $last = substr($string, -1);
+    if($last == "s" || $last == "x") {
+        return $string.'\'';
     }
     else {
-        echo $GLOBALS['optionsDB']['colorNav'];
+        return $string."s";
     }
-}
-
-function getAdminPage($string) {
-    if($string == $_SESSION['page'] && $_SESSION['adminpage']) {
-        echo $GLOBALS['optionsDB']['colorTitleBar'];
-    }
-    else {
-        echo $GLOBALS['optionsDB']['colorNavAdmin'];
-    }
-}
-
-function string2Date($string) {
-    $y = substr($string, 0, 3);
-    $m = substr($string, 5, 6);
-    $d = substr($string, 8, 9);
-}
-
-function string2gDate($string) {
-    $y = substr($string, 0, 4);
-    $m = substr($string, 5, 2);
-    $d = substr($string, 8, 2);
-    return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
-}
-
-function germanDateSpan($string1, $string2) {
-    return germanDates($string1, true, true)." - ".germanDates($string2, true, true);
 }
 
 function germanDate($string, $monthLetters) {
+    if($string == '') return;
+    if($string == null) return;
     return germanDates($string, $monthLetters, false);
 }
 
@@ -178,10 +108,482 @@ function germanDates($string, $monthLetters, $short) {
     return $s;
 }
 
+function germanDateSpan($string1, $string2) {
+    return germanDates($string1, true, true)." - ".germanDates($string2, true, true);
+}
+
+function getActiveUsers($date) {
+    $users = array();
+    if($GLOBALS['optionsDB']['showConductor']) {
+        $dirigent = '';
+    }
+    else {
+        $dirigent = 'AND `iName` != "Dirigent"';
+    }
+    if($date) {
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $date,
+        $date,
+        $dirigent
+        );
+    }
+    else {
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $dirigent
+        );
+    }
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        array_push($users, $row['Index']);
+    }
+    return $users;
+}
+
+function getAdminPage($string) {
+    if($string == $_SESSION['page'] && $_SESSION['adminpage']) {
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
+    }
+    else {
+        echo $GLOBALS['optionsDB']['colorNavAdmin'];
+    }
+}
+
+function getNextRegNumber() {
+    $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+
+    $row = mysqli_fetch_array($dbr);
+    return $row['RegNumber']+1;
+}
+
+function getOwner($index) {
+    if($index == 0) {
+        return $GLOBALS['optionsDB']['orgNameShort'];
+    }
+    
+    $user = new User;
+    $user->load_by_id($index);
+    return $user->getName();
+}
+
+function getPage($string) {
+    if($string == $_SESSION['page']) {
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
+    }
+    else {
+        echo $GLOBALS['optionsDB']['colorNav'];
+    }
+}
+
+function getShort($Vorname, $Nachname) {
+    if(strlen($Vorname) >=2) {
+        $end=2;
+        if(substr($Vorname,1,1)=="&") {
+            $end = strpos($Vorname, ";");
+        }
+        $short1 = substr($Vorname,0,$end);
+    }
+    else {
+        $short1 = $Vorname;
+    }
+    if(strlen($Nachname) >=2) {
+        $narray = explode(" ", $Nachname);
+        $end=2;
+        if(substr($narray[sizeof($narray)-1],1,1)=="&") {
+            $end = strpos($narray[sizeof($narray)-1], ";");
+        }
+        $short2 = substr($narray[sizeof($narray)-1],0,$end);
+    }
+    else {
+        $short2 = $Nachname;
+    }
+    return $short1.$short2;
+}
+
+function instrumentOption($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY `rSort`, `Sortierung`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+    return $str;
+}
+
+function instrumentOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+    return $str;
+}
+
+function isAdmin() {
+    return $_SESSION['admin'];
+}
+
+function loadconfig() {
+    $sql = sprintf('SELECT * FROM `%sconfig`;',
+		   $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $optionsDB = array();
+    while($row = mysqli_fetch_array($dbr)) {
+        $optionsDB += [$row['Parameter'] => $row['Value']];
+    }
+    return $optionsDB;
+}
+
+function loggedIn() {
+    if(!isset($_SESSION['userid'])) {
+	session_destroy();
+	return false;
+    }
+    if($_SESSION['userid'] > 0) return true;
+    session_destroy();
+    return false;
+}
+
+function meldeWert($val) {
+    switch($val) {
+	case 1:
+            return "ja";
+	case 2:
+            return "nein";
+	case 3:
+            return "vielleicht";
+	default:
+            break;
+    }
+}
+
 function mkAdmin() {
     $_SESSION['userid'] = 0;
     $_SESSION['admin'] = true;
     $_SESSION['username'] = 'SYSTEM';
+}
+
+function mkEmpty($str) {
+    if($str) return $str;
+    return "";
+}
+
+function mkNULL($str) {
+    if($str) return $str;
+    return "NULL";
+}
+
+function mkNULLstr($str) {
+    if($str) return "\"".$str."\"";
+    return "NULL";
+}
+
+function mkPrize($val) {
+    if((float)$val != 0) {
+        return sprintf("%.2f &euro;", $val);
+    }
+}
+
+function printOrchestra($tid, $scale) {
+    $width=1000*$scale;
+    $height=600*$scale;
+    $rowdistance=60*$scale;
+    $minrowdistance=150*$scale;
+    $str="<svg width=\"".$width."\" height=\"".$height."\">";
+
+    $aMeldungen = array();
+    $aInstrument = array();
+    $aUser = array();
+    if($tid) {
+        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` INNER JOIN (SELECT `Index` AS `iIndex`, `Sortierung` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `uInstrument` WHERE `Termin` = %d ORDER BY `Sortierung`, `Nachname`;",
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $tid                      
+        );
+        $dbMeldungen = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbMeldungen)) {
+            $aMeldungen[] = $row;
+        }
+    }
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;",
+                   $GLOBALS['dbprefix']
+    );
+    $dbUser = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbUser)) {
+        $aUser[] = $row;
+    }
+    $sql = sprintf("SELECT * FROM `%sInstrument`;",
+                   $GLOBALS['dbprefix']
+    );
+    $dbInstrument = mysqli_query($GLOBALS['conn'], $sql);
+    while($row = mysqli_fetch_array($dbInstrument)) {
+        $aInstrument[] = $row;
+    }
+    
+    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
+                   $GLOBALS['dbprefix']
+    );
+    $dbregister = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $k=0;
+    $i=0;
+    $j=0;
+    $lastrow=0;
+    $lmaxradius = array();
+    $rmaxradius = array();
+    $radius=0;
+    array_push($lmaxradius, 0);
+    array_push($rmaxradius, 0);
+    while($register = mysqli_fetch_array($dbregister)) {
+        if($lastrow != $register['Row']) {
+            array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+$rowdistance);
+            array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+$rowdistance);
+        }
+        $lastrow = $register['Row'];
+        if($register['Row'] > 0) {
+            if($register['ArcMin'] < 90) {
+                $radius = $lmaxradius[$register['Row']-1]+$rowdistance;
+            }
+            else {
+                $radius = $rmaxradius[$register['Row']-1]+$rowdistance;
+            }
+        }
+        if($radius<$minrowdistance) {
+            $radius = $minrowdistance;
+        }
+
+        $registerInstruments = array();
+        $sorting = array();
+        for($idx = 0; $idx < count($aInstrument); $idx++) {
+            if($aInstrument[$idx]['Register'] == $register['Index']) {
+                $registerInstruments[] = $idx;
+                $sorting[] = (int)$aInstrument[$idx]['Sortierung'];
+            }
+        }
+        asort($sorting);
+        $sortedInstruments = array();
+        $keys = array_keys($sorting);
+        for($idx = 0; $idx < count($registerInstruments); $idx++) {
+            $sortedInstruments[] = $aInstrument[$registerInstruments[$keys[$idx]]]['Index'];
+        }
+
+        foreach($sortedInstruments as $instrument) {
+            foreach($aUser AS $user) {
+                // while($user = mysqli_fetch_array($dbuser)) {
+                $match = null;
+                if($tid) {
+                    $skip = false;
+                    foreach($aMeldungen AS $meldung) {
+                        if($meldung['User'] != $user['Index']) continue;
+                        if($meldung['Instrument'] == $instrument) {
+                            $instr = $meldung['Instrument'];
+                        }
+                        else {
+                            $instr = $meldung['uInstrument'];
+                        }
+                        if($instr != $instrument) $skip=true;
+                        $match = $meldung['Wert'];
+                        break;
+                    }
+                }
+                if($user['Instrument'] != $instrument) continue;
+                if($skip) continue;
+                
+                $short=getShort($user['Vorname'], $user['Nachname']);
+                if($register['Row']==0) {
+                    $radius=0;
+                    $arc=0;
+                }
+                else {
+                    $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
+                    if($register['ArcMin'] < $register['ArcMax']) {
+                        if($arc+20*$scale/(2*pi()*$radius)*360 >=$register['ArcMax']) {
+                            $j++;
+                            $radius += 40*$scale;
+                            $k=0;
+                        }
+                    }
+                    elseif($register['ArcMin'] > $register['ArcMax']) {
+                        if($arc-20*$scale/(2*pi()*$radius)*360 <=$register['ArcMax']) {
+                            $j++;
+                            $radius += 40*$scale;
+                            $k=0;
+                        }
+                    }
+                    if($register['ArcMin'] < 90) {
+                        if($radius > $lmaxradius[$register['Row']]) {
+                            $lmaxradius[$register['Row']] = $radius;
+                        }
+                    }
+                    else {
+                        if($radius > $rmaxradius[$register['Row']]) {
+                            $rmaxradius[$register['Row']] = $radius;
+                        }
+                    }
+                    $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
+                }
+                $x = $width/2-$radius*cos($arc/180*pi());
+                $y = 40*$scale+$radius*sin($arc/180*pi());
+                if($tid) {
+                    if($match) {
+                        switch($match) {
+                        case 1:
+                            $color = "#4CAF50";
+                            $opacity = 1;
+                            break;
+                        case 2:
+                            $color = "#f42316";
+                            $opacity = 0.5;
+                            break;
+                        case 3:
+                            $color = "#2196F3";
+                            $opacity = 0.6;
+                            break;
+                        default:
+                            $color = "#ffffff";
+                            $opacity = 0.5;
+                            break;
+                        }
+                    }
+                    else {
+                        $color = "#ffffff";
+                        $opacity = 0.5;
+                    }
+                    $str=$str."<circle opacity=\"".$opacity."\" cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
+                    $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$short."</text>\n";
+                }
+                else {
+                    $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$register['Color']."\" />\n";
+                    $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$short."</text>\n";
+                }
+
+                $k++;
+            }
+        }
+        $k=0;
+        $j=0;
+        $i++;
+    }
+
+    $str=$str."</svg>";
+    return $str;
+}
+
+function recordLogin() {
+    $sql = sprintf("UPDATE `%sUser` SET `LastLogin` = CURRENT_TIMESTAMP() WHERE `Index` = %d;",
+		   $GLOBALS['dbprefix'],
+		   $_SESSION['userid']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+}
+
+function RegisterOption($val) {
+    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Sortierung`;',
+		   $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
+        }
+        else {
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+}
+
+function requireAdmin() {
+    if(!$_SESSION['admin']) die("Admin permissions required.");
+}
+
+function sql2time($time) {
+    if($time != '') {
+        return sql2timeRaw($time)." Uhr";
+    }
+}
+
+function sql2timeRaw($time) {
+    return substr($time, 0, 5);
+}
+
+function sqlerror() {
+    if(mysqli_errno($GLOBALS['conn'])) {
+        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
+        $logentry = new Log;
+        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
+    }
+}
+
+function string2gDate($string) {
+    $y = substr($string, 0, 4);
+    $m = substr($string, 5, 2);
+    $d = substr($string, 8, 2);
+    return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
+}
+
+function string2Date($string) {
+    $y = substr($string, 0, 3);
+    $m = substr($string, 5, 6);
+    $d = substr($string, 8, 9);
+}
+
+function UserOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">".$GLOBALS['optionsDB']['orgNameShort']."</option>\n";
+    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Vorname']." ".$row['Nachname']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Vorname']." ".$row['Nachname']."</option>\n";
+        }
+    }
+    return $str;
 }
 
 function validateLink($hash) {
@@ -232,279 +634,19 @@ function validateUser($login, $password) {
     return false;
 }
 
-function recordLogin() {
-    $sql = sprintf("UPDATE `%sUser` SET `LastLogin` = CURRENT_TIMESTAMP() WHERE `Index` = %d;",
-		   $GLOBALS['dbprefix'],
-		   $_SESSION['userid']
+function VehicleOption($val) {
+    $sql = sprintf('SELECT * FROM `%svehicle`;',
+		   $GLOBALS['dbprefix']
     );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-}
-
-function loggedIn() {
-    if(!isset($_SESSION['userid'])) {
-	session_destroy();
-	return false;
-    }
-    if($_SESSION['userid'] > 0) return true;
-    session_destroy();
-    return false;
-}
-
-function getActiveUsers($date) {
-    $users = array();
-    if($GLOBALS['optionsDB']['showConductor']) {
-        $dirigent = '';
-    }
-    else {
-        $dirigent = 'AND `iName` != "Dirigent"';
-    }
-    if($date) {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $date,
-        $date,
-        $dirigent
-        );
-    }
-    else {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $dirigent
-        );
-    }
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
-        array_push($users, $row['Index']);
-    }
-    return $users;
-}
-
-function sql2time($time) {
-    if($time != '') {
-        return sql2timeRaw($time)." Uhr";
-    }
-}
-
-function sql2timeRaw($time) {
-    return substr($time, 0, 5);
-}
-
-function genitiv($string) {
-    $last = substr($string, -1);
-    if($last == "s" || $last == "x") {
-        return $string.'\'';
-    }
-    else {
-        return $string."s";
-    }
-}
-
-function sqlerror() {
-    if(mysqli_errno($GLOBALS['conn'])) {
-        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
-        $logentry = new Log;
-        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
-    }
-}
-
-function meldeWert($val) {
-    switch($val) {
-	case 1:
-            return "ja";
-	case 2:
-            return "nein";
-	case 3:
-            return "vielleicht";
-	default:
-            break;
-    }
-}
-
-function bin2date($v) {
-    $c=array(false, false, false, false, false, false, false);
-    for($i=7; $i>=1; $i--) {
-        if($v/2**($i-1)>=1) {
-            $c[$i-1]=true;
-            $v=$v-2**($i-1);
-        }
-    }
-    return $c;
-}
-
-function checkCronDate($v) {
-    $c = bin2date($v);
-    $dow = intval(date("N"));
-    if($c[$dow-1] == false) { 
-        return false;
-    }
-    return true;
-}
-
-function printOrchestra($tid, $scale) {
-    $width=1000*$scale;
-    $height=600*$scale;
-    $rowdistance=60*$scale;
-    $minrowdistance=150*$scale;
-    $str="<svg width=\"".$width."\" height=\"".$height."\">";
-    if($tid) {
-        $termin = new Termin;
-        $termin->load_by_id($tid);
-        $meldungen = $termin->getMeldungUsers();
-    }
-    
-    $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
-    $GLOBALS['dbprefix']
-    );
-$dbregister = mysqli_query($GLOBALS['conn'], $sql);
-sqlerror();
-$k=0;
-$i=0;
-$j=0;
-$lastrow=0;
-$lmaxradius = array();
-$rmaxradius = array();
-$radius=0;
-array_push($lmaxradius, 0);
-array_push($rmaxradius, 0);
-while($register = mysqli_fetch_array($dbregister)) {
-    if($lastrow != $register['Row']) {
-        array_push($lmaxradius, $lmaxradius[count($lmaxradius)-1]+$rowdistance);
-        array_push($rmaxradius, $rmaxradius[count($rmaxradius)-1]+$rowdistance);
-    }
-    $lastrow = $register['Row'];
-    if($register['Row'] > 0) {
-        if($register['ArcMin'] < 90) {
-            $radius = $lmaxradius[$register['Row']-1]+$rowdistance;
+        if($val == $row['Index']) {
+            echo "<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
         }
         else {
-            $radius = $rmaxradius[$register['Row']-1]+$rowdistance;
+            echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
         }
     }
-    if($radius<$minrowdistance) {
-        $radius = $minrowdistance;
-    }
-    $r = new Register;
-    $r->load_by_id($register['Index']);
-    
-    $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Register` = %d ORDER BY `Sortierung`;',
-    $GLOBALS['dbprefix'],
-    $r->Index
-    );
-    $dbinstrument = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($instrument = mysqli_fetch_array($dbinstrument)) {
-        if($tid) {
-            $sql = sprintf('SELECT `Index`, `Nachname`, "0" AS `Meldung` FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 UNION SELECT `Index`, `Nachname`, "1" AS `Meldung` FROM `%sUser` INNER JOIN (SELECT `User`, `Termin`, `Instrument` AS `mInstrument` FROM `%sMeldungen`) `%sMeldungen` ON `User` = `Index` WHERE `Termin` = "%d" AND `%sMeldungen`.`mInstrument` = "%d" ORDER BY `Nachname`;',
-            $GLOBALS['dbprefix'],
-            $instrument['Index'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $tid,
-            $GLOBALS['dbprefix'],
-            $instrument['Index']
-            );
-        }
-        else {
-            $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` = "%d" AND `Deleted` = 0 ORDER BY `Nachname`;',
-            $GLOBALS['dbprefix'],
-            $instrument['Index']
-            );
-        }
-        $dbuser = mysqli_query($GLOBALS['conn'], $sql);
-        while($user = mysqli_fetch_array($dbuser)) {
-            if($tid) {
-                $s = array_search($user['Index'], $meldungen);
-                if(!$user['Meldung'] && $s !== false) {
-                    $m = new Meldung;
-                    $m->load_by_user_event($user['Index'], $tid);
-                    unset($meldungen[$s]);
-                    if($m->Instrument) continue;
-                }
-            }
-            $u = new User;
-            $u->load_by_id($user['Index']);
-            if($register['Row']==0) {
-                $radius=0;
-                $arc=0;
-            }
-            else {
-                $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
-                if($register['ArcMin'] < $register['ArcMax']) {
-                    if($arc+20*$scale/(2*pi()*$radius)*360 >=$register['ArcMax']) {
-                        $j++;
-                        $radius += 40*$scale;
-                        $k=0;
-                    }
-                }
-                elseif($register['ArcMin'] > $register['ArcMax']) {
-                    if($arc-20*$scale/(2*pi()*$radius)*360 <=$register['ArcMax']) {
-                        $j++;
-                        $radius += 40*$scale;
-                        $k=0;
-                    }
-                }
-                if($register['ArcMin'] < 90) {
-                    if($radius > $lmaxradius[$register['Row']]) {
-                        $lmaxradius[$register['Row']] = $radius;
-                    }
-                }
-                else {
-                    if($radius > $rmaxradius[$register['Row']]) {
-                        $rmaxradius[$register['Row']] = $radius;
-                    }
-                }
-                $arc = $register['ArcMin']+$k*($register['ArcMax']-$register['ArcMin'])/abs($register['ArcMax']-$register['ArcMin'])*40*$scale/(2*pi()*$radius)*360;
-                }
-                $x = $width/2-$radius*cos($arc/180*pi());
-                $y = 40*$scale+$radius*sin($arc/180*pi());
-                if($tid) {
-                    $m = $termin->getMeldungenByUser($u->Index);
-                    if(count($m)) {
-                        $meldung = new Meldung;
-                        $meldung->load_by_id($m[0]);
-                        switch($meldung->Wert) {
-                        case 1:
-                            $color = "#4CAF50";
-                            $opacity = 1;
-                            break;
-                        case 2:
-                            $color = "#f42316";
-                            $opacity = 0.5;
-                            break;
-                        case 3:
-                            $color = "#2196F3";
-                            $opacity = 0.6;
-                            break;
-                        }
-                    }
-                    else {
-                        $color = "#ffffff";
-                        $opacity = 0.5;
-                    }
-                    $str=$str."<circle opacity=\"".$opacity."\" cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
-                    $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
-                }
-                else {
-                    $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$register['Color']."\" />\n";
-                    $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$u->getShort()."</text>\n";
-                }
-
-                $k++;
-            }
-        }
-        $k=0;
-        $j=0;
-        $i++;
-    }
-
-    $str=$str."</svg>";
-    return $str;
 }
 ?>

@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Bechreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -824,9 +824,15 @@ class Termin
         case 3:
             return $GLOBALS['optionsDB']['colorAppmntMaybe'];
             break;
-        }            
+        default:
+            return null;
+        }
+        return null;
     }
     protected function mainColor() {
+        $c = $this->globalShiftColor();
+        if($c) return;
+        if(!$this->Shifts) {
         switch($this->Wert) {
         case 1:
             return $GLOBALS['optionsDB']['colorAppmntYes'];
@@ -838,8 +844,7 @@ class Termin
             return $GLOBALS['optionsDB']['colorAppmntMaybe'];
             break;
         }
-        $c = $this->globalShiftColor();
-        if($c) return;
+    }
         if($this->Auftritt) {
             return $GLOBALS['optionsDB']['colorAppmntConcert'];
         }
@@ -1472,6 +1477,9 @@ class Termin
             $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"tracking.php\" method=\"POST\">\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Anwesenheitsliste</button>\n";
             $str=$str."\t\t</form>\n";
+            $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"mail.php\" method=\"POST\">\n";
+            $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Email an Teilnehmer</button>\n";
+            $str=$str."\t\t</form>\n";
             if($this->Shifts) {
                 $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
                 $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
@@ -1717,6 +1725,49 @@ class Termin
         return $str;
     }
     public function getResponseLine($filterregister) {
+        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` = '0')
+
+UNION
+
+(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` != '0')
+
+ORDER BY `Nachname`, `Vorname`;",
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $this->Index,
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $this->Index,
+                       $GLOBALS['dbprefix']
+        );
+        $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $aMeldungen = array();
+        while($row = mysqli_fetch_array($dbr2)) {
+            $aMeldungen[] = $row;
+        }      
+        
         if($this->vName == "Bus") {
             $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
             $bus=true;
@@ -1778,50 +1829,12 @@ class Termin
                 $register->load_by_id($row['Index']);
                 $nReg = $register->members();
                 $snReg+=$nReg;
-                $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rName` FROM `%sMeldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
-WHERE `Termin` = '%d' AND `rIndex` = '%d' AND `%sMeldungen`.`Instrument` = '0')
-
-UNION
-
-(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rName` FROM `%sMeldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
-WHERE `Termin` = '%d' AND `rIndex` = '%d' AND `%sMeldungen`.`Instrument` != '0')
-
-ORDER BY `Nachname`, `Vorname`;",
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $this->Index,
-                $row['Index'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $this->Index,
-                $row['Index'],
-                $GLOBALS['dbprefix']
-                );
-                $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
-                sqlerror();
                 $ja=0;
                 $nein=0;
                 $vielleicht=0;
-                while($row2 = mysqli_fetch_array($dbr2)) {
+                // while($row2 = mysqli_fetch_array($dbr2)) {
+                foreach($aMeldungen as $row2) {
+                    if($row2['rIndex'] != $row['Index']) continue;
                     $antwort='';
                     switch($row2['Wert']) {
                     case 1:

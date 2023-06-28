@@ -1,12 +1,13 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Nachname':
 	    case 'Vorname':
+        case 'RefID':
         case 'login':
 	    case 'Passhash':
 	    case 'activeLink':
@@ -33,6 +34,7 @@ class User
         switch($key) {
 	    case 'Index':
 	    case 'Instrument':
+        case 'RefID':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
@@ -76,12 +78,15 @@ class User
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
             $row = mysqli_fetch_array($dbr);
-            $this->iName = $row['Name'];
+            if($row) {
+                $this->iName = $row['Name'];
+            }
         }
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, Login: %s, Mitglied: %s, Istrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
+        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, RefID: %d, Login: %s, Mitglied: %s, Instrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
+        $this->RefID,
         $this->login,
         bool2string($this->Mitglied),
         $this->iName,
@@ -184,10 +189,11 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%d", "%d", "%s", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", "%s", "%d", "%s", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mkNULL($this->RefID),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
@@ -206,10 +212,11 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mkNULL($this->RefID),
         mysqli_real_escape_string($GLOBALS['conn'], $this->login),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
@@ -231,6 +238,7 @@ class User
         return $this->Vorname." ".$this->Nachname;
     }
     public function getInstrument() {
+        if(!$this->Instrument || $this->Instrument == 0) return "";
         $i = new Instrument;
         $i->load_by_id($this->Instrument);
         return $i->Name;
@@ -295,7 +303,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gel&ouml;schter", `Nachname` = "Benutzer" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gel&ouml;schter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0 WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -314,9 +322,7 @@ class User
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Index` = "%d";',
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
+        $sql = sprintf('SELECT * FROM `%sUser` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $Index
         );
@@ -326,8 +332,56 @@ class User
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
+        $this->iName = $this->getInstrument();
     }
 
+    public function getLastVisit() {
+        $sql = sprintf('SELECT `Datum` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum` FROM `%sTermine` WHERE `DATUM` <= CURRENT_DATE() ORDER BY `Datum` DESC) `%sTermine` ON `Termin` = `tIndex` WHERE `Wert` = "1" AND `User` = "%d" ORDER BY `Datum` DESC LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        if($row) {
+            return $row['Datum'];
+        }
+    }
+
+    public function getLoans() {
+        $sql = sprintf('SELECT `Index` FROM `%sLoans` WHERE `User` = %d AND `EndDate` IS NULL;',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $loans = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($loans, $row['Index']);
+        }
+        return $loans;
+    }
+
+    public function getInstruments() {
+        $sql = sprintf('SELECT `Index` FROM `%sInstruments` WHERE `Owner` = %d',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $instruments = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($instruments, $row['Index']);
+        }
+        return $instruments;
+    }
+
+    public function hasInstruments() {
+        return count($this->getLoans()) + count($this->getInstruments());
+    }
+    
     public function printTableLine() {
         if($this->Mitglied) {
             echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
@@ -336,9 +390,10 @@ class User
             echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";            
         }
         echo "  <div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".$this->iName."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".$this->iName."</div>\n";
         echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->getLastVisit(), 1)."</div>\n";
         echo "</div>\n";
         ?>
         <div id="id<?php echo $this->Index; ?>" class="w3-modal">
@@ -370,6 +425,9 @@ class User
     <div class="w3-container w3-row w3-margin">
           <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
     </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
+    </div>
       <?php
       }
       ?>
@@ -384,6 +442,9 @@ class User
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($this->LastLogin, 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Letzte Anwesenheit:</div><div class="w3-col l6"><b><?php echo germanDate($this->getLastVisit(), 1); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Meldequote:</div><div class="w3-col l6"><b><?php echo $this->getMeldeQuote()*100; ?> %</b></div>
