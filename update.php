@@ -53,6 +53,9 @@ $para=array(
     'MessageOfTheDayShort',
     'showAddToCalendarButton',
     'alwaysYesNewAppmnts',
+    'showMessageOfTheDay',
+    'orgName',
+    'orgNameShort',
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -93,10 +96,13 @@ $desc=array(
     "Sende Nachricht, wenn Termin am folgenden Tag ansteht zu folgender Uhrzeit.",
     "Man kann sich auch von bereits geschlossenen Anmeldungen abmelden.",
     "Zeige einen Sitzplan des Orchesters in allen Meldungen",
-    "Nachricht, die jedem Nutzen ein Einloggen angezeigt wird.",
-    "Zusammenfassung der Nachricht, die jedem Nutzen ein Einloggen angezeigt wird.",
+    "Nachricht, die jedem Nutzen beim Einloggen angezeigt wird.",
+    "Zusammenfassung der Nachricht, die jedem Nutzen beim Einloggen angezeigt wird.",
     "Zeige Button zum Erstellen von Kalendereinträgen",
     "Nutzer, die automatisch in neue Termine mit Ja eingetragen werden (userID durch Komma getrennt)",
+    "Zeige Nachricht, die jedem Nutzen beim Einloggen angezeigt wird.",
+    "Vereinsname",
+    "Vereinsname (kurz)",
 );
 $value=array(
     "w3-opacity",
@@ -141,6 +147,9 @@ $value=array(
     "",
     0,
     "",
+    0,
+    "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
+    "Musikverein Duisdorf",
 );
 $type=array(
     "string",
@@ -184,6 +193,9 @@ $type=array(
     "text",
     "text",
     "bool",
+    "string",
+    "bool",
+    "string",
     "string",
 );
 

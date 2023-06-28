@@ -1,7 +1,7 @@
 <?php
 class div
 {
-    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null);
+    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'step' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null, 'checked' => null);
     public function __get($key) {
         switch($key) {
 	    case 'indent':
@@ -16,12 +16,14 @@ class div
         case 'value':
         case 'type':
         case 'min':
+        case 'step':
         case 'href':
         case 'default':
         case 'emptyBody':
         case 'action':
         case 'method':
         case 'placeholder':
+        case 'checked':
             return $this->_data[$key];
             break;
         default:
@@ -53,6 +55,7 @@ class div
         case 'type':
         case 'href':
         case 'min':
+        case 'step':
         case 'default':
         case 'action':
         case 'method':
@@ -61,6 +64,7 @@ class div
             break;
 	    case 'bold':
 	    case 'emptyBody':
+	    case 'checked':
             $this->_data[$key] = (bool)$val;
             break;
         default:
@@ -110,6 +114,9 @@ class div
         if($this->min != null) {
             $str=$str." min=\"".$this->min."\"";
         }
+        if($this->step != null) {
+            $str=$str." step=\"".$this->step."\"";
+        }
         if($this->default != null) {
             $str=$str." default=\"".$this->default."\"";
         }
@@ -124,6 +131,9 @@ class div
         }
         if($this->placeholder != null) {
             $str=$str." placeholder=\"".$this->placeholder."\"";
+        }
+        if($this->checked) {
+            $str=$str." checked";
         }
         $str=$str.">\n";
         if($this->body) {
