@@ -19,6 +19,7 @@ if(isset($_POST['insertAushilfe'])) {
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/changeInstrument.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/meldeshift.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
     <h2>Bevorstehende Termine</h2>
