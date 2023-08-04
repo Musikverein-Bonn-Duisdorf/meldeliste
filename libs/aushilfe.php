@@ -34,7 +34,7 @@ class Aushilfe
     }
 
     public function getVars() {
-        this->getInstrumentName();
+        $this->getInstrumentName();
         return sprintf("Aushilfen-ID: %d, Name: %s, Instrument: %s",
         $this->Index,
         $this->getName(),
