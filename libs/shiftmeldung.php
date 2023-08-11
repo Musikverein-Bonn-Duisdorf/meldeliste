@@ -30,6 +30,32 @@ class Shiftmeldung
             break;
         }	
     }
+
+    public function getChanges() {
+        $old = new Shiftmeldung;
+        $old->load_by_id($this->Index);
+
+        $u = new User;
+        $u->load_by_id($this->User);
+        $s = new Shift;
+        $s->load_by_id($this->Shift);
+        $t = new Termin;
+        $t->load_by_id($s->Termin);
+        $str = sprintf("Melde-ID: %d, Termin: (%d) %s, Schicht: (%d) %s %s %s, User: %s",
+        $this->Index,
+        $t->Index,
+        $t->Name,
+        $s->Index,
+        $s->Name,
+        $t->Datum,
+        $s->Start,
+        $u->getName()
+        );
+
+        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeWert($this->Wert)."</b>";
+        return $str;
+    }
+
     public function getVars() {
         $u = new User;
         $u->load_by_id($this->User);
@@ -53,9 +79,9 @@ class Shiftmeldung
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();
