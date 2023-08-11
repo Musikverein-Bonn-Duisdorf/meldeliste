@@ -37,6 +37,41 @@ class Meldung
             break;
         }	
     }
+    public function getChanges() {
+        $old = new Meldung;
+        $old->load_by_id($this->Index);
+
+        $u = new User;
+        $u->load_by_id($this->User);
+        $t = new Termin;
+        $t->load_by_id($this->Termin);
+
+        $str = sprintf("Melde-ID: %d, Termin: (%d) %s %s %s, User: %s",
+        $this->Index,
+        $this->Termin,
+        $t->Name,
+        $t->Datum,
+        $t->Uhrzeit,
+        $u->getName()
+        );
+        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeWert($this->Wert)."</b>";
+        if($this->Children != $old->Children) $str.=", Kinder: ".$old->Children." &rArr; <b>".$this->Children."</b>";
+        if($this->Guests != $old->Guests) $str.=", G&auml;ste: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
+        if($this->Instrument != $old->Instrument) {
+            $newinstrument = $this->Instrument;
+            if($newinstrument == 0) $newinstrument = $u->Instrument;
+            $newinstr = new Instrument;
+            $newinstr->load_by_id($newinstrument);
+
+            $oldinstrument = $old->Instrument;
+            if($oldinstrument == 0) $oldinstrument = $u->Instrument;
+            $oldinstr = new Instrument;
+            $oldinstr->load_by_id($oldinstrument);
+            
+            $str.=", Instrument: ".$oldinstr->Name." &rArr; <b>".$newinstr->Name."</b>";
+        }
+        return $str;
+    }
     public function getVars() {
         $u = new User;
         $u->load_by_id($this->User);
@@ -67,9 +102,9 @@ class Meldung
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();
