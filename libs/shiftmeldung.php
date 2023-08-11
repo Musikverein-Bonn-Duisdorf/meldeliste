@@ -52,7 +52,7 @@ class Shiftmeldung
         $u->getName()
         );
 
-        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeWert($this->Wert)."</b>";
+        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeSymbol($this->Wert)."</b>";
         return $str;
     }
 
@@ -72,7 +72,7 @@ class Shiftmeldung
         $t->Datum,
         $s->Start,
         $u->getName(),
-        meldeWert($this->Wert)
+        meldeSymbol($this->Wert)
         );
         return $str;
     }

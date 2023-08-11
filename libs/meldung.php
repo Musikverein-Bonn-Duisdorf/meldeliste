@@ -54,7 +54,7 @@ class Meldung
         $t->Uhrzeit,
         $u->getName()
         );
-        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeWert($this->Wert)."</b>";
+        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeSymbol($this->Wert)."</b>";
         if($this->Children != $old->Children) $str.=", Kinder: ".$old->Children." &rArr; <b>".$this->Children."</b>";
         if($this->Guests != $old->Guests) $str.=", G&auml;ste: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
         if($this->Instrument != $old->Instrument) {
@@ -89,7 +89,7 @@ class Meldung
         $t->Datum,
         $t->Uhrzeit,
         $u->getName(),
-        meldeWert($this->Wert),
+        meldeSymbol($this->Wert),
         $instr->Name
         );
         if($GLOBALS['optionsDB']['showChildOption']) {
