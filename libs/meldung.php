@@ -72,6 +72,7 @@ class Meldung
         }
         return $str;
     }
+
     public function getVars() {
         $u = new User;
         $u->load_by_id($this->User);
