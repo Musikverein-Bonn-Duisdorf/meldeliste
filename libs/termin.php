@@ -95,10 +95,12 @@ class Termin
         if($this->published != $old->published) $str.=", published: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
         if($this->open != $old->open) $str.=", open: ".$old->open." &rArr; <b>".$this->open."</b>";
         if($this->Wert != $old->Wert) $str.=", Wert: ".$old->Wert." &rArr; <b>".$this->Wert."</b>";
-        if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
-        if($this->Guests != $old->Guests) $str.=", Guests: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
-        if($this->vName != $old->vName) $str.=", vName: ".$old->vName." &rArr; <b>".$this->vName."</b>";
-        if($this->new != $old->new) $str.=", new: ".bool2string($old->new)." &rArr; <b>".bool2string($this->new)."</b>";
+        if($GLOBALS['optionsDB']['showChildOption']) {
+            if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
+        }
+        if($GLOBALS['optionsDB']['showGuestOption']) {
+            if($this->Guests != $old->Guests) $str.=", Guests: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
+        }
         
         return $str;
     }
