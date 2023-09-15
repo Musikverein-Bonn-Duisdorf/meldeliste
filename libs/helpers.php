@@ -633,7 +633,7 @@ function validateLink($hash) {
         break;
     }
     $logentry = new Log;
-    $logentry->error("Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");
+    $logentry->error("Login not successful. Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");
     return false;
 }
 function validateUser($login, $password) {
@@ -659,7 +659,7 @@ function validateUser($login, $password) {
         }
     }
     $logentry = new Log;
-    $logentry->error("Invalid password for username <b>".htmlspecialchars($login)."</b>.");
+    $logentry->error("Login not successful. Invalid password for username <b>".htmlspecialchars($login)."</b>.");
     return false;
 }
 
