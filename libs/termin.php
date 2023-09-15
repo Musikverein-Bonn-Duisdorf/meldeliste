@@ -70,6 +70,39 @@ class Termin
             break;
         }	
     }
+
+    public function getChanges() {
+        $old = new Termin;
+        $old->load_by_id($this->Index);
+        
+        $str = sprintf("Termin-ID: %d, <b>%s</b>, ",
+        $this->Index,
+        $this->Name
+        );
+        if($this->Datum != $old->Datum) $str.=", Datum: ".$old->getDate()." &rArr; <b>".$this->getDate()."</b>";
+        if($this->EndDatum != $old->EndDatum) $str.=", Enddatum: ".$old->EndDatum." &rArr; <b>".$this->EndDatum."</b>";
+        if($this->Uhrzeit != $old->Uhrzeit) $str.=", Uhrzeit: ".$old->Uhrzeit." &rArr; <b>".$this->Uhrzeit."</b>";
+        if($this->Uhrzeit2 != $old->Uhrzeit2) $str.=", Uhrzeit2: ".$old->Uhrzeit2." &rArr; <b>".$this->Uhrzeit2."</b>";
+        if($this->Capacity != $old->Capacity) $str.=", Capacity: ".$old->Capacity." &rArr; <b>".$this->Capacity."</b>";
+        if($this->Vehicle != $old->Vehicle) $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
+        if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
+        if($this->Auftritt != $old->Auftritt) $str.=", Auftritt: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
+        if($this->Ort1 != $old->Ort1) $str.=", Ort1: ".$old->Ort1." &rArr; <b>".$this->Ort1."</b>";
+        if($this->Ort2 != $old->Ort2) $str.=", Ort2: ".$old->Ort2." &rArr; <b>".$this->Ort2."</b>";
+        if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
+        if($this->Ort4 != $old->Ort4) $str.=", Ort4: ".$old->Ort4." &rArr; <b>".$this->Ort4."</b>";
+        if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
+        if($this->published != $old->published) $str.=", published: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
+        if($this->open != $old->open) $str.=", open: ".$old->open." &rArr; <b>".$this->open."</b>";
+        if($this->Wert != $old->Wert) $str.=", Wert: ".$old->Wert." &rArr; <b>".$this->Wert."</b>";
+        if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
+        if($this->Guests != $old->Guests) $str.=", Guests: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
+        if($this->vName != $old->vName) $str.=", vName: ".$old->vName." &rArr; <b>".$this->vName."</b>";
+        if($this->new != $old->new) $str.=", new: ".bool2string($old->new)." &rArr; <b>".bool2string($this->new)."</b>";
+        
+        return $str;
+    }
+    
     public function getVars() {
         if(!$this->vName) {
             $sql = sprintf('SELECT * FROM `%svehicle` WHERE `Index` = %d;',
@@ -81,7 +114,7 @@ class Termin
             $row = mysqli_fetch_array($dbr);
             $this->vName = $row['Name'];
         }
-        return sprintf("Termin-ID: %d, Datum: %s, Beginn: %s, Ende: %s, Abfahrt: %s, mit: %s, max. Teilnehmer: %d, Name: %s, Auftritt: %s, Ort1: %s, Ort2: %s, Ort3: %s, Ort4: %s, Beschreibung: %s, Schichten: %s, sichtbar: %s, offen: %s",
+        return sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
         $this->Index,
         $this->getDate(),
         $this->Uhrzeit,
@@ -105,7 +138,7 @@ class Termin
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
             $this->update();
         }
         else {
