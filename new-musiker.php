@@ -8,6 +8,10 @@ else {
     $_SESSION['page']='newmusiker';
     $_SESSION['adminpage']=true;
 }
+if(requirePermission("perm_editUser")) {
+    
+}
+
 include "common/header.php";
 $fill = false;
 if(isset($_POST['id'])) {
