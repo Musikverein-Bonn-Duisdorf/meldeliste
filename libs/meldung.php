@@ -46,7 +46,7 @@ class Meldung
         $t = new Termin;
         $t->load_by_id($this->Termin);
 
-        $str = sprintf("Melde-ID: %d, Termin: (%d) %s %s %s, User: %s",
+        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>",
         $this->Index,
         $this->Termin,
         $t->Name,
