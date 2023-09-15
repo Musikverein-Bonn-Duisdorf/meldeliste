@@ -94,7 +94,6 @@ class Termin
         if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
         if($this->published != $old->published) $str.=", published: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
         if($this->open != $old->open) $str.=", open: ".$old->open." &rArr; <b>".$this->open."</b>";
-        if($this->Wert != $old->Wert) $str.=", Wert: ".$old->Wert." &rArr; <b>".$this->Wert."</b>";
         if($GLOBALS['optionsDB']['showChildOption']) {
             if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
         }
