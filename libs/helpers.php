@@ -632,6 +632,8 @@ function validateLink($hash) {
         return true;
         break;
     }
+    $logentry = new Log;
+    $logentry->error("Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");
     return false;
 }
 function validateUser($login, $password) {
@@ -656,6 +658,8 @@ function validateUser($login, $password) {
             return true;
         }
     }
+    $logentry = new Log;
+    $logentry->error("Invalid password for username <b>".htmlspecialchars($login)."</b>.");
     return false;
 }
 
