@@ -1,5 +1,5 @@
 Contact: mailto:meldeliste@musikverein-bonn-duisdorf.de
-Expires: 2022-12-27T23:00:00.000Z
+Expires: 2024-09-16T23:00:00.000Z
 Acknowledgments: https://meldeliste.musikverein-bonn-duisdorf.de/security.php
 Preferred-Languages: de, en
 Canonical: https://meldeliste.musikverein-bonn-duisdorf.de/security.txt

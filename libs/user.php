@@ -69,6 +69,44 @@ class User
             break;
         }	
     }
+    
+    public function getChanges() {
+        $old = new User;
+        $old->load_by_id($this->Index);
+
+        $u = new User;
+        $u->load_by_id($this->User);
+        $t = new Termin;
+        $t->load_by_id($this->Termin);
+
+        $str = sprintf("User-ID: %d %s %s",
+        $this->Index,
+        $this->Vorname,
+        $this->Nachname
+        );
+        if($this->Vorname != $old->Vorname) $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
+        if($this->Nachname != $old->Nachname) $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+        if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
+        if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
+        if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
+        if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
+        if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
+        if($this->getMail != $old->getMail) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
+        if($this->Admin != $old->Admin) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
+        if($this->RegisterLead != $old->RegisterLead) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
+        if($this->Instrument != $old->Instrument) {
+            $newinstr = new Instrument;
+            $newinstr->load_by_id($this->Instrument);
+
+            $oldinstr = new Instrument;
+            $oldinstr->load_by_id($old->Instrument);
+            
+            $str.=", Instrument: ".$oldinstr->Name." &rArr; <b>".$newinstr->Name."</b>";
+        }
+
+        return $str;
+    }
+    
     public function getVars() {
         if(!$this->iName) {
             $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Index` = %d;',
@@ -126,9 +164,9 @@ class User
         if($this->activeLink == '') $this->generateLink();
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();

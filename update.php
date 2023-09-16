@@ -56,6 +56,7 @@ $para=array(
     'showMessageOfTheDay',
     'orgName',
     'orgNameShort',
+    'numberOfDaysInHistory'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -103,6 +104,7 @@ $desc=array(
     "Zeige Nachricht, die jedem Nutzen beim Einloggen angezeigt wird.",
     "Vereinsname",
     "Vereinsname (kurz)",
+"Anzahl der Tage in der Statistikberechnung"
 );
 $value=array(
     "w3-opacity",
@@ -150,6 +152,7 @@ $value=array(
     0,
     "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
     "Musikverein Duisdorf",
+365
 );
 $type=array(
     "string",
@@ -197,6 +200,7 @@ $type=array(
     "bool",
     "string",
     "string",
+    "uint"
 );
 
 $N = count($para);
@@ -223,21 +227,6 @@ for($i=0; $i<$N; $i++) {
         echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogInfo']."\"><div class=\"w3-col l2 m2 s2\">Skip</div><div class=\"w3-col l10 m10 s10\">".$para[$i]."</div></div>";
     }
 }
-
-
-$sql = sprintf("ALTER TABLE `%sUser` ADD `Email2` TEXT NOT NULL AFTER `Email`;",
-$GLOBALS['dbprefix']
-);
-echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
-mysqli_query($GLOBALS['conn'], $sql);
-
-
-$sql = sprintf("ALTER TABLE `%sTermine` ADD `EndDatum` DATE NULL AFTER `Datum`;",
-$GLOBALS['dbprefix']
-);
-echo "<div class=\"w3-row w3-container w3-border w3-border-black w3-padding ".$GLOBALS['optionsDB']['colorLogDBInsert']."\"><div class=\"w3-col l2 m2 s2\"><b>INSERT</b></div><div class=\"w3-col l10 m10 s10\">".htmlspecialchars($sql)."</div></div>";
-mysqli_query($GLOBALS['conn'], $sql);
-
 
 ?>
 

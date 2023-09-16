@@ -10,8 +10,9 @@ if(!requirePermission("perm_showLog")) die();
 </div>
 <?php
 $now = date("Y-m-d");
-$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(CASE WHEN `Type` = 0 THEN 1 END) AS `NumLogs0`, COUNT(CASE WHEN `Type` = 1 THEN 1 END) AS `NumLogs1`, COUNT(CASE WHEN `Type` = 2 THEN 1 END) AS `NumLogs2`, COUNT(CASE WHEN `Type` = 3 THEN 1 END) AS `NumLogs3`, COUNT(CASE WHEN `Type` = 4 THEN 1 END) AS `NumLogs4`, COUNT(CASE WHEN `Type` = 5 THEN 1 END) AS `NumLogs5`, COUNT(CASE WHEN `Type` = 6 THEN 1 END) AS `NumLogs6`, COUNT(CASE WHEN `Type` = 7 THEN 1 END) AS `NumLogs7` FROM  `%sLog` GROUP BY DATE(`Timestamp`) ORDER BY `LogDate` DESC LIMIT 365;',
-$GLOBALS['dbprefix']
+$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(CASE WHEN `Type` = 0 THEN 1 END) AS `NumLogs0`, COUNT(CASE WHEN `Type` = 1 THEN 1 END) AS `NumLogs1`, COUNT(CASE WHEN `Type` = 2 THEN 1 END) AS `NumLogs2`, COUNT(CASE WHEN `Type` = 3 THEN 1 END) AS `NumLogs3`, COUNT(CASE WHEN `Type` = 4 THEN 1 END) AS `NumLogs4`, COUNT(CASE WHEN `Type` = 5 THEN 1 END) AS `NumLogs5`, COUNT(CASE WHEN `Type` = 6 THEN 1 END) AS `NumLogs6`, COUNT(CASE WHEN `Type` = 7 THEN 1 END) AS `NumLogs7` FROM  `%sLog` GROUP BY DATE(`Timestamp`) ORDER BY `LogDate` DESC LIMIT %d;',
+$GLOBALS['dbprefix'],
+$GLOBALS['optionsDB']['numberOfDaysInHistory']
 );
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
@@ -69,8 +70,9 @@ function drawBasic() {
 
 
 <?php
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 AND `Datum` BETWEEN NOW() - INTERVAL 365 DAY AND NOW() ORDER BY `Datum`;",
-    $GLOBALS['dbprefix']
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 AND `Datum` BETWEEN NOW() - INTERVAL %d DAY AND NOW() ORDER BY `Datum`;",
+    $GLOBALS['dbprefix'],
+    $GLOBALS['optionsDB']['numberOfDaysInHistory']
     );
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
 sqlerror();
