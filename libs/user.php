@@ -176,6 +176,8 @@ class User
             $this->update();
         }
         else {
+            $this->Vorname = htmlentities(trim($this->Vorname));
+            $this->Nachname = htmlentities(trim($this->Nachname));
             $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
