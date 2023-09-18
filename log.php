@@ -3,10 +3,7 @@ session_start();
 $_SESSION['page']='log';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
-/* $sql = sprintf('SELECT * FROM `User`;'); */
-/* $dbr = mysqli_query($conn, $sql); */
-/* sqlerror(); */
+if(!requirePermission("perm_showLog")) die();
 ?>
 <div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Log</h2>

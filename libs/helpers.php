@@ -252,10 +252,6 @@ function instrumentOptionAll($val) {
     return $str;
 }
 
-function isAdmin() {
-    return $_SESSION['admin'];
-}
-
 function loadconfig() {
     $sql = sprintf('SELECT * FROM `%sconfig`;',
 		   $GLOBALS['dbprefix']
@@ -267,6 +263,12 @@ function loadconfig() {
         $optionsDB += [$row['Parameter'] => $row['Value']];
     }
     return $optionsDB;
+}
+
+function loadPermissions($user) {
+    $p = new Permissions;
+    $p->load_by_user($user);
+    return $p;
 }
 
 function loggedIn() {
@@ -561,6 +563,18 @@ function requireAdmin() {
     if(!$_SESSION['admin']) die("Admin permissions required.");
 }
 
+function requirePermission($perm) {
+    $P = new Permissions;
+    $P->load_by_user($_SESSION['userid']);
+    return $P->getPermission($perm);
+}
+
+function isAdmin() {
+    $P = new Permissions;
+    $P->load_by_user($_SESSION['userid']);
+    return $P->getAdmin();
+}
+
 function sql2time($time) {
     if($time != '') {
         return sql2timeRaw($time)." Uhr";
@@ -629,8 +643,8 @@ function validateLink($hash) {
         $logentry = new Log;
         $logentry->info("Login via Link.");
         recordLogin();
+        $_SESSION['permissions'] = loadPermissions($row['Index']);
         return true;
-        break;
     }
     $logentry = new Log;
     $logentry->error("Login not successful. Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");
@@ -655,6 +669,8 @@ function validateUser($login, $password) {
             $logentry = new Log;
             $logentry->info("Login via Password.");
             recordLogin();
+            $_SESSION['permissions'] = loadPermissions($row['Index']);
+            var_dump($_SESSION['permissions']);
             return true;
         }
     }
