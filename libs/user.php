@@ -80,7 +80,7 @@ class User
         $t = new Termin;
         $t->load_by_id($this->Termin);
 
-        $str = sprintf("User-ID: %d %s %s",
+        $str = sprintf("User-ID: %d <b>%s %s</b>",
         $this->Index,
         $this->Vorname,
         $this->Nachname
@@ -121,7 +121,7 @@ class User
                 $this->iName = $row['Name'];
             }
         }
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, RefID: %d, Login: %s, Mitglied: %s, Instrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
+        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%d</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%d</b>, LastLogin: <b>%s</b>",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
