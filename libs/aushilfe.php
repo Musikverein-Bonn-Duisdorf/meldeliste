@@ -29,6 +29,7 @@ class Aushilfe
             $this->_data[$key] = trim($val);
             break;
         default:
+            $this->_data[$key] = $val;
             break;
         }	
     }
