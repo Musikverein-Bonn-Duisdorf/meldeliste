@@ -38,10 +38,10 @@ class User
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = $val;
             break;
 	    case 'Vorname':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = $val;
             break;
 	    case 'Passhash':
             $this->_data[$key] = $val;
@@ -80,13 +80,19 @@ class User
         $t = new Termin;
         $t->load_by_id($this->Termin);
 
-        $str = sprintf("User-ID: %d %s %s",
+        $str = sprintf("User-ID: %d <b>%s %s</b>",
         $this->Index,
         $this->Vorname,
         $this->Nachname
         );
-        if($this->Vorname != $old->Vorname) $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
-        if($this->Nachname != $old->Nachname) $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+        if($this->Vorname != $old->Vorname) {
+            $this->Vorname = htmlentities(trim($this->Vorname));
+            $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
+        }
+        if($this->Nachname != $old->Nachname) {
+            $this->Nachname = htmlentities(trim($this->Nachname));
+            $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+        }
         if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
         if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
         if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
@@ -121,7 +127,7 @@ class User
                 $this->iName = $row['Name'];
             }
         }
-        return sprintf("User-ID: %d, Vorname: %s, Nachname: %s, RefID: %d, Login: %s, Mitglied: %s, Instrument: %s, Email: %s, Email2: %s, Mailverteiler: %s, Admin: %s, RegisterLead: %d, LastLogin: %s",
+        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%d</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%d</b>, LastLogin: <b>%s</b>",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
@@ -170,6 +176,8 @@ class User
             $this->update();
         }
         else {
+            $this->Vorname = htmlentities(trim($this->Vorname));
+            $this->Nachname = htmlentities(trim($this->Nachname));
             $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
