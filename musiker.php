@@ -15,6 +15,12 @@ if(isset($_POST['insert'])) {
         }
     }
 }
+if(isset($_POST['deactivate'])) {
+    $n = new User;
+    $n->load_by_id($_POST['Index']);
+    $n->Instrument=0;
+    $n->save();
+}
 if(isset($_POST['delete'])) {
     $n = new User;
     $n->load_by_id($_POST['Index']);
