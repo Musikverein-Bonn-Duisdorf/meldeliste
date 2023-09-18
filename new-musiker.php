@@ -8,6 +8,10 @@ else {
     $_SESSION['page']='newmusiker';
     $_SESSION['adminpage']=true;
 }
+if(requirePermission("perm_editUser")) {
+    
+}
+
 include "common/header.php";
 $fill = false;
 if(isset($_POST['id'])) {
@@ -84,7 +88,7 @@ if($fill && ($n->login || $edit == 3)) {
       <label>Mailverteiler</label>
     </div>
     <?php
-      if($_SESSION['admin']) {
+      if(requirePermission("perm_editUsers")) {
       ?>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="Mitglied" value="0">
