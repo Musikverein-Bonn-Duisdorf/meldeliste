@@ -45,6 +45,7 @@ if($u->hasInstruments()) { ?>
       <a title="neuen Musiker anlegen" alt="neuen Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>"><i class="fas fa-plus-circle"></i> Musiker anlegen</a>
       <a title="neuen Termin erstellen" alt="neuen Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newtermin');?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
       <a title="Email versenden" alt="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mail');?>"><i class="fas fa-envelope-open-text"></i> Email versenden</a>
+      <a title="Userliste" alt="Userliste" href="users.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('users');?>"><i class="fas fa-users"></i> Userliste</a>
       <a title="Konfiguration" alt="Konfiguration" href="config-menu.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('config');?>"><i class="fas fa-cogs"></i> Konfiguration</a>
       <a title="Instrumente" alt="Instrumente" href="instruments.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('instruments');?>"><i class="fas fa-drum"></i> Instrumente</a>
       <a title="Statistik" alt="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('evaluate');?>"><i class="fas fa-chart-pie"></i> Statistik</a>
