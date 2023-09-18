@@ -8,6 +8,8 @@ if(!requirePermission("perm_showLog")) die();
 <div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Log</h2>
 </div>
+<input class="w3-input w3-border w3-padding" type="text" placeholder="Log durchsuchen..." id="filterString" onkeyup="filterLog()">
+<div id="Liste">
 <?php
 $now = date("Y-m-d");
 $sql = sprintf('SELECT `Index` FROM `%sLog` ORDER BY `Index` DESC LIMIT 1000;',
@@ -21,6 +23,7 @@ while($row = mysqli_fetch_array($dbr)) {
     echo $M->printTableLine();
 }
 ?>
+</div>
 <script>
 Element.prototype.appendAfter = function (element) {
     element.parentNode.insertBefore(this, element.nextSibling);
@@ -57,6 +60,9 @@ Element.prototype.appendAfter = function (element) {
 var interval = setInterval(getLog, 5000);
 
 </script>
+
+<script src="js/filterLog.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+
 <?php
 include "common/footer.php";
 ?>

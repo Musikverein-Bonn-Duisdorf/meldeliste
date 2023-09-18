@@ -40,14 +40,42 @@ class Loan
         return true;
     }
 
-    public function getVars() {
+    public function getChanges() {
+        $old = new Loan;
+        $old->load_by_id($this->Index);
+
+        $u = new User;
+        $u->load_by_id($this->User);
+
         $Instrument = new Instruments;
         $Instrument->load_by_id($this->Instrument);
         
-        return sprintf("Loan-ID: %d, Instrument: %d (%s), StartDate: %s, EndDate: %s, ContractFile: %s",
+        $str = sprintf("Loan-ID: %d, Instrument: (%d) <b>%s</b>, User: (%d) <b>%s</b>",
         $this->Index,
         $this->Instrument,
         $Instrument->getInstrumentName(),
+        $this->User,
+        $u->getName()
+        );
+        if($this->StartDate != $old->StartDate) $str.=", StartDate: ".germanDate($old->StartDate,0)." &rArr; <b>".germanDate($this->StartDate,0)."</b>";
+        if($this->EndDate != $old->EndDate) $str.=", EndDate: ".germanDate($old->EndDate,0)." &rArr; <b>".germanDate($this->EndDate,0)."</b>";
+
+        return $str;
+    }
+
+    public function getVars() {
+        $Instrument = new Instruments;
+        $Instrument->load_by_id($this->Instrument);
+
+        $u = new User;
+        $u->load_by_id($this->User);
+        
+        return sprintf("Loan-ID: %d, Instrument: (%d) <b>%s</b>, User: (%d) <b>%s</b>, StartDate: <b>%s</b>, EndDate: <b>%s</b>, ContractFile: <b>%s</b>",
+        $this->Index,
+        $this->Instrument,
+        $Instrument->getInstrumentName(),
+        $this->User,
+        $u->getName(),
         germanDate($this->StartDate,0),
         germanDate($this->EndDate,0),
         $Instrument->ContractFile
@@ -57,9 +85,9 @@ class Loan
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();

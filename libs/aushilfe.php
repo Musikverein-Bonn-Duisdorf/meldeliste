@@ -29,8 +29,37 @@ class Aushilfe
             $this->_data[$key] = trim($val);
             break;
         default:
+            $this->_data[$key] = $val;
             break;
         }	
+    }
+
+    public function getChanges() {
+        $old = new Aushilfe;
+        $old->load_by_id($this->Index);
+
+        $t = new Termin;
+        $t->load_by_id($this->Termin);
+
+        $str = sprintf("Aushilfen-ID: %d <b>%s</b>, Termin: (%d) <b>%s</b>",
+        $this->Index,
+        $this->Name,
+        $this->Termin,
+        $t->Name
+        );
+        if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
+        if($this->Nachname != $old->Nachname) $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+        if($this->Instrument != $old->Instrument) {
+            $newinstr = new Instrument;
+            $newinstr->load_by_id($this->Instrument);
+
+            $oldinstr = new Instrument;
+            $oldinstr->load_by_id($old->Instrument);
+            
+            $str.=", Instrument: ".$oldinstr->Name." &rArr; <b>".$newinstr->Name."</b>";
+        }
+
+        return $str;
     }
 
     public function getVars() {
@@ -50,7 +79,7 @@ class Aushilfe
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
             $this->update();
         }
         else {

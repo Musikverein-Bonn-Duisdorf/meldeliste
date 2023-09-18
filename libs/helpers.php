@@ -433,6 +433,7 @@ function printOrchestra($tid, $scale) {
         }
 
         foreach($sortedInstruments as $instrument) {
+            $skip = false;
             foreach($aUser AS $user) {
                 // while($user = mysqli_fetch_array($dbuser)) {
                 $match = null;
