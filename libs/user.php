@@ -38,10 +38,10 @@ class User
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Nachname':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = $val;
             break;
 	    case 'Vorname':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = $val;
             break;
 	    case 'Passhash':
             $this->_data[$key] = $val;
@@ -85,8 +85,14 @@ class User
         $this->Vorname,
         $this->Nachname
         );
-        if($this->Vorname != $old->Vorname) $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
-        if($this->Nachname != $old->Nachname) $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+        if($this->Vorname != $old->Vorname) {
+            $this->Vorname = htmlentities(trim($this->Vorname));
+            $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
+        }
+        if($this->Nachname != $old->Nachname) {
+            $this->Nachname = htmlentities(trim($this->Nachname));
+            $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+        }
         if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
         if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
         if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
