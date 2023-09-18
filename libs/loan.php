@@ -46,6 +46,9 @@ class Loan
 
         $u = new User;
         $u->load_by_id($this->User);
+
+        $Instrument = new Instruments;
+        $Instrument->load_by_id($this->Instrument);
         
         $str = sprintf("Loan-ID: %d, Instrument: (%d) <b>%s</b>, User: (%d) <b>%s</b>",
         $this->Index,
