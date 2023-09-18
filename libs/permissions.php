@@ -14,7 +14,8 @@ class Permissions
         'perm_sendEmail' => null,
         'perm_showResponse' => null,
         'perm_editResponse' => null,
-        'perm_editConfig' => null
+        'perm_editConfig' => null,
+        'perm_editPermissions' => null
     );
     public function __get($key) {
         switch($key) {
@@ -31,6 +32,7 @@ class Permissions
 	    case 'perm_showResponse':
 	    case 'perm_editResponse':
 	    case 'perm_editConfig':
+	    case 'perm_editPermissions':
             return $this->_data[$key];
             break;
         default:
@@ -52,6 +54,7 @@ class Permissions
 	    case 'perm_showResponse':
 	    case 'perm_editResponse':
 	    case 'perm_editConfig':
+	    case 'perm_editPermissions':
             $this->_data[$key] = (int)$val;
             break;
         default:
@@ -82,6 +85,7 @@ class Permissions
         if($this->perm_showResponse != $old->perm_showResponse) $str.=", perm_showResponse: ".$old->perm_showResponse." &rArr; <b>".$this->perm_showResponse."</b>";
         if($this->perm_editResponse != $old->perm_editResponse) $str.=", perm_editResponse: ".$old->perm_editResponse." &rArr; <b>".$this->perm_editResponse."</b>";
         if($this->perm_editConfig != $old->perm_editConfig) $str.=", perm_editConfig: ".$old->perm_editConfig." &rArr; <b>".$this->perm_editConfig."</b>";
+        if($this->perm_editPermissions != $old->perm_editPermissions) $str.=", perm_editPermissions: ".$old->perm_editPermissions." &rArr; <b>".$this->perm_editPermissions."</b>";
 
         return $str;
     }
@@ -89,7 +93,7 @@ class Permissions
     public function getVars() {
         $u = new User;
         $u->load_by_id($this->User);
-        return sprintf("Permission-ID: %d, User: (%d) <b>%s</b>, perm_showHiddenAppmnts: <b>%s</b>, perm_showUsers: <b>%s</b>, perm_editUsers: <b>%s</b>, perm_editAppmnts: <b>%s</b>, perm_showLog: <b>%s</b>, perm_showInstruments: <b>%s</b>, perm_editInstruments: <b>%s</b>, perm_sendEmail: <b>%s</b>, perm_showResponse: <b>%s</b>, perm_editResponse: <b>%s</b>, perm_editConfig: <b>%s</b>",
+        return sprintf("Permission-ID: %d, User: (%d) <b>%s</b>, perm_showHiddenAppmnts: <b>%s</b>, perm_showUsers: <b>%s</b>, perm_editUsers: <b>%s</b>, perm_editAppmnts: <b>%s</b>, perm_showLog: <b>%s</b>, perm_showInstruments: <b>%s</b>, perm_editInstruments: <b>%s</b>, perm_sendEmail: <b>%s</b>, perm_showResponse: <b>%s</b>, perm_editResponse: <b>%s</b>, perm_editConfig: <b>%s</b>, perm_editPermissions: <b>%s</b>",
         $this->Index,
         $this->User,
         $u->getName(),
@@ -104,6 +108,7 @@ class Permissions
         bool2string($this->perm_showResponse),
         bool2string($this->perm_editResponse),
         bool2string($this->perm_editConfig),
+        bool2string($this->perm_editPermissions)
         );        
     }
     
@@ -127,7 +132,7 @@ class Permissions
     }
     
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_showInstruments`, `perm_editInstruments`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_showInstruments`, `perm_editInstruments`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -140,7 +145,8 @@ class Permissions
                        $this->perm_sendEmail,
                        $this->perm_showResponse,
                        $this->perm_editResponse,
-                       $this->perm_editConfig
+        $this->perm_editConfig,
+                       $this->perm_editPermissions
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -150,7 +156,7 @@ class Permissions
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_showInstruments` = "%d", `perm_editInstruments` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_showInstruments` = "%d", `perm_editInstruments` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d" WHERE `Index` = "%d";',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -164,6 +170,7 @@ class Permissions
                        $this->perm_showResponse,
                        $this->perm_editResponse,
                        $this->perm_editConfig,
+                       $this->perm_editPermissions,
                        $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -236,6 +243,7 @@ class Permissions
         if($this->perm_showResponse) return true;
         if($this->perm_editResponse) return true;
         if($this->perm_editConfig) return true;
+        if($this->perm_editPermissions) return true;
     }
     
     public function getPermission($perm) {
@@ -262,6 +270,8 @@ class Permissions
             return $this->perm_editResponse;
 	    case 'perm_editConfig':
             return $this->perm_editConfig;
+	    case 'perm_editPermissions':
+            return $this->perm_editPermissions;
         default:
             break;
         }

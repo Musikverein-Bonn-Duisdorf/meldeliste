@@ -8,11 +8,11 @@ else {
     $_SESSION['page']='newmusiker';
     $_SESSION['adminpage']=true;
 }
+include "common/header.php";
 if(requirePermission("perm_editUser")) {
     
 }
 
-include "common/header.php";
 $fill = false;
 if(isset($_POST['id'])) {
     $n = new User;

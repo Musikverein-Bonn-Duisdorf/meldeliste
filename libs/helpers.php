@@ -671,7 +671,6 @@ function validateUser($login, $password) {
             $logentry->info("Login via Password.");
             recordLogin();
             $_SESSION['permissions'] = loadPermissions($row['Index']);
-            var_dump($_SESSION['permissions']);
             return true;
         }
     }
