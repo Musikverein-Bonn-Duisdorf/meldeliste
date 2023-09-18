@@ -505,5 +505,95 @@ class User
       </div>
         <?php
     }
+
+
+
+    public function printUserTableLine() {
+        $main = new div;
+        $main->class="w3-row w3-padding w3-mobile w3-border-bottom w3-border-black";
+        $main->class=$GLOBALS['optionsDB']['HoverEffect'];
+        $main->onclick="document.getElementById('id".$this->Index."').style.display='block'";
+        if(!$this->Instrument) {
+            $main->class=$GLOBALS['optionsDB']['colorDisabled'];
+        }
+        echo $main->open();
+        echo "  <div class=\"w3-col l1 w3-container\">".$this->Index."</div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
+        echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->getLastVisit(), 1)."</div>\n";
+        echo $main->close();
+        ?>
+        <div id="id<?php echo $this->Index; ?>" class="w3-modal">
+        <div class="w3-modal-content">
+
+        <header class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>"> 
+      <span onclick="document.getElementById('id<?php echo $this->Index; ?>').style.display='none'" 
+      class="w3-button w3-display-topright">&times;</span>
+      <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>
+    </header>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">userID:</div><div class="w3-col l6"><b><?php echo $this->Index; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $this->iName; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($this->Mitglied); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
+    </div>
+      <?php
+      if($_SESSION['admin']) {
+      ?>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Admin:</div><div class="w3-col l6"><b><?php echo bool2string($this->Admin); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+          <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
+    </div>
+      <?php
+      }
+      ?>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">zweite Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email2; ?>"><?php echo $this->Email2; ?></a></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $this->login; ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($this->LastLogin, 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Letzte Anwesenheit:</div><div class="w3-col l6"><b><?php echo germanDate($this->getLastVisit(), 1); ?></b></div>
+    </div>
+    <div class="w3-container w3-row w3-margin">
+      <div class="w3-col l6">Meldequote:</div><div class="w3-col l6"><b><?php echo $this->getMeldeQuote()*100; ?> %</b></div>
+    </div>
+      <?php
+      if($this->RegisterLead) {
+          $r = new Register;
+          $r->load_by_id($this->getRegister());
+      ?>
+          <div class="w3-container w3-row w3-margin">
+          <div class="w3-col l6">Registerführer:</div><div class="w3-col l6"><b><?php echo $r->Name; ?></b></div>
+          </div>
+      <?php
+      }
+      ?>
+      <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
+      <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
+      </form>
+      </div>
+      </div>
+        <?php
+    }
 };
 ?>
