@@ -58,12 +58,61 @@ class Permissions
             break;
         }	
     }
+
+    public function getChanges() {
+        $old = new Permissions;
+        $old->load_by_id($this->Index);
+
+        $u = new User;
+        $u->load_by_id($this->User);
+
+        $str = sprintf("Permission-ID: %d, User: (%d) <b>%s</b>",
+        $this->Index,
+        $this->User,
+        $u->getName()
+        );
+        if($this->perm_showHiddenAppmnts != $old->perm_showHiddenAppmnts) $str.=", perm_showHiddenAppmnts: ".$old->perm_showHiddenAppmnts." &rArr; <b>".$this->perm_showHiddenAppmnts."</b>";
+        if($this->perm_showUsers != $old->perm_showUsers) $str.=", perm_showUsers: ".$old->perm_showUsers." &rArr; <b>".$this->perm_showUsers."</b>";
+        if($this->perm_editUsers != $old->perm_editUsers) $str.=", perm_editUsers: ".$old->perm_editUsers." &rArr; <b>".$this->perm_editUsers."</b>";
+        if($this->perm_editAppmnts != $old->perm_editAppmnts) $str.=", perm_editAppmnts: ".$old->perm_editAppmnts." &rArr; <b>".$this->perm_editAppmnts."</b>";
+        if($this->perm_showLog != $old->perm_showLog) $str.=", perm_showLog: ".$old->perm_showLog." &rArr; <b>".$this->perm_showLog."</b>";
+        if($this->perm_showInstruments != $old->perm_showInstruments) $str.=", perm_showInstruments: ".$old->perm_showInstruments." &rArr; <b>".$this->perm_showInstruments."</b>";
+        if($this->perm_editInstruments != $old->perm_editInstruments) $str.=", perm_editInstruments: ".$old->perm_editInstruments." &rArr; <b>".$this->perm_editInstruments."</b>";
+        if($this->perm_sendEmail != $old->perm_sendEmail) $str.=", perm_sendEmail: ".$old->perm_sendEmail." &rArr; <b>".$this->perm_sendEmail."</b>";
+        if($this->perm_showResponse != $old->perm_showResponse) $str.=", perm_showResponse: ".$old->perm_showResponse." &rArr; <b>".$this->perm_showResponse."</b>";
+        if($this->perm_editResponse != $old->perm_editResponse) $str.=", perm_editResponse: ".$old->perm_editResponse." &rArr; <b>".$this->perm_editResponse."</b>";
+        if($this->perm_editConfig != $old->perm_editConfig) $str.=", perm_editConfig: ".$old->perm_editConfig." &rArr; <b>".$this->perm_editConfig."</b>";
+
+        return $str;
+    }
+
+    public function getVars() {
+        $u = new User;
+        $u->load_by_id($this->User);
+        return sprintf("Permission-ID: %d, User: (%d) <b>%s</b>, perm_showHiddenAppmnts: <b>%s</b>, perm_showUsers: <b>%s</b>, perm_editUsers: <b>%s</b>, perm_editAppmnts: <b>%s</b>, perm_showLog: <b>%s</b>, perm_showInstruments: <b>%s</b>, perm_editInstruments: <b>%s</b>, perm_sendEmail: <b>%s</b>, perm_showResponse: <b>%s</b>, perm_editResponse: <b>%s</b>, perm_editConfig: <b>%s</b>",
+        $this->Index,
+        $this->User,
+        $u->getName(),
+        bool2string($this->perm_showHiddenAppmnts),
+        bool2string($this->perm_showUsers),
+        bool2string($this->perm_editUsers),
+        bool2string($this->perm_editAppmnts),
+        bool2string($this->perm_showLog),
+        bool2string($this->perm_showInstruments),
+        bool2string($this->perm_editInstruments),
+        bool2string($this->perm_sendEmail),
+        bool2string($this->perm_showResponse),
+        bool2string($this->perm_editResponse),
+        bool2string($this->perm_editConfig),
+        );        
+    }
+    
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();
