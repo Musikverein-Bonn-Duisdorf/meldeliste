@@ -55,7 +55,7 @@ class User
 	    case 'singleUsePW':
 	    case 'RegisterLead':
 	    case 'Deleted':
-            $this->_data[$key] = (bool)$val;
+            $this->_data[$key] = (int)$val;
             break;
 	    case 'login':
 	    case 'iName':
@@ -66,6 +66,7 @@ class User
             $this->_data[$key] = trim($val);
             break;
         default:
+            $this->_data[$key] = $val;
             break;
         }	
     }
@@ -355,7 +356,7 @@ class User
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            $this->__set($key, $val);
         }
     }
     public function load_by_id($Index) {
