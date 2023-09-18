@@ -34,9 +34,13 @@ class Aushilfe
     }
 
     public function getVars() {
+        $t = new Termin;
+        $t->load_by_id($this->Termin);
         $this->getInstrumentName();
-        return sprintf("Aushilfen-ID: %d, Name: %s, Instrument: %s",
+        return sprintf("Aushilfen-ID: %d, Termin: (%d) <b>%s</b>, Name: <b>%s</b>, Instrument: <b>%s</b>",
         $this->Index,
+        $this->Termin,
+        $t->Name,
         $this->getName(),
         $this->iName,
         );
@@ -50,9 +54,9 @@ class Aushilfe
             $this->update();
         }
         else {
+            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->insert();
         }
     }
 
