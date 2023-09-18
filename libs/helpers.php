@@ -294,6 +294,31 @@ function meldeWert($val) {
     }
 }
 
+function meldeSymbol($val) {
+    $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
+    $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
+
+    $div = new div;
+    $div->class="w3-button w3-border w3-border-black w3-center";
+    switch($val) {
+	case 1:
+        $div->class=$colors[0];
+        $div->body=$symbols[0];
+        break;
+	case 2:
+        $div->class=$colors[1];
+        $div->body=$symbols[1];
+        break;
+	case 3:
+        $div->class=$colors[2];
+        $div->body=$symbols[2];
+        break;
+	default:
+        break;
+    }
+    return $div->print();
+}
+
 function mkAdmin() {
     $_SESSION['userid'] = 0;
     $_SESSION['admin'] = true;
@@ -621,6 +646,8 @@ function validateLink($hash) {
         $_SESSION['permissions'] = loadPermissions($row['Index']);
         return true;
     }
+    $logentry = new Log;
+    $logentry->error("Login not successful. Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");
     return false;
 }
 function validateUser($login, $password) {
@@ -647,6 +674,8 @@ function validateUser($login, $password) {
             return true;
         }
     }
+    $logentry = new Log;
+    $logentry->error("Login not successful. Invalid password for username <b>".htmlspecialchars($login)."</b>.");
     return false;
 }
 
