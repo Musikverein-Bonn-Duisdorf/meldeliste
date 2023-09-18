@@ -110,20 +110,32 @@ class Usermail {
             else {
                 if($this->register > 0) {
                     $register = sprintf("AND `Register` = %d", $this->register);
-                }
-                if($this->memberonly) {
-                    $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1 %s;",
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $register);
+                    if($this->memberonly) {
+                        $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1 %s;",
+                        $GLOBALS['dbprefix'],
+                        $GLOBALS['dbprefix'],
+                        $GLOBALS['dbprefix'],
+                        $register);
+                    }
+                    else {
+                        $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1 %s;",
+                        $GLOBALS['dbprefix'],
+                        $GLOBALS['dbprefix'],
+                        $GLOBALS['dbprefix'],
+                        $register);
+                    }
                 }
                 else {
-                    $sql = sprintf("SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1 %s;",
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $register);
+                    if($this->memberonly) {
+                        $sql = sprintf("SELECT * FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1;",
+                        $GLOBALS['dbprefix']
+                        );
+                    }
+                    else {
+                        $sql = sprintf("SELECT * FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1;",
+                        $GLOBALS['dbprefix']
+                        );
+                    }
                 }
             }
         }
