@@ -464,20 +464,23 @@ class User
       <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
     </div>
       <?php
-      if($_SESSION['admin']) {
+      if(requirePermission("perm_showUsers")) {
       ?>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Admin:</div><div class="w3-col l6"><b><?php echo bool2string($this->Admin); ?></b></div>
-    </div>
     <div class="w3-container w3-row w3-margin">
           <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
     </div>
+    <div class="w3-container w3-margin">
+      <div class="w3-col l6">Berechtigungen:</div>
       <?php
+         $p = new Permissions;
+         $p->load_by_user($this->Index);
+         echo $p->printShort();
       }
       ?>
+    </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
     </div>
@@ -554,20 +557,23 @@ class User
       <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
     </div>
       <?php
-      if($_SESSION['admin']) {
+      if(requirePermission("perm_showUsers")) {
       ?>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Admin:</div><div class="w3-col l6"><b><?php echo bool2string($this->Admin); ?></b></div>
-    </div>
     <div class="w3-container w3-row w3-margin">
           <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
     </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
     </div>
+    <div class="w3-container w3-margin">
+      <div class="w3-col l6">Berechtigungen:</div>
       <?php
+         $p = new Permissions;
+         $p->load_by_user($this->Index);
+         echo $p->printShort();
       }
       ?>
+    </div>
     <div class="w3-container w3-row w3-margin">
       <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
     </div>
