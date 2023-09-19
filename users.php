@@ -50,7 +50,7 @@ $nMusiker = $row['Count'];
 </div>
 
 <div>
-<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterMusiker()">
+<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterLog()">
 </div>
 <div id="Liste">
 <?php
@@ -66,7 +66,7 @@ while($row = mysqli_fetch_array($dbr)) {
 }
 ?>
 </div>
-<script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/filterLog.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
 <?php
 include "common/footer.php";
