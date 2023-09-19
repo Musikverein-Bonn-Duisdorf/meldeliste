@@ -3,7 +3,8 @@ session_start();
 $_SESSION['page']='newtermin';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
+if(!requirePermission("perm_editAppmnts")) die();
+
 $fill = false;
 if(isset($_POST['id'])) {
     $n = new Termin;

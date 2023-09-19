@@ -9,6 +9,7 @@ else {
     $_SESSION['adminpage']=true;
 }
 include "common/header.php";
+
 $fill = false;
 if(isset($_POST['id'])) {
     $n = new User;
@@ -23,7 +24,7 @@ if(isset($_POST['mode'])) {
         $edit = 2;
     }
 }
-if($_SESSION['admin']) {
+if(requirePermission("perm_editUser")) {
     $edit = 3;
 }
 
@@ -45,8 +46,10 @@ else {
     <label>Vorname</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".$n->Vorname."\" ".$disabled; ?>>
     <label>Nachname</label>
-    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\" ".$disabled; ?>>
+<?php if(requirePermission("perm_editUsers")) { ?>
+        <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\" ".$disabled; ?>>
 <label>Mitglieds-Nr. (optional)</label>
+                   <?php } ?>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="RefID" type="number" placeholder="Vereins-Nr." <?php if($fill) echo "value=\"".$n->RefID."\" ".$disabled; ?>>
     <label>Emailadressen</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
@@ -84,17 +87,12 @@ if($fill && ($n->login || $edit == 3)) {
       <label>Mailverteiler</label>
     </div>
     <?php
-      if($_SESSION['admin']) {
+      if(requirePermission("perm_editUsers")) {
       ?>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="Mitglied" value="0">
       <input class="w3-check" type="checkbox" name="Mitglied" value="1" <?php if($fill && (bool)$n->Mitglied){ echo "checked ";} ?>>
       <label>Mitglied</label>
-    </div>
-    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
-      <input type="hidden" name="Admin" value="0">
-      <input class="w3-check" type="checkbox" name="Admin" value="1" <?php if($fill && (bool)$n->Admin) echo "checked "; ?>>
-      <label>Admin</label>
     </div>
 <?php   if($GLOBALS['optionsDB']['showRegisterLead']) { ?>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">

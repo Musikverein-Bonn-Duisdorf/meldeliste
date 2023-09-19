@@ -3,6 +3,7 @@ session_start();
 $_SESSION['page']='musiker';
 $_SESSION['adminpage']=true;
 include "common/header.php";
+if(!requirePermission("perm_showUsers")) die();
 
 if(isset($_POST['insert'])) {
     $n = new User;
@@ -42,8 +43,7 @@ if(isset($_POST['newmail'])) {
         $n->newmail("");
     }
 }
-if($_SESSION['admin']) {
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1;',
+$sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
@@ -91,12 +91,6 @@ while($row = mysqli_fetch_array($dbr)) {
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
-<?php }
-else {
-?>
-    <meta http-equiv="refresh" content="0; URL=index.php" />
 <?php
-}
-
 include "common/footer.php";
 ?>

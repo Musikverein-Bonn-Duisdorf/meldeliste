@@ -3,7 +3,7 @@ session_start();
 $_SESSION['page']='meldungen';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
+if(!requirePermission("perm_showResponse")) die();
 
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">

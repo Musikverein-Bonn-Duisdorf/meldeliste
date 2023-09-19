@@ -3,7 +3,7 @@ session_start();
 $_SESSION['page']='update';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
+if(!requirePermission("perm_editConfig")) die();
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
     <h2>Updater</h2>
