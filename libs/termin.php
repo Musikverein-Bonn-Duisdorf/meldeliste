@@ -939,7 +939,7 @@ class Termin
             $btn->indent = $indent;
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if($this->open == false && $_SESSION['admin'] == false) {
+            if($this->open == false && requirePermission("perm_editResponse") == false) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -984,7 +984,7 @@ class Termin
             $btn->indent = $indent;
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if($this->open == false && $_SESSION['admin'] == false) {
+            if($this->open == false && requirePermission("perm_editResponse") == false) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -1030,7 +1030,7 @@ class Termin
 
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if(!$this->open && !$_SESSION['admin']) {
+            if(!$this->open && !requirePermission("perm_editResponse")) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -1079,7 +1079,7 @@ class Termin
 
             $btn->class="w3-col s3 m3 l3";
             $btn->class="w3-margin-left";
-            if(!$this->open && !$_SESSION['admin']) {
+            if(!$this->open && !requirePermission("perm_editResponse")) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
                         $str=$str.$btn->print();
@@ -1122,7 +1122,7 @@ class Termin
         $admStatusDiv->class="w3-col l1 m12 s12";
         $admStatusDiv->class="w3-row";
         $admStatusDiv->class="w3-mobile";
-        if($_SESSION['admin'] && $GLOBALS['optionsDB']['statusPerMail']) {
+        if(requirePermission("perm_sendEmail") && $GLOBALS['optionsDB']['statusPerMail']) {
             $admStatusDiv->tag="button";
             $admStatusDiv->class="w3-margin-top";
             $admStatusDiv->class="w3-btn";
@@ -1221,7 +1221,7 @@ class Termin
             $str=$str.$btnDiv->open();
             $indent++;
             if($this->Capacity) {
-                if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || $_SESSION['admin']) {
+                if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || requirePermission("perm_editResponse")) {
                     $str=$str.$this->makeButtons(2, $indent, $this->Wert);
                 }
                 else {
@@ -1391,7 +1391,7 @@ class Termin
                 $str=$str.$btnDiv->open();
                 $indent++;
                 if($s->Bedarf) {
-                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || $_SESSION['admin']) {
+                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || requirePermission("perm_editResponse")) {
                         $str=$str.$this->makeShiftButtonsUser(2, $indent, $s->Index, $m->Wert, $user);
                     }
                     else {
@@ -2201,22 +2201,20 @@ ORDER BY `Nachname`, `Vorname`;",
         $str=$str."<h2>".$this->Name."</h2>";
         $str=$str."</header>";
 
-        /* if($_SESSION['admin']) { */
-            $str = $str."<div>";
-            if($GLOBALS['optionsDB']['showOrchestraView']) {
-                $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
-                $str = $str."<div class=\"w3-container w3-hide-small w3-hide-medium\">\n";
-                $str = $str.printOrchestra($this->Index, 1);
-                $str = $str."</div>";
-                $str = $str."<div class=\"w3-container w3-hide-small w3-hide-large\">\n";
-                $str = $str.printOrchestra($this->Index, 0.6);
-                $str = $str."</div>";
-                $str = $str."<div class=\"w3-container w3-hide-large w3-hide-medium\">\n";
-                $str = $str.printOrchestra($this->Index, 0.4);
-                $str = $str."</div>";
-            }
+        $str = $str."<div>";
+        if($GLOBALS['optionsDB']['showOrchestraView']) {
+            $str = $str."<div class=\"w3-container w3-margin-top\"><b>Besetzung</b></div>\n";
+            $str = $str."<div class=\"w3-container w3-hide-small w3-hide-medium\">\n";
+            $str = $str.printOrchestra($this->Index, 1);
             $str = $str."</div>";
-        /* } */
+            $str = $str."<div class=\"w3-container w3-hide-small w3-hide-large\">\n";
+            $str = $str.printOrchestra($this->Index, 0.6);
+            $str = $str."</div>";
+            $str = $str."<div class=\"w3-container w3-hide-large w3-hide-medium\">\n";
+            $str = $str.printOrchestra($this->Index, 0.4);
+            $str = $str."</div>";
+        }
+        $str = $str."</div>";
         
         $str = $str."<div class=\"w3-container w3-margin-top\"><div class=\"w3-row\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\"><b>Zusagen</b></div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
         $actcol=2;
@@ -2242,7 +2240,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $str=$str.$whoNo;
         $str = $str."</div>";
 
-        if($_SESSION['admin']) {
+        if(requirePermission("perm_editResponse")) {
                     $str = $str."<div class=\"w3-container w3-margin-top\"><b>noch nicht gemeldet</b></div>\n";
             $str = $str."<form class=\"w3-container w3-row\" action=\"termine.php\" method=\"POST\">";
             foreach($this->getMissingUsers() as &$missing) {
@@ -2481,7 +2479,7 @@ ORDER BY `Nachname`, `Vorname`;",
                 $str=$str.$btnDiv->open();
                 $indent++;
                 if($s->Bedarf) {
-                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || $_SESSION['admin']) {
+                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || requirePermission("perm_editResponse")) {
                         $str=$str.$this->makeShiftButtonsUser(2, $indent, $s->Index, $m->Wert, $user);
                     }
                     else {

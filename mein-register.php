@@ -33,7 +33,7 @@ while($row = mysqli_fetch_array($dbr)) {
     if($M->published > 0) {        
         echo $M->printMyResponseLine();
     }
-    elseif($_SESSION['admin']) {
+    elseif(requirePermission("perm_showHiddenAppmnts")) {
         echo $M->printMyResponseLine();
     }
     elseif($meldung) {

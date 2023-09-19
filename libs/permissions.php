@@ -327,5 +327,30 @@ class Permissions
         $str.=$main->close();        
         return $str;
     }
+
+    public function printShort() {
+        $str="";
+        $main = new div;
+        $main->class="w3-col l6 w3-row";
+        $str.=$main->open();
+
+        $size = count($this->_data);
+        $i = 0;
+        foreach ($this->_data as $key => $value) {
+            $i++;
+            if($key == "Index" || $key == "User") continue;
+            if($i == $size/2+1) break;
+            if($value) {
+                $div = new div;
+                $div->class="w3-col l4 w3-margin-right w3-margin-bottom w3-center";
+                $div->class=bool2color($value);
+                $div->body="<b>".substr($key,5)."</b>";
+                $str.=$div->print();
+            }
+        }
+ 
+        $str.=$main->close();        
+        return $str;
+    }
 };
 ?>
