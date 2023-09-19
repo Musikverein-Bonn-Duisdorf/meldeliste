@@ -31,7 +31,7 @@ if(isset($_POST['delete'])) {
     $n->load_by_id($_POST['Index']);
     $n->delete();
 }
-if($_SESSION['admin']) {
+if(requirePermission("perm_showInstruments")) {
     $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sInstruments`;',
     $GLOBALS['dbprefix']
     );

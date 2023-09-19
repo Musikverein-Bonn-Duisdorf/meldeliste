@@ -1,13 +1,11 @@
 <?php
 session_start();
 include 'common/include.php';
-/* mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn'])); */
-requireAdmin();
+if(!requirePermission("perm_sendEmail")) die();
 
 $target_dir = "uploads/";
 $filecount = count($_FILES['attachment']['name']);
 
-/* $file = $_FILES["attachment"]; */
 for ($i=0; $i < $filecount; $i++) {
     $file = $_FILES["attachment"]['name'][$i];
     $tmpfile = $_FILES["attachment"]['tmp_name'][$i];

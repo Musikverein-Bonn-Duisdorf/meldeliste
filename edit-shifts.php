@@ -3,7 +3,7 @@ session_start();
 $_SESSION['page']='shifts';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
+if(!requirePermission("perm_editAppmnts")) die();
 
 if(isset($_POST['Termin'])) {
     $n = new Termin;
