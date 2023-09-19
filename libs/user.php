@@ -509,10 +509,14 @@ class User
           </div>
       <?php
       }
+      if(requirePermission("perm_editUser")) {
       ?>
       <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
       <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
       </form>
+              <?php
+              }
+        ?>
       </div>
       </div>
         <?php
