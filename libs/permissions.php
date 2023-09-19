@@ -19,45 +19,15 @@ class Permissions
     );
     public function __get($key) {
         switch($key) {
-	    case 'Index':
-	    case 'User':
-	    case 'perm_showHiddenAppmnts':
-	    case 'perm_showUsers':
-	    case 'perm_editUsers':
-	    case 'perm_editAppmnts':
-	    case 'perm_showLog':
-	    case 'perm_showInstruments':
-	    case 'perm_editInstruments':
-	    case 'perm_sendEmail':
-	    case 'perm_showResponse':
-	    case 'perm_editResponse':
-	    case 'perm_editConfig':
-	    case 'perm_editPermissions':
-            return $this->_data[$key];
-            break;
         default:
+            return $this->_data[$key];
             break;
         }
     }
     public function __set($key, $val) {
         switch($key) {
-	    case 'Index':
-	    case 'User':
-	    case 'perm_showHiddenAppmnts':
-	    case 'perm_showUsers':
-	    case 'perm_editUsers':
-	    case 'perm_editAppmnts':
-	    case 'perm_showLog':
-	    case 'perm_showInstruments':
-	    case 'perm_editInstruments':
-	    case 'perm_sendEmail':
-	    case 'perm_showResponse':
-	    case 'perm_editResponse':
-	    case 'perm_editConfig':
-	    case 'perm_editPermissions':
-            $this->_data[$key] = (int)$val;
-            break;
         default:
+            $this->_data[$key] = (int)$val;
             break;
         }	
     }
