@@ -3,11 +3,11 @@ session_start();
 $_SESSION['page']='nomitglied';
 $_SESSION['adminpage']=true;
 include "common/header.php";
+if(!requirePermission("perm_showUsers")) die();
 
-if($_SESSION['admin']) {
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 0 AND `Instrument` > 0 AND `Deleted` != 1;',
-    $GLOBALS['dbprefix']
-    );
+$sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 0 AND `Instrument` > 0 AND `Deleted` != 1;',
+               $GLOBALS['dbprefix']
+);
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
 $row = mysqli_fetch_array($dbr);
@@ -34,11 +34,7 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
-<?php }
-else {
-?>
-    <meta http-equiv="refresh" content="0; URL=index.php" />
+
 <?php
-}
 include "common/footer.php";
 ?>

@@ -3,7 +3,7 @@ session_start();
 $_SESSION['page']='public-entry';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
+if(!requirePermission("perm_editResponse")) die();
 
 $state = 1;
 

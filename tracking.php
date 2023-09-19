@@ -3,6 +3,8 @@ session_start();
 $_SESSION['page']='tracking';
 $_SESSION['adminpage']=true;
 include "common/header.php";
+if(!requirePermission("perm_showResponse")) die();
+
 $termin = new Termin;
 $termin->load_by_id($_POST['termin']);
 ?>
