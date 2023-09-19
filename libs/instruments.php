@@ -349,7 +349,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="number";
@@ -385,7 +385,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="text";
@@ -412,7 +412,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="text";
@@ -439,7 +439,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="text";
@@ -466,7 +466,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="date";
@@ -493,7 +493,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="number";
@@ -539,7 +539,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="select";
             $content->name="Owner";
@@ -565,7 +565,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $hidden = new div;
             $hidden->tag="input";
             $hidden->type="hidden";
@@ -599,7 +599,7 @@ class Instruments
         $content = new div;
         $content->indent=$indent;
         $content->col(4,6,6);
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $content->class="w3-input";
             $content->tag="input";
             $content->type="text";
@@ -612,7 +612,7 @@ class Instruments
         $str=$str.$content->print();
         $str=$str.$modalrow->close();
 
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $indent--;
             $modalrow = new div;
             $modalrow->indent=$indent;
@@ -636,7 +636,7 @@ class Instruments
         $str=$str.$detailform->close();
         $indent--;
 
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $indent--;
             $modalrow = new div;
             $modalrow->indent=$indent;
@@ -729,7 +729,7 @@ class Instruments
         $str=$str.$modalrow2->close();
 
         // --> new Loan
-        if(isAdmin()) {
+        if(requirePermission("perm_editInstruments")) {
             $indent--;
             $modalrow2 = new div;
             $modalrow2->indent=$indent;
@@ -810,7 +810,7 @@ class Instruments
                 $content->body=germanDate($L->StartDate,0);
                 $str=$str.$content->print();
                 
-                if($L->EndDate == null && isAdmin()) {
+                if($L->EndDate == null && requirePermission("perm_editInstruments")) {
                     $form = new div;
                     $form->indent=$indent;
                     $form->tag="form";

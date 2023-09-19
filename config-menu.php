@@ -3,7 +3,8 @@ session_start();
 $_SESSION['page']='config';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-requireAdmin();
+if(!requirePermission("perm_editConfig")) die();
+
 $fill = false;
 if(isset($_POST['save'])) {
     $sql = sprintf('SELECT * FROM `%sconfig`;',
