@@ -9,9 +9,6 @@ else {
     $_SESSION['adminpage']=true;
 }
 include "common/header.php";
-if(requirePermission("perm_editUser")) {
-    
-}
 
 $fill = false;
 if(isset($_POST['id'])) {
@@ -27,7 +24,7 @@ if(isset($_POST['mode'])) {
         $edit = 2;
     }
 }
-if($_SESSION['admin']) {
+if(requirePermission("perm_editUser")) {
     $edit = 3;
 }
 
@@ -94,11 +91,6 @@ if($fill && ($n->login || $edit == 3)) {
       <input type="hidden" name="Mitglied" value="0">
       <input class="w3-check" type="checkbox" name="Mitglied" value="1" <?php if($fill && (bool)$n->Mitglied){ echo "checked ";} ?>>
       <label>Mitglied</label>
-    </div>
-    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
-      <input type="hidden" name="Admin" value="0">
-      <input class="w3-check" type="checkbox" name="Admin" value="1" <?php if($fill && (bool)$n->Admin) echo "checked "; ?>>
-      <label>Admin</label>
     </div>
 <?php   if($GLOBALS['optionsDB']['showRegisterLead']) { ?>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">

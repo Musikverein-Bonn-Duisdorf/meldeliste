@@ -3,7 +3,8 @@ session_start();
 $_SESSION['page']='register';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if($_SESSION['admin']) {
+if(!requirePermission("perm_showUsers")) die();
+
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <h2>Registerübersicht</h2>
@@ -30,11 +31,7 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->memberTable();
 }
 ?>
-<?php }
-else {
-?>
-    <meta http-equiv="refresh" content="0; URL=index.php" />
+
 <?php
-}
 include "common/footer.php";
 ?>
