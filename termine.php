@@ -74,7 +74,7 @@ while($row = mysqli_fetch_array($dbr)) {
     if($M->published > 0) {        
         echo $M->printBasicTableLine();
     }
-    elseif($_SESSION['admin']) {
+    elseif(requirePermission("perm_showHiddenAppmnts")) {
         echo $M->printBasicTableLine();
     }
     elseif($meldung) {

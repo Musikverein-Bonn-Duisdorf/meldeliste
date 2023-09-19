@@ -30,6 +30,19 @@ class Config
         }	
     }
 
+    public function getChanges() {
+        $old = new Config;
+        $old->load_by_id($this->Index);
+        
+        $str = sprintf("Config-ID: %d <b>%s</b>",
+        $this->Index,
+        $this->Parameter
+        );
+        if($this->Value != $old->Value) $str.=", Value: ".$old->Value." &rArr; <b>".$this->Value."</b>";
+
+        return $str;
+    }
+
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
@@ -38,9 +51,9 @@ class Config
             $logentry->DBupdate($this->getVars());
         }
         else {
-            $this->insert();
             $logentry = new Log;
-            $logentry->DBinsert($this->getVars());
+            $logentry->DBinsert($this->getChanges());
+            $this->insert();
         }
     }
 
