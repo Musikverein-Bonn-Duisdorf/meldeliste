@@ -1557,7 +1557,8 @@ class Termin
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
             $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"copy\" value=\"".$this->Index."\">kopieren</button>\n";
             $str=$str."\t\t</form>\n";
-            if(requirePermission("perm_showResponse")) {
+        }
+        if(requirePermission("perm_editResponse")) {
                 $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"tracking.php\" method=\"POST\">\n";
                 $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Anwesenheitsliste</button>\n";
                 $str=$str."\t\t</form>\n";
@@ -1567,6 +1568,7 @@ class Termin
                 $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Email an Teilnehmer</button>\n";
                 $str=$str."\t\t</form>\n";
             }
+        if(requirePermission("perm_editAppmnts")) {
             if($this->Shifts) {
                 $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
                 $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";

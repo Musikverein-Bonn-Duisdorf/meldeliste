@@ -31,11 +31,8 @@ if($u->hasInstruments()) { ?>
     <button title="Admin" alt="Admin" class="w3-button w3-mobile w3-hide-small <?php getAdminPage($_SESSION['page']); ?>"><i class="fas fa-wrench"></i></button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
       <?php if(requirePermission("perm_showResponse")) { ?>
-         <a title="Meldungen - Archiv" alt="archiv" href="archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('archiv');?>"><i class="fas fa-history"></i> Archiv: Meldungen</a>
-         <a title="Termine - Archiv" alt="termine archiv" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('termine-archiv');?>"><i class="fas fa-history"></i> Archiv: Termine</a>
-      <?php } ?>
-      <?php if(requirePermission("perm_showResponse")) { ?>
          <a title="Meldungen" alt="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('meldungen');?>"><i class="fas fa-comment-dots"></i> Meldungen</a>
+         <a title="Meldungen - Archiv" alt="archiv" href="archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('archiv');?>"><i class="fas fa-history"></i> Archiv: Meldungen</a>
 	 <?php if(requirePermission("perm_editResponse")) { ?>
             <a title="im Auftrag melden" alt="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('public-entry');?>"><i class="fas fa-comments"></i> im Auftrag melden</a>
 	 <?php } ?>
@@ -52,13 +49,14 @@ if($u->hasInstruments()) { ?>
 	 <?php } ?>
 	 <?php if(requirePermission("perm_editUsers")) { ?>
 	    <a title="neuen Musiker anlegen" alt="neuen Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>"><i class="fas fa-plus-circle"></i> Musiker anlegen</a>
-	 <?php } ?>
+	 <?php }
+                } ?>
 	 <?php if(requirePermission("perm_editPermissions")) { ?>
 	    <a title="Berechtigungen ändern" alt="Berechtigungen ändern" href="permissions.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('permissions');?>"><i class="fas fa-lock"></i> Berechtigungen ändern</a>
 	 <?php } ?>
-      <?php } ?>
       <?php if(requirePermission("perm_editAppmnts")) { ?>
 	    <a title="neuen Termin erstellen" alt="neuen Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newtermin');?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
+         <a title="Termine - Archiv" alt="termine archiv" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('termine-archiv');?>"><i class="fas fa-history"></i> Archiv: Termine</a>
       <?php } ?>
       <?php if(requirePermission("perm_sendEmail")) { ?>
          <a title="Email versenden" alt="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mail');?>"><i class="fas fa-envelope-open-text"></i> Email versenden</a>

@@ -202,7 +202,7 @@ class Permissions
     }
 
     public function getAdmin() {
-        if($this->perm_showHiddenAppmnts) return true;
+        // if($this->perm_showHiddenAppmnts) return true;
         if($this->perm_showUsers) return true;
         if($this->perm_editUsers) return true;
         if($this->perm_editAppmnts) return true;
