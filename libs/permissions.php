@@ -277,5 +277,55 @@ class Permissions
         }
         return false;
     }
+
+    public function printHeaderLine() {
+        $str="";
+        $main = new div;
+        $main->class="permissions w3-center w3-border-bottom w3-border-black w3-margin-bottom w3-teal w3-padding";
+        $str.=$main->open();
+
+        foreach ($this->_data as $key => $value) {
+            if($key == "Index") continue;
+            $div = new div;
+            if($key == "User") {
+                $div->body=$key;
+            }
+            else {
+                $div->body=substr($key,5);
+            }
+            $str.=$div->print();
+        }
+ 
+        $str.=$main->close();        
+        return $str;
+    }
+    
+    public function printEditLine() {
+        $str="";
+        $main = new div;
+        $main->class="permissions w3-center w3-border-bottom w3-border-black w3-margin-bottom";
+        $str.=$main->open();
+
+        $div = new div;
+        $u = new User;
+        $u->load_by_id($this->User);
+        $div->body=$u->getName();
+        $str.=$div->print();
+
+        $size = count($this->_data);
+        $i = 0;
+        foreach ($this->_data as $key => $value) {
+            $i++;
+            if($key == "Index" || $key == "User") continue;
+            if($i == $size/2+1) break;
+            $div = new div;
+            $div->class=bool2color($value);
+            $div->body=bool2string($value);
+            $str.=$div->print();
+        }
+ 
+        $str.=$main->close();        
+        return $str;
+    }
 };
 ?>

@@ -15,6 +15,11 @@ function bool2string($val) {
     return "nein";
 }
 
+function bool2color($val) {
+    if($val) return "w3-light-green";
+    return "";
+}
+
 function checkCronDate($v) {
     $c = bin2date($v);
     $dow = intval(date("N"));
