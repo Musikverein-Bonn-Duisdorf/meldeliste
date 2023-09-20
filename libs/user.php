@@ -27,6 +27,7 @@ class User
             return $this->_data[$key];
             break;
         default:
+            return $this->_data[$key];
             break;
         }
     }
@@ -95,6 +96,8 @@ class User
         }
         if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
         if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
+        if($this->Passhash != $old->Passhash) $str.=", Passhash: ".$old->Passhash." &rArr; <b>".$this->Passhash."</b>";
+        if($this->activeLink != $old->activeLink) $str.=", activeLink: ".$old->activeLink." &rArr; <b>".$this->activeLink."</b>";
         if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
         if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
         if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
