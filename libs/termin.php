@@ -143,9 +143,9 @@ class Termin
             $this->update();
         }
         else {
+            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->insert();
             $this->makeAlwaysYes();
         }
     }
