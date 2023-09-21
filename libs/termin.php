@@ -1511,11 +1511,24 @@ class Termin
                 $div->tag="form";
                 $div->method="POST";
                 $div->action="";
-                $div->class="w3-container w3-row w3-margin";
+                $div->class="w3-container w3-row w3-margin w3-card w3-padding";
                 $str.=$div->open();
                 $aushilfe = new div;
+                $aushilfe->class="w3-row w3-margin-bottom";
+                $aushilfe->body="<b>Aushilfen</b>";
+                $str.=$aushilfe->print();
+
+                $row = new div;
+                $row->class="w3-row w3-margin-bottom";
+                $str.=$row->open();
+                $aushilfe = new div;
                 $aushilfe->class="w3-col l3";
-                $aushilfe->body="Aushilfen:";
+                $aushilfe->body="&nbsp;";
+                $str.=$aushilfe->print();
+
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l2";
+                $aushilfe->body="Name:";
                 $str.=$aushilfe->print();
 
                 $aushilfe = new div;
@@ -1524,6 +1537,18 @@ class Termin
                 $aushilfe->type="text";
                 $aushilfe->tag="input";
                 $aushilfe->name="Name";
+                $str.=$aushilfe->print();
+                $str.=$row->close();
+
+                $str.=$row->open();
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l3";
+                $aushilfe->body="&nbsp;";
+                $str.=$aushilfe->print();
+
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l2";
+                $aushilfe->body="Instrument:";
                 $str.=$aushilfe->print();
 
                 $aushilfe = new div;
@@ -1535,19 +1560,36 @@ class Termin
 
                 $aushilfe = new div;
                 $aushilfe->tag="select";
-                $aushilfe->class="w3-col l4 w3-input";
+                $aushilfe->class="w3-col l3 w3-input";
                 $aushilfe->name="Instrument";
                 $aushilfe->body=instrumentOption(0);
                 $str.=$aushilfe->print();
+                $str.=$row->close();
+
+                $row = new div;
+                $row->class="w3-row";
+                $str.=$row->open();
+                $aushilfe = new div;
+                $aushilfe->class="w3-col l5";
+                $aushilfe->body="&nbsp;";
+                $str.=$aushilfe->print();
 
                 $aushilfe = new div;
-                $aushilfe->class="w3-col l2 w3-btn";
+                $aushilfe->class="w3-col l3 w3-btn w3-input";
                 $aushilfe->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
                 $aushilfe->tag="input";
                 $aushilfe->type="submit";
                 $aushilfe->name="insertAushilfe";
                 $aushilfe->value="eintragen";
                 $str.=$aushilfe->print();
+                $str.=$row->close();
+
+                // aktive Aushilfen
+                $aushilfe = new div;
+                $aushilfe->class="w3-row w3-margin-bottom";
+                $aushilfe->body="<b>aktive Aushilfen</b>";
+                $str.=$aushilfe->print();
+                $str.=$this->aktiveAushilfenTermin();
 
                 $str.=$div->close();
                 // } Aushilfen
@@ -1849,9 +1891,20 @@ class Termin
         sqlerror();
         $aushilfen = array();
         while($row = mysqli_fetch_array($dbr)) {
-            $aushilfen[] = $row;
+            $aushilfen[] = $row['Index'];
         }
         return $aushilfen;
+    }
+
+    public function aktiveAushilfenTermin() {
+        $str="";
+        $aushilfen = $this->getAushilfen();
+        foreach ($aushilfen as $aushilfe) {
+            $a = new Aushilfe;
+            $a->load_by_id($aushilfe);
+            $str.=$a->TerminLine();
+        }
+        return $str;
     }
 
     public function getResponseLine($filterregister) {
