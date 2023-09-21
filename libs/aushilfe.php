@@ -139,5 +139,50 @@ class Aushilfe
         $this->iName = $i->Name;
         return $this->iName;
     }
+
+    public function TerminLine() {
+        $str="";
+
+        $div = new div;
+        $div->class="w3-row";
+        $div->tag="form";
+        $div->action="";
+        $div->method="POST";
+        $str.=$div->open();
+
+        $aushilfe = new div;
+        $aushilfe->class="w3-col l3";
+        $aushilfe->body="&nbsp;";
+        $str.=$aushilfe->print();
+
+        $aushilfe = new div;
+        $aushilfe->class="w3-col l3";
+        $aushilfe->body="<b>".$this->Name."</b>";
+        $str.=$aushilfe->print();
+
+        $aushilfe = new div;
+        $aushilfe->class="w3-col l3";
+        $aushilfe->body=$this->getInstrumentName();
+        $str.=$aushilfe->print();
+
+        $aushilfe = new div;
+        $aushilfe->type="number";
+        $aushilfe->name="Index";
+        $aushilfe->value=$this->Index;
+        $str.=$aushilfe->print();
+
+        $aushilfe = new div;
+        $aushilfe->class="w3-col l1 w3-btn";
+        $aushilfe->class=$GLOBALS['optionsDB']['colorBtnDelete'];
+        $aushilfe->class="w3-border";
+        $aushilfe->type="submit";
+        $aushilfe->name="deleteAushilfe";
+        $aushilfe->body="&times;";
+        $str.=$aushilfe->print();
+
+        $str.=$div->close();
+        $str.=$div->print();
+        return $str;
+    }
 };
 ?>
