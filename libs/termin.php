@@ -1,4 +1,4 @@
-<?php
+c<?php
 class Termin
 {
     private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Bechreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
@@ -75,7 +75,7 @@ class Termin
         $old = new Termin;
         $old->load_by_id($this->Index);
         
-        $str = sprintf("Termin-ID: %d, <b>%s</b>, ",
+        $str = sprintf("Termin-ID: %d, <b>%s</b>",
         $this->Index,
         $this->Name
         );
