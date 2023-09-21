@@ -1513,6 +1513,7 @@ class Termin
                 $div->action="";
                 $div->class="w3-container w3-row w3-margin w3-card w3-padding";
                 $str.=$div->open();
+
                 $aushilfe = new div;
                 $aushilfe->class="w3-row w3-margin-bottom";
                 $aushilfe->body="<b>Aushilfen</b>";
@@ -1584,13 +1585,20 @@ class Termin
                 $str.=$aushilfe->print();
                 $str.=$row->close();
 
+                $str.=$div->close();
+
                 // aktive Aushilfen
+                $div = new div;
+                $div->class="w3-container w3-row w3-margin w3-card w3-padding";
+                $str.=$div->open();
+
                 $aushilfe = new div;
                 $aushilfe->class="w3-row w3-margin-bottom";
                 $aushilfe->body="<b>aktive Aushilfen</b>";
                 $str.=$aushilfe->print();
-                $str.=$this->aktiveAushilfenTermin();
 
+                $str.=$this->aktiveAushilfenTermin();
+                
                 $str.=$div->close();
                 // } Aushilfen
             }
