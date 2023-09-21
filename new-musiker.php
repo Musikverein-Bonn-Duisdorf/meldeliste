@@ -24,7 +24,7 @@ if(isset($_POST['mode'])) {
         $edit = 2;
     }
 }
-if(requirePermission("perm_editUser")) {
+if(requirePermission("perm_editUsers")) {
     $edit = 3;
 }
 
