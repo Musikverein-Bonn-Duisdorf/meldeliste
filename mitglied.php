@@ -4,10 +4,11 @@ $_SESSION['page']='mitglied';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_showUsers")) die();
+include "libs/form-response.php";
 
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1;',
-    $GLOBALS['dbprefix']
-    );
+$sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1;',
+$GLOBALS['dbprefix']
+);
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
 $row = mysqli_fetch_array($dbr);

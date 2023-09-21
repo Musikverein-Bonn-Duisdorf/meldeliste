@@ -4,45 +4,8 @@ $_SESSION['page']='musiker';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_showUsers")) die();
+include "libs/form-response.php";
 
-if(isset($_POST['insert'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->fill_from_array($_POST);
-    $n->save();
-    if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
-        if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
-            $n->passwd($_POST['pw1']);
-        }
-    }
-}
-if(isset($_POST['deactivate'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->Instrument=0;
-    $n->save();
-}
-if(isset($_POST['delete'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->delete();
-}
-if(isset($_POST['passwd'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->fill_from_array($_POST);
-    if($_POST['Index'] > 0) {
-        $n->passwd("");
-    }
-}
-if(isset($_POST['newmail'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->fill_from_array($_POST);
-    if($_POST['Index'] > 0) {
-        $n->newmail("");
-    }
-}
 $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],

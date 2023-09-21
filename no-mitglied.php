@@ -4,9 +4,10 @@ $_SESSION['page']='nomitglied';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_showUsers")) die();
+include "libs/form-response.php";
 
 $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Mitglied` = 0 AND `Instrument` > 0 AND `Deleted` != 1;',
-               $GLOBALS['dbprefix']
+$GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
