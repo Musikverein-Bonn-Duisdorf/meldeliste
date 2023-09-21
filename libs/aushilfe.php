@@ -109,6 +109,21 @@ class Aushilfe
         return true;
     }
     
+    public function delete() {
+        if(!$this->Index) return false;
+        $sql = sprintf('DELETE FROM `%sAushilfen` WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
+        $this->_data['Index'] = null;
+        return true;
+    }
+
     public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `%sAushilfen` WHERE `Index` = "%d";',
@@ -142,46 +157,54 @@ class Aushilfe
 
     public function TerminLine() {
         $str="";
-
+        $indent=1;
         $div = new div;
+        $div->indent=$indent;
         $div->class="w3-row";
         $div->tag="form";
-        $div->action="";
         $div->method="POST";
+        $div->action="index.php";
         $str.=$div->open();
 
+        $indent++;
         $aushilfe = new div;
+        $aushilfe->indent=$indent;
         $aushilfe->class="w3-col l3";
         $aushilfe->body="&nbsp;";
         $str.=$aushilfe->print();
 
         $aushilfe = new div;
+        $aushilfe->indent=$indent;
         $aushilfe->class="w3-col l3";
         $aushilfe->body="<b>".$this->Name."</b>";
         $str.=$aushilfe->print();
 
         $aushilfe = new div;
+        $aushilfe->indent=$indent;
         $aushilfe->class="w3-col l3";
         $aushilfe->body=$this->getInstrumentName();
         $str.=$aushilfe->print();
 
         $aushilfe = new div;
-        $aushilfe->type="number";
+        $aushilfe->indent=$indent;
+        $aushilfe->tag="input";
+        $aushilfe->type="hidden";
         $aushilfe->name="Index";
         $aushilfe->value=$this->Index;
         $str.=$aushilfe->print();
 
         $aushilfe = new div;
+        $aushilfe->indent=$indent;
+        $aushilfe->tag="input";
         $aushilfe->class="w3-col l1 w3-btn";
         $aushilfe->class=$GLOBALS['optionsDB']['colorBtnDelete'];
         $aushilfe->class="w3-border";
         $aushilfe->type="submit";
         $aushilfe->name="deleteAushilfe";
-        $aushilfe->body="&times;";
+        $aushilfe->value="&times;";
         $str.=$aushilfe->print();
 
         $str.=$div->close();
-        $str.=$div->print();
         return $str;
     }
 };
