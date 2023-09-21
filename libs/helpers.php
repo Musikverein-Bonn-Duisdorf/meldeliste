@@ -215,6 +215,16 @@ function getShort($Vorname, $Nachname) {
     return $short1.$short2;
 }
 
+function getShortAushilfe($Name) {
+    $narray = explode(" ", $Name);
+    if(sizeof($narray) > 1) {
+        return getShort($narray[0], $narray[1]);
+    }
+    else {
+        return substr($Name,0,4);
+    }
+}
+
 function instrumentOption($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
@@ -359,6 +369,7 @@ function printOrchestra($tid, $scale) {
     $str="<svg width=\"".$width."\" height=\"".$height."\">";
 
     $aMeldungen = array();
+    $aAushilfen = array();
     $aInstrument = array();
     $aUser = array();
     if($tid) {
@@ -373,6 +384,15 @@ function printOrchestra($tid, $scale) {
         $dbMeldungen = mysqli_query($GLOBALS['conn'], $sql);
         while($row = mysqli_fetch_array($dbMeldungen)) {
             $aMeldungen[] = $row;
+        }
+
+        $sql = sprintf("SELECT * FROM `%sAushilfen` WHERE `Termin` = %d;",
+        $GLOBALS['dbprefix'],
+        $tid
+        );
+        $dbAushilfe = mysqli_query($GLOBALS['conn'], $sql);
+        while($row = mysqli_fetch_array($dbAushilfe)) {
+            $aAushilfen[] = $row;
         }
     }
     $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;",
@@ -389,7 +409,7 @@ function printOrchestra($tid, $scale) {
     while($row = mysqli_fetch_array($dbInstrument)) {
         $aInstrument[] = $row;
     }
-    
+
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
                    $GLOBALS['dbprefix']
     );
@@ -437,30 +457,56 @@ function printOrchestra($tid, $scale) {
             $sortedInstruments[] = $aInstrument[$registerInstruments[$keys[$idx]]]['Index'];
         }
 
+        // combine Users and Aushilfen in one array()
+        $allMusiker = array();
+        foreach($aUser as $user) {
+            $short=getShort($user['Vorname'], $user['Nachname']);
+            $wert = -1;
+            $instr = $user['Instrument'];
+            foreach($aMeldungen AS $meldung) {
+                if($meldung['User'] != $user['Index']) continue;
+                if($meldung['Instrument'] != $user['Instrument'] && $meldung['Instrument'] > 0) {
+                    $instr = $meldung['Instrument'];
+                }
+                $wert = $meldung['Wert'];
+                break;
+            }
+
+            $line = array("short" => $short, "Instrument" => $instr, "Wert" => $wert);
+            $allMusiker[] = $line;
+        }
+        if($tid) {
+            foreach($aAushilfen as $user) {
+                $short=getShortAushilfe($user['Name']);
+                $line = array("short" => $short, "Instrument" => $user['Instrument'], "Wert" => 1);
+                $allMusiker[] = $line;
+            }
+        }
+
+        $allSorted = array();
+        foreach($allMusiker as $m) {
+            if($m["Wert"] != 1) {
+                $allSorted[] = $m;
+            }
+        }
+        foreach($allMusiker as $m) {
+            if($m["Wert"] == 1) {
+                $allSorted[] = $m;
+            }
+        }
+        $allMusiker = $allSorted;        
+        
         foreach($sortedInstruments as $instrument) {
             $skip = false;
-            foreach($aUser AS $user) {
-                // while($user = mysqli_fetch_array($dbuser)) {
-                $match = null;
+            foreach($allMusiker AS $user) {
                 if($tid) {
                     $skip = false;
-                    foreach($aMeldungen AS $meldung) {
-                        if($meldung['User'] != $user['Index']) continue;
-                        if($meldung['Instrument'] == $instrument) {
-                            $instr = $meldung['Instrument'];
-                        }
-                        else {
-                            $instr = $meldung['uInstrument'];
-                        }
-                        if($instr != $instrument) $skip=true;
-                        $match = $meldung['Wert'];
-                        break;
-                    }
+                    $match = $user["Wert"];
                 }
                 if($user['Instrument'] != $instrument) continue;
                 if($skip) continue;
                 
-                $short=getShort($user['Vorname'], $user['Nachname']);
+                $short=$user['short'];
                 if($register['Row']==0) {
                     $radius=0;
                     $arc=0;
