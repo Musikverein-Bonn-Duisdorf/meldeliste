@@ -16,6 +16,11 @@ if(isset($_POST['insertAushilfe'])) {
         $aushilfe->fill_from_array($_POST);
         $aushilfe->save();
 }
+if(isset($_POST['deleteAushilfe'])) {
+        $aushilfe = new Aushilfe;
+        $aushilfe->load_by_id($_POST['Index']);
+        $aushilfe->delete();
+}
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>

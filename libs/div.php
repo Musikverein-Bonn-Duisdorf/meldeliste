@@ -56,10 +56,10 @@ class div
         case 'href':
         case 'min':
         case 'step':
-        case 'default':
         case 'action':
         case 'method':
         case 'placeholder':
+        case 'default':
             $this->_data[$key] = trim($val);
             break;
 	    case 'bold':
