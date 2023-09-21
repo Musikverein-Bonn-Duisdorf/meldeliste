@@ -76,11 +76,6 @@ class User
         $old = new User;
         $old->load_by_id($this->Index);
 
-        $u = new User;
-        $u->load_by_id($this->User);
-        $t = new Termin;
-        $t->load_by_id($this->Termin);
-
         $str = sprintf("User-ID: %d <b>%s %s</b>",
         $this->Index,
         $this->Vorname,
