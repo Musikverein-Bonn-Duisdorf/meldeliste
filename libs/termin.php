@@ -80,7 +80,7 @@ class Termin
         $this->Name
         );
         if($this->Datum != $old->Datum) $str.=", Datum: ".$old->getDate()." &rArr; <b>".$this->getDate()."</b>";
-        if($this->EndDatum != $old->EndDatum) $str.=", Enddatum: ".$old->EndDatum." &rArr; <b>".$this->EndDatum."</b>";
+        if($this->EndDatum != $old->EndDatum) $str.=", Enddatum: ".medDate($old->EndDatum)." &rArr; <b>".medDate($this->EndDatum)."</b>";
         if($this->Uhrzeit != $old->Uhrzeit) $str.=", Uhrzeit: ".$old->Uhrzeit." &rArr; <b>".$this->Uhrzeit."</b>";
         if($this->Uhrzeit2 != $old->Uhrzeit2) $str.=", Uhrzeit2: ".$old->Uhrzeit2." &rArr; <b>".$this->Uhrzeit2."</b>";
         if($this->Capacity != $old->Capacity) $str.=", Capacity: ".$old->Capacity." &rArr; <b>".$this->Capacity."</b>";
@@ -92,7 +92,7 @@ class Termin
         if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
         if($this->Ort4 != $old->Ort4) $str.=", Ort4: ".$old->Ort4." &rArr; <b>".$this->Ort4."</b>";
         if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
-        if($this->published != $old->published) $str.=", published: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
+        if($this->published != $old->published) $str.=", sichtbar: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
         if($this->open != $old->open) $str.=", open: ".$old->open." &rArr; <b>".$this->open."</b>";
         if($GLOBALS['optionsDB']['showChildOption']) {
             if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
@@ -219,8 +219,8 @@ class Termin
         return $str;
     }
     public function getDate() {
-        if(!$this->EndDatum) return $this->Datum;
-        return "(".$this->Datum." - ".$this->EndDatum.")";
+        if(!$this->EndDatum) return medDate($this->Datum);
+        return "(".medDate($this->Datum)." - ".medDate($this->EndDatum).")";
     }
     public function getGermanDate() {
         if(!$this->EndDatum) return germanDate($this->Datum, 1);

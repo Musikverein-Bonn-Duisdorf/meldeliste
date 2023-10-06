@@ -39,6 +39,17 @@ function genitiv($string) {
     }
 }
 
+function medDate($string) {
+    if($string == '') return;
+    if($string == null) return;
+    $y = substr($string, 0, 4);
+    $m = substr($string, 5, 2);
+    $d = substr($string, 8, 2);
+    
+    $date = mktime(0,0,0, $m, $d, $y);
+    return date("d-M-Y", $date);
+}
+
 function germanDate($string, $monthLetters) {
     if($string == '') return;
     if($string == null) return;
@@ -373,9 +384,7 @@ function printOrchestra($tid, $scale) {
     $aInstrument = array();
     $aUser = array();
     if($tid) {
-        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` INNER JOIN (SELECT `Index` AS `iIndex`, `Sortierung` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `uInstrument` WHERE `Termin` = %d ORDER BY `Sortierung`, `Nachname`;",
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
+        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = %d ORDER BY `Instrument`, `Nachname`, `Vorname`;",
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
@@ -395,7 +404,7 @@ function printOrchestra($tid, $scale) {
             $aAushilfen[] = $row;
         }
     }
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND `Instrument` > 0 ORDER BY `Nachname`, `Vorname`;",
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;",
                    $GLOBALS['dbprefix']
     );
     $dbUser = mysqli_query($GLOBALS['conn'], $sql);
