@@ -25,39 +25,41 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 </div>
 <script>
-Element.prototype.appendAfter = function (element) {
-    element.parentNode.insertBefore(this, element.nextSibling);
-}, false;
+    Element.prototype.appendAfter = function (element) {
+	element.parentNode.insertBefore(this, element.nextSibling);
+    }, false;
 
-    function getLog() {
-	if (window.XMLHttpRequest) {
-	    // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
-	    xmlhttp=new XMLHttpRequest();
-	}
-	else {
-	    // AJAX mit IE6, IE5
-	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	xmlhttp.onreadystatechange=function() {
-	    if (xmlhttp.readyState==4 && xmlhttp.status==200 && xmlhttp.responseText) {
-            var parent = document.getElementById("header");
+function getLog() {
+    if (window.XMLHttpRequest) {
+	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+	xmlhttp=new XMLHttpRequest();
+    }
+    else {
+	// AJAX mit IE6, IE5
+	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlhttp.onreadystatechange=function() {
+	if (xmlhttp.readyState==4 && xmlhttp.status==200 && xmlhttp.responseText) {
+            var parent = document.getElementById("Liste");
             var NewElement = document.createElement("div");
-            NewElement.appendAfter(parent.nextSibling);
+	    var first = parent.firstElementChild;
+	    first.parentNode.insertBefore(NewElement, first);
+            // NewElement.appendAfter(parent.nextSibling);
             let doc = new DOMParser().parseFromString(xmlhttp.responseText, 'text/html');
             let div = doc.body.firstChild;
             NewElement.parentNode.replaceChild(div, NewElement);
-	    }
 	}
-    var parent = document.getElementById("header");
-    var first = parent.nextSibling.nextSibling;
+    }
+    var parent = document.getElementById("Liste");
+    var first = parent.firstElementChild;
     var maxIndex = parseInt(first.id);
     if(maxIndex > 0) {
         var str = "getLog.php?id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&maxIndex="+maxIndex;
         xmlhttp.open("GET", str, true);
         xmlhttp.send();
     }
-    }
-var interval = setInterval(getLog, 5000);
+}
+var interval = setInterval(getLog, 1000);
 
 </script>
 
