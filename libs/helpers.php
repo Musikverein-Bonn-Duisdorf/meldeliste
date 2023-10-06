@@ -39,6 +39,17 @@ function genitiv($string) {
     }
 }
 
+function medDate($string) {
+    if($string == '') return;
+    if($string == null) return;
+    $y = substr($string, 0, 4);
+    $m = substr($string, 5, 2);
+    $d = substr($string, 8, 2);
+    
+    $date = mktime(0,0,0, $m, $d, $y);
+    return date("d-M-Y", $date);
+}
+
 function germanDate($string, $monthLetters) {
     if($string == '') return;
     if($string == null) return;
