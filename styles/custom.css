@@ -1,8 +1,8 @@
  .permissions {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-column-gap: 1px;
-    grid-row-gap: 1px;
-    justify-items: stretch;
-    align-items: stretch;
+     display: grid;
+     grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+     grid-column-gap: 1px;
+     grid-row-gap: 1px;
+     justify-items: stretch;
+     align-items: stretch;
  }
