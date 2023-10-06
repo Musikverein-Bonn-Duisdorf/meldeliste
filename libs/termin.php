@@ -92,7 +92,7 @@ class Termin
         if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
         if($this->Ort4 != $old->Ort4) $str.=", Ort4: ".$old->Ort4." &rArr; <b>".$this->Ort4."</b>";
         if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
-        if($this->published != $old->published) $str.=", published: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
+        if($this->published != $old->published) $str.=", sichtbar: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
         if($this->open != $old->open) $str.=", open: ".$old->open." &rArr; <b>".$this->open."</b>";
         if($GLOBALS['optionsDB']['showChildOption']) {
             if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
