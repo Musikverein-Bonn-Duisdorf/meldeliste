@@ -19,7 +19,7 @@ if(isset($_POST['insert'])) {
 }
 if(isset($_POST['delete'])) {
     $n = new Termin;
-    $n->fill_from_array($_POST);
+    $n->load_by_id($_POST['Index']);
     $n->delete();
 }
 if(isset($_POST['meldung'])) {
