@@ -47,7 +47,7 @@ class Shiftmeldung
         $t->Name,
         $s->Index,
         $s->Name,
-        $t->Datum,
+        medDate($t->Datum),
         $s->Start,
         $u->getName()
         );
@@ -69,7 +69,7 @@ class Shiftmeldung
         $t->Name,
         $s->Index,
         $s->Name,
-        $t->Datum,
+        medDate($t->Datum),
         $s->Start,
         $u->getName(),
         meldeSymbol($this->Wert)

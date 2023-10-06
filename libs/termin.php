@@ -79,8 +79,8 @@ class Termin
         $this->Index,
         $this->Name
         );
-        if($this->Datum != $old->Datum) $str.=", Datum: ".$old->getDate()." &rArr; <b>".$this->getDate()."</b>";
-        if($this->EndDatum != $old->EndDatum) $str.=", Enddatum: ".$old->EndDatum." &rArr; <b>".$this->EndDatum."</b>";
+        if($this->Datum != $old->Datum) $str.=", Datum: ".medDate($old->getDate())." &rArr; <b>".medDate($this->getDate())."</b>";
+        if($this->EndDatum != $old->EndDatum) $str.=", Enddatum: ".medDate($old->EndDatum)." &rArr; <b>".medDate($this->EndDatum)."</b>";
         if($this->Uhrzeit != $old->Uhrzeit) $str.=", Uhrzeit: ".$old->Uhrzeit." &rArr; <b>".$this->Uhrzeit."</b>";
         if($this->Uhrzeit2 != $old->Uhrzeit2) $str.=", Uhrzeit2: ".$old->Uhrzeit2." &rArr; <b>".$this->Uhrzeit2."</b>";
         if($this->Capacity != $old->Capacity) $str.=", Capacity: ".$old->Capacity." &rArr; <b>".$this->Capacity."</b>";
@@ -117,7 +117,7 @@ class Termin
         }
         return sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
         $this->Index,
-        $this->getDate(),
+        medDate($this->getDate()),
         $this->Uhrzeit,
         $this->Uhrzeit2,
         $this->Abfahrt,
