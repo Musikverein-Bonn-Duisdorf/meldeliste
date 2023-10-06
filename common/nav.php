@@ -7,7 +7,7 @@
       ?></p>
 </div>
 <?php if(getBranchName() != "master") { ?>
-<div class="w3-yellow w3-padding">
+<div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
 <?php echo "devlopment branch: <b>".getBranchName()."</b>"; ?>
 </div>
 <?php } ?>
