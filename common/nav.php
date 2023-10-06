@@ -6,6 +6,9 @@
       if(isAdmin()) echo " (Admin)";
       ?></p>
 </div>
+<div class="w3-yellow w3-padding">
+<?php if(getBranchName() != "master") echo "devlopment branch: <b>".getBranchName()."</b>"; ?>
+</div>
 <div class="w3-bar <?php echo $optionsDB['colorNav']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
   <a title="Home" alt="Home" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="fas fa-home"></i></a>
