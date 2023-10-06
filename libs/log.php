@@ -102,7 +102,10 @@ class Log
         );
         $last = new Log;
         $last->getLast();
-        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message) && $this->User == $last->User) return true;
+        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message) && $this->User == $last->User) {
+            $last->now();
+            return true;
+        }
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
@@ -132,6 +135,17 @@ class Log
         sqlerror();
         if(!$dbr) return false;
         $this->_data['Index'] = null;
+        return true;
+    }
+
+    protected function now() {
+        $sql = sprintf('UPDATE `%sLog` SET `Timestamp` = NOW() WHERE `Index` = "%d";',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
         return true;
     }
     public function fill_from_array($row) {
