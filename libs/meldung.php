@@ -50,7 +50,7 @@ class Meldung
         $this->Index,
         $this->Termin,
         $t->Name,
-        $t->Datum,
+        medDate($t->Datum),
         $t->Uhrzeit,
         $u->getName()
         );
@@ -86,7 +86,7 @@ class Meldung
         $this->Index,
         $this->Termin,
         $t->Name,
-        $t->Datum,
+        medDate($t->Datum),
         $t->Uhrzeit,
         $u->getName(),
         meldeSymbol($this->Wert),
