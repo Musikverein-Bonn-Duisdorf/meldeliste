@@ -57,7 +57,7 @@ if($u->hasInstruments()) { ?>
 	 <?php }
                 } ?>
 	 <?php if(requirePermission("perm_editPermissions")) { ?>
-	    <a title="Berechtigungen ändern" alt="Berechtigungen ändern" href="permissions.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('permissions');?>"><i class="fas fa-lock"></i> Berechtigungen ändern</a>
+	    <a title="Berechtigungen" alt="Berechtigungen ändern" href="permissions.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('permissions');?>"><i class="fas fa-lock"></i> Berechtigungen ändern</a>
 	 <?php } ?>
       <?php if(requirePermission("perm_editAppmnts")) { ?>
 	    <a title="neuen Termin erstellen" alt="neuen Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newtermin');?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
