@@ -1,6 +1,6 @@
 <?php
 
-include "config.php";
+include "common/config.php";
 include "libs/helpers.php";
 $optionsDB = loadconfig();
 global $optionsDB;
