@@ -40,7 +40,7 @@ if(!requirePermission("perm_editConfig")) die();
   </div>
 <?php if($vCurrent != $vNew) {
                    $logentry = new Log;
-                   $logentry->DBinfo("Updated Software from Version ".$vCurrent." to ".$vNew);
+                   $logentry->info("Updated Software from Version ".$vCurrent." to ".$vNew);
 
 ?>
   <div class="w3-container w3-yellow w3-padding">updated <b><?php echo $vCurrent."</b> -> <b>".$vNew; ?></b></div>
