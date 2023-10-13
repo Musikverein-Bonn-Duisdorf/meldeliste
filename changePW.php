@@ -27,7 +27,7 @@ if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
  ?>
     <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>
-  <body class="<?php echo $GLOBALS['optionsDB']['ColorBackground']; ?>">
+  <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?>">
     <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
       <h1><?php echo $optionsDB['WebSiteName']; ?></h1>
     </div>
