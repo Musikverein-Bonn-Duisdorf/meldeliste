@@ -56,7 +56,7 @@ if(!requirePermission("perm_editConfig")) die();
       $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
       $status = explode("\n", shell_exec("git remote -v update origin 2>&1"));
       foreach($status as $line) {
-          $found = strpos($line, getBranchName());
+          $found = strpos($line, "origin/".getBranchName());
           if($found) {
               echo "<div class=\"w3-yellow\"><b>".$line."</b></div>";
           }
