@@ -22,16 +22,34 @@ if(!requirePermission("perm_editConfig")) die();
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
   <?php echo "Aktueller Branch: <b>".getBranchName()."</b>"; ?>
 </div>
-<div class=" w3-card-4 w3-margin">
-  <div class="w3-container w3-teal"><h3>git status</h3></div>
-  <div class="w3-padding">
     <?php
            if(isset($_POST['pull'])) {
+?>      
+      
+      <div class=" w3-card-4 w3-margin">
+  <div class="w3-container w3-teal"><h3>git pull</h3></div>
+  <div class="w3-padding">
+  <?php
+               $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
                $pull = explode("\n", shell_exec("git pull origin ".getBranchName()." 2>&1"));
+               $vNew = shell_exec("git rev-parse --short HEAD 2>&1");
                foreach($pull as $line) {
                    echo "<div>".$line."</div>";
                }
+  ?>
+  </div>
+<?php if($vCurrent != $vNew) { ?>
+  <div class="w3-container w3-yellow"><h3>updated <?php echo $vCurrent." -> ".$vNew; ?></h3></div>
+<?php } ?>
+</div>
+    <?php
            }
+?>      
+      <div class=" w3-card-4 w3-margin">
+  <div class="w3-container w3-teal"><h3>git status</h3></div>
+  <div class="w3-padding">
+    <?php
+      $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
       $status = explode("\n", shell_exec("git remote -v update origin 2>&1"));
       foreach($status as $line) {
           $found = strpos($line, getBranchName());
