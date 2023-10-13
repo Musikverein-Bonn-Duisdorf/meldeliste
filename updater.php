@@ -28,7 +28,7 @@ if(!requirePermission("perm_editConfig")) die();
       
       <div class=" w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>git pull</h3></div>
-  <div class="w3-padding">
+  <div class="w3-padding w3-code">
   <?php
                $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
                $pull = explode("\n", shell_exec("git pull origin ".getBranchName()." 2>&1"));
@@ -51,7 +51,7 @@ if(!requirePermission("perm_editConfig")) die();
 ?>      
       <div class=" w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>git status</h3></div>
-  <div class="w3-padding">
+  <div class="w3-padding w3-code">
     <?php
       $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
       $status = explode("\n", shell_exec("git remote -v update origin 2>&1"));
