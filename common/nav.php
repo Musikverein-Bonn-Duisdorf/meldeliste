@@ -68,6 +68,7 @@ if($u->hasInstruments()) { ?>
       <?php } ?>
       <?php if(requirePermission("perm_editConfig")) { ?>
 	 <a title="Konfiguration" alt="Konfiguration" href="config-menu.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('config');?>"><i class="fas fa-cogs"></i> Konfiguration</a>
+	 <a title="Updater" alt="Updater" href="updater.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('updater');?>"><i class="fas fa-code-branch"></i> Updater</a>
       <?php } ?>
       <?php if(requirePermission("perm_showInstruments")) { ?>
          <a title="Instrumente" alt="Instrumente" href="instruments.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('instruments');?>"><i class="fas fa-drum"></i> Instrumente</a>
