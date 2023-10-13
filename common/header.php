@@ -5,9 +5,10 @@
       <link rel="stylesheet" href="styles/w3.css">
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
       <link rel="stylesheet" href="styles/custom.css">
+      <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/fontawesome.css">
+      <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/brands.css">
+      <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/solid.css">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-	  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-      <script src="https://use.fontawesome.com/914ad24785.js"></script>
 	  <?php
           include 'include.php';
       ?>
