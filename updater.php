@@ -43,7 +43,7 @@ if(!requirePermission("perm_editConfig")) die();
                    $logentry->DBinfo("Updated Software from Version ".$vCurrent." to ".$vNew);
 
 ?>
-  <div class="w3-container w3-yellow"><h3>updated <?php echo $vCurrent." -> ".$vNew; ?></h3></div>
+  <div class="w3-container w3-yellow w3-padding">updated <b><?php echo $vCurrent."</b> -> <b>".$vNew; ?></b></div>
 <?php } ?>
 </div>
     <?php
