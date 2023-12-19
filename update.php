@@ -4,12 +4,25 @@ $_SESSION['page']='update';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_editConfig")) die();
+
+$oldversion = "NULL";
+
+$logentry = new Log;
+$logentry->info("Updating server from version ".$oldversion." to ".$GLOBALS['version']['String']);
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
     <h2>Updater</h2>
 </div>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>"></div>
+<div class="w3-container w3-padding <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
+         Updating from version <b><?php echo $oldversion; ?></b> to <b><?php echo $GLOBALS['version']['String']; ?></b>...
+</div>
 <?php
+
+$InfoTable = new SQLtable("Info");
+$InfoTable->createString();
+$InfoTable->createColumnString("Parameter", "TEXT", "NULL");
+$InfoTable->createColumnString("Value", "TEXT", "NULL");
+
 $para=array(
     "styleAppmntUnpublished",
     'colorLogDefault', 
