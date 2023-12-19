@@ -471,6 +471,10 @@ class Termin
             $m->load_by_id($meldungen[$i]);
             if($m->Wert == $val) $r++;
         }
+        if($val == 1) {
+            $aushilfen = $this->getAushilfen();
+            $r += count($aushilfen);
+        }
         return $r;
     }
     public function getMeldungRatio() {
