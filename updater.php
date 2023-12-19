@@ -73,6 +73,20 @@ if(!requirePermission("perm_editConfig")) die();
   <form action="" method="post">
     <button class="w3-button w3-blue" type="submit" value="pull" name="pull">pull</button>
   </form>
+</div>
+
+<div class=" w3-card-4 w3-margin">
+  <div class="w3-container w3-teal"><h3>Datenbank Integrität</h3></div>
+  <form action="" method="post">
+    <button class="w3-button w3-blue" type="submit" value="dbcreate" name="dbcreate">Datenbank pr&uuml;fen</button>
+  </form>
+  <div class="w3-container">
+  <?php
+   if(isset($_POST['dbcreate'])) {
+       include "dbintegrity.php";
+       DBCheckIntegrity();
+   }
+  ?>
   </div>
 </div>
 
