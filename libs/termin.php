@@ -2242,7 +2242,7 @@ ORDER BY `Nachname`, `Vorname`;",
             $aushilfen = $this->getAushilfen();
             foreach($aushilfen as &$aushilfe) {
                 $A = new Aushilfe;
-                $A->load_by_id($aushilfe['Index']);
+                $A->load_by_id($aushilfe);
                 $ja++;
                 $antwort='ja';
                 $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$A->getName()."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
