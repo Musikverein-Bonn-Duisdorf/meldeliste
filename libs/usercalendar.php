@@ -23,9 +23,9 @@ class UserCalendar
 
     public function makeHeader() {
         $str="BEGIN:VCALENDAR\n";
-        $str+="VERSION:2.0\n";
-        $str+="CREATED:19960329T133000Z\n";
-        $str+="CALSCALE:GREGORIAN\n";
+        $str.="VERSION:2.0\n";
+        $str.="CREATED:19960329T133000Z\n";
+        $str.="CALSCALE:GREGORIAN\n";
         return $str;
     }
 
@@ -66,15 +66,15 @@ class UserCalendar
             }
         }
         
-        $str+=$indent."SUMMARY".$n->Name."\n";
-        $str+=$indent."DTSTART;TZID=Europe/Berlin:".$begin."\n";
-        $str+=$indent."DTEND;TZID=Europe/Berlin:".$end."\n";
+        $str.=$indent."SUMMARY".$n->Name."\n";
+        $str.=$indent."DTSTART;TZID=Europe/Berlin:".$begin."\n";
+        $str.=$indent."DTEND;TZID=Europe/Berlin:".$end."\n";
         // LOCATION:1000 Broadway Ave.\, Brooklyn
         //      DESCRIPTION: Access-A-Ride trip to 900 Jay St.\, Brooklyn
         //      STATUS:CONFIRMED CANCELLED TENTATIVE
 
         
-        $str+=$indent."END:VEVENT\n";
+        $str.=$indent."END:VEVENT\n";
         return $str;
     }
 
@@ -91,9 +91,9 @@ class UserCalendar
         $dbr = mysqli_query($conn, $sql);
         sqlerror();
         while($row = mysqli_fetch_array($dbr)) {
-            $str+=$this->makeAppmnt($row(['Index']));    
+            $str.=$this->makeAppmnt($row(['Index']));    
         }
-        $str+=$this->makeFooter();
+        $str.=$this->makeFooter();
         fwrite($out, $str);
         fclose($out);
     }
