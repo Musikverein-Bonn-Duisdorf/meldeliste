@@ -69,7 +69,8 @@ $para=array(
     'showMessageOfTheDay',
     'orgName',
     'orgNameShort',
-    'numberOfDaysInHistory'
+    'numberOfDaysInHistory',
+    'calendarPastDays'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -117,7 +118,8 @@ $desc=array(
     "Zeige Nachricht, die jedem Nutzen beim Einloggen angezeigt wird.",
     "Vereinsname",
     "Vereinsname (kurz)",
-"Anzahl der Tage in der Statistikberechnung"
+    "Anzahl der Tage in der Statistikberechnung",
+"Termine im Kalender anzeigen, die wieviele Tage alt sind"
 );
 $value=array(
     "w3-opacity",
@@ -165,6 +167,7 @@ $value=array(
     0,
     "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
     "Musikverein Duisdorf",
+    "7"
 365
 );
 $type=array(
@@ -213,6 +216,7 @@ $type=array(
     "bool",
     "string",
     "string",
+    "uint",
     "uint"
 );
 
