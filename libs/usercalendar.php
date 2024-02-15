@@ -39,11 +39,9 @@ class UserCalendar
         $n->load_by_id($id);
         $m = new Meldung;
         $status = $m->getUserEvent($this->User, $id);
-        if($status == 2) return;
+        if($status == 2) return "";
         
-        $indent="";
-        // $indent="\t";
-        $str=$indent."BEGIN:VEVENT\n";
+        $str="BEGIN:VEVENT\n";
 
         if($n->EndDatum) {
             $end = gmdate('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
@@ -69,21 +67,21 @@ class UserCalendar
                 $end = gmdate('Ymd\THis', strtotime($n->Datum." 23:59:00"));
             }
         }
-        $str.=$indent."SUMMARY:".$n->Name."\n";
-        $str.=$indent."DESCRIPTION:".$n->Beschreibung."\n";
+        $str.="SUMMARY:".$n->Name."\n";
+        $str.="DESCRIPTION:".$n->Beschreibung."\n";
 
         if($status == null || $status == 3) {
-            $str.=$indent."STATUS:TENTATIVE\n";
+            $str.="STATUS:TENTATIVE\n";
         }
         else {
-            $str.=$indent."STATUS:CONFIRMED\n";
+            $str.="STATUS:CONFIRMED\n";
         }
         
-        $str.=$indent."DTSTART;TZID=Europe/Berlin:".$begin."\n";
-        $str.=$indent."DTEND;TZID=Europe/Berlin:".$end."\n";
-        $str.=$indent."LOCATION:".$n->Ort1.",".$n->Ort2.",".$n->Ort3.",".$n->Ort4."\n"
+        $str.="DTSTART;TZID=Europe/Berlin:".$begin."\n";
+        $str.="DTEND;TZID=Europe/Berlin:".$end."\n";
+        $str.="LOCATION:".$n->Ort1.",".$n->Ort2.",".$n->Ort3.",".$n->Ort4."\n";
 
-        $str.=$indent."END:VEVENT\n";
+        $str.="END:VEVENT\n";
         return $str;
     }
 
