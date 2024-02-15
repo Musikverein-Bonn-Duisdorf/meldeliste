@@ -72,7 +72,6 @@ class UserCalendar
         // LOCATION:1000 Broadway Ave.\, Brooklyn
         //      DESCRIPTION: Access-A-Ride trip to 900 Jay St.\, Brooklyn
         //      STATUS:CONFIRMED CANCELLED TENTATIVE
-
         
         $str.=$indent."END:VEVENT\n";
         return $str;
@@ -91,7 +90,8 @@ class UserCalendar
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         while($row = mysqli_fetch_array($dbr)) {
-            $str.=$this->makeAppmnt($row(['Index']));    
+            var_dump($row);
+            $str.=$this->makeAppmnt($row(['Index']));
         }
         $str.=$this->makeFooter();
         fwrite($out, $str);
