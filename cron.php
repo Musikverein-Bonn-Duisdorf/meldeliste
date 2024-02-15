@@ -71,6 +71,10 @@ case "tomorrow":
         echo $n->printBasicTableLine()."\n";
 	}
 	break;
+case "calendar":
+	echo "calendar...\n";
+    rebuildCalendars();
+    break;
 case "reminder":
 	echo "reminder...\n";
 	if($GLOBALS['optionsDB']['cronSendReminder'] == 0) {
