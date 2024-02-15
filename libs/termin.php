@@ -148,7 +148,6 @@ class Termin
             $logentry->DBinsert($this->getVars());
             $this->makeAlwaysYes();
         }
-        rebuildCalendars();
     }
     public function is_valid() {
         if(!$this->Datum) return false;
