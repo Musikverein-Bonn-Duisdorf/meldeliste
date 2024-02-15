@@ -44,27 +44,27 @@ class UserCalendar
         $str="BEGIN:VEVENT\n";
 
         if($n->EndDatum) {
-            $end = gmdate('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
+            $end = date('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
             if($n->Uhrzeit2) {
-                $end = gmdate('Ymd\THis', strtotime($n->EndDatum." ".$n->Uhrzeit2));
+                $end = date('Ymd\THis', strtotime($n->EndDatum." ".$n->Uhrzeit2));
             }
-            $begin = gmdate('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit));
+            $begin = date('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit));
             if($n->Uhrzeit == NULL) {
-                $begin = gmdate('Ymd\THis', strtotime($n->Datum." 00:00:00"));
-                $end = gmdate('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
+                $begin = date('Ymd\THis', strtotime($n->Datum." 00:00:00"));
+                $end = date('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
             }        
         }
         else {
-            $end = gmdate('Ymd\THis', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
+            $end = date('Ymd\THis', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
 
             if($n->Uhrzeit2) {
-                $end = gmdate('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit2));
+                $end = date('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit2));
             }
 
-            $begin = gmdate('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit));
+            $begin = date('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit));
             if($n->Uhrzeit == NULL) {
-                $begin = gmdate('Ymd\THis', strtotime($n->Datum." 00:00:00"));
-                $end = gmdate('Ymd\THis', strtotime($n->Datum." 23:59:00"));
+                $begin = date('Ymd\THis', strtotime($n->Datum." 00:00:00"));
+                $end = date('Ymd\THis', strtotime($n->Datum." 23:59:00"));
             }
         }
         $str.="SUMMARY:".$n->Name."\n";
@@ -139,27 +139,27 @@ END:VCALENDAR
 
 //     date_default_timezone_set('Europe/Berlin');
 //     if($n->EndDatum) {
-//         $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
+//         $end = date('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
 //         if($n->Uhrzeit2) {
-//             $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." ".$n->Uhrzeit2));
+//             $end = date('Y-m-d H:i:s', strtotime($n->EndDatum." ".$n->Uhrzeit2));
 //         }
-//         $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
+//         $begin = date('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
 //         if($n->Uhrzeit == NULL) {
-//             $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
-//             $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
+//             $begin = date('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
+//             $end = date('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
 //         }        
 //     }
 //     else {
-//         $end = gmdate('Y-m-d H:i:s', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
+//         $end = date('Y-m-d H:i:s', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
 
 //         if($n->Uhrzeit2) {
-//             $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit2));
+//             $end = date('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit2));
 //         }
 
-//         $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
+//         $begin = date('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
 //         if($n->Uhrzeit == NULL) {
-//             $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
-//             $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 23:59:00"));
+//             $begin = date('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
+//             $end = date('Y-m-d H:i:s', strtotime($n->Datum." 23:59:00"));
 //         }
 //     }
 
