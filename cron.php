@@ -74,6 +74,7 @@ case "tomorrow":
 case "calendar":
 	echo "calendar...\n";
     rebuildCalendars();
+	echo "done...\n";
     break;
 case "reminder":
 	echo "reminder...\n";
