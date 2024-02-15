@@ -79,7 +79,9 @@ class UserCalendar
     }
 
     public function makeCalendar() {
-        $out = fopen("MVDcal_".$u->activeLink.".ics", "w");
+        $u = new User;
+        $u->load_by_id($this->User);
+        $out = fopen("calendars/MVDcal_".$u->activeLink.".ics", "w");
         $str=$this->makeHeader();
 
         $sql = sprintf('SELECT `Index` FROM `%sTermine` ORDER BY `Datum`, `Uhrzeit` DESC LIMIT %s;',
