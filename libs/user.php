@@ -233,6 +233,9 @@ class User
     public function getLink() {
         return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
     }
+    public function getCalendarLink() {
+        return $GLOBALS['optionsDB']['WebSiteURL']."/calendars/MVDcal_".$this->activeLink.".ics";
+    }
     protected function insert() {
         $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", "%s", "%d", "%s", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],

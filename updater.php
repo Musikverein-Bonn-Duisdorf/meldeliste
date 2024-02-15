@@ -90,11 +90,6 @@ if(!requirePermission("perm_editConfig")) die();
   </div>
 </div>
 
-<?php
-      $c = new UserCalendar;
-$c->User=$_SESSION['userid'];
-$c->makeCalendar();
-?>
   <?php
 include "common/footer.php";
 ?>
