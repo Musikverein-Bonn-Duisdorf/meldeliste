@@ -620,6 +620,19 @@ function RegisterOption($val) {
     }
 }
 
+function rebuildCalendars() {
+    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` != 0;',
+		   $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        $c = new UserCalendar;
+        $c->User = $row['Index'];
+        $c->makeCalendar();
+    }
+}
+
 function requireAdmin() {
     if(!$_SESSION['admin']) die("Admin permissions required.");
 }
