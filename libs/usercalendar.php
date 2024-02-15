@@ -88,7 +88,7 @@ class UserCalendar
                        $GLOBALS['dbprefix'],
                        100 // <-- TODO : make configurable
         );
-        $dbr = mysqli_query($conn, $sql);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         while($row = mysqli_fetch_array($dbr)) {
             $str.=$this->makeAppmnt($row(['Index']));    
