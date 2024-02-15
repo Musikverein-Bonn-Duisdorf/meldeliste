@@ -22,6 +22,7 @@ include "libs/loan.php";
 include "libs/register.php";
 include "libs/usermail.php";
 include "libs/ics.php";
+include "libs/usercalendar.php";
 include "libs/aushilfe.php";
 include "libs/aushilfeShift.php";
 

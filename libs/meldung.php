@@ -112,6 +112,9 @@ class Meldung
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
         }
+        $c = new UserCalendar;
+        $c->User = $this->User;
+        $c->makeCalendar();
     }
     public function is_valid() {
         if(!$this->User) return false;
@@ -193,6 +196,15 @@ class Meldung
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
+    }
+
+
+    public function getUserEvent($user, $event) {
+        $this->load_by_user_event($user, $event);
+        if($this->Index) {
+            return $this->Wert;
+        }
+        else return null;
     }
 };
 ?>

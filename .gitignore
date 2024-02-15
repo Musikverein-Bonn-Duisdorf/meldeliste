@@ -2,4 +2,4 @@
 common/config.php
 uploads/*
 !uploads/README
-
+calendars/*.ics
