@@ -93,7 +93,7 @@ class UserCalendar
 
         $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= current_date - interval "%d" day ORDER BY `Datum` DESC, `Uhrzeit` DESC;',
                        $GLOBALS['dbprefix'],
-                       365 // <-- TODO : make configurable
+                       $GLOBALS['optionsDB']['calendarPastDays'] // <-- TODO : make configurable
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();

@@ -621,7 +621,7 @@ function RegisterOption($val) {
 }
 
 function rebuildCalendars() {
-    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` != 0;',
+    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Instrument` != 0 AND `activeLink` IS NOT NULL;',
 		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
