@@ -37,7 +37,10 @@ class UserCalendar
     public function makeAppmnt($id) {
         $n = new Termin;
         $n->load_by_id($id);
-
+        $m = new Meldung;
+        $status = $m->getUserEvent($this->User, $id);
+        if($status == 2) return;
+        
         $indent="";
         // $indent="\t";
         $str=$indent."BEGIN:VEVENT\n";
@@ -68,12 +71,17 @@ class UserCalendar
         }
         $str.=$indent."SUMMARY:".$n->Name."\n";
         $str.=$indent."DESCRIPTION:".$n->Beschreibung."\n";
-        $str.=$indent."STATUS:CONFIRMED\n";
+
+        if($status == null || $status == 3) {
+            $str.=$indent."STATUS:TENTATIVE\n";
+        }
+        else {
+            $str.=$indent."STATUS:CONFIRMED\n";
+        }
+        
         $str.=$indent."DTSTART;TZID=Europe/Berlin:".$begin."\n";
         $str.=$indent."DTEND;TZID=Europe/Berlin:".$end."\n";
-        // LOCATION:1000 Broadway Ave.\, Brooklyn
-        //      DESCRIPTION: Access-A-Ride trip to 900 Jay St.\, Brooklyn
-        //      STATUS:CONFIRMED CANCELLED TENTATIVE
+        $str.=$indent."LOCATION:".$n->Ort1.",".$n->Ort2.",".$n->Ort3.",".$n->Ort4."\n"
 
         $str.=$indent."END:VEVENT\n";
         return $str;
