@@ -120,7 +120,7 @@ if($fill && ($n->login || $edit == 3)) {
 <button class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
 <?php } ?>
 <?php if($fill) { ?>
-          <div class="w3-row"><a href="<?php echo $n->getLink(); ?>"><?php echo $n->getLink(); ?></a></div>                                                               <div class="w3-row"><a href="<?php echo $n->getLink(); ?>"><?php echo $n->getCalendarLink(); ?></a></div>
+          <div class="w3-row"><a href="<?php echo $n->getLink(); ?>"><?php echo $n->getLink(); ?></a></div>                                                               <div class="w3-row"><a href="<?php echo $n->getCalendarLink(); ?>"><?php echo $n->getCalendarLink(); ?></a></div>
 <?php } ?>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
