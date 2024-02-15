@@ -168,7 +168,6 @@ $value=array(
     "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
     "Musikverein Duisdorf",
     "7"
-365
 );
 $type=array(
     "string",
