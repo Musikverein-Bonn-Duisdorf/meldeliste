@@ -91,7 +91,7 @@ class UserCalendar
         $out = fopen("calendars/MVDcal_".$u->activeLink.".ics", "w");
         $str=$this->makeHeader();
 
-        $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= current_date - interval '%d' day ORDER BY `Datum` DESC, `Uhrzeit` DESC;',
+        $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= current_date - interval "%d" day ORDER BY `Datum` DESC, `Uhrzeit` DESC;',
                        $GLOBALS['dbprefix'],
                        365 // <-- TODO : make configurable
         );
