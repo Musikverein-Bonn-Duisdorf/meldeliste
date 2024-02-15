@@ -194,5 +194,14 @@ class Meldung
             $this->fill_from_array($row);
         }
     }
+
+
+    public function getUserEvent($user, $event) {
+        $this->load_by_user_event($user, $event);
+        if($this->Index) {
+            return $this->Wert;
+        }
+        else return null;
+    }
 };
 ?>
