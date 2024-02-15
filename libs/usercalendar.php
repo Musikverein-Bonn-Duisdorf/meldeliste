@@ -30,7 +30,7 @@ class UserCalendar
     }
 
     public function makeFooter() {
-        $str="END:VCALENDAR";    
+        $str="END:VCALENDAR\n";
         return $str;
     }
 
@@ -38,41 +38,43 @@ class UserCalendar
         $n = new Termin;
         $n->load_by_id($id);
 
-        $indent="\t";
+        $indent="";
+        // $indent="\t";
         $str=$indent."BEGIN:VEVENT\n";
 
         if($n->EndDatum) {
-            $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
+            $end = gmdate('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
             if($n->Uhrzeit2) {
-                $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." ".$n->Uhrzeit2));
+                $end = gmdate('Ymd\THis', strtotime($n->EndDatum." ".$n->Uhrzeit2));
             }
-            $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
+            $begin = gmdate('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit));
             if($n->Uhrzeit == NULL) {
-                $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
-                $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
+                $begin = gmdate('Ymd\THis', strtotime($n->Datum." 00:00:00"));
+                $end = gmdate('Ymd\THis', strtotime($n->EndDatum." 23:59:00"));
             }        
         }
         else {
-            $end = gmdate('Y-m-d H:i:s', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
+            $end = gmdate('Ymd\THis', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
 
             if($n->Uhrzeit2) {
-                $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit2));
+                $end = gmdate('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit2));
             }
 
-            $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
+            $begin = gmdate('Ymd\THis', strtotime($n->Datum." ".$n->Uhrzeit));
             if($n->Uhrzeit == NULL) {
-                $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
-                $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 23:59:00"));
+                $begin = gmdate('Ymd\THis', strtotime($n->Datum." 00:00:00"));
+                $end = gmdate('Ymd\THis', strtotime($n->Datum." 23:59:00"));
             }
         }
-        
-        $str.=$indent."SUMMARY".$n->Name."\n";
+        $str.=$indent."SUMMARY:".$n->Name."\n";
+        $str.=$indent."DESCRIPTION:".$n->Beschreibung."\n";
+        $str.=$indent."STATUS:CONFIRMED\n";
         $str.=$indent."DTSTART;TZID=Europe/Berlin:".$begin."\n";
         $str.=$indent."DTEND;TZID=Europe/Berlin:".$end."\n";
         // LOCATION:1000 Broadway Ave.\, Brooklyn
         //      DESCRIPTION: Access-A-Ride trip to 900 Jay St.\, Brooklyn
         //      STATUS:CONFIRMED CANCELLED TENTATIVE
-        
+
         $str.=$indent."END:VEVENT\n";
         return $str;
     }
@@ -83,15 +85,14 @@ class UserCalendar
         $out = fopen("calendars/MVDcal_".$u->activeLink.".ics", "w");
         $str=$this->makeHeader();
 
-        $sql = sprintf('SELECT `Index` FROM `%sTermine` ORDER BY `Datum`, `Uhrzeit` DESC LIMIT %s;',
+        $sql = sprintf('SELECT `Index` FROM `%sTermine` ORDER BY `Datum` DESC, `Uhrzeit` DESC LIMIT %s;',
                        $GLOBALS['dbprefix'],
                        100 // <-- TODO : make configurable
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         while($row = mysqli_fetch_array($dbr)) {
-            var_dump($row);
-            $str.=$this->makeAppmnt($row(['Index']));
+   	    $str.=$this->makeAppmnt($row['Index']);
         }
         $str.=$this->makeFooter();
         fwrite($out, $str);
