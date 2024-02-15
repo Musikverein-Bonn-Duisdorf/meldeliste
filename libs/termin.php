@@ -148,7 +148,7 @@ class Termin
             $logentry->DBinsert($this->getVars());
             $this->makeAlwaysYes();
         }
-        exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
+        // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
     }
     public function is_valid() {
         if(!$this->Datum) return false;
