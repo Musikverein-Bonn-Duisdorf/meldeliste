@@ -231,7 +231,7 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/calendars/MVDcal_".$this->activeLink.".ics";
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", "%s", "%d", "%s", "%s", "%s", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %s, "%d", "%s", "%s", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -243,7 +243,7 @@ class User
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
-        $GLOBALS['conn'], $this->Birthday,
+        mkNULLstr($this->Birthday),
         $this->getMail,
         $this->Admin,
         $this->RegisterLead
@@ -255,7 +255,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -267,7 +267,7 @@ class User
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
-        $this->Birthday,
+        mkNULLstr($this->Birthday),
         $this->getMail,
         $this->Admin,
         $this->RegisterLead,
