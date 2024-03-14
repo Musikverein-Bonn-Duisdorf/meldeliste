@@ -177,6 +177,7 @@ function getBirthdays($date1, $date2) {
 
     $users = array();
     $birthdays = array();
+    $ages = array();
     
     for($i = $begin; $i <= $end; $i->modify('+1 day')) {
         $date=$i->format("-m-d");
@@ -189,10 +190,13 @@ function getBirthdays($date1, $date2) {
         while($row = mysqli_fetch_array($dbr)) {
             array_push($users, $row['Index']);
             array_push($birthdays, $row['Birthday']);
+            $bday = new DateTime($row['Birthday']);
+            $age=intval($bday->format("Y"))-intval($date->format("Y"));
+            array_push($ages, $age);
         }
     }
     for($i = 0; $i < sizeof($users); $i++) {
-        echo $users[$i]." ".germanDate($birthdays[$i], false)."<br />\n";
+        echo $users[$i]." ".germanDate($birthdays[$i], false)." ".$age[$i]."<br />\n";
     }
 }
 
