@@ -7,7 +7,7 @@
       ?></p>
       <?php if(requirePermission("perm_showUsers")) {
           ?>
-          <div class="w3-container">
+          <div class="w3-container w3-margin-bottom w3-mobile">
           <?php
           getCurrentBirthdays();
  } ?>
