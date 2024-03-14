@@ -50,8 +50,8 @@ else {
  <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\" ".$disabled; ?>>
     <label>Mitglieds-Nr. (optional)</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="RefID" type="number" placeholder="Vereins-Nr." <?php if($fill) echo "value=\"".$n->RefID."\" ".$disabled; ?>>
-    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Birthday" type="date" placeholder="Geburtstag (optional)" <?php if($fill) echo "value=\"".$n->Birthday."\""; ?>>
     <label>Geburtsdatum (optional)</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Birthday" type="date" placeholder="Geburtstag (optional)" <?php if($fill) echo "value=\"".$n->Birthday."\""; ?>>
 <?php } ?>
         
     <label>Emailadressen</label>
