@@ -196,7 +196,9 @@ function getBirthdays($date1, $date2) {
         }
     }
     for($i = 0; $i < sizeof($users); $i++) {
-        echo $users[$i]." ".germanDate($birthdays[$i], false)." ".$ages[$i]."<br />\n";
+        $u = new User;
+        $u->load_by_id($users[$i]);
+        echo $u->getName()." ".germanDate($birthdays[$i], false)." ".$ages[$i]."<br />\n";
     }
 }
 
