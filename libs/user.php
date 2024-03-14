@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'Birthday' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -16,6 +16,7 @@ class User
 	    case 'iName':
 	    case 'Email':
 	    case 'Email2':
+	    case 'Birthday':
 	    case 'getMail':
 	    case 'Admin':
         case 'singleUsePW':
@@ -36,20 +37,6 @@ class User
 	    case 'Index':
 	    case 'Instrument':
         case 'RefID':
-            $this->_data[$key] = (int)$val;
-            break;
-	    case 'Nachname':
-            $this->_data[$key] = $val;
-            break;
-	    case 'Vorname':
-            $this->_data[$key] = $val;
-            break;
-	    case 'Passhash':
-            $this->_data[$key] = $val;
-            break;
-	    case 'activeLink':
-            $this->_data[$key] = $val;
-            break;
 	    case 'Mitglied':
 	    case 'getMail':
 	    case 'Admin':
@@ -64,8 +51,13 @@ class User
 	    case 'Email2':
 	    case 'LastLogin':
 	    case 'DeletedOn':
+	    case 'Birthday':
             $this->_data[$key] = trim($val);
             break;
+	    case 'Nachname':
+	    case 'Vorname':
+	    case 'Passhash':
+	    case 'activeLink':
         default:
             $this->_data[$key] = $val;
             break;
@@ -96,6 +88,7 @@ class User
         if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
         if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
         if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
+        if($this->Birthday != $old->Birthday) $str.=", Geburtstag: ".germanDate($old->Birthday, true)." &rArr; <b>".germanDate($this->Birthday, true)."</b>";
         if($this->getMail != $old->getMail) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
         if($this->Admin != $old->Admin) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
         if($this->RegisterLead != $old->RegisterLead) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
@@ -125,7 +118,7 @@ class User
                 $this->iName = $row['Name'];
             }
         }
-        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%d</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%d</b>, LastLogin: <b>%s</b>",
+        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%d</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Geburtstag: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%d</b>, LastLogin: <b>%s</b>",
         $this->Index,
         $this->Vorname,
         $this->Nachname,
@@ -135,6 +128,7 @@ class User
         $this->iName,
         $this->Email,
         $this->Email2,
+        germanDate($this->Birthday, true),
         bool2string($this->getMail),
         bool2string($this->Admin),
         bool2string($this->RegisterLead),
@@ -237,7 +231,7 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/calendars/MVDcal_".$this->activeLink.".ics";
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", "%s", "%d", "%s", "%s", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %s, "%d", "%s", "%s", "%s", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -249,6 +243,7 @@ class User
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
+        mkNULLstr($this->Birthday),
         $this->getMail,
         $this->Admin,
         $this->RegisterLead
@@ -260,7 +255,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
@@ -272,6 +267,7 @@ class User
         $this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
+        mkNULLstr($this->Birthday),
         $this->getMail,
         $this->Admin,
         $this->RegisterLead,
