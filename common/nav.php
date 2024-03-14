@@ -6,8 +6,12 @@
       if(isAdmin()) echo " (Admin)";
       ?></p>
       <?php if(requirePermission("perm_showUsers")) {
- getCurrentBirthdays();
+          ?>
+          <div class="w3-container">
+          <?php
+          getCurrentBirthdays();
  } ?>
+     </div>
 </div>
 <?php if(getBranchName() != "master") { ?>
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
