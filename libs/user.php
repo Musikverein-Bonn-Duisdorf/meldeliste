@@ -88,7 +88,7 @@ class User
         if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
         if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
         if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
-        if($this->Birthday != $old->Birthday) $str.=", Geburtstag: ".$old->Birthday." &rArr; <b>".$this->Birthday."</b>";
+        if($this->Birthday != $old->Birthday) $str.=", Geburtstag: ".germanDate($old->Birthday, true)." &rArr; <b>".germanDate($this->Birthday, true)."</b>";
         if($this->getMail != $old->getMail) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
         if($this->Admin != $old->Admin) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
         if($this->RegisterLead != $old->RegisterLead) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
