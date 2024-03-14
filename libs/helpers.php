@@ -171,6 +171,42 @@ function getAdminPage($string) {
     }
 }
 
+function getBirthdays($date1, $date2) {
+    $begin = new DateTime($date1);
+    $end   = new DateTime($date2);
+
+    $users = array();
+    $birthdays = array();
+    $ages = array();
+    
+    for($i = $begin; $i <= $end; $i->modify('+1 day')) {
+        $date=$i->format("-m-d");
+        $sql = sprintf('SELECT `Index`, `Birthday` FROM `%sUser` WHERE `Birthday` LIKE "%%%s" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
+                       $GLOBALS['dbprefix'],
+                       $date
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($users, $row['Index']);
+            array_push($birthdays, $row['Birthday']);
+            $bday = new DateTime($row['Birthday']);
+            $age=intval($i->format("Y"))-intval($bday->format("Y"));
+            array_push($ages, $age);
+        }
+    }
+    for($i = 0; $i < sizeof($users); $i++) {
+        $day = new DateTime($birthdays[$i]);
+        $u = new User;
+        $u->load_by_id($users[$i]);
+        echo "<div><i class=\"fa-solid fa-cake-candles\"></i> <b>".$u->getName()."</b> wird am <b>".$day->format("d.m.")."</b> ".$ages[$i].".</div>\n";
+    }
+}
+
+function getCurrentBirthdays() {
+    return getBirthdays(date('d.m.Y',strtotime("-7 days")), date("Y-m-d"));
+}
+
 function getNextRegNumber() {
     $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
     $GLOBALS['dbprefix']
