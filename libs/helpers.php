@@ -191,7 +191,7 @@ function getBirthdays($date1, $date2) {
             array_push($users, $row['Index']);
             array_push($birthdays, $row['Birthday']);
             $bday = new DateTime($row['Birthday']);
-            $age=intval($bday->format("Y"))-intval($date->format("Y"));
+            $age=intval($bday->format("Y"))-intval($i->format("Y"));
             array_push($ages, $age);
         }
     }
