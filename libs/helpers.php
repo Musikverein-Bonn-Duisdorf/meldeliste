@@ -174,15 +174,12 @@ function getAdminPage($string) {
 function getBirthdays($date1, $date2) {
     $begin = new DateTime($date1);
     $end   = new DateTime($date2);
-    echo $begin->format("Y-m-d");
-    echo $end->format("Y-m-d");
 
     $users = array();
     $birthdays = array();
     
     for($i = $begin; $i <= $end; $i->modify('+1 day')) {
         $date=$i->format("-m-d");
-        echo $date;
         $sql = sprintf('SELECT `Index`, `Birthday` FROM `%sUser` WHERE `Birthday` LIKE "%%%s" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
                        $GLOBALS['dbprefix'],
                        $date
@@ -192,11 +189,10 @@ function getBirthdays($date1, $date2) {
         while($row = mysqli_fetch_array($dbr)) {
             array_push($users, $row['Index']);
             array_push($birthdays, $row['Birthday']);
-            echo $row['Birthday'];
         }
     }
     for($i = 0; $i < sizeof($users); $i++) {
-        echo $users[$i]." ".germanDate($birthdays[$i],true)."<br />\n";
+        echo $users[$i]." ".germanDate($birthdays[$i], false)."<br />\n";
     }
 }
 
