@@ -174,8 +174,8 @@ function getAdminPage($string) {
 function getBirthdays($date1, $date2) {
     $begin = new DateTime($date1);
     $end   = new DateTime($date2);
-    echo $begin;
-    echo $end;
+    echo $begin->format("-m-d");
+    echo $end->format("-m-d");
     $users = array();
     $birthdays = array();
     
