@@ -5,9 +5,9 @@
       echo $_SESSION['username'];
       if(isAdmin()) echo " (Admin)";
       ?></p>
-          <p>
-<?php getCurrentBirthdays(); ?>
-          </p>
+      <?php if(requirePermission("perm_showUsers")) {
+ getCurrentBirthdays();
+ } ?>
 </div>
 <?php if(getBranchName() != "master") { ?>
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
