@@ -183,7 +183,7 @@ function getBirthdays($date1, $date2) {
     for($i = $begin; $i <= $end; $i->modify('+1 day')) {
         $date=$i->format("-m-d");
         echo $date;
-        $sql = sprintf('SELECT `Index`, `Birthday` FROM `%sUser` WHERE `Birthday` LIKE "%s" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT `Index`, `Birthday` FROM `%sUser` WHERE `Birthday` LIKE "%%%s" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
                        $GLOBALS['dbprefix'],
                        $date
         );
