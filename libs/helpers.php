@@ -199,7 +199,7 @@ function getBirthdays($date1, $date2) {
         $day = new DateTime($birthdays[$i]);
         $u = new User;
         $u->load_by_id($users[$i]);
-        echo "<div><i class=\"fa-solid fa-cake-candles\"></i> <b>".$u->getName()."</b> wird am <b>".$day->format("d. M")."</b> ".$ages[$i].".</div>\n";
+        echo "<div><i class=\"fa-solid fa-cake-candles\"></i> <b>".$u->getName()."</b> wird am <b>".$day->format("d. F")."</b> ".$ages[$i].".</div>\n";
     }
 }
 
