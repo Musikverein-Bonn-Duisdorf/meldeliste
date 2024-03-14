@@ -197,7 +197,7 @@ function getBirthdays($date1, $date2) {
 }
 
 function getCurrentBirthdays() {
-    return getBirthdays(date("Y-m-d"), date('d.m.Y',strtotime("-7 days")));
+    return getBirthdays(date('d.m.Y',strtotime("-7 days")), date("Y-m-d"));
 }
 
 function getNextRegNumber() {
