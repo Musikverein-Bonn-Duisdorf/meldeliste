@@ -171,6 +171,35 @@ function getAdminPage($string) {
     }
 }
 
+function getBirthdays($date1, $date2) {
+    $begin = new DateTime($date1);
+    $end   = new DateTime($date2);
+
+    $users = array();
+    $birthdays = array();
+    
+    for($i = $begin; $i <= $end; $i->modify('+1 day')) {
+        $date=$i->format("-m-d");
+        $sql = sprintf('SELECT `Index`, `Birthday` FROM `%sUser` WHERE `Birthday` LIKE "%s" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
+                       $GLOBALS['dbprefix'],
+                       $date
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($users, $row['Index']);
+            array_push($birthdays, $row['Birthday']);
+        }
+    }
+    for($i = 0; $i < sizeof($users)) {
+        echo $users[$i]." ".germanDate($birthdays[$i],true)."<br />\n";
+    }
+}
+
+function getCurrentBirthdays() {
+    return getBirthdays(date("Y-m-d"), date('d.m.Y',strtotime("-7 days")));
+}
+
 function getNextRegNumber() {
     $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
     $GLOBALS['dbprefix']
