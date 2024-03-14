@@ -128,7 +128,7 @@ class User
         $this->iName,
         $this->Email,
         $this->Email2,
-        $this->Birthday,
+        germanDate($this->Birthday, true),
         bool2string($this->getMail),
         bool2string($this->Admin),
         bool2string($this->RegisterLead),
