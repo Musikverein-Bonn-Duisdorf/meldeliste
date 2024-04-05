@@ -244,6 +244,12 @@ for($i=0; $i<$N; $i++) {
     }
 }
 
+$sql = sprintf("CREATE TABLE `%sEmail` ( `Index` INT NOT NULL AUTO_INCREMENT , `Sender` INT NOT NULL , `Date` DATETIME NOT NULL , `Subject` TEXT NOT NULL , `Body` TEXT NULL , `Draft` INT NOT NULL , PRIMARY KEY (`Index`)) ENGINE = InnoDB;",
+		   $GLOBALS['dbprefix']
+);
+$dbr = mysqli_query($GLOBALS['conn'], $sql);
+sqlerror();
+
 ?>
 
 <?php
