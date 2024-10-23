@@ -15,6 +15,8 @@ function meldeShift(cronID, user, shift, termin, wert) {
             oldel.parentNode.replaceChild(newel, oldel);
 	}
     }
+    if(shift == 0) return;
+    if(user == 0) return;
     var str = "meldeshift.php?cmd=save&id="+cronID+"&user="+user+"&termin="+termin+"&wert="+wert+"&shift="+shift;
     xmlhttp.open("GET",str,true);
     xmlhttp.send();

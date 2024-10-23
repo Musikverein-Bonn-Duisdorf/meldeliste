@@ -23,6 +23,9 @@ function melde(cronID, user, termin, wert, Children, Guests) {
         var GuestInput = document.getElementById("Guests"+termin);
         Guests = GuestInput.value;
     }
+    if(user == 0) return;
+    if(isNaN(wert) || wert > 3 || wert < 0) return;
+    if(termin == 0) return;
     var str = "melde.php?cmd=save&id="+cronID+"&user="+user+"&termin="+termin+"&wert="+wert+"&Children="+Children+"&Guests="+Guests;
     xmlhttp.open("GET",str,true);
     xmlhttp.send();
