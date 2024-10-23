@@ -7,11 +7,12 @@
       ?></p>
       <?php if(requirePermission("perm_showUsers")) {
           ?>
-          <div class="w3-container w3-margin-bottom w3-mobile">
+  <!-- <div class="w3-container w3-margin-bottom w3-mobile"> -->
           <?php
-          getCurrentBirthdays();
- } ?>
-     </div>
+           // getCurrentBirthdays();
+          ?>
+    <!--             </div> -->
+  <?php } ?>
 </div>
 <?php if(getBranchName() != "master") { ?>
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
