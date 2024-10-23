@@ -70,7 +70,8 @@ $para=array(
     'orgName',
     'orgNameShort',
     'numberOfDaysInHistory',
-    'calendarPastDays'
+    'calendarPastDays',
+    'alwaysMaybeNewAppmnts'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -119,7 +120,8 @@ $desc=array(
     "Vereinsname",
     "Vereinsname (kurz)",
     "Anzahl der Tage in der Statistikberechnung",
-"Termine im Kalender anzeigen, die wieviele Tage alt sind"
+"Termine im Kalender anzeigen, die wieviele Tage alt sind",
+    "Nutzer, die automatisch in neue Termine mit Vielleicht eingetragen werden (userID durch Komma getrennt)"
 );
 $value=array(
     "w3-opacity",
@@ -167,7 +169,8 @@ $value=array(
     0,
     "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
     "Musikverein Duisdorf",
-    "7"
+    "7",
+    0
 );
 $type=array(
     "string",
@@ -216,7 +219,8 @@ $type=array(
     "string",
     "string",
     "uint",
-    "uint"
+    "uint",
+    "string"
 );
 
 $N = count($para);

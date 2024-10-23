@@ -147,6 +147,7 @@ class Termin
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
             $this->makeAlwaysYes();
+            $this->makeAlwaysMaybe();
         }
         // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
     }
@@ -238,6 +239,21 @@ class Termin
                 $m->User = intval($user);
                 $m->Termin = $this->Index;
                 $m->Wert = 1;
+                $m->save();
+            }
+        }
+    }
+    protected function makeAlwaysMaybe() {
+        if($this->Shifts) return;
+        $users = explode(",", $GLOBALS['optionsDB']['alwaysMaybeNewAppmnts']);
+        foreach($users as $user) {
+            $m = new Meldung;
+            $m->load_by_user_event(intval($user), $this->Index);
+            if($m->User < 1) {
+                $m = new Meldung;
+                $m->User = intval($user);
+                $m->Termin = $this->Index;
+                $m->Wert = 3;
                 $m->save();
             }
         }
