@@ -250,6 +250,12 @@ $sql = sprintf("CREATE TABLE `%sEmail` ( `Index` INT NOT NULL AUTO_INCREMENT , `
 $dbr = mysqli_query($GLOBALS['conn'], $sql);
 sqlerror();
 
+$sql = sprintf("CREATE TABLE `%sSentEmails` ( `Index` INT NOT NULL AUTO_INCREMENT , `Email` INT NOT NULL , `Date` DATETIME NOT NULL, `Receiver` INT NOT NULL , PRIMARY KEY (`Index`)) ENGINE = InnoDB;",
+		   $GLOBALS['dbprefix']
+);
+$dbr = mysqli_query($GLOBALS['conn'], $sql);
+sqlerror();
+
 ?>
 
 <?php
