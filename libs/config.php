@@ -35,10 +35,19 @@ class Config
         $old->load_by_id($this->Index);
         
         $str = sprintf("Config-ID: %d <b>%s</b>",
-        $this->Index,
-        $this->Parameter
+                       $this->Index,
+                       $this->Parameter
         );
         if($this->Value != $old->Value) $str.=", Value: ".$old->Value." &rArr; <b>".$this->Value."</b>";
+
+        return $str;
+    }
+
+    public function getVars() {
+        $str = sprintf("new Config: %s <b>%s</b>",
+                       $this->Parameter
+        );
+        $str.=", Value: <b>".$this->Value."</b>";
 
         return $str;
     }
@@ -48,11 +57,11 @@ class Config
         if($this->Index > 0) {
             $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
         }
         else {
             $logentry = new Log;
-            $logentry->DBinsert($this->getChanges());
+            $logentry->DBinsert($this->getVars());
             $this->insert();
         }
     }
