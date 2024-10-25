@@ -44,7 +44,8 @@ class Config
     }
 
     public function getVars() {
-        $str = sprintf("new Config: %s <b>%s</b>",
+        $str = sprintf("Config-ID: %d <b>%s</b>",
+                       $this->Index,
                        $this->Parameter
         );
         $str.=", Value: <b>".$this->Value."</b>";
@@ -55,14 +56,14 @@ class Config
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
+            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->insert();
         }
     }
 
