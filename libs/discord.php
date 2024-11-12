@@ -10,7 +10,7 @@ class Discord
 
     public function __get($key) {
         switch($key) {
-	    case 'channel':
+	    case 'message':
 	    case 'username':
             return $this->_data[$key];
             break;
@@ -21,7 +21,7 @@ class Discord
 
     public function __set($key, $val) {
         switch($key) {
-	    case 'channel':
+	    case 'message':
 	    case 'username':
             $this->_data[$key] = trim($val);
             break;
@@ -40,6 +40,8 @@ class Discord
     }
 
     public function sendMessage($message, $username = "Bot") {
+        $this->message = $message;
+        $this->username = $username;
         if(!$this->is_valid()) return false;
         $logentry = new Log;
         $logentry->DBinsert($this->getVars());
@@ -76,7 +78,7 @@ class Discord
     }
    
     public function is_valid() {
-        if(!$this->channel) return false;
+        if(!$this->username) return false;
         if(!$this->message) return false;
         return true;
     }
