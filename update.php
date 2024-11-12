@@ -71,7 +71,8 @@ $para=array(
     'orgNameShort',
     'numberOfDaysInHistory',
     'calendarPastDays',
-    'alwaysMaybeNewAppmnts'
+    'alwaysMaybeNewAppmnts',
+    'DiscordWebHookURL'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -121,7 +122,8 @@ $desc=array(
     "Vereinsname (kurz)",
     "Anzahl der Tage in der Statistikberechnung",
 "Termine im Kalender anzeigen, die wieviele Tage alt sind",
-    "Nutzer, die automatisch in neue Termine mit Vielleicht eingetragen werden (userID durch Komma getrennt)"
+    "Nutzer, die automatisch in neue Termine mit Vielleicht eingetragen werden (userID durch Komma getrennt)",
+    "URL für den Discord Webhook"
 );
 $value=array(
     "w3-opacity",
@@ -170,7 +172,8 @@ $value=array(
     "Musikverein Bonn-Duisdorf gegr. 1949 e.V.",
     "Musikverein Duisdorf",
     "7",
-    0
+    0,
+    ""
 );
 $type=array(
     "string",
@@ -220,6 +223,7 @@ $type=array(
     "string",
     "uint",
     "uint",
+    "string",
     "string"
 );
 

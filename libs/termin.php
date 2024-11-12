@@ -148,6 +148,15 @@ class Termin
             $logentry->DBinsert($this->getVars());
             $this->makeAlwaysYes();
             $this->makeAlwaysMaybe();
+
+            $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
+            $discord = new DiscordWebhook($webhookUrl);
+
+            try {
+                $response = $discord->sendMessage("Hello, Discord!", "Custom Bot");
+            } catch (Exception $e) {
+                echo "Error: " . $e->getMessage();
+            }
         }
         // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
     }
