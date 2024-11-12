@@ -7,6 +7,7 @@ global $optionsDB;
 include "version.php";
 include "libs/git.php";
 include "libs/log.php";
+include "libs/discord.php";
 include "libs/div.php";
 include "libs/user.php";
 include "libs/permissions.php";
