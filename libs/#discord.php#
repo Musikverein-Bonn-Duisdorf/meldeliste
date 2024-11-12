@@ -48,7 +48,7 @@ class Discord
         if($embed) {
             $payload = json_encode([
                 "username" => $username,
-                "avatar_url" => ,
+                "avatar_url" => $GLOBALS['optionsDB']['DiscordAvatarURL'],
                 "content" => $message,
                 "embeds" => $embed
             ]);
