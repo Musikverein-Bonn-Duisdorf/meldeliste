@@ -2632,26 +2632,35 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function DiscordMessage() {
-        $str = "Ein neuer Termin wurde erstellt.\n";
-        $str.= sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
-                       $this->Index,
-                       $this->getDate(),
-                       $this->Uhrzeit,
-                       $this->Uhrzeit2,
-                       $this->Abfahrt,
-                       $this->vName,
-                       $this->Capacity,
-                       $this->Name,
-                       bool2string($this->Auftritt),
-                       $this->Ort1,
-                       $this->Ort2,
-                       $this->Ort3,
-                       $this->Ort4,
-                       $this->Beschreibung,
-                       bool2string($this->Shifts),
-                       bool2string($this->published),
-                       bool2string($this->open)
-        );
+        $str = "\"embeds\": [{";
+        $str.= "\t\"fields\": [";
+
+        $str.= "\t\t{";
+        $str.= "\"name\": ".$this->Name.",";
+        $str.= "\"value\": ".$this->getDate().",";
+        $str.= "\t\t}";
+
+        $str.= "\t\"fields\": ]";
+        $str.= "}]";
+        // $str.= sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
+        //                $this->Index,
+        //                $this->getDate(),
+        //                $this->Uhrzeit,
+        //                $this->Uhrzeit2,
+        //                $this->Abfahrt,
+        //                $this->vName,
+        //                $this->Capacity,
+        //                $this->Name,
+        //                bool2string($this->Auftritt),
+        //                $this->Ort1,
+        //                $this->Ort2,
+        //                $this->Ort3,
+        //                $this->Ort4,
+        //                $this->Beschreibung,
+        //                bool2string($this->Shifts),
+        //                bool2string($this->published),
+        //                bool2string($this->open)
+        // );
         return $str;
     }
 };
