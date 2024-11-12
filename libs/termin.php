@@ -2633,10 +2633,10 @@ ORDER BY `Nachname`, `Vorname`;",
     private function DiscordMessage() {
         $message = "**neuer Termin**\n";
         $message .= "**".$this->Name."**\n";
-        $message .= "**Datum**: `$this->getDate()`\n";
-        if($this->Uhrzeit) $message .= "**Uhrzeit**: $this->Uhrzeit\n";
-        if($this->Beschreibung) $message .= "*$this->Beschreibung*\n";
-        if($this->Ort1) $message .= "**Ort**: *$this->Ort1*\n";
+        $message .= "**Datum**: ".$this->getDate()."\n";
+        if($this->Uhrzeit) $message .= "**Uhrzeit**: ".$this->Uhrzeit."\n";
+        if($this->Beschreibung) $message .= "*".$this->Beschreibung."*\n";
+        if($this->Ort1) $message .= "**Ort**: *".$this->Ort1."*\n";
 
         return $message;
     }
