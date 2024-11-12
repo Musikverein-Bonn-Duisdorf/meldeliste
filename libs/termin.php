@@ -141,6 +141,16 @@ class Termin
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
             $this->update();
+
+            if($this->published) {
+                $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
+                $discord = new Discord($webhookUrl);
+                try {
+                    $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
+                } catch (Exception $e) {
+                    echo "Error: " . $e->getMessage();
+                }
+            }
         }
         else {
             $this->insert();
@@ -2631,12 +2641,11 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function DiscordMessage() {
-        $message = ":mega::notes: **neuer Termin** in der Meldeliste :notes::mega:\n";
+        $message = ":mega: :notes: **neuer Termin** in der Meldeliste :notes: :mega:\n";
         $message .= $this->getDate()." **".$this->Name."**\n";
         if($this->Beschreibung) { $message .= "*".$this->Beschreibung."*\n"; }
         if($this->Uhrzeit) { $message .= "**Uhrzeit**: ".$this->Uhrzeit." Uhr\n"; }
         if($this->Ort1) { $message .= "**Ort**: *".$this->Ort1."*\n"; }
-        echo $message;
         return $message;
     }
 };
