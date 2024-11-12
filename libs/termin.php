@@ -153,8 +153,8 @@ class Termin
             $discord = new Discord($webhookUrl);
 
             $str = "Ein neuer Termin wurde erstellt.\n";
-            // $str+= "_"+$this->Name+"_\n";
-            // $str+= "_"+$this->Datum+"_\n";
+            $str.= "_".$this->Name."_\n";
+            $str.= "_".$this->Datum."_\n";
             
             try {
                 $response = $discord->sendMessage($str, "Vorschwitzender");
