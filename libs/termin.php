@@ -150,7 +150,7 @@ class Termin
             $this->makeAlwaysMaybe();
 
             $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
-            $discord = new DiscordWebhook($webhookUrl);
+            $discord = new Discord($webhookUrl);
 
             try {
                 $response = $discord->sendMessage("Hello, Discord!", "Custom Bot");
