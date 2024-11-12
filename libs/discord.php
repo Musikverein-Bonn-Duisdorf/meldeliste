@@ -32,7 +32,7 @@ class Discord
     }
 
     public function getVars() {
-        return sprintf("Discord-Channel: <b>%s</b>, Username: <b>%s</b>, Nachricht: <b>%s</b>",
+        return sprintf("DiscordWebhook: <b>%s</b>, Username: <b>%s</b>, Nachricht: <b>%s</b>",
                        $webhookUrl,
                        $this->username,
                        $this->message
@@ -45,8 +45,6 @@ class Discord
         if(!$this->is_valid()) return false;
         $logentry = new Log;
         $logentry->DBinsert($this->getVars());
-
-        // Prepare the payload to send to Discord
         $payload = json_encode([
             "content" => $message,
             "username" => $username

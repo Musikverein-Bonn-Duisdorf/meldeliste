@@ -152,8 +152,12 @@ class Termin
             $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
             $discord = new Discord($webhookUrl);
 
+            $str = "Ein neuer Termin wurde erstellt.\n";
+            $str+= "_"+$this->Name+"_\n";
+            $str+= "_"+$this->Datum+"_\n";
+            
             try {
-                $response = $discord->sendMessage("Hello, Discord!", "Custom Bot");
+                $response = $discord->sendMessage($str, "Vorschwitzender");
             } catch (Exception $e) {
                 echo "Error: " . $e->getMessage();
             }
