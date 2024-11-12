@@ -72,7 +72,8 @@ $para=array(
     'numberOfDaysInHistory',
     'calendarPastDays',
     'alwaysMaybeNewAppmnts',
-    'DiscordWebHookURL'
+    'DiscordWebHookURL',
+    'DiscordAvatarURL'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -123,7 +124,8 @@ $desc=array(
     "Anzahl der Tage in der Statistikberechnung",
 "Termine im Kalender anzeigen, die wieviele Tage alt sind",
     "Nutzer, die automatisch in neue Termine mit Vielleicht eingetragen werden (userID durch Komma getrennt)",
-    "URL für den Discord Webhook"
+    "URL für den Discord Webhook",
+    "URL für den Discord Bot-Avatar"
 );
 $value=array(
     "w3-opacity",
@@ -173,6 +175,7 @@ $value=array(
     "Musikverein Duisdorf",
     "7",
     0,
+    "",
     ""
 );
 $type=array(
@@ -223,6 +226,7 @@ $type=array(
     "string",
     "uint",
     "uint",
+    "string",
     "string",
     "string"
 );
