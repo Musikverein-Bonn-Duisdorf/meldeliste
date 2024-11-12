@@ -153,7 +153,7 @@ class Termin
             $discord = new Discord($webhookUrl);
 
             try {
-                $response = $discord->sendMessage("Ein neuer Termin wurde veröffentlicht", "Vorschwitzender", $this->DiscordMessage());
+                $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
             } catch (Exception $e) {
                 echo "Error: " . $e->getMessage();
             }
@@ -2630,7 +2630,13 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function DiscordMessage() {
-        $embed = ["fields" => ["name" => $this->Name, "value" => $this->getDate()], ["name" => "Uhrzeit", "value" => $this->Uhrzeit]];
+
+        $message = "**".$this->Name."**\n";
+        $message .= "Datum: `$this->getDate()`\n";
+        $message .= "Uhrzeit: **$this->Uhrzeit**\n";
+        $message .= "Beschreibung: *$this->Beschreibung*\n";
+        $message .= "Ort: *$this->Ort1*\n";
+
         // $str.= sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
         //                $this->Index,
         //                $this->getDate(),
@@ -2650,7 +2656,7 @@ ORDER BY `Nachname`, `Vorname`;",
         //                bool2string($this->published),
         //                bool2string($this->open)
         // );
-        return $embed;
+        return $message;
     }
 };
 ?>
