@@ -58,6 +58,8 @@ class Discord
                 "content" => $message
             ]);
         }
+
+        echo $payload;
         
         // Initialize cURL
         $ch = curl_init($this->webhookUrl);
