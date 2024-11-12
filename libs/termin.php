@@ -2631,9 +2631,8 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function DiscordMessage() {
-        $message = "**neuer Termin**\n";
-        $message .= "**".$this->Name."**\n";
-        $message .= "**Datum**: ".$this->getDate()."\n";
+        $message = "**neuer Termin** in der Meldeliste\n";
+        $message .= $this->getDate()." **".$this->Name."\n";
         if($this->Uhrzeit) { $message .= "**Uhrzeit**: ".$this->Uhrzeit."\n"; }
         if($this->Beschreibung) { $message .= "*".$this->Beschreibung."*\n"; }
         if($this->Ort1) { $message .= "**Ort**: *".$this->Ort1."*\n"; }
