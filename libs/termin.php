@@ -152,10 +152,8 @@ class Termin
             $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
             $discord = new Discord($webhookUrl);
 
-            $msg = $this->DiscordMessage();
-            
             try {
-                $response = $discord->sendMessage($msg, "Vorschwitzender");
+                $response = $discord->sendMessage("Ein neuer Termin wurde veröffentlicht", "Vorschwitzender", $this->DiscordMessage());
             } catch (Exception $e) {
                 echo "Error: " . $e->getMessage();
             }
@@ -2632,16 +2630,12 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function DiscordMessage() {
-        $str = "\"embeds\": [{";
-        $str.= "\t\"fields\": [";
+        $str = "\"fields\": [";
 
-        $str.= "\t\t{";
-        $str.= "\"name\": ".$this->Name.",";
-        $str.= "\"value\": ".$this->getDate().",";
-        $str.= "\t\t}";
+        $str.= json_encode(["name" => $this->Name, "value" => $this->getDate()]).",\n";
+        $str.= json_encode(["name" => Uhrzeit, "value" => $this->Uhrzeit]);
 
-        $str.= "\t\"fields\": ]";
-        $str.= "}]";
+        $str.= "]";
         // $str.= sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
         //                $this->Index,
         //                $this->getDate(),
@@ -2661,6 +2655,7 @@ ORDER BY `Nachname`, `Vorname`;",
         //                bool2string($this->published),
         //                bool2string($this->open)
         // );
+        echo $str;
         return $str;
     }
 };

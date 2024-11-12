@@ -39,16 +39,25 @@ class Discord
         );
     }
 
-    public function sendMessage($message, $username = "Bot") {
+    public function sendMessage($message, $username = "Bot", $embed = NULL) {
         $this->message = $message;
         $this->username = $username;
         if(!$this->is_valid()) return false;
         $logentry = new Log;
         $logentry->DBinsert($this->getVars());
-        $payload = json_encode([
-            "content" => $message,
-            "username" => $username
-        ]);
+        if($embed) {
+            $payload = json_encode([
+                "username" => $username,
+                "content" => $message,
+                "embeds" => $embed
+            ]);
+        }
+        else {
+            $payload = json_encode([
+                "username" => $username,
+                "content" => $message
+            ]);
+        }
         
         // Initialize cURL
         $ch = curl_init($this->webhookUrl);
