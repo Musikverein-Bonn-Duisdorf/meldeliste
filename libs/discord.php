@@ -48,7 +48,7 @@ class Discord
         if($embed) {
             $payload = json_encode([
                 "username" => $username,
-                "avatar_url" => "https://www.musikverein-bonn-duisdorf.de/uploads/images/Gallery/Divers/MVD_Wappen.jpg",
+                // "avatar_url" => "https://www.musikverein-bonn-duisdorf.de/uploads/images/Gallery/Divers/MVD_Wappen.jpg",
                 "content" => $message,
                 "embeds" => $embed
             ]);
@@ -56,7 +56,7 @@ class Discord
         else {
             $payload = json_encode([
                 "username" => $username,
-                "avatar_url" => "https://www.musikverein-bonn-duisdorf.de/uploads/images/Gallery/Divers/MVD_Wappen.jpg",
+                // "avatar_url" => "https://www.musikverein-bonn-duisdorf.de/uploads/images/Gallery/Divers/MVD_Wappen.jpg",
                 "content" => $message
             ]);
         }
