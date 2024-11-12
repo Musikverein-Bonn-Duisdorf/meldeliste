@@ -152,7 +152,6 @@ class Termin
             if(this->published) {
                 $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
                 $discord = new Discord($webhookUrl);
-
                 try {
                     $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
                 } catch (Exception $e) {
