@@ -141,6 +141,16 @@ class Termin
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
             $this->update();
+
+            if($this->published) {
+                $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
+                $discord = new Discord($webhookUrl);
+                try {
+                    $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
+                } catch (Exception $e) {
+                    echo "Error: " . $e->getMessage();
+                }
+            }
         }
         else {
             $this->insert();
@@ -148,6 +158,16 @@ class Termin
             $logentry->DBinsert($this->getVars());
             $this->makeAlwaysYes();
             $this->makeAlwaysMaybe();
+
+            if($this->published) {
+                $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
+                $discord = new Discord($webhookUrl);
+                try {
+                    $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
+                } catch (Exception $e) {
+                    echo "Error: " . $e->getMessage();
+                }
+            }
         }
         // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
     }
@@ -2618,6 +2638,15 @@ ORDER BY `Nachname`, `Vorname`;",
             }
         }
         return $str;
+    }
+
+    private function DiscordMessage() {
+        $message = ":mega: :notes: **neuer Termin** in der Meldeliste :notes: :mega:\n";
+        $message .= $this->getDate()." **".$this->Name."**\n";
+        if($this->Beschreibung) { $message .= "*".$this->Beschreibung."*\n"; }
+        if($this->Uhrzeit) { $message .= "**Uhrzeit**: ".$this->Uhrzeit." Uhr\n"; }
+        if($this->Ort1) { $message .= "**Ort**: *".$this->Ort1."*\n"; }
+        return $message;
     }
 };
 ?>
