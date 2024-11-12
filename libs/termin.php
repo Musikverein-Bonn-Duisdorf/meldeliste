@@ -149,7 +149,7 @@ class Termin
             $this->makeAlwaysYes();
             $this->makeAlwaysMaybe();
 
-            if(this->published) {
+            if($this->published) {
                 $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
                 $discord = new Discord($webhookUrl);
                 try {
