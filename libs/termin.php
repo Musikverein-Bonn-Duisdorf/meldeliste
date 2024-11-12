@@ -2655,7 +2655,6 @@ ORDER BY `Nachname`, `Vorname`;",
         //                bool2string($this->published),
         //                bool2string($this->open)
         // );
-        echo $str;
         return $str;
     }
 };
