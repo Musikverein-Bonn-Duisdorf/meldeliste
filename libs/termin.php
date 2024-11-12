@@ -2637,7 +2637,7 @@ ORDER BY `Nachname`, `Vorname`;",
         if($this->Uhrzeit) $message .= "**Uhrzeit**: ".$this->Uhrzeit."\n";
         if($this->Beschreibung) $message .= "*".$this->Beschreibung."*\n";
         if($this->Ort1) $message .= "**Ort**: *".$this->Ort1."*\n";
-
+        echo $message;
         return $message;
     }
 };
