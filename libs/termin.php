@@ -149,13 +149,15 @@ class Termin
             $this->makeAlwaysYes();
             $this->makeAlwaysMaybe();
 
-            $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
-            $discord = new Discord($webhookUrl);
+            if(this->published) {
+                $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
+                $discord = new Discord($webhookUrl);
 
-            try {
-                $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
-            } catch (Exception $e) {
-                echo "Error: " . $e->getMessage();
+                try {
+                    $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
+                } catch (Exception $e) {
+                    echo "Error: " . $e->getMessage();
+                }
             }
         }
         // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
@@ -2630,32 +2632,13 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function DiscordMessage() {
+        $message = "**neuer Termin**\n";
+        $message .= "**".$this->Name."**\n";
+        $message .= "**Datum**: `$this->getDate()`\n";
+        if($this->Uhrzeit) $message .= "**Uhrzeit**: $this->Uhrzeit\n";
+        if($this->Beschreibung) $message .= "*$this->Beschreibung*\n";
+        if($this->Ort1) $message .= "**Ort**: *$this->Ort1*\n";
 
-        $message = "**".$this->Name."**\n";
-        $message .= "Datum: `$this->getDate()`\n";
-        $message .= "Uhrzeit: **$this->Uhrzeit**\n";
-        $message .= "Beschreibung: *$this->Beschreibung*\n";
-        $message .= "Ort: *$this->Ort1*\n";
-
-        // $str.= sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
-        //                $this->Index,
-        //                $this->getDate(),
-        //                $this->Uhrzeit,
-        //                $this->Uhrzeit2,
-        //                $this->Abfahrt,
-        //                $this->vName,
-        //                $this->Capacity,
-        //                $this->Name,
-        //                bool2string($this->Auftritt),
-        //                $this->Ort1,
-        //                $this->Ort2,
-        //                $this->Ort3,
-        //                $this->Ort4,
-        //                $this->Beschreibung,
-        //                bool2string($this->Shifts),
-        //                bool2string($this->published),
-        //                bool2string($this->open)
-        // );
         return $message;
     }
 };
