@@ -106,6 +106,10 @@ class Usermail {
                 $GLOBALS['dbprefix'],
                 $this->termin
                 );
+
+                $Termin = new Termin;
+                $Termin->load_by_id($this->termin);
+                $mail->Subject = $GLOBALS['mailconfig']['subjectprefix']."[".$Termin->getGermanDate()." ".$Termin->Name."]".$this->subject;
             }
             else {
                 if($this->register > 0) {
