@@ -73,7 +73,8 @@ $para=array(
     'calendarPastDays',
     'alwaysMaybeNewAppmnts',
     'DiscordWebHookURL',
-    'DiscordAvatarURL'
+    'DiscordAvatarURL',
+    'DiscordBotName'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -176,7 +177,8 @@ $value=array(
     "7",
     0,
     "",
-    ""
+    "",
+    "Bot"
 );
 $type=array(
     "string",
@@ -226,6 +228,7 @@ $type=array(
     "string",
     "uint",
     "uint",
+    "string",
     "string",
     "string",
     "string"

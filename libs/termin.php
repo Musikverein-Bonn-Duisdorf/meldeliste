@@ -145,8 +145,9 @@ class Termin
             if($this->published) {
                 $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
                 $discord = new Discord($webhookUrl);
+                $botname = $GLOBALS['optionsDB']['DiscordBotName'];
                 try {
-                    $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
+                    $response = $discord->sendMessage($this->DiscordMessageUpdate(), $botname);
                 } catch (Exception $e) {
                     echo "Error: " . $e->getMessage();
                 }
@@ -163,7 +164,7 @@ class Termin
                 $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
                 $discord = new Discord($webhookUrl);
                 try {
-                    $response = $discord->sendMessage($this->DiscordMessage(), "Vorschwitzender");
+                    $response = $discord->sendMessage($this->DiscordMessage(), $botname);
                 } catch (Exception $e) {
                     echo "Error: " . $e->getMessage();
                 }
@@ -2642,6 +2643,14 @@ ORDER BY `Nachname`, `Vorname`;",
 
     private function DiscordMessage() {
         $message = ":mega: :notes: **neuer Termin** in der Meldeliste :notes: :mega:\n";
+        $message .= $this->getDate()." **".$this->Name."**\n";
+        if($this->Beschreibung) { $message .= "*".$this->Beschreibung."*\n"; }
+        if($this->Uhrzeit) { $message .= "**Uhrzeit**: ".$this->Uhrzeit." Uhr\n"; }
+        if($this->Ort1) { $message .= "**Ort**: *".$this->Ort1."*\n"; }
+        return $message;
+    }
+    private function DiscordMessageUpdate() {
+        $message = ":mega: :notes: **Terminänderung** in der Meldeliste :notes: :mega:\n";
         $message .= $this->getDate()." **".$this->Name."**\n";
         if($this->Beschreibung) { $message .= "*".$this->Beschreibung."*\n"; }
         if($this->Uhrzeit) { $message .= "**Uhrzeit**: ".$this->Uhrzeit." Uhr\n"; }
