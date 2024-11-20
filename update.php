@@ -123,7 +123,7 @@ $desc=array(
     "Vereinsname",
     "Vereinsname (kurz)",
     "Anzahl der Tage in der Statistikberechnung",
-"Termine im Kalender anzeigen, die wieviele Tage alt sind",
+    "Termine im Kalender anzeigen, die wieviele Tage alt sind",
     "Nutzer, die automatisch in neue Termine mit Vielleicht eingetragen werden (userID durch Komma getrennt)",
     "URL für den Discord Webhook",
     "URL für den Discord Bot-Avatar",
@@ -177,6 +177,7 @@ $value=array(
     "Musikverein Duisdorf",
     "7",
     0,
+    "",
     "",
     "",
     "Bot"
