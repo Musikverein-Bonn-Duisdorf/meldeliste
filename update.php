@@ -73,7 +73,8 @@ $para=array(
     'calendarPastDays',
     'alwaysMaybeNewAppmnts',
     'DiscordWebHookURL',
-    'DiscordAvatarURL'
+    'DiscordAvatarURL',
+    'DiscordBotName'
 );
 $desc=array(
     "Stil f&uuml;r nicht ver&ouml;ffentlichte Termine",
@@ -125,7 +126,8 @@ $desc=array(
 "Termine im Kalender anzeigen, die wieviele Tage alt sind",
     "Nutzer, die automatisch in neue Termine mit Vielleicht eingetragen werden (userID durch Komma getrennt)",
     "URL für den Discord Webhook",
-    "URL für den Discord Bot-Avatar"
+    "URL für den Discord Bot-Avatar",
+    "Anzeigename des Discord Bots"
 );
 $value=array(
     "w3-opacity",
@@ -176,7 +178,8 @@ $value=array(
     "7",
     0,
     "",
-    ""
+    "",
+    "Bot"
 );
 $type=array(
     "string",
@@ -226,6 +229,7 @@ $type=array(
     "string",
     "uint",
     "uint",
+    "string",
     "string",
     "string",
     "string"
