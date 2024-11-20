@@ -4,3 +4,4 @@ uploads/*
 !uploads/README
 calendars/*.ics
 php.ini
+error-log.php
