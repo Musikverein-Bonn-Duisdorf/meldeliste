@@ -77,6 +77,7 @@ class AppmntFreeTextResponse
     public function is_valid() {
         if(!$this->User) return false;
         if(!$this->Termin) return false;
+        if($this->Text == "") $this->Text = null;
         return true;
     }
 
