@@ -21,6 +21,7 @@ case "save":
     $m->Children = $_GET['Children'];
     $m->Guests = $_GET['Guests'];
     $m->save();
+
     $t = new Termin;
     $t->load_by_id($_GET['termin']);
     echo $t->printBasicTableLine();
@@ -46,6 +47,18 @@ case "status":
     $mail = new Usermail;
     $mail->singleUser($_GET['user'], $t->Name, $body);
     break;
+case "freetext":
+    $m = new AppmntFreeTextResponse;
+    $m->load_by_user_event($_GET['user'], $_GET['termin']);
+    $m->User = $_GET['user'];
+    $m->Termin = $_GET['termin'];
+    $m->Text = $_GET['freeText'];
+    $m->save();
+
+    $t = new Termin;
+    $t->load_by_id($_GET['termin']);
+    echo $t->printBasicTableLine();
+break;
 default:
     break;
 }

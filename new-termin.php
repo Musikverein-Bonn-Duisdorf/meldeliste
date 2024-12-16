@@ -87,6 +87,8 @@ if($GLOBALS['optionsDB']['showTravelTime']) {
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Ort4" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort4."\""; ?>>
     <label>Kapazit&auml;t</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Capacity" type="number" min="0" step="1" <?php if($fill) echo "value=\"".$n->Capacity."\""; ?>>
+    <label>Freitext-Rückmeldung (optional)</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="defaultFreeText" type="text" <?php if($fill) echo "value=\"".$n->defaultFreeText."\""; ?>>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
     <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
     <label>Auftritt</label>
