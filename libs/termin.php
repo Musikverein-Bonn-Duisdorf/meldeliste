@@ -1305,12 +1305,11 @@ class Termin
 
             $FreeTextInDiv = new div;
             $FreeTextInDiv->indent=$indent;
-            $FreeTextInDiv->col(8, 6, 6);
-            $FreeTextInDiv->class="w3-margin-top w3-container w3-input w3-border w3-mobile";
+            $FreeTextInDiv->col(6, 6, 6);
+            $FreeTextInDiv->class="w3-input w3-border w3-mobile w3-margin-bottom";
             $FreeTextInDiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
             $FreeTextInDiv->type="text";
             $FreeTextInDiv->tag="input";
-            // $FreeTextInDiv->style="width: 5em";
 
             $ft = new AppmntFreeTextResponse;
             $ft->load_by_user_event($user, $this->Index);
