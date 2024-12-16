@@ -1290,17 +1290,24 @@ class Termin
         $str=$str.$this->statusMailBtn($indent);
 
         if($this->defaultFreeText) {
+            $ftRow = new div;
+            $ftRow->indent=$indent;
+            $ftRow->class="w3-row w3-margin-bottom";
+            $str=$str.$ftRow->open();
+            
             $freeTextLabel = new div;
             $freeTextLabel->indent=$indent;
-            $freeTextLabel->class="w3-margin-bottom";
+            // $freeTextLabel->class="w3-margin-bottom";
             $freeTextLabel->col(2, 6, 6);
+            $freeTextLabel->bold();
             $freeTextLabel->body="Zusatzangabe";
             $str=$str.$freeTextLabel->print();
 
             $FreeTextInDiv = new div;
             $FreeTextInDiv->indent=$indent;
             $FreeTextInDiv->col(8, 6, 6);
-            $FreeTextInDiv->class="w3-row w3-margin-top w3-container w3-input";
+            $FreeTextInDiv->class="w3-margin-top w3-container w3-input w3-border w3-mobile";
+            $FreeTextInDiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
             $FreeTextInDiv->type="text";
             $FreeTextInDiv->tag="input";
             // $FreeTextInDiv->style="width: 5em";
@@ -1329,6 +1336,7 @@ class Termin
             $FreeTextSaveBtn->bold();
             $FreeTextSaveBtn->body="speichern";
             $str=$str.$FreeTextSaveBtn->print();
+            $str=$str.$ftRow->close();
         }
 
         $str=$str.$mainline->close();
