@@ -1288,6 +1288,41 @@ class Termin
             $str=$str.$btnDiv->close();
         }
         $str=$str.$this->statusMailBtn($indent);
+
+        if($this->defaultFreeText) {
+            $freeTextLabel = new div;
+            $freeTextLabel->indent=$indent;
+            $freeTextLabel->class="w3-margin-bottom";
+            $freeTextLabel->col(3, 0, 0);
+            $freeTextLabel->body="Zusatzangabe";
+            $str=$str.$freeTextLabel->print();
+
+            $FreeTextInDiv = new div;
+            $FreeTextInDiv->indent=$indent;
+            $FreeTextInDiv->col(1, 6, 6);
+            $FreeTextInDiv->class="w3-row w3-margin-top w3-container";
+            $FreeTextInDiv->type="text";
+            $FreeTextInDiv->tag="input";
+            $FreeTextInDiv->style="width: 5em";
+            $FreeTextInDiv->value=$this->defaultFreeText;
+            $FreeTextInDiv->id="FreeText".$this->Index;
+            $FreeTextInDiv->name="AppmntFreeTextResponse";
+            $FreeTextInDiv->emptyBody=true;
+            $str=$str.$FreeTextInDiv->print();
+            
+            $FreeTextSaveBtn = new div;
+            $FreeTextSaveBtn->indent=$indent;
+            $FreeTextSaveBtn->tag="button";
+            $FreeTextSaveBtn->class="w3-btn w3-row w3-border w3-border-black w3-margin-top";
+            $FreeTextSaveBtn->col(2, 12, 12);
+            $FreeTextSaveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
+            $FreeTextSaveBtn->name="saveFreeText";
+            $FreeTextSaveBtn->onclick="meldeFT('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.")";
+            $FreeTextSaveBtn->bold();
+            $FreeTextSaveBtn->body="speichern";
+            $str=$str.$FreeTextSaveBtn->print();
+        }
+
         $str=$str.$mainline->close();
         $indent--;
         $indent--;
@@ -1471,39 +1506,6 @@ class Termin
                 $indent--;
             }
         }
-        if($this->defaultFreeText) {
-            $freeTextLabel = new div;
-            $freeTextLabel->indent=$indent;
-            $freeTextLabel->class="w3-margin-bottom";
-            $freeTextLabel->col(3, 0, 0);
-            $freeTextLabel->body="Zusatzangabe";
-            $str=$str.$freeTextLabel->print();
-
-            $FreeTextInDiv = new div;
-            $FreeTextInDiv->indent=$indent;
-            $FreeTextInDiv->col(1, 6, 6);
-            $FreeTextInDiv->class="w3-row w3-margin-top w3-container";
-            $FreeTextInDiv->type="text";
-            $FreeTextInDiv->tag="input";
-            $FreeTextInDiv->style="width: 5em";
-            $FreeTextInDiv->value=$this->defaultFreeText;
-            $FreeTextInDiv->id="FreeText".$this->Index;
-            $FreeTextInDiv->name="AppmntFreeTextResponse";
-            $FreeTextInDiv->emptyBody=true;
-            $str=$str.$FreeTextInDiv->print();
-            
-            $FreeTextSaveBtn = new div;
-            $FreeTextSaveBtn->indent=$indent;
-            $FreeTextSaveBtn->tag="button";
-            $FreeTextSaveBtn->class="w3-btn w3-row w3-border w3-border-black w3-margin-top";
-            $FreeTextSaveBtn->col(2, 12, 12);
-            $FreeTextSaveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $FreeTextSaveBtn->name="saveFreeText";
-            $FreeTextSaveBtn->onclick="meldeFT('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.")";
-            $FreeTextSaveBtn->bold();
-            $FreeTextSaveBtn->body="speichern";
-            $str=$str.$FreeTextSaveBtn->print();
-}
         $str=$str.$main->close();
 
         $str=$str."\t<div id=\"id".$this->Index."\" class=\"w3-modal\">\n";
