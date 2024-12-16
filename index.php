@@ -24,6 +24,7 @@ if(isset($_POST['deleteAushilfe'])) {
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/meldeFT.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/changeInstrument.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/meldeshift.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
