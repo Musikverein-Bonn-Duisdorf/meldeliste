@@ -1316,9 +1316,6 @@ class Termin
             if($ft->Text) {
                 $FreeTextInDiv->value=$ft->Text;
             }
-            else {
-                $FreeTextInDiv->value=$this->defaultFreeText;
-            }
             $FreeTextInDiv->id="FreeText".$this->Index;
             $FreeTextInDiv->name="AppmntFreeTextResponse";
             $FreeTextInDiv->default=$this->defaultFreeText;
