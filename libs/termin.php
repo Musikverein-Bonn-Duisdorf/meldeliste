@@ -1292,12 +1292,12 @@ class Termin
         if($this->defaultFreeText) {
             $ftRow = new div;
             $ftRow->indent=$indent;
-            $ftRow->class="w3-row w3-margin-bottom";
+            $ftRow->class="w3-row";
             $str=$str.$ftRow->open();
             
             $freeTextLabel = new div;
             $freeTextLabel->indent=$indent;
-            // $freeTextLabel->class="w3-margin-bottom";
+            // $freeTextLabel->class="w3-margin-bottom w3-margin-top";
             $freeTextLabel->col(2, 6, 6);
             $freeTextLabel->bold();
             $freeTextLabel->body="Zusatzangabe";
@@ -1305,8 +1305,8 @@ class Termin
 
             $FreeTextInDiv = new div;
             $FreeTextInDiv->indent=$indent;
-            $FreeTextInDiv->col(6, 6, 6);
-            $FreeTextInDiv->class="w3-input w3-border w3-mobile w3-margin-bottom";
+            $FreeTextInDiv->col(7, 6, 6);
+            $FreeTextInDiv->class="w3-input w3-border w3-mobile w3-margin-bottom w3-margin-top";
             $FreeTextInDiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
             $FreeTextInDiv->type="text";
             $FreeTextInDiv->tag="input";
