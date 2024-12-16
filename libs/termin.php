@@ -1321,6 +1321,7 @@ class Termin
             }
             $FreeTextInDiv->id="FreeText".$this->Index;
             $FreeTextInDiv->name="AppmntFreeTextResponse";
+            $FreeTextInDiv->default=$this->defaultFreeText;
             $FreeTextInDiv->emptyBody=true;
             $str=$str.$FreeTextInDiv->print();
             
