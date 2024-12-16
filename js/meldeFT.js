@@ -18,7 +18,6 @@ function meldeFT(cronID, user, termin) {
     var FreeText = document.getElementById("FreeText"+termin);
     FreeText = FreeText.value;
     if(user == 0) return;
-    if(isNaN(wert) || wert > 3 || wert < 0) return;
     if(termin == 0) return;
     var str = "melde.php?cmd=freetext&id="+cronID+"&user="+user+"&termin="+termin+"&freeText="+FreeText;
     xmlhttp.open("GET",str,true);
