@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Bechreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Bechreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -27,6 +27,7 @@ class Termin
 	    case 'Guests':
 	    case 'vName':
 	    case 'new':
+        case 'defaultFreeText':
             return $this->_data[$key];
             break;
         default:
@@ -48,6 +49,7 @@ class Termin
 	    case 'Uhrzeit':
 	    case 'Uhrzeit2':
 	    case 'Abfahrt':
+        case 'defaultFreeText':
             $this->_data[$key] = trim($val);
             break;
 	    case 'Name':
@@ -100,7 +102,7 @@ class Termin
         if($GLOBALS['optionsDB']['showGuestOption']) {
             if($this->Guests != $old->Guests) $str.=", Guests: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
         }
-        
+        if($this->defaultFreeText != $old->defaultFreeText) $str.=", Ort4: ".$old->defaultFreeText." &rArr; <b>".$this->defaultFreeText."</b>"; 
         return $str;
     }
     
@@ -115,28 +117,30 @@ class Termin
             $row = mysqli_fetch_array($dbr);
             $this->vName = $row['Name'];
         }
-        return sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>",
-        $this->Index,
-        $this->getDate(),
-        $this->Uhrzeit,
-        $this->Uhrzeit2,
-        $this->Abfahrt,
-        $this->vName,
-        $this->Capacity,
-        $this->Name,
-        bool2string($this->Auftritt),
-        $this->Ort1,
-        $this->Ort2,
-        $this->Ort3,
-        $this->Ort4,
-        $this->Beschreibung,
-        bool2string($this->Shifts),
-        bool2string($this->published),
-        bool2string($this->open)
+        return sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>, FreeText: <b>%s</b>",
+                       $this->Index,
+                       $this->getDate(),
+                       $this->Uhrzeit,
+                       $this->Uhrzeit2,
+                       $this->Abfahrt,
+                       $this->vName,
+                       $this->Capacity,
+                       $this->Name,
+                       bool2string($this->Auftritt),
+                       $this->Ort1,
+                       $this->Ort2,
+                       $this->Ort3,
+                       $this->Ort4,
+                       $this->Beschreibung,
+                       bool2string($this->Shifts),
+                       bool2string($this->published),
+                       bool2string($this->open),
+                       $this->defaultFreeText
         );
     }
     public function save() {
         if(!$this->is_valid()) return false;
+        if($this->defaultFreeText == "") $this->defaultFreeText = null;
         if($this->Index > 0) {
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
@@ -186,7 +190,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`, `defaultFreeText`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d", "%s");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -204,7 +208,8 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
         $this->published,
-        $this->open
+                       $this->open,
+                       $this->defaultFreeText
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -321,7 +326,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -341,6 +346,7 @@ class Termin
         $this->published,
         $this->open,
         $this->new,
+                       $this->defaultFreeText,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
