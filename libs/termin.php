@@ -1293,7 +1293,7 @@ class Termin
             $freeTextLabel = new div;
             $freeTextLabel->indent=$indent;
             $freeTextLabel->class="w3-margin-bottom";
-            $freeTextLabel->col(2, 0, 0);
+            $freeTextLabel->col(2, 6, 6);
             $freeTextLabel->body="Zusatzangabe";
             $str=$str.$freeTextLabel->print();
 
