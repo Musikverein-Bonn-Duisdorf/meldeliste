@@ -1297,7 +1297,7 @@ class Termin
             
             $freeTextLabel = new div;
             $freeTextLabel->indent=$indent;
-            // $freeTextLabel->class="w3-margin-bottom w3-margin-top";
+            $freeTextLabel->class="w3-margin-bottom w3-margin-top w3-mobile";
             $freeTextLabel->col(2, 6, 6);
             $freeTextLabel->bold();
             $freeTextLabel->body="Zusatzangabe";
