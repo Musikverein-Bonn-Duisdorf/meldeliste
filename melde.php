@@ -50,6 +50,8 @@ case "status":
 case "freetext":
     $m = new AppmntFreeTextResponse;
     $m->load_by_user_event($_GET['user'], $_GET['termin']);
+    $m->User = $_GET['user'];
+    $m->Termin = $_GET['termin'];
     $m->Text = $_GET['freeText'];
     $m->save();
 
