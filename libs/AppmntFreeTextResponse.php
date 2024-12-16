@@ -138,6 +138,20 @@ class AppmntFreeTextResponse
         }
     }
 
+    public function load_by_user_event($user, $event) {
+        $sql = sprintf('SELECT * FROM `%sAppmntFreeTextResponse` WHERE `User` = "%d" AND `Termin` = "%d";',
+        $GLOBALS['dbprefix'],
+        $user,
+        $event
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+        if(is_array($row)) {
+            $this->fill_from_array($row);
+        }
+    }
+
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
             $this->_data[$key] = $val;
