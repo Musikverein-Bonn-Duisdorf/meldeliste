@@ -1293,13 +1293,13 @@ class Termin
             $freeTextLabel = new div;
             $freeTextLabel->indent=$indent;
             $freeTextLabel->class="w3-margin-bottom";
-            $freeTextLabel->col(3, 0, 0);
+            $freeTextLabel->col(2, 0, 0);
             $freeTextLabel->body="Zusatzangabe";
             $str=$str.$freeTextLabel->print();
 
             $FreeTextInDiv = new div;
             $FreeTextInDiv->indent=$indent;
-            $FreeTextInDiv->col(1, 6, 6);
+            $FreeTextInDiv->col(8, 6, 6);
             $FreeTextInDiv->class="w3-row w3-margin-top w3-container";
             $FreeTextInDiv->type="text";
             $FreeTextInDiv->tag="input";
