@@ -1304,7 +1304,15 @@ class Termin
             $FreeTextInDiv->type="text";
             $FreeTextInDiv->tag="input";
             $FreeTextInDiv->style="width: 5em";
-            $FreeTextInDiv->value=$this->defaultFreeText;
+
+            $ft = new AppmntFreeTextResponse;
+            $ft->load_by_user_event($user, $this->Index);
+            if($ft.Text) {
+                $FreeTextInDiv->value=$ft.Text;
+            }
+            else {
+                $FreeTextInDiv->value=$this->defaultFreeText;
+            }
             $FreeTextInDiv->id="FreeText".$this->Index;
             $FreeTextInDiv->name="AppmntFreeTextResponse";
             $FreeTextInDiv->emptyBody=true;
