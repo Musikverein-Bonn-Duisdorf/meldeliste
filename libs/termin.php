@@ -1307,8 +1307,8 @@ class Termin
 
             $ft = new AppmntFreeTextResponse;
             $ft->load_by_user_event($user, $this->Index);
-            if($ft.Text) {
-                $FreeTextInDiv->value=$ft.Text;
+            if($ft->Text) {
+                $FreeTextInDiv->value=$ft->Text;
             }
             else {
                 $FreeTextInDiv->value=$this->defaultFreeText;
