@@ -21,6 +21,7 @@ case "save":
     $m->Children = $_GET['Children'];
     $m->Guests = $_GET['Guests'];
     $m->save();
+
     $t = new Termin;
     $t->load_by_id($_GET['termin']);
     echo $t->printBasicTableLine();
@@ -51,7 +52,11 @@ case "freetext":
     $m->load_by_user_event($_GET['user'], $_GET['termin']);
     $m->Text = $_GET['freeText'];
     $m->save();
-    break;
+
+    $t = new Termin;
+    $t->load_by_id($_GET['termin']);
+    echo $t->printBasicTableLine();
+break;
 default:
     break;
 }
