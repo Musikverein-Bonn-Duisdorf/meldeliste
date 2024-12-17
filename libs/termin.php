@@ -2167,7 +2167,6 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoYes=$whoYes.$ft->Text;
                             }
                             $whoYes=$whoYes."</div>";
-                            $actcol++;
                         }
                         $whoYes=$whoYes."</div>\n";
                         break;
@@ -2214,6 +2213,7 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoMaybe=$whoMaybe."&nbsp;";
                             }
                             $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
                         }
                         if($this->defaultFreeText) {
                             $ft = new AppmntFreeTextResponse;
@@ -2223,7 +2223,6 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoMaybe=$whoMaybe.$ft->Text;
                             }
                             $whoMaybe=$whoMaybe."</div>";
-                            $actcol++;
                         }
 
                         $whoMaybe=$whoMaybe."</div>\n";
@@ -2308,6 +2307,7 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoYes=$whoYes."+ ".$row['Guests'];
                         }
                         $whoYes=$whoYes."</div>";
+                        $actcol++;
                     }
                     if($this->defaultFreeText) {
                         $ft = new AppmntFreeTextResponse;
@@ -2317,7 +2317,6 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoYes=$whoYes.$ft->Text;
                         }
                         $whoYes=$whoYes."</div>";
-                        $actcol++;
                     }
 
                     $whoYes=$whoYes."</div>\n";
@@ -2357,6 +2356,7 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoMaybe=$whoMaybe."+ ".$row['Guests'];
                             }
                             $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
                         }
                         if($this->defaultFreeText) {
                             $ft = new AppmntFreeTextResponse;
@@ -2366,7 +2366,6 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoMaybe=$whoMaybe.$ft->Text;
                             }
                             $whoMaybe=$whoMaybe."</div>";
-                            $actcol++;
                         }
 
                         $whoMaybe=$whoMaybe."</div>\n";
