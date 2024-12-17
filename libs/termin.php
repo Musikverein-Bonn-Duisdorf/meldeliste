@@ -2064,12 +2064,16 @@ ORDER BY `Nachname`, `Vorname`;",
             $cols = 2;
             $bus=false;
         }
+        if($this->defaultFreeText) $cols++;
         switch($cols) {
         case 3:
-            $colsize = array(5,5,2);
+            $colsize = array(4,3,5);
             break;
         case 4:
             $colsize = array(4,4,2,2);
+            break;
+        case 5:
+            $colsize = array(3,3,2,2,2);
             break;
         case 2:
         default:
@@ -2157,6 +2161,16 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoYes=$whoYes."&nbsp;";
                             }
                             $whoYes=$whoYes."</div>";
+                            $actcol++;
+                        }
+                        if($this->defaultFreeText) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row2['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoYes=$whoYes.$ft->Text;
+                                $whoYes=$whoYes."</div>";
+                            }
                         }
                         $whoYes=$whoYes."</div>\n";
                         break;
@@ -2203,7 +2217,18 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoMaybe=$whoMaybe."&nbsp;";
                             }
                             $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
                         }
+                        if($this->defaultFreeText) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row2['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoMaybe=$whoMaybe.$ft->Text;
+                                $whoMaybe=$whoMaybe."</div>";
+                            }
+                        }
+
                         $whoMaybe=$whoMaybe."</div>\n";
                         break;
                     default:
@@ -2286,7 +2311,18 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoYes=$whoYes."+ ".$row['Guests'];
                         }
                         $whoYes=$whoYes."</div>";
+                        $actcol++;
                     }
+                    if($this->defaultFreeText) {
+                        $ft = new AppmntFreeTextResponse;
+                        $ft->load_by_user_event($row['User'], $this->Index);
+                        if($ft->Text) {
+                            $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                            $whoYes=$whoYes.$ft->Text;
+                            $whoYes=$whoYes."</div>";
+                        }
+                    }
+
                     $whoYes=$whoYes."</div>\n";
                     break;
                 case 2:
@@ -2324,7 +2360,18 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoMaybe=$whoMaybe."+ ".$row['Guests'];
                             }
                             $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
                         }
+                        if($this->defaultFreeText) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoMaybe=$whoMaybe.$ft->Text;
+                                $whoMaybe=$whoMaybe."</div>";
+                            }
+                        }
+
                         $whoMaybe=$whoMaybe."</div>\n";
                     break;
                 default:
