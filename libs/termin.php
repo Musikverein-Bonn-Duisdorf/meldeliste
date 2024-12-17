@@ -2162,6 +2162,7 @@ ORDER BY `Nachname`, `Vorname`;",
                         if($this->defaultFreeText) {
                             $ft = new AppmntFreeTextResponse;
                             $ft->load_by_user_event($row['User'], $this->Index);
+                            echo $row['User'];
                             if($ft->Text) {
                                 $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                                 $whoYes=$whoYes.$ft->Text;
