@@ -2169,8 +2169,8 @@ ORDER BY `Nachname`, `Vorname`;",
                             if($ft->Text) {
                                 $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                                 $whoYes=$whoYes.$ft->Text;
+                                $whoYes=$whoYes."</div>";
                             }
-                            $whoYes=$whoYes."</div>";
                         }
                         $whoYes=$whoYes."</div>\n";
                         break;
@@ -2225,8 +2225,8 @@ ORDER BY `Nachname`, `Vorname`;",
                             if($ft->Text) {
                                 $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                                 $whoMaybe=$whoMaybe.$ft->Text;
+                                $whoMaybe=$whoMaybe."</div>";
                             }
-                            $whoMaybe=$whoMaybe."</div>";
                         }
 
                         $whoMaybe=$whoMaybe."</div>\n";
@@ -2319,8 +2319,8 @@ ORDER BY `Nachname`, `Vorname`;",
                         if($ft->Text) {
                             $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                             $whoYes=$whoYes.$ft->Text;
+                            $whoYes=$whoYes."</div>";
                         }
-                        $whoYes=$whoYes."</div>";
                     }
 
                     $whoYes=$whoYes."</div>\n";
@@ -2368,8 +2368,8 @@ ORDER BY `Nachname`, `Vorname`;",
                             if($ft->Text) {
                                 $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                                 $whoMaybe=$whoMaybe.$ft->Text;
+                                $whoMaybe=$whoMaybe."</div>";
                             }
-                            $whoMaybe=$whoMaybe."</div>";
                         }
 
                         $whoMaybe=$whoMaybe."</div>\n";
