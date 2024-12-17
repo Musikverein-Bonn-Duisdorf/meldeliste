@@ -33,6 +33,10 @@ class User
         }
     }
     public function __set($key, $val) {
+        if($val == null) {
+            $this->_data[$key] = null;
+            return;
+        }
         switch($key) {
 	    case 'Index':
 	    case 'Instrument':
