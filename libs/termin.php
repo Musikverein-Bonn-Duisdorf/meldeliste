@@ -2162,7 +2162,6 @@ ORDER BY `Nachname`, `Vorname`;",
                         if($this->defaultFreeText) {
                             $ft = new AppmntFreeTextResponse;
                             $ft->load_by_user_event($row['User'], $this->Index);
-                            echo $row['User'];
                             if($ft->Text) {
                                 $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                                 $whoYes=$whoYes.$ft->Text;
@@ -2216,6 +2215,17 @@ ORDER BY `Nachname`, `Vorname`;",
                             }
                             $whoMaybe=$whoMaybe."</div>";
                         }
+                        if($this->defaultFreeText) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoMaybe=$whoMaybe.$ft->Text;
+                            }
+                            $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
+                        }
+
                         $whoMaybe=$whoMaybe."</div>\n";
                         break;
                     default:
@@ -2299,6 +2309,17 @@ ORDER BY `Nachname`, `Vorname`;",
                         }
                         $whoYes=$whoYes."</div>";
                     }
+                    if($this->defaultFreeText) {
+                        $ft = new AppmntFreeTextResponse;
+                        $ft->load_by_user_event($row['User'], $this->Index);
+                        if($ft->Text) {
+                            $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                            $whoYes=$whoYes.$ft->Text;
+                        }
+                        $whoYes=$whoYes."</div>";
+                        $actcol++;
+                    }
+
                     $whoYes=$whoYes."</div>\n";
                     break;
                 case 2:
@@ -2337,6 +2358,17 @@ ORDER BY `Nachname`, `Vorname`;",
                             }
                             $whoMaybe=$whoMaybe."</div>";
                         }
+                        if($this->defaultFreeText) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoMaybe=$whoMaybe.$ft->Text;
+                            }
+                            $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
+                        }
+
                         $whoMaybe=$whoMaybe."</div>\n";
                     break;
                 default:
