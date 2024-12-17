@@ -2064,12 +2064,16 @@ ORDER BY `Nachname`, `Vorname`;",
             $cols = 2;
             $bus=false;
         }
+        if($this->defaultFreeText) $cols++;
         switch($cols) {
         case 3:
-            $colsize = array(5,5,2);
+            $colsize = array(4,3,5);
             break;
         case 4:
             $colsize = array(4,4,2,2);
+            break;
+        case 5:
+            $colsize = array(3,3,2,2,2);
             break;
         case 2:
         default:
