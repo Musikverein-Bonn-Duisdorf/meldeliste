@@ -2157,6 +2157,17 @@ ORDER BY `Nachname`, `Vorname`;",
                                 $whoYes=$whoYes."&nbsp;";
                             }
                             $whoYes=$whoYes."</div>";
+                            $actcol++;
+                        }
+                        if($this->defaultFreeText) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($user, $this->Index);
+                            if($ft->Text) {
+                                $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoYes=$whoYes.$ft->Text;
+                            }
+                            $whoYes=$whoYes."</div>";
+                            $actcol++;
                         }
                         $whoYes=$whoYes."</div>\n";
                         break;
