@@ -161,10 +161,10 @@ class Termin
             $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->makeAlwaysYes();
-            $this->makeAlwaysMaybe();
 
             if($this->published) {
+	        $this->makeAlwaysYes();
+        	$this->makeAlwaysMaybe();
                 $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
                 $discord = new Discord($webhookUrl);
                 $botname = $GLOBALS['optionsDB']['DiscordBotName'];
@@ -2064,7 +2064,7 @@ ORDER BY `Nachname`, `Vorname`;",
             $cols = 2;
             $bus=false;
         }
-        if($this->defaultFreeText) $cols++;
+        if($this->defaultFreeText && isAdmin()) $cols++;
         switch($cols) {
         case 3:
             $colsize = array(4,3,5);
@@ -2163,7 +2163,7 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoYes=$whoYes."</div>";
                             $actcol++;
                         }
-                        if($this->defaultFreeText) {
+                        if($this->defaultFreeText && isAdmin()) {
                             $ft = new AppmntFreeTextResponse;
                             $ft->load_by_user_event($row2['User'], $this->Index);
                             if($ft->Text) {
@@ -2219,7 +2219,7 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
-                        if($this->defaultFreeText) {
+                        if($this->defaultFreeText && isAdmin()) {
                             $ft = new AppmntFreeTextResponse;
                             $ft->load_by_user_event($row2['User'], $this->Index);
                             if($ft->Text) {
@@ -2313,7 +2313,7 @@ ORDER BY `Nachname`, `Vorname`;",
                         $whoYes=$whoYes."</div>";
                         $actcol++;
                     }
-                    if($this->defaultFreeText) {
+                    if($this->defaultFreeText && isAdmin()) {
                         $ft = new AppmntFreeTextResponse;
                         $ft->load_by_user_event($row['User'], $this->Index);
                         if($ft->Text) {
@@ -2362,7 +2362,7 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoMaybe=$whoMaybe."</div>";
                             $actcol++;
                         }
-                        if($this->defaultFreeText) {
+                        if($this->defaultFreeText && isAdmin()) {
                             $ft = new AppmntFreeTextResponse;
                             $ft->load_by_user_event($row['User'], $this->Index);
                             if($ft->Text) {
