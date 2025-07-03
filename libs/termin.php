@@ -161,10 +161,10 @@ class Termin
             $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->makeAlwaysYes();
-            $this->makeAlwaysMaybe();
 
             if($this->published) {
+	        $this->makeAlwaysYes();
+        	$this->makeAlwaysMaybe();
                 $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
                 $discord = new Discord($webhookUrl);
                 $botname = $GLOBALS['optionsDB']['DiscordBotName'];
