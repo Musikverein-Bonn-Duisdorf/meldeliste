@@ -1,7 +1,7 @@
 <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
   <h1 class="w3-hide-small"><?php echo $optionsDB['WebSiteName']; ?></h1>
   <h1 class="w3-hide-large w3-hide-medium"><?php echo $optionsDB['WebSiteNameShort']; ?></h1>
-  <img src="imgs/Logo.png" style="max-height:60px;   position: absolute; top: 20px; right: 20px;">
+  <img src="imgs/Logo.png" style="max-height:100px; position: absolute; top: 20px; right: 20px;">
   <p><?php
       echo $_SESSION['username'];
       if(isAdmin()) echo " (Admin)";
