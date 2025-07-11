@@ -10,6 +10,8 @@
       <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/brands.css">
       <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/solid.css">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <link rel="icon" href="imgs/MVDLogo32x32.png" sizes="32x32" />
+
 	  <?php
           include 'include.php';
       ?>
