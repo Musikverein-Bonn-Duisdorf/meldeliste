@@ -4,6 +4,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1">      
       <link rel="stylesheet" href="styles/w3.css">
       <link rel="stylesheet" href="styles/w3-colors-highway.css">
+      <link rel="stylesheet" href="styles/w3-colors-mvd.css">
       <link rel="stylesheet" href="styles/custom.css">
       <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/fontawesome.css">
       <link rel="stylesheet" href="styles/fontawesome-free-6.4.2-web/css/brands.css">
