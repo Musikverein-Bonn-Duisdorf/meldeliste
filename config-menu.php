@@ -143,7 +143,7 @@ while($row = mysqli_fetch_array($dbr)) {
         echo "<input class=\"w3-col l4 m4 s12\" type=\"email\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
         break;
     case 'color':
-        $colors=array("", "w3-red", "w3-pink", "w3-purple", "w3-deep-purple", "w3-indigo", "w3-blue", "w3-light-blue", "w3-aqua", "w3-cyan", "w3-teal", "w3-green", "w3-light-green", "w3-lime", "w3-sand", "w3-khaki", "w3-yellow", "w3-amber", "w3-orange", "w3-deep-orange", "w3-blue-gray", "w3-brown", "w3-light-gray", "w3-gray", "w3-dark-gray", "w3-pale-red", "w3-pale-yellow", "w3-pale-green", "w3-pale-blue", "w3-highway-brown", "w3-highway-red", "w3-highway-orange", "w3-highway-schoolbus", "w3-highway-yellow", "w3-highway-green", "w3-highway-blue");
+        $colors=array("", "w3-mvd-blue", "w3-mvd-black", "w3-mvd-yellow", "w3-mvd-egg", "w3-mvd-white", "w3-mvd-gray", "w3-red", "w3-pink", "w3-purple", "w3-deep-purple", "w3-indigo", "w3-blue", "w3-light-blue", "w3-aqua", "w3-cyan", "w3-teal", "w3-green", "w3-light-green", "w3-lime", "w3-sand", "w3-khaki", "w3-yellow", "w3-amber", "w3-orange", "w3-deep-orange", "w3-blue-gray", "w3-brown", "w3-light-gray", "w3-gray", "w3-dark-gray", "w3-pale-red", "w3-pale-yellow", "w3-pale-green", "w3-pale-blue", "w3-highway-brown", "w3-highway-red", "w3-highway-orange", "w3-highway-schoolbus", "w3-highway-yellow", "w3-highway-green", "w3-highway-blue");
         echo "<div class=\"w3-col l4 m4 s12 w3-center w3-dropdown-hover\"><button class=\"w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\">Farbauswahl</button>";
         echo "<div class=\"w3-dropdown-content w3-row w3-center w3-border w3-border-black\">";
         for($i=0; $i<count($colors); $i++) {
