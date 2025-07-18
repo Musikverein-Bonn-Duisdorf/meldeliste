@@ -38,8 +38,11 @@ class UserCalendar
         $n = new Termin;
         $n->load_by_id($id);
         $m = new Meldung;
-        $status = $m->getUserEvent($this->User, $id);
-        if($status == 2) return "";
+	$status = 1;
+        if($this->User) {
+    	    $status = $m->getUserEvent($this->User, $id);
+            if($status == 2) return "";
+	}
         
         $str="BEGIN:VEVENT\n";
 
@@ -86,17 +89,23 @@ class UserCalendar
     }
 
     public function makeCalendar() {
-        $u = new User;
-        $u->load_by_id($this->User);
-        $out = fopen("calendars/MVDcal_".$u->activeLink.".ics", "w");
-        $str=$this->makeHeader();
-
-        $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= current_date - interval "%d" day ORDER BY `Datum` DESC, `Uhrzeit` DESC;',
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['optionsDB']['calendarPastDays'] // <-- TODO : make configurable
-        );
+	if($this->User) {
+        	$u = new User;
+        	$u->load_by_id($this->User);
+        	$out = fopen("calendars/MVDcal_".$u->activeLink.".ics", "w");
+ 	}
+	else {
+		$out = fopen("calendars/MVDcal_all.ics", "w");
+	}
+       	
+	    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= current_date - interval "%d" day ORDER BY `Datum` DESC, `Uhrzeit` DESC;',
+                  $GLOBALS['dbprefix'],
+                  $GLOBALS['optionsDB']['calendarPastDays'] // <-- TODO : make configurable
+       	);
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
+
+	$str=$this->makeHeader();
         while($row = mysqli_fetch_array($dbr)) {
    	    $str.=$this->makeAppmnt($row['Index']);
         }
