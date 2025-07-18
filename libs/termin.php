@@ -175,6 +175,9 @@ class Termin
                 }
             }
         }
+	$c = new UserCalendar;
+        $c->User = 0;
+        $c->makeCalendar();
         // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
     }
     public function is_valid() {
