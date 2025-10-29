@@ -112,9 +112,9 @@ class Meldung
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
         }
-        $c = new UserCalendar;
-        $c->User = $this->User;
-        $c->makeCalendar();
+        //$c = new UserCalendar;
+        //$c->User = $this->User;
+        //$c->makeCalendar();
     }
     public function is_valid() {
         if(!$this->User) return false;
