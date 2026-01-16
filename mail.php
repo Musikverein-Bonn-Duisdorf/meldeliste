@@ -14,15 +14,18 @@ if(isset($_POST['termin'])) {
 if(isset($_POST['preview']) || isset($_POST['send'])) {
     $preview=true;
     if($_POST['gruss'] == 1) {
-        $gruss = "Viele Grüße\n".$_SESSION['Vorname'];
+        $gruss = "\n\n"."Viele Grüße\n".$_SESSION['Vorname'];
     }
     elseif($_POST['gruss'] == 2) {
-        $gruss = "Viele Grüße\nder Vorstand";
+        $gruss = "\n\n"."Viele Grüße\nder Vorstand";
     }
     elseif($_POST['gruss'] == 3) {
-        $gruss = "Viele Grüße\n".$GLOBALS['optionsDB']['MailGreetings'];
+        $gruss = "\n\n"."Viele Grüße\n".$GLOBALS['optionsDB']['MailGreetings'];
     }
-    $text = $_POST['Text']."\n\n".$gruss;
+    elseif($_POST['gruss'] == 4) {
+        $gruss = $_SESSION['Vorname'];
+    }
+    $text = $_POST['Text'].$gruss;
     $anrede = "Hallo {VORNAME},";
     if(isset($_POST['to']) && $_POST['to'] == 'aktiv') {
         $memberonly = true;
@@ -128,6 +131,7 @@ else {
       <option value="1" <?php if($preview && $_POST['gruss']==1) echo "selected"; ?>>Viele Grüße, <?php echo $_SESSION['Vorname']; ?></option>
       <option value="2" <?php if($preview && $_POST['gruss']==2) echo "selected"; ?>>Viele Grüße, der Vorstand</option>
       <option value="3" <?php if($preview && $_POST['gruss']==3) echo "selected"; ?>>Viele Grüße, <?php echo $GLOBALS['optionsDB']['MailGreetings']; ?></option>
+      <option value="4" <?php if($preview && $_POST['gruss']==4) echo "selected"; ?>><?php echo $_SESSION['Vorname']; ?></option>
     </select>
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="preview">Vorschau</button>
 
