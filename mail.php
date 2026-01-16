@@ -23,7 +23,7 @@ if(isset($_POST['preview']) || isset($_POST['send'])) {
         $gruss = "\n\n"."Viele Grüße\n".$GLOBALS['optionsDB']['MailGreetings'];
     }
     elseif($_POST['gruss'] == 4) {
-        $gruss = $_SESSION['Vorname'];
+        $gruss = "\n".$_SESSION['Vorname'];
     }
     $text = $_POST['Text'].$gruss;
     $anrede = "Hallo {VORNAME},";
