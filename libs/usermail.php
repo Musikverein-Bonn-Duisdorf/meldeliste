@@ -159,29 +159,27 @@ class Usermail {
                 }
 		try {
                 $mail->Send();
+            $mail->clearAddresses();
+            $logentry = new Log;
+            $logmessage = sprintf("An: %s %s, Betreff: %s",
+            $row['Vorname'],
+            $row['Nachname'],
+            $this->subject
+            );
+            $logentry->email($logmessage);
 		} catch (Exception $e) {
 		      $logentry = new Log;
 
-		      $logmessage = sprintf("Kann Email nicht senden | An: %s %s | Betreff: %s | Text: %s | PHPMailer: %s",
+		      $logmessage = sprintf("Kann Email nicht senden | An: %s %s | Betreff: %s | PHPMailer: %s",
         $row['Vorname'],
         $row['Nachname'],
         $this->subject,
-        $text,
         $mail->ErrorInfo
     );
 
     $logentry->error($logmessage);
 		}
             }
-            $mail->clearAddresses();
-            $logentry = new Log;
-            $logmessage = sprintf("An: %s %s, Betreff: %s, Text: %s",
-            $row['Vorname'],
-            $row['Nachname'],
-            $this->subject,
-            $text
-            );
-            $logentry->email($logmessage);
             $i++;
         }
         echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
