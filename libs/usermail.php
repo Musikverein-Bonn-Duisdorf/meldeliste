@@ -157,7 +157,21 @@ class Usermail {
                 if($row['Email2']) {
                     $mail->addAddress($row['Email2'], $row['Vorname']." ".$row['Nachname']);
                 }
+		try {
                 $mail->Send();
+		} catch (Exception $e) {
+		      $logentry = new Log;
+
+		      $logmessage = sprintf("Kann Email nicht senden | An: %s %s | Betreff: %s | Text: %s | PHPMailer: %s",
+        $row['Vorname'],
+        $row['Nachname'],
+        $this->subject,
+        $text,
+        $mail->ErrorInfo
+    );
+
+    $logentry->error($logmessage);
+		}
             }
             $mail->clearAddresses();
             $logentry = new Log;
