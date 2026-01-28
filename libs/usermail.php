@@ -164,30 +164,33 @@ class Usermail {
                 if($row['Email2']) {
                     $mail->addAddress($row['Email2'], $row['Vorname']." ".$row['Nachname']);
                 }
-		try {
-                $mail->Send();
-            $logentry = new Log;
-            $logmessage = sprintf("An: %s %s, Betreff: %s",
-            $row['Vorname'],
-            $row['Nachname'],
-            $this->subject
-            );
-            $logentry->email($logmessage);
-		} catch (Exception $e) {
-		      $logentry = new Log;
-
-		      $logmessage = sprintf("Kann Email nicht senden | An: %s %s | Betreff: %s | PHPMailer: %s",
-        $row['Vorname'],
-        $row['Nachname'],
-        $this->subject,
-        $mail->ErrorInfo
-    );
-
-    $logentry->error($logmessage);
-		}
+				try {
+						$mail->Send();
+					$logentry = new Log;
+					$logmessage = sprintf("An: %s %s, Betreff: %s",
+					$row['Vorname'],
+					$row['Nachname'],
+					$this->subject
+					);
+					$logentry->email($logmessage);
+				} catch (Exception $e) {
+					$logentry = new Log;
+		
+					$logmessage = sprintf("Kann Email nicht senden | An: %s %s | Betreff: %s | PHPMailer: %s",
+						$row['Vorname'],
+						$row['Nachname'],
+						$this->subject,
+						$mail->ErrorInfo
+					);
+		
+					$logentry->error($logmessage);
+					$mail->smtpClose();
+					echo "<div class=\"w3-container w3-red\"><h3>Mailversand abgebrochen</h3><p>Fehler: ".$e->getMessage()."</p></div>";
+					throw $e;
+				}
+				usleep(100000); // 100 ms Pause
+            	$i++;
             }
-			usleep(100000); // 100 ms Pause
-            $i++;
         }
 		$mail->smtpClose();
         echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
