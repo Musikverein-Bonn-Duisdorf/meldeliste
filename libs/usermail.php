@@ -68,22 +68,24 @@ class Usermail {
     }
     public function send($text) {
         $mail = new PHPMailer(true);
-        $mail->IsSMTP();
-		$mail->SMTPKeepAlive = true;
-		$mail->Timeout = 15;
+        //$mail->IsSMTP();
+		$mail->IsMail();
+		//$mail->SMTPKeepAlive = true;
+		//$mail->Timeout = 15;
         $mail->CharSet = 'UTF-8';
         
-        $mail->Host       = gethostbyname($GLOBALS['mailconfig']['server']);
+        //$mail->Host       = gethostbyname($GLOBALS['mailconfig']['server']);
+		
 		// --> DEBUG ONLY
 		//$mail->SMTPDebug = 2;
 		//$mail->Debugoutput = 'error_log';
         $mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
 		// <-- DEBUG ONLY
-        $mail->SMTPAuth   = true;                  // enable SMTP authentication
-        $mail->SMTPSecure = $GLOBALS['mailconfig']['secure'];
-        $mail->Port       = $GLOBALS['mailconfig']['port'];                    // set the SMTP port for the GMAIL server
-        $mail->Username   = $GLOBALS['mailconfig']['user']; // SMTP account username example
-        $mail->Password   = $GLOBALS['mailconfig']['password'];        // SMTP account password example
+        //$mail->SMTPAuth   = true;                  // enable SMTP authentication
+        //$mail->SMTPSecure = $GLOBALS['mailconfig']['secure'];
+        //$mail->Port       = $GLOBALS['mailconfig']['port'];                    // set the SMTP port for the GMAIL server
+        //$mail->Username   = $GLOBALS['mailconfig']['user']; // SMTP account username example
+        //$mail->Password   = $GLOBALS['mailconfig']['password'];        // SMTP account password example
         $mail->setFrom($GLOBALS['mailconfig']['from'], $GLOBALS['mailconfig']['fromName']);
         $mail->IsHTML(true);
 
