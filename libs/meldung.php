@@ -45,8 +45,8 @@ class Meldung
         $u->load_by_id($this->User);
         $t = new Termin;
         $t->load_by_id($this->Termin);
-
-        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>",
+		$str = "";
+        $strGeneral = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>",
         $this->Index,
         $this->Termin,
         $t->Name,
@@ -54,7 +54,8 @@ class Meldung
         $t->Uhrzeit,
         $u->getName()
         );
-        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; <b>".meldeSymbol($this->Wert)."</b>";
+        if($this->Wert != $old->Wert) $str.=", Wert: ".meldeWert($old->Wert)." &rArr; ".meldeSymbol($this->Wert)."  ";
+		str.=$strGeneral;
         if($this->Children != $old->Children) $str.=", Kinder: ".$old->Children." &rArr; <b>".$this->Children."</b>";
         if($this->Guests != $old->Guests) $str.=", G&auml;ste: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
         if($this->Instrument != $old->Instrument) {
@@ -82,14 +83,14 @@ class Meldung
         if($instrument == 0) $instrument = $u->Instrument;
         $instr = new Instrument;
         $instr->load_by_id($instrument);
-        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>, Wert: <b>%s</b>, Instrument: <b>%s</b>",
+        $str = sprintf("%s Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>, Instrument: <b>%s</b>",
+        meldeSymbol($this->Wert),
         $this->Index,
         $this->Termin,
         $t->Name,
         medDate($t->Datum),
         $t->Uhrzeit,
         $u->getName(),
-        meldeSymbol($this->Wert),
         $instr->Name
         );
         if($GLOBALS['optionsDB']['showChildOption']) {
