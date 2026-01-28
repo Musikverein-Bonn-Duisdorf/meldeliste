@@ -69,11 +69,17 @@ class Usermail {
     public function send($text) {
         $mail = new PHPMailer(true);
         $mail->IsSMTP();
+		$mail->SMTPKeepAlive = true;
+		$mail->Timeout = 15;
         $mail->CharSet = 'UTF-8';
         
-        $mail->Host       = $GLOBALS['mailconfig']['server']; // SMTP server example
+        $mail->Host       = gethostbyname($GLOBALS['mailconfig']['server']);
+		// --> DEBUG ONLY
+		$mail->SMTPDebug = 2;
+		$mail->Debugoutput = 'error_log';
+        // $mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
+		// <-- DEBUG ONLY
         $mail->SMTPAuth   = true;                  // enable SMTP authentication
-        $mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
         $mail->SMTPSecure = $GLOBALS['mailconfig']['secure'];
         $mail->Port       = $GLOBALS['mailconfig']['port'];                    // set the SMTP port for the GMAIL server
         $mail->Username   = $GLOBALS['mailconfig']['user']; // SMTP account username example
@@ -150,6 +156,7 @@ class Usermail {
             $anrede = "Hallo ".$row['Vorname'].",";
             $link= $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
 
+            $mail->clearAllRecipients();
             $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 
             if($row['Email']) {
@@ -159,7 +166,6 @@ class Usermail {
                 }
 		try {
                 $mail->Send();
-            $mail->clearAddresses();
             $logentry = new Log;
             $logmessage = sprintf("An: %s %s, Betreff: %s",
             $row['Vorname'],
@@ -180,8 +186,10 @@ class Usermail {
     $logentry->error($logmessage);
 		}
             }
+			usleep(100000); // 100 ms Pause
             $i++;
         }
+		$mail->smtpClose();
         echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
     }
 }
