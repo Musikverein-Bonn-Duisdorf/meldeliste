@@ -75,9 +75,9 @@ class Usermail {
         
         $mail->Host       = gethostbyname($GLOBALS['mailconfig']['server']);
 		// --> DEBUG ONLY
-		$mail->SMTPDebug = 2;
-		$mail->Debugoutput = 'error_log';
-        // $mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
+		//$mail->SMTPDebug = 2;
+		//$mail->Debugoutput = 'error_log';
+        $mail->SMTPDebug  = false;                     // enables SMTP debug information (for testing)
 		// <-- DEBUG ONLY
         $mail->SMTPAuth   = true;                  // enable SMTP authentication
         $mail->SMTPSecure = $GLOBALS['mailconfig']['secure'];
