@@ -27,7 +27,7 @@ class Inventory
         }	
     }
     public function is_valid() {
-        if(!$this->Name) return false;
+        if(!$this->Typ) return false;
         return true;
     }
     public function fill_from_array($row) {
