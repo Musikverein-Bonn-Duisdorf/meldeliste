@@ -218,6 +218,17 @@ function getNextRegNumber() {
     return $row['RegNumber']+1;
 }
 
+function getNextRegInventoryNumber() {
+    $sql = sprintf('SELECT `RegNumber` FROM `%sInventories` ORDER BY `RegNumber` DESC LIMIT 1;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+
+    $row = mysqli_fetch_array($dbr);
+    return $row['RegNumber']+1;
+}
+
 function getOwner($index) {
     if($index == 0) {
         return $GLOBALS['optionsDB']['orgNameShort'];

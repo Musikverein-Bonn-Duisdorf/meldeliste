@@ -41,25 +41,25 @@ if(requirePermission("perm_showInventories")) {
     $nInventories = $row['Count'];
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Inventurliste (<?php echo $nInventories; ?>)</h2>
+  <h2>Inventarliste (<?php echo $nInventories; ?>)</h2>
 </div>
 
 <div class="w3-row">
-  <input class="w3-input w3-border w3-padding w3-col l6 s6 m6" type="text" placeholder="Nach Instrument suchen..." id="filterString" onkeyup="filterMusiker()">
+  <input class="w3-input w3-border w3-padding w3-col l6 s6 m6" type="text" placeholder="Nach Inventar suchen..." id="filterString" onkeyup="filterMusiker()">
   <div onclick="document.getElementById('inputModal').style.display='block'" class="w3-col l1 m6 s6 w3-center w3-padding <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"><i class="fas fa-plus"></i></div>
 </div>
 <div id="inputModal" class="w3-modal">
   <form class="w3-modal-content" action="" method="POST">
     <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <span onclick="document.getElementById('inputModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
-      <h2>neues Instrument anlegen</h2>
+      <h2>neues Inventar anlegen</h2>
     </header>
     <div class="w3-row w3-padding">
       <div class="w3-col l4 m6 s6"><b>Inventarnummer</b></div>
-      <input name="RegNumber" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegNumber(); ?>" />
+      <input name="RegNumber" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegInventoryNumber(); ?>" />
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Instrument</b></div>
+      <div class="w3-col l4 m6 s6"><b>Inventar</b></div>
       <select class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Inventory">
 	<?php echo instrumentOptionAll(0); ?>
       </select>
