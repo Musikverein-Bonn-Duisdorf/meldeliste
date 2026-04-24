@@ -325,6 +325,25 @@ function instrumentOptionAll($val) {
     return $str;
 }
 
+function inventoryOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Typ']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Typ']."</option>\n";
+        }
+    }
+    return $str;
+}
+
 function loadconfig() {
     $sql = sprintf('SELECT * FROM `%sconfig`;',
 		   $GLOBALS['dbprefix']
