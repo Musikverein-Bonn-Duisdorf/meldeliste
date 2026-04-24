@@ -82,6 +82,7 @@ class Inventories
       $sql = sprintf('INSERT INTO `%sInventories` (`RegNumber`, `Inventory`, `Description`, `PurchaseDate`, `PurchasePrize`, `Comment`) VALUES ("%d", "%d", "%s", %s, "%d", "%s");',
         $GLOBALS['dbprefix'],
         $this->RegNumber,
+        $this->Inventory,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Description),
         mkNULLstr($this->PurchaseDate),
         mkEmpty($this->PurchasePrize),
