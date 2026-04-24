@@ -95,7 +95,7 @@ if(requirePermission("perm_showInventories")) {
 </div>
 <div id="Liste">
 <?php
-    $sql = sprintf('SELECT `Index` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` ORDER BY `iSort`;',
+    $sql = sprintf('SELECT `Index` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` ORDER BY `iSort`;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix']
