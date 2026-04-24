@@ -61,7 +61,7 @@ if(requirePermission("perm_showInventories")) {
     <div class="w3-row w3-padding">
       <div class="w3-col l4 m6 s6"><b>Inventar</b></div>
       <select class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Inventory">
-	<?php echo instrumentOptionAll(0); ?>
+	<?php echo inventoryOptionAll(0); ?>
       </select>
     </div>
     <div class="w3-row w3-padding">
