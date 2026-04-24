@@ -167,7 +167,7 @@ class Inventories
     }
 
     public function printTableLine() {
-        $sql = sprintf('SELECT * FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
