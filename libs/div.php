@@ -60,10 +60,12 @@ class div
         case 'method':
         case 'placeholder':
         case 'default':
-            if($val):
+            if($val) {
                 $this->_data[$key] = trim($val);
-            else:
+            }
+            else {
                 $this->_data[$key] = "";
+            }
             break;
 	    case 'bold':
 	    case 'emptyBody':
