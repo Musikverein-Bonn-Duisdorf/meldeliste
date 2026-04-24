@@ -56,7 +56,12 @@ class User
 	    case 'LastLogin':
 	    case 'DeletedOn':
 	    case 'Birthday':
-            $this->_data[$key] = trim($val);
+            if($val) {
+                $this->_data[$key] = trim($val);
+            }
+            else {
+                $this->_data[$key] = "";
+            }
             break;
 	    case 'Nachname':
 	    case 'Vorname':
