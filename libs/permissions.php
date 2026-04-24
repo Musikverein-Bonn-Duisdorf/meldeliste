@@ -11,6 +11,8 @@ class Permissions
         'perm_showLog' => null,
         'perm_showInstruments' => null,
         'perm_editInstruments' => null,
+        'perm_showInventories' => null,
+        'perm_editInventories' => null,
         'perm_sendEmail' => null,
         'perm_showResponse' => null,
         'perm_editResponse' => null,
@@ -51,6 +53,8 @@ class Permissions
         if($this->perm_showLog != $old->perm_showLog) $str.=", perm_showLog: ".$old->perm_showLog." &rArr; <b>".$this->perm_showLog."</b>";
         if($this->perm_showInstruments != $old->perm_showInstruments) $str.=", perm_showInstruments: ".$old->perm_showInstruments." &rArr; <b>".$this->perm_showInstruments."</b>";
         if($this->perm_editInstruments != $old->perm_editInstruments) $str.=", perm_editInstruments: ".$old->perm_editInstruments." &rArr; <b>".$this->perm_editInstruments."</b>";
+        if($this->perm_showInventories != $old->perm_showInventories) $str.=", perm_showInventories: ".$old->perm_showInventories." &rArr; <b>".$this->perm_showInventories."</b>";
+        if($this->perm_editInventories != $old->perm_editInventories) $str.=", perm_editInventories: ".$old->perm_editInventories." &rArr; <b>".$this->perm_editInventories."</b>";
         if($this->perm_sendEmail != $old->perm_sendEmail) $str.=", perm_sendEmail: ".$old->perm_sendEmail." &rArr; <b>".$this->perm_sendEmail."</b>";
         if($this->perm_showResponse != $old->perm_showResponse) $str.=", perm_showResponse: ".$old->perm_showResponse." &rArr; <b>".$this->perm_showResponse."</b>";
         if($this->perm_editResponse != $old->perm_editResponse) $str.=", perm_editResponse: ".$old->perm_editResponse." &rArr; <b>".$this->perm_editResponse."</b>";
@@ -63,7 +67,7 @@ class Permissions
     public function getVars() {
         $u = new User;
         $u->load_by_id($this->User);
-        return sprintf("Permission-ID: %d, User: (%d) <b>%s</b>, perm_showHiddenAppmnts: <b>%s</b>, perm_showUsers: <b>%s</b>, perm_editUsers: <b>%s</b>, perm_editAppmnts: <b>%s</b>, perm_showLog: <b>%s</b>, perm_showInstruments: <b>%s</b>, perm_editInstruments: <b>%s</b>, perm_sendEmail: <b>%s</b>, perm_showResponse: <b>%s</b>, perm_editResponse: <b>%s</b>, perm_editConfig: <b>%s</b>, perm_editPermissions: <b>%s</b>",
+        return sprintf("Permission-ID: %d, User: (%d) <b>%s</b>, perm_showHiddenAppmnts: <b>%s</b>, perm_showUsers: <b>%s</b>, perm_editUsers: <b>%s</b>, perm_editAppmnts: <b>%s</b>, perm_showLog: <b>%s</b>, perm_showInstruments: <b>%s</b>, perm_editInstruments: <b>%s</b>, perm_showInventories: <b>%s</b>, perm_editInventories: <b>%s</b>, perm_sendEmail: <b>%s</b>, perm_showResponse: <b>%s</b>, perm_editResponse: <b>%s</b>, perm_editConfig: <b>%s</b>, perm_editPermissions: <b>%s</b>",
         $this->Index,
         $this->User,
         $u->getName(),
@@ -74,6 +78,8 @@ class Permissions
         bool2string($this->perm_showLog),
         bool2string($this->perm_showInstruments),
         bool2string($this->perm_editInstruments),
+        bool2string($this->perm_showInventories),
+        bool2string($this->perm_editInventories),
         bool2string($this->perm_sendEmail),
         bool2string($this->perm_showResponse),
         bool2string($this->perm_editResponse),
@@ -102,7 +108,7 @@ class Permissions
     }
     
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_showInstruments`, `perm_editInstruments`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_showInstruments`, `perm_editInstruments`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -112,6 +118,8 @@ class Permissions
                        $this->perm_showLog,
                        $this->perm_showInstruments,
                        $this->perm_editInstruments,
+                       $this->perm_showInventories,
+                       $this->perm_editInventories,
                        $this->perm_sendEmail,
                        $this->perm_showResponse,
                        $this->perm_editResponse,
@@ -126,7 +134,7 @@ class Permissions
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_showInstruments` = "%d", `perm_editInstruments` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_showInstruments` = "%d", `perm_editInstruments` = "%d", `perm_showInventories` = "%d", `perm_editInventories` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d" WHERE `Index` = "%d";',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -136,6 +144,8 @@ class Permissions
                        $this->perm_showLog,
                        $this->perm_showInstruments,
                        $this->perm_editInstruments,
+                       $this->perm_showInventories,
+                       $this->perm_editInventories,
                        $this->perm_sendEmail,
                        $this->perm_showResponse,
                        $this->perm_editResponse,
@@ -209,6 +219,8 @@ class Permissions
         if($this->perm_showLog) return true;
         if($this->perm_showInstruments) return true;
         if($this->perm_editInstruments) return true;
+        if($this->perm_showInventories) return true;
+        if($this->perm_editInventories) return true;
         if($this->perm_sendEmail) return true;
         if($this->perm_showResponse) return true;
         if($this->perm_editResponse) return true;
@@ -232,6 +244,10 @@ class Permissions
             return $this->perm_showInstruments;
 	    case 'perm_editInstruments':
             return $this->perm_editInstruments;
+	    case 'perm_showInventories':
+            return $this->perm_showInventories;
+	    case 'perm_editInventories':
+            return $this->perm_editInventories;
 	    case 'perm_sendEmail':
             return $this->perm_sendEmail;
 	    case 'perm_showResponse':
