@@ -5,12 +5,12 @@ $_SESSION['adminpage']=true;
 include "common/header.php";
 
 if(isset($_POST['newLoan'])) {
-    $n = new InventoryLoan;
+    $n = new InventoriesLoan;
     $n->fill_from_array($_POST);
     $n->save();
 }
 if(isset($_POST['endLoan'])) {
-    $n = new InventoryLoan;
+    $n = new InventoriesLoan;
     $n->load_by_id($_POST['Index']);
     $n->EndDate = $_POST['EndDate'];
     $n->save();
