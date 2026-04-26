@@ -211,12 +211,19 @@ class Inventories
         $field->indent=$indent;
         $field->class="w3-center w3-border-right";
         if(requirePermission("perm_showInventories")) {
-            $field->col(4,4,4);
+            $field->col(2,4,4);
         }
         else {
-            $field->col(6,4,4);
+            $field->col(4,4,4);
         }
         $field->body=$row['Description'];
+        $str=$str.$field->print();
+
+        $field = new div;
+        $field->indent=$indent;
+        $field->class="w3-center w3-border-right";
+        $field->col(2,2,2);
+        $field->body=$row['Comment'];
         $str=$str.$field->print();
 
         if(requirePermission("perm_showInventories")) {
