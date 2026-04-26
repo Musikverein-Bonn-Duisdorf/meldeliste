@@ -110,7 +110,7 @@ if(requirePermission("perm_showInventories")) {
     }
 ?>
 </div>
-<script src="js/filterInventories.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/filterInstruments.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
 <?php }
     else {
