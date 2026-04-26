@@ -18,12 +18,14 @@ include "common/header.php";
 $u = new User;
 $u->load_by_id($_SESSION['userid']);
 $loans = $u->getInventoriesLoans();
-for($i=0; $i < count($loans); $i++) {
-    $loan = new InventoriesLoan;
-    $loan->load_by_id($loans[$i]);
-    $inventory = new Inventories;
-    $inventory->load_by_id($loan->Inventory);
-    echo $inventory->printTableLine();
+if(count($loans)) {
+    for($i=0; $i < count($loans); $i++) {
+        $loan = new InventoriesLoan;
+        $loan->load_by_id($loans[$i]);
+        $inventory = new Inventories;
+        $inventory->load_by_id($loan->Inventory);
+        echo $inventory->printTableLine();
+    }
 }
 
 include "common/footer.php";
