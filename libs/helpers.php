@@ -218,6 +218,17 @@ function getNextRegNumber() {
     return $row['RegNumber']+1;
 }
 
+function getNextRegInventoryNumber() {
+    $sql = sprintf('SELECT `RegNumber` FROM `%sInventories` ORDER BY `RegNumber` DESC LIMIT 1;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+
+    $row = mysqli_fetch_array($dbr);
+    return $row['RegNumber']+1;
+}
+
 function getOwner($index) {
     if($index == 0) {
         return $GLOBALS['optionsDB']['orgNameShort'];
@@ -309,6 +320,25 @@ function instrumentOptionAll($val) {
         }
         else {
             $str=$str."<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
+        }
+    }
+    return $str;
+}
+
+function inventoryOptionAll($val) {
+    $str='';
+    $str=$str."<option value=\"0\">keins</option>\n";
+    $sql = sprintf('SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
+    $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    while($row = mysqli_fetch_array($dbr)) {
+        if($val == $row['Index']) {
+            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Typ']."</option>\n";
+        }
+        else {
+            $str=$str."<option value=\"".$row['Index']."\">".$row['Typ']."</option>\n";
         }
     }
     return $str;

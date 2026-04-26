@@ -32,6 +32,9 @@ $u = new User;
 $u->load_by_id($_SESSION['userid']);
 if($u->hasInstruments()) { ?>
     <a title="Instrumente" alt="Meine Instrumente" href="myinstruments.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('myinstruments');?>"><i class="fas fa-drum"></i></a>
+<?php } 
+if($u->hasInventories()) { ?>
+    <a title="Inventar" alt="Meine Inventar" href="myinventories.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('myinventories');?>"><i class="fas fa-shirt"></i></a>
 <?php } ?>
   <form action="new-musiker.php" method="POST">
     <button title="Mein Profil" alt="Mein Profil" type="submit" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('me');?>">
@@ -81,6 +84,9 @@ if($u->hasInstruments()) { ?>
       <?php } ?>
       <?php if(requirePermission("perm_showInstruments")) { ?>
          <a title="Instrumente" alt="Instrumente" href="instruments.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('instruments');?>"><i class="fas fa-drum"></i> Instrumente</a>
+      <?php } ?>
+      <?php if(requirePermission("perm_showInventories")) { ?>
+         <a title="Inventar" alt="Inventar" href="inventories.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('inventories');?>"><i class="fas fa-shirt"></i> Inventar</a>
       <?php } ?>
       <?php if(requirePermission("perm_showLog")) { ?>
          <a title="Statistik" alt="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('evaluate');?>"><i class="fas fa-chart-pie"></i> Statistik</a>
