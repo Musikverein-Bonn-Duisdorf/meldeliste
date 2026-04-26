@@ -56,7 +56,12 @@ class User
 	    case 'LastLogin':
 	    case 'DeletedOn':
 	    case 'Birthday':
-            $this->_data[$key] = trim($val);
+            if($val) {
+                $this->_data[$key] = trim($val);
+            }
+            else {
+                $this->_data[$key] = "";
+            }
             break;
 	    case 'Nachname':
 	    case 'Vorname':
@@ -412,6 +417,20 @@ class User
         return $loans;
     }
 
+    public function getInventoriesLoans() {
+        $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `User` = %d AND `EndDate` IS NULL;',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $loans = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($loans, $row['Index']);
+        }
+        return $loans;
+    }
+
     public function getInstruments() {
         $sql = sprintf('SELECT `Index` FROM `%sInstruments` WHERE `Owner` = %d',
         $GLOBALS['dbprefix'],
@@ -426,8 +445,26 @@ class User
         return $instruments;
     }
 
+    public function getInventories() {
+        $sql = sprintf('SELECT `Index` FROM `%sInventories` WHERE `Owner` = %d',
+        $GLOBALS['dbprefix'],
+        $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $inventories = array();
+        while($row = mysqli_fetch_array($dbr)) {
+            array_push($instruments, $row['Index']);
+        }
+        return $inventories;
+    }
+
     public function hasInstruments() {
         return count($this->getLoans()) + count($this->getInstruments());
+    }
+
+    public function hasInventories() {
+        return count($this->getInventoriesLoans());
     }
     
     public function printTableLine() {
