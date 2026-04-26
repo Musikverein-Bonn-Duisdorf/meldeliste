@@ -47,7 +47,7 @@ class InventoriesLoan
         $u = new User;
         $u->load_by_id($this->User);
 
-        $Inventory = new Inventorys;
+        $Inventory = new Inventories;
         $Inventory->load_by_id($this->Inventory);
         
         $str = sprintf("InventoriesLoan-ID: %d, Inventory: (%d) <b>%s</b>, User: (%d) <b>%s</b>",
@@ -64,7 +64,7 @@ class InventoriesLoan
     }
 
     public function getVars() {
-        $Inventory = new Inventorys;
+        $Inventory = new Inventories;
         $Inventory->load_by_id($this->Inventory);
 
         $u = new User;
