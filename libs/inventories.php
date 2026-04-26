@@ -683,7 +683,7 @@ class Inventories
     }
 
     public function getLoans() {
-        $sql = sprintf('SELECT `Index` FROM `%sInventoryLoans` WHERE `Inventory` = "%d" ORDER BY `StartDate` DESC;',
+        $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `Inventory` = "%d" ORDER BY `StartDate` DESC;',
         $GLOBALS['dbprefix'],
         $this->Index
         );
