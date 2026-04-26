@@ -196,21 +196,26 @@ class Inventories
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->col(1,2,2);
         $field->body=$row['RegNumber'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right";
-        $field->col(1,4,4);
+        $field->col(2,2,2);
         $field->body=$row['iTyp'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right";
-        $field->col(1,4,4);
+        if(requirePermission("perm_showInventories")) {
+            $field->col(3,4,4);
+        }
+        else {
+            $field->col(5,4,4);
+        }
         $field->body=$row['Description'];
         $str=$str.$field->print();
 
@@ -218,28 +223,28 @@ class Inventories
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->col(1,4,4);
         $field->body=germanDate($row['PurchaseDate'], 0);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->col(1,4,4);
         $field->body=mkPrize($row['PurchasePrize']);
         $str=$str.$field->print();
         }
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center";
-        $field->col(1,1,1);
+        $field->col(2,2,2);
         $field->body=$this->getActiveLoanNameShort();
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->col(1,2,2);
         $field->body=$this->getActiveLoanDate();
         $str=$str.$field->print();
 
