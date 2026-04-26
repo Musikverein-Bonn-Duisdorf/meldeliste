@@ -117,7 +117,7 @@ class Inventories
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
 
-        $sql = sprintf('DELETE FROM `%sInventoryLoans` WHERE `Inventory` = "%d";',
+        $sql = sprintf('DELETE FROM `%sInventoriesLoans` WHERE `Inventory` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
