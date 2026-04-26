@@ -22,6 +22,7 @@ include "libs/instruments.php";
 include "libs/inventory.php";
 include "libs/inventories.php";
 include "libs/loan.php";
+include "libs/inventoriesloan.php";
 include "libs/register.php";
 include "libs/usermail.php";
 include "libs/ics.php";
