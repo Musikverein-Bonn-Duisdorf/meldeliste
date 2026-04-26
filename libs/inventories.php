@@ -604,7 +604,7 @@ class Inventories
             
         $loans = $this->getLoans();
         for($i=0; $i<count($loans); $i++) {           
-                $L = new Loan;
+                $L = new InventoriesLoan;
                 $L->load_by_id($loans[$i]);
                 $indent--;
                 $modalrow2 = new div;
@@ -700,7 +700,7 @@ class Inventories
     public function getActiveLoan() {
         $loans = $this->getLoans();
         if($loans) {
-            $l = new Loan;
+            $l = new InventoriesLoan;
             $l->load_by_id($loans[0]);
             
             if($l->EndDate) {
@@ -717,7 +717,7 @@ class Inventories
     public function getActiveLoanName() {
         $loan = $this->getActiveLoan();
         if($loan) {
-            $L = new Loan;
+            $L = new InventoriesLoan;
             $L->load_by_id($loan);
             $u = new User;
             $u->load_by_id($L->User);
@@ -728,7 +728,7 @@ class Inventories
     public function getActiveLoanNameShort() {
         $loan = $this->getActiveLoan();
         if($loan) {
-            $L = new Loan;
+            $L = new InventoriesLoan;
             $L->load_by_id($loan);
             $u = new User;
             $u->load_by_id($L->User);
@@ -739,7 +739,7 @@ class Inventories
     public function getActiveLoanDate() {
         $loan = $this->getActiveLoan();
         if($loan) {
-            $L = new Loan;
+            $L = new InventoriesLoan;
             $L->load_by_id($loan);
             return germanDate($L->StartDate,0);
         }
