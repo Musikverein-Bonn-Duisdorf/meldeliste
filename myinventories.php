@@ -15,20 +15,6 @@ include "common/header.php";
   <div class="w3-col l2 m2 s2 w3-center w3-border-right"><b>ausgeliehen seit</b></div>
 </div>
 <?php
-      $sql = sprintf('SELECT `Index` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` WHERE `Owner` = %d ORDER BY `iSort`;',
-      $GLOBALS['dbprefix'],
-      $GLOBALS['dbprefix'],
-      $GLOBALS['dbprefix'],
-      $_SESSION['userid']
-      );
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new Instruments;
-    $M->load_by_id($row['Index']);
-    echo $M->printTableLine();
-}
-
 $u = new User;
 $u->load_by_id($_SESSION['userid']);
 $loans = $u->getInventoriesLoans();
