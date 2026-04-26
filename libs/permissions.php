@@ -123,7 +123,7 @@ class Permissions
                        $this->perm_sendEmail,
                        $this->perm_showResponse,
                        $this->perm_editResponse,
-        $this->perm_editConfig,
+                       $this->perm_editConfig,
                        $this->perm_editPermissions
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
