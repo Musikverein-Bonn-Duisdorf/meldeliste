@@ -12,7 +12,11 @@ include "common/header.php";
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Inventarnummer</b></div>
   <div class="w3-col l1 m2 s2 w3-center w3-border-right"><b>Typ</b></div>
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Beschreibung</b></div>
-  <div class="w3-col l2 m2 s2 w3-center w3-border-right"><b>ausgeliehen seit</b></div>
+<?php if(requirePermission("perm_showInventories")) { ?>
+  <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Kaufdatum</b></div>
+  <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Kaufpreis</b></div>
+<?php } ?>
+  <div class="w3-col l2 m2 s2 w3-center w3-border-right"><b>ausgeliehen an</b></div>
 </div>
 <?php
 $u = new User;

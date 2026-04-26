@@ -214,6 +214,7 @@ class Inventories
         $field->body=$row['Description'];
         $str=$str.$field->print();
 
+        if(requirePermission("perm_showInventories")) {
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
@@ -227,7 +228,7 @@ class Inventories
         $field->col(1,1,1);
         $field->body=mkPrize($row['PurchasePrize']);
         $str=$str.$field->print();
-
+        }
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center";
