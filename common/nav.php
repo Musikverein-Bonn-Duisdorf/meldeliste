@@ -32,7 +32,7 @@ $u = new User;
 $u->load_by_id($_SESSION['userid']);
 if($u->hasInstruments()) { ?>
     <a title="Instrumente" alt="Meine Instrumente" href="myinstruments.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('myinstruments');?>"><i class="fas fa-drum"></i></a>
-<?php } ?>
+<?php } 
 if($u->hasInventories()) { ?>
     <a title="Inventar" alt="Meine Inventar" href="myinventories.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('myinventories');?>"><i class="fas fa-shirt"></i></a>
 <?php } ?>
