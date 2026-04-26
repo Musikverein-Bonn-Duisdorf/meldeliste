@@ -53,7 +53,7 @@ class InventoriesLoan
         $str = sprintf("InventoriesLoan-ID: %d, Inventory: (%d) <b>%s</b>, User: (%d) <b>%s</b>",
         $this->Index,
         $this->Inventory,
-        $Inventory->getInventoryName(),
+        $Inventory->getInventoryType(),
         $this->User,
         $u->getName()
         );
@@ -73,7 +73,7 @@ class InventoriesLoan
         return sprintf("InventoriesLoan-ID: %d, Inventory: (%d) <b>%s</b>, User: (%d) <b>%s</b>, StartDate: <b>%s</b>, EndDate: <b>%s</b>, ContractFile: <b>%s</b>",
         $this->Index,
         $this->Inventory,
-        $Inventory->getInventoryName(),
+        $Inventory->getInventoryType(),
         $this->User,
         $u->getName(),
         germanDate($this->StartDate,0),
