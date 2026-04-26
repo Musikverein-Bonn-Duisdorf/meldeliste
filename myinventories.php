@@ -20,7 +20,6 @@ include "common/header.php";
   <div class="w3-col l4 m4 s4 w3-center w3-border-right"><b>Beschreibung</b></div>    
   <div class="w3-col l2 m4 s4 w3-center w3-border-right"><b>Kommentar</b></div>    
 <?php } ?>
-  <div class="w3-col l2 m4 s4 w3-center w3-border-right"><b>Kommentar</b></div>    
   <div class="w3-col l3 m2 s2 w3-center w3-border-right"><b>ausgeliehen an</b></div>
 </div>
 <?php
