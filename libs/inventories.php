@@ -266,7 +266,6 @@ class Inventories
     }
 
     public function printTableLine($editable = true) {
-        $canEdit = $editable && requirePermission("perm_editInventories");
         $sql = sprintf(
             'SELECT `%sInventories`.*, `iTyp`, `iSort`, `iPrefix`, `instName` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort`, `Prefix` AS `iPrefix` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` LEFT JOIN (SELECT `Index` AS `instIndex`, `Name` AS `instName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `instIndex` WHERE `%sInventories`.`Index` = "%d";',
             $GLOBALS['dbprefix'],
@@ -288,7 +287,7 @@ class Inventories
         $line = new div;
         $line->indent=$indent;
         $line->class="w3-row w3-padding";
-        $line->onclick="document.getElementById('".$this->Index."').style.display='block'";
+        $line->onclick="openModal('inventory', ".$this->Index.")";
         if(!empty($this->Insurance)) {
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
         }
@@ -361,19 +360,29 @@ class Inventories
         $str=$str.$field->print();
 
         $str=$str.$line->close();
-        $indent--;
-        $modal = new div;
-        $modal->indent=$indent;
-        $modal->class="w3-modal";
-        $modal->id=$this->Index;
-        $str=$str.$modal->open();
+        return $str;
+    }
 
-        $indent++;
-        $modalcontent = new div;
-        $modalcontent->indent=$indent;
-        $modalcontent->class="w3-modal-content";
-        $str=$str.$modalcontent->open();
-        $indent++;
+    public function getModalHtml($editable = true) {
+        $canEdit = $editable && requirePermission("perm_editInventories");
+        $sql = sprintf(
+            'SELECT `%sInventories`.*, `iTyp`, `iSort`, `iPrefix`, `instName` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort`, `Prefix` AS `iPrefix` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` LEFT JOIN (SELECT `Index` AS `instIndex`, `Name` AS `instName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `instIndex` WHERE `%sInventories`.`Index` = "%d";',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_array($dbr);
+
+        $str = "";
+
+        $indent = 0;
         $header = new div;
         $header->indent=$indent;
         $header->class="w3-container";
@@ -384,7 +393,7 @@ class Inventories
         $span = new div;
         $span->indent=$indent;
         $span->tag="span";
-        $span->onclick="document.getElementById('".$this->Index."').style.display='none'";
+        $span->onclick="closeModal()";
         $span->class="w3-button w3-display-topright";
         $span->body="&times;";
         $str=$str.$span->print();
@@ -717,11 +726,8 @@ class Inventories
                 }
                 $str=$str.$modalrow2->close();
             }
-        $str=$str.$modalrow->close();            
-        $indent--;
-        $str=$str.$modalcontent->close();
-        $str=$str.$modal->close();
-        
+        $str=$str.$modalrow->close();
+
         return $str;
     }
 
