@@ -378,7 +378,10 @@ class Inventories
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        $row = mysqli_fetch_array($dbr);
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if(!is_array($row)) {
+            return '<header class="w3-container '.$GLOBALS['optionsDB']['colorTitleBar'].'"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Inventar</h2></header><div class="w3-container w3-padding"><p>Datensatz konnte nicht geladen werden.</p></div>';
+        }
 
         $str = "";
 
@@ -401,7 +404,7 @@ class Inventories
         $content = new div;
         $content->indent=$indent;
         $headerTitle = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
-        $content->body="<h2>".htmlspecialchars($headerTitle, ENT_QUOTES, 'UTF-8')."</h2>";
+        $content->body="<h2>".htmlspecialchars((string)$headerTitle, ENT_QUOTES, 'UTF-8')."</h2>";
         $str=$str.$content->print();
         $str=$str.$header->close();
 
@@ -410,7 +413,7 @@ class Inventories
         $detailform->indent = $indent;
         if($canEdit) {
             $detailform->tag="form";
-            $detailform->action="";
+            $detailform->action="inventories.php";
             $detailform->method="POST";
         }
         $str=$str.$detailform->open();
@@ -532,7 +535,7 @@ class Inventories
             $modalrow->style="display: none;";
             $modalrow->id="del".$this->Index;
             $modalrow->tag="form";
-            $modalrow->action="";
+            $modalrow->action="inventories.php";
             $modalrow->method="POST";
             $str=$str.$modalrow->open();
             $indent++;
@@ -605,7 +608,7 @@ class Inventories
             $modalrow2->indent=$indent;
             $modalrow2->class="w3-row w3-center w3-padding";
             $modalrow2->tag="form";
-            $modalrow2->action="";
+            $modalrow2->action="inventories.php";
             $modalrow2->method="POST";
             $str=$str.$modalrow2->open();
             $indent++;
@@ -684,7 +687,7 @@ class Inventories
                     $form = new div;
                     $form->indent=$indent;
                     $form->tag="form";
-                    $form->action="";
+                    $form->action="inventories.php";
                     $form->method="POST";
                     $str=$str.$form->open();
                     
@@ -740,6 +743,7 @@ class Inventories
         sqlerror();
 
         $loans = array();
+        if(!$dbr) return $loans;
         while($row = mysqli_fetch_array($dbr)) {
             array_push($loans, (int)$row['Index']);
         }

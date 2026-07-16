@@ -91,27 +91,39 @@ case 'user':
 
 case 'inventory':
     // Any logged-in user may open (e.g. myinventories); edit UI gated by $editable
-    $inv = new Inventories;
-    $inv->load_by_id($id);
-    if(!(int)$inv->Index) {
-        http_response_code(404);
-        echo '<div class="w3-container w3-padding"><p>Inventar nicht gefunden.</p></div>';
-        exit;
+    try {
+        $inv = new Inventories;
+        $inv->load_by_id($id);
+        if(!(int)$inv->Index) {
+            http_response_code(404);
+            echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Inventar nicht gefunden.</p></div>';
+            exit;
+        }
+        $editable = requirePermission('perm_editInventories');
+        echo $inv->getModalHtml($editable);
     }
-    $editable = requirePermission('perm_editInventories');
-    echo $inv->getModalHtml($editable);
+    catch(Throwable $e) {
+        http_response_code(500);
+        echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Inventar-Modal: '.htmlspecialchars($e->getMessage()).'</p></div>';
+    }
     break;
 
 case 'instrument':
     // Insurance / instrument lists: session auth is enough; edit gated in modal
-    $ins = new Instruments;
-    $ins->load_by_id($id);
-    if(!(int)$ins->Index) {
-        http_response_code(404);
-        echo '<div class="w3-container w3-padding"><p>Instrument nicht gefunden.</p></div>';
-        exit;
+    try {
+        $ins = new Instruments;
+        $ins->load_by_id($id);
+        if(!(int)$ins->Index) {
+            http_response_code(404);
+            echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Instrument nicht gefunden.</p></div>';
+            exit;
+        }
+        echo $ins->getModalHtml();
     }
-    echo $ins->getModalHtml();
+    catch(Throwable $e) {
+        http_response_code(500);
+        echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Instrument-Modal: '.htmlspecialchars($e->getMessage()).'</p></div>';
+    }
     break;
 
 default:
