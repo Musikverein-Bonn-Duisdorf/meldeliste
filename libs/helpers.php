@@ -804,14 +804,21 @@ function validateLink($hash) {
 }
 function validateUser($login, $password) {
     $_SESSION['userid'] = 0;
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `login` = '%s';",
+    $login = trim((string)$login);
+    if($login === '' || $password === null || $password === '') {
+        $logentry = new Log;
+        $logentry->error("Login not successful. Leerer Benutzername oder Passwort.");
+        return false;
+    }
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `login` = '%s' AND `Deleted` != 1;",
 		   $GLOBALS['dbprefix'],
-		   $login
+		   mysqli_real_escape_string($GLOBALS['conn'], $login)
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        if(password_verify($password, $row['Passhash'])) {
+    while($row = mysqli_fetch_assoc($dbr)) {
+        $hash = (string)$row['Passhash'];
+        if($hash !== '' && password_verify($password, $hash)) {
             $_SESSION['userid'] = $row['Index'];
             $_SESSION['Vorname'] = $row['Vorname'];
             $_SESSION['Nachname'] = $row['Nachname'];

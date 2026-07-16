@@ -1,40 +1,123 @@
 <?php
 session_start();
-if(isset($_POST['id']) && $_SESSION['userid'] == $_POST['id']) {
-    $_SESSION['page']='me';
-    $_SESSION['adminpage']=false;
+
+$msg = '';
+$msgErr = '';
+
+if(isset($_POST['id']) && isset($_SESSION['userid']) && (int)$_SESSION['userid'] === (int)$_POST['id']) {
+    $_SESSION['page'] = 'me';
+    $_SESSION['adminpage'] = false;
 }
 else {
-    $_SESSION['page']='newmusiker';
-    $_SESSION['adminpage']=true;
+    $_SESSION['page'] = 'newmusiker';
+    $_SESSION['adminpage'] = true;
 }
 include "common/header.php";
 
+$canEditUsers = requirePermission("perm_editUsers");
+$userid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+
+// Self-service profile save (non-admin "Mein Profil")
+if(isset($_POST['insert']) && !$canEditUsers) {
+    $selfId = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
+    try {
+        if($selfId < 1 || $selfId !== $userid) {
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                "Profil speichern verweigert: User-ID <b>%d</b> wollte Index <b>%d</b> ändern.",
+                $userid,
+                $selfId
+            ));
+            $msgErr = 'Speichern nicht erlaubt.';
+        }
+        else {
+            $n = new User;
+            $n->load_by_id($selfId);
+            if((int)$n->Index !== $selfId) {
+                $msgErr = 'Benutzer nicht gefunden.';
+            }
+            else {
+                $n->Email = isset($_POST['Email']) ? $_POST['Email'] : $n->Email;
+                $n->Email2 = isset($_POST['Email2']) ? $_POST['Email2'] : $n->Email2;
+                $n->getMail = isset($_POST['getMail']) ? (int)$_POST['getMail'] : 0;
+                if(!$n->save()) {
+                    $msgErr = 'Profil konnte nicht gespeichert werden.';
+                }
+                else {
+                    $msg = 'Profil gespeichert.';
+                    $logentry = new Log;
+                    $logentry->info(sprintf("Eigenes Profil gespeichert | User-ID: <b>%d</b>", $selfId));
+                }
+                if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
+                    $pw1 = (string)$_POST['pw1'];
+                    $pw2 = (string)$_POST['pw2'];
+                    if($pw1 !== '' || $pw2 !== '') {
+                        if($pw1 === '' || $pw2 === '') {
+                            $msgErr = 'Bitte beide Passwortfelder ausfüllen.';
+                        }
+                        elseif($pw1 !== $pw2) {
+                            $msgErr = 'Passwörter stimmen nicht überein.';
+                        }
+                        elseif(!$n->passwd($pw1)) {
+                            $msgErr = 'Passwort konnte nicht gesetzt werden. Bitte Loginname prüfen.';
+                        }
+                        else {
+                            $msg = trim($msg.' Passwort wurde gesetzt.');
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch(Throwable $e) {
+        $logentry = new Log;
+        $logentry->error(sprintf(
+            "Profil/Passwort Exception | User-ID: <b>%d</b>, Fehler: <b>%s</b>",
+            $userid,
+            htmlspecialchars($e->getMessage())
+        ));
+        $msgErr = 'Unerwarteter Fehler: '.$e->getMessage();
+    }
+    $_POST['id'] = $userid;
+    $_POST['mode'] = 'useredit';
+}
+
 $fill = false;
+$n = new User;
 if(isset($_POST['id'])) {
-    $n = new User;
-    $n->load_by_id($_POST['id']);
+    $n->load_by_id((int)$_POST['id']);
     if($n->Index > 0) {
         $fill = true;
     }
 }
-$edit = 1;
-if(isset($_POST['mode'])) {
-    if($_POST['mode'] == "useredit") {
-        $edit = 2;
+elseif(isset($_POST['Index']) && $canEditUsers) {
+    $n->load_by_id((int)$_POST['Index']);
+    if($n->Index > 0) {
+        $fill = true;
     }
 }
-if(requirePermission("perm_editUsers")) {
+
+$edit = 1;
+if(isset($_POST['mode']) && $_POST['mode'] == 'useredit') {
+    $edit = 2;
+}
+if($canEditUsers) {
     $edit = 3;
 }
 
-$disabled = '';
-if($edit!=3) {
-    $disabled = 'disabled';
+// Non-admins may only edit their own profile
+if($edit == 2 && $fill && (int)$n->Index !== $userid) {
+    $logentry = new Log;
+    $logentry->error(sprintf(
+        "Fremdes Profil geöffnet verweigert | Session: <b>%d</b>, Ziel: <b>%d</b>",
+        $userid,
+        (int)$n->Index
+    ));
+    die('<div class="w3-panel w3-red w3-padding"><b>Kein Zugriff auf dieses Profil.</b></div>');
 }
-else {
-    $disabled = '';
-}
+
+$disabled = ($edit != 3) ? 'disabled' : '';
+$formAction = ($edit == 2) ? '' : 'musiker.php';
 ?>
 <div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Profil bearbeiten</h2>
@@ -42,40 +125,45 @@ else {
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
 <div class="w3-card <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile w3-center w3-border w3-padding w3-col s6 l4">
-  <form action="musiker.php" method="POST">
-    <label>Vorname</label>
-    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".$n->Vorname."\" ".$disabled; ?>>
-    <label>Nachname</label>
-<?php if(requirePermission("perm_editUsers")) { ?>
- <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".$n->Nachname."\" ".$disabled; ?>>
-    <label>Mitglieds-Nr. (optional)</label>
-    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="RefID" type="number" placeholder="Vereins-Nr." <?php if($fill) echo "value=\"".$n->RefID."\" ".$disabled; ?>>
-    <!-- <label>Geburtsdatum (optional)</label> -->
-    <!-- <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Birthday" type="date" placeholder="Geburtstag (optional)" <?php if($fill) echo "value=\"".$n->Birthday."\""; ?>> -->
+<?php if($msg !== '') { ?>
+  <div class="w3-panel w3-green w3-padding"><b><?php echo htmlspecialchars($msg); ?></b></div>
 <?php } ?>
-        
+<?php if($msgErr !== '') { ?>
+  <div class="w3-panel w3-red w3-padding"><b><?php echo htmlspecialchars($msgErr); ?></b></div>
+<?php } ?>
+  <form action="<?php echo htmlspecialchars($formAction); ?>" method="POST">
+<?php if($edit == 2) { ?>
+    <input type="hidden" name="mode" value="useredit">
+    <input type="hidden" name="id" value="<?php echo (int)$userid; ?>">
+<?php } ?>
+    <label>Vorname</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8')."\""; ?> <?php echo $disabled; ?>>
+    <label>Nachname</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->Nachname, ENT_QUOTES, 'UTF-8')."\""; ?> <?php echo $disabled; ?>>
+<?php if($canEditUsers) { ?>
+    <label>Mitglieds-Nr. (optional)</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="RefID" type="number" placeholder="Vereins-Nr." <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->RefID, ENT_QUOTES, 'UTF-8')."\""; ?> <?php echo $disabled; ?>>
+<?php } elseif($fill) { ?>
+    <input type="hidden" name="Nachname" value="<?php echo htmlspecialchars((string)$n->Nachname, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="Vorname" value="<?php echo htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8'); ?>">
+<?php } ?>
+
     <label>Emailadressen</label>
-    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".$n->Email."\""; ?>>
-    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Email2" type="email" placeholder="Email 2 (optional)" <?php if($fill) echo "value=\"".$n->Email2."\""; ?>>
-<?php
-if($edit != 2) {
-?>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->Email, ENT_QUOTES, 'UTF-8')."\""; ?>>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Email2" type="email" placeholder="Email 2 (optional)" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->Email2, ENT_QUOTES, 'UTF-8')."\""; ?>>
+<?php if($edit != 2) { ?>
     <label class="w3-text-gray">Loginname (optional)</label>
-<input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".$n->login."\" ".$disabled; ?>>
-<?php
-}
-if($fill && ($n->login || $edit == 3)) {
-?>
-<label class="w3-text-gray">neues Passwort (optional)</label>
-<input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****">
-<label class="w3-text-gray">neues Passwort wiederholen (optional)</label>
-<input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****">
-<?php
-}
-?>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8')."\""; ?> <?php echo $disabled; ?>>
+<?php } ?>
+<?php if($fill && ($n->login || $edit == 3)) { ?>
+    <label class="w3-text-gray">neues Passwort (optional)</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****" autocomplete="new-password">
+    <label class="w3-text-gray">neues Passwort wiederholen (optional)</label>
+    <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****" autocomplete="new-password">
+<?php } ?>
     <label>Instrument</label>
-<select class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
-      <?php
+    <select class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
+<?php
   if($fill) {
       echo instrumentOption($n->Instrument);
   }
@@ -89,9 +177,7 @@ if($fill && ($n->login || $edit == 3)) {
       <input class="w3-check" type="checkbox" name="getMail" value="1" <?php if($fill && (bool)$n->getMail) echo "checked "; ?>>
       <label>Mailverteiler</label>
     </div>
-    <?php
-      if(requirePermission("perm_editUsers")) {
-      ?>
+<?php if($canEditUsers) { ?>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="Mitglied" value="0">
       <input class="w3-check" type="checkbox" name="Mitglied" value="1" <?php if($fill && (bool)$n->Mitglied){ echo "checked ";} ?>>
@@ -103,42 +189,37 @@ if($fill && ($n->login || $edit == 3)) {
       <input class="w3-check" type="checkbox" name="RegisterLead" value="1" <?php if($fill && (bool)$n->RegisterLead) echo "checked "; ?>>
       <label>Registerführer</label>
     </div>
-    <?php
-      }
-      }
-      ?>
-    <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
+<?php   } ?>
+<?php } ?>
+    <input type="hidden" name="Index" <?php if($fill) echo "value=\"".(int)$n->Index."\""; ?>>
     <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="insert" value="speichern">
-    <?php
-      if($fill && $edit != 2) {
-      ?>
+<?php if($fill && $edit != 2) { ?>
     <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="passwd" value="Zufallspasswort generieren">
     <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="newmail" value="Email mit Link senden">
     <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="deactivate" value="Deaktivieren">
-    <?php
-}
-      ?>
+<?php } ?>
   </form>
-<?php if($fill) { ?>
+<?php if($fill && $canEditUsers) { ?>
 <button class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
 <?php } ?>
-<?php if($fill) { ?>
-          <div class="w3-row"><a href="<?php echo $n->getLink(); ?>"><?php echo $n->getLink(); ?></a></div>                                                               <div class="w3-row"><a href="<?php echo $n->getCalendarLink(); ?>"><?php echo $n->getCalendarLink(); ?></a></div>
+<?php if($fill && $canEditUsers) { ?>
+          <div class="w3-row"><a href="<?php echo htmlspecialchars($n->getLink()); ?>"><?php echo htmlspecialchars($n->getLink()); ?></a></div>
+          <div class="w3-row"><a href="<?php echo htmlspecialchars($n->getCalendarLink()); ?>"><?php echo htmlspecialchars($n->getCalendarLink()); ?></a></div>
 <?php } ?>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
-<?php if($fill) { ?>
+<?php if($fill && $canEditUsers) { ?>
     <div id="delmodal" class="w3-modal">
     <div class="w3-modal-content w3-card">
     <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
     <span onclick="document.getElementById('delmodal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
     <h2>L&ouml;schen best&auml;tigen</h2>
     </header>
-    <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo $n->Vorname." ".$n->Nachname; ?></b> l&ouml;schen wollen?</div>
+    <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo htmlspecialchars($n->Vorname." ".$n->Nachname); ?></b> l&ouml;schen wollen?</div>
     <div class="w3-container w3-mobile">
     <form action="musiker.php" method="POST">
-    <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
+    <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
     <div class="w3-row">
     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
     <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
