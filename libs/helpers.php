@@ -585,6 +585,35 @@ function mkPrize($val) {
     }
 }
 
+/**
+ * Format a config value for log display (HTML-escaped).
+ */
+function formatConfigLogValue($value, $type = '') {
+    if($value === null || $value === '') {
+        return '(leer)';
+    }
+    if($type === 'bool') {
+        return bool2string($value);
+    }
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Write a DBupdate log entry for a config parameter change.
+ */
+function logConfigChange($parameter, $oldValue, $newValue, $type = '') {
+    if((string)$oldValue === (string)$newValue) {
+        return;
+    }
+    $logentry = new Log;
+    $logentry->DBupdate(sprintf(
+        'Config <b>%s</b>: %s &rArr; <b>%s</b>',
+        htmlspecialchars((string)$parameter, ENT_QUOTES, 'UTF-8'),
+        formatConfigLogValue($oldValue, $type),
+        formatConfigLogValue($newValue, $type)
+    ));
+}
+
 function printOrchestra($tid, $scale) {
     $width=1000*$scale;
     $height=600*$scale;
