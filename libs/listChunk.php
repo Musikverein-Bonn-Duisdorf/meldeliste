@@ -43,14 +43,16 @@ function listChunkLog($beforeIndex, $limit) {
     }
     $html = '';
     $next = $beforeIndex;
+    // Capture all echoes (printTableLine uses echo; must not leak before page chrome)
+    ob_start();
     foreach($ids as $id) {
         $M = new Log;
         $M->load_by_id($id);
-        ob_start();
         $M->printTableLine();
-        $html .= ob_get_clean();
         $next = $id;
     }
+    $html = ob_get_clean();
+    if($html === false) $html = '';
     return array(
         'html' => $html,
         'nextCursor' => (string)$next,
