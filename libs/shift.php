@@ -43,7 +43,7 @@ class Shift
         sqlerror();
         $row = mysqli_fetch_array($dbr);
 
-        return sprintf("Schicht: %d, Termin: %d, Name: %s, Start: %s, Ende: %s, Bedarf: %d",
+        return sprintf("Schicht: %d, Termin: <b>%d</b>, Name: <b>%s</b>, Start: <b>%s</b>, Ende: <b>%s</b>, Bedarf: <b>%d</b>",
         $this->Index,
         $this->Termin,
         $this->Name,
