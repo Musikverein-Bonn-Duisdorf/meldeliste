@@ -83,6 +83,10 @@ case "processMailQueue":
 	echo "processMailQueue...\n";
 	MailJob::ensureSchema();
 	$result = Usermail::processQueue();
+	if(!empty($result['skipped'])) {
+		echo "skipped=1 (another worker active)\n";
+		break;
+	}
 	echo "batchSize=".$result['batchSize']
 		." processed=".$result['processed']
 		." sent=".$result['sent']

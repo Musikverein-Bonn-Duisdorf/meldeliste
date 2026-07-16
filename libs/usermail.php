@@ -367,12 +367,48 @@ class Usermail {
         $maxAttempts = isset($GLOBALS['optionsDB']['cronMailQueueMaxAttempts'])
             ? (int)$GLOBALS['optionsDB']['cronMailQueueMaxAttempts']
             : 3;
+
+        // Still claimed by this worker?
+        $chk = sprintf(
+            'SELECT `Status` FROM `%sMailOutbox` WHERE `Index` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$outbox->Index
+        );
+        $chkR = mysqli_query($GLOBALS['conn'], $chk);
+        $chkRow = $chkR ? mysqli_fetch_assoc($chkR) : null;
+        if(!$chkRow || $chkRow['Status'] !== 'sending') {
+            $logentry = new Log;
+            $logentry->warning(sprintf(
+                'Email-Versand abgebrochen (Status nicht mehr sending) | Outbox-ID: <b>%d</b>, Status: <b>%s</b>',
+                (int)$outbox->Index,
+                htmlspecialchars($chkRow ? (string)$chkRow['Status'] : '—')
+            ));
+            return false;
+        }
+
         try {
             $mail->Send();
+            $mark = sprintf(
+                'UPDATE `%sMailOutbox` SET `Status` = "sent", `SentAt` = NOW(), `LastError` = NULL, `Attempts` = %d WHERE `Index` = %d AND `Status` = "sending";',
+                $GLOBALS['dbprefix'],
+                (int)$outbox->Attempts,
+                (int)$outbox->Index
+            );
+            $markOk = mysqli_query($GLOBALS['conn'], $mark);
+            if(!$markOk || mysqli_affected_rows($GLOBALS['conn']) !== 1) {
+                $logentry = new Log;
+                $logentry->warning(sprintf(
+                    'Email möglicherweise doppelt vermieden | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s</b> — Status war nicht mehr sending nach Send()',
+                    (int)$outbox->Index,
+                    (int)$job->Index,
+                    htmlspecialchars(implode(', ', $addrs))
+                ));
+                $job->refreshCounts();
+                return false;
+            }
             $outbox->Status = 'sent';
             $outbox->SentAt = date('Y-m-d H:i:s');
             $outbox->LastError = null;
-            $outbox->save();
 
             $logentry = new Log;
             $logentry->email(sprintf(
@@ -437,7 +473,8 @@ class Usermail {
 
     /**
      * Process a batch of pending outbox rows.
-     * @return array{processed:int,sent:int,failed:int,reclaimed:int,batchSize:int}
+     * Exclusive lock prevents concurrent cron workers from double-sending.
+     * @return array{processed:int,sent:int,failed:int,reclaimed:int,batchSize:int,skipped:bool}
      */
     public static function processQueue($batchSize = null, $maxAttempts = null) {
         $batchSize = $batchSize !== null
@@ -447,47 +484,75 @@ class Usermail {
             ? (int)$maxAttempts
             : (isset($GLOBALS['optionsDB']['cronMailQueueMaxAttempts']) ? (int)$GLOBALS['optionsDB']['cronMailQueueMaxAttempts'] : 3);
 
-        $reclaimed = MailOutbox::reclaimStuckSending(10);
-        $items = MailOutbox::claimPending($batchSize, $maxAttempts);
-        $sent = 0;
-        $failed = 0;
-        $mailer = new Usermail;
-        foreach($items as $item) {
-            if($mailer->dispatchOne($item)) {
-                $sent++;
-            }
-            else {
-                $failed++;
-            }
-        }
-
-        $result = array(
-            'processed' => count($items),
-            'sent' => $sent,
-            'failed' => $failed,
-            'reclaimed' => $reclaimed,
+        $empty = array(
+            'processed' => 0,
+            'sent' => 0,
+            'failed' => 0,
+            'reclaimed' => 0,
             'batchSize' => $batchSize,
+            'skipped' => false,
         );
 
-        if($reclaimed > 0 || count($items) > 0) {
+        $lockName = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$GLOBALS['dbprefix']).'mail_queue';
+        $lockSql = sprintf("SELECT GET_LOCK('%s', 0) AS `got`;", mysqli_real_escape_string($GLOBALS['conn'], $lockName));
+        $lockR = mysqli_query($GLOBALS['conn'], $lockSql);
+        $lockRow = $lockR ? mysqli_fetch_assoc($lockR) : null;
+        if(!$lockRow || (int)$lockRow['got'] !== 1) {
             $logentry = new Log;
-            $summary = sprintf(
-                'Mail-Queue Lauf | Batch: <b>%d</b>, beansprucht: <b>%d</b>, gesendet: <b>%d</b>, fehlgeschlagen/übersprungen: <b>%d</b>, hängende sending zurückgeholt: <b>%d</b>',
-                $batchSize,
-                count($items),
-                $sent,
-                $failed,
-                $reclaimed
-            );
-            if($failed > 0) {
-                $logentry->warning($summary);
-            }
-            else {
-                $logentry->info($summary);
-            }
+            $logentry->info('Mail-Queue Lauf übersprungen (bereits ein Worker aktiv)');
+            $empty['skipped'] = true;
+            return $empty;
         }
 
-        return $result;
+        try {
+            // Only safe once we hold the exclusive lock: no other worker is mid-send.
+            $reclaimed = MailOutbox::reclaimStuckSending();
+            $items = MailOutbox::claimPending($batchSize, $maxAttempts);
+            $sent = 0;
+            $failed = 0;
+            $mailer = new Usermail;
+            foreach($items as $item) {
+                if($mailer->dispatchOne($item)) {
+                    $sent++;
+                }
+                else {
+                    $failed++;
+                }
+            }
+
+            $result = array(
+                'processed' => count($items),
+                'sent' => $sent,
+                'failed' => $failed,
+                'reclaimed' => $reclaimed,
+                'batchSize' => $batchSize,
+                'skipped' => false,
+            );
+
+            if($reclaimed > 0 || count($items) > 0) {
+                $logentry = new Log;
+                $summary = sprintf(
+                    'Mail-Queue Lauf | Batch: <b>%d</b>, beansprucht: <b>%d</b>, gesendet: <b>%d</b>, fehlgeschlagen/übersprungen: <b>%d</b>, hängende sending zurückgeholt: <b>%d</b>',
+                    $batchSize,
+                    count($items),
+                    $sent,
+                    $failed,
+                    $reclaimed
+                );
+                if($failed > 0) {
+                    $logentry->warning($summary);
+                }
+                else {
+                    $logentry->info($summary);
+                }
+            }
+
+            return $result;
+        }
+        finally {
+            $releaseSql = sprintf("SELECT RELEASE_LOCK('%s');", mysqli_real_escape_string($GLOBALS['conn'], $lockName));
+            mysqli_query($GLOBALS['conn'], $releaseSql);
+        }
     }
 
     /**
