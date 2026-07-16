@@ -81,6 +81,7 @@ case "calendar":
     break;
 case "processMailQueue":
 	echo "processMailQueue...\n";
+	MailJob::ensureSchema();
 	$result = Usermail::processQueue();
 	echo "processed=".$result['processed']." sent=".$result['sent']." failed=".$result['failed']."\n";
 	break;

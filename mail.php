@@ -1,8 +1,11 @@
 <?php
 session_start();
 $_SESSION['page']='mail';
+$_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_sendEmail")) die();
+
+MailJob::ensureSchema();
 
 $msg = '';
 $preview = false;
