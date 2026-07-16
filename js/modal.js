@@ -36,7 +36,7 @@ function openModal(type, id, register) {
     xhr.onreadystatechange = function() {
         if(xhr.readyState !== 4) return;
         if(modalLoadingKey !== key) return;
-        if(xhr.status >= 200 && xhr.status < 300) {
+        if(xhr.status >= 200 && xhr.status < 300 && xhr.responseText) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
         }
@@ -44,7 +44,7 @@ function openModal(type, id, register) {
             content.innerHTML = xhr.responseText;
         }
         else {
-            content.innerHTML = '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Modal konnte nicht geladen werden.</p></div>';
+            content.innerHTML = '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Modal konnte nicht geladen werden (HTTP '+xhr.status+').</p></div>';
         }
     };
     var url = 'getModal.php?type=' + encodeURIComponent(type) + '&id=' + encodeURIComponent(id);
