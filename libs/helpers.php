@@ -372,10 +372,12 @@ function w3ColorToHex($class) {
     static $map = array(
         'w3-mvd-blue' => '#345A95',
         'w3-mvd-gray' => '#969696',
+        'w3-mvd-dark-gray' => '#454545',
         'w3-mvd-egg' => '#FDF9E7',
         'w3-mvd-yellow' => '#FFC300',
         'w3-mvd-white' => '#FDFFFC',
         'w3-mvd-black' => '#040006',
+        'w3-mvd-light-blue' => '#7F9DC1',
         'w3-amber' => '#FFC107',
         'w3-aqua' => '#00FFFF',
         'w3-blue' => '#2196F3',
@@ -462,7 +464,7 @@ function renderConfigColorCss($wrapStyleTag = true) {
 
 function getColorConfigParameters() {
     static $params = null;
-    if($params !== null) return $params;
+    if($params !== null && count($params) > 0) return $params;
     $params = array();
     if(function_exists('getConfigDefaults')) {
         foreach(getConfigDefaults() as $item) {
