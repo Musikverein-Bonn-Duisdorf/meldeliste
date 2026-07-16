@@ -206,6 +206,7 @@ class User
     }
     public function newmail() {
         $mail = new Usermail;
+        $mail->source = 'welcome';
         $mail->singleUser($this->Index, $GLOBALS['optionsDB']['newMailSubject'], $GLOBALS['optionsDB']['newMailText']."\n".$GLOBALS['optionsDB']['MailGreetings']);
     }
     public function passwd($password) {
@@ -295,6 +296,7 @@ class User
             ));
             try {
                 $mail = new Usermail;
+                $mail->source = 'passwd';
                 if($arbPW) {
                     $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "ein neues Passwort wurde erstellt. Beim n&auml;chsten Login wirst du aufgefordert, dieses zu &auml;ndern.\nDu kannst dich nun unter\n\n<a href=\"".$GLOBALS['optionsDB']['WebSiteURL']."\">".$GLOBALS['optionsDB']['WebSiteURL']."</a>\n\neinloggen.\nBenutzername: ".$this->login."\nPasswort: ".$password);
                 }

@@ -46,8 +46,11 @@ case "newAppmnts":
     echo $i." new Appointments identified\n";
 	if($i) {
         $mail = new Usermail;
+        $mail->source = 'cron_new';
+        $mail->quiet = true;
         $mail->subject("neue Termine");
         $mail->send($GLOBALS['optionsDB']['cronSendnewAppmntsText'].$Appmnts."\n\n".$GLOBALS['optionsDB']['MailGreetings']);
+        echo $i." appointments → mail queue enqueued\n";
 	}
 	break;
 case "tomorrow":
@@ -76,6 +79,11 @@ case "calendar":
     rebuildCalendars();
 	echo "done...\n";
     break;
+case "processMailQueue":
+	echo "processMailQueue...\n";
+	$result = Usermail::processQueue();
+	echo "processed=".$result['processed']." sent=".$result['sent']." failed=".$result['failed']."\n";
+	break;
 case "reminder":
 	echo "reminder...\n";
 	if($GLOBALS['optionsDB']['cronSendReminder'] == 0) {
@@ -127,6 +135,7 @@ case "reminder":
         echo $u->getName()." (".$u->getRegisterName().") ".$row2['cnt']."/".$Nappmnts.", missing: ".$missing."<br />\n";
         if($missing > 0) {
             $mail = new Usermail;
+            $mail->source = 'cron_reminder';
             if($missing == 1) {
                 $body = "Es fehlt noch eine R&uuml;ckmeldung von dir.\n\n";
             }

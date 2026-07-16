@@ -480,6 +480,18 @@ function getConfigDefaults() {
             'Description' => 'Uhrzeit für Erinnerungsmails',
         ),
         array(
+            'Parameter' => 'cronMailQueueBatchSize',
+            'Value' => '20',
+            'Type' => 'uint',
+            'Description' => 'Anzahl Emails pro Cron-Lauf der Mail-Queue',
+        ),
+        array(
+            'Parameter' => 'cronMailQueueMaxAttempts',
+            'Value' => '3',
+            'Type' => 'uint',
+            'Description' => 'Maximale Versandversuche pro Queue-Eintrag',
+        ),
+        array(
             'Parameter' => 'newMailSubject',
             'Value' => 'Willkommen',
             'Type' => 'string',

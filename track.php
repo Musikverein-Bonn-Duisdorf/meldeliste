@@ -44,6 +44,7 @@ case "status":
     $body = "dies ist der Meldestand f&uuml;r ".$today.".\n";
     $body = $body.$t->printMailResponse();
     $mail = new Usermail;
+    $mail->source = 'status';
     $mail->singleUser($_GET['user'], $t->Name, $body);
     break;
 default:
