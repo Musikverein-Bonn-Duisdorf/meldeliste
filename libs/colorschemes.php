@@ -2,161 +2,227 @@
 /**
  * Five editable brand color schemes for Meldeliste.
  * Live color* config params mirror the active scheme.
+ *
+ * Markenkit:
+ *   #FDFFFC Weiß | #040006 Schwarz | #345A95 Blau | #969696 Grau
+ *   #454545 Dunkelgrau | #FDF9E7 Creme | #FFC300 Gold | #7F9DC1 Hellblau
  */
 
 function getColorSchemeIds() {
     return array('classic', 'light', 'dark', 'gold', 'soft');
 }
 
-function getSemanticColorDefaults() {
+/** Brand palette tokens (uppercase hex). */
+function getBrandPalette() {
     return array(
-        'colorLogFatal' => '#F44336',
-        'colorLogError' => '#FF5722',
-        'colorBtnYes' => '#4CAF50',
-        'colorBtnNo' => '#F44336',
-        'colorBtnDelete' => '#F44336',
-        'colorSuccess' => '#4CAF50',
-        'colorAppmntYes' => '#004D33',
-        'colorAppmntNo' => '#A6001A',
-        'colorUserNoMember' => '',
-        'colorAppmntNoConcert' => '',
+        'white' => '#FDFFFC',
+        'black' => '#040006',
+        'blue' => '#345A95',
+        'gray' => '#969696',
+        'darkGray' => '#454545',
+        'egg' => '#FDF9E7',
+        'gold' => '#FFC300',
+        'lightBlue' => '#7F9DC1',
     );
 }
 
+/**
+ * Complete color map for one scheme — every color* config key must be present.
+ * Only brand-kit hex (or empty) allowed.
+ */
+function buildBrandSchemeColors($chrome) {
+    $p = getBrandPalette();
+    $c = array_merge(array(
+        // Surfaces / chrome
+        'colorBackground' => $p['egg'],
+        'colorInputBackground' => $p['egg'],
+        'colorTitle' => $p['blue'],
+        'colorTitleBar' => $p['blue'],
+        'colorNav' => $p['blue'],
+        'colorNavAdmin' => $p['darkGray'],
+        'colorBtnSubmit' => $p['blue'],
+        'colorBtnEdit' => $p['lightBlue'],
+        'colorBtnMaybe' => $p['lightBlue'],
+        'colorWarning' => $p['gold'],
+        'colorDisabled' => $p['gray'],
+        // Status (Vereins-Muster: Blau = positiv, Dunkelgrau = negativ, Gold = unsicher)
+        'colorSuccess' => $p['blue'],
+        'colorBtnYes' => $p['blue'],
+        'colorBtnNo' => $p['darkGray'],
+        'colorBtnDelete' => $p['darkGray'],
+        'colorAppmntYes' => $p['blue'],
+        'colorAppmntNo' => $p['darkGray'],
+        'colorAppmntMaybe' => $p['gold'],
+        // People / events
+        'colorUserMember' => $p['lightBlue'],
+        'colorUserNoMember' => '',
+        'colorAppmntConcert' => $p['lightBlue'],
+        'colorAppmntNoConcert' => '',
+        // Log rows
+        'colorLogDefault' => $p['gray'],
+        'colorLogFatal' => $p['black'],
+        'colorLogError' => $p['darkGray'],
+        'colorLogWarning' => $p['gold'],
+        'colorLogDBDelete' => $p['darkGray'],
+        'colorLogDBInsert' => $p['gold'],
+        'colorLogDBUpdate' => $p['egg'],
+        'colorLogEmail' => $p['gold'],
+        'colorLogInfo' => $p['lightBlue'],
+    ), $chrome);
+
+    return $c;
+}
+
 function getDefaultColorSchemes() {
-    $sem = getSemanticColorDefaults();
+    $p = getBrandPalette();
     return array(
+        // Website-nah: Creme-Grund, Primärblau, Gold-Akzent
         'classic' => array(
             'name' => 'Klassisch',
-            'colors' => array_merge($sem, array(
-                'colorBackground' => '#FDF9E7',
-                'colorTitle' => '#345A95',
-                'colorTitleBar' => '#345A95',
-                'colorNav' => '#345A95',
-                'colorNavAdmin' => '#454545',
-                'colorBtnSubmit' => '#345A95',
-                'colorBtnEdit' => '#7F9DC1',
-                'colorBtnMaybe' => '#345A95',
-                'colorInputBackground' => '#FDF9E7',
-                'colorWarning' => '#FFC300',
-                'colorDisabled' => '#969696',
-                'colorUserMember' => '#7F9DC1',
-                'colorAppmntConcert' => '#7F9DC1',
-                'colorAppmntMaybe' => '#345A95',
-                'colorLogDefault' => '#969696',
-                'colorLogWarning' => '#345A95',
-                'colorLogDBDelete' => '#7F9DC1',
-                'colorLogDBInsert' => '#FFC300',
-                'colorLogDBUpdate' => '#FDF9E7',
-                'colorLogEmail' => '#FFC300',
-                'colorLogInfo' => '#7F9DC1',
+            'colors' => buildBrandSchemeColors(array(
+                'colorBackground' => $p['egg'],
+                'colorInputBackground' => $p['white'],
+                'colorTitle' => $p['blue'],
+                'colorTitleBar' => $p['blue'],
+                'colorNav' => $p['blue'],
+                'colorNavAdmin' => $p['darkGray'],
+                'colorBtnSubmit' => $p['blue'],
+                'colorBtnEdit' => $p['lightBlue'],
+                'colorBtnMaybe' => $p['lightBlue'],
+                'colorWarning' => $p['gold'],
+                'colorUserMember' => $p['lightBlue'],
+                'colorAppmntConcert' => $p['lightBlue'],
+                'colorAppmntMaybe' => $p['gold'],
+                'colorLogWarning' => $p['blue'],
+                'colorLogDBUpdate' => $p['egg'],
+                'colorLogInfo' => $p['lightBlue'],
             )),
         ),
+        // Hell: Weiß-Grund, Blau + Hellblau
         'light' => array(
             'name' => 'Hell',
-            'colors' => array_merge($sem, array(
-                'colorBackground' => '#FDFFFC',
-                'colorTitle' => '#345A95',
-                'colorTitleBar' => '#7F9DC1',
-                'colorNav' => '#345A95',
-                'colorNavAdmin' => '#969696',
-                'colorBtnSubmit' => '#345A95',
-                'colorBtnEdit' => '#7F9DC1',
-                'colorBtnMaybe' => '#7F9DC1',
-                'colorInputBackground' => '#FDFFFC',
-                'colorWarning' => '#FFC300',
-                'colorDisabled' => '#969696',
-                'colorUserMember' => '#7F9DC1',
-                'colorAppmntConcert' => '#345A95',
-                'colorAppmntMaybe' => '#7F9DC1',
-                'colorLogDefault' => '#969696',
-                'colorLogWarning' => '#345A95',
-                'colorLogDBDelete' => '#7F9DC1',
-                'colorLogDBInsert' => '#FFC300',
-                'colorLogDBUpdate' => '#FDFFFC',
-                'colorLogEmail' => '#FFC300',
-                'colorLogInfo' => '#7F9DC1',
+            'colors' => buildBrandSchemeColors(array(
+                'colorBackground' => $p['white'],
+                'colorInputBackground' => $p['egg'],
+                'colorTitle' => $p['blue'],
+                'colorTitleBar' => $p['lightBlue'],
+                'colorNav' => $p['blue'],
+                'colorNavAdmin' => $p['gray'],
+                'colorBtnSubmit' => $p['blue'],
+                'colorBtnEdit' => $p['lightBlue'],
+                'colorBtnMaybe' => $p['lightBlue'],
+                'colorWarning' => $p['gold'],
+                'colorUserMember' => $p['blue'],
+                'colorAppmntConcert' => $p['blue'],
+                'colorAppmntMaybe' => $p['lightBlue'],
+                'colorLogDefault' => $p['gray'],
+                'colorLogWarning' => $p['lightBlue'],
+                'colorLogDBDelete' => $p['gray'],
+                'colorLogDBInsert' => $p['gold'],
+                'colorLogDBUpdate' => $p['white'],
+                'colorLogEmail' => $p['gold'],
+                'colorLogInfo' => $p['lightBlue'],
             )),
         ),
+        // Dunkel: Schwarz/Dunkelgrau, Blau + Gold-Akzente
         'dark' => array(
             'name' => 'Dunkel',
-            'colors' => array_merge($sem, array(
-                'colorBackground' => '#040006',
-                'colorTitle' => '#345A95',
-                'colorTitleBar' => '#454545',
-                'colorNav' => '#345A95',
-                'colorNavAdmin' => '#454545',
-                'colorBtnSubmit' => '#7F9DC1',
-                'colorBtnEdit' => '#7F9DC1',
-                'colorBtnMaybe' => '#7F9DC1',
-                'colorInputBackground' => '#454545',
-                'colorWarning' => '#FFC300',
-                'colorDisabled' => '#969696',
-                'colorUserMember' => '#7F9DC1',
-                'colorAppmntConcert' => '#345A95',
-                'colorAppmntMaybe' => '#7F9DC1',
-                'colorLogDefault' => '#454545',
-                'colorLogWarning' => '#7F9DC1',
-                'colorLogDBDelete' => '#345A95',
-                'colorLogDBInsert' => '#FFC300',
-                'colorLogDBUpdate' => '#454545',
-                'colorLogEmail' => '#FFC300',
-                'colorLogInfo' => '#7F9DC1',
+            'colors' => buildBrandSchemeColors(array(
+                'colorBackground' => $p['black'],
+                'colorInputBackground' => $p['darkGray'],
+                'colorTitle' => $p['blue'],
+                'colorTitleBar' => $p['darkGray'],
+                'colorNav' => $p['blue'],
+                'colorNavAdmin' => $p['darkGray'],
+                'colorBtnSubmit' => $p['lightBlue'],
+                'colorBtnEdit' => $p['gold'],
+                'colorBtnMaybe' => $p['lightBlue'],
+                'colorWarning' => $p['gold'],
+                'colorDisabled' => $p['gray'],
+                'colorSuccess' => $p['lightBlue'],
+                'colorBtnYes' => $p['lightBlue'],
+                'colorBtnNo' => $p['gray'],
+                'colorBtnDelete' => $p['gray'],
+                'colorAppmntYes' => $p['lightBlue'],
+                'colorAppmntNo' => $p['gray'],
+                'colorAppmntMaybe' => $p['gold'],
+                'colorUserMember' => $p['lightBlue'],
+                'colorAppmntConcert' => $p['blue'],
+                'colorLogDefault' => $p['darkGray'],
+                'colorLogFatal' => $p['gold'],
+                'colorLogError' => $p['gray'],
+                'colorLogWarning' => $p['gold'],
+                'colorLogDBDelete' => $p['gray'],
+                'colorLogDBInsert' => $p['gold'],
+                'colorLogDBUpdate' => $p['darkGray'],
+                'colorLogEmail' => $p['gold'],
+                'colorLogInfo' => $p['lightBlue'],
             )),
         ),
+        // Gold: Creme-Grund, Gold-Titel/CTA, Blau als Sekundär
         'gold' => array(
             'name' => 'Gold',
-            'colors' => array_merge($sem, array(
-                'colorBackground' => '#FDF9E7',
-                'colorTitle' => '#FFC300',
-                'colorTitleBar' => '#345A95',
-                'colorNav' => '#345A95',
-                'colorNavAdmin' => '#454545',
-                'colorBtnSubmit' => '#FFC300',
-                'colorBtnEdit' => '#345A95',
-                'colorBtnMaybe' => '#7F9DC1',
-                'colorInputBackground' => '#FDFFFC',
-                'colorWarning' => '#FFC300',
-                'colorDisabled' => '#969696',
-                'colorUserMember' => '#345A95',
-                'colorAppmntConcert' => '#FFC300',
-                'colorAppmntMaybe' => '#345A95',
-                'colorLogDefault' => '#969696',
-                'colorLogWarning' => '#FFC300',
-                'colorLogDBDelete' => '#7F9DC1',
-                'colorLogDBInsert' => '#FFC300',
-                'colorLogDBUpdate' => '#FDF9E7',
-                'colorLogEmail' => '#FFC300',
-                'colorLogInfo' => '#345A95',
+            'colors' => buildBrandSchemeColors(array(
+                'colorBackground' => $p['egg'],
+                'colorInputBackground' => $p['white'],
+                'colorTitle' => $p['gold'],
+                'colorTitleBar' => $p['blue'],
+                'colorNav' => $p['blue'],
+                'colorNavAdmin' => $p['darkGray'],
+                'colorBtnSubmit' => $p['gold'],
+                'colorBtnEdit' => $p['blue'],
+                'colorBtnMaybe' => $p['lightBlue'],
+                'colorWarning' => $p['gold'],
+                'colorSuccess' => $p['blue'],
+                'colorBtnYes' => $p['blue'],
+                'colorAppmntYes' => $p['blue'],
+                'colorAppmntMaybe' => $p['gold'],
+                'colorUserMember' => $p['blue'],
+                'colorAppmntConcert' => $p['gold'],
+                'colorLogDefault' => $p['gray'],
+                'colorLogWarning' => $p['gold'],
+                'colorLogDBDelete' => $p['darkGray'],
+                'colorLogDBInsert' => $p['gold'],
+                'colorLogDBUpdate' => $p['egg'],
+                'colorLogEmail' => $p['gold'],
+                'colorLogInfo' => $p['blue'],
             )),
         ),
+        // Soft-Blau: Hellblau dominiert Chrome, Blau für CTAs
         'soft' => array(
             'name' => 'Soft-Blau',
-            'colors' => array_merge($sem, array(
-                'colorBackground' => '#FDFFFC',
-                'colorTitle' => '#7F9DC1',
-                'colorTitleBar' => '#7F9DC1',
-                'colorNav' => '#7F9DC1',
-                'colorNavAdmin' => '#969696',
-                'colorBtnSubmit' => '#345A95',
-                'colorBtnEdit' => '#345A95',
-                'colorBtnMaybe' => '#7F9DC1',
-                'colorInputBackground' => '#FDF9E7',
-                'colorWarning' => '#FFC300',
-                'colorDisabled' => '#969696',
-                'colorUserMember' => '#7F9DC1',
-                'colorAppmntConcert' => '#7F9DC1',
-                'colorAppmntMaybe' => '#345A95',
-                'colorLogDefault' => '#969696',
-                'colorLogWarning' => '#7F9DC1',
-                'colorLogDBDelete' => '#345A95',
-                'colorLogDBInsert' => '#FFC300',
-                'colorLogDBUpdate' => '#FDF9E7',
-                'colorLogEmail' => '#FFC300',
-                'colorLogInfo' => '#7F9DC1',
+            'colors' => buildBrandSchemeColors(array(
+                'colorBackground' => $p['white'],
+                'colorInputBackground' => $p['egg'],
+                'colorTitle' => $p['lightBlue'],
+                'colorTitleBar' => $p['lightBlue'],
+                'colorNav' => $p['lightBlue'],
+                'colorNavAdmin' => $p['gray'],
+                'colorBtnSubmit' => $p['blue'],
+                'colorBtnEdit' => $p['blue'],
+                'colorBtnMaybe' => $p['lightBlue'],
+                'colorWarning' => $p['gold'],
+                'colorSuccess' => $p['blue'],
+                'colorBtnYes' => $p['blue'],
+                'colorAppmntYes' => $p['blue'],
+                'colorAppmntMaybe' => $p['lightBlue'],
+                'colorUserMember' => $p['lightBlue'],
+                'colorAppmntConcert' => $p['lightBlue'],
+                'colorLogDefault' => $p['gray'],
+                'colorLogWarning' => $p['lightBlue'],
+                'colorLogDBDelete' => $p['blue'],
+                'colorLogDBInsert' => $p['gold'],
+                'colorLogDBUpdate' => $p['egg'],
+                'colorLogEmail' => $p['gold'],
+                'colorLogInfo' => $p['lightBlue'],
             )),
         ),
     );
+}
+
+function getClassicBrandColorDefaults() {
+    $schemes = getDefaultColorSchemes();
+    return $schemes['classic']['colors'];
 }
 
 function getConfigParamRawValue($parameter) {
@@ -337,6 +403,12 @@ function ensureColorSchemesStored() {
     if($raw !== null && trim($raw) !== '') {
         $decoded = json_decode($raw, true);
         if(is_array($decoded) && count($decoded) > 0) {
+            // Merge missing keys from factory, persist if anything was added
+            $merged = loadColorSchemes();
+            $json = json_encode($merged, JSON_UNESCAPED_UNICODE);
+            if($json !== false && $json !== $raw) {
+                saveColorSchemes($merged);
+            }
             return true;
         }
     }
