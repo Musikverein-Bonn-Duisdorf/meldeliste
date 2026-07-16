@@ -21,7 +21,8 @@ if($id <= 0 || $type === '') {
 switch($type) {
 case 'termin':
     $t = new Termin;
-    if(!$t->load_by_id($id)) {
+    $t->load_by_id($id);
+    if(!(int)$t->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Termin nicht gefunden.</p></div>';
         exit;
@@ -36,7 +37,8 @@ case 'terminResponse':
         exit;
     }
     $t = new Termin;
-    if(!$t->load_by_id($id)) {
+    $t->load_by_id($id);
+    if(!(int)$t->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Termin nicht gefunden.</p></div>';
         exit;
@@ -55,13 +57,15 @@ case 'shiftResponse':
         exit;
     }
     $s = new Shift;
-    if(!$s->load_by_id($id)) {
+    $s->load_by_id($id);
+    if(!(int)$s->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Schicht nicht gefunden.</p></div>';
         exit;
     }
     $t = new Termin;
-    if(!$t->load_by_id($s->Termin)) {
+    $t->load_by_id($s->Termin);
+    if(!(int)$t->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Termin nicht gefunden.</p></div>';
         exit;
@@ -76,7 +80,8 @@ case 'user':
         exit;
     }
     $u = new User;
-    if(!$u->load_by_id($id)) {
+    $u->load_by_id($id);
+    if(!(int)$u->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Benutzer nicht gefunden.</p></div>';
         exit;
@@ -87,7 +92,8 @@ case 'user':
 case 'inventory':
     // Any logged-in user may open (e.g. myinventories); edit UI gated by $editable
     $inv = new Inventories;
-    if(!$inv->load_by_id($id)) {
+    $inv->load_by_id($id);
+    if(!(int)$inv->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Inventar nicht gefunden.</p></div>';
         exit;
@@ -99,7 +105,8 @@ case 'inventory':
 case 'instrument':
     // Insurance / instrument lists: session auth is enough; edit gated in modal
     $ins = new Instruments;
-    if(!$ins->load_by_id($id)) {
+    $ins->load_by_id($id);
+    if(!(int)$ins->Index) {
         http_response_code(404);
         echo '<div class="w3-container w3-padding"><p>Instrument nicht gefunden.</p></div>';
         exit;
