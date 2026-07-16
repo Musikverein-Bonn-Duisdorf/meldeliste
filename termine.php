@@ -65,7 +65,7 @@ $chunk = listChunkTermine('future', 'basic', '', 50, $chunkUser);
 ?>
 <div id="Liste">
 <?php echo $chunk['html']; ?>
-<div<?php echo listChunkRenderSentinelAttrs('termine', $chunk['nextCursor'], $chunk['hasMore']); ?> data-extra="user=<?php echo $chunkUser; ?>"></div>
+<?php echo listChunkRenderSentinel('termine', $chunk['nextCursor'], $chunk['hasMore'], '', ' data-extra="user='.$chunkUser.'"'); ?>
 </div>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php

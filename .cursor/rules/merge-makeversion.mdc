@@ -1,0 +1,15 @@
+---
+description: Beim Mergen immer ./makeVersion.sh ausführen
+alwaysApply: true
+---
+
+# Merge: Version bump
+
+Whenever merging into `dev` and/or `master` (or when the user asks to merge):
+
+1. Complete the merge(s) and push as requested.
+2. **Always** run `./makeVersion.sh` afterwards on the branch that should get the release commit (typically `master` after `dev` → `master`).
+3. Push the resulting release commit (`VERSION`, `HASH`, `common/version.php`).
+4. If `dev` should stay in sync with the release files, merge/cherry-pick or merge `master` back into `dev` and push `dev`.
+
+Do not skip `./makeVersion.sh` on merges unless the user explicitly says so.

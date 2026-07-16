@@ -21,7 +21,7 @@ if($leak !== false && $leak !== '') {
 </div>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>
-<div<?php echo listChunkRenderSentinelAttrs('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog'); ?> style="clear:both;height:1px;"></div>
+<?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog'); ?>
 </div>
 <script>
 function getLogMaxIndex() {
