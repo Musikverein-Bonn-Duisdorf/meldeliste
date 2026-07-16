@@ -3,7 +3,7 @@ session_start();
 $_SESSION['page'] = 'mail';
 $_SESSION['adminpage'] = true;
 
-include 'common/include.php';
+include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 
 if(!loggedIn()) {
@@ -113,7 +113,7 @@ $allReg = ($register === 0);
 
 $drafts = MailJob::listDrafts();
 
-include 'common/header.php';
+include_once 'common/header.php';
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Email versenden</h2>

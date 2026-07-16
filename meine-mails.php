@@ -3,7 +3,7 @@ session_start();
 $_SESSION['page'] = 'meinemails';
 $_SESSION['adminpage'] = false;
 
-include 'common/include.php';
+include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 if(!loggedIn()) {
     header('Location: login.php');
@@ -23,7 +23,7 @@ if(isset($_POST['delete']) && isset($_POST['id'])) {
     exit;
 }
 
-include "common/header.php";
+include_once "common/header.php";
 
 $statusLabels = array(
     'pending' => 'Warteschlange',

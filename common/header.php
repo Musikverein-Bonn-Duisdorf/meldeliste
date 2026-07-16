@@ -12,7 +12,7 @@
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	  
 	  <?php
-          include 'include.php';
+          include_once 'include.php';
           echo renderConfigColorCss();
       ?>
       <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
