@@ -310,6 +310,7 @@ function instrumentOptionAll($val) {
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
+    if(!$dbr) return $str;
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {
             $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Name']."</option>\n";
@@ -905,6 +906,7 @@ function UserOptionAll($val) {
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
+    if(!$dbr) return $str;
     while($row = mysqli_fetch_array($dbr)) {
         if($val == $row['Index']) {
             $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Vorname']." ".$row['Nachname']."</option>\n";
