@@ -10,33 +10,51 @@ if($_GET['id'] != $GLOBALS['cronID']) {
 }
 switch($_GET['cmd']) {
 case "change":
-    $sql = sprintf('SELECT * FROM `%sconfig`;',
-    $GLOBALS['dbprefix']
+    if(!isset($_GET['para']) || !isset($_GET['value'])) {
+        die('missing para/value');
+    }
+    $para = (string)$_GET['para'];
+    $value = (string)$_GET['value'];
+
+    $sql = sprintf(
+        'SELECT `Parameter`, `Type`, `Value` FROM `%sconfig` WHERE `Parameter` = "%s" LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($conn, $para)
     );
     $dbr = mysqli_query($conn, $sql);
     sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        switch($row['Type']) {
-        case "bool":
-        case "uint":
-        case "int":
-        case "time":
-        case "string":
-        case "color":
-        default:
-            if(isset($_GET['value'])) {
-                $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
-                $GLOBALS['dbprefix'],
-                mysqli_real_escape_string($conn, $_GET['value']),
-                $_GET['para']
-                );
-                if($_GET['value'] == $row['Value']) break;
-                $dbr2 = mysqli_query($conn, $sql);
-                sqlerror();
-            }
-        break;
+    $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+    if(!$row) {
+        die('unknown parameter');
+    }
+
+    if($row['Type'] === 'color') {
+        $value = trim($value);
+        if($value !== '' && !isHexColor($value)) {
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                "Ungültige Farbe abgelehnt | Parameter: <b>%s</b>, Wert: <b>%s</b>",
+                htmlspecialchars($para),
+                htmlspecialchars($value)
+            ));
+            die('invalid color');
+        }
+        if($value !== '') {
+            $value = normalizeHexColor($value);
         }
     }
+
+    if($value === (string)$row['Value']) {
+        break;
+    }
+    $sql = sprintf(
+        'UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($conn, $value),
+        mysqli_real_escape_string($conn, $para)
+    );
+    $dbr2 = mysqli_query($conn, $sql);
+    sqlerror();
     break;
 default:
     break;

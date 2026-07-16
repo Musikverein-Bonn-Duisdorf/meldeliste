@@ -343,6 +343,137 @@ function inventoryOptionAll($val) {
     return $str;
 }
 
+function isHexColor($value) {
+    if(!is_string($value)) return false;
+    return (bool)preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', trim($value));
+}
+
+function normalizeHexColor($value) {
+    $value = strtoupper(trim((string)$value));
+    if(!isHexColor($value)) return '';
+    if(strlen($value) === 4) {
+        return '#'.$value[1].$value[1].$value[2].$value[2].$value[3].$value[3];
+    }
+    return $value;
+}
+
+function hexContrastText($hex) {
+    $hex = normalizeHexColor($hex);
+    if($hex === '') return '#000000';
+    $r = hexdec(substr($hex, 1, 2));
+    $g = hexdec(substr($hex, 3, 2));
+    $b = hexdec(substr($hex, 5, 2));
+    // Relative luminance (sRGB approx.)
+    $luma = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+    return ($luma > 0.55) ? '#000000' : '#FFFFFF';
+}
+
+function w3ColorToHex($class) {
+    static $map = array(
+        'w3-mvd-blue' => '#345A95',
+        'w3-mvd-gray' => '#969696',
+        'w3-mvd-egg' => '#FDF9E7',
+        'w3-mvd-yellow' => '#FFC300',
+        'w3-mvd-white' => '#FDFFFC',
+        'w3-mvd-black' => '#040006',
+        'w3-amber' => '#FFC107',
+        'w3-aqua' => '#00FFFF',
+        'w3-blue' => '#2196F3',
+        'w3-light-blue' => '#87CEEB',
+        'w3-brown' => '#795548',
+        'w3-cyan' => '#00BCD4',
+        'w3-blue-grey' => '#607D8B',
+        'w3-blue-gray' => '#607D8B',
+        'w3-green' => '#4CAF50',
+        'w3-light-green' => '#8BC34A',
+        'w3-indigo' => '#3F51B5',
+        'w3-khaki' => '#F0E68C',
+        'w3-lime' => '#CDDC39',
+        'w3-orange' => '#FF9800',
+        'w3-deep-orange' => '#FF5722',
+        'w3-pink' => '#E91E63',
+        'w3-purple' => '#9C27B0',
+        'w3-deep-purple' => '#673AB7',
+        'w3-red' => '#F44336',
+        'w3-sand' => '#FDF5E6',
+        'w3-teal' => '#009688',
+        'w3-yellow' => '#FFEB3B',
+        'w3-white' => '#FFFFFF',
+        'w3-black' => '#000000',
+        'w3-grey' => '#9E9E9E',
+        'w3-gray' => '#9E9E9E',
+        'w3-light-grey' => '#F1F1F1',
+        'w3-light-gray' => '#F1F1F1',
+        'w3-dark-grey' => '#616161',
+        'w3-dark-gray' => '#616161',
+        'w3-pale-red' => '#FFDDDD',
+        'w3-pale-green' => '#DDFFDD',
+        'w3-pale-yellow' => '#FFFFCC',
+        'w3-pale-blue' => '#DDFFFF',
+        'w3-highway-brown' => '#633517',
+        'w3-highway-red' => '#A6001A',
+        'w3-highway-orange' => '#E06000',
+        'w3-highway-schoolbus' => '#EE9600',
+        'w3-highway-yellow' => '#FFAB00',
+        'w3-highway-green' => '#004D33',
+        'w3-highway-blue' => '#00477E',
+    );
+    $class = trim((string)$class);
+    return isset($map[$class]) ? $map[$class] : '#808080';
+}
+
+function colorPickerValue($raw) {
+    $raw = trim((string)$raw);
+    if($raw === '') return '#808080';
+    if(isHexColor($raw)) return normalizeHexColor($raw);
+    return w3ColorToHex($raw);
+}
+
+function colorToCssClass($value) {
+    $value = trim((string)$value);
+    if($value === '') return '';
+    if(isHexColor($value)) {
+        $hex = normalizeHexColor($value);
+        $class = 'cfg-hex-'.strtolower(substr($hex, 1));
+        if(!isset($GLOBALS['cfgColorCssRules'])) {
+            $GLOBALS['cfgColorCssRules'] = array();
+        }
+        $GLOBALS['cfgColorCssRules'][$class] = array(
+            'bg' => $hex,
+            'fg' => hexContrastText($hex),
+        );
+        return $class;
+    }
+    return $value;
+}
+
+function renderConfigColorCss($wrapStyleTag = true) {
+    if(empty($GLOBALS['cfgColorCssRules']) || !is_array($GLOBALS['cfgColorCssRules'])) {
+        return '';
+    }
+    $css = '';
+    foreach($GLOBALS['cfgColorCssRules'] as $class => $colors) {
+        $css .= '.'.preg_replace('/[^a-z0-9\-]/i', '', $class)
+            .'{color:'.$colors['fg'].' !important;background-color:'.$colors['bg'].' !important;}';
+    }
+    if($css === '') return '';
+    return $wrapStyleTag ? '<style type="text/css">'.$css.'</style>' : $css;
+}
+
+function getColorConfigParameters() {
+    static $params = null;
+    if($params !== null) return $params;
+    $params = array();
+    if(function_exists('getConfigDefaults')) {
+        foreach(getConfigDefaults() as $item) {
+            if(isset($item['Type']) && $item['Type'] === 'color' && isset($item['Parameter'])) {
+                $params[$item['Parameter']] = true;
+            }
+        }
+    }
+    return $params;
+}
+
 function loadconfig() {
     $optionsDB = array();
     $sql = sprintf('SELECT * FROM `%sconfig`;',
@@ -359,6 +490,12 @@ function loadconfig() {
             if(!array_key_exists($item['Parameter'], $optionsDB)) {
                 $optionsDB[$item['Parameter']] = $item['Value'];
             }
+        }
+    }
+    $colorParams = getColorConfigParameters();
+    foreach($optionsDB as $param => $value) {
+        if(isset($colorParams[$param]) || isHexColor($value)) {
+            $optionsDB[$param] = colorToCssClass($value);
         }
     }
     return $optionsDB;

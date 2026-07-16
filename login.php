@@ -9,6 +9,7 @@ session_start();
     <link rel="stylesheet" href="styles/w3-colors-highway.css">
     <?php
       include 'common/include.php';
+      echo renderConfigColorCss();
       ?>
     <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
     <!-- successfully included php libraries -->

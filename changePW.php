@@ -78,6 +78,7 @@ if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
     <link rel="stylesheet" href="styles/w3-colors-highway.css">
     <meta charset="utf-8">
     <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
+    <?php echo renderConfigColorCss(); ?>
     <title><?php echo htmlspecialchars($optionsDB['WebSiteName']); ?></title>
   </head>
   <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?>">
