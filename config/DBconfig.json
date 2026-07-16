@@ -39,27 +39,19 @@
 	"Sortierung": {"Type": "int", "Default": 1},
 	"Spielbar": {"Type": "int", "Default": 1}
     },
-    "Instruments": {
-	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
-	"RegNumber": {"Type": "int", "Null": "YES"},
-	"Instrument": {"Type": "int"},
-	"Vendor": {"Type": "text", "Collation": "latin1_swedish_ci"},
-	"Model": {"Type": "text", "Collation": "latin1_swedish_ci"},
-	"SerialNr": {"Type": "text", "Collation": "latin1_swedish_ci"},
-	"PurchaseDate": {"Type": "date", "Null": "YES"},
-	"PurchasePrize": {"Type": "text", "Collation": "latin1_swedish_ci"},
-	"Owner": {"Type": "int", "Null": "YES"},
-	"Insurance": {"Type": "tinyint", "Default": 0},
-	"Comment": {"Type": "text", "Collation": "latin1_swedish_ci"}
-    },
     "Inventories": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"RegNumber": {"Type": "int", "Null": "YES"},
 	"Inventory": {"Type": "int"},
-	"Description": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Instrument": {"Type": "int", "Null": "YES"},
+	"Description": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Vendor": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Model": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"SerialNr": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
 	"PurchaseDate": {"Type": "date", "Null": "YES"},
 	"PurchasePrize": {"Type": "text", "Collation": "latin1_swedish_ci"},
 	"Owner": {"Type": "int", "Null": "YES"},
+	"Insurance": {"Type": "tinyint", "Default": 0},
 	"Comment": {"Type": "text", "Collation": "latin1_swedish_ci"}
     },
     "InventoriesLoans": {
@@ -76,14 +68,6 @@
 	"Prefix": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
 	"Protected": {"Type": "tinyint", "Default": 0},
 	"Sortierung": {"Type": "int", "Default": 1}
-    },
-    "Loans": {
-	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
-	"User": {"Type": "int"},
-	"Instrument": {"Type": "int"},
-	"StartDate": {"Type": "date"},
-	"EndDate": {"Type": "date", "Null": "YES"},
-	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"}
     },
     "Log": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

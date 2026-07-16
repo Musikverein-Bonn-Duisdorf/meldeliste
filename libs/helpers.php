@@ -325,9 +325,8 @@ function inventoryOptionAll($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
     $sql = sprintf(
-        'SELECT * FROM `%sInventory` WHERE (`Prefix` IS NULL OR `Prefix` != "%s") ORDER BY `Sortierung`;',
-        $GLOBALS['dbprefix'],
-        mysqli_real_escape_string($GLOBALS['conn'], RegNumber::DEFAULT_INSTR_PREFIX)
+        'SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
+        $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();

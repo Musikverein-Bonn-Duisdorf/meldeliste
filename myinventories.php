@@ -25,15 +25,28 @@ include "common/header.php";
 <?php
 $u = new User;
 $u->load_by_id($_SESSION['userid']);
+$shown = array();
+
+$owned = $u->getInventories();
+for($i=0; $i < count($owned); $i++) {
+    $id = (int)$owned[$i];
+    if(isset($shown[$id])) continue;
+    $shown[$id] = true;
+    $inventory = new Inventories;
+    $inventory->load_by_id($id);
+    echo $inventory->printTableLine(false);
+}
+
 $loans = $u->getInventoriesLoans();
-if(count($loans)) {
-    for($i=0; $i < count($loans); $i++) {
-        $loan = new InventoriesLoan;
-        $loan->load_by_id($loans[$i]);
-        $inventory = new Inventories;
-        $inventory->load_by_id($loan->Inventory);
-        echo $inventory->printTableLine();
-    }
+for($i=0; $i < count($loans); $i++) {
+    $loan = new InventoriesLoan;
+    $loan->load_by_id($loans[$i]);
+    $id = (int)$loan->Inventory;
+    if(isset($shown[$id])) continue;
+    $shown[$id] = true;
+    $inventory = new Inventories;
+    $inventory->load_by_id($id);
+    echo $inventory->printTableLine(false);
 }
 
 include "common/footer.php";

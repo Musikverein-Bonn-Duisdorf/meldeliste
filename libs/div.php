@@ -51,7 +51,6 @@ class div
 	    case 'id':
         case 'name':
         case 'tag':
-        case 'value':
         case 'type':
         case 'href':
         case 'min':
@@ -65,6 +64,15 @@ class div
             }
             else {
                 $this->_data[$key] = "";
+            }
+            break;
+        case 'value':
+            // Allow "0" (e.g. RegNumber); only null means omit attribute
+            if($val === null) {
+                $this->_data[$key] = null;
+            }
+            else {
+                $this->_data[$key] = trim((string)$val);
             }
             break;
 	    case 'bold':
@@ -110,8 +118,8 @@ class div
         if($this->name) {
             $str=$str." name=\"".$this->name."\"";
         }
-        if($this->value) {
-            $str=$str." value=\"".$this->value."\"";
+        if($this->value !== null) {
+            $str=$str." value=\"".htmlspecialchars((string)$this->value, ENT_QUOTES, 'UTF-8')."\"";
         }
         if($this->type) {
             $str=$str." type=\"".$this->type."\"";
