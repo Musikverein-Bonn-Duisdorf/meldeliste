@@ -89,7 +89,8 @@ case 'user':
     echo $u->getModalHtml();
     break;
 
-case 'inventory':
+case 'inventar':
+case 'inventory': // alias
     // Any logged-in user may open (e.g. myinventories); edit UI gated by $editable
     try {
         $inv = new Inventories;
