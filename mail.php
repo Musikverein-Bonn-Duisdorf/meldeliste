@@ -461,7 +461,7 @@ foreach($allJobs as $rowJob) {
 
   <form id="uploadform" name="uploadform" action="uploadfile.php" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="job" value="<?php echo (int)$job->Index; ?>" />
-    <label>Anhang (nur Email #<?php echo (int)$job->Index; ?>)</label>
+    <label>Anhang</label>
     <div class="w3-row">
 	<input id="attachment" class="w3-input w3-col l6 w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" type="file" name="attachment[]" onchange="showUploadButton()"/>
 	<div class="w3-col l2">&nbsp;</div>
