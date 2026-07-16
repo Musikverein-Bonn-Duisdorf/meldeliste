@@ -266,7 +266,6 @@ class Inventories
     }
 
     public function printTableLine($editable = true) {
-        $canEdit = $editable && requirePermission("perm_editInventories");
         $sql = sprintf(
             'SELECT `%sInventories`.*, `iTyp`, `iSort`, `iPrefix`, `instName` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort`, `Prefix` AS `iPrefix` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` LEFT JOIN (SELECT `Index` AS `instIndex`, `Name` AS `instName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `instIndex` WHERE `%sInventories`.`Index` = "%d";',
             $GLOBALS['dbprefix'],
@@ -288,7 +287,7 @@ class Inventories
         $line = new div;
         $line->indent=$indent;
         $line->class="w3-row w3-padding";
-        $line->onclick="document.getElementById('".$this->Index."').style.display='block'";
+        $line->onclick="openModal('inventar', ".$this->Index.")";
         if(!empty($this->Insurance)) {
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
         }
@@ -361,19 +360,33 @@ class Inventories
         $str=$str.$field->print();
 
         $str=$str.$line->close();
-        $indent--;
-        $modal = new div;
-        $modal->indent=$indent;
-        $modal->class="w3-modal";
-        $modal->id=$this->Index;
-        $str=$str.$modal->open();
+        return $str;
+    }
 
-        $indent++;
-        $modalcontent = new div;
-        $modalcontent->indent=$indent;
-        $modalcontent->class="w3-modal-content";
-        $str=$str.$modalcontent->open();
-        $indent++;
+    public function getModalHtml($editable = true) {
+        $canEdit = $editable && requirePermission("perm_editInventories");
+        $sql = sprintf(
+            'SELECT `%sInventories`.*, `iTyp`, `iSort`, `iPrefix`, `instName` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort`, `Prefix` AS `iPrefix` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` LEFT JOIN (SELECT `Index` AS `instIndex`, `Name` AS `instName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `instIndex` WHERE `%sInventories`.`Index` = "%d";',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if(!is_array($row)) {
+            return '<header class="w3-container '.$GLOBALS['optionsDB']['colorTitleBar'].'"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Inventar</h2></header><div class="w3-container w3-padding"><p>Datensatz konnte nicht geladen werden.</p></div>';
+        }
+
+        $str = "";
+
+        // Start above 0: extracted from nested modal wrappers; loan loop still decrements
+        $indent = 2;
         $header = new div;
         $header->indent=$indent;
         $header->class="w3-container";
@@ -384,7 +397,7 @@ class Inventories
         $span = new div;
         $span->indent=$indent;
         $span->tag="span";
-        $span->onclick="document.getElementById('".$this->Index."').style.display='none'";
+        $span->onclick="closeModal()";
         $span->class="w3-button w3-display-topright";
         $span->body="&times;";
         $str=$str.$span->print();
@@ -392,7 +405,7 @@ class Inventories
         $content = new div;
         $content->indent=$indent;
         $headerTitle = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
-        $content->body="<h2>".htmlspecialchars($headerTitle, ENT_QUOTES, 'UTF-8')."</h2>";
+        $content->body="<h2>".htmlspecialchars((string)$headerTitle, ENT_QUOTES, 'UTF-8')."</h2>";
         $str=$str.$content->print();
         $str=$str.$header->close();
 
@@ -401,7 +414,7 @@ class Inventories
         $detailform->indent = $indent;
         if($canEdit) {
             $detailform->tag="form";
-            $detailform->action="";
+            $detailform->action="inventories.php";
             $detailform->method="POST";
         }
         $str=$str.$detailform->open();
@@ -523,7 +536,7 @@ class Inventories
             $modalrow->style="display: none;";
             $modalrow->id="del".$this->Index;
             $modalrow->tag="form";
-            $modalrow->action="";
+            $modalrow->action="inventories.php";
             $modalrow->method="POST";
             $str=$str.$modalrow->open();
             $indent++;
@@ -555,7 +568,7 @@ class Inventories
 
         }
         
-        $indent--;
+        $indent = 1;
         $modalrow = new div;
         $modalrow->indent=$indent;
         $modalrow->class="w3-padding w3-margin-bottom";
@@ -563,12 +576,12 @@ class Inventories
         $modalrow->body="<b>Leihhistorie:</b>";
         $str=$str.$modalrow->open();
 
-        $indent++;
+        $indent = 2;
         $modalrow2 = new div;
         $modalrow2->indent=$indent;
         $modalrow2->class="w3-row w3-center w3-padding w3-border-bottom";
         $str=$str.$modalrow2->open();
-        $indent++;
+        $indent = 3;
         $content = new div;
         $content->indent=$indent;
         $content->col(2,4,4);
@@ -591,15 +604,15 @@ class Inventories
 
         // --> new Loan
         if($canEdit) {
-            $indent--;
+            $indent = 2;
             $modalrow2 = new div;
             $modalrow2->indent=$indent;
             $modalrow2->class="w3-row w3-center w3-padding";
             $modalrow2->tag="form";
-            $modalrow2->action="";
+            $modalrow2->action="inventories.php";
             $modalrow2->method="POST";
             $str=$str.$modalrow2->open();
-            $indent++;
+            $indent = 3;
             $content = new div;
             $content->indent=$indent;
             $content->tag="input";
@@ -649,7 +662,7 @@ class Inventories
         for($i=0; $i<count($loans); $i++) {           
                 $L = new InventoriesLoan;
                 $L->load_by_id($loans[$i]);
-                $indent--;
+                $indent = 2;
                 $modalrow2 = new div;
                 $modalrow2->indent=$indent;
                 $modalrow2->class="w3-row w3-center w3-padding";
@@ -657,7 +670,7 @@ class Inventories
                     $modalrow2->class="w3-teal";
                 }
                 $str=$str.$modalrow2->open();
-                $indent++;
+                $indent = 3;
                 $content = new div;
                 $content->indent=$indent;
                 $content->col(2,4,4);
@@ -675,7 +688,7 @@ class Inventories
                     $form = new div;
                     $form->indent=$indent;
                     $form->tag="form";
-                    $form->action="";
+                    $form->action="inventories.php";
                     $form->method="POST";
                     $str=$str.$form->open();
                     
@@ -717,11 +730,8 @@ class Inventories
                 }
                 $str=$str.$modalrow2->close();
             }
-        $str=$str.$modalrow->close();            
-        $indent--;
-        $str=$str.$modalcontent->close();
-        $str=$str.$modal->close();
-        
+        $str=$str.$modalrow->close();
+
         return $str;
     }
 
@@ -734,6 +744,7 @@ class Inventories
         sqlerror();
 
         $loans = array();
+        if(!$dbr) return $loans;
         while($row = mysqli_fetch_array($dbr)) {
             array_push($loans, (int)$row['Index']);
         }
