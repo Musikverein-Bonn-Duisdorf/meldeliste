@@ -43,7 +43,7 @@ $sqlList = sprintf(
      FROM `%sMailOutbox` o
      LEFT JOIN `%sMailJob` j ON j.`Index` = o.`Job`
      WHERE o.`User` = %d AND o.`DeletedByUser` = 0 AND o.`Status` IN ("pending", "sending", "sent")
-     ORDER BY COALESCE(o.`SentAt`, o.`Created`) DESC, o.`Index` DESC
+     ORDER BY o.`Created` DESC, o.`Index` DESC
      LIMIT 200;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
@@ -83,8 +83,7 @@ $resolveSender = function($senderId) use (&$userNameCache) {
 <?php if($viewMail) {
     $subj = htmlspecialchars((string)$viewMail->Subject, ENT_QUOTES, 'UTF-8');
     $body = nl2br((string)$viewMail->BodyText);
-    $whenRaw = !empty($viewMail->SentAt) ? $viewMail->SentAt : $viewMail->Created;
-    $when = htmlspecialchars($formatMailDate($whenRaw), ENT_QUOTES, 'UTF-8');
+    $when = htmlspecialchars($formatMailDate($viewMail->Created), ENT_QUOTES, 'UTF-8');
     $job = new MailJob;
     $job->load_by_id((int)$viewMail->Job);
     $sender = htmlspecialchars($resolveSender((int)$job->CreatedBy), ENT_QUOTES, 'UTF-8');
@@ -126,8 +125,7 @@ else {
     while($row = mysqli_fetch_assoc($dbr)) {
         $id = (int)$row['Index'];
         $unread = empty($row['ReadAt']);
-        $whenRaw = !empty($row['SentAt']) ? $row['SentAt'] : $row['Created'];
-        $when = htmlspecialchars($formatMailDate($whenRaw), ENT_QUOTES, 'UTF-8');
+        $when = htmlspecialchars($formatMailDate($row['Created']), ENT_QUOTES, 'UTF-8');
         $sender = htmlspecialchars($resolveSender(isset($row['SenderId']) ? $row['SenderId'] : 0), ENT_QUOTES, 'UTF-8');
         $subject = $row['Subject'] !== '' && $row['Subject'] !== null
             ? htmlspecialchars((string)$row['Subject'], ENT_QUOTES, 'UTF-8')
