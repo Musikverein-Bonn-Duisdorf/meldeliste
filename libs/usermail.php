@@ -196,7 +196,13 @@ class Usermail {
                 continue;
             }
 
-            $bodyStored = "Hallo ".$row['Vorname'].",\n\n".$text;
+            if(function_exists('mailBodyLooksLikeHtml') && mailBodyLooksLikeHtml($text)) {
+                $anredeHtml = '<p>Hallo '.htmlspecialchars((string)$row['Vorname'], ENT_QUOTES, 'UTF-8').',</p>';
+                $bodyStored = $anredeHtml.(function_exists('sanitizeMailHtml') ? sanitizeMailHtml($text) : $text);
+            }
+            else {
+                $bodyStored = "Hallo ".$row['Vorname'].",\n\n".$text;
+            }
             $out = new MailOutbox;
             $out->Job = $job->Index;
             $out->User = (int)$row['Index'];
@@ -315,16 +321,17 @@ class Usermail {
         $link = $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$activeLink;
 
         // BodyText already contains greeting; strip duplicate greeting for HTML if present
-        $plain = (string)$outbox->BodyText;
-        $plainForHtml = $plain;
-        $prefix = $anrede."\n\n";
-        if(strpos($plainForHtml, $prefix) === 0) {
-            $plainForHtml = substr($plainForHtml, strlen($prefix));
-        }
+        $bodyInner = function_exists('stripMailBodyGreeting')
+            ? stripMailBodyGreeting((string)$outbox->BodyText, $vorname)
+            : (string)$outbox->BodyText;
+        $bodyHtml = function_exists('formatMailBodyForEmail')
+            ? formatMailBodyForEmail($bodyInner)
+            : nl2br($bodyInner);
+        $mail->AltBody = trim(html_entity_decode(strip_tags(str_replace(array('<br>', '<br/>', '<br />', '</p>'), array("\n", "\n", "\n", "\n\n"), $anrede."\n\n".$bodyInner)), ENT_QUOTES, 'UTF-8'));
 
         $mail->Body = "<html><head><style>".$style."</style></head><body>"
             ."<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div>"
-            ."<div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($plainForHtml)."</p></div>"
+            ."<div class=\"w3-container\"><p>".htmlspecialchars($anrede, ENT_QUOTES, 'UTF-8')."</p>".$bodyHtml."</div>"
             ."<a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">zu ".genitiv($vorname !== '' ? $vorname : 'deiner')." Meldeliste</a>"
             ."</body></html>";
 
