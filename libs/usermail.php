@@ -264,12 +264,26 @@ class Usermail {
             $outbox->LastError = 'MailJob fehlt';
             $outbox->Attempts = (int)$outbox->Attempts + 1;
             $outbox->save();
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Job fehlt, An: <b>%s</b>, Betreff: <b>%s</b>',
+                (int)$outbox->Index,
+                htmlspecialchars((string)$outbox->ToEmail),
+                htmlspecialchars((string)$outbox->Subject)
+            ));
             return false;
         }
         if($job->Status === 'cancelled') {
             $outbox->Status = 'cancelled';
             $outbox->LastError = null;
             $outbox->save();
+            $logentry = new Log;
+            $logentry->warning(sprintf(
+                'Email-Versand übersprungen (Job abgebrochen) | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s</b>',
+                (int)$outbox->Index,
+                (int)$job->Index,
+                htmlspecialchars((string)$outbox->ToEmail)
+            ));
             return false;
         }
 
@@ -284,15 +298,15 @@ class Usermail {
         $mail->IsHTML(true);
         $mail->Subject = $outbox->Subject;
 
-        $style = file_get_contents("styles/w3.css");
-        $style .= file_get_contents("styles/w3-colors-highway.css");
-        if(is_readable("styles/w3-color-mvd.css")) {
-            $style .= file_get_contents("styles/w3-color-mvd.css");
+        $style = '';
+        foreach(array('styles/w3.css', 'styles/w3-colors-highway.css', 'styles/w3-color-mvd.css', 'styles/w3-colors-mvd.css') as $cssFile) {
+            if(is_readable($cssFile)) {
+                $style .= file_get_contents($cssFile);
+            }
         }
-        elseif(is_readable("styles/w3-colors-mvd.css")) {
-            $style .= file_get_contents("styles/w3-colors-mvd.css");
+        if(function_exists('renderConfigColorCss')) {
+            $style .= renderConfigColorCss(false);
         }
-        $style .= renderConfigColorCss(false);
 
         $vorname = $user->Index ? (string)$user->Vorname : '';
         $nachname = $user->Index ? (string)$user->Nachname : '';
@@ -316,6 +330,22 @@ class Usermail {
 
         $addrs = array_map('trim', explode(',', (string)$outbox->ToEmail));
         $addrs = array_values(array_filter($addrs));
+        if(!$addrs) {
+            $outbox->Status = 'failed';
+            $outbox->LastError = 'Keine gültige Empfängeradresse';
+            $outbox->Attempts = (int)$outbox->Attempts + 1;
+            $outbox->save();
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User: <b>%s %s</b> — keine gültige Empfängeradresse',
+                (int)$outbox->Index,
+                (int)$job->Index,
+                htmlspecialchars($vorname),
+                htmlspecialchars($nachname)
+            ));
+            $job->refreshCounts();
+            return false;
+        }
         foreach($addrs as $addr) {
             $mail->addAddress($addr, trim($vorname.' '.$nachname));
         }
@@ -334,6 +364,9 @@ class Usermail {
         }
 
         $outbox->Attempts = (int)$outbox->Attempts + 1;
+        $maxAttempts = isset($GLOBALS['optionsDB']['cronMailQueueMaxAttempts'])
+            ? (int)$GLOBALS['optionsDB']['cronMailQueueMaxAttempts']
+            : 3;
         try {
             $mail->Send();
             $outbox->Status = 'sent';
@@ -343,25 +376,26 @@ class Usermail {
 
             $logentry = new Log;
             $logentry->email(sprintf(
-                "An: %s %s, Betreff: %s",
-                $vorname,
-                $nachname,
-                $outbox->Subject
+                'Email versendet | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s %s</b> &lt;%s&gt;, Betreff: <b>%s</b>',
+                (int)$outbox->Index,
+                (int)$job->Index,
+                htmlspecialchars($vorname),
+                htmlspecialchars($nachname),
+                htmlspecialchars(implode(', ', $addrs)),
+                htmlspecialchars((string)$outbox->Subject)
             ));
             $job->refreshCounts();
             usleep(100000);
             return true;
         }
         catch(Throwable $e) {
-            $maxAttempts = isset($GLOBALS['optionsDB']['cronMailQueueMaxAttempts'])
-                ? (int)$GLOBALS['optionsDB']['cronMailQueueMaxAttempts']
-                : 3;
             $err = $e->getMessage();
             if($mail->ErrorInfo) {
                 $err = $mail->ErrorInfo.' | '.$err;
             }
             $outbox->LastError = $err;
-            if($outbox->Attempts >= $maxAttempts) {
+            $final = $outbox->Attempts >= $maxAttempts;
+            if($final) {
                 $outbox->Status = 'failed';
             }
             else {
@@ -370,14 +404,26 @@ class Usermail {
             $outbox->save();
 
             $logentry = new Log;
-            $logentry->error(sprintf(
-                "Kann Email nicht senden | An: <b>%s %s</b> | Betreff: <b>%s</b> | PHPMailer: <b>%s</b> | Exception: <b>%s</b>",
+            $msg = sprintf(
+                'Email-Versand %s | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s %s</b> &lt;%s&gt;, Betreff: <b>%s</b>, Versuch: <b>%d</b>/%d, PHPMailer: <b>%s</b>, Exception: <b>%s</b>',
+                $final ? 'endgültig fehlgeschlagen' : 'fehlgeschlagen (wird erneut versucht)',
+                (int)$outbox->Index,
+                (int)$job->Index,
                 htmlspecialchars($vorname),
                 htmlspecialchars($nachname),
+                htmlspecialchars(implode(', ', $addrs)),
                 htmlspecialchars((string)$outbox->Subject),
+                (int)$outbox->Attempts,
+                $maxAttempts,
                 htmlspecialchars((string)$mail->ErrorInfo),
                 htmlspecialchars($e->getMessage())
-            ));
+            );
+            if($final) {
+                $logentry->error($msg);
+            }
+            else {
+                $logentry->warning($msg);
+            }
             try {
                 $mail->smtpClose();
             }
@@ -391,7 +437,7 @@ class Usermail {
 
     /**
      * Process a batch of pending outbox rows.
-     * @return array{processed:int,sent:int,failed:int}
+     * @return array{processed:int,sent:int,failed:int,reclaimed:int,batchSize:int}
      */
     public static function processQueue($batchSize = null, $maxAttempts = null) {
         $batchSize = $batchSize !== null
@@ -401,6 +447,7 @@ class Usermail {
             ? (int)$maxAttempts
             : (isset($GLOBALS['optionsDB']['cronMailQueueMaxAttempts']) ? (int)$GLOBALS['optionsDB']['cronMailQueueMaxAttempts'] : 3);
 
+        $reclaimed = MailOutbox::reclaimStuckSending(10);
         $items = MailOutbox::claimPending($batchSize, $maxAttempts);
         $sent = 0;
         $failed = 0;
@@ -413,11 +460,34 @@ class Usermail {
                 $failed++;
             }
         }
-        return array(
+
+        $result = array(
             'processed' => count($items),
             'sent' => $sent,
             'failed' => $failed,
+            'reclaimed' => $reclaimed,
+            'batchSize' => $batchSize,
         );
+
+        if($reclaimed > 0 || count($items) > 0) {
+            $logentry = new Log;
+            $summary = sprintf(
+                'Mail-Queue Lauf | Batch: <b>%d</b>, beansprucht: <b>%d</b>, gesendet: <b>%d</b>, fehlgeschlagen/übersprungen: <b>%d</b>, hängende sending zurückgeholt: <b>%d</b>',
+                $batchSize,
+                count($items),
+                $sent,
+                $failed,
+                $reclaimed
+            );
+            if($failed > 0) {
+                $logentry->warning($summary);
+            }
+            else {
+                $logentry->info($summary);
+            }
+        }
+
+        return $result;
     }
 
     /**

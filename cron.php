@@ -83,7 +83,12 @@ case "processMailQueue":
 	echo "processMailQueue...\n";
 	MailJob::ensureSchema();
 	$result = Usermail::processQueue();
-	echo "processed=".$result['processed']." sent=".$result['sent']." failed=".$result['failed']."\n";
+	echo "batchSize=".$result['batchSize']
+		." processed=".$result['processed']
+		." sent=".$result['sent']
+		." failed=".$result['failed']
+		." reclaimed=".$result['reclaimed']
+		."\n";
 	break;
 case "reminder":
 	echo "reminder...\n";
