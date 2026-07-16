@@ -74,10 +74,13 @@ class MailJob
         if($done) return true;
         $table = new SQLtable('MailJob');
         $outbox = new SQLtable('MailOutbox');
-        $needs = !$table->exists() || !$outbox->exists() || !$table->columnExists('Gruss');
+        $needs = !$table->exists() || !$outbox->exists()
+            || !$table->columnExists('Gruss')
+            || !$outbox->columnExists('ReadAt');
         if($needs) {
             $manager = new DatabaseManager();
             $manager->create();
+            $manager->repair();
         }
         $done = true;
         return (new SQLtable('MailJob'))->exists() && (new SQLtable('MailOutbox'))->exists();
@@ -198,10 +201,83 @@ class MailJob
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if($dbr) {
+            $logentry = new Log;
+            $logentry->DBdelete(sprintf('Email-Entwurf gelöscht | Email-ID: <b>%d</b>', (int)$this->Index));
             $this->_data['Index'] = null;
             return true;
         }
         return false;
+    }
+
+    public function canCancel() {
+        return $this->Index && in_array((string)$this->Status, array('queued', 'processing'), true);
+    }
+
+    public function canDelete() {
+        if(!$this->Index) return false;
+        if((string)$this->Status === 'draft') return true;
+        return (int)$this->Sent === 0;
+    }
+
+    /**
+     * Stop further PHPMailer sends; already sent outbox rows stay.
+     */
+    public function cancel() {
+        if(!$this->canCancel()) return false;
+        $sql = sprintf(
+            'UPDATE `%sMailOutbox` SET `Status` = "cancelled" WHERE `Job` = %d AND `Status` IN ("pending", "sending");',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+
+        $this->Status = 'cancelled';
+        $this->update();
+        $this->refreshCounts();
+
+        $logentry = new Log;
+        $logentry->email(sprintf(
+            'Email-Versand abgebrochen | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, bereits gesendet: <b>%d</b>/%d',
+            (int)$this->Index,
+            htmlspecialchars((string)$this->Subject),
+            (int)$this->Sent,
+            (int)$this->Total
+        ));
+        return true;
+    }
+
+    /**
+     * Delete draft, or any job that has not yet reached any recipient (Sent = 0).
+     */
+    public function deleteCompletely() {
+        if(!$this->canDelete()) return false;
+        if((string)$this->Status === 'draft') {
+            return $this->deleteDraft();
+        }
+
+        $id = (int)$this->Index;
+        $subject = (string)$this->Subject;
+        $sqlOut = sprintf('DELETE FROM `%sMailOutbox` WHERE `Job` = %d;', $GLOBALS['dbprefix'], $id);
+        $dbrOut = mysqli_query($GLOBALS['conn'], $sqlOut);
+        sqlerror();
+        if(!$dbrOut) return false;
+
+        $this->cleanupAttachments();
+        $sql = sprintf('DELETE FROM `%sMailJob` WHERE `Index` = %d;', $GLOBALS['dbprefix'], $id);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+
+        $logentry = new Log;
+        $logentry->DBdelete(sprintf(
+            'Email gelöscht (noch nicht versendet) | Email-ID: <b>%d</b>, Betreff: <b>%s</b>',
+            $id,
+            htmlspecialchars($subject)
+        ));
+        $this->_data['Index'] = null;
+        return true;
     }
 
     public function applyGreeting($vornameSession = '') {
@@ -241,6 +317,12 @@ class MailJob
         $this->Sent = (int)$row['sent'];
         $this->Failed = (int)$row['failed'];
         $open = (int)$row['open'];
+
+        if($this->Status === 'cancelled') {
+            $this->update();
+            return;
+        }
+
         if($open > 0) {
             $this->Status = 'processing';
         }
@@ -324,6 +406,8 @@ class MailJob
         case 'queued':
         case 'processing':
             return 'wird versendet…';
+        case 'cancelled':
+            return 'abgebrochen';
         case 'done':
             return 'Versendet';
         case 'failed':
@@ -340,6 +424,8 @@ class MailJob
         case 'queued':
         case 'processing':
             return isset($GLOBALS['optionsDB']['colorWarning']) ? $GLOBALS['optionsDB']['colorWarning'] : 'w3-yellow';
+        case 'cancelled':
+            return isset($GLOBALS['optionsDB']['colorBtnNo']) ? $GLOBALS['optionsDB']['colorBtnNo'] : 'w3-grey';
         case 'done':
             return isset($GLOBALS['optionsDB']['colorLogEmail']) ? $GLOBALS['optionsDB']['colorLogEmail'] : 'w3-green';
         case 'failed':

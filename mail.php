@@ -67,6 +67,30 @@ if(isset($_POST['delete_draft']) && $job && $job->Status === 'draft') {
     exit;
 }
 
+// Versand abbrechen (queued/processing)
+if(isset($_POST['cancel_job'])) {
+    $cancelId = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    $cancelJob = new MailJob;
+    $cancelJob->load_by_id($cancelId);
+    if($cancelJob->Index && $cancelJob->cancel()) {
+        header('Location: mail.php?cancelled='.$cancelId);
+        exit;
+    }
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Abbruch nicht möglich.</h3></div>';
+}
+
+// Löschen (Entwurf oder noch an niemanden versendet)
+if(isset($_POST['delete_job'])) {
+    $delId = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    $delJob = new MailJob;
+    $delJob->load_by_id($delId);
+    if($delJob->Index && $delJob->deleteCompletely()) {
+        header('Location: mail.php?deleted='.$delId);
+        exit;
+    }
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Löschen nicht möglich (bereits an Empfänger versendet).</h3></div>';
+}
+
 // Speichern / Vorschau / Senden
 if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['preview']) || isset($_POST['send']))) {
     $job->Subject = isset($_POST['Betreff']) ? (string)$_POST['Betreff'] : '';
@@ -111,7 +135,17 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
 if(isset($_GET['queued'])) {
     $n = isset($_GET['n']) ? (int)$_GET['n'] : 0;
     $qid = (int)$_GET['queued'];
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>'.$n.' Nachrichten aus Email-ID '.$qid.' in die Warteschlange gestellt.</h3><p>Versand per Cron <code>processMailQueue</code>.</p></div>';
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>'.$n.' Nachrichten aus Email-ID '.$qid.' in die Warteschlange gestellt.</h3><p>Sofort im Nutzer-Posteingang sichtbar; Versand per PHPMailer asynchron (<code>processMailQueue</code>).</p></div>';
+    $job = null;
+}
+if(isset($_GET['cancelled'])) {
+    $cid = (int)$_GET['cancelled'];
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorWarning'].'"><h3>Versand von Email-ID '.$cid.' abgebrochen.</h3><p>Bereits versendete Nachrichten bleiben erhalten; offene Empfänger wurden aus der Queue entfernt.</p></div>';
+    $job = null;
+}
+if(isset($_GET['deleted'])) {
+    $did = (int)$_GET['deleted'];
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>Email-ID '.$did.' gelöscht.</h3></div>';
     $job = null;
 }
 
@@ -150,6 +184,7 @@ include_once 'common/header.php';
       <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
         <th>ID</th>
         <th>Datum</th>
+        <th>Von</th>
         <th>Betreff</th>
         <th>Status</th>
         <th>Empfänger</th>
@@ -159,14 +194,31 @@ include_once 'common/header.php';
     <tbody>
 <?php
 if(!count($allJobs)) {
-    echo '<tr><td colspan="6">Noch keine Emails vorhanden.</td></tr>';
+    echo '<tr><td colspan="7">Noch keine Emails vorhanden.</td></tr>';
 }
+$userNameCache = array();
 foreach($allJobs as $rowJob) {
     $id = (int)$rowJob->Index;
     $subject = $rowJob->Subject !== '' && $rowJob->Subject !== null
         ? htmlspecialchars((string)$rowJob->Subject, ENT_QUOTES, 'UTF-8')
         : '<em>(ohne Betreff)</em>';
-    $created = htmlspecialchars((string)$rowJob->Created, ENT_QUOTES, 'UTF-8');
+    $createdRaw = (string)$rowJob->Created;
+    $created = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
+    if(strlen($createdRaw) >= 16) {
+        $created .= ' '.htmlspecialchars(sql2timeRaw(substr($createdRaw, 11, 8)), ENT_QUOTES, 'UTF-8');
+    }
+    $byId = (int)$rowJob->CreatedBy;
+    if($byId > 0) {
+        if(!isset($userNameCache[$byId])) {
+            $u = new User;
+            $u->load_by_id($byId);
+            $userNameCache[$byId] = $u->Index ? $u->getName() : ('User '.$byId);
+        }
+        $byName = htmlspecialchars($userNameCache[$byId], ENT_QUOTES, 'UTF-8');
+    }
+    else {
+        $byName = 'System';
+    }
     $status = htmlspecialchars($rowJob->statusLabel(), ENT_QUOTES, 'UTF-8');
     $statusCls = $rowJob->statusClass();
     $counts = '';
@@ -182,12 +234,28 @@ foreach($allJobs as $rowJob) {
     echo '<tr>';
     echo '<td>'.$id.'</td>';
     echo '<td>'.$created.'</td>';
+    echo '<td>'.$byName.'</td>';
     echo '<td>'.$subject.'</td>';
     echo '<td><span class="w3-tag '.$statusCls.'">'.$status.'</span></td>';
     echo '<td>'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</td>';
     echo '<td>';
     if($rowJob->Status === 'draft') {
         echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a> ';
+    }
+    if($rowJob->canCancel()) {
+        echo '<form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
+        echo '<input type="hidden" name="id" value="'.$id.'" />';
+        echo '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
+        echo '</form> ';
+    }
+    if($rowJob->canDelete()) {
+        $delConfirm = $rowJob->Status === 'draft'
+            ? 'Entwurf #'.$id.' wirklich löschen?'
+            : 'Email-ID '.$id.' wirklich löschen? (noch an niemanden per PHPMailer versendet)';
+        echo '<form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
+        echo '<input type="hidden" name="id" value="'.$id.'" />';
+        echo '<button type="submit" name="delete_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Löschen</button>';
+        echo '</form> ';
     }
     echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?copy='.$id.'">Als Entwurf kopieren</a>';
     echo '</td>';
@@ -275,7 +343,7 @@ foreach($allJobs as $rowJob) {
 
   <form method="post" action="mail.php?id=<?php echo (int)$job->Index; ?>" onsubmit="return confirm('Entwurf #<?php echo (int)$job->Index; ?> wirklich löschen?');">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
-    <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?> w3-margin" name="delete_draft" value="1">Entwurf löschen</button>
+    <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?> w3-margin" name="delete_job" value="1">Entwurf löschen</button>
   </form>
 
   <form id="uploadform" name="uploadform" action="uploadfile.php" method="POST" enctype="multipart/form-data">
