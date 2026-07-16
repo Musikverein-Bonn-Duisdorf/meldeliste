@@ -21,19 +21,13 @@ $nMusiker = $row['Count'];
 </div>
 <div id="Liste">
 <?php
-$sql = sprintf('SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
-$GLOBALS['dbprefix']
-);
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new User;
-    $M->load_by_id($row['Index']);
-    $M->printTableLine();
-}
+$chunk = listChunkUsers('mitglied', 0, 50);
+echo $chunk['html'];
 ?>
+<div<?php echo listChunkRenderSentinelAttrs('mitglied', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker'); ?>></div>
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
 <?php
 include "common/footer.php";
