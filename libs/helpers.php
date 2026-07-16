@@ -208,25 +208,17 @@ function getCurrentBirthdays() {
 }
 
 function getNextRegNumber() {
-    $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-
-    $row = mysqli_fetch_array($dbr);
-    return $row['RegNumber']+1;
+    return RegNumber::nextForInstruments();
 }
 
-function getNextRegInventoryNumber() {
-    $sql = sprintf('SELECT `RegNumber` FROM `%sInventories` ORDER BY `RegNumber` DESC LIMIT 1;',
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-
-    $row = mysqli_fetch_array($dbr);
-    return $row['RegNumber']+1;
+function getNextRegInventoryNumber($inventoryTypeId = 0) {
+    $inventoryTypeId = (int)$inventoryTypeId;
+    if($inventoryTypeId < 1) {
+        $map = RegNumber::nextMapForInventoryTypes();
+        if(empty($map)) return 1;
+        return (int)reset($map);
+    }
+    return RegNumber::nextForType($inventoryTypeId);
 }
 
 function getOwner($index) {
@@ -286,7 +278,9 @@ function getShortAushilfe($Name) {
 function instrumentOption($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY `rSort`, `Sortierung`;',
+    // LEFT JOIN: Instrument types must appear even if Register rows are missing
+    $sql = sprintf('SELECT `%sInstrument`.* FROM `%sInstrument` LEFT JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY COALESCE(`rSort`, 9999), `Sortierung`;',
+    $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix']
@@ -307,7 +301,9 @@ function instrumentOption($val) {
 function instrumentOptionAll($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
+    // LEFT JOIN: Instrument types must appear even if Register rows are missing
+    $sql = sprintf('SELECT `%sInstrument`.* FROM `%sInstrument` LEFT JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY COALESCE(`rSort`, 9999), `Sortierung`;',
+    $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix']
@@ -328,17 +324,20 @@ function instrumentOptionAll($val) {
 function inventoryOptionAll($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
-    $GLOBALS['dbprefix']
+    $sql = sprintf(
+        'SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
+        $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
+        $label = $row['Typ'];
+        if(!empty($row['Prefix'])) $label = $row['Prefix'].' — '.$row['Typ'];
         if($val == $row['Index']) {
-            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Typ']."</option>\n";
+            $str=$str."<option value=\"".$row['Index']."\" selected>".htmlspecialchars($label)."</option>\n";
         }
         else {
-            $str=$str."<option value=\"".$row['Index']."\">".$row['Typ']."</option>\n";
+            $str=$str."<option value=\"".$row['Index']."\">".htmlspecialchars($label)."</option>\n";
         }
     }
     return $str;

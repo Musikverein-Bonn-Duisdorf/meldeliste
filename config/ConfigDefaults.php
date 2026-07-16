@@ -491,6 +491,12 @@ function getConfigDefaults() {
             'Type' => 'text',
             'Description' => 'Text der Willkommensmail',
         ),
+        array(
+            'Parameter' => 'regNumberInstrumentsMigrated',
+            'Value' => '0',
+            'Type' => 'bool',
+            'Description' => 'Instrument-RegNumbers dem INSTR-Kreis zugeordnet',
+        ),
     );
 }
 ?>

@@ -116,32 +116,32 @@ class User
     
     public function getVars() {
         if(!$this->iName) {
-            $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Index` = %d;',
+            $sql = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
-            $this->Instrument
+            (int)$this->Instrument
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
-            $row = mysqli_fetch_array($dbr);
-            if($row) {
+            $row = $dbr ? mysqli_fetch_array($dbr) : null;
+            if($row && isset($row['Name'])) {
                 $this->iName = $row['Name'];
             }
         }
-        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%d</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Geburtstag: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%d</b>, LastLogin: <b>%s</b>",
-        $this->Index,
-        $this->Vorname,
-        $this->Nachname,
-        $this->RefID,
-        $this->login,
+        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%s</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Geburtstag: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%s</b>, LastLogin: <b>%s</b>",
+        (int)$this->Index,
+        (string)$this->Vorname,
+        (string)$this->Nachname,
+        $this->RefID === null || $this->RefID === '' ? '-' : (string)$this->RefID,
+        (string)$this->login,
         bool2string($this->Mitglied),
-        $this->iName,
-        $this->Email,
-        $this->Email2,
+        (string)$this->iName,
+        (string)$this->Email,
+        (string)$this->Email2,
         germanDate($this->Birthday, true),
         bool2string($this->getMail),
         bool2string($this->Admin),
         bool2string($this->RegisterLead),
-        $this->LastLogin
+        (string)$this->LastLogin
         );
     }
     public function getShort() {
@@ -169,20 +169,28 @@ class User
         return $short1.$short2;
     }
     public function save() {
-        if($this->activeLink == '') $this->generateLink();
+        if($this->activeLink == '' || $this->activeLink === null) $this->generateLink();
+        if($this->Passhash === null) $this->Passhash = '';
+        if($this->login === null) $this->login = '';
+        if($this->Email === null) $this->Email = '';
+        if($this->Email2 === null) $this->Email2 = '';
+        if($this->Admin === null) $this->Admin = 0;
+        if($this->RegisterLead === null) $this->RegisterLead = 0;
+        if($this->Mitglied === null) $this->Mitglied = 0;
+        if($this->getMail === null) $this->getMail = 0;
+        if($this->Instrument === null) $this->Instrument = 0;
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
-            $this->update();
+            return $this->update();
         }
-        else {
-            $this->Vorname = htmlentities(trim($this->Vorname));
-            $this->Nachname = htmlentities(trim($this->Nachname));
-            $this->insert();
-            $logentry = new Log;
-            $logentry->DBinsert($this->getVars());
-        }
+        $this->Vorname = htmlentities(trim((string)$this->Vorname));
+        $this->Nachname = htmlentities(trim((string)$this->Nachname));
+        if(!$this->insert()) return false;
+        $logentry = new Log;
+        $logentry->DBinsert($this->getVars());
+        return true;
     }
     public function singleUsePW($val) {
         $sql = sprintf('UPDATE `%sUser` SET `singleUsePW` = %d WHERE `Index` = %d;',
@@ -240,22 +248,22 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/calendars/MVDcal_".$this->activeLink.".ics";
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %s, "%d", "%s", "%s", "%s", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, "%d", "%s", "%s", %s, "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
         mkNULL($this->RefID),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
-        $this->Mitglied,
-        $this->Instrument,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->login),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
+        (int)$this->Mitglied,
+        (int)$this->Instrument,
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
         mkNULLstr($this->Birthday),
-        $this->getMail,
-        $this->Admin,
-        $this->RegisterLead
+        (int)$this->getMail,
+        (int)$this->Admin,
+        (int)$this->RegisterLead
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -266,21 +274,21 @@ class User
     protected function update() {
         $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Nachname),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Vorname),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
         mkNULL($this->RefID),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->login),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Passhash),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->activeLink),
-        $this->Mitglied,
-        $this->Instrument,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Email),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Email2),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->login),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
+        (int)$this->Mitglied,
+        (int)$this->Instrument,
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email),
+        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
         mkNULLstr($this->Birthday),
-        $this->getMail,
-        $this->Admin,
-        $this->RegisterLead,
-        $this->Index
+        (int)$this->getMail,
+        (int)$this->Admin,
+        (int)$this->RegisterLead,
+        (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -404,9 +412,13 @@ class User
     }
 
     public function getLoans() {
-        $sql = sprintf('SELECT `Index` FROM `%sLoans` WHERE `User` = %d AND `EndDate` IS NULL;',
+        $instrType = RegNumber::loadInstrType();
+        $instrTypeId = $instrType ? (int)$instrType->Index : 0;
+        $sql = sprintf('SELECT l.`Index` FROM `%sInventoriesLoans` l INNER JOIN `%sInventories` i ON i.`Index` = l.`Inventory` WHERE l.`User` = %d AND l.`EndDate` IS NULL AND i.`Inventory` = %d;',
         $GLOBALS['dbprefix'],
-        $this->Index
+        $GLOBALS['dbprefix'],
+        $this->Index,
+        $instrTypeId
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -432,9 +444,12 @@ class User
     }
 
     public function getInstruments() {
-        $sql = sprintf('SELECT `Index` FROM `%sInstruments` WHERE `Owner` = %d',
+        $instrType = RegNumber::loadInstrType();
+        $instrTypeId = $instrType ? (int)$instrType->Index : 0;
+        $sql = sprintf('SELECT `Index` FROM `%sInventories` WHERE `Owner` = %d AND `Inventory` = %d',
         $GLOBALS['dbprefix'],
-        $this->Index
+        $this->Index,
+        $instrTypeId
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -446,15 +461,16 @@ class User
     }
 
     public function getInventories() {
-        $sql = sprintf('SELECT `Index` FROM `%sInventories` WHERE `Owner` = %d',
-        $GLOBALS['dbprefix'],
-        $this->Index
+        $sql = sprintf(
+            'SELECT `Index` FROM `%sInventories` WHERE `Owner` = %d',
+            $GLOBALS['dbprefix'],
+            $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $inventories = array();
         while($row = mysqli_fetch_array($dbr)) {
-            array_push($instruments, $row['Index']);
+            array_push($inventories, $row['Index']);
         }
         return $inventories;
     }
@@ -464,7 +480,7 @@ class User
     }
 
     public function hasInventories() {
-        return count($this->getInventoriesLoans());
+        return count($this->getInventoriesLoans()) + count($this->getInventories());
     }
     
     public function printTableLine() {
