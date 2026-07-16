@@ -4,6 +4,7 @@ include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 
 header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
 if(!loggedIn() || !requirePermission('perm_sendEmail')) {
     http_response_code(403);
@@ -30,19 +31,14 @@ if(count($ids)) {
         $job = new MailJob;
         $job->load_by_id($id);
         if($job->Index) {
-            if(in_array((string)$job->Status, array('queued', 'processing'), true)) {
-                $job->refreshCounts();
-                $job->load_by_id($id);
-            }
             $jobs[] = $job;
         }
     }
 }
 else {
     foreach(MailJob::listJobs(null, 300) as $job) {
-        if(in_array((string)$job->Status, array('queued', 'processing'), true)) {
-            $job->refreshCounts();
-            $job->load_by_id((int)$job->Index);
+        $progress = $job->liveProgress();
+        if($progress['sending'] || in_array((string)$job->Status, array('queued', 'processing'), true)) {
             $jobs[] = $job;
         }
     }
@@ -50,23 +46,19 @@ else {
 
 $out = array('jobs' => array());
 foreach($jobs as $job) {
-    $sending = in_array((string)$job->Status, array('queued', 'processing'), true);
-    $counts = (int)$job->Sent.'/'.(int)$job->Total;
-    if((int)$job->Failed > 0) {
-        $counts .= ' ('.(int)$job->Failed.' Fehler)';
-    }
+    $progress = $job->liveProgress();
     $out['jobs'][] = array(
         'id' => (int)$job->Index,
         'status' => (string)$job->Status,
-        'statusLabel' => $job->statusLabel(),
-        'statusClass' => $job->statusClass(),
-        'sent' => (int)$job->Sent,
-        'total' => (int)$job->Total,
-        'failed' => (int)$job->Failed,
-        'counts' => $counts,
-        'sending' => $sending,
-        'canCancel' => $job->canCancel(),
-        'canDelete' => $job->canDelete(),
+        'statusLabel' => $progress['statusLabel'],
+        'statusClass' => $progress['statusClass'],
+        'sent' => $progress['sent'],
+        'total' => $progress['total'],
+        'failed' => $progress['failed'],
+        'counts' => $progress['counts'],
+        'sending' => $progress['sending'],
+        'canCancel' => $progress['sending'],
+        'canDelete' => !$progress['sending'] && (int)$progress['sent'] === 0,
     );
 }
 

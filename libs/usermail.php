@@ -389,7 +389,7 @@ class Usermail {
         try {
             $mail->Send();
             $mark = sprintf(
-                'UPDATE `%sMailOutbox` SET `Status` = "sent", `SentAt` = NOW(), `LastError` = NULL, `Attempts` = %d WHERE `Index` = %d AND `Status` = "sending";',
+                'UPDATE `%sMailOutbox` SET `Status` = "sent", `SentAt` = NOW(), `LastError` = NULL, `LockedAt` = NULL, `Attempts` = %d WHERE `Index` = %d AND `Status` = "sending";',
                 $GLOBALS['dbprefix'],
                 (int)$outbox->Attempts,
                 (int)$outbox->Index
@@ -437,6 +437,7 @@ class Usermail {
             else {
                 $outbox->Status = 'pending';
             }
+            $outbox->LockedAt = null;
             $outbox->save();
 
             $logentry = new Log;
@@ -473,7 +474,7 @@ class Usermail {
 
     /**
      * Process a batch of pending outbox rows.
-     * Exclusive lock prevents concurrent cron workers from double-sending.
+     * File lock (reliable on shared hosting) + stale LockedAt reclaim.
      * @return array{processed:int,sent:int,failed:int,reclaimed:int,batchSize:int,skipped:bool}
      */
     public static function processQueue($batchSize = null, $maxAttempts = null) {
@@ -493,20 +494,24 @@ class Usermail {
             'skipped' => false,
         );
 
-        $lockName = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$GLOBALS['dbprefix']).'mail_queue';
-        $lockSql = sprintf("SELECT GET_LOCK('%s', 0) AS `got`;", mysqli_real_escape_string($GLOBALS['conn'], $lockName));
-        $lockR = mysqli_query($GLOBALS['conn'], $lockSql);
-        $lockRow = $lockR ? mysqli_fetch_assoc($lockR) : null;
-        if(!$lockRow || (int)$lockRow['got'] !== 1) {
+        $lockPath = dirname(__DIR__).'/uploads/.mail_queue.lock';
+        if(!is_dir(dirname($lockPath))) {
+            @mkdir(dirname($lockPath), 0755, true);
+        }
+        $lockFp = @fopen($lockPath, 'c+');
+        if(!$lockFp || !flock($lockFp, LOCK_EX | LOCK_NB)) {
+            if($lockFp) {
+                fclose($lockFp);
+            }
             $logentry = new Log;
-            $logentry->info('Mail-Queue Lauf übersprungen (bereits ein Worker aktiv)');
+            $logentry->info('Mail-Queue Lauf übersprungen (Datei-Lock aktiv — anderer Worker)');
             $empty['skipped'] = true;
             return $empty;
         }
 
         try {
-            // Only safe once we hold the exclusive lock: no other worker is mid-send.
-            $reclaimed = MailOutbox::reclaimStuckSending();
+            // Only reclaim rows stuck longer than 5 minutes (never steal an active send).
+            $reclaimed = MailOutbox::reclaimStuckSending(5);
             $items = MailOutbox::claimPending($batchSize, $maxAttempts);
             $sent = 0;
             $failed = 0;
@@ -550,8 +555,8 @@ class Usermail {
             return $result;
         }
         finally {
-            $releaseSql = sprintf("SELECT RELEASE_LOCK('%s');", mysqli_real_escape_string($GLOBALS['conn'], $lockName));
-            mysqli_query($GLOBALS['conn'], $releaseSql);
+            flock($lockFp, LOCK_UN);
+            fclose($lockFp);
         }
     }
 

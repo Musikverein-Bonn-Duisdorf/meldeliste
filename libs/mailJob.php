@@ -78,7 +78,8 @@ class MailJob
         $outbox = new SQLtable('MailOutbox');
         $needs = !$table->exists() || !$outbox->exists()
             || !$table->columnExists('Gruss')
-            || !$outbox->columnExists('ReadAt');
+            || !$outbox->columnExists('ReadAt')
+            || !$outbox->columnExists('LockedAt');
         if($needs) {
             $manager = new DatabaseManager();
             $manager->create();
@@ -467,19 +468,96 @@ class MailJob
     public function statusClass() {
         switch((string)$this->Status) {
         case 'draft':
-            return isset($GLOBALS['optionsDB']['colorBtnEdit']) ? $GLOBALS['optionsDB']['colorBtnEdit'] : 'w3-light-grey';
+            return self::tagClass('colorBtnEdit', 'w3-light-grey');
         case 'queued':
         case 'processing':
-            return isset($GLOBALS['optionsDB']['colorWarning']) ? $GLOBALS['optionsDB']['colorWarning'] : 'w3-yellow';
+            return self::tagClass('colorWarning', 'w3-amber');
         case 'cancelled':
-            return isset($GLOBALS['optionsDB']['colorBtnNo']) ? $GLOBALS['optionsDB']['colorBtnNo'] : 'w3-grey';
+            return self::tagClass('colorBtnNo', 'w3-grey');
         case 'done':
-            return isset($GLOBALS['optionsDB']['colorLogEmail']) ? $GLOBALS['optionsDB']['colorLogEmail'] : 'w3-green';
+            return self::tagClass('colorLogEmail', 'w3-green');
         case 'failed':
-            return isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red';
+            return self::tagClass('colorLogError', 'w3-red');
         default:
             return 'w3-light-grey';
         }
+    }
+
+    /**
+     * Prefer w3-* classes for tags; Hex-Farben sind als class ungeeignet.
+     */
+    private static function tagClass($optionKey, $fallback) {
+        $v = isset($GLOBALS['optionsDB'][$optionKey]) ? (string)$GLOBALS['optionsDB'][$optionKey] : '';
+        if($v !== '' && strpos($v, 'w3-') === 0) {
+            return $v;
+        }
+        return $fallback;
+    }
+
+    /**
+     * Live progress from outbox without finalizing job status.
+     * @return array{sent:int,failed:int,open:int,total:int,sending:bool,counts:string,statusLabel:string,statusClass:string}
+     */
+    public function liveProgress() {
+        $sent = (int)$this->Sent;
+        $failed = (int)$this->Failed;
+        $open = 0;
+        $total = (int)$this->Total;
+        if($this->Index) {
+            $sql = sprintf(
+                'SELECT
+                    SUM(CASE WHEN `Status` = "sent" THEN 1 ELSE 0 END) AS `sent`,
+                    SUM(CASE WHEN `Status` = "failed" THEN 1 ELSE 0 END) AS `failed`,
+                    SUM(CASE WHEN `Status` IN ("pending","sending") THEN 1 ELSE 0 END) AS `open`,
+                    COUNT(*) AS `total`
+                 FROM `%sMailOutbox` WHERE `Job` = %d;',
+                $GLOBALS['dbprefix'],
+                (int)$this->Index
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+            if($row) {
+                $sent = (int)$row['sent'];
+                $failed = (int)$row['failed'];
+                $open = (int)$row['open'];
+                $total = (int)$row['total'];
+            }
+        }
+        $sending = $open > 0;
+        $counts = $sent.'/'.$total;
+        if($failed > 0) {
+            $counts .= ' ('.$failed.' Fehler)';
+        }
+        if($sending) {
+            $label = 'wird versendet…';
+            $cls = self::tagClass('colorWarning', 'w3-amber');
+        }
+        else {
+            $label = $this->statusLabel();
+            $cls = $this->statusClass();
+            if($total > 0 && $sent > 0 && $failed === 0) {
+                $label = 'Versendet';
+                $cls = self::tagClass('colorLogEmail', 'w3-green');
+            }
+            elseif($total > 0 && $failed > 0 && $sent === 0) {
+                $label = 'Fehler';
+                $cls = self::tagClass('colorLogError', 'w3-red');
+            }
+            elseif($total > 0 && $failed > 0 && $sent > 0) {
+                $label = 'Versendet';
+                $cls = self::tagClass('colorLogEmail', 'w3-green');
+            }
+        }
+        return array(
+            'sent' => $sent,
+            'failed' => $failed,
+            'open' => $open,
+            'total' => $total,
+            'sending' => $sending,
+            'counts' => $counts,
+            'statusLabel' => $label,
+            'statusClass' => $cls,
+        );
     }
 
     /**
