@@ -221,9 +221,28 @@ class Usermail {
         $job->Subject = $subjectFull;
         $job->save();
 
+        $logentry = new Log;
+        if($count > 0) {
+            $logentry->email(sprintf(
+                "In Warteschlange gestellt | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Empfänger: <b>%d</b>, Quelle: <b>%s</b>",
+                (int)$job->Index,
+                htmlspecialchars($subjectFull),
+                $count,
+                htmlspecialchars($source)
+            ));
+        }
+        else {
+            $logentry->warning(sprintf(
+                "Warteschlange leer | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Quelle: <b>%s</b> (keine gültigen Emailadressen)",
+                (int)$job->Index,
+                htmlspecialchars($subjectFull),
+                htmlspecialchars($source)
+            ));
+        }
+
         if(!$this->quiet) {
             if($count > 0) {
-                echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>".$count." Nachrichten in die Warteschlange gestellt (Email-ID ".$job->Index."). </h3><p>Der Versand erfolgt asynchron durch den Mail-Queue-Cron.</p></div>";
+                echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>".$count." Nachrichten in die Warteschlange gestellt (Email-ID ".$job->Index."). </h3><p>Im Nutzer-Posteingang sofort sichtbar; Versand per PHPMailer asynchron durch den Mail-Queue-Cron.</p></div>";
             }
             else {
                 echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>Keine gültigen Emailadressen gefunden. Kein Versand möglich.</h3></div>";
@@ -244,6 +263,12 @@ class Usermail {
             $outbox->Status = 'failed';
             $outbox->LastError = 'MailJob fehlt';
             $outbox->Attempts = (int)$outbox->Attempts + 1;
+            $outbox->save();
+            return false;
+        }
+        if($job->Status === 'cancelled') {
+            $outbox->Status = 'cancelled';
+            $outbox->LastError = null;
             $outbox->save();
             return false;
         }

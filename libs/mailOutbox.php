@@ -12,6 +12,7 @@ class MailOutbox
         'Attempts' => 0,
         'LastError' => null,
         'SentAt' => null,
+        'ReadAt' => null,
         'DeletedByUser' => 0,
         'Created' => null,
     );
@@ -38,6 +39,7 @@ class MailOutbox
         case 'Status':
         case 'LastError':
         case 'SentAt':
+        case 'ReadAt':
         case 'Created':
             $this->_data[$key] = $val === null ? null : trim((string)$val);
             break;
@@ -54,6 +56,11 @@ class MailOutbox
         return true;
     }
 
+    public function isUnread() {
+        $r = $this->ReadAt;
+        return $r === null || $r === '' || $r === '0000-00-00 00:00:00';
+    }
+
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
@@ -64,7 +71,7 @@ class MailOutbox
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sMailOutbox` (`Job`, `User`, `ToEmail`, `Subject`, `BodyText`, `Status`, `Attempts`, `LastError`, `SentAt`, `DeletedByUser`) VALUES (%d, %d, "%s", "%s", "%s", "%s", %d, %s, %s, %d);',
+            'INSERT INTO `%sMailOutbox` (`Job`, `User`, `ToEmail`, `Subject`, `BodyText`, `Status`, `Attempts`, `LastError`, `SentAt`, `ReadAt`, `DeletedByUser`) VALUES (%d, %d, "%s", "%s", "%s", "%s", %d, %s, %s, %s, %d);',
             $GLOBALS['dbprefix'],
             (int)$this->Job,
             (int)$this->User,
@@ -73,12 +80,9 @@ class MailOutbox
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->BodyText),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Status),
             (int)$this->Attempts,
-            $this->LastError === null || $this->LastError === ''
-                ? 'NULL'
-                : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->LastError).'"',
-            $this->SentAt === null || $this->SentAt === ''
-                ? 'NULL'
-                : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->SentAt).'"',
+            $this->sqlNullableString($this->LastError),
+            $this->sqlNullableString($this->SentAt),
+            $this->sqlNullableString($this->ReadAt),
             (int)$this->DeletedByUser
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -90,7 +94,7 @@ class MailOutbox
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailOutbox` SET `Job`=%d, `User`=%d, `ToEmail`="%s", `Subject`="%s", `BodyText`="%s", `Status`="%s", `Attempts`=%d, `LastError`=%s, `SentAt`=%s, `DeletedByUser`=%d WHERE `Index`=%d;',
+            'UPDATE `%sMailOutbox` SET `Job`=%d, `User`=%d, `ToEmail`="%s", `Subject`="%s", `BodyText`="%s", `Status`="%s", `Attempts`=%d, `LastError`=%s, `SentAt`=%s, `ReadAt`=%s, `DeletedByUser`=%d WHERE `Index`=%d;',
             $GLOBALS['dbprefix'],
             (int)$this->Job,
             (int)$this->User,
@@ -99,18 +103,22 @@ class MailOutbox
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->BodyText),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Status),
             (int)$this->Attempts,
-            $this->LastError === null || $this->LastError === ''
-                ? 'NULL'
-                : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->LastError).'"',
-            $this->SentAt === null || $this->SentAt === ''
-                ? 'NULL'
-                : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->SentAt).'"',
+            $this->sqlNullableString($this->LastError),
+            $this->sqlNullableString($this->SentAt),
+            $this->sqlNullableString($this->ReadAt),
             (int)$this->DeletedByUser,
             (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         return (bool)$dbr;
+    }
+
+    private function sqlNullableString($val) {
+        if($val === null || $val === '' || $val === '0000-00-00 00:00:00') {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$val).'"';
     }
 
     public function load_by_id($Index) {
@@ -136,6 +144,52 @@ class MailOutbox
         if((int)$this->User !== (int)$userId) return false;
         $this->DeletedByUser = 1;
         return $this->update();
+    }
+
+    public function markRead($userId) {
+        if((int)$this->User !== (int)$userId) return false;
+        if(!$this->isUnread()) return true;
+        $sql = sprintf(
+            'UPDATE `%sMailOutbox` SET `ReadAt` = NOW() WHERE `Index` = %d AND `User` = %d AND `ReadAt` IS NULL;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index,
+            (int)$userId
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+        }
+        catch(Throwable $e) {
+            $logentry = new Log;
+            $logentry->error('markRead fehlgeschlagen: '.$e->getMessage());
+            return false;
+        }
+        if($dbr) {
+            $this->load_by_id((int)$this->Index);
+        }
+        return (bool)$dbr;
+    }
+
+    public static function countUnreadForUser($userId) {
+        $userId = (int)$userId;
+        if($userId <= 0) return 0;
+        $sql = sprintf(
+            'SELECT COUNT(*) AS `cnt` FROM `%sMailOutbox`
+             WHERE `User` = %d AND `DeletedByUser` = 0
+               AND `Status` IN ("pending", "sending", "sent")
+               AND `ReadAt` IS NULL;',
+            $GLOBALS['dbprefix'],
+            $userId
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return 0;
+        }
+        if(!$dbr) return 0;
+        $row = mysqli_fetch_assoc($dbr);
+        return $row ? (int)$row['cnt'] : 0;
     }
 
     /**
