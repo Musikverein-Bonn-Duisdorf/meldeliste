@@ -61,7 +61,7 @@ class Instruments
         $row = $dbr ? mysqli_fetch_array($dbr) : null;
         $Instrument = ($row && isset($row['Name'])) ? $row['Name'] : '?';
 
-        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %s, Hersteller: %s, Model: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
+        return sprintf("Instrument-ID: %d, Instrument: <b>%s</b>, Inventarnummer: <b>%s</b>, Hersteller: <b>%s</b>, Model: <b>%s</b>, Seriennummer: <b>%s</b>, Kaufdatum: <b>%s</b>, Kaufpreis: <b>%s</b>, Besitzer: <b>%s</b>, Versichert: <b>%s</b>, Kommentar: <b>%s</b>",
         (int)$this->Index,
         $Instrument,
         RegNumber::displayInstrument($this->RegNumber),

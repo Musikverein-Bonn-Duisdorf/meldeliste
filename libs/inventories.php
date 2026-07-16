@@ -101,7 +101,7 @@ class Inventories
         $family = $this->getInstrumentName();
         if($family !== '') $typeName = $family;
 
-        return sprintf("Inventory-ID: %d, Inventory: %s, Inventarnummer: %s, Beschreibung: %s, Hersteller: %s, Modell: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
+        return sprintf("Inventory-ID: %d, Inventory: <b>%s</b>, Inventarnummer: <b>%s</b>, Beschreibung: <b>%s</b>, Hersteller: <b>%s</b>, Modell: <b>%s</b>, Seriennummer: <b>%s</b>, Kaufdatum: <b>%s</b>, Kaufpreis: <b>%s</b>, Besitzer: <b>%s</b>, Versichert: <b>%s</b>, Kommentar: <b>%s</b>",
         (int)$this->Index,
         $typeName,
         RegNumber::displayInventory($this->Inventory, $this->RegNumber),
