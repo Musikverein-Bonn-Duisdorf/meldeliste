@@ -345,14 +345,22 @@ function inventoryOptionAll($val) {
 }
 
 function loadconfig() {
+    $optionsDB = array();
     $sql = sprintf('SELECT * FROM `%sconfig`;',
 		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    $optionsDB = array();
-    while($row = mysqli_fetch_array($dbr)) {
-        $optionsDB += [$row['Parameter'] => $row['Value']];
+    if($dbr) {
+        while($row = mysqli_fetch_array($dbr)) {
+            $optionsDB[$row['Parameter']] = $row['Value'];
+        }
+    }
+    if(function_exists('getConfigDefaults')) {
+        foreach(getConfigDefaults() as $item) {
+            if(!array_key_exists($item['Parameter'], $optionsDB)) {
+                $optionsDB[$item['Parameter']] = $item['Value'];
+            }
+        }
     }
     return $optionsDB;
 }
@@ -726,10 +734,15 @@ function sql2timeRaw($time) {
 }
 
 function sqlerror() {
-    if(mysqli_errno($GLOBALS['conn'])) {
-        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
+    if(!isset($GLOBALS['conn']) || !mysqli_errno($GLOBALS['conn'])) {
+        return;
+    }
+    $msg = mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']);
+    $color = isset($GLOBALS['optionsDB']['colorLogFatal']) ? $GLOBALS['optionsDB']['colorLogFatal'] : 'w3-red';
+    echo "<div class=\"w3-container ".$color." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".htmlspecialchars($msg)."</div>";
+    if(class_exists('Log')) {
         $logentry = new Log;
-        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
+        $logentry->error($msg);
     }
 }
 

@@ -4,6 +4,9 @@ $_SESSION['page']='updater';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_editConfig")) die();
+if(empty($_SESSION['admin'])) {
+    die("<div class=\"w3-panel w3-red w3-padding\"><b>Admin-Zugang erforderlich.</b></div>");
+}
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Updater</h2>
@@ -77,14 +80,19 @@ if(!requirePermission("perm_editConfig")) die();
 
 <div class=" w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>Datenbank Integrität</h3></div>
-  <form action="" method="post">
-    <button class="w3-button w3-blue" type="submit" value="dbcreate" name="dbcreate">Datenbank pr&uuml;fen</button>
+  <div class="w3-padding">
+    <p>Prüfen meldet Abweichungen ohne Änderungen. Reparieren legt fehlende Tabellen/Spalten an und gleicht abweichende Spalten-Definitionen an.</p>
+  </div>
+  <form action="" method="post" class="w3-padding">
+    <button class="w3-button w3-blue" type="submit" value="dbcheck" name="dbcheck">Datenbank prüfen</button>
+    <button class="w3-button w3-orange" type="submit" value="dbrepair" name="dbrepair">Datenbank reparieren</button>
   </form>
   <div class="w3-container">
   <?php
-   if(isset($_POST['dbcreate'])) {
-       include "dbintegrity.php";
-       DBCheckIntegrity();
+   if(isset($_POST['dbcheck']) || isset($_POST['dbrepair'])) {
+       include_once "dbintegrity.php";
+       $mode = isset($_POST['dbrepair']) ? 'repair' : 'check';
+       DBCheckIntegrity($mode);
    }
   ?>
   </div>
