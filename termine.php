@@ -60,29 +60,14 @@ if(isset($_POST['proxy'])) {
 </div>
 <?php
 }
-$now = date("Y-m-d");
-$sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',
-$GLOBALS['dbprefix'],
-$now
-);
-
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new Termin;
-    $M->load_by_id($row['Index']);
-    $meldung = $M->getMeldungenByUser($user);
-    if($M->published > 0) {        
-        echo $M->printBasicTableLine();
-    }
-    elseif(requirePermission("perm_showHiddenAppmnts")) {
-        echo $M->printBasicTableLine();
-    }
-    elseif($meldung) {
-        echo $M->printBasicTableLine();        
-    }
-}
+$chunkUser = isset($user) ? (int)$user : (int)$_SESSION['userid'];
+$chunk = listChunkTermine('future', 'basic', '', 50, $chunkUser);
 ?>
+<div id="Liste">
+<?php echo $chunk['html']; ?>
+<div<?php echo listChunkRenderSentinelAttrs('termine', $chunk['nextCursor'], $chunk['hasMore']); ?> data-extra="user=<?php echo $chunkUser; ?>"></div>
+</div>
+<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php
 include "common/footer.php";
 ?>

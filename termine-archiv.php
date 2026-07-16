@@ -59,19 +59,13 @@ if(isset($_POST['proxy'])) {
 </div>
 <?php
 }
-$now = date("Y-m-d");
-    $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` <= "%s" ORDER BY `Datum` DESC, `Uhrzeit`;',
-    $GLOBALS['dbprefix'],
-    $now
-    );
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new Termin;
-    $M->load_by_id($row['Index']);
-    echo $M->printBasicTableLine();
-}
+$chunk = listChunkTermine('past', 'basic', '', 50, isset($user) ? (int)$user : (int)$_SESSION['userid']);
 ?>
+<div id="Liste">
+<?php echo $chunk['html']; ?>
+<div<?php echo listChunkRenderSentinelAttrs('termineArchiv', $chunk['nextCursor'], $chunk['hasMore']); ?>></div>
+</div>
+<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php
 include "common/footer.php";
 ?>
