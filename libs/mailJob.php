@@ -70,6 +70,7 @@ class MailJob
 
     /**
      * Ensure MailJob / MailOutbox tables (and columns) exist.
+     * Also migrate text columns to utf8mb4 so WYSIWYG/Unicode (Sonderzeichen) can be stored.
      */
     public static function ensureSchema() {
         static $done = false;
@@ -85,8 +86,38 @@ class MailJob
             $manager->create();
             $manager->repair();
         }
+        self::ensureUtf8mb4();
         $done = true;
         return (new SQLtable('MailJob'))->exists() && (new SQLtable('MailOutbox'))->exists();
+    }
+
+    /**
+     * Mail tables were created as latin1; TinyMCE bodies need utf8mb4.
+     */
+    protected static function ensureUtf8mb4() {
+        static $utfDone = false;
+        if($utfDone || !isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        foreach(array('MailJob', 'MailOutbox') as $short) {
+            $name = $GLOBALS['dbprefix'].$short;
+            $check = mysqli_query(
+                $GLOBALS['conn'],
+                "SELECT `TABLE_COLLATION` AS `c` FROM INFORMATION_SCHEMA.TABLES
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '".mysqli_real_escape_string($GLOBALS['conn'], $name)."' LIMIT 1"
+            );
+            $row = $check ? mysqli_fetch_assoc($check) : null;
+            $collation = $row && isset($row['c']) ? (string)$row['c'] : '';
+            if($collation !== '' && stripos($collation, 'utf8mb4') === 0) {
+                continue;
+            }
+            mysqli_query(
+                $GLOBALS['conn'],
+                'ALTER TABLE `'.str_replace('`', '``', $name).'` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
+            );
+            // ignore errors (missing table / insufficient privileges); next save will surface issues
+        }
+        $utfDone = true;
     }
 
     /**

@@ -1,6 +1,10 @@
 <?php
 
 include "common/config.php";
+if(isset($GLOBALS['conn']) && $GLOBALS['conn']) {
+    mysqli_set_charset($GLOBALS['conn'], 'utf8mb4');
+    @mysqli_query($GLOBALS['conn'], "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+}
 include "config/ConfigDefaults.php";
 include "libs/helpers.php";
 include "libs/colorschemes.php";
