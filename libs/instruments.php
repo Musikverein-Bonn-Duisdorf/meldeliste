@@ -30,16 +30,16 @@ class Instruments
             break;
 	    case 'Index':
 	    case 'Instrument':
-	    case 'Vendor':
 	    case 'Owner':
 	    case 'Insurance':
         case 'RegNumber':
             $this->_data[$key] = (int)$val;
             break;
+	    case 'Vendor':
 	    case 'SerialNr':
 	    case 'Model':
 	    case 'Comment':
-            $this->_data[$key] = trim($val);
+            $this->_data[$key] = trim((string)$val);
             break;
         default:
             break;
@@ -52,57 +52,72 @@ class Instruments
     }
 
     public function getVars() {
-        $sql = sprintf('SELECT * FROM `%sInstrument` WHERE `Index` = %d;',
+        $sql = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = %d;',
         $GLOBALS['dbprefix'],
-        $this->Instrument
+        (int)$this->Instrument
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        $row = mysqli_fetch_array($dbr);
-        $Instrument = $row['Name'];
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        $Instrument = ($row && isset($row['Name'])) ? $row['Name'] : '?';
 
-        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %d, Hersteller: %s, Model: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
-        $this->Index,
+        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %s, Hersteller: %s, Model: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
+        (int)$this->Index,
         $Instrument,
-        $this->RegNumber,
-        $this->Vendor,
-        $this->Model,
-        $this->SerialNr,
+        RegNumber::displayInstrument($this->RegNumber),
+        (string)$this->Vendor,
+        (string)$this->Model,
+        (string)$this->SerialNr,
         germanDate($this->PurchaseDate,0),
         mkPrize($this->PurchasePrize),
-        getOwner($this->Owner),
+        getOwner((int)$this->Owner),
         bool2string($this->Insurance),
-        $this->Comment
+        (string)$this->Comment
         );
     }
 
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
+            if(!$this->update()) return false;
             $logentry = new Log;
             $logentry->DBupdate($this->getVars());
+            return true;
         }
-        else {
-            $this->insert();
-            $logentry = new Log;
-            $logentry->DBinsert($this->getVars());
-        }
+        if(!$this->insert()) return false;
+        $logentry = new Log;
+        $logentry->DBinsert($this->getVars());
+        return true;
+    }
+
+    protected function instrInventoryTypeId() {
+        RegNumber::ensureInstrType();
+        $instrType = RegNumber::loadInstrType();
+        return $instrType ? (int)$instrType->Index : 0;
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sInstruments` (`RegNumber`, `Instrument`, `Vendor`, `Model`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%s", "%s", "%s", %s, "%s", "%s", "%d", "%s");',
-        $GLOBALS['dbprefix'],
-        $this->RegNumber,
-        $this->Instrument,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Model),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
-        mkNULLstr($this->PurchaseDate),
-        mkEmpty($this->PurchasePrize),
-        $this->Owner,
-        $this->Insurance,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Comment)
+        $inventoryTypeId = $this->instrInventoryTypeId();
+        if($inventoryTypeId < 1) {
+            sqlerror();
+            return false;
+        }
+        $description = trim((string)$this->Vendor.' '.(string)$this->Model);
+        $sql = sprintf(
+            'INSERT INTO `%sInventories` (`RegNumber`, `Inventory`, `Instrument`, `Description`, `Vendor`, `Model`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES ("%d", "%d", "%d", "%s", "%s", "%s", "%s", %s, "%s", "%d", "%d", "%s");',
+            $GLOBALS['dbprefix'],
+            (int)$this->RegNumber,
+            $inventoryTypeId,
+            (int)$this->Instrument,
+            mysqli_real_escape_string($GLOBALS['conn'], $description),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vendor),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Model),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->SerialNr),
+            mkNULLstr($this->PurchaseDate),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)mkEmpty($this->PurchasePrize)),
+            (int)$this->Owner,
+            (int)$this->Insurance,
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Comment)
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -112,19 +127,25 @@ class Instruments
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sInstruments` SET `RegNumber` = "%d", `Instrument` = "%d", `Vendor` = "%s", `Model` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
-        $GLOBALS['dbprefix'],
-        $this->RegNumber,
-        $this->Instrument,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Vendor),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Model),
-        mysqli_real_escape_string($GLOBALS['conn'], $this->SerialNr),
-        mkNULLstr($this->PurchaseDate),
-        mkEmpty($this->PurchasePrize),
-        $this->Owner,
-        $this->Insurance,
-        mysqli_real_escape_string($GLOBALS['conn'], $this->Comment),
-        $this->Index
+        $inventoryTypeId = $this->instrInventoryTypeId();
+        if($inventoryTypeId < 1) return false;
+        $description = trim((string)$this->Vendor.' '.(string)$this->Model);
+        $sql = sprintf(
+            'UPDATE `%sInventories` SET `RegNumber` = "%d", `Inventory` = "%d", `Instrument` = "%d", `Description` = "%s", `Vendor` = "%s", `Model` = "%s", `SerialNr` = "%s", `PurchaseDate` = %s, `PurchasePrize` = "%s", `Owner` = "%d", `Insurance` = "%d", `Comment` = "%s" WHERE `Index` = "%d";',
+            $GLOBALS['dbprefix'],
+            (int)$this->RegNumber,
+            $inventoryTypeId,
+            (int)$this->Instrument,
+            mysqli_real_escape_string($GLOBALS['conn'], $description),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vendor),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Model),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->SerialNr),
+            mkNULLstr($this->PurchaseDate),
+            mysqli_real_escape_string($GLOBALS['conn'], (string)mkEmpty($this->PurchasePrize)),
+            (int)$this->Owner,
+            (int)$this->Insurance,
+            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Comment),
+            (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -137,14 +158,14 @@ class Instruments
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
 
-        $sql = sprintf('DELETE FROM `%sLoans` WHERE `Instrument` = "%d";',
+        $sql = sprintf('DELETE FROM `%sInventoriesLoans` WHERE `Inventory` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
 
-        $sql = sprintf('DELETE FROM `%sInstruments` WHERE `Index` = "%d" LIMIT 1;',
+        $sql = sprintf('DELETE FROM `%sInventories` WHERE `Index` = "%d" LIMIT 1;',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -157,14 +178,16 @@ class Instruments
     }
     
     public function fill_from_array($row) {
+        $allowed = array('Index', 'RegNumber', 'Instrument', 'Vendor', 'Model', 'SerialNr', 'PurchasePrize', 'PurchaseDate', 'Owner', 'Insurance', 'Comment');
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            if(!is_string($key) || !in_array($key, $allowed, true)) continue;
+            $this->$key = $val;
         }
     }
 
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `%sInstruments` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInventories` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $Index
         );
@@ -179,16 +202,46 @@ class Instruments
     public function getInstrumentName() {
         $sql = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
-        $this->Instrument
+        (int)$this->Instrument
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        $row = mysqli_fetch_array($dbr);
-        return $row['Name'];
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        return ($row && isset($row['Name'])) ? $row['Name'] : '';
+    }
+
+    /** Label (l4) + value (l8) row for instrument detail modal — keeps inputs out of w3-col floats. */
+    private function modalDetailRow($indent, $label, $valueHtml) {
+        $row = new div;
+        $row->indent = $indent;
+        $row->class = "w3-row w3-padding";
+        $str = $row->open();
+
+        $lab = new div;
+        $lab->indent = $indent + 1;
+        $lab->col(4, 12, 12);
+        $lab->body = "<b>".htmlspecialchars($label, ENT_QUOTES, 'UTF-8').":</b>";
+        $str .= $lab->print();
+
+        $val = new div;
+        $val->indent = $indent + 1;
+        $val->col(8, 12, 12);
+        $str .= $val->open();
+        $str .= $valueHtml;
+        $str .= $val->close();
+
+        $str .= $row->close();
+        return $str;
+    }
+
+    private function modalDisplayText($text) {
+        $text = trim(html_entity_decode(strip_tags((string)$text)));
+        if($text === '') return '<span class="w3-text-gray">—</span>';
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     }
 
     public function printTableLine() {
-        $sql = sprintf('SELECT * FROM `%sInstruments` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
@@ -219,7 +272,7 @@ class Instruments
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
         $field->col(1,1,1);
-        $field->body=$row['RegNumber'];
+        $field->body=RegNumber::displayInstrument($row['RegNumber']);
         $str=$str.$field->print();
 
         $field = new div;
@@ -334,285 +387,76 @@ class Instruments
         $detailform->action="";
         $detailform->method="POST";
         $str=$str.$detailform->open();
-        
+
+        $canEdit = requirePermission("perm_editInstruments");
         $indent++;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Inventarnummer:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="number";
-            $content->name="RegNumber";
-            $content->value=$this->RegNumber;
+
+        // Inventarnummer
+        $str .= $this->modalDetailRow($indent, 'Inventarnummer', $canEdit
+            ? '<input class="w3-input w3-border" type="number" name="RegNumber" value="'.htmlspecialchars((string)$this->RegNumber, ENT_QUOTES, 'UTF-8').'">'
+              .'<div class="w3-small w3-text-gray" style="margin-top:4px;">'.htmlspecialchars(RegNumber::displayInstrument($this->RegNumber), ENT_QUOTES, 'UTF-8').'</div>'
+            : htmlspecialchars(RegNumber::displayInstrument($this->RegNumber), ENT_QUOTES, 'UTF-8')
+        );
+        if($canEdit) {
+            $str .= '<input type="hidden" name="Index" value="'.(int)$this->Index.'">';
+        }
+
+        // Hersteller
+        $str .= $this->modalDetailRow($indent, 'Hersteller', $canEdit
+            ? '<input class="w3-input w3-border" type="text" name="Vendor" value="'.htmlspecialchars((string)$this->Vendor, ENT_QUOTES, 'UTF-8').'">'
+            : $this->modalDisplayText($this->Vendor)
+        );
+
+        // Modell
+        $str .= $this->modalDetailRow($indent, 'Modell', $canEdit
+            ? '<input class="w3-input w3-border" type="text" name="Model" value="'.htmlspecialchars((string)$this->Model, ENT_QUOTES, 'UTF-8').'">'
+            : $this->modalDisplayText($this->Model)
+        );
+
+        // Seriennummer
+        $str .= $this->modalDetailRow($indent, 'Seriennummer', $canEdit
+            ? '<input class="w3-input w3-border" type="text" name="SerialNr" value="'.htmlspecialchars((string)$this->SerialNr, ENT_QUOTES, 'UTF-8').'">'
+            : $this->modalDisplayText($this->SerialNr)
+        );
+
+        // Kaufdatum
+        $str .= $this->modalDetailRow($indent, 'Kaufdatum', $canEdit
+            ? '<input class="w3-input w3-border" type="date" name="PurchaseDate" value="'.htmlspecialchars((string)$this->PurchaseDate, ENT_QUOTES, 'UTF-8').'">'
+            : $this->modalDisplayText(germanDate($this->PurchaseDate, 0))
+        );
+
+        // Kaufpreis
+        $str .= $this->modalDetailRow($indent, 'Kaufpreis', $canEdit
+            ? '<input class="w3-input w3-border" type="number" step="0.01" name="PurchasePrize" value="'.htmlspecialchars((string)$this->PurchasePrize, ENT_QUOTES, 'UTF-8').'">'
+            : $this->modalDisplayText(mkPrize($this->PurchasePrize))
+        );
+
+        // Zeitwert (immer Anzeige)
+        $str .= $this->modalDetailRow($indent, 'Zeitwert', $this->modalDisplayText(mkPrize($this->getCurrentValue())));
+
+        // Besitzer
+        $str .= $this->modalDetailRow($indent, 'Besitzer', $canEdit
+            ? '<select class="w3-select w3-border w3-input" name="Owner">'.userOptionAll($this->Owner).'</select>'
+            : $this->modalDisplayText(getOwner($this->Owner))
+        );
+
+        // Versichert
+        if($canEdit) {
+            $insHtml = '<input type="hidden" name="Insurance" value="0">'
+                .'<label><input class="w3-check" type="checkbox" name="Insurance" value="1"'.($this->Insurance ? ' checked' : '').'> ja</label>';
         }
         else {
-            $content->body=$this->RegNumber;
+            $insHtml = $this->modalDisplayText(bool2string($this->Insurance));
         }
-        $str=$str.$content->print();
+        $str .= $this->modalDetailRow($indent, 'Versichert', $insHtml);
 
-        $content = new div;
-        $content->indent=$indent;
-        $content->tag="input";
-        $content->type="hidden";
-        $content->name="Index";
-        $content->value=$this->Index;
-        $str=$str.$content->print();
+        // Kommentar
+        $str .= $this->modalDetailRow($indent, 'Kommentar', $canEdit
+            ? '<input class="w3-input w3-border" type="text" name="Comment" value="'.htmlspecialchars((string)$this->Comment, ENT_QUOTES, 'UTF-8').'">'
+            : $this->modalDisplayText($this->Comment)
+        );
 
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Hersteller:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="text";
-            $content->name="Vendor";
-            $content->value=$this->Vendor;
-        }
-        else {
-            $content->body=$this->Vendor;
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Modell:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="text";
-            $content->name="Model";
-            $content->value=$this->Model;
-        }
-        else {
-            $content->body=$this->Model;
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Seriennummer:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="text";
-            $content->name="SerialNr";
-            $content->value=$this->SerialNr;
-        }
-        else {
-            $content->body=$this->SerialNr;
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Kaufdatum:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="date";
-            $content->name="PurchaseDate";
-            $content->value=$this->PurchaseDate;
-        }
-        else {
-            $content->body=$this->PurchaseDate;
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Kaufpreis:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="number";
-            $content->step="0.01";
-            $content->name="PurchasePrize";
-            $content->value=$this->PurchasePrize;
-        }
-        else {
-            $content->body=mkPrize($this->PurchasePrize);
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Zeitwert:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        $content->body=mkPrize($this->getCurrentValue($row['PurchasePrize']));
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-        
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Besitzer:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="select";
-            $content->name="Owner";
-            $content->body=userOptionAll($this->Owner);
-        }
-        else {
-            $content->body=getOwner($this->Owner);
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Versichert:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $hidden = new div;
-            $hidden->tag="input";
-            $hidden->type="hidden";
-            $hidden->name="Insurance";
-            $hidden->value=0;
-            $str=$str.$hidden->print();
-            
-            $content->tag="input";
-            $content->type="checkbox";
-            $content->name="Insurance";
-            $content->value=1;
-            $content->checked=$this->Insurance;
-        }
-        else {
-            $content->body=bool2string($this->Insurance);
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        $indent--;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-row w3-padding";
-        $str=$str.$modalrow->open();
-        $indent++;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,6,6);
-        $content->body="<b>Kommentar:</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(4,6,6);
-        if(requirePermission("perm_editInstruments")) {
-            $content->class="w3-input";
-            $content->tag="input";
-            $content->type="text";
-            $content->name="Comment";
-            $content->value=$this->Comment;
-        }
-        else {
-            $content->body=$this->Comment;
-        }
-        $str=$str.$content->print();
-        $str=$str.$modalrow->close();
-
-        if(requirePermission("perm_editInstruments")) {
+        if($canEdit) {
             $indent--;
             $modalrow = new div;
             $modalrow->indent=$indent;
@@ -627,7 +471,7 @@ class Instruments
             $content->value="update";
             $content->class="w3-button";
             $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->col(2,6,6);
+            $content->col(4,6,6);
             $content->body="speichern";
             $str=$str.$content->print();        
             $str=$str.$modalrow->close();
@@ -636,7 +480,7 @@ class Instruments
         $str=$str.$detailform->close();
         $indent--;
 
-        if(requirePermission("perm_editInstruments")) {
+        if($canEdit) {
             $indent--;
             $modalrow = new div;
             $modalrow->indent=$indent;
@@ -865,7 +709,7 @@ class Instruments
     }
 
         public function printInsuranceLine() {
-        $sql = sprintf('SELECT * FROM `%sInstruments` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
@@ -896,7 +740,7 @@ class Instruments
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
         $field->col(1,1,1);
-        $field->body=$row['RegNumber'];
+        $field->body=RegNumber::displayInstrument($row['RegNumber']);
         $str=$str.$field->print();
 
         $field = new div;
@@ -947,7 +791,7 @@ class Instruments
     }
 
     public function getLoans() {
-        $sql = sprintf('SELECT `Index` FROM `%sLoans` WHERE `Instrument` = "%d" ORDER BY `StartDate` DESC;',
+        $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `Inventory` = "%d" ORDER BY `StartDate` DESC;',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -1027,7 +871,7 @@ class Instruments
     }
 
     public function getCsvLine() {
-        $sql = sprintf('SELECT * FROM `%sInstruments` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
