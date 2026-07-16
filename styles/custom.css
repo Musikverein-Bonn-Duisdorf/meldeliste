@@ -6,3 +6,59 @@
      justify-items: stretch;
      align-items: stretch;
  }
+
+/* Admin nested dropdowns (MELD-58) */
+.admin-nav > .w3-dropdown-content {
+  min-width: 220px;
+  z-index: 10;
+}
+/* w3.css opens ALL nested .w3-dropdown-content on parent hover — reset that */
+.admin-nav:hover .w3-dropdown-content {
+  display: none;
+}
+.admin-nav:hover > .w3-dropdown-content {
+  display: block;
+}
+.admin-nav-group {
+  width: 100%;
+  position: relative;
+}
+.admin-nav-group > .w3-button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+}
+.admin-nav-caret {
+  float: right;
+  margin-top: 3px;
+}
+.admin-nav-group > .w3-dropdown-content {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 220px;
+  z-index: 11;
+}
+.admin-nav-group:hover > .w3-dropdown-content {
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .admin-nav .admin-nav-group > .w3-dropdown-content {
+    position: static;
+    display: block;
+    min-width: 100%;
+    box-shadow: none;
+  }
+  .admin-nav:hover .admin-nav-group > .w3-dropdown-content,
+  .admin-nav.w3-show .admin-nav-group > .w3-dropdown-content {
+    display: block;
+  }
+  .admin-nav-caret {
+    display: none;
+  }
+  .admin-nav-group > .w3-button {
+    font-weight: bold;
+    pointer-events: none;
+  }
+}
