@@ -17,6 +17,7 @@ class MailJob
         'Total' => 0,
         'Sent' => 0,
         'Failed' => 0,
+        'QueueCreated' => null,
     );
 
     public function __get($key) {
@@ -45,6 +46,7 @@ class MailJob
         case 'AttachmentPath':
         case 'Status':
         case 'Created':
+        case 'QueueCreated':
             $this->_data[$key] = $val === null ? null : trim((string)$val);
             break;
         default:
@@ -177,7 +179,13 @@ class MailJob
     public function load_by_id($Index) {
         self::ensureSchema();
         $Index = (int)$Index;
-        $sql = sprintf('SELECT * FROM `%sMailJob` WHERE `Index` = %d;', $GLOBALS['dbprefix'], $Index);
+        $sql = sprintf(
+            'SELECT j.*, (SELECT MIN(o.`Created`) FROM `%sMailOutbox` o WHERE o.`Job` = j.`Index`) AS `QueueCreated`
+             FROM `%sMailJob` j WHERE j.`Index` = %d;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $Index
+        );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $row = $dbr ? mysqli_fetch_array($dbr) : null;
@@ -386,24 +394,43 @@ class MailJob
     }
 
     /**
+     * Timestamp for lists: queue/inbox time when available, else job Created.
+     */
+    public function listTimestamp() {
+        if($this->QueueCreated !== null && $this->QueueCreated !== '') {
+            return (string)$this->QueueCreated;
+        }
+        return (string)$this->Created;
+    }
+
+    /**
      * @param string|null $statusFilter null = all
      * @return MailJob[]
      */
     public static function listJobs($statusFilter = null, $limit = 200) {
         self::ensureSchema();
         $limit = max(1, (int)$limit);
+        $prefix = $GLOBALS['dbprefix'];
+        $queueCreated = sprintf(
+            '(SELECT MIN(o.`Created`) FROM `%sMailOutbox` o WHERE o.`Job` = j.`Index`) AS `QueueCreated`',
+            $prefix
+        );
         if($statusFilter !== null && $statusFilter !== '') {
             $sql = sprintf(
-                'SELECT * FROM `%sMailJob` WHERE `Status` = "%s" ORDER BY `Created` DESC, `Index` DESC LIMIT %d;',
-                $GLOBALS['dbprefix'],
+                'SELECT j.*, %s FROM `%sMailJob` j WHERE j.`Status` = "%s" ORDER BY COALESCE((SELECT MIN(o2.`Created`) FROM `%sMailOutbox` o2 WHERE o2.`Job` = j.`Index`), j.`Created`) DESC, j.`Index` DESC LIMIT %d;',
+                $queueCreated,
+                $prefix,
                 mysqli_real_escape_string($GLOBALS['conn'], (string)$statusFilter),
+                $prefix,
                 $limit
             );
         }
         else {
             $sql = sprintf(
-                'SELECT * FROM `%sMailJob` ORDER BY `Created` DESC, `Index` DESC LIMIT %d;',
-                $GLOBALS['dbprefix'],
+                'SELECT j.*, %s FROM `%sMailJob` j ORDER BY COALESCE((SELECT MIN(o2.`Created`) FROM `%sMailOutbox` o2 WHERE o2.`Job` = j.`Index`), j.`Created`) DESC, j.`Index` DESC LIMIT %d;',
+                $queueCreated,
+                $prefix,
+                $prefix,
                 $limit
             );
         }

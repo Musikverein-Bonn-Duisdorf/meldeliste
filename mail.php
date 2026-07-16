@@ -203,7 +203,7 @@ foreach($allJobs as $rowJob) {
     $subject = $rowJob->Subject !== '' && $rowJob->Subject !== null
         ? htmlspecialchars((string)$rowJob->Subject, ENT_QUOTES, 'UTF-8')
         : '<em>(ohne Betreff)</em>';
-    $createdRaw = (string)$rowJob->Created;
+    $createdRaw = (string)$rowJob->listTimestamp();
     $created = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
     if(strlen($createdRaw) >= 16) {
         $created .= ' '.htmlspecialchars(sql2timeRaw(substr($createdRaw, 11, 8)), ENT_QUOTES, 'UTF-8');
@@ -478,7 +478,7 @@ function delFile(hash) {
 <?php } elseif($job && $job->Status !== 'draft') {
     $viewSubject = htmlspecialchars((string)$job->Subject, ENT_QUOTES, 'UTF-8');
     $viewBody = nl2br((string)$job->BodyText);
-    $createdRaw = (string)$job->Created;
+    $createdRaw = (string)$job->listTimestamp();
     $createdView = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
     if(strlen($createdRaw) >= 16) {
         $createdView .= ' '.htmlspecialchars(sql2timeRaw(substr($createdRaw, 11, 8)), ENT_QUOTES, 'UTF-8');
