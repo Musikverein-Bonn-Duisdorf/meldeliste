@@ -1,7 +1,9 @@
 <?php
 
 include "common/config.php";
+include "config/ConfigDefaults.php";
 include "libs/helpers.php";
+include "libs/colorschemes.php";
 $optionsDB = loadconfig();
 global $optionsDB;
 include "version.php";
@@ -12,8 +14,6 @@ include "libs/div.php";
 include "libs/user.php";
 include "libs/permissions.php";
 include "libs/SQLtable.php";
-include "config/ConfigDefaults.php";
-include "libs/colorschemes.php";
 include "libs/DatabaseManager.php";
 include "libs/RegNumber.php";
 include "libs/termin.php";

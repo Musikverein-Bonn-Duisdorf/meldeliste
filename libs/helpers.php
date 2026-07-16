@@ -464,7 +464,7 @@ function renderConfigColorCss($wrapStyleTag = true) {
 
 function getColorConfigParameters() {
     static $params = null;
-    if($params !== null) return $params;
+    if($params !== null && count($params) > 0) return $params;
     $params = array();
     if(function_exists('getConfigDefaults')) {
         foreach(getConfigDefaults() as $item) {

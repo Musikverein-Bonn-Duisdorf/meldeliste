@@ -339,9 +339,15 @@ function applyColorScheme($schemeId) {
         return false;
     }
     setConfigParamRawValue('colorSchemeActive', $schemeId);
-    $colors = $schemes[$schemeId]['colors'];
-    $colorParams = getColorConfigParameters();
-    foreach($colorParams as $param => $_) {
+    $colors = isset($schemes[$schemeId]['colors']) && is_array($schemes[$schemeId]['colors'])
+        ? $schemes[$schemeId]['colors']
+        : array();
+    // Prefer scheme color keys directly; fall back to known color params.
+    $params = array_keys($colors);
+    if(count($params) === 0) {
+        $params = array_keys(getColorConfigParameters());
+    }
+    foreach($params as $param) {
         if(!array_key_exists($param, $colors)) {
             continue;
         }
