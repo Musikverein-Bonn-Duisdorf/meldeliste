@@ -1043,6 +1043,11 @@ function sanitizeMailHtmlStyleAttr($style) {
         'font-style' => true,
         'text-decoration' => true,
         'text-align' => true,
+        'border-collapse' => true,
+        'border' => true,
+        'width' => true,
+        'padding' => true,
+        'margin-left' => true,
     );
     $out = array();
     foreach(explode(';', (string)$style) as $part) {
@@ -1078,6 +1083,18 @@ function sanitizeMailHtmlStyleAttr($style) {
                 continue;
             }
         }
+        elseif($prop === 'border-collapse') {
+            if(!in_array(strtolower($val), array('collapse', 'separate'), true)) {
+                continue;
+            }
+        }
+        elseif($prop === 'border' || $prop === 'padding' || $prop === 'margin-left' || $prop === 'width') {
+            if(!preg_match('/^[\d.]+\s*(px|pt|em|rem|%)?(\s+solid\s+(#[0-9a-f]{3,8}|[a-z]+))?$/i', $val)
+                && !preg_match('/^[\d.]+(px|pt|em|rem|%)$/i', $val)
+                && !preg_match('/^\d+(\s+\d+){0,3}$/', $val)) {
+                continue;
+            }
+        }
         elseif($prop === 'font-weight') {
             if(!preg_match('/^(normal|bold|bolder|lighter|[1-9]00)$/i', $val)) {
                 continue;
@@ -1108,12 +1125,34 @@ function sanitizeMailHtml($html) {
     }
     $html = preg_replace('#<(script|iframe|object|embed|form|input|button|link|meta|style|svg|math)(\s[^>]*)?>[\s\S]*?</\1>#i', '', $html);
     $html = preg_replace('#<(script|iframe|object|embed|form|input|button|link|meta|style|svg|math)(\s[^>]*)?/?>#i', '', $html);
-    $html = strip_tags($html, '<p><br><b><strong><i><em><u><s><strike><ul><ol><li><a><h1><h2><h3><h4><blockquote><span><div>');
+    $html = strip_tags($html, '<p><br><b><strong><i><em><u><s><strike><ul><ol><li><a><h1><h2><h3><h4><blockquote><span><div><hr><table><thead><tbody><tr><th><td>');
     $html = preg_replace('/\son[a-z]+\s*=\s*("|\')[\s\S]*?\1/i', '', $html);
     $html = preg_replace('/\son[a-z]+\s*=\s*[^\s>]+/i', '', $html);
     $html = preg_replace('/\s(href|src)\s*=\s*("|\')\s*javascript:[^"\']*\2/i', ' href="#"', $html);
     $html = preg_replace('/\s(href|src)\s*=\s*javascript:[^\s>]+/i', ' href="#"', $html);
     $html = preg_replace('/\s(class|id|data-[\w-]+)\s*=\s*("|\')[\s\S]*?\2/i', '', $html);
+    // Keep simple table attributes commonly set by TinyMCE
+    $html = preg_replace_callback('/<(table|td|th|tr)(\s[^>]*)?>/i', function($m) {
+        $tag = strtolower($m[1]);
+        $attrs = isset($m[2]) ? $m[2] : '';
+        $keep = '';
+        if(preg_match('/\sborder\s*=\s*("|\')?(\d+)\1?/i', $attrs, $bm)) {
+            $keep .= ' border="'.(int)$bm[2].'"';
+        }
+        if(preg_match('/\scolspan\s*=\s*("|\')?(\d+)\1?/i', $attrs, $cm)) {
+            $keep .= ' colspan="'.(int)$cm[2].'"';
+        }
+        if(preg_match('/\srowspan\s*=\s*("|\')?(\d+)\1?/i', $attrs, $rm)) {
+            $keep .= ' rowspan="'.(int)$rm[2].'"';
+        }
+        if(preg_match('/\sstyle\s*=\s*("|\')(.*?)\1/is', $attrs, $sm)) {
+            $clean = sanitizeMailHtmlStyleAttr($sm[2]);
+            if($clean !== '') {
+                $keep .= ' style="'.htmlspecialchars($clean, ENT_QUOTES, 'UTF-8').'"';
+            }
+        }
+        return '<'.$tag.$keep.'>';
+    }, $html);
     $html = preg_replace_callback('/\sstyle\s*=\s*("|\')(.*?)\1/is', function($m) {
         $clean = sanitizeMailHtmlStyleAttr($m[2]);
         return $clean !== '' ? ' style="'.htmlspecialchars($clean, ENT_QUOTES, 'UTF-8').'"' : '';
