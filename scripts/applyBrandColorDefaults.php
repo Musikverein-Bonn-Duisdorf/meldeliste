@@ -20,14 +20,6 @@ if(!is_readable($configFile)) {
 }
 
 require_once $configFile;
-
-if(!function_exists('sqlerror')) {
-    function sqlerror() {
-        if(!isset($GLOBALS['conn']) || !mysqli_errno($GLOBALS['conn'])) return;
-        fwrite(STDERR, "SQL ERROR ".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."\n");
-    }
-}
-
 require_once $root.'/config/ConfigDefaults.php';
 require_once $root.'/libs/helpers.php';
 require_once $root.'/libs/colorschemes.php';
