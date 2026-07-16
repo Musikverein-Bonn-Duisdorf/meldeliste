@@ -287,7 +287,7 @@ class Inventories
         $line = new div;
         $line->indent=$indent;
         $line->class="w3-row w3-padding";
-        $line->onclick="openModal('inventory', ".$this->Index.")";
+        $line->onclick="openModal('inventar', ".$this->Index.")";
         if(!empty($this->Insurance)) {
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
         }
