@@ -35,10 +35,10 @@ class AushilfeShift
 
     public function getVars() {
         this->getInstrumentName();
-        return sprintf("AushilfenShift-ID: %d, Name: %s, Instrument: %s",
+        return sprintf("AushilfenShift-ID: %d, Name: <b>%s</b>, Instrument: <b>%s</b>",
         $this->Index,
         $this->getName(),
-        $this->iName,
+        $this->iName
         );
     }
 
