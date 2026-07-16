@@ -335,7 +335,7 @@ foreach($allJobs as $rowJob) {
 
     <?php if($preview) { ?>
                          <div class="w3-container w3-mobile w3-border w3-border-black w3-left-align w3-margin-bottom"><b>Betreff:</b> <?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?></div>
-                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />\n\n".nl2br(htmlspecialchars($textPreview, ENT_QUOTES, 'UTF-8')); ?></p></div></div>
+                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />\n\n".nl2br($textPreview); ?></p></div></div>
         <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send" value="1">In Warteschlange stellen</button>
         <p class="w3-small">Der Versand erfolgt asynchron per Cron (<code>processMailQueue</code>).</p>
     <?php } ?>
@@ -412,7 +412,7 @@ function delFile(hash) {
 </div>
 <?php } elseif($job && $job->Status !== 'draft') {
     $viewSubject = htmlspecialchars((string)$job->Subject, ENT_QUOTES, 'UTF-8');
-    $viewBody = nl2br(htmlspecialchars((string)$job->BodyText, ENT_QUOTES, 'UTF-8'));
+    $viewBody = nl2br((string)$job->BodyText);
     $createdRaw = (string)$job->Created;
     $createdView = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
     if(strlen($createdRaw) >= 16) {

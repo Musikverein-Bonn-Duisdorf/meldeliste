@@ -82,7 +82,7 @@ $resolveSender = function($senderId) use (&$userNameCache) {
 
 <?php if($viewMail) {
     $subj = htmlspecialchars((string)$viewMail->Subject, ENT_QUOTES, 'UTF-8');
-    $body = nl2br(htmlspecialchars((string)$viewMail->BodyText, ENT_QUOTES, 'UTF-8'));
+    $body = nl2br((string)$viewMail->BodyText);
     $whenRaw = !empty($viewMail->SentAt) ? $viewMail->SentAt : $viewMail->Created;
     $when = htmlspecialchars($formatMailDate($whenRaw), ENT_QUOTES, 'UTF-8');
     $job = new MailJob;
