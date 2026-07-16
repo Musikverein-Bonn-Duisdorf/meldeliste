@@ -337,7 +337,7 @@ foreach($allJobs as $rowJob) {
 <div class="w3-row">
 <div class="w3-col s12 m1 l1">&nbsp;</div>
 <div class="w3-panel w3-mobile w3-border w3-col s12 m10 l10" style="text-align:left;">
-  <p class="w3-left-align"><b>Email-ID <?php echo (int)$job->Index; ?></b> (Entwurf)</p>
+  <p class="w3-left-align"><b>Entwurf</b></p>
   <form name="mailform" class="w3-container w3-margin" action="mail.php?id=<?php echo (int)$job->Index; ?>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
     <label>Empfänger</label>

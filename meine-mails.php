@@ -76,9 +76,6 @@ $resolveSender = function($senderId) use (&$userNameCache) {
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Meine Nachrichten</h2>
 </div>
-<div class="w3-container w3-padding">
-  <p>Hier siehst du die an dich gerichteten Emails der Meldeliste. Ungelesene Einträge sind farblich markiert.</p>
-</div>
 
 <?php if($viewMail) {
     $subj = htmlspecialchars((string)$viewMail->Subject, ENT_QUOTES, 'UTF-8');
