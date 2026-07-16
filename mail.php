@@ -235,7 +235,7 @@ foreach($allJobs as $rowJob) {
     echo '<td>'.$id.'</td>';
     echo '<td>'.$created.'</td>';
     echo '<td>'.$byName.'</td>';
-    echo '<td>'.$subject.'</td>';
+    echo '<td><a href="mail.php?id='.$id.'">'.$subject.'</a></td>';
     echo '<td><span class="w3-tag '.$statusCls.'">'.$status.'</span></td>';
     echo '<td>'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</td>';
     echo '<td>';
@@ -410,14 +410,119 @@ function delFile(hash) {
 </div>
 
 </div>
-<?php } elseif($job && $job->Status !== 'draft') { ?>
+<?php } elseif($job && $job->Status !== 'draft') {
+    $viewSubject = htmlspecialchars((string)$job->Subject, ENT_QUOTES, 'UTF-8');
+    $viewBody = nl2br(htmlspecialchars((string)$job->BodyText, ENT_QUOTES, 'UTF-8'));
+    $createdRaw = (string)$job->Created;
+    $createdView = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
+    if(strlen($createdRaw) >= 16) {
+        $createdView .= ' '.htmlspecialchars(sql2timeRaw(substr($createdRaw, 11, 8)), ENT_QUOTES, 'UTF-8');
+    }
+    $byId = (int)$job->CreatedBy;
+    if($byId > 0) {
+        $byUser = new User;
+        $byUser->load_by_id($byId);
+        $byName = $byUser->Index ? htmlspecialchars($byUser->getName(), ENT_QUOTES, 'UTF-8') : ('User '.$byId);
+    }
+    else {
+        $byName = 'System';
+    }
+    $outboxRows = $job->listOutboxRows();
+    $outboxStatusLabel = array(
+        'pending' => 'Warteschlange',
+        'sending' => 'Wird gesendet',
+        'sent' => 'Versendet',
+        'failed' => 'Fehler',
+        'cancelled' => 'Abgebrochen',
+    );
+    $outboxStatusClass = array(
+        'pending' => isset($GLOBALS['optionsDB']['colorWarning']) ? $GLOBALS['optionsDB']['colorWarning'] : 'w3-yellow',
+        'sending' => isset($GLOBALS['optionsDB']['colorWarning']) ? $GLOBALS['optionsDB']['colorWarning'] : 'w3-yellow',
+        'sent' => isset($GLOBALS['optionsDB']['colorLogEmail']) ? $GLOBALS['optionsDB']['colorLogEmail'] : 'w3-green',
+        'failed' => isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red',
+        'cancelled' => isset($GLOBALS['optionsDB']['colorBtnNo']) ? $GLOBALS['optionsDB']['colorBtnNo'] : 'w3-grey',
+    );
+?>
 <div class="w3-container w3-padding">
-  <p>Email #<?php echo (int)$job->Index; ?> hat Status
-    <span class="w3-tag <?php echo $job->statusClass(); ?>"><?php echo htmlspecialchars($job->statusLabel(), ENT_QUOTES, 'UTF-8'); ?></span>
-    und kann nicht mehr bearbeitet werden.
-    <a href="mail.php?copy=<?php echo (int)$job->Index; ?>">Als Entwurf kopieren</a>
-    oder <a href="mail.php">zur Übersicht</a>.
-  </p>
+  <div class="w3-card w3-padding w3-margin-bottom">
+    <p class="w3-small">
+      Email-ID <?php echo (int)$job->Index; ?>
+      · <span class="w3-tag <?php echo $job->statusClass(); ?>"><?php echo htmlspecialchars($job->statusLabel(), ENT_QUOTES, 'UTF-8'); ?></span>
+      · <?php echo $createdView; ?>
+      · von <?php echo $byName; ?>
+      · Empfänger <?php echo (int)$job->Sent; ?>/<?php echo (int)$job->Total; ?><?php if((int)$job->Failed > 0) echo ' ('.(int)$job->Failed.' Fehler)'; ?>
+    </p>
+    <h3 class="w3-margin-top"><?php echo $viewSubject !== '' ? $viewSubject : '<em>(ohne Betreff)</em>'; ?></h3>
+    <div class="w3-padding-16 w3-border-top"><?php echo $viewBody !== '' ? $viewBody : '<em>(kein Text)</em>'; ?></div>
+    <div class="w3-padding-16">
+      <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail.php?copy=<?php echo (int)$job->Index; ?>">Als Entwurf kopieren</a>
+      <?php if($job->canCancel()) { ?>
+      <form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm('Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?');">
+        <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
+        <button type="submit" name="cancel_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Abbrechen</button>
+      </form>
+      <?php } ?>
+      <?php if($job->canDelete()) { ?>
+      <form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm('Email-ID <?php echo (int)$job->Index; ?> wirklich löschen?');">
+        <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
+        <button type="submit" name="delete_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?>">Löschen</button>
+      </form>
+      <?php } ?>
+      <a class="w3-button" href="mail.php">Zur Übersicht</a>
+    </div>
+  </div>
+
+  <h4>Empfänger</h4>
+  <div class="w3-responsive">
+  <table class="w3-table w3-bordered w3-striped w3-hoverable">
+    <thead>
+      <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+        <th>Empfänger</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Versendet</th>
+        <th>Fehler</th>
+      </tr>
+    </thead>
+    <tbody>
+<?php
+if(!count($outboxRows)) {
+    echo '<tr><td colspan="5">Keine Empfänger-Einträge.</td></tr>';
+}
+else {
+    foreach($outboxRows as $or) {
+        $ou = new User;
+        $ou->load_by_id((int)$or['User']);
+        $ouName = $ou->Index
+            ? htmlspecialchars($ou->getName(), ENT_QUOTES, 'UTF-8')
+            : ('User '.(int)$or['User']);
+        $st = (string)$or['Status'];
+        $stLabel = isset($outboxStatusLabel[$st]) ? $outboxStatusLabel[$st] : $st;
+        $stCls = isset($outboxStatusClass[$st]) ? $outboxStatusClass[$st] : 'w3-light-grey';
+        $sentRaw = !empty($or['SentAt']) ? (string)$or['SentAt'] : '';
+        $sentView = '—';
+        if($sentRaw !== '') {
+            $sentView = htmlspecialchars((string)germanDate($sentRaw, true), ENT_QUOTES, 'UTF-8');
+            if(strlen($sentRaw) >= 16) {
+                $sentView .= ' '.htmlspecialchars(sql2timeRaw(substr($sentRaw, 11, 8)), ENT_QUOTES, 'UTF-8');
+            }
+        }
+        $err = !empty($or['LastError'])
+            ? htmlspecialchars((string)$or['LastError'], ENT_QUOTES, 'UTF-8')
+            : '—';
+        echo '<tr>';
+        echo '<td>'.$ouName.'</td>';
+        echo '<td>'.htmlspecialchars((string)$or['ToEmail'], ENT_QUOTES, 'UTF-8').'</td>';
+        echo '<td><span class="w3-tag '.$stCls.'">'.htmlspecialchars($stLabel, ENT_QUOTES, 'UTF-8').'</span></td>';
+        echo '<td>'.$sentView.'</td>';
+        echo '<td class="w3-small">'.$err.'</td>';
+        echo '</tr>';
+    }
+}
+?>
+    </tbody>
+  </table>
+  </div>
 </div>
 <?php } ?>
 

@@ -361,6 +361,26 @@ class MailJob
     /**
      * @return MailJob[]
      */
+    /**
+     * @return array[] associative rows from MailOutbox for this job
+     */
+    public function listOutboxRows() {
+        if(!$this->Index) return array();
+        $sql = sprintf(
+            'SELECT * FROM `%sMailOutbox` WHERE `Job` = %d ORDER BY `Index` ASC;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $rows = array();
+        if(!$dbr) return $rows;
+        while($row = mysqli_fetch_assoc($dbr)) {
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public static function listDrafts() {
         return self::listJobs('draft');
     }
