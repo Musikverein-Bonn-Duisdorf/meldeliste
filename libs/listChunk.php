@@ -310,4 +310,19 @@ function listChunkRenderSentinelAttrs($type, $cursor, $hasMore, $filterFn = '') 
     }
     return $attrs;
 }
+
+/**
+ * Full status/sentinel bar for infinite scroll (loading + end-of-list).
+ * @param string $extraHtmlAttrs e.g. ' data-extra="user=1"'
+ */
+function listChunkRenderSentinel($type, $cursor, $hasMore, $filterFn = '', $extraHtmlAttrs = '') {
+    $attrs = listChunkRenderSentinelAttrs($type, $cursor, $hasMore, $filterFn).$extraHtmlAttrs;
+    if($hasMore) {
+        // Invisible sentinel for IntersectionObserver; status text is set by JS while loading / at end
+        return '<div'.$attrs.' style="clear:both;height:1px;padding:0;margin:0;"></div>';
+    }
+    return '<div class="w3-panel w3-padding w3-center w3-margin-top w3-light-grey"'
+        .$attrs
+        .' style="clear:both;">Keine weiteren Einträge</div>';
+}
 ?>
