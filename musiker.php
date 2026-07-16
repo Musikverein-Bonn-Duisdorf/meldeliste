@@ -129,23 +129,13 @@ $nMusiker = $row['Count'];
 </div>
 <div id="Liste">
 <?php
-$sql = sprintf('SELECT `Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
-$GLOBALS['dbprefix'],
-$GLOBALS['dbprefix'],
-$GLOBALS['dbprefix'],
-$GLOBALS['dbprefix'],
-$GLOBALS['dbprefix']
-);
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new User;
-    $M->load_by_id($row['Index']);
-    $M->printTableLine();
-}
+$chunk = listChunkUsers('musiker', 0, 50);
+echo $chunk['html'];
 ?>
+<div<?php echo listChunkRenderSentinelAttrs('musiker', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker'); ?>></div>
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
 <?php
 include "common/footer.php";
