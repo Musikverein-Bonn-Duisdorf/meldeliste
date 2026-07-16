@@ -14,7 +14,7 @@ $chunk = listChunkTermine('future', 'response', '', 50, (int)$_SESSION['userid']
   <div class="w3-panel w3-col l3 w3-left"></div>
   <div class="w3-col l6 s12 m12" id="Liste">
 <?php echo $chunk['html']; ?>
-<div<?php echo listChunkRenderSentinelAttrs('meldungen', $chunk['nextCursor'], $chunk['hasMore']); ?>></div>
+<?php echo listChunkRenderSentinel('meldungen', $chunk['nextCursor'], $chunk['hasMore']); ?>
   </div>
   <div class="w3-col l3"></div>
 </div>

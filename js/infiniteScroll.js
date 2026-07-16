@@ -7,6 +7,9 @@
 (function() {
     var loading = false;
     var observer = null;
+    var MSG_LOADING = 'Weitere Einträge werden geladen…';
+    var MSG_END = 'Keine weiteren Einträge';
+    var MSG_ERROR = 'Laden fehlgeschlagen. Bitte erneut versuchen.';
 
     function getSentinel() {
         return document.getElementById('listSentinel');
@@ -14,6 +17,45 @@
 
     function getList() {
         return document.getElementById('Liste');
+    }
+
+    function setBarVisible(visible) {
+        var sentinel = getSentinel();
+        if(!sentinel) return;
+        if(visible) {
+            sentinel.className = 'w3-panel w3-padding w3-center w3-margin-top w3-light-grey';
+            sentinel.style.cssText = 'clear:both;';
+        }
+        else {
+            sentinel.className = '';
+            sentinel.style.cssText = 'clear:both;height:1px;padding:0;margin:0;';
+            sentinel.textContent = '';
+        }
+    }
+
+    function setStatus(text, isLoading) {
+        var sentinel = getSentinel();
+        if(!sentinel) return;
+        if(text) {
+            setBarVisible(true);
+            sentinel.textContent = text;
+        }
+        else {
+            setBarVisible(false);
+        }
+        if(isLoading) {
+            sentinel.setAttribute('aria-busy', 'true');
+        }
+        else {
+            sentinel.removeAttribute('aria-busy');
+        }
+    }
+
+    function showEnd() {
+        var sentinel = getSentinel();
+        if(!sentinel) return;
+        sentinel.setAttribute('data-has-more', '0');
+        setStatus(MSG_END, false);
     }
 
     function applyFilter(sentinel) {
@@ -51,6 +93,7 @@
 
         loading = true;
         if(observer) observer.unobserve(sentinel);
+        setStatus(MSG_LOADING, true);
 
         var url = 'getList.php?type=' + encodeURIComponent(type)
             + '&cursor=' + encodeURIComponent(cursor)
@@ -69,8 +112,11 @@
             if(xhr.readyState !== 4) return;
             loading = false;
             if(xhr.status < 200 || xhr.status >= 300) {
+                setStatus(MSG_ERROR, false);
                 if(observer && sentinel.getAttribute('data-has-more') === '1') {
-                    observer.observe(sentinel);
+                    setTimeout(function() {
+                        if(observer) observer.observe(sentinel);
+                    }, 500);
                 }
                 return;
             }
@@ -80,7 +126,6 @@
                 nextCursor = cursor;
                 hasMore = false;
             }
-            // Prevent tight loops that re-request the same cursor
             if(nextCursor === cursor) {
                 hasMore = false;
             }
@@ -91,11 +136,11 @@
             applyFilter(sentinel);
 
             if(!hasMore) {
-                sentinel.style.display = 'none';
+                showEnd();
                 return;
             }
+            setStatus('', false);
             if(observer) {
-                // Re-observe after layout so we only load again if still in view / user scrolls
                 setTimeout(function() {
                     if(sentinel.getAttribute('data-has-more') === '1') {
                         observer.observe(sentinel);
@@ -111,13 +156,11 @@
         var sentinel = getSentinel();
         if(!sentinel) return;
         if(sentinel.getAttribute('data-has-more') !== '1') {
-            sentinel.style.display = 'none';
+            showEnd();
             return;
         }
-        // Initial page already loaded first chunk; require a cursor for next page
         if(!sentinel.getAttribute('data-cursor')) {
-            sentinel.setAttribute('data-has-more', '0');
-            sentinel.style.display = 'none';
+            showEnd();
             return;
         }
 
