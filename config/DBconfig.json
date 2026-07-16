@@ -73,6 +73,8 @@
     "Inventory": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Typ": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Prefix": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Protected": {"Type": "tinyint", "Default": 0},
 	"Sortierung": {"Type": "int", "Default": 1}
     },
     "Loans": {

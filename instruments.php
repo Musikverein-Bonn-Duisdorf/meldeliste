@@ -55,7 +55,7 @@ if(requirePermission("perm_showInstruments")) {
       <h2>neues Instrument anlegen</h2>
     </header>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Inventarnummer</b></div>
+      <div class="w3-col l4 m6 s6"><b>Inventarnummer</b> <span class="w3-small">(<?php echo htmlspecialchars(RegNumber::displayInstrument(getNextRegNumber())); ?>)</span></div>
       <input name="RegNumber" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegNumber(); ?>" />
     </div>
     <div class="w3-row w3-padding">

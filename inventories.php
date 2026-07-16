@@ -55,14 +55,14 @@ if(requirePermission("perm_showInventories")) {
       <h2>neues Inventar anlegen</h2>
     </header>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Inventarnummer</b></div>
-      <input name="RegNumber" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegInventoryNumber(); ?>" />
-    </div>
-    <div class="w3-row w3-padding">
       <div class="w3-col l4 m6 s6"><b>Inventar</b></div>
-      <select class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Inventory">
+      <select id="newInventoryType" class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Inventory">
 	<?php echo inventoryOptionAll(0); ?>
       </select>
+    </div>
+    <div class="w3-row w3-padding">
+      <div class="w3-col l4 m6 s6"><b>Inventarnummer</b> <span class="w3-small" id="regPreview"></span></div>
+      <input id="newRegNumber" name="RegNumber" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegInventoryNumber(); ?>" />
     </div>
     <div class="w3-row w3-padding">
       <div class="w3-col l4 m6 s6"><b>Beschreibung</b></div>
@@ -112,6 +112,33 @@ if(requirePermission("perm_showInventories")) {
 ?>
 </div>
 <script src="js/filterInstruments.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script>
+var nextRegByType = <?php echo json_encode(RegNumber::nextMapForInventoryTypes()); ?>;
+var prefixByType = <?php
+$map = array();
+$sql = sprintf('SELECT `Index`, `Prefix` FROM `%sInventory`;', $GLOBALS['dbprefix']);
+$dbr = mysqli_query($GLOBALS['conn'], $sql);
+while($dbr && ($r = mysqli_fetch_array($dbr))) {
+    $map[(int)$r['Index']] = $r['Prefix'];
+}
+echo json_encode($map);
+?>;
+function updateNewRegNumber() {
+  var sel = document.getElementById('newInventoryType');
+  var inp = document.getElementById('newRegNumber');
+  var prev = document.getElementById('regPreview');
+  if(!sel || !inp) return;
+  var id = sel.value;
+  if(nextRegByType[id]) inp.value = nextRegByType[id];
+  var p = prefixByType[id] || 'X';
+  if(prev) prev.textContent = '(' + p + '-' + String(inp.value).padStart(3,'0') + ')';
+}
+var sel = document.getElementById('newInventoryType');
+if(sel) {
+  sel.addEventListener('change', updateNewRegNumber);
+  updateNewRegNumber();
+}
+</script>
 
 <?php }
     else {

@@ -88,6 +88,9 @@ if($u->hasInventories()) { ?>
       <?php if(requirePermission("perm_showInventories")) { ?>
          <a title="Inventar" alt="Inventar" href="inventories.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('inventories');?>"><i class="fas fa-shirt"></i> Inventar</a>
       <?php } ?>
+      <?php if(requirePermission("perm_editInventories")) { ?>
+         <a title="Inventar-Typen" alt="Inventar-Typen" href="inventory-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('inventory-types');?>"><i class="fas fa-tags"></i> Inventar-Typen</a>
+      <?php } ?>
       <?php if(requirePermission("perm_showLog")) { ?>
          <a title="Statistik" alt="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('evaluate');?>"><i class="fas fa-chart-pie"></i> Statistik</a>
          <a title="Logfile anschauen" alt="Logfile anschauen" href="log.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('log');?>"><i class="fas fa-poll"></i> Log</a>

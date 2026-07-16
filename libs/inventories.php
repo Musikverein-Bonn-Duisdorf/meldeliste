@@ -53,10 +53,10 @@ class Inventories
         $row = mysqli_fetch_array($dbr);
         $Instrument = $row['Typ'];
 
-        return sprintf("Inventory-ID: %d, Inventory: %s, Inventarnummer: %d, Beschreibung: %s, Kaufdatum: %s, Kaufpreis: %s, Kommentar: %s",
+        return sprintf("Inventory-ID: %d, Inventory: %s, Inventarnummer: %s, Beschreibung: %s, Kaufdatum: %s, Kaufpreis: %s, Kommentar: %s",
         $this->Index,
         $Instrument,
-        $this->RegNumber,
+        RegNumber::displayInventory($this->Inventory, $this->RegNumber),
         $this->Description,
         germanDate($this->PurchaseDate,0),
         mkPrize($this->PurchasePrize),
@@ -197,7 +197,7 @@ class Inventories
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
         $field->col(1,2,2);
-        $field->body=$row['RegNumber'];
+        $field->body=RegNumber::displayInventory($row['Inventory'], $row['RegNumber']);
         $str=$str.$field->print();
 
         $field = new div;
@@ -318,11 +318,18 @@ class Inventories
             $content->type="number";
             $content->name="RegNumber";
             $content->value=$this->RegNumber;
+            $str=$str.$content->print();
+            $hint = new div;
+            $hint->indent=$indent;
+            $hint->col(6,12,12);
+            $hint->class="w3-small";
+            $hint->body=RegNumber::displayInventory($this->Inventory, $this->RegNumber);
+            $str=$str.$hint->print();
         }
         else {
-            $content->body=$this->RegNumber;
+            $content->body=RegNumber::displayInventory($this->Inventory, $this->RegNumber);
+            $str=$str.$content->print();
         }
-        $str=$str.$content->print();
 
         $content = new div;
         $content->indent=$indent;

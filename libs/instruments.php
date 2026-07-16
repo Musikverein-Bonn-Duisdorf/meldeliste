@@ -61,10 +61,10 @@ class Instruments
         $row = mysqli_fetch_array($dbr);
         $Instrument = $row['Name'];
 
-        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %d, Hersteller: %s, Model: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
+        return sprintf("Instrument-ID: %d, Instrument: %s, Inventarnummer: %s, Hersteller: %s, Model: %s, Seriennummer: %s, Kaufdatum: %s, Kaufpreis: %s, Besitzer: %s, Versichert: %s, Kommentar: %s",
         $this->Index,
         $Instrument,
-        $this->RegNumber,
+        RegNumber::displayInstrument($this->RegNumber),
         $this->Vendor,
         $this->Model,
         $this->SerialNr,
@@ -219,7 +219,7 @@ class Instruments
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
         $field->col(1,1,1);
-        $field->body=$row['RegNumber'];
+        $field->body=RegNumber::displayInstrument($row['RegNumber']);
         $str=$str.$field->print();
 
         $field = new div;
@@ -355,11 +355,18 @@ class Instruments
             $content->type="number";
             $content->name="RegNumber";
             $content->value=$this->RegNumber;
+            $str=$str.$content->print();
+            $hint = new div;
+            $hint->indent=$indent;
+            $hint->col(6,12,12);
+            $hint->class="w3-small";
+            $hint->body=RegNumber::displayInstrument($this->RegNumber);
+            $str=$str.$hint->print();
         }
         else {
-            $content->body=$this->RegNumber;
+            $content->body=RegNumber::displayInstrument($this->RegNumber);
+            $str=$str.$content->print();
         }
-        $str=$str.$content->print();
 
         $content = new div;
         $content->indent=$indent;
@@ -896,7 +903,7 @@ class Instruments
         $field->indent=$indent;
         $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
         $field->col(1,1,1);
-        $field->body=$row['RegNumber'];
+        $field->body=RegNumber::displayInstrument($row['RegNumber']);
         $str=$str.$field->print();
 
         $field = new div;
