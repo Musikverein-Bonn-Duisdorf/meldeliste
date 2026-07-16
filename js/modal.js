@@ -40,6 +40,9 @@ function openModal(type, id, register) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
         }
+        else if(xhr.responseText) {
+            content.innerHTML = xhr.responseText;
+        }
         else {
             content.innerHTML = '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Modal konnte nicht geladen werden.</p></div>';
         }
