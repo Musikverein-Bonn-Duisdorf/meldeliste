@@ -23,8 +23,8 @@ $nMusiker = $row['Count'];
 <?php
 $chunk = listChunkUsers('mitglied', 0, 50);
 echo $chunk['html'];
+echo listChunkRenderSentinel('mitglied', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker');
 ?>
-<div<?php echo listChunkRenderSentinelAttrs('mitglied', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker'); ?>></div>
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
