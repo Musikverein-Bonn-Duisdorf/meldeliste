@@ -385,7 +385,8 @@ class Inventories
 
         $str = "";
 
-        $indent = 0;
+        // Start above 0: extracted from nested modal wrappers; loan loop still decrements
+        $indent = 2;
         $header = new div;
         $header->indent=$indent;
         $header->class="w3-container";
@@ -567,7 +568,7 @@ class Inventories
 
         }
         
-        $indent--;
+        $indent = 1;
         $modalrow = new div;
         $modalrow->indent=$indent;
         $modalrow->class="w3-padding w3-margin-bottom";
@@ -575,12 +576,12 @@ class Inventories
         $modalrow->body="<b>Leihhistorie:</b>";
         $str=$str.$modalrow->open();
 
-        $indent++;
+        $indent = 2;
         $modalrow2 = new div;
         $modalrow2->indent=$indent;
         $modalrow2->class="w3-row w3-center w3-padding w3-border-bottom";
         $str=$str.$modalrow2->open();
-        $indent++;
+        $indent = 3;
         $content = new div;
         $content->indent=$indent;
         $content->col(2,4,4);
@@ -603,7 +604,7 @@ class Inventories
 
         // --> new Loan
         if($canEdit) {
-            $indent--;
+            $indent = 2;
             $modalrow2 = new div;
             $modalrow2->indent=$indent;
             $modalrow2->class="w3-row w3-center w3-padding";
@@ -611,7 +612,7 @@ class Inventories
             $modalrow2->action="inventories.php";
             $modalrow2->method="POST";
             $str=$str.$modalrow2->open();
-            $indent++;
+            $indent = 3;
             $content = new div;
             $content->indent=$indent;
             $content->tag="input";
@@ -661,7 +662,7 @@ class Inventories
         for($i=0; $i<count($loans); $i++) {           
                 $L = new InventoriesLoan;
                 $L->load_by_id($loans[$i]);
-                $indent--;
+                $indent = 2;
                 $modalrow2 = new div;
                 $modalrow2->indent=$indent;
                 $modalrow2->class="w3-row w3-center w3-padding";
@@ -669,7 +670,7 @@ class Inventories
                     $modalrow2->class="w3-teal";
                 }
                 $str=$str.$modalrow2->open();
-                $indent++;
+                $indent = 3;
                 $content = new div;
                 $content->indent=$indent;
                 $content->col(2,4,4);

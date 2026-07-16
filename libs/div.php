@@ -101,7 +101,7 @@ class div
         $this->bold=true;
     }
     public function open() {
-        $str=str_repeat("\t", $this->indent);
+        $str=str_repeat("\t", max(0, (int)$this->indent));
         $str=$str."<".$this->tag;
         if($this->id) {
             $str=$str." id=\"".$this->id."\"";
@@ -163,13 +163,13 @@ class div
         return $str;
     }
     public function close() {
-        $str=str_repeat("\t", $this->indent);
+        $str=str_repeat("\t", max(0, (int)$this->indent));
         $str=$str."</".$this->tag.">\n";
         return $str;
     }
     public function print() {
         $str=$this->open();
-        if(!$this->body && $this->emptyBody == false) $str=$str.str_repeat("\t", $this->indent+1)."&nbsp;\n";
+        if(!$this->body && $this->emptyBody == false) $str=$str.str_repeat("\t", max(0, (int)$this->indent+1))."&nbsp;\n";
         $str=$str.$this->close();
         return $str;
     }

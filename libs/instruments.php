@@ -364,7 +364,8 @@ class Instruments
 
         $str = "";
 
-        $indent = 0;
+        // Start above 0: extracted from nested modal wrappers; loan loop still decrements
+        $indent = 2;
         $header = new div;
         $header->indent=$indent;
         $header->class="w3-container";
