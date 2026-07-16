@@ -86,9 +86,15 @@ class Inventory
 
         $inst = 0;
         if($this->Prefix === RegNumber::DEFAULT_INSTR_PREFIX || (int)$this->Protected === 1) {
-            $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sInstruments`;', $GLOBALS['dbprefix']);
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            if($dbr && ($row = mysqli_fetch_array($dbr))) $inst = (int)$row['CNT'];
+            $instrType = RegNumber::loadInstrType();
+            if($instrType) {
+                $sql = sprintf('SELECT COUNT(`Index`) AS `CNT` FROM `%sInventories` WHERE `Inventory` = %d;',
+                    $GLOBALS['dbprefix'],
+                    (int)$instrType->Index
+                );
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                if($dbr && ($row = mysqli_fetch_array($dbr))) $inst = (int)$row['CNT'];
+            }
         }
         return array('inventories' => $inv, 'instruments' => $inst);
     }

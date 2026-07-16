@@ -90,9 +90,12 @@ class RegNumber
     }
 
     public static function nextForInstruments() {
+        $type = self::loadInstrType();
+        if(!$type || !$type->Index) return 1;
         $sql = sprintf(
-            'SELECT MAX(`RegNumber`) AS `M` FROM `%sInstruments`;',
-            $GLOBALS['dbprefix']
+            'SELECT MAX(`RegNumber`) AS `M` FROM `%sInventories` WHERE `Inventory` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$type->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -102,14 +105,13 @@ class RegNumber
     }
 
     /**
-     * Map of inventory type Index => next RegNumber (excludes INSTR series types for item forms).
+     * Map of inventory type Index => next RegNumber (includes INSTR series types).
      */
     public static function nextMapForInventoryTypes() {
         $map = array();
         $sql = sprintf(
-            'SELECT `Index` FROM `%sInventory` WHERE `Prefix` IS NULL OR `Prefix` != "%s" ORDER BY `Sortierung`;',
-            $GLOBALS['dbprefix'],
-            mysqli_real_escape_string($GLOBALS['conn'], self::DEFAULT_INSTR_PREFIX)
+            'SELECT `Index` FROM `%sInventory` ORDER BY `Sortierung`;',
+            $GLOBALS['dbprefix']
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         if(!$dbr) return $map;
@@ -171,57 +173,161 @@ class RegNumber
     }
 
     /**
-     * Port existing instrument RegNumbers into INSTR series (display mapping; INT unchanged).
+     * Migrate legacy Instruments (+ Loans) into Inventories (+ InventoriesLoans), then DROP old tables.
+     * Idempotent: if Instruments table is already gone, reports ok.
      */
     public static function migrateInstruments() {
-        self::ensureInstrType();
-        $sql = sprintf(
-            'SELECT COUNT(`Index`) AS `CNT`, MAX(`RegNumber`) AS `M` FROM `%sInstruments` WHERE `RegNumber` IS NOT NULL AND `RegNumber` > 0;',
-            $GLOBALS['dbprefix']
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        $row = $dbr ? mysqli_fetch_array($dbr) : null;
-        $count = $row ? (int)$row['CNT'] : 0;
-        $max = ($row && $row['M'] !== null) ? (int)$row['M'] : 0;
-
-        $already = false;
-        if(isset($GLOBALS['optionsDB'][self::CONFIG_MIGRATED]) && $GLOBALS['optionsDB'][self::CONFIG_MIGRATED]) {
-            $already = true;
+        $instrTable = new SQLtable('Instruments');
+        if(!$instrTable->exists()) {
+            return array(
+                'status' => 'ok',
+                'message' => 'Instruments-Tabelle bereits migriert/entfernt',
+                'count' => 0,
+                'dropped' => false
+            );
         }
-        else {
-            // Persist flag in config if table exists
-            $check = sprintf(
-                "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+
+        $ensured = self::ensureInstrType();
+        if(isset($ensured['status']) && $ensured['status'] === 'error') {
+            return array('status' => 'error', 'message' => $ensured['message'], 'detail' => isset($ensured['detail']) ? $ensured['detail'] : null);
+        }
+        $type = self::loadInstrType();
+        if(!$type || !$type->Index) {
+            return array('status' => 'error', 'message' => 'INSTR-Typ fehlt, Migration abgebrochen');
+        }
+        $typeId = (int)$type->Index;
+
+        $idMap = array(); // old Instruments.Index => new Inventories.Index
+        $sql = sprintf('SELECT * FROM `%sInstruments` ORDER BY `Index`;', $GLOBALS['dbprefix']);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if(!$dbr) {
+            return array(
+                'status' => 'error',
+                'message' => 'Instruments nicht lesbar',
+                'detail' => mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+            );
+        }
+
+        $copied = 0;
+        while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+            $oldId = (int)$row['Index'];
+            $desc = trim(
+                (isset($row['Vendor']) ? $row['Vendor'] : '').
+                ((isset($row['Model']) && $row['Model'] !== '') ? ' '.$row['Model'] : '')
+            );
+            $insert = sprintf(
+                'INSERT INTO `%sInventories` (`RegNumber`, `Inventory`, `Instrument`, `Description`, `Vendor`, `Model`, `SerialNr`, `PurchaseDate`, `PurchasePrize`, `Owner`, `Insurance`, `Comment`) VALUES (%s, %d, %s, "%s", "%s", "%s", "%s", %s, "%s", %s, %d, "%s");',
+                $GLOBALS['dbprefix'],
+                $row['RegNumber'] === null || $row['RegNumber'] === '' ? 'NULL' : (int)$row['RegNumber'],
+                $typeId,
+                $row['Instrument'] === null || $row['Instrument'] === '' ? 'NULL' : (int)$row['Instrument'],
+                mysqli_real_escape_string($GLOBALS['conn'], $desc),
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$row['Vendor']),
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$row['Model']),
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$row['SerialNr']),
+                mkNULLstr(isset($row['PurchaseDate']) ? $row['PurchaseDate'] : null),
+                mysqli_real_escape_string($GLOBALS['conn'], (string)mkEmpty($row['PurchasePrize'])),
+                $row['Owner'] === null || $row['Owner'] === '' ? 'NULL' : (int)$row['Owner'],
+                (int)$row['Insurance'],
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$row['Comment'])
+            );
+            if(!mysqli_query($GLOBALS['conn'], $insert)) {
+                return array(
+                    'status' => 'error',
+                    'message' => "Instrument $oldId konnte nicht übernommen werden",
+                    'detail' => mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn']),
+                    'copied' => $copied
+                );
+            }
+            $idMap[$oldId] = (int)mysqli_insert_id($GLOBALS['conn']);
+            $copied++;
+        }
+
+        $loansCopied = 0;
+        $loansTable = new SQLtable('Loans');
+        if($loansTable->exists()) {
+            $sql = sprintf('SELECT * FROM `%sLoans` ORDER BY `Index`;', $GLOBALS['dbprefix']);
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            if($dbr) {
+                while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+                    $oldInstr = (int)$row['Instrument'];
+                    if(!isset($idMap[$oldInstr])) continue;
+                    $ins = sprintf(
+                        'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `ContractFile`) VALUES (%d, %d, %s, %s, "%s");',
+                        $GLOBALS['dbprefix'],
+                        (int)$row['User'],
+                        $idMap[$oldInstr],
+                        mkNULLstr(isset($row['StartDate']) ? $row['StartDate'] : null),
+                        mkNULLstr(isset($row['EndDate']) ? $row['EndDate'] : null),
+                        mysqli_real_escape_string($GLOBALS['conn'], (string)$row['ContractFile'])
+                    );
+                    if(mysqli_query($GLOBALS['conn'], $ins)) $loansCopied++;
+                }
+            }
+        }
+
+        // Drop legacy tables only after successful copy
+        $dropOk = true;
+        $detail = '';
+        if($loansTable->exists()) {
+            $drop = sprintf('DROP TABLE `%sLoans`;', $GLOBALS['dbprefix']);
+            if(!mysqli_query($GLOBALS['conn'], $drop)) {
+                $dropOk = false;
+                $detail = mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn']);
+            }
+        }
+        $drop = sprintf('DROP TABLE `%sInstruments`;', $GLOBALS['dbprefix']);
+        if(!mysqli_query($GLOBALS['conn'], $drop)) {
+            $dropOk = false;
+            $detail = mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn']);
+        }
+
+        if(!$dropOk) {
+            return array(
+                'status' => 'error',
+                'message' => "Daten kopiert ($copied Instrumente, $loansCopied Ausleihen), aber DROP fehlgeschlagen",
+                'detail' => $detail,
+                'count' => $copied,
+                'loans' => $loansCopied,
+                'dropped' => false
+            );
+        }
+
+        // Mark migrated in config (optional bookkeeping)
+        $check = sprintf(
+            "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+            $GLOBALS['dbprefix'],
+            self::CONFIG_MIGRATED
+        );
+        $dbr2 = mysqli_query($GLOBALS['conn'], $check);
+        $r2 = $dbr2 ? mysqli_fetch_array($dbr2) : null;
+        if(!$r2) {
+            $ins = sprintf(
+                "INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '1', 'bool', 'Instruments nach Inventories migriert, alte Tabelle entfernt');",
                 $GLOBALS['dbprefix'],
                 self::CONFIG_MIGRATED
             );
-            $dbr2 = mysqli_query($GLOBALS['conn'], $check);
-            $r2 = $dbr2 ? mysqli_fetch_array($dbr2) : null;
-            if($r2) {
-                $already = true;
-            }
-            else {
-                $ins = sprintf(
-                    "INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '1', 'bool', 'Instrument-RegNumbers dem INSTR-Kreis zugeordnet');",
-                    $GLOBALS['dbprefix'],
-                    self::CONFIG_MIGRATED
-                );
-                mysqli_query($GLOBALS['conn'], $ins);
-            }
+            mysqli_query($GLOBALS['conn'], $ins);
+        }
+        else {
+            $upd = sprintf(
+                "UPDATE `%sconfig` SET `Value` = '1', `Description` = 'Instruments nach Inventories migriert, alte Tabelle entfernt' WHERE `Parameter` = '%s';",
+                $GLOBALS['dbprefix'],
+                self::CONFIG_MIGRATED
+            );
+            mysqli_query($GLOBALS['conn'], $upd);
         }
 
-        $prefix = self::instrumentPrefix();
         return array(
-            'status' => $already ? 'ok' : 'created',
+            'status' => 'created',
             'message' => sprintf(
-                '%d Instrument(e) im Kreis %s (max %d)%s',
-                $count,
-                $prefix,
-                $max,
-                $already ? ' — bereits migriert' : ' — Migration markiert'
+                '%d Instrument(e) und %d Ausleihe(n) nach Inventories übernommen; Instruments/Loans gelöscht',
+                $copied,
+                $loansCopied
             ),
-            'count' => $count,
-            'max' => $max
+            'count' => $copied,
+            'loans' => $loansCopied,
+            'dropped' => true
         );
     }
 }
