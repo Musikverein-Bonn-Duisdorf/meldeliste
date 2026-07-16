@@ -193,6 +193,37 @@ class MailOutbox
     }
 
     /**
+     * Reclaim rows stuck in "sending" (previous worker died / timed out).
+     * Safe at the start of a queue run before claiming new work.
+     * @return int number of rows reset to pending
+     */
+    public static function reclaimStuckSending($olderThanMinutes = 10) {
+        // $olderThanMinutes kept for API compatibility; we reset all "sending"
+        // because a live worker holds them only during the current request.
+        unset($olderThanMinutes);
+        $sql = sprintf(
+            'UPDATE `%sMailOutbox` SET `Status` = "pending" WHERE `Status` = "sending";',
+            $GLOBALS['dbprefix']
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return 0;
+        }
+        if(!$dbr) return 0;
+        $n = mysqli_affected_rows($GLOBALS['conn']);
+        if($n > 0) {
+            $logentry = new Log;
+            $logentry->warning(sprintf(
+                'Mail-Queue: <b>%d</b> hängende Einträge (Status sending) zurück auf pending gesetzt',
+                $n
+            ));
+        }
+        return max(0, $n);
+    }
+
+    /**
      * Claim up to $limit pending rows for sending.
      * @return MailOutbox[]
      */
