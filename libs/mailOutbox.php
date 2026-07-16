@@ -193,13 +193,11 @@ class MailOutbox
     }
 
     /**
-     * Reclaim rows stuck in "sending" (previous worker died / timed out).
-     * Safe at the start of a queue run before claiming new work.
+     * Reclaim rows stuck in "sending" after a crashed worker.
+     * Call only while holding the processQueue exclusive lock.
      * @return int number of rows reset to pending
      */
-    public static function reclaimStuckSending($olderThanMinutes = 10) {
-        // $olderThanMinutes kept for API compatibility; we reset all "sending"
-        // because a live worker holds them only during the current request.
+    public static function reclaimStuckSending($olderThanMinutes = null) {
         unset($olderThanMinutes);
         $sql = sprintf(
             'UPDATE `%sMailOutbox` SET `Status` = "pending" WHERE `Status` = "sending";',
