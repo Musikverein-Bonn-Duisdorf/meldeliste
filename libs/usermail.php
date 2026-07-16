@@ -100,6 +100,13 @@ class Usermail {
         $mail->Subject = $GLOBALS['mailconfig']['subjectprefix'].$this->subject;
         $style=file_get_contents("styles/w3.css");
         $style=$style.file_get_contents("styles/w3-colors-highway.css");
+        if(is_readable("styles/w3-color-mvd.css")) {
+            $style=$style.file_get_contents("styles/w3-color-mvd.css");
+        }
+        elseif(is_readable("styles/w3-colors-mvd.css")) {
+            $style=$style.file_get_contents("styles/w3-colors-mvd.css");
+        }
+        $style=$style.renderConfigColorCss(false);
         $register = '';
         if($this->User > 0) {
             $sql = sprintf("SELECT * FROM `%sUser` WHERE `Index` = %d AND `Deleted` != 1;",
