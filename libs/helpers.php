@@ -1031,6 +1031,74 @@ function mailBodyLooksLikeHtml($text) {
 }
 
 /**
+ * Allow only safe CSS declarations for mail HTML (color, size, align).
+ */
+function sanitizeMailHtmlStyleAttr($style) {
+    $allowed = array(
+        'color' => true,
+        'background-color' => true,
+        'font-size' => true,
+        'font-family' => true,
+        'font-weight' => true,
+        'font-style' => true,
+        'text-decoration' => true,
+        'text-align' => true,
+    );
+    $out = array();
+    foreach(explode(';', (string)$style) as $part) {
+        $part = trim($part);
+        if($part === '' || strpos($part, ':') === false) {
+            continue;
+        }
+        list($prop, $val) = array_map('trim', explode(':', $part, 2));
+        $prop = strtolower($prop);
+        if(!isset($allowed[$prop])) {
+            continue;
+        }
+        if(preg_match('/expression|javascript|import|@import|url\s*\(/i', $val)) {
+            continue;
+        }
+        if($prop === 'color' || $prop === 'background-color') {
+            if(!preg_match('/^(#[0-9a-f]{3,8}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*[\d.]+)?\s*\)|[a-z]+)$/i', $val)) {
+                continue;
+            }
+        }
+        elseif($prop === 'font-size') {
+            if(!preg_match('/^[\d.]+(px|pt|em|rem|%)$/i', $val)) {
+                continue;
+            }
+        }
+        elseif($prop === 'font-family') {
+            if(!preg_match('/^[a-z0-9\s,"\'\-]+$/i', $val)) {
+                continue;
+            }
+        }
+        elseif($prop === 'text-align') {
+            if(!in_array(strtolower($val), array('left', 'right', 'center', 'justify'), true)) {
+                continue;
+            }
+        }
+        elseif($prop === 'font-weight') {
+            if(!preg_match('/^(normal|bold|bolder|lighter|[1-9]00)$/i', $val)) {
+                continue;
+            }
+        }
+        elseif($prop === 'font-style') {
+            if(!in_array(strtolower($val), array('normal', 'italic', 'oblique'), true)) {
+                continue;
+            }
+        }
+        elseif($prop === 'text-decoration') {
+            if(!preg_match('/^(none|underline|line-through)(\s+(none|underline|line-through))*$/i', $val)) {
+                continue;
+            }
+        }
+        $out[] = $prop.': '.$val;
+    }
+    return implode('; ', $out);
+}
+
+/**
  * Allowlist-sanitize HTML for email bodies (MELD-46).
  */
 function sanitizeMailHtml($html) {
@@ -1040,11 +1108,16 @@ function sanitizeMailHtml($html) {
     }
     $html = preg_replace('#<(script|iframe|object|embed|form|input|button|link|meta|style|svg|math)(\s[^>]*)?>[\s\S]*?</\1>#i', '', $html);
     $html = preg_replace('#<(script|iframe|object|embed|form|input|button|link|meta|style|svg|math)(\s[^>]*)?/?>#i', '', $html);
-    $html = strip_tags($html, '<p><br><b><strong><i><em><u><ul><ol><li><a><h1><h2><h3><h4><blockquote>');
+    $html = strip_tags($html, '<p><br><b><strong><i><em><u><s><strike><ul><ol><li><a><h1><h2><h3><h4><blockquote><span><div>');
     $html = preg_replace('/\son[a-z]+\s*=\s*("|\')[\s\S]*?\1/i', '', $html);
     $html = preg_replace('/\son[a-z]+\s*=\s*[^\s>]+/i', '', $html);
     $html = preg_replace('/\s(href|src)\s*=\s*("|\')\s*javascript:[^"\']*\2/i', ' href="#"', $html);
     $html = preg_replace('/\s(href|src)\s*=\s*javascript:[^\s>]+/i', ' href="#"', $html);
+    $html = preg_replace('/\s(class|id|data-[\w-]+)\s*=\s*("|\')[\s\S]*?\2/i', '', $html);
+    $html = preg_replace_callback('/\sstyle\s*=\s*("|\')(.*?)\1/is', function($m) {
+        $clean = sanitizeMailHtmlStyleAttr($m[2]);
+        return $clean !== '' ? ' style="'.htmlspecialchars($clean, ENT_QUOTES, 'UTF-8').'"' : '';
+    }, $html);
     return $html;
 }
 

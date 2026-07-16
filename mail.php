@@ -415,15 +415,30 @@ foreach($allJobs as $rowJob) {
     menubar: false,
     branding: false,
     promotion: false,
-    height: 320,
+    height: 360,
     plugins: 'lists link autolink',
-    toolbar: 'undo redo | bold italic underline | bullist numlist | link | removeformat',
+    toolbar: 'undo redo | blocks | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | link | removeformat',
+    block_formats: 'Absatz=p; Überschrift 2=h2; Überschrift 3=h3; Überschrift 4=h4',
+    font_family_formats: 'Arial=arial,helvetica,sans-serif; Georgia=georgia,serif; Times New Roman=times new roman,times,serif; Verdana=verdana,geneva,sans-serif; Courier New=courier new,courier,monospace',
+    font_size_formats: '10pt 12pt 14pt 16pt 18pt 24pt 36pt',
+    color_map: [
+      '000000', 'Schwarz',
+      '333333', 'Dunkelgrau',
+      'FFFFFF', 'Weiß',
+      'E53935', 'Rot',
+      'FB8C00', 'Orange',
+      'FDD835', 'Gelb',
+      '43A047', 'Grün',
+      '1E88E5', 'Blau',
+      '8E24AA', 'Violett',
+      '6D4C41', 'Braun'
+    ],
     link_default_target: '_blank',
     link_assume_external_targets: true,
     convert_urls: false,
     relative_urls: false,
     entity_encoding: 'raw',
-    content_style: 'body { font-family: sans-serif; font-size: 14px; }',
+    content_style: 'body { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; }',
     setup: function (editor) {
       var form = document.querySelector('form[name="mailform"]') || editor.getElement().form;
       if (form) {
