@@ -30,15 +30,32 @@ class Config
         }	
     }
 
+    public function getVars() {
+        return sprintf(
+            'Config-ID: %d, Parameter: <b>%s</b>, Value: <b>%s</b>, Type: <b>%s</b>',
+            (int)$this->Index,
+            htmlspecialchars((string)$this->Parameter, ENT_QUOTES, 'UTF-8'),
+            formatConfigLogValue($this->Value, (string)$this->Type),
+            htmlspecialchars((string)$this->Type, ENT_QUOTES, 'UTF-8')
+        );
+    }
+
     public function getChanges() {
         $old = new Config;
         $old->load_by_id($this->Index);
         
         $str = sprintf("Config-ID: %d <b>%s</b>",
         $this->Index,
-        $this->Parameter
+        htmlspecialchars((string)$this->Parameter, ENT_QUOTES, 'UTF-8')
         );
-        if($this->Value != $old->Value) $str.=", Value: ".$old->Value." &rArr; <b>".$this->Value."</b>";
+        if($this->Value != $old->Value) {
+            $str.=", Value: ".formatConfigLogValue($old->Value, (string)$this->Type)
+                ." &rArr; <b>".formatConfigLogValue($this->Value, (string)$this->Type)."</b>";
+        }
+        if($this->Type != $old->Type) {
+            $str.=", Type: ".htmlspecialchars((string)$old->Type, ENT_QUOTES, 'UTF-8')
+                ." &rArr; <b>".htmlspecialchars((string)$this->Type, ENT_QUOTES, 'UTF-8')."</b>";
+        }
 
         return $str;
     }
@@ -46,14 +63,14 @@ class Config
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
-            $logentry = new Log;
-            $logentry->DBinsert($this->getChanges());
             $this->insert();
+            $logentry = new Log;
+            $logentry->DBinsert($this->getVars());
         }
     }
 
@@ -79,10 +96,11 @@ class Config
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s", `Type` = "%s";',
+        $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s", `Type` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
-        $this->Value,
-        $this->Type
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Value),
+        mysqli_real_escape_string($GLOBALS['conn'], $this->Type),
+        (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
