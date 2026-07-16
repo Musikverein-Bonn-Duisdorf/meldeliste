@@ -12,6 +12,7 @@ class MailOutbox
         'Attempts' => 0,
         'LastError' => null,
         'SentAt' => null,
+        'LockedAt' => null,
         'ReadAt' => null,
         'DeletedByUser' => 0,
         'Created' => null,
@@ -39,6 +40,7 @@ class MailOutbox
         case 'Status':
         case 'LastError':
         case 'SentAt':
+        case 'LockedAt':
         case 'ReadAt':
         case 'Created':
             $this->_data[$key] = $val === null ? null : trim((string)$val);
@@ -71,7 +73,7 @@ class MailOutbox
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sMailOutbox` (`Job`, `User`, `ToEmail`, `Subject`, `BodyText`, `Status`, `Attempts`, `LastError`, `SentAt`, `ReadAt`, `DeletedByUser`) VALUES (%d, %d, "%s", "%s", "%s", "%s", %d, %s, %s, %s, %d);',
+            'INSERT INTO `%sMailOutbox` (`Job`, `User`, `ToEmail`, `Subject`, `BodyText`, `Status`, `Attempts`, `LastError`, `SentAt`, `LockedAt`, `ReadAt`, `DeletedByUser`) VALUES (%d, %d, "%s", "%s", "%s", "%s", %d, %s, %s, %s, %s, %d);',
             $GLOBALS['dbprefix'],
             (int)$this->Job,
             (int)$this->User,
@@ -82,6 +84,7 @@ class MailOutbox
             (int)$this->Attempts,
             $this->sqlNullableString($this->LastError),
             $this->sqlNullableString($this->SentAt),
+            $this->sqlNullableString($this->LockedAt),
             $this->sqlNullableString($this->ReadAt),
             (int)$this->DeletedByUser
         );
@@ -94,7 +97,7 @@ class MailOutbox
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailOutbox` SET `Job`=%d, `User`=%d, `ToEmail`="%s", `Subject`="%s", `BodyText`="%s", `Status`="%s", `Attempts`=%d, `LastError`=%s, `SentAt`=%s, `ReadAt`=%s, `DeletedByUser`=%d WHERE `Index`=%d;',
+            'UPDATE `%sMailOutbox` SET `Job`=%d, `User`=%d, `ToEmail`="%s", `Subject`="%s", `BodyText`="%s", `Status`="%s", `Attempts`=%d, `LastError`=%s, `SentAt`=%s, `LockedAt`=%s, `ReadAt`=%s, `DeletedByUser`=%d WHERE `Index`=%d;',
             $GLOBALS['dbprefix'],
             (int)$this->Job,
             (int)$this->User,
@@ -105,6 +108,7 @@ class MailOutbox
             (int)$this->Attempts,
             $this->sqlNullableString($this->LastError),
             $this->sqlNullableString($this->SentAt),
+            $this->sqlNullableString($this->LockedAt),
             $this->sqlNullableString($this->ReadAt),
             (int)$this->DeletedByUser,
             (int)$this->Index
@@ -193,15 +197,18 @@ class MailOutbox
     }
 
     /**
-     * Reclaim rows stuck in "sending" after a crashed worker.
-     * Call only while holding the processQueue exclusive lock.
-     * @return int number of rows reset to pending
+     * Reclaim only stale "sending" rows (worker crashed). Never touch fresh locks.
+     * @param int $olderThanMinutes
+     * @return int
      */
-    public static function reclaimStuckSending($olderThanMinutes = null) {
-        unset($olderThanMinutes);
+    public static function reclaimStuckSending($olderThanMinutes = 5) {
+        $olderThanMinutes = max(2, (int)$olderThanMinutes);
         $sql = sprintf(
-            'UPDATE `%sMailOutbox` SET `Status` = "pending" WHERE `Status` = "sending";',
-            $GLOBALS['dbprefix']
+            'UPDATE `%sMailOutbox` SET `Status` = "pending", `LockedAt` = NULL
+             WHERE `Status` = "sending"
+               AND (`LockedAt` IS NULL OR `LockedAt` < (NOW() - INTERVAL %d MINUTE));',
+            $GLOBALS['dbprefix'],
+            $olderThanMinutes
         );
         try {
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -214,8 +221,9 @@ class MailOutbox
         if($n > 0) {
             $logentry = new Log;
             $logentry->warning(sprintf(
-                'Mail-Queue: <b>%d</b> hängende Einträge (Status sending) zurück auf pending gesetzt',
-                $n
+                'Mail-Queue: <b>%d</b> hängende Einträge (sending älter als %d Min.) zurück auf pending gesetzt',
+                $n,
+                $olderThanMinutes
             ));
         }
         return max(0, $n);
@@ -242,13 +250,14 @@ class MailOutbox
             $item = new MailOutbox;
             $item->fill_from_array($row);
             $claim = sprintf(
-                'UPDATE `%sMailOutbox` SET `Status` = "sending" WHERE `Index` = %d AND `Status` = "pending";',
+                'UPDATE `%sMailOutbox` SET `Status` = "sending", `LockedAt` = NOW() WHERE `Index` = %d AND `Status` = "pending";',
                 $GLOBALS['dbprefix'],
                 (int)$item->Index
             );
             $ok = mysqli_query($GLOBALS['conn'], $claim);
             if($ok && mysqli_affected_rows($GLOBALS['conn']) === 1) {
                 $item->Status = 'sending';
+                $item->LockedAt = date('Y-m-d H:i:s');
                 $rows[] = $item;
             }
         }

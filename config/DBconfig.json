@@ -104,6 +104,7 @@
 	"Attempts": {"Type": "int", "Default": 0},
 	"LastError": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
 	"SentAt": {"Type": "timestamp", "Null": "YES", "Default": null},
+	"LockedAt": {"Type": "timestamp", "Null": "YES", "Default": null},
 	"ReadAt": {"Type": "timestamp", "Null": "YES", "Default": null},
 	"DeletedByUser": {"Type": "tinyint", "Default": 0},
 	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
