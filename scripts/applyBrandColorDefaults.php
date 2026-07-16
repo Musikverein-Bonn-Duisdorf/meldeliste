@@ -1,9 +1,11 @@
 <?php
 /**
- * Apply color defaults from ConfigDefaults to the existing config table.
- * Does not run automatically — for local testing / intentional brand reset.
+ * Seed/update color schemes and apply the classic (or given) scheme.
  *
- * Usage: php scripts/applyBrandColorDefaults.php
+ * Usage:
+ *   php scripts/applyBrandColorDefaults.php
+ *   php scripts/applyBrandColorDefaults.php classic|light|dark|gold|soft
+ *   php scripts/applyBrandColorDefaults.php --reset-schemes
  */
 if(php_sapi_name() !== 'cli') {
     fwrite(STDERR, "CLI only.\n");
@@ -18,7 +20,17 @@ if(!is_readable($configFile)) {
 }
 
 require_once $configFile;
+
+if(!function_exists('sqlerror')) {
+    function sqlerror() {
+        if(!isset($GLOBALS['conn']) || !mysqli_errno($GLOBALS['conn'])) return;
+        fwrite(STDERR, "SQL ERROR ".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."\n");
+    }
+}
+
 require_once $root.'/config/ConfigDefaults.php';
+require_once $root.'/libs/helpers.php';
+require_once $root.'/libs/colorschemes.php';
 
 if(!isset($GLOBALS['conn']) || !$GLOBALS['conn']) {
     fwrite(STDERR, "No DB connection.\n");
@@ -27,51 +39,64 @@ if(!isset($GLOBALS['conn']) || !$GLOBALS['conn']) {
 
 $conn = $GLOBALS['conn'];
 $prefix = $GLOBALS['dbprefix'];
-$updated = 0;
-$skipped = 0;
-$missing = 0;
 
+// Ensure new config params exist
 foreach(getConfigDefaults() as $item) {
-    if(!isset($item['Type']) || $item['Type'] !== 'color') {
-        continue;
-    }
     $param = $item['Parameter'];
-    $value = (string)$item['Value'];
-
     $sql = sprintf(
-        "SELECT `Value` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+        "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
         $prefix,
         mysqli_real_escape_string($conn, $param)
     );
     $dbr = mysqli_query($conn, $sql);
-    if(!$dbr) {
-        fwrite(STDERR, "SQL ERROR ".mysqli_errno($conn).": ".mysqli_error($conn)."\n");
-        exit(1);
-    }
-    $row = mysqli_fetch_assoc($dbr);
-    if(!$row) {
-        echo "MISSING\t".$param."\n";
-        $missing++;
+    $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+    if($row) {
         continue;
     }
-    if((string)$row['Value'] === $value) {
-        echo "OK\t".$param."\n";
-        $skipped++;
-        continue;
-    }
-    $sql = sprintf(
-        "UPDATE `%sconfig` SET `Value` = '%s' WHERE `Parameter` = '%s';",
+    $insert = sprintf(
+        "INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '%s', '%s', '%s');",
         $prefix,
-        mysqli_real_escape_string($conn, $value),
-        mysqli_real_escape_string($conn, $param)
+        mysqli_real_escape_string($conn, $param),
+        mysqli_real_escape_string($conn, (string)$item['Value']),
+        mysqli_real_escape_string($conn, $item['Type']),
+        mysqli_real_escape_string($conn, $item['Description'])
     );
-    if(!mysqli_query($conn, $sql)) {
+    if(mysqli_query($conn, $insert)) {
+        echo "CREATED\t".$param."\n";
+    }
+    else {
         fwrite(STDERR, "SQL ERROR ".mysqli_errno($conn).": ".mysqli_error($conn)."\n");
         exit(1);
     }
-    echo "UPDATED\t".$param."\t".($row['Value'] === '' ? '(empty)' : $row['Value'])." -> ".($value === '' ? '(empty)' : $value)."\n";
-    $updated++;
 }
 
-echo "\nDone. updated=".$updated." unchanged=".$skipped." missing=".$missing."\n";
-exit($missing > 0 ? 2 : 0);
+$resetSchemes = in_array('--reset-schemes', $argv, true);
+$schemeId = 'classic';
+foreach(array_slice($argv, 1) as $arg) {
+    if($arg === '--reset-schemes') continue;
+    $schemeId = $arg;
+}
+
+if($resetSchemes || getConfigParamRawValue('colorSchemes') === null || trim((string)getConfigParamRawValue('colorSchemes')) === '') {
+    saveColorSchemes(getDefaultColorSchemes());
+    echo "SCHEMES\tseeded factory defaults\n";
+}
+else {
+    ensureColorSchemesStored();
+}
+
+$schemes = loadColorSchemes();
+if(!isset($schemes[$schemeId])) {
+    fwrite(STDERR, "Unknown scheme: ".$schemeId."\n");
+    fwrite(STDERR, "Available: ".implode(', ', array_keys($schemes))."\n");
+    exit(1);
+}
+
+if(!applyColorScheme($schemeId)) {
+    fwrite(STDERR, "Failed to apply scheme ".$schemeId."\n");
+    exit(1);
+}
+
+echo "APPLIED\t".$schemeId." (".$schemes[$schemeId]['name'].")\n";
+echo "Done.\n";
+exit(0);
