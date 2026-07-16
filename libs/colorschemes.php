@@ -76,27 +76,42 @@ function buildBrandSchemeColors($chrome) {
 function getDefaultColorSchemes() {
     $p = getBrandPalette();
     return array(
-        // Website-nah: Creme-Grund, Primärblau, Gold-Akzent
+        // Live-Produktion (IONOS): w3-mvd-* / Status-Farben als Hex
         'classic' => array(
             'name' => 'Klassisch',
-            'colors' => buildBrandSchemeColors(array(
-                'colorBackground' => $p['egg'],
-                'colorInputBackground' => $p['white'],
-                'colorTitle' => $p['blue'],
-                'colorTitleBar' => $p['blue'],
-                'colorNav' => $p['blue'],
-                'colorNavAdmin' => $p['darkGray'],
-                'colorBtnSubmit' => $p['blue'],
-                'colorBtnEdit' => $p['lightBlue'],
-                'colorBtnMaybe' => $p['lightBlue'],
-                'colorWarning' => $p['gold'],
-                'colorUserMember' => $p['lightBlue'],
-                'colorAppmntConcert' => $p['lightBlue'],
-                'colorAppmntMaybe' => $p['gold'],
-                'colorLogWarning' => $p['blue'],
-                'colorLogDBUpdate' => $p['egg'],
-                'colorLogInfo' => $p['lightBlue'],
-            )),
+            'colors' => array(
+                'colorBackground' => '#FDFFFC',       // w3-mvd-white
+                'colorTitle' => '#FDF9E7',             // w3-mvd-egg
+                'colorTitleBar' => '#345A95',          // w3-mvd-blue
+                'colorWarning' => '#FDF9E7',           // w3-mvd-egg
+                'colorBtnDelete' => '#F44336',         // w3-red
+                'colorInputBackground' => '#F1F1F1',   // w3-light-gray
+                'colorBtnSubmit' => '#9C27B0',         // w3-purple
+                'colorUserNoMember' => '#FDF9E7',      // w3-mvd-egg
+                'colorUserMember' => '#345A95',        // w3-mvd-blue
+                'colorLogDefault' => '#FDFFFC',        // w3-mvd-white
+                'colorLogFatal' => '#F44336',          // w3-red
+                'colorLogError' => '#FFC300',          // w3-mvd-yellow
+                'colorLogWarning' => '#FFC300',        // w3-mvd-yellow
+                'colorLogDBDelete' => '#FDFFFC',       // w3-mvd-white
+                'colorLogDBInsert' => '#FDFFFC',       // w3-mvd-white
+                'colorLogDBUpdate' => '#FDFFFC',       // w3-mvd-white
+                'colorLogEmail' => '#FDFFFC',          // w3-mvd-white
+                'colorLogInfo' => '#FDFFFC',           // w3-mvd-white
+                'colorAppmntConcert' => '#FDF9E7',     // w3-mvd-egg
+                'colorAppmntNoConcert' => '#FDFFFC',   // w3-mvd-white
+                'colorAppmntYes' => '#004D33',         // w3-highway-green
+                'colorAppmntNo' => '#A6001A',          // w3-highway-red
+                'colorAppmntMaybe' => '#00477E',       // w3-highway-blue
+                'colorBtnYes' => '#4CAF50',            // w3-green
+                'colorBtnNo' => '#F44336',             // w3-red
+                'colorBtnMaybe' => '#2196F3',          // w3-blue
+                'colorDisabled' => '#9E9E9E',          // w3-gray
+                'colorBtnEdit' => '#009688',           // w3-teal
+                'colorSuccess' => '#4CAF50',           // w3-green
+                'colorNav' => '#969696',               // w3-mvd-gray
+                'colorNavAdmin' => '#607D8B',          // w3-blue-gray
+            ),
         ),
         // Hell: Weiß-Grund, Blau + Hellblau
         'light' => array(
