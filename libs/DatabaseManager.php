@@ -238,7 +238,10 @@ class DatabaseManager
         $this->processSchema(true, false);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
+        $this->ensureDefaultRegisters();
+        $this->ensureDefaultInstruments();
         $this->ensureDefaultAdmin();
+        $this->migrateRegNumbers();
         return $this->report;
     }
 
@@ -247,8 +250,172 @@ class DatabaseManager
         $this->processSchema(true, true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
+        $this->ensureDefaultRegisters();
+        $this->ensureDefaultInstruments();
         $this->ensureDefaultAdmin();
+        $this->migrateRegNumbers();
         return $this->report;
+    }
+
+    /**
+     * Seed default register rows (idempotent: insert missing Index only).
+     * Required so Instrument types (Flöte, …) can join / sort by register.
+     */
+    public function ensureDefaultRegisters() {
+        $table = new SQLtable('Register');
+        if(!$table->exists()) {
+            $this->addReport('data', 'Register', 'missing', 'Register-Tabelle fehlt');
+            return false;
+        }
+        if(!function_exists('getRegisterDefaults')) {
+            require_once dirname(__DIR__).'/config/RegisterDefaults.php';
+        }
+        $created = 0;
+        $skipped = 0;
+        foreach(getRegisterDefaults() as $row) {
+            $id = (int)$row['Index'];
+            $sql = sprintf(
+                'SELECT `Index` FROM `%sRegister` WHERE `Index` = %d LIMIT 1;',
+                $GLOBALS['dbprefix'],
+                $id
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $exists = $dbr && mysqli_fetch_array($dbr);
+            if($exists) {
+                $skipped++;
+                continue;
+            }
+            $insert = sprintf(
+                'INSERT INTO `%sRegister` (`Index`, `Name`, `Sortierung`, `Row`, `ArcMin`, `ArcMax`, `Color`) VALUES (%d, "%s", %d, %d, %s, %s, "%s");',
+                $GLOBALS['dbprefix'],
+                $id,
+                mysqli_real_escape_string($GLOBALS['conn'], $row['Name']),
+                (int)$row['Sortierung'],
+                (int)$row['Row'],
+                (float)$row['ArcMin'],
+                (float)$row['ArcMax'],
+                mysqli_real_escape_string($GLOBALS['conn'], $row['Color'])
+            );
+            if(mysqli_query($GLOBALS['conn'], $insert)) {
+                $created++;
+            }
+            else {
+                $this->addReport(
+                    'data',
+                    'Register.'.$id,
+                    'error',
+                    'Register konnte nicht angelegt werden',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+            }
+        }
+        if($created > 0) {
+            $maxId = 0;
+            foreach(getRegisterDefaults() as $row) {
+                if((int)$row['Index'] > $maxId) $maxId = (int)$row['Index'];
+            }
+            mysqli_query(
+                $GLOBALS['conn'],
+                sprintf('ALTER TABLE `%sRegister` AUTO_INCREMENT = %d;', $GLOBALS['dbprefix'], $maxId + 1)
+            );
+            $this->addReport('data', 'Register', 'created', "$created Register angelegt ($skipped bereits vorhanden)");
+            return true;
+        }
+        $this->addReport('data', 'Register', 'ok', "Register vorhanden ($skipped)");
+        return false;
+    }
+
+    /**
+     * Seed default instrument types (idempotent: insert missing Index only).
+     * These are playable types (Flöte, Trompete, …) — not inventory items / Inventory prefixes.
+     */
+    public function ensureDefaultInstruments() {
+        $table = new SQLtable('Instrument');
+        if(!$table->exists()) {
+            $this->addReport('data', 'Instrument', 'missing', 'Instrument-Tabelle fehlt');
+            return false;
+        }
+        if(!function_exists('getInstrumentDefaults')) {
+            require_once dirname(__DIR__).'/config/InstrumentDefaults.php';
+        }
+        $created = 0;
+        $skipped = 0;
+        foreach(getInstrumentDefaults() as $row) {
+            $id = (int)$row['Index'];
+            $sql = sprintf(
+                'SELECT `Index` FROM `%sInstrument` WHERE `Index` = %d LIMIT 1;',
+                $GLOBALS['dbprefix'],
+                $id
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $exists = $dbr && mysqli_fetch_array($dbr);
+            if($exists) {
+                $skipped++;
+                continue;
+            }
+            $insert = sprintf(
+                'INSERT INTO `%sInstrument` (`Index`, `Name`, `Register`, `Sortierung`, `Spielbar`) VALUES (%d, "%s", %d, %d, %d);',
+                $GLOBALS['dbprefix'],
+                $id,
+                mysqli_real_escape_string($GLOBALS['conn'], $row['Name']),
+                (int)$row['Register'],
+                (int)$row['Sortierung'],
+                (int)$row['Spielbar']
+            );
+            if(mysqli_query($GLOBALS['conn'], $insert)) {
+                $created++;
+            }
+            else {
+                $this->addReport(
+                    'data',
+                    'Instrument.'.$id,
+                    'error',
+                    'Instrument-Typ konnte nicht angelegt werden',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+            }
+        }
+        if($created > 0) {
+            // Keep AUTO_INCREMENT above highest seeded id
+            $maxId = 0;
+            foreach(getInstrumentDefaults() as $row) {
+                if((int)$row['Index'] > $maxId) $maxId = (int)$row['Index'];
+            }
+            mysqli_query(
+                $GLOBALS['conn'],
+                sprintf('ALTER TABLE `%sInstrument` AUTO_INCREMENT = %d;', $GLOBALS['dbprefix'], $maxId + 1)
+            );
+            $this->addReport('data', 'Instrument', 'created', "$created Instrument-Typ(en) angelegt ($skipped bereits vorhanden)");
+            return true;
+        }
+        $this->addReport('data', 'Instrument', 'ok', "Instrument-Typen vorhanden ($skipped)");
+        return false;
+    }
+
+    /**
+     * Inventory prefixes, INSTR type, instrument series migration.
+     */
+    private function migrateRegNumbers() {
+        if(!class_exists('RegNumber')) {
+            require_once dirname(__DIR__).'/libs/RegNumber.php';
+        }
+        if(!class_exists('Inventory')) {
+            require_once dirname(__DIR__).'/libs/inventory.php';
+        }
+        $table = new SQLtable('Inventory');
+        if(!$table->exists()) {
+            $this->addReport('data', 'RegNumber', 'missing', 'Inventory-Tabelle fehlt — Nummernmigration übersprungen');
+            return;
+        }
+
+        $r = RegNumber::ensureInstrType();
+        $this->addReport('data', 'INSTR', $r['status'], $r['message'], isset($r['detail']) ? $r['detail'] : null);
+
+        $r = RegNumber::migrateInventoryPrefixes();
+        $this->addReport('data', 'Prefix', $r['status'], $r['message']);
+
+        $r = RegNumber::migrateInstruments();
+        $this->addReport('data', 'Instruments', $r['status'], $r['message']);
     }
 
     /**
