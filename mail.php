@@ -36,6 +36,20 @@ if(isset($_GET['new'])) {
     $msg = '<div class="w3-container w3-red"><h3>Entwurf konnte nicht angelegt werden.</h3></div>';
 }
 
+// Bestehende Email als Entwurf kopieren
+if(isset($_GET['copy'])) {
+    $src = new MailJob;
+    $src->load_by_id((int)$_GET['copy']);
+    if($src->Index) {
+        $copied = $src->copyAsDraft((int)$_SESSION['userid']);
+        if($copied && $copied->Index) {
+            header('Location: mail.php?id='.(int)$copied->Index);
+            exit;
+        }
+    }
+    $msg = '<div class="w3-container w3-red"><h3>Kopieren als Entwurf fehlgeschlagen.</h3></div>';
+}
+
 // Entwurf laden
 if($jobId > 0) {
     $job = new MailJob;
@@ -111,7 +125,7 @@ $textPreview = $job ? $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSIO
 $anrede = 'Hallo {VORNAME},';
 $allReg = ($register === 0);
 
-$drafts = MailJob::listDrafts();
+$allJobs = MailJob::listJobs(null, 300);
 
 include_once 'common/header.php';
 ?>
@@ -122,19 +136,67 @@ include_once 'common/header.php';
 
 <div class="w3-container w3-padding">
   <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail.php?new=1<?php echo $terminParam ? '&termin='.(int)$terminParam : ''; ?>">Neue Email</a>
+  <?php if($job) { ?>
+  <a class="w3-button w3-margin-left" href="mail.php">Zur Übersicht</a>
+  <?php } ?>
 </div>
 
-<?php if(count($drafts) > 0 && !$job) { ?>
+<?php if(!$job) { ?>
 <div class="w3-container w3-padding">
-  <h3>Offene Entwürfe</h3>
-  <ul class="w3-ul w3-border">
-  <?php foreach($drafts as $d) {
-      $title = $d->Subject !== '' ? htmlspecialchars($d->Subject, ENT_QUOTES, 'UTF-8') : '(ohne Betreff)';
-      $by = (int)$d->CreatedBy;
-      echo '<li><a href="mail.php?id='.(int)$d->Index.'"><b>#'.(int)$d->Index.'</b> '.$title.'</a>';
-      echo ' <span class="w3-small">('.htmlspecialchars((string)$d->Created, ENT_QUOTES, 'UTF-8').', User '.$by.')</span></li>';
-  } ?>
-  </ul>
+  <p>Emails haben eine feste ID. Anhänge liegen getrennt pro Email. Mehrere Admins können parallel an Entwürfen arbeiten.</p>
+  <div class="w3-responsive">
+  <table class="w3-table w3-bordered w3-striped w3-hoverable">
+    <thead>
+      <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+        <th>ID</th>
+        <th>Datum</th>
+        <th>Betreff</th>
+        <th>Status</th>
+        <th>Empfänger</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody>
+<?php
+if(!count($allJobs)) {
+    echo '<tr><td colspan="6">Noch keine Emails vorhanden.</td></tr>';
+}
+foreach($allJobs as $rowJob) {
+    $id = (int)$rowJob->Index;
+    $subject = $rowJob->Subject !== '' && $rowJob->Subject !== null
+        ? htmlspecialchars((string)$rowJob->Subject, ENT_QUOTES, 'UTF-8')
+        : '<em>(ohne Betreff)</em>';
+    $created = htmlspecialchars((string)$rowJob->Created, ENT_QUOTES, 'UTF-8');
+    $status = htmlspecialchars($rowJob->statusLabel(), ENT_QUOTES, 'UTF-8');
+    $statusCls = $rowJob->statusClass();
+    $counts = '';
+    if($rowJob->Status !== 'draft') {
+        $counts = (int)$rowJob->Sent.'/'.(int)$rowJob->Total;
+        if((int)$rowJob->Failed > 0) {
+            $counts .= ' ('.(int)$rowJob->Failed.' Fehler)';
+        }
+    }
+    else {
+        $counts = '—';
+    }
+    echo '<tr>';
+    echo '<td>'.$id.'</td>';
+    echo '<td>'.$created.'</td>';
+    echo '<td>'.$subject.'</td>';
+    echo '<td><span class="w3-tag '.$statusCls.'">'.$status.'</span></td>';
+    echo '<td>'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</td>';
+    echo '<td>';
+    if($rowJob->Status === 'draft') {
+        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a> ';
+    }
+    echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?copy='.$id.'">Als Entwurf kopieren</a>';
+    echo '</td>';
+    echo '</tr>';
+}
+?>
+    </tbody>
+  </table>
+  </div>
 </div>
 <?php } ?>
 
@@ -280,9 +342,14 @@ function delFile(hash) {
 </div>
 
 </div>
-<?php } elseif(!$job) { ?>
+<?php } elseif($job && $job->Status !== 'draft') { ?>
 <div class="w3-container w3-padding">
-  <p>Lege mit „Neue Email“ einen Entwurf an (feste ID). Mehrere Admins können parallel an verschiedenen Emails arbeiten, ohne sich bei Anhängen in die Quere zu kommen.</p>
+  <p>Email #<?php echo (int)$job->Index; ?> hat Status
+    <span class="w3-tag <?php echo $job->statusClass(); ?>"><?php echo htmlspecialchars($job->statusLabel(), ENT_QUOTES, 'UTF-8'); ?></span>
+    und kann nicht mehr bearbeitet werden.
+    <a href="mail.php?copy=<?php echo (int)$job->Index; ?>">Als Entwurf kopieren</a>
+    oder <a href="mail.php">zur Übersicht</a>.
+  </p>
 </div>
 <?php } ?>
 

@@ -280,11 +280,31 @@ class MailJob
      * @return MailJob[]
      */
     public static function listDrafts() {
+        return self::listJobs('draft');
+    }
+
+    /**
+     * @param string|null $statusFilter null = all
+     * @return MailJob[]
+     */
+    public static function listJobs($statusFilter = null, $limit = 200) {
         self::ensureSchema();
-        $sql = sprintf(
-            'SELECT * FROM `%sMailJob` WHERE `Status` = "draft" ORDER BY `Index` DESC;',
-            $GLOBALS['dbprefix']
-        );
+        $limit = max(1, (int)$limit);
+        if($statusFilter !== null && $statusFilter !== '') {
+            $sql = sprintf(
+                'SELECT * FROM `%sMailJob` WHERE `Status` = "%s" ORDER BY `Created` DESC, `Index` DESC LIMIT %d;',
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$statusFilter),
+                $limit
+            );
+        }
+        else {
+            $sql = sprintf(
+                'SELECT * FROM `%sMailJob` ORDER BY `Created` DESC, `Index` DESC LIMIT %d;',
+                $GLOBALS['dbprefix'],
+                $limit
+            );
+        }
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $list = array();
@@ -295,6 +315,80 @@ class MailJob
             $list[] = $j;
         }
         return $list;
+    }
+
+    public function statusLabel() {
+        switch((string)$this->Status) {
+        case 'draft':
+            return 'Entwurf';
+        case 'queued':
+        case 'processing':
+            return 'wird versendet…';
+        case 'done':
+            return 'Versendet';
+        case 'failed':
+            return 'Fehler';
+        default:
+            return (string)$this->Status;
+        }
+    }
+
+    public function statusClass() {
+        switch((string)$this->Status) {
+        case 'draft':
+            return isset($GLOBALS['optionsDB']['colorBtnEdit']) ? $GLOBALS['optionsDB']['colorBtnEdit'] : 'w3-light-grey';
+        case 'queued':
+        case 'processing':
+            return isset($GLOBALS['optionsDB']['colorWarning']) ? $GLOBALS['optionsDB']['colorWarning'] : 'w3-yellow';
+        case 'done':
+            return isset($GLOBALS['optionsDB']['colorLogEmail']) ? $GLOBALS['optionsDB']['colorLogEmail'] : 'w3-green';
+        case 'failed':
+            return isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red';
+        default:
+            return 'w3-light-grey';
+        }
+    }
+
+    /**
+     * Copy this job into a new draft (content + recipient settings; attachments if still present).
+     * @return MailJob|null
+     */
+    public function copyAsDraft($createdBy = 0) {
+        if(!$this->Index) return null;
+        $copy = self::createDraft((int)$createdBy, (int)$this->Termin);
+        if(!$copy || !$copy->Index) return null;
+
+        $subject = (string)$this->Subject;
+        $prefix = isset($GLOBALS['mailconfig']['subjectprefix']) ? (string)$GLOBALS['mailconfig']['subjectprefix'] : '';
+        if($prefix !== '' && strpos($subject, $prefix) === 0) {
+            $subject = substr($subject, strlen($prefix));
+        }
+
+        $copy->Subject = $subject;
+        $copy->BodyText = (string)$this->BodyText;
+        $copy->Source = 'mail';
+        $copy->MemberOnly = (int)$this->MemberOnly;
+        $copy->Register = (int)$this->Register;
+        $copy->Termin = (int)$this->Termin;
+        $copy->Gruss = (int)$this->Gruss;
+        $copy->save();
+        $copy->ensureAttachmentDir();
+
+        $src = (string)$this->AttachmentPath;
+        $dst = (string)$copy->AttachmentPath;
+        if($src !== '' && $dst !== '' && is_dir($src) && is_dir($dst)) {
+            $files = scandir($src);
+            if(is_array($files)) {
+                foreach($files as $file) {
+                    if($file === '.' || $file === '..') continue;
+                    $from = $src.'/'.$file;
+                    if(is_file($from)) {
+                        @copy($from, $dst.'/'.$file);
+                    }
+                }
+            }
+        }
+        return $copy;
     }
 }
 ?>
