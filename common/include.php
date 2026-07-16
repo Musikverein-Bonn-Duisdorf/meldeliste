@@ -13,6 +13,7 @@ include "libs/user.php";
 include "libs/permissions.php";
 include "libs/SQLtable.php";
 include "config/ConfigDefaults.php";
+include "libs/colorschemes.php";
 include "libs/DatabaseManager.php";
 include "libs/RegNumber.php";
 include "libs/termin.php";

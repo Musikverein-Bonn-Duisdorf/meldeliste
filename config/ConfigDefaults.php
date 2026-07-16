@@ -492,6 +492,18 @@ function getConfigDefaults() {
             'Description' => 'Text der Willkommensmail',
         ),
         array(
+            'Parameter' => 'colorSchemeActive',
+            'Value' => 'classic',
+            'Type' => 'string',
+            'Description' => 'Aktives Farbschema (classic, light, dark, gold, soft)',
+        ),
+        array(
+            'Parameter' => 'colorSchemes',
+            'Value' => '',
+            'Type' => 'internal',
+            'Description' => 'Gespeicherte Farbschemata (JSON, intern)',
+        ),
+        array(
             'Parameter' => 'regNumberInstrumentsMigrated',
             'Value' => '0',
             'Type' => 'bool',
