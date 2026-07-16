@@ -35,7 +35,22 @@ if(isset($_POST['save'])) {
         case "int":
         case "time":
         case "string":
+        case "email":
+        case "text":
+            if(isset($_POST[$row['Parameter']])) {
+                $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($conn, $_POST[$row['Parameter']]),
+                $row['Parameter']
+                );
+                if($_POST[$row['Parameter']] == $row['Value']) break;
+                $dbr2 = mysqli_query($conn, $sql);
+                sqlerror();
+            }
+            break;
         case "color":
+            // Farben werden per AJAX (savePara.php) gespeichert
+            break;
         default:
             if(isset($_POST[$row['Parameter']])) {
                 $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
@@ -55,16 +70,21 @@ if(isset($_POST['save'])) {
 <script>
 function savePara(Parameter, Value) {
 	if (window.XMLHttpRequest) {
-	    // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	    xmlhttp=new XMLHttpRequest();
 	}
 	else {
-	    // AJAX mit IE6, IE5
 	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 	}
-	var str = "savePara.php?cmd=change&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&para="+Parameter+"&value="+Value;
+	var str = "savePara.php?cmd=change&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&para="+encodeURIComponent(Parameter)+"&value="+encodeURIComponent(Value);
 	xmlhttp.open("GET",str,true);
-	xmlhttp.send();    
+	xmlhttp.send();
+}
+function clearColor(Parameter, inputId, labelId) {
+    savePara(Parameter, '');
+    var input = document.getElementById(inputId);
+    if(input) input.value = '#808080';
+    var label = document.getElementById(labelId);
+    if(label) label.textContent = '(keine)';
 }
 </script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
@@ -143,18 +163,19 @@ while($row = mysqli_fetch_array($dbr)) {
         echo "<input class=\"w3-col l4 m4 s12\" type=\"email\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
         break;
     case 'color':
-        $colors=array("", "w3-mvd-blue", "w3-mvd-black", "w3-mvd-yellow", "w3-mvd-egg", "w3-mvd-white", "w3-mvd-gray", "w3-red", "w3-pink", "w3-purple", "w3-deep-purple", "w3-indigo", "w3-blue", "w3-light-blue", "w3-aqua", "w3-cyan", "w3-teal", "w3-green", "w3-light-green", "w3-lime", "w3-sand", "w3-khaki", "w3-yellow", "w3-amber", "w3-orange", "w3-deep-orange", "w3-blue-gray", "w3-brown", "w3-light-gray", "w3-gray", "w3-dark-gray", "w3-pale-red", "w3-pale-yellow", "w3-pale-green", "w3-pale-blue", "w3-highway-brown", "w3-highway-red", "w3-highway-orange", "w3-highway-schoolbus", "w3-highway-yellow", "w3-highway-green", "w3-highway-blue");
-        echo "<div class=\"w3-col l4 m4 s12 w3-center w3-dropdown-hover\"><button class=\"w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\">Farbauswahl</button>";
-        echo "<div class=\"w3-dropdown-content w3-row w3-center w3-border w3-border-black\">";
-        for($i=0; $i<count($colors); $i++) {
-            if($colors[$i] == $row['Value']) {
-                echo "<div class=\"w3-btn w3-col l2 m2 s2 ".$colors[$i]." w3-padding w3-margin-right w3-center w3-border w3-border-black\"><b>".$colors[$i]."</b></div>";
-            }
-            else {
-                echo "<div class=\"w3-btn w3-col l2 m2 s2 ".$colors[$i]." w3-padding w3-margin-right w3-center\" onclick=\"savePara('".$row['Parameter']."', '".$colors[$i]."')\">".$colors[$i]."</div>";
-            }
-        }
-        echo "</div>\n";
+        $raw = (string)$row['Value'];
+        $picker = colorPickerValue($raw);
+        $display = ($raw === '') ? '(keine)' : $raw;
+        $safePara = htmlspecialchars($row['Parameter'], ENT_QUOTES, 'UTF-8');
+        $inputId = 'color_'.$row['Parameter'];
+        $labelId = 'colorlabel_'.$row['Parameter'];
+        echo "<div class=\"w3-col l4 m4 s12 w3-center\">\n";
+        echo "<span id=\"".$labelId."\" class=\"w3-small\">".htmlspecialchars($display, ENT_QUOTES, 'UTF-8')."</span><br>\n";
+        echo "<input id=\"".$inputId."\" type=\"color\" value=\"".htmlspecialchars($picker, ENT_QUOTES, 'UTF-8')."\" "
+            ."onchange=\"savePara('".$safePara."', this.value); document.getElementById('".$labelId."').textContent=this.value;\" "
+            ."style=\"width:3.5em;height:2.2em;padding:0;border:1px solid #000;vertical-align:middle;\" />\n";
+        echo "&nbsp;<button type=\"button\" class=\"w3-button w3-small ".$GLOBALS['optionsDB']['colorBtnEdit']."\" "
+            ."onclick=\"clearColor('".$safePara."', '".$inputId."', '".$labelId."')\">keine Farbe</button>\n";
         echo "</div>\n";
         break;
     default:
