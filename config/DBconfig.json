@@ -1,5 +1,10 @@
 {
-    
+    "AppmntFreeTextResponse": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Termin": {"Type": "int"},
+	"User": {"Type": "int"},
+	"Text": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"}
+    },
     "Aushilfen": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Termin": {"Type": "int"},
@@ -22,6 +27,11 @@
 	"Wert": {"Type": "int"},
 	"Timestamp": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
     },
+    "Info": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Parameter": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Value": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"}
+    },
     "Instrument": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Name": {"Type": "text", "Collation": "latin1_swedish_ci"},
@@ -29,25 +39,35 @@
 	"Sortierung": {"Type": "int", "Default": 1},
 	"Spielbar": {"Type": "int", "Default": 1}
     },
-    "Instruments": {
+    "Inventories": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"RegNumber": {"Type": "int", "Null": "YES"},
-	"Instrument": {"Type": "int"},
-	"Vendor": {"Type": "text", "Collation": "latin1_swedish_ci"},
-	"Model": {"Type": "text", "Collation": "latin1_swedish_ci"},
-	"SerialNr": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Inventory": {"Type": "int"},
+	"Instrument": {"Type": "int", "Null": "YES"},
+	"Description": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Vendor": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Model": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"SerialNr": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
 	"PurchaseDate": {"Type": "date", "Null": "YES"},
 	"PurchasePrize": {"Type": "text", "Collation": "latin1_swedish_ci"},
 	"Owner": {"Type": "int", "Null": "YES"},
 	"Insurance": {"Type": "tinyint", "Default": 0},
 	"Comment": {"Type": "text", "Collation": "latin1_swedish_ci"}
     },
-    "Loans": {
+    "InventoriesLoans": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"User": {"Type": "int"},
+	"Inventory": {"Type": "int"},
 	"StartDate": {"Type": "date"},
 	"EndDate": {"Type": "date", "Null": "YES"},
 	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"}
+    },
+    "Inventory": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Typ": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Prefix": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Protected": {"Type": "tinyint", "Default": 0},
+	"Sortierung": {"Type": "int", "Default": 1}
     },
     "Log": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
@@ -69,18 +89,20 @@
     "Permissions": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"User": {"Type": "int"},
-	"perm_showHiddenAppmnts": {"Type": "int"},
-	"perm_showUsers": {"Type": "int"},
-	"perm_editUsers": {"Type": "int"},
-	"perm_editAppmnts": {"Type": "int"},
-	"perm_showLog": {"Type": "int"},
-	"perm_showInstruments": {"Type": "int"},
-	"perm_editInstruments": {"Type": "int"},
-	"perm_sendEmail": {"Type": "int"},
-	"perm_showResponse": {"Type": "int"},
-	"perm_editResponse": {"Type": "int"},
-	"perm_editConfig": {"Type": "int"},
-	"perm_editPermissions": {"Type": "int"}
+	"perm_showHiddenAppmnts": {"Type": "int", "Default": 0},
+	"perm_showUsers": {"Type": "int", "Default": 0},
+	"perm_editUsers": {"Type": "int", "Default": 0},
+	"perm_editAppmnts": {"Type": "int", "Default": 0},
+	"perm_showLog": {"Type": "int", "Default": 0},
+	"perm_showInstruments": {"Type": "int", "Default": 0},
+	"perm_editInstruments": {"Type": "int", "Default": 0},
+	"perm_showInventories": {"Type": "int", "Default": 0},
+	"perm_editInventories": {"Type": "int", "Default": 0},
+	"perm_sendEmail": {"Type": "int", "Default": 0},
+	"perm_showResponse": {"Type": "int", "Default": 0},
+	"perm_editResponse": {"Type": "int", "Default": 0},
+	"perm_editConfig": {"Type": "int", "Default": 0},
+	"perm_editPermissions": {"Type": "int", "Default": 0}
     },
     "Register": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
@@ -109,7 +131,7 @@
     "Termine": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Datum": {"Type": "date"},
-	"EndDatum": {"Type": "date", "Null": "YES"},	
+	"EndDatum": {"Type": "date", "Null": "YES"},
 	"Uhrzeit": {"Type": "time", "Null": "YES"},
 	"Uhrzeit2": {"Type": "time", "Null": "YES"},
 	"Abfahrt": {"Type": "time", "Null": "YES"},
@@ -118,14 +140,15 @@
 	"Name": {"Type": "text", "Collation": "latin1_swedish_ci"},
 	"Beschreibung": {"Type": "text", "Collation": "latin1_swedish_ci"},
 	"Auftritt": {"Type": "tinyint", "Default": 1},
-    	"Ort1": {"Type": "text", "Collation": "latin1_swedish_ci"},
-    	"Ort2": {"Type": "text", "Collation": "latin1_swedish_ci"},
-    	"Ort3": {"Type": "text", "Collation": "latin1_swedish_ci"},
-    	"Ort4": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Ort1": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Ort2": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Ort3": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Ort4": {"Type": "text", "Collation": "latin1_swedish_ci"},
 	"Shifts": {"Type": "int", "Default": 0},
 	"published": {"Type": "int", "Default": 0},
 	"open": {"Type": "int", "Default": 1},
-	"new": {"Type": "int", "Default": 1}
+	"new": {"Type": "int", "Default": 1},
+	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"}
     },
     "User": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
@@ -134,6 +157,7 @@
 	"RefID": {"Type": "int", "Null": "YES"},
 	"Email": {"Type": "text", "Collation": "latin1_swedish_ci"},
 	"Email2": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Birthday": {"Type": "date", "Null": "YES"},
 	"login": {"Type": "text", "Collation": "latin1_swedish_ci", "Null": "YES"},
 	"Passhash": {"Type": "text", "Collation": "latin1_swedish_ci", "Null": "YES"},
 	"singleUsePW": {"Type": "int", "Default": 0},

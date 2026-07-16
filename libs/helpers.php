@@ -208,25 +208,17 @@ function getCurrentBirthdays() {
 }
 
 function getNextRegNumber() {
-    $sql = sprintf('SELECT `RegNumber` FROM `%sInstruments` ORDER BY `RegNumber` DESC LIMIT 1;',
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-
-    $row = mysqli_fetch_array($dbr);
-    return $row['RegNumber']+1;
+    return RegNumber::nextForInstruments();
 }
 
-function getNextRegInventoryNumber() {
-    $sql = sprintf('SELECT `RegNumber` FROM `%sInventories` ORDER BY `RegNumber` DESC LIMIT 1;',
-    $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-
-    $row = mysqli_fetch_array($dbr);
-    return $row['RegNumber']+1;
+function getNextRegInventoryNumber($inventoryTypeId = 0) {
+    $inventoryTypeId = (int)$inventoryTypeId;
+    if($inventoryTypeId < 1) {
+        $map = RegNumber::nextMapForInventoryTypes();
+        if(empty($map)) return 1;
+        return (int)reset($map);
+    }
+    return RegNumber::nextForType($inventoryTypeId);
 }
 
 function getOwner($index) {
@@ -286,7 +278,9 @@ function getShortAushilfe($Name) {
 function instrumentOption($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY `rSort`, `Sortierung`;',
+    // LEFT JOIN: Instrument types must appear even if Register rows are missing
+    $sql = sprintf('SELECT `%sInstrument`.* FROM `%sInstrument` LEFT JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` WHERE `Spielbar` = 1 ORDER BY COALESCE(`rSort`, 9999), `Sortierung`;',
+    $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix']
@@ -307,7 +301,9 @@ function instrumentOption($val) {
 function instrumentOptionAll($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInstrument` INNER JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY `rSort`, `Sortierung`;',
+    // LEFT JOIN: Instrument types must appear even if Register rows are missing
+    $sql = sprintf('SELECT `%sInstrument`.* FROM `%sInstrument` LEFT JOIN (SELECT `Index` AS `rIndex`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `rIndex` = `Register` ORDER BY COALESCE(`rSort`, 9999), `Sortierung`;',
+    $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix']
@@ -328,31 +324,42 @@ function instrumentOptionAll($val) {
 function inventoryOptionAll($val) {
     $str='';
     $str=$str."<option value=\"0\">keins</option>\n";
-    $sql = sprintf('SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
-    $GLOBALS['dbprefix']
+    $sql = sprintf(
+        'SELECT * FROM `%sInventory` ORDER BY `Sortierung`;',
+        $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     while($row = mysqli_fetch_array($dbr)) {
+        $label = $row['Typ'];
+        if(!empty($row['Prefix'])) $label = $row['Prefix'].' — '.$row['Typ'];
         if($val == $row['Index']) {
-            $str=$str."<option value=\"".$row['Index']."\" selected>".$row['Typ']."</option>\n";
+            $str=$str."<option value=\"".$row['Index']."\" selected>".htmlspecialchars($label)."</option>\n";
         }
         else {
-            $str=$str."<option value=\"".$row['Index']."\">".$row['Typ']."</option>\n";
+            $str=$str."<option value=\"".$row['Index']."\">".htmlspecialchars($label)."</option>\n";
         }
     }
     return $str;
 }
 
 function loadconfig() {
+    $optionsDB = array();
     $sql = sprintf('SELECT * FROM `%sconfig`;',
 		   $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    $optionsDB = array();
-    while($row = mysqli_fetch_array($dbr)) {
-        $optionsDB += [$row['Parameter'] => $row['Value']];
+    if($dbr) {
+        while($row = mysqli_fetch_array($dbr)) {
+            $optionsDB[$row['Parameter']] = $row['Value'];
+        }
+    }
+    if(function_exists('getConfigDefaults')) {
+        foreach(getConfigDefaults() as $item) {
+            if(!array_key_exists($item['Parameter'], $optionsDB)) {
+                $optionsDB[$item['Parameter']] = $item['Value'];
+            }
+        }
     }
     return $optionsDB;
 }
@@ -726,10 +733,15 @@ function sql2timeRaw($time) {
 }
 
 function sqlerror() {
-    if(mysqli_errno($GLOBALS['conn'])) {
-        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogFatal']." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn'])."</div>";
+    if(!isset($GLOBALS['conn']) || !mysqli_errno($GLOBALS['conn'])) {
+        return;
+    }
+    $msg = mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']);
+    $color = isset($GLOBALS['optionsDB']['colorLogFatal']) ? $GLOBALS['optionsDB']['colorLogFatal'] : 'w3-red';
+    echo "<div class=\"w3-container ".$color." w3-mobile w3-border w3-padding w3-border-black\"><b>SQL ERROR </b>".htmlspecialchars($msg)."</div>";
+    if(class_exists('Log')) {
         $logentry = new Log;
-        $logentry->error(mysqli_errno($GLOBALS['conn']).": ".mysqli_error($GLOBALS['conn']));
+        $logentry->error($msg);
     }
 }
 
