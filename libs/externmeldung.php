@@ -42,7 +42,7 @@ class ExternMeldung
         $i->load_by_id($this->Instrument);
         $u = new User;
         $u->load_by_id($this->User);
-        $str = sprintf("extMelde-ID: %d, eingetragen von: %s, Termin: %d (%s), Name: %s, Instrument: %s, Wert: %s",
+        $str = sprintf("extMelde-ID: %d, eingetragen von: <b>%s</b>, Termin: (%d) <b>%s</b>, Name: <b>%s</b>, Instrument: <b>%s</b>, Wert: <b>%s</b>",
         $this->Index,
         $u->getName(),
         $this->Termin,

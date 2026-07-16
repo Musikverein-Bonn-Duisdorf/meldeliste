@@ -78,7 +78,7 @@ class Loan
         $u->getName(),
         germanDate($this->StartDate,0),
         germanDate($this->EndDate,0),
-        $Instrument->ContractFile
+        $this->ContractFile
         );
     }
 
@@ -97,7 +97,7 @@ class Loan
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sLoans` (`User`, `Instrument`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", %s, %s, "%s");',
+        $sql = sprintf('INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", %s, %s, "%s");',
         $GLOBALS['dbprefix'],
         $this->User,
         $this->Instrument,
@@ -113,7 +113,7 @@ class Loan
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sLoans` SET `User` = "%d", `Instrument` = "%d", `StartDate` = %s, `EndDate` = %s, `ContractFile` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `ContractFile` = "%s" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->User,
         $this->Instrument,
@@ -133,7 +133,7 @@ class Loan
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
 
-        $sql = sprintf('DELETE FROM `%sLoans` WHERE `Index` = "%d" LIMIT 1;',
+        $sql = sprintf('DELETE FROM `%sInventoriesLoans` WHERE `Index` = "%d" LIMIT 1;',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -146,14 +146,21 @@ class Loan
     }
 
     public function fill_from_array($row) {
+        $allowed = array('Index', 'User', 'Instrument', 'StartDate', 'EndDate', 'ContractFile');
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            if(!is_string($key)) continue;
+            if($key === 'Inventory') {
+                $this->Instrument = $val;
+                continue;
+            }
+            if(!in_array($key, $allowed, true)) continue;
+            $this->$key = $val;
         }
     }
 
     public function load_by_id($Index) {
         $Index = (int) $Index;
-        $sql = sprintf('SELECT * FROM `%sLoans` WHERE `Index` = "%d";',
+        $sql = sprintf('SELECT * FROM `%sInventoriesLoans` WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $Index
         );

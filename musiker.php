@@ -6,10 +6,24 @@ include "common/header.php";
 if(!requirePermission("perm_showUsers")) die();
 
 if(isset($_POST['insert'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->fill_from_array($_POST);
-    $n->save();
+    try {
+        $n = new User;
+        $id = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
+        if($id > 0) {
+            $n->load_by_id($id);
+        }
+        $n->fill_from_array($_POST);
+        // New user: empty Index must not force update path
+        if($id < 1) {
+            $n->Index = null;
+        }
+        if(!$n->save()) {
+            echo '<div class="w3-panel w3-red w3-padding"><b>Musiker konnte nicht gespeichert werden.</b> Vorname und Nachname sind Pflicht.</div>';
+        }
+    }
+    catch(Throwable $e) {
+        echo '<div class="w3-panel w3-red w3-padding"><b>Fehler beim Speichern:</b> '.htmlspecialchars($e->getMessage()).'</div>';
+    }
     if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
         if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
             $n->passwd($_POST['pw1']);

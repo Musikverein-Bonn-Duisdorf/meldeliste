@@ -4,8 +4,19 @@ $_SESSION['page']='insurance';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 
-    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sInstruments` WHERE `Insurance` = "1";',
-    $GLOBALS['dbprefix']
+if(!requirePermission("perm_showInventories") && !requirePermission("perm_showInstruments")) {
+ ?>
+<meta http-equiv="refresh" content="0; URL=index.php" />
+<?php
+    include "common/footer.php";
+    exit;
+}
+
+    $instrType = RegNumber::loadInstrType();
+    $instrTypeId = $instrType ? (int)$instrType->Index : 0;
+    $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sInventories` WHERE `Inventory` = %d AND `Insurance` = "1";',
+    $GLOBALS['dbprefix'],
+    $instrTypeId
     );
     $dbr = mysqli_query($conn, $sql);
     sqlerror();
@@ -30,12 +41,13 @@ include "common/header.php";
 </div>
 <div id="Liste">
 <?php
-    $sql = sprintf('SELECT `Index` FROM `%sInstruments` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Insurance` = "1" AND `rName` != "keins" ORDER BY `rSort`, `iSort`;',
+    $sql = sprintf('SELECT `Index` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName`, `Sortierung` AS `iSort` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `Inventory` = %d AND `Insurance` = "1" AND `rName` != "keins" ORDER BY `rSort`, `iSort`;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix']
+    $GLOBALS['dbprefix'],
+    $instrTypeId
     );
     $dbr = mysqli_query($conn, $sql);
     sqlerror();
