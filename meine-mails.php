@@ -2,10 +2,15 @@
 session_start();
 $_SESSION['page'] = 'meinemails';
 $_SESSION['adminpage'] = false;
-include "common/header.php";
+
+include 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+if(!loggedIn()) {
+    header('Location: login.php');
+    exit;
+}
 
 $userId = (int)$_SESSION['userid'];
-
 MailJob::ensureSchema();
 
 if(isset($_POST['delete']) && isset($_POST['id'])) {
@@ -17,6 +22,8 @@ if(isset($_POST['delete']) && isset($_POST['id'])) {
     header('Location: meine-mails.php');
     exit;
 }
+
+include "common/header.php";
 
 $statusLabels = array(
     'pending' => 'Warteschlange',

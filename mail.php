@@ -1,9 +1,22 @@
 <?php
 session_start();
-$_SESSION['page']='mail';
-$_SESSION['adminpage']=true;
-include "common/header.php";
-if(!requirePermission("perm_sendEmail")) die();
+$_SESSION['page'] = 'mail';
+$_SESSION['adminpage'] = true;
+
+include 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+
+if(!loggedIn()) {
+    header('Location: login.php');
+    exit;
+}
+if(!empty($_SESSION['singleUsePW'])) {
+    header('Location: changePW.php');
+    exit;
+}
+if(!requirePermission('perm_sendEmail')) {
+    die('Keine Berechtigung.');
+}
 
 MailJob::ensureSchema();
 
@@ -13,11 +26,11 @@ $job = null;
 $jobId = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['id']) ? (int)$_POST['id'] : 0);
 $terminParam = isset($_GET['termin']) ? (int)$_GET['termin'] : (isset($_POST['termin']) ? (int)$_POST['termin'] : 0);
 
-// Neue Email: Draft mit fester ID anlegen
+// Neue Email: Draft mit fester ID anlegen (vor HTML-Ausgabe!)
 if(isset($_GET['new'])) {
-    $job = MailJob::createDraft((int)$_SESSION['userid'], $terminParam);
-    if($job && $job->Index) {
-        header('Location: mail.php?id='.(int)$job->Index);
+    $created = MailJob::createDraft((int)$_SESSION['userid'], $terminParam);
+    if($created && $created->Index) {
+        header('Location: mail.php?id='.(int)$created->Index);
         exit;
     }
     $msg = '<div class="w3-container w3-red"><h3>Entwurf konnte nicht angelegt werden.</h3></div>';
@@ -31,14 +44,10 @@ if($jobId > 0) {
         $job = null;
         $msg = '<div class="w3-container w3-red"><h3>Email-ID '.$jobId.' nicht gefunden.</h3></div>';
     }
-    elseif($job->Status !== 'draft' && !isset($_POST['send'])) {
-        // Nach dem Queuen: Hinweis, Formular nicht mehr editierbar
-    }
 }
 
 // Entwurf löschen
 if(isset($_POST['delete_draft']) && $job && $job->Status === 'draft') {
-    $delId = (int)$job->Index;
     $job->deleteDraft();
     header('Location: mail.php');
     exit;
@@ -75,12 +84,12 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     if(isset($_POST['send'])) {
         $mail = new Usermail;
         $mail->source = 'mail';
-        $count = $mail->enqueueDraft($job, false);
+        $count = $mail->enqueueDraft($job, true);
         if($count > 0) {
             header('Location: mail.php?queued='.(int)$job->Index.'&n='.$count);
             exit;
         }
-        // reload job status
+        $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Keine gültigen Emailadressen gefunden.</h3></div>';
         $job->load_by_id($job->Index);
     }
 }
@@ -98,11 +107,13 @@ $termin = $job ? (int)$job->Termin : $terminParam;
 $gruss = $job ? (int)$job->Gruss : 1;
 $betreff = $job ? (string)$job->Subject : '';
 $textRaw = $job ? (string)$job->BodyText : '';
-$textPreview = $job ? $job->applyGreeting($_SESSION['Vorname']) : '';
-$anrede = "Hallo {VORNAME},";
+$textPreview = $job ? $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '') : '';
+$anrede = 'Hallo {VORNAME},';
 $allReg = ($register === 0);
 
 $drafts = MailJob::listDrafts();
+
+include 'common/header.php';
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Email versenden</h2>
