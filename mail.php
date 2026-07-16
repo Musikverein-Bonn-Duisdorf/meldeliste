@@ -335,8 +335,9 @@ foreach($allJobs as $rowJob) {
 <?php } ?>
 
 <?php if($job && $job->Status === 'draft') { ?>
-<div class="w3-panel w3-mobile w3-center w3-col s1 m1 l4"></div>
-<div class="w3-panel w3-mobile w3-center w3-border w3-col s10 m10 l4">
+<div class="w3-row">
+<div class="w3-col s12 m1 l1">&nbsp;</div>
+<div class="w3-panel w3-mobile w3-border w3-col s12 m10 l10" style="text-align:left;">
   <p class="w3-left-align"><b>Email-ID <?php echo (int)$job->Index; ?></b> (Entwurf) — Anhänge nur für diese Email.</p>
   <form name="mailform" class="w3-container w3-margin" action="mail.php?id=<?php echo (int)$job->Index; ?>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
@@ -418,6 +419,7 @@ foreach($allJobs as $rowJob) {
     height: 360,
     plugins: 'lists link autolink',
     toolbar: 'undo redo | blocks | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | link | removeformat',
+    toolbar_mode: 'wrap',
     block_formats: 'Absatz=p; Überschrift 2=h2; Überschrift 3=h3; Überschrift 4=h4',
     font_family_formats: 'Arial=arial,helvetica,sans-serif; Georgia=georgia,serif; Times New Roman=times new roman,times,serif; Verdana=verdana,geneva,sans-serif; Courier New=courier new,courier,monospace',
     font_size_formats: '10pt 12pt 14pt 16pt 18pt 24pt 36pt',
@@ -518,6 +520,7 @@ function delFile(hash) {
 ?>
 </div>
 
+</div>
 </div>
 <?php } elseif($job && $job->Status !== 'draft') {
     $viewSubject = htmlspecialchars((string)$job->Subject, ENT_QUOTES, 'UTF-8');
