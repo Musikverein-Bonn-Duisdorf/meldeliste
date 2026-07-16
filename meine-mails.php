@@ -6,6 +6,8 @@ include "common/header.php";
 
 $userId = (int)$_SESSION['userid'];
 
+MailJob::ensureSchema();
+
 if(isset($_POST['delete']) && isset($_POST['id'])) {
     $out = new MailOutbox;
     $out->load_by_id((int)$_POST['id']);

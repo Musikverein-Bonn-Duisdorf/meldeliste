@@ -67,9 +67,27 @@ class MailJob
     }
 
     /**
+     * Ensure MailJob / MailOutbox tables (and columns) exist.
+     */
+    public static function ensureSchema() {
+        static $done = false;
+        if($done) return true;
+        $table = new SQLtable('MailJob');
+        $outbox = new SQLtable('MailOutbox');
+        $needs = !$table->exists() || !$outbox->exists() || !$table->columnExists('Gruss');
+        if($needs) {
+            $manager = new DatabaseManager();
+            $manager->create();
+        }
+        $done = true;
+        return (new SQLtable('MailJob'))->exists() && (new SQLtable('MailOutbox'))->exists();
+    }
+
+    /**
      * Create a new draft with fixed ID and dedicated attachment directory.
      */
     public static function createDraft($createdBy = 0, $termin = 0) {
+        self::ensureSchema();
         $job = new MailJob;
         $job->CreatedBy = (int)$createdBy;
         $job->Subject = '';
@@ -154,6 +172,7 @@ class MailJob
     }
 
     public function load_by_id($Index) {
+        self::ensureSchema();
         $Index = (int)$Index;
         $sql = sprintf('SELECT * FROM `%sMailJob` WHERE `Index` = %d;', $GLOBALS['dbprefix'], $Index);
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -261,6 +280,7 @@ class MailJob
      * @return MailJob[]
      */
     public static function listDrafts() {
+        self::ensureSchema();
         $sql = sprintf(
             'SELECT * FROM `%sMailJob` WHERE `Status` = "draft" ORDER BY `Index` DESC;',
             $GLOBALS['dbprefix']
