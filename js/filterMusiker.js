@@ -5,6 +5,7 @@ function filterMusiker() {
     table = document.getElementById("Liste");
     tr = table.getElementsByTagName("div");
     for (i = 0; i < tr.length; i++) {
+	if(tr[i].id === "listSentinel") continue;
 	if(tr[i].className=="w3-modal" || tr[i].className=="w3-modal-content") continue;
 	if(tr[i].parentNode !== table) continue
 	td = tr[i].getElementsByTagName("div")[0];
