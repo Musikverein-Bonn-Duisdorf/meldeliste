@@ -64,7 +64,7 @@ class Log
     public function generate($Type, $Message) {
        $this->Type = $Type;
        $this->Message = $Message;
-       $this->User = $_SESSION['userid'];
+       $this->User = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
        $this->save();
        $this->Index = NULL;
     }
@@ -78,8 +78,8 @@ class Log
         }
     }
     public function is_valid() {
-        if(!$this->Type) return false;
-        if(!$this->Message) return false;
+        if($this->Type === null || $this->Type === '') return false;
+        if($this->Message === null || $this->Message === '') return false;
         return true;
     }
     public function getLast() {
