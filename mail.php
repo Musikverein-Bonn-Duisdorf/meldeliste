@@ -197,6 +197,7 @@ if(!count($allJobs)) {
     echo '<tr><td colspan="7">Noch keine Emails vorhanden.</td></tr>';
 }
 $userNameCache = array();
+$mailSendingIds = array();
 foreach($allJobs as $rowJob) {
     $id = (int)$rowJob->Index;
     $subject = $rowJob->Subject !== '' && $rowJob->Subject !== null
@@ -231,31 +232,39 @@ foreach($allJobs as $rowJob) {
     else {
         $counts = '—';
     }
-    echo '<tr>';
+    $isSending = in_array((string)$rowJob->Status, array('queued', 'processing'), true);
+    if($isSending) {
+        $mailSendingIds[] = $id;
+    }
+    echo '<tr data-mail-id="'.$id.'"'.($isSending ? ' data-mail-sending="1"' : '').'>';
     echo '<td>'.$id.'</td>';
     echo '<td>'.$created.'</td>';
     echo '<td>'.$byName.'</td>';
     echo '<td><a href="mail.php?id='.$id.'">'.$subject.'</a></td>';
-    echo '<td><span class="w3-tag '.$statusCls.'">'.$status.'</span></td>';
-    echo '<td>'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</td>';
-    echo '<td>';
+    echo '<td class="mail-status-cell"><span class="w3-tag mail-status-tag '.$statusCls.'">'.$status.'</span></td>';
+    echo '<td class="mail-counts-cell">'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</td>';
+    echo '<td class="mail-actions-cell">';
     if($rowJob->Status === 'draft') {
         echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a> ';
     }
     if($rowJob->canCancel()) {
+        echo '<span class="mail-cancel-wrap">';
         echo '<form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
         echo '<input type="hidden" name="id" value="'.$id.'" />';
         echo '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
         echo '</form> ';
+        echo '</span>';
     }
     if($rowJob->canDelete()) {
         $delConfirm = $rowJob->Status === 'draft'
             ? 'Entwurf #'.$id.' wirklich löschen?'
             : 'Email-ID '.$id.' wirklich löschen? (noch an niemanden per PHPMailer versendet)';
+        echo '<span class="mail-delete-wrap">';
         echo '<form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
         echo '<input type="hidden" name="id" value="'.$id.'" />';
         echo '<button type="submit" name="delete_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Löschen</button>';
         echo '</form> ';
+        echo '</span>';
     }
     echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?copy='.$id.'">Als Entwurf kopieren</a>';
     echo '</td>';
@@ -266,6 +275,62 @@ foreach($allJobs as $rowJob) {
   </table>
   </div>
 </div>
+<?php if(count($mailSendingIds)) { ?>
+<script>
+(function() {
+  var pollIds = <?php echo json_encode(array_values($mailSendingIds)); ?>;
+  if(!pollIds.length) return;
+
+  function applyJob(job) {
+    var row = document.querySelector('tr[data-mail-id="' + job.id + '"]');
+    if(!row) return;
+    var tag = row.querySelector('.mail-status-tag');
+    if(tag) {
+      tag.className = 'w3-tag mail-status-tag ' + (job.statusClass || '');
+      tag.textContent = job.statusLabel || job.status;
+    }
+    var counts = row.querySelector('.mail-counts-cell');
+    if(counts) {
+      counts.textContent = job.counts || '';
+    }
+    var cancelWrap = row.querySelector('.mail-cancel-wrap');
+    if(cancelWrap) {
+      cancelWrap.style.display = job.canCancel ? '' : 'none';
+    }
+    var deleteWrap = row.querySelector('.mail-delete-wrap');
+    if(deleteWrap) {
+      deleteWrap.style.display = job.canDelete ? '' : 'none';
+    }
+    if(job.sending) {
+      row.setAttribute('data-mail-sending', '1');
+    }
+    else {
+      row.removeAttribute('data-mail-sending');
+      pollIds = pollIds.filter(function(id) { return id !== job.id; });
+    }
+  }
+
+  function poll() {
+    if(!pollIds.length) return;
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState !== 4 || xhr.status !== 200) return;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if(!data || !data.jobs) return;
+        data.jobs.forEach(applyJob);
+      }
+      catch(e) {}
+    };
+    xhr.open('GET', 'mailStatus.php?ids=' + encodeURIComponent(pollIds.join(',')), true);
+    xhr.send();
+  }
+
+  setInterval(poll, 1000);
+  poll();
+})();
+</script>
+<?php } ?>
 <?php } ?>
 
 <?php if($job && $job->Status === 'draft') { ?>
@@ -445,12 +510,12 @@ function delFile(hash) {
 ?>
 <div class="w3-container w3-padding">
   <div class="w3-card w3-padding w3-margin-bottom">
-    <p class="w3-small">
+    <p class="w3-small" id="mail-detail-meta">
       Email-ID <?php echo (int)$job->Index; ?>
-      · <span class="w3-tag <?php echo $job->statusClass(); ?>"><?php echo htmlspecialchars($job->statusLabel(), ENT_QUOTES, 'UTF-8'); ?></span>
+      · <span id="mail-detail-status" class="w3-tag <?php echo $job->statusClass(); ?>"><?php echo htmlspecialchars($job->statusLabel(), ENT_QUOTES, 'UTF-8'); ?></span>
       · <?php echo $createdView; ?>
       · von <?php echo $byName; ?>
-      · Empfänger <?php echo (int)$job->Sent; ?>/<?php echo (int)$job->Total; ?><?php if((int)$job->Failed > 0) echo ' ('.(int)$job->Failed.' Fehler)'; ?>
+      · Empfänger <span id="mail-detail-counts"><?php echo (int)$job->Sent; ?>/<?php echo (int)$job->Total; ?><?php if((int)$job->Failed > 0) echo ' ('.(int)$job->Failed.' Fehler)'; ?></span>
     </p>
     <h3 class="w3-margin-top"><?php echo $viewSubject !== '' ? $viewSubject : '<em>(ohne Betreff)</em>'; ?></h3>
     <div class="w3-padding-16 w3-border-top"><?php echo $viewBody !== '' ? $viewBody : '<em>(kein Text)</em>'; ?></div>
@@ -524,6 +589,40 @@ else {
   </table>
   </div>
 </div>
+<?php if(in_array((string)$job->Status, array('queued', 'processing'), true)) { ?>
+<script>
+(function() {
+  var jobId = <?php echo (int)$job->Index; ?>;
+  var timer = setInterval(function() {
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState !== 4 || xhr.status !== 200) return;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if(!data || !data.jobs || !data.jobs.length) return;
+        var job = data.jobs[0];
+        var statusEl = document.getElementById('mail-detail-status');
+        var countsEl = document.getElementById('mail-detail-counts');
+        if(statusEl) {
+          statusEl.className = 'w3-tag ' + (job.statusClass || '');
+          statusEl.textContent = job.statusLabel || job.status;
+        }
+        if(countsEl) {
+          countsEl.textContent = job.counts || '';
+        }
+        if(!job.sending) {
+          clearInterval(timer);
+          window.location.reload();
+        }
+      }
+      catch(e) {}
+    };
+    xhr.open('GET', 'mailStatus.php?ids=' + jobId, true);
+    xhr.send();
+  }, 1000);
+})();
+</script>
+<?php } ?>
 <?php } ?>
 
 <?php
