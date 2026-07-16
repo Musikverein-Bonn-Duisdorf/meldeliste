@@ -136,12 +136,12 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
 if(isset($_GET['queued'])) {
     $n = isset($_GET['n']) ? (int)$_GET['n'] : 0;
     $qid = (int)$_GET['queued'];
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>'.$n.' Nachrichten aus Email-ID '.$qid.' in die Warteschlange gestellt.</h3><p>Sofort im Nutzer-Posteingang sichtbar; Versand per PHPMailer asynchron (<code>processMailQueue</code>).</p></div>';
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>'.$n.' Nachrichten aus Email-ID '.$qid.' in die Warteschlange gestellt.</h3></div>';
     $job = null;
 }
 if(isset($_GET['cancelled'])) {
     $cid = (int)$_GET['cancelled'];
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorWarning'].'"><h3>Versand von Email-ID '.$cid.' abgebrochen.</h3><p>Bereits versendete Nachrichten bleiben erhalten; offene Empfänger wurden aus der Queue entfernt.</p></div>';
+    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorWarning'].'"><h3>Versand von Email-ID '.$cid.' abgebrochen.</h3></div>';
     $job = null;
 }
 if(isset($_GET['deleted'])) {
@@ -178,7 +178,6 @@ include_once 'common/header.php';
 
 <?php if(!$job) { ?>
 <div class="w3-container w3-padding">
-  <p>Emails haben eine feste ID. Anhänge liegen getrennt pro Email. Mehrere Admins können parallel an Entwürfen arbeiten.</p>
   <div class="w3-responsive">
   <table class="w3-table w3-bordered w3-striped w3-hoverable">
     <thead>
@@ -338,7 +337,7 @@ foreach($allJobs as $rowJob) {
 <div class="w3-row">
 <div class="w3-col s12 m1 l1">&nbsp;</div>
 <div class="w3-panel w3-mobile w3-border w3-col s12 m10 l10" style="text-align:left;">
-  <p class="w3-left-align"><b>Email-ID <?php echo (int)$job->Index; ?></b> (Entwurf) — Anhänge nur für diese Email.</p>
+  <p class="w3-left-align"><b>Email-ID <?php echo (int)$job->Index; ?></b> (Entwurf)</p>
   <form name="mailform" class="w3-container w3-margin" action="mail.php?id=<?php echo (int)$job->Index; ?>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
     <label>Empfänger</label>
@@ -404,7 +403,6 @@ foreach($allJobs as $rowJob) {
                          <div class="w3-container w3-mobile w3-border w3-border-black w3-left-align w3-margin-bottom"><b>Betreff:</b> <?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?></div>
                          <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."</p>".formatMailBodyForDisplay($textPreview)."</div>"; ?></div>
         <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send" value="1">In Warteschlange stellen</button>
-        <p class="w3-small">Der Versand erfolgt asynchron per Cron (<code>processMailQueue</code>).</p>
     <?php } ?>
   </form>
 

@@ -248,7 +248,7 @@ class Usermail {
 
         if(!$this->quiet) {
             if($count > 0) {
-                echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>".$count." Nachrichten in die Warteschlange gestellt (Email-ID ".$job->Index."). </h3><p>Im Nutzer-Posteingang sofort sichtbar; Versand per PHPMailer asynchron durch den Mail-Queue-Cron.</p></div>";
+                echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>".$count." Nachrichten in die Warteschlange gestellt (Email-ID ".$job->Index."). </h3></div>";
             }
             else {
                 echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>Keine gültigen Emailadressen gefunden. Kein Versand möglich.</h3></div>";
