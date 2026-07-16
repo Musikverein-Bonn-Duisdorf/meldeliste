@@ -29,6 +29,9 @@ if(isset($_POST['save'])) {
             );            
             $dbr2 = mysqli_query($conn, $sql);
             sqlerror();
+            if($dbr2) {
+                logConfigChange($row['Parameter'], $row['Value'], $val, $row['Type']);
+            }
             break;
         case "bool":
         case "uint":
@@ -38,14 +41,18 @@ if(isset($_POST['save'])) {
         case "email":
         case "text":
             if(isset($_POST[$row['Parameter']])) {
+                $newVal = $_POST[$row['Parameter']];
+                if($newVal == $row['Value']) break;
                 $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
                 $GLOBALS['dbprefix'],
-                mysqli_real_escape_string($conn, $_POST[$row['Parameter']]),
+                mysqli_real_escape_string($conn, $newVal),
                 $row['Parameter']
                 );
-                if($_POST[$row['Parameter']] == $row['Value']) break;
                 $dbr2 = mysqli_query($conn, $sql);
                 sqlerror();
+                if($dbr2) {
+                    logConfigChange($row['Parameter'], $row['Value'], $newVal, $row['Type']);
+                }
             }
             break;
         case "color":
@@ -53,14 +60,18 @@ if(isset($_POST['save'])) {
             break;
         default:
             if(isset($_POST[$row['Parameter']])) {
+                $newVal = $_POST[$row['Parameter']];
+                if($newVal == $row['Value']) break;
                 $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
                 $GLOBALS['dbprefix'],
-                mysqli_real_escape_string($conn, $_POST[$row['Parameter']]),
+                mysqli_real_escape_string($conn, $newVal),
                 $row['Parameter']
                 );
-                if($_POST[$row['Parameter']] == $row['Value']) break;
                 $dbr2 = mysqli_query($conn, $sql);
                 sqlerror();
+                if($dbr2) {
+                    logConfigChange($row['Parameter'], $row['Value'], $newVal, $row['Type']);
+                }
             }
             break;
         }
