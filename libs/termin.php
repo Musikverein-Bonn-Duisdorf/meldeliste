@@ -1712,9 +1712,7 @@ class Termin
             $str=$str."</form>\n";
         }
         if(requirePermission("perm_sendEmail")) {
-            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"mail.php\" method=\"POST\">\n";
-            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Email an Teilnehmer</button>\n";
-            $str=$str."</form>\n";
+            $str=$str."<a class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" href=\"mail.php?new=1&termin=".$this->Index."\">Email an Teilnehmer</a>\n";
         }
         if(requirePermission("perm_editAppmnts")) {
             if($this->Shifts) {

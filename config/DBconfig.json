@@ -76,6 +76,37 @@
 	"Type": {"Type": "int"},
 	"Message": {"Type": "text", "Collation": "latin1_swedish_ci"}
     },
+    "MailJob": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
+	"CreatedBy": {"Type": "int", "Default": 0},
+	"Subject": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"BodyText": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Source": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"MemberOnly": {"Type": "tinyint", "Default": 0},
+	"Register": {"Type": "int", "Default": 0},
+	"Termin": {"Type": "int", "Default": 0},
+	"Gruss": {"Type": "int", "Default": 1},
+	"AttachmentPath": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Status": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Total": {"Type": "int", "Default": 0},
+	"Sent": {"Type": "int", "Default": 0},
+	"Failed": {"Type": "int", "Default": 0}
+    },
+    "MailOutbox": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Job": {"Type": "int"},
+	"User": {"Type": "int"},
+	"ToEmail": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Subject": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"BodyText": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"Status": {"Type": "text", "Collation": "latin1_swedish_ci"},
+	"Attempts": {"Type": "int", "Default": 0},
+	"LastError": {"Type": "text", "Null": "YES", "Collation": "latin1_swedish_ci"},
+	"SentAt": {"Type": "timestamp", "Null": "YES", "Default": null},
+	"DeletedByUser": {"Type": "tinyint", "Default": 0},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
+    },
     "Meldungen": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Timestamp": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
