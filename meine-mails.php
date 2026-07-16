@@ -82,7 +82,7 @@ $resolveSender = function($senderId) use (&$userNameCache) {
 
 <?php if($viewMail) {
     $subj = htmlspecialchars((string)$viewMail->Subject, ENT_QUOTES, 'UTF-8');
-    $body = nl2br((string)$viewMail->BodyText);
+    $body = formatMailBodyForDisplay((string)$viewMail->BodyText);
     $when = htmlspecialchars($formatMailDate($viewMail->Created), ENT_QUOTES, 'UTF-8');
     $job = new MailJob;
     $job->load_by_id((int)$viewMail->Job);

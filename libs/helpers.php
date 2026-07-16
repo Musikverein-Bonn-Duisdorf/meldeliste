@@ -1022,4 +1022,73 @@ function VehicleOption($val) {
         }
     }
 }
+
+/**
+ * True if mail body looks like HTML (WYSIWYG) rather than plain text.
+ */
+function mailBodyLooksLikeHtml($text) {
+    return (bool)preg_match('/<[a-z][\s\S]*>/i', (string)$text);
+}
+
+/**
+ * Allowlist-sanitize HTML for email bodies (MELD-46).
+ */
+function sanitizeMailHtml($html) {
+    $html = (string)$html;
+    if($html === '') {
+        return '';
+    }
+    $html = preg_replace('#<(script|iframe|object|embed|form|input|button|link|meta|style|svg|math)(\s[^>]*)?>[\s\S]*?</\1>#i', '', $html);
+    $html = preg_replace('#<(script|iframe|object|embed|form|input|button|link|meta|style|svg|math)(\s[^>]*)?/?>#i', '', $html);
+    $html = strip_tags($html, '<p><br><b><strong><i><em><u><ul><ol><li><a><h1><h2><h3><h4><blockquote>');
+    $html = preg_replace('/\son[a-z]+\s*=\s*("|\')[\s\S]*?\1/i', '', $html);
+    $html = preg_replace('/\son[a-z]+\s*=\s*[^\s>]+/i', '', $html);
+    $html = preg_replace('/\s(href|src)\s*=\s*("|\')\s*javascript:[^"\']*\2/i', ' href="#"', $html);
+    $html = preg_replace('/\s(href|src)\s*=\s*javascript:[^\s>]+/i', ' href="#"', $html);
+    return $html;
+}
+
+/**
+ * Format stored mail body for safe HTML display (preview / inbox).
+ */
+function formatMailBodyForDisplay($text) {
+    $text = (string)$text;
+    if($text === '') {
+        return '';
+    }
+    if(mailBodyLooksLikeHtml($text)) {
+        return sanitizeMailHtml($text);
+    }
+    return nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8'));
+}
+
+/**
+ * Format stored mail body for embedding into the PHPMailer HTML wrapper.
+ */
+function formatMailBodyForEmail($text) {
+    return formatMailBodyForDisplay($text);
+}
+
+/**
+ * Strip leading personal greeting from outbox body (plain or HTML).
+ */
+function stripMailBodyGreeting($body, $vorname) {
+    $body = (string)$body;
+    $vorname = (string)$vorname;
+    $anrede = $vorname !== '' ? 'Hallo '.$vorname.',' : 'Hallo,';
+    $prefix = $anrede."\n\n";
+    if(strpos($body, $prefix) === 0) {
+        return substr($body, strlen($prefix));
+    }
+    $htmlPrefix = '<p>'.htmlspecialchars($anrede, ENT_QUOTES, 'UTF-8').'</p>';
+    if(strpos($body, $htmlPrefix) === 0) {
+        return substr($body, strlen($htmlPrefix));
+    }
+    // TinyMCE may wrap without escaping differently
+    $htmlPrefixLoose = '<p>'.$anrede.'</p>';
+    if(strpos($body, $htmlPrefixLoose) === 0) {
+        return substr($body, strlen($htmlPrefixLoose));
+    }
+    return $body;
+}
 ?>

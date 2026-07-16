@@ -94,7 +94,8 @@ if(isset($_POST['delete_job'])) {
 // Speichern / Vorschau / Senden
 if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['preview']) || isset($_POST['send']))) {
     $job->Subject = isset($_POST['Betreff']) ? (string)$_POST['Betreff'] : '';
-    $job->BodyText = isset($_POST['Text']) ? (string)$_POST['Text'] : '';
+    $rawBody = isset($_POST['Text']) ? (string)$_POST['Text'] : '';
+    $job->BodyText = function_exists('sanitizeMailHtml') ? sanitizeMailHtml($rawBody) : $rawBody;
     $job->Gruss = isset($_POST['gruss']) ? (int)$_POST['gruss'] : 1;
     $job->Termin = isset($_POST['termin']) ? (int)$_POST['termin'] : (int)$job->Termin;
     if($job->Termin) {
@@ -388,7 +389,7 @@ foreach($allJobs as $rowJob) {
     <label>Text</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile" name="anrede" value="Hallo {VORNAME}," disabled/>
 
-    <textarea rows="10" cols="50" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile" name="Text" placeholder="Hier Emailtext einfügen"><?php echo htmlspecialchars($textRaw, ENT_QUOTES, 'UTF-8'); ?></textarea>
+    <textarea id="mail-body" rows="12" cols="50" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile" name="Text" placeholder="Hier Emailtext einfügen"><?php echo htmlspecialchars($textRaw, ENT_QUOTES, 'UTF-8'); ?></textarea>
     <select class="w3-select w3-margin-bottom" name="gruss">
       <option value="1" <?php if($gruss==1) echo "selected"; ?>>Viele Grüße, <?php echo htmlspecialchars($_SESSION['Vorname'], ENT_QUOTES, 'UTF-8'); ?></option>
       <option value="2" <?php if($gruss==2) echo "selected"; ?>>Viele Grüße, der Vorstand</option>
@@ -400,11 +401,39 @@ foreach($allJobs as $rowJob) {
 
     <?php if($preview) { ?>
                          <div class="w3-container w3-mobile w3-border w3-border-black w3-left-align w3-margin-bottom"><b>Betreff:</b> <?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?></div>
-                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />\n\n".nl2br($textPreview); ?></p></div></div>
+                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."</p>".formatMailBodyForDisplay($textPreview)."</div>"; ?></div>
         <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send" value="1">In Warteschlange stellen</button>
         <p class="w3-small">Der Versand erfolgt asynchron per Cron (<code>processMailQueue</code>).</p>
     <?php } ?>
   </form>
+
+  <script src="js/tinymce/tinymce.min.js?<?php echo isset($GLOBALS['version']['Hash']) ? htmlspecialchars($GLOBALS['version']['Hash'], ENT_QUOTES, 'UTF-8') : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/tinymce/tinymce.min.js'); ?>"></script>
+  <script>
+  tinymce.init({
+    selector: '#mail-body',
+    license_key: 'gpl',
+    menubar: false,
+    branding: false,
+    promotion: false,
+    height: 320,
+    plugins: 'lists link autolink',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link | removeformat',
+    link_default_target: '_blank',
+    link_assume_external_targets: true,
+    convert_urls: false,
+    relative_urls: false,
+    entity_encoding: 'raw',
+    content_style: 'body { font-family: sans-serif; font-size: 14px; }',
+    setup: function (editor) {
+      var form = document.querySelector('form[name="mailform"]') || editor.getElement().form;
+      if (form) {
+        form.addEventListener('submit', function () {
+          editor.save();
+        });
+      }
+    }
+  });
+  </script>
 
   <form method="post" action="mail.php?id=<?php echo (int)$job->Index; ?>" onsubmit="return confirm('Entwurf #<?php echo (int)$job->Index; ?> wirklich löschen?');">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
@@ -477,7 +506,7 @@ function delFile(hash) {
 </div>
 <?php } elseif($job && $job->Status !== 'draft') {
     $viewSubject = htmlspecialchars((string)$job->Subject, ENT_QUOTES, 'UTF-8');
-    $viewBody = nl2br((string)$job->BodyText);
+    $viewBody = formatMailBodyForDisplay((string)$job->BodyText);
     $createdRaw = (string)$job->listTimestamp();
     $createdView = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
     if(strlen($createdRaw) >= 16) {

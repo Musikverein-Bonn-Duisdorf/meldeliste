@@ -290,8 +290,27 @@ class MailJob
     }
 
     public function applyGreeting($vornameSession = '') {
+        $body = (string)$this->BodyText;
         $gruss = (int)$this->Gruss;
+        $asHtml = function_exists('mailBodyLooksLikeHtml') && mailBodyLooksLikeHtml($body);
         $suffix = '';
+        if($asHtml) {
+            $safeName = htmlspecialchars((string)$vornameSession, ENT_QUOTES, 'UTF-8');
+            $safeGreet = htmlspecialchars((string)$GLOBALS['optionsDB']['MailGreetings'], ENT_QUOTES, 'UTF-8');
+            if($gruss === 1) {
+                $suffix = '<p>Viele Grüße<br>'.$safeName.'</p>';
+            }
+            elseif($gruss === 2) {
+                $suffix = '<p>Viele Grüße<br>der Vorstand</p>';
+            }
+            elseif($gruss === 3) {
+                $suffix = '<p>Viele Grüße<br>'.$safeGreet.'</p>';
+            }
+            elseif($gruss === 4) {
+                $suffix = '<p>'.$safeName.'</p>';
+            }
+            return $body.$suffix;
+        }
         if($gruss === 1) {
             $suffix = "\n\nViele Grüße\n".$vornameSession;
         }
@@ -304,7 +323,7 @@ class MailJob
         elseif($gruss === 4) {
             $suffix = "\n".$vornameSession;
         }
-        return (string)$this->BodyText.$suffix;
+        return $body.$suffix;
     }
 
     public function refreshCounts() {
