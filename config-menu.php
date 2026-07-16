@@ -77,7 +77,11 @@ function savePara(Parameter, Value, reload) {
 	}
 	xmlhttp.onreadystatechange = function() {
 	    if(xmlhttp.readyState === 4 && reload) {
-	        window.location.reload();
+	        if(xmlhttp.status >= 200 && xmlhttp.status < 300 && xmlhttp.responseText.indexOf('ok') !== -1) {
+	            window.location.reload();
+	        } else {
+	            alert('Farbschema konnte nicht übernommen werden: ' + xmlhttp.responseText);
+	        }
 	    }
 	};
 	var str = "savePara.php?cmd=change&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&para="+encodeURIComponent(Parameter)+"&value="+encodeURIComponent(Value);
