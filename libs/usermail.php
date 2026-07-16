@@ -154,6 +154,7 @@ class Usermail {
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $i=0;
+        $hadAnyRecipient = false;
         while($row = mysqli_fetch_array($dbr)) {
             $anrede = "Hallo ".$row['Vorname'].",";
             $link= $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$row['activeLink'];
@@ -162,6 +163,7 @@ class Usermail {
             $mail->Body = "<html><head><style>".$style."</style></head><body><div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."<br /><br />".nl2br($text)."</p></div><a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">zu ".genitiv($row['Vorname'])." Meldeliste</a></body></html>";
 
             if($row['Email']) {
+                $hadAnyRecipient = true;
                 $mail->addAddress($row['Email'], $row['Vorname']." ".$row['Nachname']);
                 if($row['Email2']) {
                     $mail->addAddress($row['Email2'], $row['Vorname']." ".$row['Nachname']);
@@ -175,26 +177,32 @@ class Usermail {
 					$this->subject
 					);
 					$logentry->email($logmessage);
-				} catch (Exception $e) {
+					$i++;
+				} catch (Throwable $e) {
 					$logentry = new Log;
 		
-					$logmessage = sprintf("Kann Email nicht senden | An: %s %s | Betreff: %s | PHPMailer: %s",
+					$logmessage = sprintf("Kann Email nicht senden | An: <b>%s %s</b> | Betreff: <b>%s</b> | PHPMailer: <b>%s</b> | Exception: <b>%s</b>",
 						$row['Vorname'],
 						$row['Nachname'],
 						$this->subject,
-						$mail->ErrorInfo
+						$mail->ErrorInfo,
+						$e->getMessage()
 					);
 		
 					$logentry->error($logmessage);
 					$mail->smtpClose();
-					echo "<div class=\"w3-container w3-red\"><h3>Mailversand abgebrochen</h3><p>Fehler: ".$e->getMessage()."</p></div>";
-					throw $e;
+					echo "<div class=\"w3-container w3-red\"><h3>Mailversand fehlgeschlagen</h3><p>Fehler: ".htmlspecialchars($e->getMessage())."</p></div>";
 				}
 				usleep(100000); // 100 ms Pause
-            	$i++;
             }
         }
 		$mail->smtpClose();
-        echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
+        if($i > 0) {
+            echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>Es wurden ".$i." Emails versandt.</h3></div>";
+        }
+        else {
+            $msg = $hadAnyRecipient ? "Es wurden keine Emails erfolgreich versandt." : "Keine gültigen Emailadressen gefunden. Kein Versand möglich.";
+            echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>".$msg."</h3></div>";
+        }
     }
 }

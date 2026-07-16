@@ -33,7 +33,7 @@ class User
         }
     }
     public function __set($key, $val) {
-        if($val == null) {
+        if($val === null) {
             $this->_data[$key] = null;
             return;
         }
@@ -56,8 +56,8 @@ class User
 	    case 'LastLogin':
 	    case 'DeletedOn':
 	    case 'Birthday':
-            if($val) {
-                $this->_data[$key] = trim($val);
+            if($val !== '' && $val !== null) {
+                $this->_data[$key] = trim((string)$val);
             }
             else {
                 $this->_data[$key] = "";
@@ -195,12 +195,12 @@ class User
     public function singleUsePW($val) {
         $sql = sprintf('UPDATE `%sUser` SET `singleUsePW` = %d WHERE `Index` = %d;',
         $GLOBALS['dbprefix'],
-        (bool)$val,
-        $this->Index
+        (int)(bool)$val,
+        (int)$this->Index
         );
         mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        if($_SESSION['userid'] == $this->Index) {
+        if(isset($_SESSION['userid']) && (int)$_SESSION['userid'] === (int)$this->Index) {
             $_SESSION['singleUsePW'] = (bool)$val;
         }
     }
@@ -209,28 +209,118 @@ class User
         $mail->singleUser($this->Index, $GLOBALS['optionsDB']['newMailSubject'], $GLOBALS['optionsDB']['newMailText']."\n".$GLOBALS['optionsDB']['MailGreetings']);
     }
     public function passwd($password) {
-        if(!$this->login) {
-            return false;
-        }
-        $arbPW = false;
-        if($password == '') {
-            $password = uniqid();
-            $arbPW = true;
-        }
-        if($this->Index) {
-            $this->Passhash = password_hash($password, PASSWORD_DEFAULT);
-            $mail = new Usermail;
+        try {
+            if(!(int)$this->Index) {
+                $logentry = new Log;
+                $logentry->error("Passwort setzen fehlgeschlagen: keine User-ID.");
+                return false;
+            }
+            if($this->login === null || $this->login === '') {
+                $logentry = new Log;
+                $logentry->error(sprintf(
+                    "Passwort setzen fehlgeschlagen: User-ID <b>%d</b> hat keinen Loginname.",
+                    (int)$this->Index
+                ));
+                return false;
+            }
+            $arbPW = false;
+            if($password === null || $password === '') {
+                $password = uniqid('', true);
+                $arbPW = true;
+            }
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            if(!$hash) {
+                $logentry = new Log;
+                $logentry->error(sprintf(
+                    "password_hash fehlgeschlagen | User-ID: <b>%d</b>, Login: <b>%s</b>",
+                    (int)$this->Index,
+                    htmlspecialchars((string)$this->login)
+                ));
+                return false;
+            }
+            $this->Passhash = $hash;
             if($arbPW) {
-                $this->singleUsePW(1);
-                $this->update();
-                $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "ein neues Passwort wurde erstellt. Beim n&auml;chsten Login wirst du aufgefordert, dieses zu &auml;ndern.\nDu kannst dich nun unter\n\n<a href=\"".$GLOBALS['optionsDB']['WebSiteURL']."\">".$GLOBALS['optionsDB']['WebSiteURL']."</a>\n\neinloggen.\nBenutzername: ".$this->login."\nPasswort: ".$password);
+                $singleUse = 1;
             }
             else {
                 $this->generateLink();
-                $this->singleUsePW(0);
-                $this->update();
-                $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "dein neues Passwort wurde gespeichert. Damit ist auch der alte Login-Link ungültig. Bitte nutze ab sofort den Link unter dieser Email.\n\nBenutzername: ".$this->login);
+                $singleUse = 0;
             }
+            $sql = sprintf(
+                'UPDATE `%sUser` SET `Passhash` = "%s", `singleUsePW` = %d, `activeLink` = "%s" WHERE `Index` = %d;',
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
+                $singleUse,
+                mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
+                (int)$this->Index
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if(!$dbr) {
+                $logentry = new Log;
+                $logentry->error(sprintf(
+                    "Passwort-SQL fehlgeschlagen | User-ID: <b>%d</b>, Login: <b>%s</b>, MySQL: <b>%s</b>",
+                    (int)$this->Index,
+                    htmlspecialchars((string)$this->login),
+                    htmlspecialchars(mysqli_error($GLOBALS['conn']))
+                ));
+                return false;
+            }
+            $checkSql = sprintf(
+                'SELECT `Passhash`, `singleUsePW` FROM `%sUser` WHERE `Index` = %d;',
+                $GLOBALS['dbprefix'],
+                (int)$this->Index
+            );
+            $check = mysqli_query($GLOBALS['conn'], $checkSql);
+            sqlerror();
+            $row = $check ? mysqli_fetch_assoc($check) : null;
+            if(!$row || !password_verify($password, (string)$row['Passhash'])) {
+                $logentry = new Log;
+                $logentry->error(sprintf(
+                    "Passwort nach Speichern nicht verifizierbar | User-ID: <b>%d</b>, Login: <b>%s</b>",
+                    (int)$this->Index,
+                    htmlspecialchars((string)$this->login)
+                ));
+                return false;
+            }
+            if(isset($_SESSION['userid']) && (int)$_SESSION['userid'] === (int)$this->Index) {
+                $_SESSION['singleUsePW'] = (bool)$singleUse;
+            }
+            $logentry = new Log;
+            $logentry->info(sprintf(
+                "Passwort gesetzt | User-ID: <b>%d</b>, Login: <b>%s</b>, Einmalpasswort: <b>%s</b>",
+                (int)$this->Index,
+                htmlspecialchars((string)$this->login),
+                $arbPW ? 'ja' : 'nein'
+            ));
+            try {
+                $mail = new Usermail;
+                if($arbPW) {
+                    $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "ein neues Passwort wurde erstellt. Beim n&auml;chsten Login wirst du aufgefordert, dieses zu &auml;ndern.\nDu kannst dich nun unter\n\n<a href=\"".$GLOBALS['optionsDB']['WebSiteURL']."\">".$GLOBALS['optionsDB']['WebSiteURL']."</a>\n\neinloggen.\nBenutzername: ".$this->login."\nPasswort: ".$password);
+                }
+                else {
+                    $mail->singleUser($this->Index, $GLOBALS['optionsDB']['SubjectPW'], "dein neues Passwort wurde gespeichert. Damit ist auch der alte Login-Link ungültig. Bitte nutze ab sofort den Link unter dieser Email.\n\nBenutzername: ".$this->login);
+                }
+            }
+            catch(Throwable $e) {
+                $logentry = new Log;
+                $logentry->error(sprintf(
+                    "Passwort gespeichert, aber Mailversand fehlgeschlagen | User-ID: <b>%d</b>, Login: <b>%s</b>, Fehler: <b>%s</b>",
+                    (int)$this->Index,
+                    htmlspecialchars((string)$this->login),
+                    htmlspecialchars($e->getMessage())
+                ));
+            }
+            return true;
+        }
+        catch(Throwable $e) {
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                "Passwort setzen Exception | User-ID: <b>%d</b>, Fehler: <b>%s</b>",
+                (int)$this->Index,
+                htmlspecialchars($e->getMessage())
+            ));
+            return false;
         }
     }
     public function is_valid() {
@@ -377,7 +467,9 @@ class User
         return true;
     }
     public function fill_from_array($row) {
+        if(!is_array($row)) return;
         foreach($row as $key => $val) {
+            if(is_int($key)) continue;
             $this->__set($key, $val);
         }
     }
@@ -389,7 +481,7 @@ class User
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
-        $row = mysqli_fetch_array($dbr);
+        $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
         if(is_array($row)) {
             $this->fill_from_array($row);
         }

@@ -3,7 +3,14 @@ session_start();
 $_SESSION['page']='musiker';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_showUsers")) die();
+if(!requirePermission("perm_showUsers")) {
+    $logentry = new Log;
+    $logentry->error(sprintf(
+        "Zugriff auf musiker.php verweigert | User-ID: <b>%d</b>",
+        isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0
+    ));
+    die('<div class="w3-panel w3-red w3-padding"><b>Keine Berechtigung.</b> Eigenes Profil bitte über „Mein Profil“ speichern.</div>');
+}
 
 if(isset($_POST['insert'])) {
     try {
@@ -20,14 +27,25 @@ if(isset($_POST['insert'])) {
         if(!$n->save()) {
             echo '<div class="w3-panel w3-red w3-padding"><b>Musiker konnte nicht gespeichert werden.</b> Vorname und Nachname sind Pflicht.</div>';
         }
+        elseif(isset($_POST['pw1']) && isset($_POST['pw2'])) {
+            if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
+                if(!$n->passwd($_POST['pw1'])) {
+                    echo '<div class="w3-panel w3-red w3-padding"><b>Passwort konnte nicht gesetzt werden.</b> Bitte Loginname prüfen.</div>';
+                }
+            }
+            elseif($_POST['pw1'] != '' || $_POST['pw2'] != '') {
+                echo '<div class="w3-panel w3-red w3-padding"><b>Passwörter stimmen nicht überein.</b></div>';
+            }
+        }
     }
     catch(Throwable $e) {
+        $logentry = new Log;
+        $logentry->error(sprintf(
+            "Musiker speichern/Passwort Exception | User-ID: <b>%d</b>, Fehler: <b>%s</b>",
+            isset($_POST['Index']) ? (int)$_POST['Index'] : 0,
+            htmlspecialchars($e->getMessage())
+        ));
         echo '<div class="w3-panel w3-red w3-padding"><b>Fehler beim Speichern:</b> '.htmlspecialchars($e->getMessage()).'</div>';
-    }
-    if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
-        if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
-            $n->passwd($_POST['pw1']);
-        }
     }
 }
 if(isset($_POST['deactivate'])) {
@@ -42,19 +60,43 @@ if(isset($_POST['delete'])) {
     $n->delete();
 }
 if(isset($_POST['passwd'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->fill_from_array($_POST);
-    if($_POST['Index'] > 0) {
-        $n->passwd("");
+    try {
+        $n = new User;
+        $n->load_by_id($_POST['Index']);
+        $n->fill_from_array($_POST);
+        if((int)$_POST['Index'] > 0) {
+            if(!$n->passwd("")) {
+                echo '<div class="w3-panel w3-red w3-padding"><b>Zufallspasswort konnte nicht erzeugt werden.</b> Bitte Loginname prüfen.</div>';
+            }
+        }
+    }
+    catch(Throwable $e) {
+        $logentry = new Log;
+        $logentry->error(sprintf(
+            "Zufallspasswort Exception | User-ID: <b>%d</b>, Fehler: <b>%s</b>",
+            isset($_POST['Index']) ? (int)$_POST['Index'] : 0,
+            htmlspecialchars($e->getMessage())
+        ));
+        echo '<div class="w3-panel w3-red w3-padding"><b>Fehler beim Erzeugen des Passworts:</b> '.htmlspecialchars($e->getMessage()).'</div>';
     }
 }
 if(isset($_POST['newmail'])) {
-    $n = new User;
-    $n->load_by_id($_POST['Index']);
-    $n->fill_from_array($_POST);
-    if($_POST['Index'] > 0) {
-        $n->newmail("");
+    try {
+        $n = new User;
+        $n->load_by_id($_POST['Index']);
+        $n->fill_from_array($_POST);
+        if((int)$_POST['Index'] > 0) {
+            $n->newmail();
+        }
+    }
+    catch(Throwable $e) {
+        $logentry = new Log;
+        $logentry->error(sprintf(
+            "newmail Exception | User-ID: <b>%d</b>, Fehler: <b>%s</b>",
+            isset($_POST['Index']) ? (int)$_POST['Index'] : 0,
+            htmlspecialchars($e->getMessage())
+        ));
+        echo '<div class="w3-panel w3-red w3-padding"><b>Fehler beim Mailversand:</b> '.htmlspecialchars($e->getMessage()).'</div>';
     }
 }
 $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1;',
