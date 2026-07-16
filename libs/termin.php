@@ -1242,10 +1242,10 @@ class Termin
         $nameDiv->col(3, 0, 0);
         $nameDiv->bold();
         if($GLOBALS['optionsDB']['showAddToCalendarButton']) {
-            $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" style=\"font-size: 30px;\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
+            $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"openModal('termin', ".$this->Index.")\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" style=\"font-size: 30px;\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
         }
         else {
-            $nameDiv->body="<i onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
+            $nameDiv->body="<i onclick=\"openModal('termin', ".$this->Index.")\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
         }
         $str=$str.$nameDiv->print();
 
@@ -1523,59 +1523,60 @@ class Termin
             }
         }
         $str=$str.$main->close();
+        return $str;
+    }
 
-        $str=$str."\t<div id=\"id".$this->Index."\" class=\"w3-modal\">\n";
-        $str=$str."\t\t<div class=\"w3-modal-content\">\n";
-        $str=$str."\t\t\t<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">\n";
-        $str=$str."\t\t\t\t<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\" "; 
-        $str=$str."class=\"w3-button w3-display-topright\">&times;</span>\n";
-        $str=$str."\t\t\t<h2>".$this->Name."</h2>\n";
-        $str=$str."\t\t</header>\n";
-        $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Datum:</div>\n<div class=\"w3-col l9\"><b>".$this->getGermanDate()."</b></div>\n";
-        $str=$str."\t\t</div>\n";
-        $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Beginn:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>\n";
-        $str=$str."\t\t</div>\n";
+    public function getDetailModalHtml() {
+        $str="";
+        $str=$str."<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">\n";
+        $str=$str."<span onclick=\"closeModal()\" class=\"w3-button w3-display-topright\">&times;</span>\n";
+        $str=$str."<h2>".$this->Name."</h2>\n";
+        $str=$str."</header>\n";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+        $str=$str."<div class=\"w3-col l3\">Datum:</div>\n<div class=\"w3-col l9\"><b>".$this->getGermanDate()."</b></div>\n";
+        $str=$str."</div>\n";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+        $str=$str."<div class=\"w3-col l3\">Beginn:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>\n";
+        $str=$str."</div>\n";
         if($this->Ende) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Ende:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>\n";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">Ende:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>\n";
+            $str=$str."</div>\n";
         }
         if($this->Abfahrt && $GLOBALS['optionsDB']['showTravelTime']) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Abfahrt:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Abfahrt)."</b></div>\n";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">Abfahrt:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Abfahrt)."</b></div>\n";
+            $str=$str."</div>\n";
         }
         if($GLOBALS['optionsDB']['showVehicle']) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Anfahrt mit:</div>\n<div class=\"w3-col l9\"><b>".$this->vName."</b></div>\n";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">Anfahrt mit:</div>\n<div class=\"w3-col l9\"><b>".$this->vName."</b></div>\n";
+            $str=$str."</div>\n";
         }
-        $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Beschreibung:</div>\n<div class=\"w3-col l9\"><b>".$this->Beschreibung."</b></div>\n";
-        $str=$str."\t\t</div>\n";
-        $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Ort:</div>\n<div class=\"w3-col l9\"><b>".$this->Ort1."</b><br>".$this->Ort2."<br>".$this->Ort3."<br>".$this->Ort4."</div>\n";
-        $str=$str."\t\t</div>\n";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+        $str=$str."<div class=\"w3-col l3\">Beschreibung:</div>\n<div class=\"w3-col l9\"><b>".$this->Beschreibung."</b></div>\n";
+        $str=$str."</div>\n";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+        $str=$str."<div class=\"w3-col l3\">Ort:</div>\n<div class=\"w3-col l9\"><b>".$this->Ort1."</b><br>".$this->Ort2."<br>".$this->Ort3."<br>".$this->Ort4."</div>\n";
+        $str=$str."</div>\n";
         if($GLOBALS['googlemapsapi'] && ($this->Ort1 || $this->Ort2)) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Karte:</div>\n<div class=\"w3-col l9\"><iframe width=\"auto\" height=\"auto\" frameborder=\"0\" style=\"border:0\" src=\"https://www.google.com/maps/embed/v1/place?key=".$GLOBALS['googlemapsapi']."&q=".$this->Ort1."+".$this->Ort2."+".$this->Ort3."+".$this->Ort4."\" allowfullscreen></iframe></div>\n";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">Karte:</div>\n<div class=\"w3-col l9\"><iframe width=\"auto\" height=\"auto\" frameborder=\"0\" style=\"border:0\" src=\"https://www.google.com/maps/embed/v1/place?key=".$GLOBALS['googlemapsapi']."&q=".$this->Ort1."+".$this->Ort2."+".$this->Ort3."+".$this->Ort4."\" allowfullscreen></iframe></div>\n";
+            $str=$str."</div>\n";
         }
         if($this->Capacity) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Pl&auml;tze:</div>\n<div class=\"w3-col l9\"><b>".$this->Capacity."</b></div>\n";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">Pl&auml;tze:</div>\n<div class=\"w3-col l9\"><b>".$this->Capacity."</b></div>\n";
+            $str=$str."</div>\n";
         }
-        $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Auftritt:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>\n";
-        $str=$str."\t\t</div>\n";
-        $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."\t\t\t<div class=\"w3-col l3\">Schichten zu besetzen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Shifts)."</b></div>\n";
-        $str=$str."\t\t</div>\n";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+        $str=$str."<div class=\"w3-col l3\">Auftritt:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>\n";
+        $str=$str."</div>\n";
+        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+        $str=$str."<div class=\"w3-col l3\">Schichten zu besetzen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Shifts)."</b></div>\n";
+        $str=$str."</div>\n";
         if($this->Auftritt) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
 
             $u = new User;
             $u->load_by_id($this->getUser());
@@ -1587,26 +1588,25 @@ class Termin
                 if($m->Instrument) $instrument = $m->Instrument;
             }
 
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Instrument f&uuml;r diesen Auftritt:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
-            $str=$str."\t\t\t<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument('".$GLOBALS['cronID']."', ".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-col l3\">Instrument f&uuml;r diesen Auftritt:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
+            $str=$str."<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument('".$GLOBALS['cronID']."', ".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
+            $str=$str."</div>\n";
         }
         if(requirePermission("perm_editAppmnts")) {
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">sichtbar:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>\n";
-            $str=$str."\t\t</div>\n";
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">Anmeldung offen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->open)."</b></div>\n";
-            $str=$str."\t\t</div>\n";
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">neu:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->new)."</b></div>\n";
-            $str=$str."\t\t</div>\n";
-            $str=$str."\t\t<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."\t\t\t<div class=\"w3-col l3\">ID:</div>\n<div class=\"w3-col l9\"><b>".$this->Index."</b></div>\n";
-            $str=$str."\t\t</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">sichtbar:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>\n";
+            $str=$str."</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">Anmeldung offen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->open)."</b></div>\n";
+            $str=$str."</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">neu:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->new)."</b></div>\n";
+            $str=$str."</div>\n";
+            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
+            $str=$str."<div class=\"w3-col l3\">ID:</div>\n<div class=\"w3-col l9\"><b>".$this->Index."</b></div>\n";
+            $str=$str."</div>\n";
 
             if(!$this->Shifts) {
-                // { Aushilfen
                 $div = new div;
                 $div->tag="form";
                 $div->method="POST";
@@ -1687,7 +1687,6 @@ class Termin
 
                 $str.=$div->close();
 
-                // aktive Aushilfen
                 $div = new div;
                 $div->class="w3-container w3-row w3-margin w3-card w3-padding";
                 $str.=$div->open();
@@ -1698,35 +1697,32 @@ class Termin
                 $str.=$aushilfe->print();
 
                 $str.=$this->aktiveAushilfenTermin();
-                
+
                 $str.=$div->close();
-                // } Aushilfen
             }
-            
-            $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
-            $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
-            $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"copy\" value=\"".$this->Index."\">kopieren</button>\n";
-            $str=$str."\t\t</form>\n";
+
+            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
+            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
+            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"copy\" value=\"".$this->Index."\">kopieren</button>\n";
+            $str=$str."</form>\n";
         }
         if(requirePermission("perm_editResponse")) {
-                $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"tracking.php\" method=\"POST\">\n";
-                $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Anwesenheitsliste</button>\n";
-                $str=$str."\t\t</form>\n";
-            }
-            if(requirePermission("perm_sendEmail")) {
-                $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"mail.php\" method=\"POST\">\n";
-                $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Email an Teilnehmer</button>\n";
-                $str=$str."\t\t</form>\n";
-            }
+            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"tracking.php\" method=\"POST\">\n";
+            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Anwesenheitsliste</button>\n";
+            $str=$str."</form>\n";
+        }
+        if(requirePermission("perm_sendEmail")) {
+            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"mail.php\" method=\"POST\">\n";
+            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Email an Teilnehmer</button>\n";
+            $str=$str."</form>\n";
+        }
         if(requirePermission("perm_editAppmnts")) {
             if($this->Shifts) {
-                $str=$str."\t\t<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
-                $str=$str."\t\t\t<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
-                $str=$str."\t\t</form>\n";
+                $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
+                $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
+                $str=$str."</form>\n";
             }
         }
-        $str=$str."\t</div>\n";
-        $str=$str."\t</div> <! -- Woher -->\n";
         return $str;
     }
     public function getResponseString() {
@@ -1790,7 +1786,7 @@ class Termin
             $s->load_by_id($shifts[$i]);
             $shift = new div;
             $shift->indent=$indent;
-            $shift->onclick="document.getElementById('ids".$s->Index."').style.display='block'";
+            $shift->onclick="openModal('shiftResponse', ".$s->Index.")";
             $shift->class="w3-row w3-border-bottom w3-border-black";
             $str=$str.$shift->open();
             $indent++;
@@ -1842,127 +1838,6 @@ class Termin
             $str=$str.$shift->close();
             $indent--;
 
-            $modal = new div;
-            $modal->indent=$indent;
-            $modal->id="ids".$s->Index;
-            $modal->class="w3-modal";
-            $str=$str.$modal->open();
-            $indent++;
-        
-            $modalcontent = new div;
-            $modalcontent->indent=$indent;
-            $modalcontent->class="w3-modal-content";
-            $str=$str.$modalcontent->open();
-            $indent++;
-
-            $modalheader = new div;
-            $modalheader->tag="header";
-            $modalheader->class="w3-container";
-            $modalheader->class=$GLOBALS['optionsDB']['colorTitleBar'];
-            $modalheader->indent=$indent;
-            $str=$str.$modalheader->open();
-
-            $modalclose = new div;
-            $modalclose->tag="span";
-            $modalclose->class="w3-button w3-display-topright";
-            $modalclose->onclick="document.getElementById('ids".$s->Index."').style.display='none'";
-            $modalclose->body="&times;";
-            $indent++;
-            $modalclose->indent=$indent;
-            $str=$str.$modalclose->print();
-
-            $modaltitle = new div;
-            $modaltitle->tag="h2";
-            $modaltitle->body=$this->Name." - ".$s->Name." ".$s->getTime();
-            $modaltitle->indent=$indent;
-            $str=$str.$modaltitle->print();
-
-            $str=$str.$modalheader->close();
-            $indent--;
-
-            $modalbody = new div;
-            $modalbody->indent = $indent;
-            $modalbody->class="w3-container";
-            $str=$str.$modalbody->open();
-            $indent++;
-            
-            $modalY = new div;
-            $modalY->indent=$indent;
-            $modalY->class="w3-row w3-margin-top";
-            $modalY->bold();
-            $modalY->body="Zusagen";
-            $str=$str.$modalY->open();
-            $indent++;
-            
-            $u = $s->getMeldungenUser(1);
-            for($j=0; $j<count($u); $j++) {
-                $udiv = new div;
-                $udiv->indent=$indent;
-                $udiv->class="w3-row";
-                $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
-                $udiv->body=$u[$j];
-                $str=$str.$udiv->print();
-            }
-            $u = $s->getMeldungenAushilfenShift();
-            for($j=0; $j<count($u); $j++) {
-                $udiv = new div;
-                $udiv->indent=$indent;
-                $udiv->class="w3-row";
-                $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
-                $udiv->body=$u[$j];
-                $str=$str.$udiv->print();
-            }
-            $str=$str.$modalY->close();
-            $indent--;
-
-            $modalM = new div;
-            $modalM->indent=$indent;
-            $modalM->class="w3-row w3-margin-top";
-            $modalM->bold();
-            $modalM->body="unsicher";
-            $str=$str.$modalM->open();
-            $indent++;
-            
-            $u = $s->getMeldungenUser(3);
-            for($j=0; $j<count($u); $j++) {
-                $udiv = new div;
-                $udiv->indent=$indent;
-                $udiv->class="w3-row";
-                $udiv->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
-                $udiv->body=$u[$j];
-                $str=$str.$udiv->print();
-            }
-            $str=$str.$modalM->close();
-            $indent--;
-
-            $modalN = new div;
-            $modalN->indent=$indent;
-            $modalN->class="w3-row w3-margin-top";
-            $modalN->bold();
-            $modalN->body="Absagen";
-            $str=$str.$modalN->open();
-            $indent++;
-            
-            $u = $s->getMeldungenUser(2);
-            for($j=0; $j<count($u); $j++) {
-                $udiv = new div;
-                $udiv->indent=$indent;
-                $udiv->class="w3-row";
-                $udiv->class=$GLOBALS['optionsDB']['colorBtnNo'];
-                $udiv->body=$u[$j];
-                $str=$str.$udiv->print();
-            }
-            $str=$str.$modalN->close();
-            $indent--;
-
-            $str=$str.$modalbody->close();
-            $indent--;
-            
-            $str=$str.$modalcontent->close();
-            $indent--;
-            $str=$str.$modal->close();
-            $indent--;
-
         }
                 
         $str=$str.$content->close();
@@ -1970,6 +1845,114 @@ class Termin
         $str=$str.$containerdiv->close();
         $indent--;
 
+        return $str;
+    }
+
+    public function getShiftResponseModalHtml($s) {
+        $str="";
+        $indent=0;
+
+        $modalheader = new div;
+        $modalheader->tag="header";
+        $modalheader->class="w3-container";
+        $modalheader->class=$GLOBALS['optionsDB']['colorTitleBar'];
+        $modalheader->indent=$indent;
+        $str=$str.$modalheader->open();
+
+        $modalclose = new div;
+        $modalclose->tag="span";
+        $modalclose->class="w3-button w3-display-topright";
+        $modalclose->onclick="closeModal()";
+        $modalclose->body="&times;";
+        $indent++;
+        $modalclose->indent=$indent;
+        $str=$str.$modalclose->print();
+
+        $modaltitle = new div;
+        $modaltitle->tag="h2";
+        $modaltitle->body=$this->Name." - ".$s->Name." ".$s->getTime();
+        $modaltitle->indent=$indent;
+        $str=$str.$modaltitle->print();
+
+        $str=$str.$modalheader->close();
+        $indent--;
+
+        $modalbody = new div;
+        $modalbody->indent = $indent;
+        $modalbody->class="w3-container";
+        $str=$str.$modalbody->open();
+        $indent++;
+
+        $modalY = new div;
+        $modalY->indent=$indent;
+        $modalY->class="w3-row w3-margin-top";
+        $modalY->bold();
+        $modalY->body="Zusagen";
+        $str=$str.$modalY->open();
+        $indent++;
+
+        $u = $s->getMeldungenUser(1);
+        for($j=0; $j<count($u); $j++) {
+            $udiv = new div;
+            $udiv->indent=$indent;
+            $udiv->class="w3-row";
+            $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
+            $udiv->body=$u[$j];
+            $str=$str.$udiv->print();
+        }
+        $u = $s->getMeldungenAushilfenShift();
+        for($j=0; $j<count($u); $j++) {
+            $udiv = new div;
+            $udiv->indent=$indent;
+            $udiv->class="w3-row";
+            $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
+            $udiv->body=$u[$j];
+            $str=$str.$udiv->print();
+        }
+        $str=$str.$modalY->close();
+        $indent--;
+
+        $modalM = new div;
+        $modalM->indent=$indent;
+        $modalM->class="w3-row w3-margin-top";
+        $modalM->bold();
+        $modalM->body="unsicher";
+        $str=$str.$modalM->open();
+        $indent++;
+
+        $u = $s->getMeldungenUser(3);
+        for($j=0; $j<count($u); $j++) {
+            $udiv = new div;
+            $udiv->indent=$indent;
+            $udiv->class="w3-row";
+            $udiv->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
+            $udiv->body=$u[$j];
+            $str=$str.$udiv->print();
+        }
+        $str=$str.$modalM->close();
+        $indent--;
+
+        $modalN = new div;
+        $modalN->indent=$indent;
+        $modalN->class="w3-row w3-margin-top";
+        $modalN->bold();
+        $modalN->body="Absagen";
+        $str=$str.$modalN->open();
+        $indent++;
+
+        $u = $s->getMeldungenUser(2);
+        for($j=0; $j<count($u); $j++) {
+            $udiv = new div;
+            $udiv->indent=$indent;
+            $udiv->class="w3-row";
+            $udiv->class=$GLOBALS['optionsDB']['colorBtnNo'];
+            $udiv->body=$u[$j];
+            $str=$str.$udiv->print();
+        }
+        $str=$str.$modalN->close();
+        $indent--;
+
+        $str=$str.$modalbody->close();
         return $str;
     }
 
@@ -2084,22 +2067,17 @@ ORDER BY `Nachname`, `Vorname`;",
             break;
         }
 
-        $str = "<div class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
-        $str=$str."<div onclick=\"document.getElementById('id".$this->Index."').style.display='block'\" class=\"w3-container w3-margin-bottom\">\n";
-        $whoYes = '';
-        $whoNo = '';
-        $whoMaybe = '';
+        $modalOpen = "openModal('terminResponse', ".$this->Index.((int)$filterregister ? ", ".(int)$filterregister : "").")";
+        $str = "<div class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
+        $str=$str."<div onclick=\"".$modalOpen."\" class=\"w3-container w3-margin-bottom\">\n";
 
         $aushilfen=array();
         if($this->Auftritt) {
             if($filterregister) {
-                $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'keins' AND `Index` = '%d' ORDER BY `Sortierung`;",
-                $GLOBALS['dbprefix'],
-                $filterregister
-                );
-                $aushilfen = $this->getAushilfenRegister($filterregister);
+                $lists = $this->buildResponseLists($filterregister);
+                $str=$str.$lists['whoYes'].$lists['whoNo'].$lists['whoMaybe'];
             }
-            else { // $filterregister
+            else {
                 if($GLOBALS['optionsDB']['showConductor']) {
                     $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
                     $GLOBALS['dbprefix']
@@ -2110,169 +2088,79 @@ ORDER BY `Nachname`, `Vorname`;",
                     $GLOBALS['dbprefix']
                     );
                 }
-            }
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            $sja=0;
-            $sall=0;
-            $snReg=0;
-            $snein=0;
-            $svielleicht=0;
-            $childrenYes=0;
-            $guestsYes=0;
-            $childrenMaybe=0;
-            $guestsMaybe=0;
-            while($row = mysqli_fetch_array($dbr)) {
-                $register = new Register();
-                $register->load_by_id($row['Index']);
-                $aushilfen = $this->getAushilfenRegister($row['Index']);
-                $nReg = $register->members();
-                $snReg+=$nReg;
-                $ja=0;
-                $nein=0;
-                $vielleicht=0;
-                // while($row2 = mysqli_fetch_array($dbr2)) {
-                foreach($aMeldungen as $row2) {
-                    if($row2['rIndex'] != $row['Index']) continue;
-                    $antwort='';
-                    switch($row2['Wert']) {
-                    case 1:
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                sqlerror();
+                $sja=0;
+                $sall=0;
+                $snReg=0;
+                $snein=0;
+                $svielleicht=0;
+                $childrenYes=0;
+                $guestsYes=0;
+                $childrenMaybe=0;
+                $guestsMaybe=0;
+                while($row = mysqli_fetch_array($dbr)) {
+                    $register = new Register();
+                    $register->load_by_id($row['Index']);
+                    $aushilfen = $this->getAushilfenRegister($row['Index']);
+                    $nReg = $register->members();
+                    $snReg+=$nReg;
+                    $ja=0;
+                    $nein=0;
+                    $vielleicht=0;
+                    foreach($aMeldungen as $row2) {
+                        if($row2['rIndex'] != $row['Index']) continue;
+                        switch($row2['Wert']) {
+                        case 1:
+                            $ja++;
+                            $sja++;
+                            if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                                $childrenYes+=$row2['Children'];
+                            }
+                            if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                                $guestsYes+=$row2['Guests'];
+                            }
+                            break;
+                        case 2:
+                            $nein++;
+                            $snein++;
+                            break;
+                        case 3:
+                            $vielleicht++;
+                            $svielleicht++;
+                            if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                                $childrenMaybe+=$row2['Children'];
+                            }
+                            if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                                $guestsMaybe+=$row2['Guests'];
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+
+                    foreach($aushilfen as &$aushilfe) {
+                        $A = new Aushilfe;
+                        $A->load_by_id($aushilfe['Index']);
                         $ja++;
                         $sja++;
-                        $antwort='ja';
-                        $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
-                        $actcol=2;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                            $childrenYes+=$row2['Children'];
-                            $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                            if($row2['Children'] > 0) {
-                                $whoYes=$whoYes."+ ".$row2['Children'];
-                            }
-                            else {
-                                $whoYes=$whoYes."&nbsp;";
-                            }
-                            $whoYes=$whoYes."</div>";
-                            $actcol++;
-                        }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $guestsYes+=$row2['Guests'];
-                            $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                            if($row2['Guests'] > 0) {
-                                $whoYes=$whoYes."+ ".$row2['Guests'];
-                            }
-                            else {
-                                $whoYes=$whoYes."&nbsp;";
-                            }
-                            $whoYes=$whoYes."</div>";
-                            $actcol++;
-                        }
-                        if($this->defaultFreeText && isAdmin()) {
-                            $ft = new AppmntFreeTextResponse;
-                            $ft->load_by_user_event($row2['User'], $this->Index);
-                            if($ft->Text) {
-                                $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                                $whoYes=$whoYes.$ft->Text;
-                                $whoYes=$whoYes."</div>";
-                            }
-                        }
-                        $whoYes=$whoYes."</div>\n";
-                        break;
-                    case 2:
-                        $nein++;
-                        $snein++;
-                        $antwort='nein';
-                        $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnNo']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
-                        $actcol=2;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                            $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
-                            $actcol++;
-                        }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
-                        }
-                        $whoNo=$whoNo."</div>\n";
-                        break;
-                    case 3:
-                        $vielleicht++;
-                        $svielleicht++;
-                        $antwort='vielleicht';
-                        $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
-                        $actcol=2;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                            $childrenMaybe+=$row2['Children'];
-                            $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                            if($row2['Children'] > 0) {
-                                $whoMaybe=$whoMaybe."+ ".$row2['Children'];
-                            }
-                            else {
-                                $whoMaybe=$whoMaybe."&nbsp;";
-                            }
-                            $whoMaybe=$whoMaybe."</div>";
-                            $actcol++;
-                        }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $guestsMaybe+=$row2['Guests'];
-                            $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                            if($row2['Guests'] > 0) {
-                                $whoMaybe=$whoMaybe."+ ".$row2['Guests'];
-                            }
-                            else {
-                                $whoMaybe=$whoMaybe."&nbsp;";
-                            }
-                            $whoMaybe=$whoMaybe."</div>";
-                            $actcol++;
-                        }
-                        if($this->defaultFreeText && isAdmin()) {
-                            $ft = new AppmntFreeTextResponse;
-                            $ft->load_by_user_event($row2['User'], $this->Index);
-                            if($ft->Text) {
-                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                                $whoMaybe=$whoMaybe.$ft->Text;
-                                $whoMaybe=$whoMaybe."</div>";
-                            }
-                        }
-
-                        $whoMaybe=$whoMaybe."</div>\n";
-                        break;
-                    default:
-                        break;
                     }
-                }
-
-                // { Aushilfen
-                foreach($aushilfen as &$aushilfe) {
-                    $A = new Aushilfe;
-                    $A->load_by_id($aushilfe['Index']);
-                    $ja++;
-                    $sja++;
-                    $antwort='ja';
-                    $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$A->getName()."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$A->getInstrumentName()."</div>";
-                    $whoYes=$whoYes."</div>\n";
-                }
-                // } Aushilfen
-                $all = $ja+$nein+$vielleicht;
-                $sall=$sall+$all;
-                if($filterregister) {
-                    $str=$str.$whoYes;
-                    $str=$str.$whoNo;
-                    $str=$str.$whoMaybe;
-                }
-                else {
+                    $all = $ja+$nein+$vielleicht;
+                    $sall=$sall+$all;
                     $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\">".$row['Name']."</div>\n<div class=\"w3-col l2 m2 s2\">".$all." / ".sprintf("%02d", $nReg)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div>\n</div>\n";
                 }
-            }
-            if(!$filterregister) {
                 if($bus && $GLOBALS['optionsDB']['showChildOption']) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
-            }
+                    $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
+                }
                 if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div>\n</div>\n";
-            }
-            $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\"><b>Summe</b></div>\n<div class=\"w3-col l2 m2 s2\"><b>".$sall;
-            if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
-                $str=$str."+".($childrenYes+$childrenMaybe+$guestsYes+$guestsMaybe);
-            }
-            $str=$str." / ".sprintf("%02d", $snReg)."</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($sja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($svielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
+                    $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div>\n</div>\n";
+                }
+                $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\"><b>Summe</b></div>\n<div class=\"w3-col l2 m2 s2\"><b>".$sall;
+                if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
+                    $str=$str."+".($childrenYes+$childrenMaybe+$guestsYes+$guestsMaybe);
+                }
+                $str=$str." / ".sprintf("%02d", $snReg)."</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($sja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($svielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
             }
         }
         else { // $this->Auftritt
@@ -2295,11 +2183,255 @@ ORDER BY `Nachname`, `Vorname`;",
                 switch($row['Wert']) {
                 case 1:
                     $ja++;
-                    $antwort='ja';
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                        $childrenYes+=$row['Children'];
+                    }
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                        $guestsYes+=$row['Guests'];
+                    }
+                    break;
+                case 2:
+                    $nein++;
+                    break;
+                case 3:
+                    $vielleicht++;
+                    $childrenMaybe+=$row['Children'];
+                    $guestsMaybe+=$row['Guests'];
+                    break;
+                default:
+                    break;
+                }
+            }
+            $aushilfen = $this->getAushilfen();
+            foreach($aushilfen as &$aushilfe) {
+                $A = new Aushilfe;
+                $A->load_by_id($aushilfe);
+                $ja++;
+            }
+
+            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
+                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
+            }
+            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
+                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div>\n</div>\n";
+            }
+            $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($ja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($vielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
+        }
+        $str=$str."</div></div>\n";
+        return $str;
+    }
+
+    private function buildResponseLists($filterregister) {
+        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` = '0')
+
+UNION
+
+(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
+INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
+INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` != '0')
+
+ORDER BY `Nachname`, `Vorname`;",
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $this->Index,
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $this->Index,
+                       $GLOBALS['dbprefix']
+        );
+        $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $aMeldungen = array();
+        while($row = mysqli_fetch_array($dbr2)) {
+            $aMeldungen[] = $row;
+        }
+
+        if($this->vName == "Bus") {
+            $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
+            $bus=true;
+        }
+        else {
+            $cols = 2;
+            $bus=false;
+        }
+        if($this->defaultFreeText && isAdmin()) $cols++;
+        switch($cols) {
+        case 3:
+            $colsize = array(4,3,5);
+            break;
+        case 4:
+            $colsize = array(4,4,2,2);
+            break;
+        case 5:
+            $colsize = array(3,3,2,2,2);
+            break;
+        case 2:
+        default:
+            $colsize = array(6,6);
+            break;
+        }
+
+        $whoYes = '';
+        $whoNo = '';
+        $whoMaybe = '';
+
+        if($this->Auftritt) {
+            if($filterregister) {
+                $registerIds = array($filterregister);
+            }
+            else {
+                if($GLOBALS['optionsDB']['showConductor']) {
+                    $sql = sprintf("SELECT `Index` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                    $GLOBALS['dbprefix']
+                    );
+                }
+                else {
+                    $sql = sprintf("SELECT `Index` FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
+                    $GLOBALS['dbprefix']
+                    );
+                }
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                sqlerror();
+                $registerIds = array();
+                while($row = mysqli_fetch_array($dbr)) {
+                    $registerIds[] = $row['Index'];
+                }
+            }
+            foreach($registerIds as $registerId) {
+                $aushilfen = $this->getAushilfenRegister($registerId);
+                foreach($aMeldungen as $row2) {
+                    if($row2['rIndex'] != $registerId) continue;
+                    switch($row2['Wert']) {
+                    case 1:
+                        $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
+                        $actcol=2;
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                            if($row2['Children'] > 0) {
+                                $whoYes=$whoYes."+ ".$row2['Children'];
+                            }
+                            else {
+                                $whoYes=$whoYes."&nbsp;";
+                            }
+                            $whoYes=$whoYes."</div>";
+                            $actcol++;
+                        }
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                            if($row2['Guests'] > 0) {
+                                $whoYes=$whoYes."+ ".$row2['Guests'];
+                            }
+                            else {
+                                $whoYes=$whoYes."&nbsp;";
+                            }
+                            $whoYes=$whoYes."</div>";
+                            $actcol++;
+                        }
+                        if($this->defaultFreeText && isAdmin()) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row2['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoYes=$whoYes.$ft->Text;
+                                $whoYes=$whoYes."</div>";
+                            }
+                        }
+                        $whoYes=$whoYes."</div>\n";
+                        break;
+                    case 2:
+                        $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnNo']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
+                        $actcol=2;
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
+                            $actcol++;
+                        }
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
+                        }
+                        $whoNo=$whoNo."</div>\n";
+                        break;
+                    case 3:
+                        $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row2['Vorname']." ".$row2['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$row2['iName']."</div>";
+                        $actcol=2;
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                            if($row2['Children'] > 0) {
+                                $whoMaybe=$whoMaybe."+ ".$row2['Children'];
+                            }
+                            else {
+                                $whoMaybe=$whoMaybe."&nbsp;";
+                            }
+                            $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
+                        }
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                            if($row2['Guests'] > 0) {
+                                $whoMaybe=$whoMaybe."+ ".$row2['Guests'];
+                            }
+                            else {
+                                $whoMaybe=$whoMaybe."&nbsp;";
+                            }
+                            $whoMaybe=$whoMaybe."</div>";
+                            $actcol++;
+                        }
+                        if($this->defaultFreeText && isAdmin()) {
+                            $ft = new AppmntFreeTextResponse;
+                            $ft->load_by_user_event($row2['User'], $this->Index);
+                            if($ft->Text) {
+                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                                $whoMaybe=$whoMaybe.$ft->Text;
+                                $whoMaybe=$whoMaybe."</div>";
+                            }
+                        }
+                        $whoMaybe=$whoMaybe."</div>\n";
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                foreach($aushilfen as &$aushilfe) {
+                    $A = new Aushilfe;
+                    $A->load_by_id($aushilfe['Index']);
+                    $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$A->getName()."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">".$A->getInstrumentName()."</div>";
+                    $whoYes=$whoYes."</div>\n";
+                }
+            }
+        }
+        else {
+            $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $this->Index
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            while($row = mysqli_fetch_array($dbr)) {
+                switch($row['Wert']) {
+                case 1:
                     $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                     $actcol=2;
                     if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                        $childrenYes+=$row['Children'];
                         $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                         if($row['Children'] > 0) {
                             $whoYes=$whoYes."+ ".$row['Children'];
@@ -2308,7 +2440,6 @@ ORDER BY `Nachname`, `Vorname`;",
                         $actcol++;
                     }
                     if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                        $guestsYes+=$row['Guests'];
                         $whoYes=$whoYes."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
                         if($row['Guests'] > 0) {
                             $whoYes=$whoYes."+ ".$row['Guests'];
@@ -2325,88 +2456,83 @@ ORDER BY `Nachname`, `Vorname`;",
                             $whoYes=$whoYes."</div>";
                         }
                     }
-
                     $whoYes=$whoYes."</div>\n";
                     break;
                 case 2:
-                    $nein++;
-                    $antwort='nein';
-                        $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnNo']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
-                        $actcol=2;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                            $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
-                            $actcol++;
-                        }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
-                        }
-                        $whoNo=$whoNo."</div>\n";
+                    $whoNo = $whoNo."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnNo']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
+                    $actcol=2;
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                        $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
+                        $actcol++;
+                    }
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                        $whoNo=$whoNo."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\"></div>";
+                    }
+                    $whoNo=$whoNo."</div>\n";
                     break;
                 case 3:
-                    $vielleicht++;
-                    $antwort='vielleicht';
-                    $childrenMaybe+=$row['Children'];
-                    $guestsMaybe+=$row['Guests'];
-                        $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
-                        $actcol=2;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                    $whoMaybe = $whoMaybe."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnMaybe']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$row['Vorname']." ".$row['Nachname']."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
+                    $actcol=2;
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                        $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                        if($row['Children'] > 0) {
+                            $whoMaybe=$whoMaybe."+ ".$row['Children'];
+                        }
+                        $whoMaybe=$whoMaybe."</div>";
+                        $actcol++;
+                    }
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                        $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
+                        if($row['Guests'] > 0) {
+                            $whoMaybe=$whoMaybe."+ ".$row['Guests'];
+                        }
+                        $whoMaybe=$whoMaybe."</div>";
+                        $actcol++;
+                    }
+                    if($this->defaultFreeText && isAdmin()) {
+                        $ft = new AppmntFreeTextResponse;
+                        $ft->load_by_user_event($row['User'], $this->Index);
+                        if($ft->Text) {
                             $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                            if($row['Children'] > 0) {
-                                $whoMaybe=$whoMaybe."+ ".$row['Children'];
-                            }
+                            $whoMaybe=$whoMaybe.$ft->Text;
                             $whoMaybe=$whoMaybe."</div>";
-                            $actcol++;
                         }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                            if($row['Guests'] > 0) {
-                                $whoMaybe=$whoMaybe."+ ".$row['Guests'];
-                            }
-                            $whoMaybe=$whoMaybe."</div>";
-                            $actcol++;
-                        }
-                        if($this->defaultFreeText && isAdmin()) {
-                            $ft = new AppmntFreeTextResponse;
-                            $ft->load_by_user_event($row['User'], $this->Index);
-                            if($ft->Text) {
-                                $whoMaybe=$whoMaybe."<div class=\"w3-col l".$colsize[$actcol]." m".$colsize[$actcol]." s".$colsize[$actcol]."\">";
-                                $whoMaybe=$whoMaybe.$ft->Text;
-                                $whoMaybe=$whoMaybe."</div>";
-                            }
-                        }
-
-                        $whoMaybe=$whoMaybe."</div>\n";
+                    }
+                    $whoMaybe=$whoMaybe."</div>\n";
                     break;
                 default:
                     break;
                 }
             }
-            // { Aushilfen
             $aushilfen = $this->getAushilfen();
             foreach($aushilfen as &$aushilfe) {
                 $A = new Aushilfe;
                 $A->load_by_id($aushilfe);
-                $ja++;
-                $antwort='ja';
                 $whoYes = $whoYes."<div class=\"w3-row ".$GLOBALS['optionsDB']['colorBtnYes']."\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\">".$A->getName()."</div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
                 $whoYes=$whoYes."</div>\n";
             }
-            // } Aushilfen
-
-            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
-            }
-            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div>\n</div>\n";
-            }
-            $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($ja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($vielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
         }
-        $str=$str."</div></div>\n";
-        
-        $str=$str."<div id=\"id".$this->Index."\" class=\"w3-modal\">";
-        $str=$str."<div class=\"w3-modal-content\">";
+
+        return array(
+            'whoYes' => $whoYes,
+            'whoNo' => $whoNo,
+            'whoMaybe' => $whoMaybe,
+            'colsize' => $colsize,
+            'bus' => $bus,
+        );
+    }
+
+    public function getResponseModalHtml($filterregister = 0) {
+        $lists = $this->buildResponseLists($filterregister);
+        $whoYes = $lists['whoYes'];
+        $whoNo = $lists['whoNo'];
+        $whoMaybe = $lists['whoMaybe'];
+        $colsize = $lists['colsize'];
+        $bus = $lists['bus'];
+
+        $str="";
         $str=$str."<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">";
-        $str=$str."<span onclick=\"document.getElementById('id".$this->Index."').style.display='none'\""; 
+        $str=$str."<span onclick=\"closeModal()\""; 
         $str=$str."class=\"w3-button w3-display-topright\">&times;</span>";
         $str=$str."<h2>".$this->Name."</h2>";
         $str=$str."</header>";
@@ -2425,7 +2551,7 @@ ORDER BY `Nachname`, `Vorname`;",
             $str = $str."</div>";
         }
         $str = $str."</div>";
-        
+
         $str = $str."<div class=\"w3-container w3-margin-top\"><div class=\"w3-row\"><div class=\"w3-col l".$colsize[0]." m".$colsize[0]." s".$colsize[0]."\"><b>Zusagen</b></div>\n<div class=\"w3-col l".$colsize[1]." m".$colsize[1]." s".$colsize[1]."\">&nbsp;</div>";
         $actcol=2;
         if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
@@ -2438,7 +2564,6 @@ ORDER BY `Nachname`, `Vorname`;",
         $str=$str."</div>\n</div>\n";
 
         $str = $str."<div class=\"w3-container\">";
-        
         $str=$str.$whoYes;
         $str = $str."</div>";
         $str = $str."<div class=\"w3-container w3-margin-top\"><b>unsicher</b></div>\n";
@@ -2451,7 +2576,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $str = $str."</div>";
 
         if(requirePermission("perm_editResponse")) {
-                    $str = $str."<div class=\"w3-container w3-margin-top\"><b>noch nicht gemeldet</b></div>\n";
+            $str = $str."<div class=\"w3-container w3-margin-top\"><b>noch nicht gemeldet</b></div>\n";
             $str = $str."<form class=\"w3-container w3-row\" action=\"termine.php\" method=\"POST\">";
             foreach($this->getMissingUsers() as &$missing) {
                 $u = new User;
@@ -2460,12 +2585,9 @@ ORDER BY `Nachname`, `Vorname`;",
             }
             $str = $str."</form>";
         }
-        
+
         $str=$str."<div class=\"w3-container w3-margin-bottom\"><br />";
         $str=$str."</div>";
-        $str=$str."</div>";
-        $str=$str."</div>";
-
         return $str;
     }
 
