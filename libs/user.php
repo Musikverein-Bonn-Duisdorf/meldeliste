@@ -643,8 +643,10 @@ class User
       <?php
       }
       if($forceEditButton || requirePermission("perm_editUsers")) {
+          $returnTo = pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker');
       ?>
       <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
+      <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
       <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
       </form>
               <?php

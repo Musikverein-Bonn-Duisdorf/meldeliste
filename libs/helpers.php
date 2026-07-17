@@ -1203,4 +1203,92 @@ function stripMailBodyGreeting($body, $vorname) {
     }
     return $body;
 }
+
+/** Allowed return targets for form POST redirects (MELD-15). */
+function allowedReturnUrls() {
+    return array(
+        'users.php',
+        'musiker.php',
+        'mitglied.php',
+        'no-mitglied.php',
+        'new-musiker.php',
+        'index.php',
+    );
+}
+
+/** Map $_SESSION['page'] to list/edit PHP file. */
+function pageToReturnUrl($page) {
+    $map = array(
+        'users' => 'users.php',
+        'musiker' => 'musiker.php',
+        'mitglied' => 'mitglied.php',
+        'nomitglied' => 'no-mitglied.php',
+        'newmusiker' => 'new-musiker.php',
+        'me' => 'index.php',
+    );
+    $page = (string)$page;
+    return isset($map[$page]) ? $map[$page] : 'index.php';
+}
+
+/** Whitelist local PHP page; prevents open redirects. */
+function safeReturnUrl($url, $default = 'index.php') {
+    $allowed = allowedReturnUrls();
+    $url = trim((string)$url);
+    if($url === '') {
+        return $default;
+    }
+    if($url !== basename($url) || strpos($url, '..') !== false) {
+        return $default;
+    }
+    $base = strtok($url, '?');
+    if(in_array($base, $allowed, true)) {
+        return $base;
+    }
+    return $default;
+}
+
+function setFlash($type, $message) {
+    $_SESSION['flash'] = array(
+        'type' => (string)$type,
+        'message' => (string)$message,
+    );
+}
+
+function getFlash() {
+    if(!isset($_SESSION['flash'])) {
+        return null;
+    }
+    $flash = $_SESSION['flash'];
+    unset($_SESSION['flash']);
+    return $flash;
+}
+
+function renderFlashHtml($flash = null) {
+    if($flash === null) {
+        $flash = getFlash();
+    }
+    if(!$flash || $flash['message'] === '') {
+        return '';
+    }
+    $class = ($flash['type'] === 'error') ? 'w3-red' : 'w3-green';
+    return '<div class="w3-panel '.$class.' w3-padding"><b>'
+        .htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8')
+        .'</b></div>';
+}
+
+function redirectAfterPost($url) {
+    header('Location: '.$url);
+    exit;
+}
+
+function requireLoggedInOrRedirect() {
+    if(!loggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    if(!empty($_SESSION['singleUsePW'])) {
+        header('Location: changePW.php');
+        exit;
+    }
+}
 ?>
