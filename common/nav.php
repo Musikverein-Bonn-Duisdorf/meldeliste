@@ -20,6 +20,25 @@
 <?php echo "development branch: <b>".getBranchName()."</b>"; ?>
 </div>
 <?php } ?>
+<?php
+if(requirePermission('perm_editConfig')) {
+    try {
+        $schemaMgr = new DatabaseManager();
+        if($schemaMgr->isSchemaOutdated()) {
+            $inst = (int)$schemaMgr->getInstalledSchemaVersion();
+            $exp = (int)$schemaMgr->getExpectedSchemaVersion();
+            echo '<div class="w3-orange w3-padding"><i class="fas fa-database"></i> '
+                .'Neue Datenbank-Version verfügbar (installiert: <b>'.$inst.'</b>, Soll: <b>'.$exp.'</b>). '
+                .'Bitte im <a href="updater.php"><b>Updater</b></a> „Datenbank reparieren“ ausführen '
+                .'oder einen git pull (aktualisiert die DB bei Bedarf mit).'
+                .'</div>';
+        }
+    }
+    catch(Throwable $e) {
+        // Schema-Check darf die Navigation nicht abbrechen
+    }
+}
+?>
 <div class="w3-bar <?php echo $optionsDB['colorNav']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
   <a title="Home" alt="Home" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="fas fa-home"></i></a>
