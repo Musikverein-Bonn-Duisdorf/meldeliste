@@ -108,17 +108,22 @@ function handleUserFormPost($options = array()) {
 
     if(isset($_POST['passwd'])) {
         try {
+            $userId = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
+            if($userId < 1) {
+                $result['flash'] = array(
+                    'type' => 'error',
+                    'message' => 'Kein Benutzer ausgewählt.',
+                );
+                return $result;
+            }
             $n = new User;
-            $n->load_by_id($_POST['Index']);
-            $n->fill_from_array($_POST);
-            if((int)$_POST['Index'] > 0) {
-                if(!$n->passwd('')) {
-                    $result['flash'] = array(
-                        'type' => 'error',
-                        'message' => 'Zufallspasswort konnte nicht erzeugt werden. Bitte Loginname prüfen.',
-                    );
-                    return $result;
-                }
+            $n->load_by_id($userId);
+            if(!$n->passwd('')) {
+                $result['flash'] = array(
+                    'type' => 'error',
+                    'message' => 'Zufallspasswort konnte nicht erzeugt werden. Bitte Loginname prüfen.',
+                );
+                return $result;
             }
             $result['successMessage'] = 'Zufallspasswort erzeugt.';
         }
@@ -139,12 +144,17 @@ function handleUserFormPost($options = array()) {
 
     if(isset($_POST['newmail'])) {
         try {
-            $n = new User;
-            $n->load_by_id($_POST['Index']);
-            $n->fill_from_array($_POST);
-            if((int)$_POST['Index'] > 0) {
-                $n->newmail();
+            $userId = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
+            if($userId < 1) {
+                $result['flash'] = array(
+                    'type' => 'error',
+                    'message' => 'Kein Benutzer ausgewählt.',
+                );
+                return $result;
             }
+            $n = new User;
+            $n->load_by_id($userId);
+            $n->newmail();
             $result['successMessage'] = 'Email mit Link versendet.';
         }
         catch(Throwable $e) {
@@ -258,6 +268,29 @@ function applyUserFormPostRedirect($defaultReturnUrl, $options = array()) {
     }
     elseif($result['successMessage']) {
         setFlash('success', $result['successMessage']);
+    }
+    redirectAfterPost($returnTo);
+}
+
+/**
+ * POST handler for new-musiker.php: secondary actions stay on edit form.
+ */
+function applyNewMusikerFormPostRedirect($defaultReturnUrl) {
+    $result = handleUserFormPost(array('allowNewUser' => true));
+    if(!$result['handled']) {
+        return false;
+    }
+    $returnTo = safeReturnUrl(isset($_POST['return_to']) ? $_POST['return_to'] : '', $defaultReturnUrl);
+    if($result['flash']) {
+        setFlash($result['flash']['type'], $result['flash']['message']);
+    }
+    elseif($result['successMessage']) {
+        setFlash('success', $result['successMessage']);
+    }
+    $userId = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
+    $stayOnEdit = isset($_POST['passwd']) || isset($_POST['newmail']) || isset($_POST['deactivate']);
+    if($stayOnEdit && $userId > 0) {
+        redirectAfterPost('new-musiker.php?id='.$userId.'&return_to='.rawurlencode($returnTo));
     }
     redirectAfterPost($returnTo);
 }

@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 
 include_once 'common/include.php';
@@ -31,19 +32,25 @@ if(isset($_POST['insert']) && !$canEditUsers) {
 }
 
 if($canEditUsers && isUserFormPost()) {
-    applyUserFormPostRedirect('musiker.php', array('allowNewUser' => true));
+    applyNewMusikerFormPostRedirect('musiker.php');
 }
 
 include 'common/header.php';
 
 $returnTo = safeReturnUrl(
-    isset($_POST['return_to']) ? $_POST['return_to'] : '',
+    isset($_GET['return_to']) ? $_GET['return_to'] : (isset($_POST['return_to']) ? $_POST['return_to'] : ''),
     'musiker.php'
 );
 
 $fill = false;
 $n = new User;
-if(isset($_POST['id'])) {
+if(isset($_GET['id']) && (int)$_GET['id'] > 0) {
+    $n->load_by_id((int)$_GET['id']);
+    if($n->Index > 0) {
+        $fill = true;
+    }
+}
+elseif(isset($_POST['id'])) {
     $n->load_by_id((int)$_POST['id']);
     if($n->Index > 0) {
         $fill = true;
