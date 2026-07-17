@@ -392,9 +392,11 @@ class MailJob
         if($prefix !== '' && strpos($subject, $prefix) === 0) {
             $subject = trim(substr($subject, strlen($prefix)));
         }
-        $body = function_exists('mailBodyToPlainText')
-            ? mailBodyToPlainText((string)$this->BodyText)
-            : trim(html_entity_decode(strip_tags((string)$this->BodyText), ENT_QUOTES, 'UTF-8'));
+        $body = function_exists('mailBodyToDiscordMarkdown')
+            ? mailBodyToDiscordMarkdown((string)$this->BodyText)
+            : (function_exists('mailBodyToPlainText')
+                ? mailBodyToPlainText((string)$this->BodyText)
+                : trim(html_entity_decode(strip_tags((string)$this->BodyText), ENT_QUOTES, 'UTF-8')));
         $msg = '';
         if($subject !== '') {
             $msg .= '**'.$subject."**\n\n";
