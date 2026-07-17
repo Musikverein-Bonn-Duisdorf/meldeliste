@@ -286,7 +286,7 @@ class Inventories
         $indent=0;
         $line = new div;
         $line->indent=$indent;
-        $line->class="w3-row w3-padding";
+        $line->class="w3-row list-row w3-padding";
         $line->onclick="openModal('inventar', ".$this->Index.")";
         if(!empty($this->Insurance)) {
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
@@ -298,64 +298,64 @@ class Inventories
         $indent++;
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,2,2);
-        $field->body=RegNumber::displayInventory($row['Inventory'], $row['RegNumber']);
+        $field->class="w3-center w3-border-right list-primary";
+        $field->col(1,2,12);
+        $field->body='<b>'.RegNumber::displayInventory($row['Inventory'], $row['RegNumber']).'</b>';
         $str=$str.$field->print();
 
         $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
-        $field->col(2,2,2);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(2,2,12);
         $field->body=$typLabel;
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
+        $field->class="w3-center w3-border-right list-secondary";
         if(requirePermission("perm_showInventories")) {
-            $field->col(2,4,4);
+            $field->col(2,4,12);
         }
         else {
-            $field->col(4,4,4);
+            $field->col(4,4,12);
         }
         $field->body=$row['Description'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
-        $field->col(2,2,2);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(2,2,12);
         $field->body=$row['Comment'];
         $str=$str.$field->print();
 
         if(requirePermission("perm_showInventories")) {
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,4,4);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,4,12);
         $field->body=germanDate($row['PurchaseDate'], 0);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,4,4);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,4,12);
         $field->body=mkPrize($row['PurchasePrize']);
         $str=$str.$field->print();
         }
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center";
-        $field->col(2,2,2);
+        $field->class="w3-center list-secondary";
+        $field->col(2,2,12);
         $field->body=$this->getActiveLoanNameShort();
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,2,2);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,2,12);
         $field->body=$this->getActiveLoanDate();
         $str=$str.$field->print();
 
@@ -543,7 +543,7 @@ class Inventories
             $content = new div;
             $content->indent=$indent;
             $content->class="w3-padding";
-            $content->col(4,6,6);
+            $content->col(4,6,12);
             $content->body="Diesen Eintrag wirklich l&ouml;schen?";
             $str=$str.$content->print();        
             $content = new div;
@@ -554,7 +554,7 @@ class Inventories
             $content->type="submit";
             $content->name="delete";
             $content->value="delete";
-            $content->col(2,6,6);
+            $content->col(2,6,12);
             $content->body="Ja";
             $str=$str.$content->print();        
             $hidden = new div;

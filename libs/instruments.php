@@ -258,7 +258,7 @@ class Instruments
         $indent=0;
         $line = new div;
         $line->indent=$indent;
-        $line->class="w3-row w3-padding";
+        $line->class="w3-row list-row w3-padding";
         $line->onclick="openModal('instrument', ".$this->Index.")";
         if($this->Insurance) {
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
@@ -270,78 +270,78 @@ class Instruments
         $indent++;
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
-        $field->body=RegNumber::displayInstrument($row['RegNumber']);
+        $field->class="w3-center w3-border-right list-primary";
+        $field->col(1,1,12);
+        $field->body='<b>'.RegNumber::displayInstrument($row['RegNumber']).'</b>';
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
-        $field->col(1,4,4);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(1,4,12);
         $field->body=$row['iName'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
-        $field->col(1,4,4);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(1,4,12);
         $field->body=$row['Vendor'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,1,12);
         $field->body=$row['Model'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,1,12);
         $field->body=$row['SerialNr'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,1,12);
         $field->body=germanDate($row['PurchaseDate'], 0);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,1,12);
         $field->body=mkPrize($row['PurchasePrize']);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,1,12);
         $field->body=mkPrize($this->getCurrentValue($row['PurchasePrize']));
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(2,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(2,1,12);
         $field->body=getOwner($row['Owner']);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center";
-        $field->col(1,1,1);
+        $field->class="w3-center list-secondary";
+        $field->col(1,1,12);
         $field->body=$this->getActiveLoanNameShort();
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(1,1,12);
         $field->body=$this->getActiveLoanDate();
         $str=$str.$field->print();
 
@@ -730,7 +730,7 @@ class Instruments
         $indent=0;
         $line = new div;
         $line->indent=$indent;
-        $line->class="w3-row w3-padding";
+        $line->class="w3-row list-row w3-padding";
         $line->onclick="document.getElementById('".$this->Index."').style.display='block'";
         if($this->Insurance) {
             /* $line->class=$GLOBALS['optionsDB']['colorUserMember']; */
@@ -742,50 +742,50 @@ class Instruments
         $indent++;
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,1,1);
-        $field->body=RegNumber::displayInstrument($row['RegNumber']);
+        $field->class="w3-center w3-border-right list-primary";
+        $field->col(1,1,12);
+        $field->body='<b>'.RegNumber::displayInstrument($row['RegNumber']).'</b>';
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
-        $field->col(2,4,4);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(2,4,12);
         $field->body=$row['iName'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right";
-        $field->col(2,4,4);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(2,4,12);
         $field->body=$row['Vendor'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(2,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(2,1,12);
         $field->body=$row['Model'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(2,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(2,1,12);
         $field->body=$row['SerialNr'];
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(1,3,3);
+        $field->class="w3-center w3-border-right list-secondary";
+        $field->col(1,3,12);
         $field->body=mkPrize($this->getCurrentValue($row['PurchasePrize']));
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
-        $field->class="w3-center w3-border-right w3-hide-medium w3-hide-small";
-        $field->col(2,1,1);
+        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
+        $field->col(2,1,12);
         $field->body=getOwner($row['Owner']);
         $str=$str.$field->print();
 
