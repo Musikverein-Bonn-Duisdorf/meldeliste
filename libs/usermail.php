@@ -568,6 +568,42 @@ class Usermail {
     }
 
     /**
+     * Close the HTTP response (e.g. after a redirect), then process one queue batch.
+     * Used so Absenden can start SMTP without delaying the overview reload (MELD-66).
+     */
+    public static function finishResponseThenProcessQueue() {
+        ignore_user_abort(true);
+        if(function_exists('session_write_close')) {
+            session_write_close();
+        }
+
+        if(function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+        else {
+            if(!headers_sent()) {
+                header('Content-Length: 0');
+                header('Connection: close');
+            }
+            while(ob_get_level() > 0) {
+                ob_end_flush();
+            }
+            flush();
+        }
+
+        try {
+            self::processQueue();
+        }
+        catch(Throwable $e) {
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                'Mail-Queue Sofortlauf fehlgeschlagen | Exception: <b>%s</b>',
+                htmlspecialchars($e->getMessage())
+            ));
+        }
+    }
+
+    /**
      * @return array list of user rows with Index, Vorname, Nachname, Email, Email2, activeLink
      */
     protected function resolveRecipients() {
