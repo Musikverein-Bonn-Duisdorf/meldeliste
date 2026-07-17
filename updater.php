@@ -19,6 +19,15 @@ $pullOutput = null;
 $dbReportHtml = '';
 $dbError = '';
 $dbModeLabel = '';
+$schemaInfo = '';
+
+$schemaMgr = new DatabaseManager();
+$schemaInfo = sprintf(
+    'Schema-Version: installiert <b>%d</b>, Soll <b>%d</b>%s',
+    $schemaMgr->getInstalledSchemaVersion(),
+    $schemaMgr->getExpectedSchemaVersion(),
+    $schemaMgr->isSchemaOutdated() ? ' — <span class="w3-text-orange"><b>Update nötig</b></span>' : ' — aktuell'
+);
 
 if(isset($_POST['pull'])) {
     $vCurrent = trim((string)shell_exec('git rev-parse --short HEAD 2>&1'));
@@ -29,10 +38,33 @@ if(isset($_POST['pull'])) {
         'vCurrent' => $vCurrent,
         'vNew' => $vNew,
         'updated' => ($vCurrent !== $vNew),
+        'dbRepaired' => false,
     );
     if($pullOutput['updated']) {
         $logentry = new Log;
         $logentry->info('<b>Software Update</b> from version <b>'.$vCurrent.'</b> to <b>'.$vNew.'</b>');
+    }
+
+    // After pull: resolve DB schema if outdated (re-read version file from disk)
+    $postPullMgr = new DatabaseManager();
+    if($postPullMgr->isSchemaOutdated(true)) {
+        require_once __DIR__.'/dbintegrity.php';
+        try {
+            ob_start();
+            DBCheckIntegrity('repair');
+            $reportHtml = ob_get_clean();
+            $_SESSION['db_integrity_report_html'] = $reportHtml;
+            $_SESSION['db_integrity_mode'] = 'repair';
+            $_SESSION['db_integrity_after_pull'] = 1;
+            $pullOutput['dbRepaired'] = true;
+            $_SESSION['updater_pull_output'] = $pullOutput;
+        }
+        catch(Throwable $e) {
+            $_SESSION['db_integrity_error'] = $e->getMessage();
+            $_SESSION['db_integrity_after_pull'] = 1;
+            $_SESSION['updater_pull_output'] = $pullOutput;
+        }
+        redirectAfterPost('updater.php');
     }
 }
 
@@ -54,16 +86,36 @@ if($dbAction === 'check' || $dbAction === 'repair') {
     }
 }
 
+$afterPull = !empty($_SESSION['db_integrity_after_pull']);
+if(isset($_SESSION['db_integrity_after_pull'])) {
+    unset($_SESSION['db_integrity_after_pull']);
+}
+if(isset($_SESSION['updater_pull_output']) && is_array($_SESSION['updater_pull_output'])) {
+    $pullOutput = $_SESSION['updater_pull_output'];
+    unset($_SESSION['updater_pull_output']);
+}
+
 if(isset($_SESSION['db_integrity_report_html'])) {
     $dbReportHtml = (string)$_SESSION['db_integrity_report_html'];
     $dbMode = isset($_SESSION['db_integrity_mode']) ? (string)$_SESSION['db_integrity_mode'] : '';
-    $dbModeLabel = ($dbMode === 'repair') ? 'Reparatur' : 'Prüfung';
+    $dbModeLabel = ($dbMode === 'repair')
+        ? ($afterPull ? 'Reparatur nach Pull' : 'Reparatur')
+        : 'Prüfung';
     unset($_SESSION['db_integrity_report_html'], $_SESSION['db_integrity_mode']);
 }
 if(isset($_SESSION['db_integrity_error'])) {
     $dbError = (string)$_SESSION['db_integrity_error'];
     unset($_SESSION['db_integrity_error']);
 }
+
+// Refresh schema info after possible redirect
+$schemaMgr = new DatabaseManager();
+$schemaInfo = sprintf(
+    'Schema-Version: installiert <b>%d</b>, Soll <b>%d</b>%s',
+    $schemaMgr->getInstalledSchemaVersion(),
+    $schemaMgr->getExpectedSchemaVersion(),
+    $schemaMgr->isSchemaOutdated() ? ' — <span class="w3-text-orange"><b>Update nötig</b></span>' : ' — aktuell'
+);
 
 include 'common/header.php';
 ?>
@@ -83,6 +135,9 @@ include 'common/header.php';
 </div>
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
   <?php echo 'Aktueller Branch: <b>'.htmlspecialchars(getBranchName(), ENT_QUOTES, 'UTF-8').'</b>'; ?>
+</div>
+<div class="w3-padding w3-light-grey"><i class="fas fa-database"></i>
+  <?php echo $schemaInfo; ?>
 </div>
 <?php if($pullOutput !== null) { ?>
 <div class="w3-card-4 w3-margin">
@@ -120,6 +175,9 @@ include 'common/header.php';
 
 <div class="w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>git pull</h3></div>
+  <div class="w3-padding">
+    <p>Nach dem Pull wird die Datenbank automatisch repariert, falls die Schema-Version veraltet ist.</p>
+  </div>
   <form action="updater.php" method="post" class="w3-padding">
     <button class="w3-button w3-blue" type="submit" name="pull" value="1">pull</button>
   </form>
@@ -128,7 +186,7 @@ include 'common/header.php';
 <div class="w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>Datenbank Integrität</h3></div>
   <div class="w3-padding">
-    <p>Prüfen meldet Abweichungen ohne Änderungen. Reparieren legt fehlende Tabellen/Spalten an und gleicht abweichende Spalten-Definitionen an.</p>
+    <p>Prüfen meldet Abweichungen ohne Änderungen. Reparieren legt fehlende Tabellen/Spalten an und gleicht abweichende Spalten-Definitionen an. Bei Erfolg wird die Schema-Version aktualisiert.</p>
   </div>
   <div class="w3-padding">
     <form action="updater.php" method="post" style="display:inline;">

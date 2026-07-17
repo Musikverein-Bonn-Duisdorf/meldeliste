@@ -243,6 +243,7 @@ class DatabaseManager
         $this->ensureDefaultAdmin();
         $this->migrateRegNumbers();
         $this->ensureMailTableUtf8mb4();
+        $this->finalizeSchemaVersion();
         return $this->report;
     }
 
@@ -256,7 +257,127 @@ class DatabaseManager
         $this->ensureDefaultAdmin();
         $this->migrateRegNumbers();
         $this->ensureMailTableUtf8mb4();
+        $this->finalizeSchemaVersion();
         return $this->report;
+    }
+
+    /**
+     * Expected schema version from config/SchemaVersion.php.
+     */
+    public function getExpectedSchemaVersion($forceReload = false) {
+        if(!function_exists('getExpectedSchemaVersion')) {
+            require_once dirname(__DIR__).'/config/SchemaVersion.php';
+        }
+        return (int)call_user_func('getExpectedSchemaVersion', $forceReload);
+    }
+
+    /**
+     * Installed schema version from config table (0 if missing).
+     */
+    public function getInstalledSchemaVersion() {
+        $configTable = new SQLtable('config');
+        if(!$configTable->exists()) {
+            return 0;
+        }
+        $sql = sprintf(
+            "SELECT `Value` FROM `%sconfig` WHERE `Parameter` = 'SchemaVersion' LIMIT 1;",
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if(!$row || !isset($row['Value'])) {
+            return 0;
+        }
+        return (int)$row['Value'];
+    }
+
+    public function isSchemaOutdated($forceReload = false) {
+        return $this->getInstalledSchemaVersion() < $this->getExpectedSchemaVersion($forceReload);
+    }
+
+    /**
+     * Persist SchemaVersion in config table (insert or update).
+     */
+    public function setInstalledSchemaVersion($version) {
+        $version = (int)$version;
+        $configTable = new SQLtable('config');
+        if(!$configTable->exists()) {
+            $this->addReport('data', 'SchemaVersion', 'error', 'config-Tabelle fehlt — Version nicht gesetzt');
+            return false;
+        }
+        $param = 'SchemaVersion';
+        $sql = sprintf(
+            "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], $param)
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        $exists = $row && isset($row['Parameter']) && $row['Parameter'] === $param;
+
+        if($exists) {
+            $update = sprintf(
+                "UPDATE `%sconfig` SET `Value` = '%d' WHERE `Parameter` = '%s';",
+                $GLOBALS['dbprefix'],
+                $version,
+                mysqli_real_escape_string($GLOBALS['conn'], $param)
+            );
+            $ok = mysqli_query($GLOBALS['conn'], $update);
+        }
+        else {
+            $insert = sprintf(
+                "INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '%d', 'int', '%s');",
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], $param),
+                $version,
+                mysqli_real_escape_string($GLOBALS['conn'], 'Installierte DB-Schema-Version (Soll: config/SchemaVersion.php)')
+            );
+            $ok = mysqli_query($GLOBALS['conn'], $insert);
+        }
+
+        if($ok) {
+            if(isset($GLOBALS['optionsDB']) && is_array($GLOBALS['optionsDB'])) {
+                $GLOBALS['optionsDB']['SchemaVersion'] = (string)$version;
+            }
+            return true;
+        }
+        $this->addReport(
+            'data',
+            'SchemaVersion',
+            'error',
+            'SchemaVersion konnte nicht gespeichert werden',
+            mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+        );
+        return false;
+    }
+
+    /**
+     * After successful create/repair, bump installed version to expected.
+     */
+    private function finalizeSchemaVersion() {
+        $expected = $this->getExpectedSchemaVersion();
+        $installed = $this->getInstalledSchemaVersion();
+        if($this->hasErrors()) {
+            $this->addReport(
+                'data',
+                'SchemaVersion',
+                'mismatch',
+                sprintf('Version nicht gesetzt (Fehler vorhanden). Installiert: %d, Soll: %d', $installed, $expected)
+            );
+            return;
+        }
+        if($installed === $expected) {
+            $this->addReport('data', 'SchemaVersion', 'ok', 'Schema-Version '.$expected);
+            return;
+        }
+        if($this->setInstalledSchemaVersion($expected)) {
+            $this->addReport(
+                'data',
+                'SchemaVersion',
+                'fixed',
+                sprintf('Schema-Version %d → %d', $installed, $expected)
+            );
+        }
     }
 
     /**

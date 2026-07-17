@@ -521,6 +521,12 @@ function getConfigDefaults() {
             'Type' => 'bool',
             'Description' => 'Instrument-RegNumbers dem INSTR-Kreis zugeordnet',
         ),
+        array(
+            'Parameter' => 'SchemaVersion',
+            'Value' => '0',
+            'Type' => 'int',
+            'Description' => 'Installierte DB-Schema-Version (Soll: config/SchemaVersion.php)',
+        ),
     );
 }
 ?>

@@ -6,6 +6,7 @@ if(isset($GLOBALS['conn']) && $GLOBALS['conn']) {
     @mysqli_query($GLOBALS['conn'], "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 }
 include "config/ConfigDefaults.php";
+include "config/SchemaVersion.php";
 include "libs/helpers.php";
 include "libs/colorschemes.php";
 $optionsDB = loadconfig();
