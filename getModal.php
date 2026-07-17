@@ -31,11 +31,7 @@ case 'termin':
     break;
 
 case 'terminResponse':
-    if(!requirePermission('perm_showResponse')) {
-        http_response_code(403);
-        echo '<div class="w3-container w3-padding"><p>Keine Berechtigung.</p></div>';
-        exit;
-    }
+    // All logged-in users may view register responses (MELD-68); edit stays gated in modal HTML
     $t = new Termin;
     $t->load_by_id($id);
     if(!(int)$t->Index) {
@@ -51,11 +47,7 @@ case 'terminResponse':
     break;
 
 case 'shiftResponse':
-    if(!requirePermission('perm_showResponse')) {
-        http_response_code(403);
-        echo '<div class="w3-container w3-padding"><p>Keine Berechtigung.</p></div>';
-        exit;
-    }
+    // Same as terminResponse: view without perm_showResponse (MELD-68)
     $s = new Shift;
     $s->load_by_id($id);
     if(!(int)$s->Index) {
