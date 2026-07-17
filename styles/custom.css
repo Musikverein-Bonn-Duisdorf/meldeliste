@@ -187,6 +187,17 @@
 }
 
 @media (max-width: 600px) {
+  /* Top-level admin panel: full width when hamburger opens admin-nav */
+  .admin-nav.w3-show > .w3-dropdown-content,
+  .admin-nav.w3-show:hover > .w3-dropdown-content {
+    display: block;
+    position: static !important;
+    width: 100%;
+    max-width: none;
+    min-width: 100% !important;
+    box-shadow: none;
+  }
+
   .admin-nav > .w3-dropdown-content,
   .admin-nav .admin-nav-group > .w3-dropdown-content {
     width: 100%;
@@ -194,29 +205,76 @@
     min-width: 100% !important;
   }
 
+  /* Subgroups collapsed by default (accordion) */
   .admin-nav .admin-nav-group > .w3-dropdown-content {
     position: static !important;
-    display: block;
+    display: none !important;
     box-shadow: none;
   }
 
-  .admin-nav:hover .admin-nav-group > .w3-dropdown-content,
-  .admin-nav.w3-show .admin-nav-group > .w3-dropdown-content {
-    display: block;
+  .admin-nav .admin-nav-group.admin-nav-open > .w3-dropdown-content,
+  .admin-nav .admin-nav-group.admin-nav-open:hover > .w3-dropdown-content {
+    display: block !important;
+  }
+
+  /* No hover-open on touch devices */
+  .admin-nav:hover .admin-nav-group > .w3-dropdown-content {
+    display: none !important;
   }
 
   .admin-nav-caret {
-    display: none;
+    display: inline-block;
+    float: right;
+  }
+
+  .admin-nav-group.admin-nav-open > .w3-button .admin-nav-caret {
+    transform: rotate(90deg);
   }
 
   .admin-nav-group > .w3-button {
     font-weight: bold;
-    pointer-events: none;
+    pointer-events: auto;
     white-space: normal;
+    cursor: pointer;
   }
 
   .admin-nav-group > .w3-dropdown-content .w3-bar-item {
     white-space: normal;
     padding-left: 1.5em;
+  }
+
+  /* Wrench stays hidden; groups are the mobile entry */
+  .admin-nav > .w3-button.w3-hide-small {
+    display: none !important;
+  }
+}
+
+/* Personenlisten: gestapelte Zeilen auf schmalen Screens (MELD-59) */
+@media (max-width: 600px) {
+  .list-row {
+    display: block !important;
+    float: none !important;
+  }
+
+  .list-row .list-primary {
+    display: block;
+    width: 100% !important;
+    float: none !important;
+    font-size: 1.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .list-row .list-secondary {
+    display: block;
+    width: 100% !important;
+    float: none !important;
+    font-size: 0.9em;
+    opacity: 0.9;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+  }
+
+  .list-row .list-meta {
+    display: none !important;
   }
 }

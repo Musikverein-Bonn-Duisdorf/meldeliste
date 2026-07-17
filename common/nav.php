@@ -208,19 +208,50 @@ if($u->hasInventories()) { ?>
  }
  ?>
 <script type="text/javascript">
+  function resetAdminNavGroups() {
+    var groups = document.querySelectorAll('.admin-nav-group.admin-nav-open');
+    for(var i = 0; i < groups.length; i++) {
+      groups[i].classList.remove('admin-nav-open');
+    }
+  }
+
   function showAll() {
-  var x = document.getElementsByClassName('stdhide');
-  for(var i=0; i<x.length; i++) {
-			   if (x[i].className.indexOf("w3-show") == -1) {
-			   x[i].className = x[i].className.replace("w3-hide-small", "w3-show");
-			   } else { 
-			   x[i].className = x[i].className.replace("w3-show", "w3-hide-small");
-			   }
-			   }
-			   }
-			   <?php if(!isset($_SESSION['MessageOfTheDay'])){
-			    $_SESSION['MessageOfTheDay']=true;
-			    ?>
-			   document.getElementById('MessageOfTheDay').style.display='block';
-			   <?php } ?>
-			   </script>
+    var x = document.getElementsByClassName('stdhide');
+    var closing = false;
+    for(var i = 0; i < x.length; i++) {
+      if(x[i].className.indexOf("w3-show") == -1) {
+        x[i].className = x[i].className.replace("w3-hide-small", "w3-show");
+      }
+      else {
+        x[i].className = x[i].className.replace("w3-show", "w3-hide-small");
+        closing = true;
+      }
+    }
+    if(closing) {
+      resetAdminNavGroups();
+    }
+  }
+
+  document.addEventListener('click', function(ev) {
+    if(window.matchMedia && !window.matchMedia('(max-width: 600px)').matches) {
+      return;
+    }
+    var btn = ev.target.closest ? ev.target.closest('.admin-nav-group > .w3-button') : null;
+    if(!btn) return;
+    var group = btn.parentNode;
+    if(!group || !group.classList || !group.classList.contains('admin-nav-group')) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    var open = group.classList.contains('admin-nav-open');
+    resetAdminNavGroups();
+    if(!open) {
+      group.classList.add('admin-nav-open');
+    }
+  });
+
+  <?php if(!isset($_SESSION['MessageOfTheDay'])){
+    $_SESSION['MessageOfTheDay']=true;
+  ?>
+  document.getElementById('MessageOfTheDay').style.display='block';
+  <?php } ?>
+</script>

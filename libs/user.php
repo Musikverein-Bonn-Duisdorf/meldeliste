@@ -656,33 +656,33 @@ class User
 
     public function printTableLine() {
         if($this->Mitglied) {
-            echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
+            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
         }
         else {
-            echo "<div class=\"w3-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";            
+            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
         }
-        echo "  <div onclick=\"openModal('user', ".$this->Index.")\" class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l2 w3-container\">".$this->iName."</div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
-        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->getLastVisit(), 1)."</div>\n";
+        echo "  <div onclick=\"openModal('user', ".$this->Index.")\" class=\"w3-col l3 m6 s12 w3-container list-primary\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-secondary\">".$this->iName."</div>\n";
+        echo "  <div class=\"w3-col l3 m12 s12 w3-container list-secondary\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->getLastVisit(), 1)."</div>\n";
         echo "</div>\n";
     }
 
     public function printUserTableLine() {
         $main = new div;
-        $main->class="w3-row w3-padding w3-mobile w3-border-bottom w3-border-black";
+        $main->class="w3-row list-row w3-padding w3-mobile w3-border-bottom w3-border-black";
         $main->class=$GLOBALS['optionsDB']['HoverEffect'];
         $main->onclick="openModal('user', ".$this->Index.")";
         if(!$this->Instrument) {
             $main->class=$GLOBALS['optionsDB']['colorDisabled'];
         }
         echo $main->open();
-        echo "  <div class=\"w3-col l1 w3-container\">".$this->Index."</div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l3 w3-container\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
-        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "  <div class=\"w3-col l2 w3-container\">".germanDate($this->getLastVisit(), 1)."</div>\n";
+        echo "  <div class=\"w3-col l1 m2 s12 w3-container list-meta\">".$this->Index."</div>\n";
+        echo "  <div class=\"w3-col l3 m5 s12 w3-container list-primary\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
+        echo "  <div class=\"w3-col l3 m5 s12 w3-container list-secondary\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->LastLogin, 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->getLastVisit(), 1)."</div>\n";
         echo $main->close();
     }
 };
