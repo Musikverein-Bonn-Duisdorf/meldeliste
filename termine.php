@@ -39,6 +39,13 @@ if(isset($_POST['insertAushilfe'])) {
         $aushilfe->fill_from_array($_POST);
         $aushilfe->save();
 }
+if(isset($_POST['deleteAushilfe'])) {
+        $aushilfe = new Aushilfe;
+        $aushilfe->load_by_id((int)$_POST['Index']);
+        if($aushilfe->Index && requirePermission('perm_editAppmnts')) {
+            $aushilfe->delete();
+        }
+}
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>

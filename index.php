@@ -18,8 +18,10 @@ if(isset($_POST['insertAushilfe'])) {
 }
 if(isset($_POST['deleteAushilfe'])) {
         $aushilfe = new Aushilfe;
-        $aushilfe->load_by_id($_POST['Index']);
-        $aushilfe->delete();
+        $aushilfe->load_by_id((int)$_POST['Index']);
+        if($aushilfe->Index && requirePermission('perm_editAppmnts')) {
+            $aushilfe->delete();
+        }
 }
 ?>
 <script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>

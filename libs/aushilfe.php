@@ -163,7 +163,7 @@ class Aushilfe
         $div->class="w3-row";
         $div->tag="form";
         $div->method="POST";
-        $div->action="index.php";
+        $div->action="";
         $str.=$div->open();
 
         $indent++;
@@ -176,13 +176,13 @@ class Aushilfe
         $aushilfe = new div;
         $aushilfe->indent=$indent;
         $aushilfe->class="w3-col l3";
-        $aushilfe->body="<b>".$this->Name."</b>";
+        $aushilfe->body="<b>".htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8')."</b>";
         $str.=$aushilfe->print();
 
         $aushilfe = new div;
         $aushilfe->indent=$indent;
         $aushilfe->class="w3-col l3";
-        $aushilfe->body=$this->getInstrumentName();
+        $aushilfe->body=htmlspecialchars((string)$this->getInstrumentName(), ENT_QUOTES, 'UTF-8');
         $str.=$aushilfe->print();
 
         $aushilfe = new div;
@@ -201,7 +201,8 @@ class Aushilfe
         $aushilfe->class="w3-border";
         $aushilfe->type="submit";
         $aushilfe->name="deleteAushilfe";
-        $aushilfe->value="&times;";
+        $aushilfe->value="×";
+        $aushilfe->onclick="return confirm('Aushilfe wirklich löschen?');";
         $str.=$aushilfe->print();
 
         $str.=$div->close();
