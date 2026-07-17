@@ -364,6 +364,51 @@ class MailJob
     }
 
     /**
+     * Body without the closing greeting that enqueue/applyGreeting may have appended.
+     * Used when copying a job into a new draft.
+     */
+    public function bodyTextWithoutGreeting() {
+        $body = rtrim((string)$this->BodyText);
+        if($body === '') {
+            return $body;
+        }
+
+        $stripped = preg_replace('/\s*<p>\s*Viele\s+Grüße\s*<br\s*\/?>\s*[^<]*\s*<\/p>\s*$/iu', '', $body);
+        if(is_string($stripped) && $stripped !== $body) {
+            return rtrim($stripped);
+        }
+
+        $stripped = preg_replace('/(?:\r?\n){1,2}Viele\s+Grüße\r?\n[^\r\n]*\s*$/u', '', $body);
+        if(is_string($stripped) && $stripped !== $body) {
+            return rtrim($stripped);
+        }
+
+        if((int)$this->Gruss === 4) {
+            $name = '';
+            if((int)$this->CreatedBy > 0) {
+                $u = new User;
+                $u->load_by_id((int)$this->CreatedBy);
+                if($u->Index) {
+                    $name = trim((string)$u->Vorname);
+                }
+            }
+            if($name !== '') {
+                $q = preg_quote($name, '/');
+                $stripped = preg_replace('/\s*<p>\s*'.$q.'\s*<\/p>\s*$/iu', '', $body);
+                if(is_string($stripped) && $stripped !== $body) {
+                    return rtrim($stripped);
+                }
+                $stripped = preg_replace('/(?:\r?\n)'.$q.'\s*$/u', '', $body);
+                if(is_string($stripped) && $stripped !== $body) {
+                    return rtrim($stripped);
+                }
+            }
+        }
+
+        return $body;
+    }
+
+    /**
      * Plain-text greeting suffix (for Discord / non-HTML).
      */
     public function plainGreetingSuffix($vornameSession = '') {
@@ -743,7 +788,7 @@ class MailJob
         }
 
         $copy->Subject = $subject;
-        $copy->BodyText = (string)$this->BodyText;
+        $copy->BodyText = $this->bodyTextWithoutGreeting();
         $copy->Source = 'mail';
         $copy->MemberOnly = (int)$this->MemberOnly;
         $copy->Register = (int)$this->Register;
