@@ -250,9 +250,13 @@
 }
 
 /* Personenlisten: gestapelte Zeilen auf schmalen Screens (MELD-59) */
+.list-row.list-filtered-out {
+  display: none !important;
+}
+
 @media (max-width: 600px) {
   .list-row {
-    display: block !important;
+    display: block;
     float: none !important;
   }
 
