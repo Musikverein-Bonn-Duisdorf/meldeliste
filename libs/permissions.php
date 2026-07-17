@@ -229,89 +229,63 @@ class Permissions
     }
     
     public function getPermission($perm) {
-        switch($perm) {
-	    case 'perm_showHiddenAppmnts':
-            return $this->perm_showHiddenAppmnts;
-	    case 'perm_showUsers':
-            return $this->perm_showUsers;
-	    case 'perm_editUsers':
-            return $this->perm_editUsers;
-	    case 'perm_editAppmnts':
-            return $this->perm_editAppmnts;
-	    case 'perm_showLog':
-            return $this->perm_showLog;
-	    case 'perm_showInstruments':
-            return $this->perm_showInstruments;
-	    case 'perm_editInstruments':
-            return $this->perm_editInstruments;
-	    case 'perm_showInventories':
-            return $this->perm_showInventories;
-	    case 'perm_editInventories':
-            return $this->perm_editInventories;
-	    case 'perm_sendEmail':
-            return $this->perm_sendEmail;
-	    case 'perm_showResponse':
-            return $this->perm_showResponse;
-	    case 'perm_editResponse':
-            return $this->perm_editResponse;
-	    case 'perm_editConfig':
-            return $this->perm_editConfig;
-	    case 'perm_editPermissions':
-            return $this->perm_editPermissions;
-        default:
-            break;
+        if(!in_array($perm, self::permissionKeys(), true)) {
+            return false;
+        }
+        return (bool)$this->$perm;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function permissionKeys() {
+        return array(
+            'perm_showHiddenAppmnts',
+            'perm_showUsers',
+            'perm_editUsers',
+            'perm_editAppmnts',
+            'perm_showLog',
+            'perm_showInstruments',
+            'perm_editInstruments',
+            'perm_showInventories',
+            'perm_editInventories',
+            'perm_sendEmail',
+            'perm_showResponse',
+            'perm_editResponse',
+            'perm_editConfig',
+            'perm_editPermissions',
+        );
+    }
+
+    /**
+     * @return array<string,array{short:string,label:string}>
+     */
+    public static function permissionLabels() {
+        return array(
+            'perm_showHiddenAppmnts' => array('short' => 'Versteckt', 'label' => 'Versteckte Termine anzeigen'),
+            'perm_showUsers' => array('short' => 'User', 'label' => 'Benutzer anzeigen'),
+            'perm_editUsers' => array('short' => 'User+', 'label' => 'Benutzer bearbeiten'),
+            'perm_editAppmnts' => array('short' => 'Termine', 'label' => 'Termine bearbeiten'),
+            'perm_showLog' => array('short' => 'Log', 'label' => 'Log anzeigen'),
+            'perm_showInstruments' => array('short' => 'Instr.', 'label' => 'Instrumente anzeigen'),
+            'perm_editInstruments' => array('short' => 'Instr.+', 'label' => 'Instrumente bearbeiten'),
+            'perm_showInventories' => array('short' => 'Inventar', 'label' => 'Inventar anzeigen'),
+            'perm_editInventories' => array('short' => 'Inventar+', 'label' => 'Inventar bearbeiten'),
+            'perm_sendEmail' => array('short' => 'Mail', 'label' => 'E-Mails senden'),
+            'perm_showResponse' => array('short' => 'Melden', 'label' => 'Rückmeldungen anzeigen'),
+            'perm_editResponse' => array('short' => 'Melden+', 'label' => 'Rückmeldungen bearbeiten'),
+            'perm_editConfig' => array('short' => 'Config', 'label' => 'Konfiguration bearbeiten'),
+            'perm_editPermissions' => array('short' => 'Rechte', 'label' => 'Berechtigungen bearbeiten'),
+        );
+    }
+
+    public function hasAnyPermission() {
+        foreach(self::permissionKeys() as $key) {
+            if($this->$key) {
+                return true;
+            }
         }
         return false;
-    }
-
-    public function printHeaderLine() {
-        $str="";
-        $main = new div;
-        $main->class="permissions w3-center w3-border-bottom w3-border-black w3-margin-bottom w3-teal w3-padding";
-        $str.=$main->open();
-
-        foreach ($this->_data as $key => $value) {
-            if($key == "Index") continue;
-            $div = new div;
-            if($key == "User") {
-                $div->body=$key;
-            }
-            else {
-                $div->body=substr($key,5);
-            }
-            $str.=$div->print();
-        }
- 
-        $str.=$main->close();        
-        return $str;
-    }
-    
-    public function printEditLine() {
-        $str="";
-        $main = new div;
-        $main->class="permissions w3-center w3-border-bottom w3-border-black w3-margin-bottom";
-        $str.=$main->open();
-
-        $div = new div;
-        $u = new User;
-        $u->load_by_id($this->User);
-        $div->body=$u->getName();
-        $str.=$div->print();
-
-        $size = count($this->_data);
-        $i = 0;
-        foreach ($this->_data as $key => $value) {
-            $i++;
-            if($key == "Index" || $key == "User") continue;
-            if($i == $size/2+1) break;
-            $div = new div;
-            $div->class=bool2color($value);
-            $div->body=bool2string($value);
-            $str.=$div->print();
-        }
- 
-        $str.=$main->close();        
-        return $str;
     }
 
     public function printShort() {
@@ -320,22 +294,19 @@ class Permissions
         $main->class="w3-col l6 w3-row";
         $str.=$main->open();
 
-        $size = count($this->_data);
-        $i = 0;
-        foreach ($this->_data as $key => $value) {
-            $i++;
-            if($key == "Index" || $key == "User") continue;
-            if($i == $size/2+1) break;
-            if($value) {
-                $div = new div;
-                $div->class="w3-col l4 w3-margin-right w3-margin-bottom w3-center";
-                $div->class=bool2color($value);
-                $div->body="<b>".substr($key,5)."</b>";
-                $str.=$div->print();
+        $labels = self::permissionLabels();
+        foreach(self::permissionKeys() as $key) {
+            if(!$this->$key) {
+                continue;
             }
+            $meta = isset($labels[$key]) ? $labels[$key] : array('short' => substr($key, 5), 'label' => $key);
+            $div = new div;
+            $div->class="w3-col l4 w3-margin-right w3-margin-bottom w3-center ".bool2color(1);
+            $div->body='<span title="'.htmlspecialchars($meta['label'], ENT_QUOTES, 'UTF-8').'"><b>'.htmlspecialchars($meta['short']).'</b></span>';
+            $str.=$div->print();
         }
- 
-        $str.=$main->close();        
+
+        $str.=$main->close();
         return $str;
     }
 };

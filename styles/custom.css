@@ -1,11 +1,117 @@
- .permissions {
-     display: grid;
-     grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-     grid-column-gap: 1px;
-     grid-row-gap: 1px;
-     justify-items: stretch;
-     align-items: stretch;
- }
+.perm-matrix-wrap {
+  overflow: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 12rem);
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.perm-matrix {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.8rem;
+}
+
+.perm-matrix th,
+.perm-matrix td {
+  padding: 0.35rem 0.45rem;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #eee;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.perm-matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #009688;
+  color: #fff;
+  font-weight: 600;
+}
+
+.perm-matrix .perm-user-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+  min-width: 11rem;
+  max-width: 16rem;
+  background: #fff;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.06);
+}
+
+.perm-matrix thead th.perm-user-col {
+  z-index: 3;
+  background: #00796b;
+}
+
+.perm-matrix th.perm-col {
+  vertical-align: bottom;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.perm-matrix th.perm-col .perm-col-label {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: normal;
+  line-height: 1.15;
+  font-weight: 500;
+  text-align: left;
+  max-height: none;
+}
+
+.perm-matrix td.perm-on {
+  background: #c8e6c9;
+}
+
+.perm-matrix td.perm-off {
+  background: #fff;
+}
+
+.perm-matrix tr:hover td.perm-off {
+  background: #f7f7f7;
+}
+
+.perm-matrix tr:hover td.perm-user-col {
+  background: #f0f0f0;
+}
+
+.perm-matrix td.perm-saving {
+  opacity: 0.55;
+}
+
+.perm-matrix td.perm-error {
+  outline: 2px solid #c62828;
+  outline-offset: -2px;
+}
+
+.perm-matrix .perm-toggle {
+  width: 1.15rem;
+  height: 1.15rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+.perm-matrix .perm-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Legacy grid (unused after MELD-65 matrix); keep harmless */
+.permissions {
+  display: grid;
+  grid-template-columns: 2fr repeat(14, 1fr);
+  grid-column-gap: 1px;
+  grid-row-gap: 1px;
+  justify-items: stretch;
+  align-items: stretch;
+}
 
 /* Admin nested dropdowns (MELD-58) */
 .admin-nav > .w3-dropdown-content {
