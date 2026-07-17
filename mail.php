@@ -126,6 +126,8 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
         $count = $mail->enqueueDraft($job, true);
         if($count > 0) {
             header('Location: mail.php?queued='.(int)$job->Index.'&n='.$count);
+            // First batch immediately; overview must not wait for SMTP (MELD-66).
+            Usermail::finishResponseThenProcessQueue();
             exit;
         }
         $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Keine gültigen Emailadressen gefunden.</h3></div>';
