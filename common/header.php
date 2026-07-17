@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
+      <?php
+          if(!headers_sent()) {
+              header('Content-Type: text/html; charset=utf-8');
+          }
+      ?>
+      <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <?php
           include_once 'include.php';
@@ -41,8 +47,6 @@
               die("<div class=\"w3-panel ".$optionsDB['colorLogWarning']."\"><h2>Passwort &auml;ndern...</h2></div>");
           }
       ?>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>
   <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?>">

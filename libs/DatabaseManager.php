@@ -243,6 +243,8 @@ class DatabaseManager
         $this->ensureDefaultAdmin();
         $this->migrateRegNumbers();
         $this->ensureMailTableUtf8mb4();
+        $this->ensureAllTablesUtf8mb4();
+        $this->migrateHtmlEntitiesInTextFields();
         $this->finalizeSchemaVersion();
         return $this->report;
     }
@@ -257,6 +259,8 @@ class DatabaseManager
         $this->ensureDefaultAdmin();
         $this->migrateRegNumbers();
         $this->ensureMailTableUtf8mb4();
+        $this->ensureAllTablesUtf8mb4();
+        $this->migrateHtmlEntitiesInTextFields();
         $this->finalizeSchemaVersion();
         return $this->report;
     }
@@ -714,6 +718,142 @@ class DatabaseManager
                     mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
                 );
             }
+        }
+    }
+
+    /**
+     * Convert all schema tables to utf8mb4 (MELD-56). Mail tables already handled above.
+     */
+    private function ensureAllTablesUtf8mb4() {
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        foreach(array_keys($this->schema) as $short) {
+            $table = new SQLtable($short);
+            if(!$table->exists()) {
+                continue;
+            }
+            $name = $GLOBALS['dbprefix'].$short;
+            $check = mysqli_query(
+                $GLOBALS['conn'],
+                "SELECT `TABLE_COLLATION` AS `c` FROM INFORMATION_SCHEMA.TABLES
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '"
+                .mysqli_real_escape_string($GLOBALS['conn'], $name)."' LIMIT 1"
+            );
+            $row = $check ? mysqli_fetch_assoc($check) : null;
+            $collation = $row && isset($row['c']) ? (string)$row['c'] : '';
+            if($collation !== '' && stripos($collation, 'utf8mb4') === 0) {
+                $this->addReport('table', $short, 'ok', 'utf8mb4');
+                continue;
+            }
+            $ok = mysqli_query(
+                $GLOBALS['conn'],
+                'ALTER TABLE `'.str_replace('`', '``', $name).'` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
+            );
+            if($ok) {
+                $this->addReport('table', $short, 'fixed', 'Nach utf8mb4 konvertiert (MELD-56)');
+            }
+            else {
+                $this->addReport(
+                    'table',
+                    $short,
+                    'error',
+                    'utf8mb4-Konvertierung fehlgeschlagen',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+            }
+        }
+    }
+
+    /**
+     * Decode legacy HTML entities stored in text fields (MELD-56). Idempotent.
+     */
+    private function migrateHtmlEntitiesInTextFields() {
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        $targets = array(
+            'User' => array('Vorname', 'Nachname'),
+            'Termine' => array('Name', 'Beschreibung', 'Ort1', 'Ort2', 'Ort3', 'Ort4', 'defaultFreeText'),
+            'Schichten' => array('Name'),
+            'Aushilfen' => array('Name'),
+            'vehicle' => array('Name'),
+            'Register' => array('Name'),
+            'Instrument' => array('Name'),
+            'Inventory' => array('Typ', 'Prefix'),
+            'Inventories' => array('Description', 'Vendor', 'Model', 'SerialNr', 'Comment'),
+        );
+        $flags = ENT_QUOTES;
+        if(defined('ENT_HTML5')) {
+            $flags = ENT_QUOTES | ENT_HTML5;
+        }
+        $totalFixed = 0;
+        foreach($targets as $short => $columns) {
+            $table = new SQLtable($short);
+            if(!$table->exists()) {
+                continue;
+            }
+            $name = $GLOBALS['dbprefix'].$short;
+            $safeName = str_replace('`', '``', $name);
+            $whereParts = array();
+            foreach($columns as $col) {
+                $safeCol = str_replace('`', '``', $col);
+                $whereParts[] = '`'.$safeCol.'` LIKE \'%&%;%\'';
+            }
+            if(!count($whereParts)) {
+                continue;
+            }
+            $sql = 'SELECT `Index`, `'.implode('`, `', array_map(function($c) {
+                return str_replace('`', '``', $c);
+            }, $columns)).'` FROM `'.$safeName.'` WHERE '.implode(' OR ', $whereParts);
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            if(!$dbr) {
+                $this->addReport(
+                    'data',
+                    $short,
+                    'error',
+                    'Entity-Migration Lesen fehlgeschlagen',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+                continue;
+            }
+            $fixed = 0;
+            while($row = mysqli_fetch_assoc($dbr)) {
+                $sets = array();
+                foreach($columns as $col) {
+                    if(!isset($row[$col]) || $row[$col] === null || $row[$col] === '') {
+                        continue;
+                    }
+                    $raw = (string)$row[$col];
+                    if(strpos($raw, '&') === false || strpos($raw, ';') === false) {
+                        continue;
+                    }
+                    $decoded = html_entity_decode($raw, $flags, 'UTF-8');
+                    if($decoded === $raw) {
+                        continue;
+                    }
+                    $sets[] = '`'.str_replace('`', '``', $col).'` = "'
+                        .mysqli_real_escape_string($GLOBALS['conn'], $decoded).'"';
+                }
+                if(!count($sets)) {
+                    continue;
+                }
+                $upd = 'UPDATE `'.$safeName.'` SET '.implode(', ', $sets)
+                    .' WHERE `Index` = '.(int)$row['Index'];
+                if(mysqli_query($GLOBALS['conn'], $upd)) {
+                    $fixed++;
+                }
+            }
+            if($fixed > 0) {
+                $totalFixed += $fixed;
+                $this->addReport('data', $short, 'fixed', $fixed.' Zeile(n) HTML-Entities dekodiert');
+            }
+            else {
+                $this->addReport('data', $short, 'ok', 'keine HTML-Entities');
+            }
+        }
+        if($totalFixed > 0) {
+            $this->addReport('data', 'HtmlEntities', 'fixed', 'Gesamt '.$totalFixed.' Zeile(n) migriert');
         }
     }
 

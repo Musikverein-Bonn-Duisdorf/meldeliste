@@ -241,38 +241,39 @@ function getPage($string) {
 }
 
 function getShort($Vorname, $Nachname) {
-    if(strlen($Vorname) >=2) {
-        $end=2;
-        if(substr($Vorname,1,1)=="&") {
-            $end = strpos($Vorname, ";");
-        }
-        $short1 = substr($Vorname,0,$end);
+    $flags = ENT_QUOTES;
+    if(defined('ENT_HTML5')) {
+        $flags = ENT_QUOTES | ENT_HTML5;
     }
-    else {
-        $short1 = $Vorname;
+    $Vorname = html_entity_decode((string)$Vorname, $flags, 'UTF-8');
+    $Nachname = html_entity_decode((string)$Nachname, $flags, 'UTF-8');
+    if(function_exists('mb_substr')) {
+        $short1 = mb_substr($Vorname, 0, 2, 'UTF-8');
+        $parts = preg_split('/\s+/u', trim($Nachname), -1, PREG_SPLIT_NO_EMPTY);
+        $last = $parts ? $parts[count($parts) - 1] : $Nachname;
+        $short2 = mb_substr($last, 0, 2, 'UTF-8');
+        return $short1.$short2;
     }
-    if(strlen($Nachname) >=2) {
-        $narray = explode(" ", $Nachname);
-        $end=2;
-        if(substr($narray[sizeof($narray)-1],1,1)=="&") {
-            $end = strpos($narray[sizeof($narray)-1], ";");
-        }
-        $short2 = substr($narray[sizeof($narray)-1],0,$end);
-    }
-    else {
-        $short2 = $Nachname;
-    }
+    $short1 = substr($Vorname, 0, 2);
+    $narray = explode(' ', $Nachname);
+    $short2 = substr($narray[sizeof($narray) - 1], 0, 2);
     return $short1.$short2;
 }
 
 function getShortAushilfe($Name) {
-    $narray = explode(" ", $Name);
-    if(sizeof($narray) > 1) {
-        return getShort($narray[0], $narray[1]);
+    $flags = ENT_QUOTES;
+    if(defined('ENT_HTML5')) {
+        $flags = ENT_QUOTES | ENT_HTML5;
     }
-    else {
-        return substr($Name,0,4);
+    $Name = html_entity_decode((string)$Name, $flags, 'UTF-8');
+    $narray = preg_split('/\s+/u', trim($Name), -1, PREG_SPLIT_NO_EMPTY);
+    if($narray && count($narray) > 1) {
+        return getShort($narray[0], $narray[count($narray) - 1]);
     }
+    if(function_exists('mb_substr')) {
+        return mb_substr($Name, 0, 4, 'UTF-8');
+    }
+    return substr($Name, 0, 4);
 }
 
 function instrumentOption($val) {
@@ -817,12 +818,14 @@ function printOrchestra($tid, $scale) {
                         $color = "#ffffff";
                         $opacity = 0.5;
                     }
+                    $safeShort = htmlspecialchars((string)$short, ENT_QUOTES, 'UTF-8');
                     $str=$str."<circle opacity=\"".$opacity."\" cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$color."\" />\n";
-                    $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$short."</text>\n";
+                    $str=$str."<text opacity=\"".$opacity."\" text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$safeShort."</text>\n";
                 }
                 else {
+                    $safeShort = htmlspecialchars((string)$short, ENT_QUOTES, 'UTF-8');
                     $str=$str."<circle cx=\"".$x."\" cy=\"".$y."\" r=\"".(18*$scale)."\" stroke=\"black\" stroke-width=\"".(2*$scale)."\" fill=\"".$register['Color']."\" />\n";
-                    $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$short."</text>\n";
+                    $str=$str."<text text-anchor=\"middle\" alignment-baseline=\"central\" fill=\"#000000\" font-size=\"".(10*$scale)."\" x=\"".$x."\" y=\"".$y."\">".$safeShort."</text>\n";
                 }
 
                 $k++;
