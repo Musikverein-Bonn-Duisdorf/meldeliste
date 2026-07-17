@@ -28,7 +28,7 @@ class Shift
             $this->_data[$key] = trim($val);
             break;
 	    case 'Name':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = trim((string)$val);
             break;
         default:
             break;

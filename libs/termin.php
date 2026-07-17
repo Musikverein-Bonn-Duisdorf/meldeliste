@@ -59,7 +59,7 @@ class Termin
 	    case 'Ort2':
 	    case 'Ort3':
 	    case 'Ort4':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = trim((string)$val);
             break;
 	    case 'Auftritt':
 	    case 'Shifts':

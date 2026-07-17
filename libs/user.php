@@ -83,11 +83,11 @@ class User
         $this->Nachname
         );
         if($this->Vorname != $old->Vorname) {
-            $this->Vorname = htmlentities(trim($this->Vorname));
+            $this->Vorname = trim((string)$this->Vorname);
             $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
         }
         if($this->Nachname != $old->Nachname) {
-            $this->Nachname = htmlentities(trim($this->Nachname));
+            $this->Nachname = trim((string)$this->Nachname);
             $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
         }
         if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
@@ -185,8 +185,8 @@ class User
             $logentry->DBupdate($this->getChanges());
             return $this->update();
         }
-        $this->Vorname = htmlentities(trim((string)$this->Vorname));
-        $this->Nachname = htmlentities(trim((string)$this->Nachname));
+        $this->Vorname = trim((string)$this->Vorname);
+        $this->Nachname = trim((string)$this->Nachname);
         if(!$this->insert()) return false;
         $logentry = new Log;
         $logentry->DBinsert($this->getVars());
@@ -456,7 +456,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gel&ouml;schter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0 WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gelöschter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0 WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );

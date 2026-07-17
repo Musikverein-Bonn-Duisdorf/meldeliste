@@ -18,7 +18,7 @@ class SQLtable
         switch($key) {
 	    case 'Index':
 	    case 'Name':
-            $this->_data[$key] = htmlentities(trim($val));
+            $this->_data[$key] = trim((string)$val);
             break;
         default:
             $this->_data[$key] = $val;
@@ -114,12 +114,15 @@ class SQLtable
 
         $sqlType = $type;
         if($collation && in_array($type, array('text', 'varchar', 'char', 'mediumtext', 'longtext'), true)) {
-            $charset = 'latin1';
+            $charset = 'utf8mb4';
             if(stripos($collation, 'utf8mb4') !== false) {
                 $charset = 'utf8mb4';
             }
             elseif(stripos($collation, 'utf8') !== false) {
                 $charset = 'utf8';
+            }
+            elseif(stripos($collation, 'latin1') !== false) {
+                $charset = 'latin1';
             }
             $sqlType .= ' CHARACTER SET '.$charset.' COLLATE '.$collation;
         }
@@ -155,7 +158,7 @@ class SQLtable
     public function create() {
         if($this->exists()) return -1;
         $sql = sprintf(
-            "CREATE TABLE `%s` ( `Index` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`Index`)) ENGINE = InnoDB DEFAULT CHARSET=latin1;",
+            "CREATE TABLE `%s` ( `Index` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`Index`)) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
             $this->Name
         );
         $this->query($sql);
