@@ -74,8 +74,8 @@ if(requirePermission("perm_showInventories")) {
 </div>
 
 <div class="w3-row">
-  <input class="w3-input w3-border w3-padding w3-col l6 s6 m6" type="text" placeholder="Nach Inventar suchen..." id="filterString" onkeyup="filterMusiker()">
-  <div onclick="document.getElementById('inputModal').style.display='block'" class="w3-col l1 m6 s6 w3-center w3-padding <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"><i class="fas fa-plus"></i></div>
+  <input class="w3-input w3-border w3-padding w3-col l6 m10 s10" type="text" placeholder="Nach Inventar suchen..." id="filterString" onkeyup="filterMusiker()">
+  <div onclick="document.getElementById('inputModal').style.display='block'" class="w3-col l1 m2 s2 w3-center w3-padding <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"><i class="fas fa-plus"></i></div>
 </div>
 <div id="inputModal" class="w3-modal">
   <form class="w3-modal-content" action="" method="POST">
@@ -84,59 +84,59 @@ if(requirePermission("perm_showInventories")) {
       <h2>neues Inventar anlegen</h2>
     </header>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Inventar</b></div>
-      <select id="newInventoryType" class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Inventory">
+      <div class="w3-col l4 m6 s12"><b>Inventar</b></div>
+      <select id="newInventoryType" class="w3-col l4 m6 s12 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Inventory">
 	<?php echo inventoryOptionAll(0); ?>
       </select>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Inventarnummer</b> <span class="w3-small" id="regPreview"></span></div>
-      <input id="newRegNumber" name="RegNumber" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegInventoryNumber(); ?>" />
+      <div class="w3-col l4 m6 s12"><b>Inventarnummer</b> <span class="w3-small" id="regPreview"></span></div>
+      <input id="newRegNumber" name="RegNumber" type="number" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" value="<?php echo getNextRegInventoryNumber(); ?>" />
     </div>
     <div id="newInstrumentFamilyRow" class="w3-row w3-padding" style="display:none;">
-      <div class="w3-col l4 m6 s6"><b>Instrument</b></div>
-      <select id="newInstrumentFamily" class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Instrument">
+      <div class="w3-col l4 m6 s12"><b>Instrument</b></div>
+      <select id="newInstrumentFamily" class="w3-col l4 m6 s12 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Instrument">
 	<?php echo instrumentOptionAll(0); ?>
       </select>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Beschreibung</b></div>
-      <input name="Description" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Beschreibung</b></div>
+      <input name="Description" type="text" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Hersteller</b></div>
-      <input name="Vendor" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Hersteller</b></div>
+      <input name="Vendor" type="text" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Modell</b></div>
-      <input name="Model" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Modell</b></div>
+      <input name="Model" type="text" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Seriennummer</b></div>
-      <input name="SerialNr" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Seriennummer</b></div>
+      <input name="SerialNr" type="text" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Kaufdatum</b></div>
-      <input name="PurchaseDate" type="date" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Kaufdatum</b></div>
+      <input name="PurchaseDate" type="date" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Kaufpreis</b></div>
-      <input name="PurchasePrize" step="0.01" value="0.00" min="0" type="number" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Kaufpreis</b></div>
+      <input name="PurchasePrize" step="0.01" value="0.00" min="0" type="number" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Besitzer</b></div>
-      <select class="w3-col l4 m6 s6 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Owner">
+      <div class="w3-col l4 m6 s12"><b>Besitzer</b></div>
+      <select class="w3-col l4 m6 s12 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Owner">
 	<?php echo UserOptionAll(0); ?>
       </select>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Kommentar</b></div>
-      <input name="Comment" type="text" class="w3-input w3-col l4 m6 s6 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
+      <div class="w3-col l4 m6 s12"><b>Kommentar</b></div>
+      <input name="Comment" type="text" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s6"><b>Versichert</b></div>
+      <div class="w3-col l4 m6 s12"><b>Versichert</b></div>
       <input type="hidden" name="Insurance" value="0" />
-      <input name="Insurance" value="1" type="checkbox" class="w3-check w3-col l4 m6 s6"/>
+      <input name="Insurance" value="1" type="checkbox" class="w3-check w3-col l4 m6 s12"/>
     </div>
     <div class="w3-row w3-padding">
       <input type="submit" name="insert" value="speichern" class="w3-input w3-button w3-col l8 m12 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>"/>
