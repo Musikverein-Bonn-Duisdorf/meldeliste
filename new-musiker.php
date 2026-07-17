@@ -10,6 +10,11 @@ if(isset($_POST['id']) && isset($_SESSION['userid']) && (int)$_SESSION['userid']
     $_SESSION['page'] = 'me';
     $_SESSION['adminpage'] = false;
 }
+elseif(isset($_GET['id']) && isset($_SESSION['userid']) && (int)$_GET['id'] === (int)$_SESSION['userid']
+    && isset($_GET['mode']) && $_GET['mode'] === 'useredit') {
+    $_SESSION['page'] = 'me';
+    $_SESSION['adminpage'] = false;
+}
 else {
     $_SESSION['page'] = 'newmusiker';
     $_SESSION['adminpage'] = true;
@@ -18,9 +23,12 @@ else {
 $canEditUsers = requirePermission('perm_editUsers');
 $userid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
 
+$isSelfProfileEdit = (isset($_POST['mode']) && $_POST['mode'] === 'useredit')
+    || (isset($_GET['mode']) && $_GET['mode'] === 'useredit');
+
 include_once 'libs/form-response.php';
 
-if(isset($_POST['insert']) && !$canEditUsers) {
+if(isset($_POST['insert']) && ($isSelfProfileEdit || !$canEditUsers)) {
     $profileResult = handleSelfProfilePost($userid);
     if($profileResult['flash']) {
         setFlash($profileResult['flash']['type'], $profileResult['flash']['message']);
@@ -28,10 +36,10 @@ if(isset($_POST['insert']) && !$canEditUsers) {
     elseif($profileResult['successMessage']) {
         setFlash('success', $profileResult['successMessage']);
     }
-    redirectAfterPost('index.php');
+    redirectAfterPost('new-musiker.php?id='.$userid.'&mode=useredit');
 }
 
-if($canEditUsers && isUserFormPost()) {
+if($canEditUsers && isUserFormPost() && !$isSelfProfileEdit) {
     applyNewMusikerFormPostRedirect('musiker.php');
 }
 
@@ -45,6 +53,9 @@ $returnTo = safeReturnUrl(
 $fill = false;
 $n = new User;
 if(isset($_GET['id']) && (int)$_GET['id'] > 0) {
+    if(isset($_GET['mode']) && $_GET['mode'] === 'useredit' && (int)$_GET['id'] !== $userid) {
+        die('<div class="w3-panel w3-red w3-padding"><b>Kein Zugriff auf dieses Profil.</b></div>');
+    }
     $n->load_by_id((int)$_GET['id']);
     if($n->Index > 0) {
         $fill = true;
@@ -64,10 +75,10 @@ elseif(isset($_POST['Index']) && $canEditUsers) {
 }
 
 $edit = 1;
-if(isset($_POST['mode']) && $_POST['mode'] == 'useredit') {
+if($isSelfProfileEdit) {
     $edit = 2;
 }
-if($canEditUsers) {
+elseif($canEditUsers) {
     $edit = 3;
 }
 
