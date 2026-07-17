@@ -101,6 +101,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     if($job->Termin) {
         $job->MemberOnly = 0;
         $job->Register = 0;
+        $job->PostDiscord = isset($_POST['postDiscord']) ? 1 : 0;
     }
     else {
         $job->MemberOnly = (isset($_POST['to']) && $_POST['to'] === 'aktiv') ? 1 : 0;
@@ -110,6 +111,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
         else {
             $job->Register = 0;
         }
+        $job->PostDiscord = isset($_POST['postDiscord']) ? 1 : 0;
     }
     $job->ensureAttachmentDir();
     $job->save();
@@ -125,6 +127,10 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
         $mail->source = 'mail';
         $count = $mail->enqueueDraft($job, true);
         if($count > 0) {
+            $job->load_by_id($job->Index);
+            if((int)$job->PostDiscord) {
+                $job->publishToDiscord(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '');
+            }
             header('Location: mail.php?queued='.(int)$job->Index.'&n='.$count);
             // First batch immediately; overview must not wait for SMTP (MELD-66).
             Usermail::finishResponseThenProcessQueue();
@@ -161,6 +167,7 @@ $textRaw = $job ? (string)$job->BodyText : '';
 $textPreview = $job ? $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '') : '';
 $anrede = 'Hallo {VORNAME},';
 $allReg = ($register === 0);
+$postDiscord = $job ? ((int)$job->PostDiscord === 1) : false;
 
 $allJobs = MailJob::listJobs(null, 300);
 
@@ -382,9 +389,45 @@ foreach($allJobs as $rowJob) {
 	else {
 	    select.style.display = 'block';
 	}
+	if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
     };
 </script>
 <?php } ?>
+<script>
+(function() {
+  var form = document.mailform;
+  var cb = document.getElementById('postDiscord');
+  if(!form || !cb) return;
+  var isTermin = <?php echo $termin ? 'true' : 'false'; ?>;
+
+  window.syncDiscordDefault = function() {
+    if(isTermin) {
+      cb.checked = false;
+      return;
+    }
+    var toAll = form.to && form.to.value === 'all';
+    // radio NodeList
+    if(form.to && form.to.length) {
+      toAll = false;
+      for(var i = 0; i < form.to.length; i++) {
+        if(form.to[i].value === 'all' && form.to[i].checked) toAll = true;
+      }
+    }
+    var allReg = form.allReg ? !!form.allReg.checked : true;
+    cb.checked = !!(toAll && allReg);
+  };
+
+  if(form.to) {
+    var radios = form.to.length ? form.to : [form.to];
+    for(var i = 0; i < radios.length; i++) {
+      radios[i].addEventListener('change', window.syncDiscordDefault);
+    }
+  }
+  if(form.register) {
+    form.register.addEventListener('change', window.syncDiscordDefault);
+  }
+})();
+</script>
     <label>Betreff</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Betreff" placeholder="Hier Betreff einfügen" value="<?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?>"/>
 
@@ -398,6 +441,10 @@ foreach($allJobs as $rowJob) {
       <option value="3" <?php if($gruss==3) echo "selected"; ?>>Viele Grüße, <?php echo htmlspecialchars($GLOBALS['optionsDB']['MailGreetings'], ENT_QUOTES, 'UTF-8'); ?></option>
       <option value="4" <?php if($gruss==4) echo "selected"; ?>><?php echo htmlspecialchars($_SESSION['Vorname'], ENT_QUOTES, 'UTF-8'); ?></option>
     </select>
+    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
+      <input class="w3-check" type="checkbox" name="postDiscord" id="postDiscord" value="1" <?php if($postDiscord) echo "checked"; ?>>
+      <label for="postDiscord">Auch auf Discord posten</label>
+    </div>
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?> w3-margin-bottom w3-mobile" name="save" value="1">Entwurf speichern</button>
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="preview" value="1">Vorschau</button>
 

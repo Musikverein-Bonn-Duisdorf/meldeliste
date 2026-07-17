@@ -87,6 +87,7 @@
 	"Register": {"Type": "int", "Default": 0},
 	"Termin": {"Type": "int", "Default": 0},
 	"Gruss": {"Type": "int", "Default": 1},
+	"PostDiscord": {"Type": "tinyint", "Default": 0},
 	"AttachmentPath": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"Status": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"Total": {"Type": "int", "Default": 0},

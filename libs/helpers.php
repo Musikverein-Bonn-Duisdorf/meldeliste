@@ -1031,6 +1031,24 @@ function mailBodyLooksLikeHtml($text) {
 }
 
 /**
+ * Convert mail body (HTML or plain) to Discord-/log-friendly plain text.
+ */
+function mailBodyToPlainText($text) {
+    $text = (string)$text;
+    if(mailBodyLooksLikeHtml($text)) {
+        $text = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $text);
+        $text = preg_replace('/<\s*\/\s*p\s*>/i', "\n\n", $text);
+        $text = preg_replace('/<\s*\/\s*li\s*>/i', "\n", $text);
+        $text = preg_replace('/<\s*\/\s*h[1-6]\s*>/i', "\n\n", $text);
+        $text = strip_tags($text);
+    }
+    $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+    $text = preg_replace("/[ \t]+/", ' ', $text);
+    $text = preg_replace("/\n{3,}/", "\n\n", $text);
+    return trim($text);
+}
+
+/**
  * Allow only safe CSS declarations for mail HTML (color, size, align).
  */
 function sanitizeMailHtmlStyleAttr($style) {
