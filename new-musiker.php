@@ -1,8 +1,9 @@
 <?php
 session_start();
 
-$msg = '';
-$msgErr = '';
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+requireLoggedInOrRedirect();
 
 if(isset($_POST['id']) && isset($_SESSION['userid']) && (int)$_SESSION['userid'] === (int)$_POST['id']) {
     $_SESSION['page'] = 'me';
@@ -12,75 +13,33 @@ else {
     $_SESSION['page'] = 'newmusiker';
     $_SESSION['adminpage'] = true;
 }
-include "common/header.php";
 
-$canEditUsers = requirePermission("perm_editUsers");
+$canEditUsers = requirePermission('perm_editUsers');
 $userid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
 
-// Self-service profile save (non-admin "Mein Profil")
+include_once 'libs/form-response.php';
+
 if(isset($_POST['insert']) && !$canEditUsers) {
-    $selfId = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
-    try {
-        if($selfId < 1 || $selfId !== $userid) {
-            $logentry = new Log;
-            $logentry->error(sprintf(
-                "Profil speichern verweigert: User-ID <b>%d</b> wollte Index <b>%d</b> ändern.",
-                $userid,
-                $selfId
-            ));
-            $msgErr = 'Speichern nicht erlaubt.';
-        }
-        else {
-            $n = new User;
-            $n->load_by_id($selfId);
-            if((int)$n->Index !== $selfId) {
-                $msgErr = 'Benutzer nicht gefunden.';
-            }
-            else {
-                $n->Email = isset($_POST['Email']) ? $_POST['Email'] : $n->Email;
-                $n->Email2 = isset($_POST['Email2']) ? $_POST['Email2'] : $n->Email2;
-                $n->getMail = isset($_POST['getMail']) ? (int)$_POST['getMail'] : 0;
-                if(!$n->save()) {
-                    $msgErr = 'Profil konnte nicht gespeichert werden.';
-                }
-                else {
-                    $msg = 'Profil gespeichert.';
-                    $logentry = new Log;
-                    $logentry->info(sprintf("Eigenes Profil gespeichert | User-ID: <b>%d</b>", $selfId));
-                }
-                if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
-                    $pw1 = (string)$_POST['pw1'];
-                    $pw2 = (string)$_POST['pw2'];
-                    if($pw1 !== '' || $pw2 !== '') {
-                        if($pw1 === '' || $pw2 === '') {
-                            $msgErr = 'Bitte beide Passwortfelder ausfüllen.';
-                        }
-                        elseif($pw1 !== $pw2) {
-                            $msgErr = 'Passwörter stimmen nicht überein.';
-                        }
-                        elseif(!$n->passwd($pw1)) {
-                            $msgErr = 'Passwort konnte nicht gesetzt werden. Bitte Loginname prüfen.';
-                        }
-                        else {
-                            $msg = trim($msg.' Passwort wurde gesetzt.');
-                        }
-                    }
-                }
-            }
-        }
+    $profileResult = handleSelfProfilePost($userid);
+    if($profileResult['flash']) {
+        setFlash($profileResult['flash']['type'], $profileResult['flash']['message']);
     }
-    catch(Throwable $e) {
-        $logentry = new Log;
-        $logentry->error(sprintf(
-            "Profil/Passwort Exception | User-ID: <b>%d</b>, Fehler: <b>%s</b>",
-            $userid,
-            htmlspecialchars($e->getMessage())
-        ));
-        $msgErr = 'Unerwarteter Fehler: '.$e->getMessage();
+    elseif($profileResult['successMessage']) {
+        setFlash('success', $profileResult['successMessage']);
     }
-    $_POST['id'] = $userid;
-    $_POST['mode'] = 'useredit';
+    redirectAfterPost('index.php');
 }
+
+if($canEditUsers && isUserFormPost()) {
+    applyUserFormPostRedirect('musiker.php', array('allowNewUser' => true));
+}
+
+include 'common/header.php';
+
+$returnTo = safeReturnUrl(
+    isset($_POST['return_to']) ? $_POST['return_to'] : '',
+    'musiker.php'
+);
 
 $fill = false;
 $n = new User;
@@ -105,11 +64,10 @@ if($canEditUsers) {
     $edit = 3;
 }
 
-// Non-admins may only edit their own profile
 if($edit == 2 && $fill && (int)$n->Index !== $userid) {
     $logentry = new Log;
     $logentry->error(sprintf(
-        "Fremdes Profil geöffnet verweigert | Session: <b>%d</b>, Ziel: <b>%d</b>",
+        'Fremdes Profil geöffnet verweigert | Session: <b>%d</b>, Ziel: <b>%d</b>',
         $userid,
         (int)$n->Index
     ));
@@ -117,7 +75,7 @@ if($edit == 2 && $fill && (int)$n->Index !== $userid) {
 }
 
 $disabled = ($edit != 3) ? 'disabled' : '';
-$formAction = ($edit == 2) ? '' : 'musiker.php';
+$formAction = '';
 ?>
 <div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Profil bearbeiten</h2>
@@ -125,16 +83,13 @@ $formAction = ($edit == 2) ? '' : 'musiker.php';
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
 </div>
 <div class="w3-card <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile w3-center w3-border w3-padding w3-col s6 l4">
-<?php if($msg !== '') { ?>
-  <div class="w3-panel w3-green w3-padding"><b><?php echo htmlspecialchars($msg); ?></b></div>
-<?php } ?>
-<?php if($msgErr !== '') { ?>
-  <div class="w3-panel w3-red w3-padding"><b><?php echo htmlspecialchars($msgErr); ?></b></div>
-<?php } ?>
-  <form action="<?php echo htmlspecialchars($formAction); ?>" method="POST">
+<?php echo renderFlashHtml(); ?>
+  <form action="<?php echo htmlspecialchars($formAction, ENT_QUOTES, 'UTF-8'); ?>" method="POST">
 <?php if($edit == 2) { ?>
     <input type="hidden" name="mode" value="useredit">
     <input type="hidden" name="id" value="<?php echo (int)$userid; ?>">
+<?php } elseif($canEditUsers) { ?>
+    <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
 <?php } ?>
     <label>Vorname</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8')."\""; ?> <?php echo $disabled; ?>>
@@ -218,7 +173,8 @@ $formAction = ($edit == 2) ? '' : 'musiker.php';
     </header>
     <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo htmlspecialchars($n->Vorname." ".$n->Nachname); ?></b> l&ouml;schen wollen?</div>
     <div class="w3-container w3-mobile">
-    <form action="musiker.php" method="POST">
+    <form action="" method="POST">
+    <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
     <div class="w3-row">
     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
@@ -237,5 +193,5 @@ $formAction = ($edit == 2) ? '' : 'musiker.php';
 <?php } ?>
     <div class="w3-row">&nbsp;</div>
 <?php
-include "common/footer.php";
+include 'common/footer.php';
 ?>
