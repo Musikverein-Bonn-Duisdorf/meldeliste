@@ -33,9 +33,9 @@ class Discord
 
     public function getVars() {
         return sprintf("DiscordWebhook: <b>%s</b>, Username: <b>%s</b>, Nachricht: <b>%s</b>",
-                       $webhookUrl,
-                       $this->username,
-                       $this->message
+                       htmlspecialchars((string)$this->webhookUrl),
+                       htmlspecialchars((string)$this->username),
+                       htmlspecialchars((string)$this->message)
         );
     }
 

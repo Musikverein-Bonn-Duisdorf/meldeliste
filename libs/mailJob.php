@@ -12,6 +12,7 @@ class MailJob
         'Register' => 0,
         'Termin' => 0,
         'Gruss' => 1,
+        'PostDiscord' => 0,
         'AttachmentPath' => null,
         'Status' => 'draft',
         'Total' => 0,
@@ -35,6 +36,7 @@ class MailJob
         case 'Register':
         case 'Termin':
         case 'Gruss':
+        case 'PostDiscord':
         case 'Total':
         case 'Sent':
         case 'Failed':
@@ -79,6 +81,7 @@ class MailJob
         $outbox = new SQLtable('MailOutbox');
         $needs = !$table->exists() || !$outbox->exists()
             || !$table->columnExists('Gruss')
+            || !$table->columnExists('PostDiscord')
             || !$outbox->columnExists('ReadAt')
             || !$outbox->columnExists('LockedAt');
         if($needs) {
@@ -133,6 +136,7 @@ class MailJob
         $job->Termin = (int)$termin;
         $job->Status = 'draft';
         $job->Gruss = 1;
+        $job->PostDiscord = ((int)$termin === 0) ? 1 : 0;
         if(!$job->save()) {
             return null;
         }
@@ -157,7 +161,7 @@ class MailJob
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sMailJob` (`CreatedBy`, `Subject`, `BodyText`, `Source`, `MemberOnly`, `Register`, `Termin`, `Gruss`, `AttachmentPath`, `Status`, `Total`, `Sent`, `Failed`) VALUES (%d, "%s", "%s", "%s", %d, %d, %d, %d, %s, "%s", %d, %d, %d);',
+            'INSERT INTO `%sMailJob` (`CreatedBy`, `Subject`, `BodyText`, `Source`, `MemberOnly`, `Register`, `Termin`, `Gruss`, `PostDiscord`, `AttachmentPath`, `Status`, `Total`, `Sent`, `Failed`) VALUES (%d, "%s", "%s", "%s", %d, %d, %d, %d, %d, %s, "%s", %d, %d, %d);',
             $GLOBALS['dbprefix'],
             (int)$this->CreatedBy,
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Subject),
@@ -167,6 +171,7 @@ class MailJob
             (int)$this->Register,
             (int)$this->Termin,
             (int)$this->Gruss,
+            (int)$this->PostDiscord,
             $this->AttachmentPath === null || $this->AttachmentPath === ''
                 ? 'NULL'
                 : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->AttachmentPath).'"',
@@ -184,7 +189,7 @@ class MailJob
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailJob` SET `CreatedBy`=%d, `Subject`="%s", `BodyText`="%s", `Source`="%s", `MemberOnly`=%d, `Register`=%d, `Termin`=%d, `Gruss`=%d, `AttachmentPath`=%s, `Status`="%s", `Total`=%d, `Sent`=%d, `Failed`=%d WHERE `Index`=%d;',
+            'UPDATE `%sMailJob` SET `CreatedBy`=%d, `Subject`="%s", `BodyText`="%s", `Source`="%s", `MemberOnly`=%d, `Register`=%d, `Termin`=%d, `Gruss`=%d, `PostDiscord`=%d, `AttachmentPath`=%s, `Status`="%s", `Total`=%d, `Sent`=%d, `Failed`=%d WHERE `Index`=%d;',
             $GLOBALS['dbprefix'],
             (int)$this->CreatedBy,
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Subject),
@@ -194,6 +199,7 @@ class MailJob
             (int)$this->Register,
             (int)$this->Termin,
             (int)$this->Gruss,
+            (int)$this->PostDiscord,
             $this->AttachmentPath === null || $this->AttachmentPath === ''
                 ? 'NULL'
                 : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->AttachmentPath).'"',
@@ -355,6 +361,114 @@ class MailJob
             $suffix = "\n".$vornameSession;
         }
         return $body.$suffix;
+    }
+
+    /**
+     * Plain-text greeting suffix (for Discord / non-HTML).
+     */
+    public function plainGreetingSuffix($vornameSession = '') {
+        $gruss = (int)$this->Gruss;
+        if($gruss === 1) {
+            return "\n\nViele Grüße\n".$vornameSession;
+        }
+        if($gruss === 2) {
+            return "\n\nViele Grüße\nder Vorstand";
+        }
+        if($gruss === 3) {
+            return "\n\nViele Grüße\n".$GLOBALS['optionsDB']['MailGreetings'];
+        }
+        if($gruss === 4) {
+            return "\n".$vornameSession;
+        }
+        return '';
+    }
+
+    /**
+     * Build Discord message for this job (non-personalized greeting).
+     */
+    public function buildDiscordMessage($vornameSession = '') {
+        $subject = trim((string)$this->Subject);
+        $prefix = isset($GLOBALS['mailconfig']['subjectprefix']) ? (string)$GLOBALS['mailconfig']['subjectprefix'] : '';
+        if($prefix !== '' && strpos($subject, $prefix) === 0) {
+            $subject = trim(substr($subject, strlen($prefix)));
+        }
+        $body = function_exists('mailBodyToPlainText')
+            ? mailBodyToPlainText((string)$this->BodyText)
+            : trim(html_entity_decode(strip_tags((string)$this->BodyText), ENT_QUOTES, 'UTF-8'));
+        $msg = '';
+        if($subject !== '') {
+            $msg .= '**'.$subject."**\n\n";
+        }
+        $msg .= "Liebe Musikfreunde,\n\n".$body.$this->plainGreetingSuffix($vornameSession);
+        $path = (string)$this->AttachmentPath;
+        if($path !== '' && is_dir($path)) {
+            $files = scandir($path);
+            $hasFile = false;
+            if(is_array($files)) {
+                foreach($files as $file) {
+                    if($file === '.' || $file === '..') continue;
+                    if(is_file($path.'/'.$file)) {
+                        $hasFile = true;
+                        break;
+                    }
+                }
+            }
+            if($hasFile) {
+                $msg .= "\n\n_(Anhänge nur in der E-Mail)_";
+            }
+        }
+        return trim($msg);
+    }
+
+    /**
+     * Post once to Discord if flagged. Never throws; logs errors.
+     * @return bool
+     */
+    public function publishToDiscord($vornameSession = '') {
+        if(!(int)$this->PostDiscord) {
+            return false;
+        }
+        $webhookUrl = isset($GLOBALS['optionsDB']['DiscordWebHookURL'])
+            ? trim((string)$GLOBALS['optionsDB']['DiscordWebHookURL'])
+            : '';
+        if($webhookUrl === '') {
+            $logentry = new Log;
+            $logentry->warning(sprintf(
+                'Discord-Post übersprungen (kein Webhook) | Email-ID: <b>%d</b>',
+                (int)$this->Index
+            ));
+            return false;
+        }
+        $botname = isset($GLOBALS['optionsDB']['DiscordBotName'])
+            ? (string)$GLOBALS['optionsDB']['DiscordBotName']
+            : 'Bot';
+        $message = $this->buildDiscordMessage($vornameSession);
+        if(function_exists('mb_strlen') && mb_strlen($message, 'UTF-8') > 1900) {
+            $message = mb_substr($message, 0, 1900, 'UTF-8').'…';
+        }
+        elseif(strlen($message) > 1900) {
+            $message = substr($message, 0, 1900).'…';
+        }
+        try {
+            $discord = new Discord($webhookUrl);
+            $discord->sendMessage($message, $botname);
+            $logentry = new Log;
+            $logentry->info(sprintf(
+                'Email auf Discord gepostet | Email-ID: <b>%d</b>, Betreff: <b>%s</b>',
+                (int)$this->Index,
+                htmlspecialchars((string)$this->Subject)
+            ));
+            return true;
+        }
+        catch(Throwable $e) {
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                'Discord-Post fehlgeschlagen | Email-ID: <b>%d</b>, Exception: <b>%s</b>',
+                (int)$this->Index,
+                htmlspecialchars($e->getMessage())
+            ));
+            return false;
+        }
     }
 
     public function refreshCounts() {
@@ -632,6 +746,7 @@ class MailJob
         $copy->Register = (int)$this->Register;
         $copy->Termin = (int)$this->Termin;
         $copy->Gruss = (int)$this->Gruss;
+        $copy->PostDiscord = (int)$this->PostDiscord;
         $copy->save();
         $copy->ensureAttachmentDir();
 
