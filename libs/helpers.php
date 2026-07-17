@@ -1031,20 +1031,93 @@ function mailBodyLooksLikeHtml($text) {
 }
 
 /**
- * Convert mail body (HTML or plain) to Discord-/log-friendly plain text.
+ * Convert mail body (HTML or plain) to plain text.
  */
 function mailBodyToPlainText($text) {
     $text = (string)$text;
-    if(mailBodyLooksLikeHtml($text)) {
+    if(mailBodyLooksLikeHtml($text) || strpos($text, '<') !== false) {
         $text = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $text);
         $text = preg_replace('/<\s*\/\s*p\s*>/i', "\n\n", $text);
+        $text = preg_replace('/<\s*\/\s*div\s*>/i', "\n", $text);
         $text = preg_replace('/<\s*\/\s*li\s*>/i', "\n", $text);
         $text = preg_replace('/<\s*\/\s*h[1-6]\s*>/i', "\n\n", $text);
+        $text = preg_replace('/<\s*\/\s*tr\s*>/i', "\n", $text);
         $text = strip_tags($text);
     }
-    $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $text = str_replace("\xc2\xa0", ' ', $text);
     $text = preg_replace("/[ \t]+/", ' ', $text);
+    $text = preg_replace("/ *\n */", "\n", $text);
     $text = preg_replace("/\n{3,}/", "\n\n", $text);
+    return trim($text);
+}
+
+/**
+ * Convert mail body to Discord-friendly text (Markdown where useful, no raw HTML).
+ */
+function mailBodyToDiscordMarkdown($text) {
+    $text = (string)$text;
+    if(!mailBodyLooksLikeHtml($text) && strpos($text, '<') === false) {
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace("\xc2\xa0", ' ', $text);
+        return trim($text);
+    }
+
+    $text = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $text);
+    $text = preg_replace('/<\s*hr\s*\/?\s*>/i', "\n---\n", $text);
+    $text = preg_replace('/<\s*\/\s*p\s*>/i', "\n\n", $text);
+    $text = preg_replace('/<\s*p[^>]*>/i', '', $text);
+    $text = preg_replace('/<\s*\/\s*div\s*>/i', "\n", $text);
+    $text = preg_replace('/<\s*div[^>]*>/i', '', $text);
+
+    $text = preg_replace('/<\s*h[1-6][^>]*>(.*?)<\s*\/\s*h[1-6]\s*>/is', "**$1**\n\n", $text);
+
+    // Nested-ish inline tags: run a few passes
+    for($i = 0; $i < 3; $i++) {
+        $text = preg_replace('/<\s*(strong|b)(?:\s[^>]*)?>(.*?)<\s*\/\s*\1\s*>/is', '**$2**', $text);
+        $text = preg_replace('/<\s*(em|i)(?:\s[^>]*)?>(.*?)<\s*\/\s*\1\s*>/is', '*$2*', $text);
+        $text = preg_replace('/<\s*u(?:\s[^>]*)?>(.*?)<\s*\/\s*u\s*>/is', '__$1__', $text);
+        $text = preg_replace('/<\s*(s|strike|del)(?:\s[^>]*)?>(.*?)<\s*\/\s*\1\s*>/is', '~~$2~~', $text);
+    }
+
+    $text = preg_replace_callback(
+        '/<\s*a\s+[^>]*href\s*=\s*(["\'])(.*?)\1[^>]*>(.*?)<\s*\/\s*a\s*>/is',
+        function($m) {
+            $url = trim(html_entity_decode($m[2], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $label = trim(html_entity_decode(strip_tags($m[3]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if($url === '') {
+                return $label;
+            }
+            if($label === '' || strcasecmp($label, $url) === 0) {
+                return $url;
+            }
+            return '['.$label.']('.$url.')';
+        },
+        $text
+    );
+
+    $text = preg_replace('/<\s*li[^>]*>/i', "• ", $text);
+    $text = preg_replace('/<\s*\/\s*li\s*>/i', "\n", $text);
+    $text = preg_replace('/<\s*\/?\s*(ul|ol)[^>]*>/i', "\n", $text);
+
+    $text = preg_replace('/<\s*\/\s*tr\s*>/i', "\n", $text);
+    $text = preg_replace('/<\s*\/\s*t[dh]\s*>/i', " · ", $text);
+    $text = preg_replace('/<\s*(t[dh]|thead|tbody|table)[^>]*>/i', '', $text);
+    $text = preg_replace('/<\s*\/\s*(thead|tbody|table)\s*>/i', "\n", $text);
+
+    $text = preg_replace('/<\s*span[^>]*>/i', '', $text);
+    $text = preg_replace('/<\s*\/\s*span\s*>/i', '', $text);
+
+    $text = strip_tags($text);
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $text = str_replace("\xc2\xa0", ' ', $text);
+    // Collapse spaces/tabs but keep newlines
+    $text = preg_replace('/[^\S\n]+/', ' ', $text);
+    $text = preg_replace('/ *\n */', "\n", $text);
+    $text = preg_replace("/\n{3,}/", "\n\n", $text);
+    // Clean empty markdown leftovers
+    $text = preg_replace('/\*\*\s*\*\*/', '', $text);
+    $text = preg_replace('/(?<!\*)\*\s*\*(?!\*)/', '', $text);
     return trim($text);
 }
 
