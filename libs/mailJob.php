@@ -94,7 +94,7 @@ class MailJob
     /**
      * Mail tables were created as latin1; TinyMCE bodies need utf8mb4.
      */
-    protected static function ensureUtf8mb4() {
+    public static function ensureUtf8mb4() {
         static $utfDone = false;
         if($utfDone || !isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
             return;
