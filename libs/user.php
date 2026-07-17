@@ -578,80 +578,27 @@ class User
     }
     
     public function getModalHtml($forceEditButton = false) {
-        ob_start();
-        ?>
-        <header class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-      <span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span>
-      <h2><?php echo $this->Vorname." ".$this->Nachname; ?></h2>
-    </header>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">userID:</div><div class="w3-col l6"><b><?php echo $this->Index; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $this->iName; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($this->Mitglied); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($this->getMail); ?></b></div>
-    </div>
-      <?php
-      if(requirePermission("perm_showUsers")) {
-      ?>
-    <div class="w3-container w3-row w3-margin">
-          <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($this->Joined, 1); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $this->RefID; ?></b></div>
-    </div>
-    <div class="w3-container w3-margin">
-      <div class="w3-col l6">Berechtigungen:</div>
-      <?php
-         $p = new Permissions;
-         $p->load_by_user($this->Index);
-         echo $p->printShort();
-      }
-      ?>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email; ?>"><?php echo $this->Email; ?></a></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">zweite Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $this->Email2; ?>"><?php echo $this->Email2; ?></a></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $this->login; ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($this->LastLogin, 1); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Letzte Anwesenheit:</div><div class="w3-col l6"><b><?php echo germanDate($this->getLastVisit(), 1); ?></b></div>
-    </div>
-    <div class="w3-container w3-row w3-margin">
-      <div class="w3-col l6">Meldequote:</div><div class="w3-col l6"><b><?php echo $this->getMeldeQuote()*100; ?> %</b></div>
-    </div>
-      <?php
-      if($this->RegisterLead) {
-          $r = new Register;
-          $r->load_by_id($this->getRegister());
-      ?>
-          <div class="w3-container w3-row w3-margin">
-          <div class="w3-col l6">Registerführer:</div><div class="w3-col l6"><b><?php echo $r->Name; ?></b></div>
-          </div>
-      <?php
-      }
-      if($forceEditButton || requirePermission("perm_editUsers")) {
-          $returnTo = pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker');
-      ?>
-      <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
-      <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
-      <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $this->Index; ?>">bearbeiten</button>
-      </form>
-              <?php
-              }
-        return ob_get_clean();
+        $showUserDetails = requirePermission("perm_showUsers");
+        $permissionsHtml = '';
+        if($showUserDetails) {
+            $p = new Permissions;
+            $p->load_by_user($this->Index);
+            $permissionsHtml = $p->printShort();
+        }
+        $registerLeadName = null;
+        if($this->RegisterLead) {
+            $r = new Register;
+            $r->load_by_id($this->getRegister());
+            $registerLeadName = $r->Name;
+        }
+        return render('user/modal', array(
+            'user' => $this,
+            'showUserDetails' => $showUserDetails,
+            'permissionsHtml' => $permissionsHtml,
+            'registerLeadName' => $registerLeadName,
+            'showEditButton' => ($forceEditButton || requirePermission("perm_editUsers")),
+            'returnTo' => pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker'),
+        ));
     }
 
     public function printTableLine() {

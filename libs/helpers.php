@@ -1387,4 +1387,24 @@ function requireLoggedInOrRedirect() {
         exit;
     }
 }
+
+/**
+ * Render a PHP view from views/ and return the HTML.
+ * Convention: SQL/data in libs/, markup in views/, behaviour in js/.
+ *
+ * @param string $view Path relative to views/ without .php (e.g. 'user/modal')
+ * @param array $vars Variables extracted into the view scope
+ * @return string
+ */
+function render($view, $vars = array()) {
+    $path = dirname(__DIR__).'/views/'.$view.'.php';
+    if(!is_file($path)) {
+        trigger_error('View not found: '.$view, E_USER_WARNING);
+        return '';
+    }
+    extract($vars, EXTR_SKIP);
+    ob_start();
+    include $path;
+    return ob_get_clean();
+}
 ?>
