@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 $_SESSION['page'] = 'mitglied';
 $_SESSION['adminpage'] = true;
