@@ -47,7 +47,7 @@ for ($i=0; $i < $filecount; $i++) {
     }
     if (move_uploaded_file($tmpfile, $target_file)) {
         $hash = md5_file($target_file);
-        echo "<div class=\"w3-row\" id=\"".$hash."\"><div class=\"w3-green w3-col l6 w3-padding\">".htmlspecialchars($file)."</div><button class=\"w3-text-red fas fa-times w3-col l1 w3-padding\" onclick=\"delFile('".$hash."')\"></button><div class=\"w3-col l5 w3-padding\">&nbsp;</div></div>\n";
+        echo "<div class=\"mail-attach-row\" id=\"".$hash."\"><div class=\"w3-green w3-padding mail-attach-name\">".htmlspecialchars($file)."</div><button type=\"button\" class=\"w3-text-red fas fa-times w3-padding\" onclick=\"delFile('".$hash."')\" aria-label=\"Anhang entfernen\"></button></div>\n";
     } else {
         echo "<div class=\"w3-row w3-red\">Upload fehlgeschlagen: ".htmlspecialchars($file)."</div>";
     }

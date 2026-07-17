@@ -187,23 +187,15 @@ include_once 'common/header.php';
 
 <?php if(!$job) { ?>
 <div class="w3-container w3-padding">
-  <div class="w3-responsive">
-  <table class="w3-table w3-bordered w3-striped w3-hoverable">
-    <thead>
-      <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-        <th>ID</th>
-        <th>Datum</th>
-        <th>Von</th>
-        <th>Betreff</th>
-        <th>Status</th>
-        <th>Empfänger</th>
-        <th>Aktion</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="mail-list">
+    <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+      <div>Betreff</div>
+      <div>Status</div>
+      <div>Aktion</div>
+    </div>
 <?php
 if(!count($allJobs)) {
-    echo '<tr><td colspan="7">Noch keine Emails vorhanden.</td></tr>';
+    echo '<div class="mail-list-item"><div class="mail-list-primary">Noch keine Emails vorhanden.</div></div>';
 }
 $userNameCache = array();
 $mailSendingIds = array();
@@ -245,23 +237,21 @@ foreach($allJobs as $rowJob) {
     if($isSending) {
         $mailSendingIds[] = $id;
     }
-    echo '<tr data-mail-id="'.$id.'"'.($isSending ? ' data-mail-sending="1"' : '').'>';
-    echo '<td>'.$id.'</td>';
-    echo '<td>'.$created.'</td>';
-    echo '<td>'.$byName.'</td>';
-    echo '<td><a href="mail.php?id='.$id.'">'.$subject.'</a></td>';
-    echo '<td class="mail-status-cell"><span class="w3-tag mail-status-tag '.$statusCls.'">'.$status.'</span></td>';
-    echo '<td class="mail-counts-cell">'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</td>';
-    echo '<td class="mail-actions-cell">';
+    echo '<div class="mail-list-item" data-mail-id="'.$id.'"'.($isSending ? ' data-mail-sending="1"' : '').'>';
+    echo '<div class="mail-list-primary"><a href="mail.php?id='.$id.'">'.$subject.'</a></div>';
+    echo '<div class="mail-list-meta">#'.$id.' · '.$created.' · '.$byName.'</div>';
+    echo '<div class="mail-list-status"><span class="w3-tag mail-status-tag '.$statusCls.'">'.$status.'</span>';
+    echo ' <span class="mail-counts-cell">'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</span></div>';
+    echo '<div class="mail-list-actions mail-actions-cell">';
     if($rowJob->Status === 'draft') {
-        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a> ';
+        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a>';
     }
     if($rowJob->canCancel()) {
         echo '<span class="mail-cancel-wrap">';
-        echo '<form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
+        echo '<form method="post" action="mail.php" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
         echo '<input type="hidden" name="id" value="'.$id.'" />';
         echo '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
-        echo '</form> ';
+        echo '</form>';
         echo '</span>';
     }
     if($rowJob->canDelete()) {
@@ -269,19 +259,17 @@ foreach($allJobs as $rowJob) {
             ? 'Entwurf #'.$id.' wirklich löschen?'
             : 'Email-ID '.$id.' wirklich löschen? (noch an niemanden per PHPMailer versendet)';
         echo '<span class="mail-delete-wrap">';
-        echo '<form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
+        echo '<form method="post" action="mail.php" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
         echo '<input type="hidden" name="id" value="'.$id.'" />';
         echo '<button type="submit" name="delete_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Löschen</button>';
-        echo '</form> ';
+        echo '</form>';
         echo '</span>';
     }
     echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?copy='.$id.'">Als Entwurf kopieren</a>';
-    echo '</td>';
-    echo '</tr>';
+    echo '</div>';
+    echo '</div>';
 }
 ?>
-    </tbody>
-  </table>
   </div>
 </div>
 <?php if(count($mailSendingIds)) { ?>
@@ -291,7 +279,7 @@ foreach($allJobs as $rowJob) {
   if(!pollIds.length) return;
 
   function applyJob(job) {
-    var row = document.querySelector('tr[data-mail-id="' + job.id + '"]');
+    var row = document.querySelector('.mail-list-item[data-mail-id="' + job.id + '"]');
     if(!row) return;
     var tag = row.querySelector('.mail-status-tag');
     if(tag) {
@@ -344,8 +332,8 @@ foreach($allJobs as $rowJob) {
 
 <?php if($job && $job->Status === 'draft') { ?>
 <div class="w3-row">
-<div class="w3-col s12 m1 l1">&nbsp;</div>
-<div class="w3-panel w3-mobile w3-border w3-col s12 m10 l10" style="text-align:left;">
+<div class="w3-col s12 m1 l1 w3-hide-small">&nbsp;</div>
+<div class="w3-panel w3-mobile w3-border w3-col s12 m10 l10 mail-compose-panel" style="text-align:left;">
   <p class="w3-left-align"><b>Entwurf</b></p>
   <form name="mailform" class="w3-container w3-margin" action="mail.php?id=<?php echo (int)$job->Index; ?>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
@@ -445,28 +433,36 @@ foreach($allJobs as $rowJob) {
       <input class="w3-check" type="checkbox" name="postDiscord" id="postDiscord" value="1" <?php if($postDiscord) echo "checked"; ?>>
       <label for="postDiscord">Auch auf Discord posten</label>
     </div>
+    <div class="mail-compose-actions">
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?> w3-margin-bottom w3-mobile" name="save" value="1">Entwurf speichern</button>
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="preview" value="1">Vorschau</button>
+    </div>
 
     <?php if($preview) { ?>
                          <div class="w3-container w3-mobile w3-border w3-border-black w3-left-align w3-margin-bottom"><b>Betreff:</b> <?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?></div>
-                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container\"><p>".$anrede."</p>".formatMailBodyForDisplay($textPreview)."</div>"; ?></div>
+                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1 class=\"mail-preview-title\">".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container mail-body-content\"><p>".$anrede."</p>".formatMailBodyForDisplay($textPreview)."</div>"; ?></div>
+        <div class="mail-compose-actions">
         <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send" value="1">In Warteschlange stellen</button>
+        </div>
     <?php } ?>
   </form>
 
   <script src="js/tinymce/tinymce.min.js?<?php echo isset($GLOBALS['version']['Hash']) ? htmlspecialchars($GLOBALS['version']['Hash'], ENT_QUOTES, 'UTF-8') : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/tinymce/tinymce.min.js'); ?>"></script>
   <script>
-  tinymce.init({
+  (function() {
+    var isNarrow = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+    tinymce.init({
     selector: '#mail-body',
     license_key: 'gpl',
     menubar: false,
     branding: false,
     promotion: false,
-    height: 400,
+    height: isNarrow ? 280 : 400,
     plugins: 'lists link autolink table searchreplace code charmap nonbreaking',
-    toolbar: 'undo redo | blocks | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | outdent indent | blockquote | table | hr | link | charmap | searchreplace | code | removeformat',
-    toolbar_mode: 'wrap',
+    toolbar: isNarrow
+      ? 'undo redo | bold italic underline | bullist numlist | link | removeformat'
+      : 'undo redo | blocks | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | outdent indent | blockquote | table | hr | link | charmap | searchreplace | code | removeformat',
+    toolbar_mode: isNarrow ? 'scrolling' : 'wrap',
     block_formats: 'Absatz=p; Überschrift 2=h2; Überschrift 3=h3; Überschrift 4=h4',
     table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
     table_appearance_options: false,
@@ -491,7 +487,7 @@ foreach($allJobs as $rowJob) {
     convert_urls: false,
     relative_urls: false,
     entity_encoding: 'raw',
-    content_style: 'body { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; }',
+    content_style: 'body { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; } img, table { max-width: 100%; }',
     setup: function (editor) {
       var form = document.querySelector('form[name="mailform"]') || editor.getElement().form;
       if (form) {
@@ -501,20 +497,22 @@ foreach($allJobs as $rowJob) {
       }
     }
   });
+  })();
   </script>
 
   <form method="post" action="mail.php?id=<?php echo (int)$job->Index; ?>" onsubmit="return confirm('Entwurf #<?php echo (int)$job->Index; ?> wirklich löschen?');">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
+    <div class="mail-compose-actions">
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?> w3-margin" name="delete_job" value="1">Entwurf löschen</button>
+    </div>
   </form>
 
   <form id="uploadform" name="uploadform" action="uploadfile.php" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="job" value="<?php echo (int)$job->Index; ?>" />
     <label>Anhang</label>
-    <div class="w3-row">
-	<input id="attachment" class="w3-input w3-col l6 w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" type="file" name="attachment[]" onchange="showUploadButton()"/>
-	<div class="w3-col l2">&nbsp;</div>
-	<button id="upload" class="w3-btn w3-col l4 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="Upload" style="display:none" type="submit" role="button">Upload</button>
+    <div class="mail-attach-row">
+	<input id="attachment" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" type="file" name="attachment[]" onchange="showUploadButton()"/>
+	<button id="upload" class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="Upload" style="display:none" type="submit" role="button">Upload</button>
     </div>
   </form>
 <script>
@@ -565,7 +563,7 @@ function delFile(hash) {
             if($file == "." || $file == ".." || $file == "README") continue;
             if(!is_file($dir.'/'.$file)) continue;
             $hash = md5_file($dir.'/'.$file);
-            echo "<div class=\"w3-row\" id=\"".$hash."\"><div class=\"w3-green w3-col l6 w3-padding\">".htmlspecialchars($file)."</div><button class=\"w3-text-red fas fa-times w3-col l1 w3-padding\" onclick=\"delFile('".$hash."')\"></button><div class=\"w3-col l5 w3-padding\">&nbsp;</div></div>\n";
+            echo "<div class=\"mail-attach-row\" id=\"".$hash."\"><div class=\"w3-green w3-padding mail-attach-name\">".htmlspecialchars($file)."</div><button type=\"button\" class=\"w3-text-red fas fa-times w3-padding\" onclick=\"delFile('".$hash."')\" aria-label=\"Anhang entfernen\"></button></div>\n";
         }
     }
 ?>
@@ -616,17 +614,17 @@ function delFile(hash) {
       · Empfänger <span id="mail-detail-counts"><?php echo (int)$job->Sent; ?>/<?php echo (int)$job->Total; ?><?php if((int)$job->Failed > 0) echo ' ('.(int)$job->Failed.' Fehler)'; ?></span>
     </p>
     <h3 class="w3-margin-top"><?php echo $viewSubject !== '' ? $viewSubject : '<em>(ohne Betreff)</em>'; ?></h3>
-    <div class="w3-padding-16 w3-border-top"><?php echo $viewBody !== '' ? $viewBody : '<em>(kein Text)</em>'; ?></div>
-    <div class="w3-padding-16">
+    <div class="w3-padding-16 w3-border-top mail-body-content"><?php echo $viewBody !== '' ? $viewBody : '<em>(kein Text)</em>'; ?></div>
+    <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail.php?copy=<?php echo (int)$job->Index; ?>">Als Entwurf kopieren</a>
       <?php if($job->canCancel()) { ?>
-      <form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm('Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?');">
+      <form method="post" action="mail.php" onsubmit="return confirm('Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?');">
         <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
         <button type="submit" name="cancel_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Abbrechen</button>
       </form>
       <?php } ?>
       <?php if($job->canDelete()) { ?>
-      <form method="post" action="mail.php" style="display:inline;" onsubmit="return confirm('Email-ID <?php echo (int)$job->Index; ?> wirklich löschen?');">
+      <form method="post" action="mail.php" onsubmit="return confirm('Email-ID <?php echo (int)$job->Index; ?> wirklich löschen?');">
         <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
         <button type="submit" name="delete_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?>">Löschen</button>
       </form>
@@ -636,21 +634,15 @@ function delFile(hash) {
   </div>
 
   <h4>Empfänger</h4>
-  <div class="w3-responsive">
-  <table class="w3-table w3-bordered w3-striped w3-hoverable">
-    <thead>
-      <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-        <th>Empfänger</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Versendet</th>
-        <th>Fehler</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="mail-list">
+    <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+      <div>Empfänger</div>
+      <div>Status</div>
+      <div></div>
+    </div>
 <?php
 if(!count($outboxRows)) {
-    echo '<tr><td colspan="5">Keine Empfänger-Einträge.</td></tr>';
+    echo '<div class="mail-list-item"><div class="mail-list-primary">Keine Empfänger-Einträge.</div></div>';
 }
 else {
     foreach($outboxRows as $or) {
@@ -672,19 +664,24 @@ else {
         }
         $err = !empty($or['LastError'])
             ? htmlspecialchars((string)$or['LastError'], ENT_QUOTES, 'UTF-8')
-            : '—';
-        echo '<tr>';
-        echo '<td>'.$ouName.'</td>';
-        echo '<td>'.htmlspecialchars((string)$or['ToEmail'], ENT_QUOTES, 'UTF-8').'</td>';
-        echo '<td><span class="w3-tag '.$stCls.'">'.htmlspecialchars($stLabel, ENT_QUOTES, 'UTF-8').'</span></td>';
-        echo '<td>'.$sentView.'</td>';
-        echo '<td class="w3-small">'.$err.'</td>';
-        echo '</tr>';
+            : '';
+        $email = htmlspecialchars((string)$or['ToEmail'], ENT_QUOTES, 'UTF-8');
+        echo '<div class="mail-list-item">';
+        echo '<div class="mail-list-primary">'.$ouName.'</div>';
+        echo '<div class="mail-list-meta">'.$email;
+        if($sentView !== '—') {
+            echo ' · '.$sentView;
+        }
+        if($err !== '') {
+            echo '<br><span class="w3-text-red w3-small">'.$err.'</span>';
+        }
+        echo '</div>';
+        echo '<div class="mail-list-status"><span class="w3-tag '.$stCls.'">'.htmlspecialchars($stLabel, ENT_QUOTES, 'UTF-8').'</span></div>';
+        echo '<div class="mail-list-actions"></div>';
+        echo '</div>';
     }
 }
 ?>
-    </tbody>
-  </table>
   </div>
 </div>
 <?php if(in_array((string)$job->Status, array('queued', 'processing'), true)) { ?>
