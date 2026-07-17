@@ -1,12 +1,71 @@
 <?php
+ob_start();
 session_start();
-$_SESSION['page']='updater';
-$_SESSION['adminpage']=true;
-include "common/header.php";
-if(!requirePermission("perm_editConfig")) die();
-if(empty($_SESSION['admin'])) {
-    die("<div class=\"w3-panel w3-red w3-padding\"><b>Admin-Zugang erforderlich.</b></div>");
+$_SESSION['page'] = 'updater';
+$_SESSION['adminpage'] = true;
+
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+requireLoggedInOrRedirect();
+
+if(!requirePermission('perm_editConfig')) {
+    die();
 }
+if(empty($_SESSION['admin'])) {
+    die('<div class="w3-panel w3-red w3-padding"><b>Admin-Zugang erforderlich.</b></div>');
+}
+
+$pullOutput = null;
+$dbReportHtml = '';
+$dbError = '';
+$dbModeLabel = '';
+
+if(isset($_POST['pull'])) {
+    $vCurrent = trim((string)shell_exec('git rev-parse --short HEAD 2>&1'));
+    $pullLines = explode("\n", (string)shell_exec('git pull origin '.getBranchName().' 2>&1'));
+    $vNew = trim((string)shell_exec('git rev-parse --short HEAD 2>&1'));
+    $pullOutput = array(
+        'lines' => $pullLines,
+        'vCurrent' => $vCurrent,
+        'vNew' => $vNew,
+        'updated' => ($vCurrent !== $vNew),
+    );
+    if($pullOutput['updated']) {
+        $logentry = new Log;
+        $logentry->info('<b>Software Update</b> from version <b>'.$vCurrent.'</b> to <b>'.$vNew.'</b>');
+    }
+}
+
+$dbAction = isset($_POST['db_action']) ? (string)$_POST['db_action'] : '';
+if($dbAction === 'check' || $dbAction === 'repair') {
+    require_once __DIR__.'/dbintegrity.php';
+    try {
+        $mode = ($dbAction === 'repair') ? 'repair' : 'check';
+        ob_start();
+        DBCheckIntegrity($mode);
+        $reportHtml = ob_get_clean();
+        $_SESSION['db_integrity_report_html'] = $reportHtml;
+        $_SESSION['db_integrity_mode'] = $mode;
+        redirectAfterPost('updater.php');
+    }
+    catch(Throwable $e) {
+        $_SESSION['db_integrity_error'] = $e->getMessage();
+        redirectAfterPost('updater.php');
+    }
+}
+
+if(isset($_SESSION['db_integrity_report_html'])) {
+    $dbReportHtml = (string)$_SESSION['db_integrity_report_html'];
+    $dbMode = isset($_SESSION['db_integrity_mode']) ? (string)$_SESSION['db_integrity_mode'] : '';
+    $dbModeLabel = ($dbMode === 'repair') ? 'Reparatur' : 'Prüfung';
+    unset($_SESSION['db_integrity_report_html'], $_SESSION['db_integrity_mode']);
+}
+if(isset($_SESSION['db_integrity_error'])) {
+    $dbError = (string)$_SESSION['db_integrity_error'];
+    unset($_SESSION['db_integrity_error']);
+}
+
+include 'common/header.php';
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Updater</h2>
@@ -23,81 +82,75 @@ if(empty($_SESSION['admin'])) {
   </div>
 </div>
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
-  <?php echo "Aktueller Branch: <b>".getBranchName()."</b>"; ?>
+  <?php echo 'Aktueller Branch: <b>'.htmlspecialchars(getBranchName(), ENT_QUOTES, 'UTF-8').'</b>'; ?>
 </div>
-    <?php
-           if(isset($_POST['pull'])) {
-?>      
-      
-      <div class=" w3-card-4 w3-margin">
+<?php if($pullOutput !== null) { ?>
+<div class="w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>git pull</h3></div>
   <div class="w3-padding w3-code">
   <?php
-               $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
-               $pull = explode("\n", shell_exec("git pull origin ".getBranchName()." 2>&1"));
-               $vNew = shell_exec("git rev-parse --short HEAD 2>&1");
-               foreach($pull as $line) {
-                   echo "<div>".$line."</div>";
-               }
+    foreach($pullOutput['lines'] as $line) {
+        echo '<div>'.htmlspecialchars($line, ENT_QUOTES, 'UTF-8').'</div>';
+    }
   ?>
   </div>
-<?php if($vCurrent != $vNew) {
-                   $logentry = new Log;
-                   $logentry->info("<b>Software Update</b> from version <b>".$vCurrent."</b> to <b>".$vNew."</b>");
-
-?>
-  <div class="w3-container w3-yellow w3-padding">updated <b><?php echo $vCurrent."</b> -> <b>".$vNew; ?></b></div>
+<?php if($pullOutput['updated']) { ?>
+  <div class="w3-container w3-yellow w3-padding">updated <b><?php echo htmlspecialchars($pullOutput['vCurrent'], ENT_QUOTES, 'UTF-8'); ?></b> -&gt; <b><?php echo htmlspecialchars($pullOutput['vNew'], ENT_QUOTES, 'UTF-8'); ?></b></div>
 <?php } ?>
 </div>
-    <?php
-           }
-?>      
-      <div class=" w3-card-4 w3-margin">
+<?php } ?>
+
+<div class="w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>git status</h3></div>
   <div class="w3-padding w3-code">
     <?php
-      $vCurrent = shell_exec("git rev-parse --short HEAD 2>&1");
-      $status = explode("\n", shell_exec("git remote -v update origin 2>&1"));
+      $status = explode("\n", (string)shell_exec('git remote -v update origin 2>&1'));
       foreach($status as $line) {
-          $found = strpos($line, "origin/".getBranchName());
-          if($found) {
-              echo "<div class=\"w3-yellow\"><b>".$line."</b></div>";
+          $found = strpos($line, 'origin/'.getBranchName());
+          if($found !== false) {
+              echo '<div class="w3-yellow"><b>'.htmlspecialchars($line, ENT_QUOTES, 'UTF-8').'</b></div>';
           }
           else {
-              echo "<div>".$line."</div>";
+              echo '<div>'.htmlspecialchars($line, ENT_QUOTES, 'UTF-8').'</div>';
           }
       }
     ?>
   </div>
 </div>
 
-<div class=" w3-card-4 w3-margin">
+<div class="w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>git pull</h3></div>
-  <form action="" method="post">
-    <button class="w3-button w3-blue" type="submit" value="pull" name="pull">pull</button>
+  <form action="updater.php" method="post" class="w3-padding">
+    <button class="w3-button w3-blue" type="submit" name="pull" value="1">pull</button>
   </form>
 </div>
 
-<div class=" w3-card-4 w3-margin">
+<div class="w3-card-4 w3-margin">
   <div class="w3-container w3-teal"><h3>Datenbank Integrität</h3></div>
   <div class="w3-padding">
     <p>Prüfen meldet Abweichungen ohne Änderungen. Reparieren legt fehlende Tabellen/Spalten an und gleicht abweichende Spalten-Definitionen an.</p>
   </div>
-  <form action="" method="post" class="w3-padding">
-    <button class="w3-button w3-blue" type="submit" value="dbcheck" name="dbcheck">Datenbank prüfen</button>
-    <button class="w3-button w3-orange" type="submit" value="dbrepair" name="dbrepair">Datenbank reparieren</button>
-  </form>
-  <div class="w3-container">
-  <?php
-   if(isset($_POST['dbcheck']) || isset($_POST['dbrepair'])) {
-       include_once "dbintegrity.php";
-       $mode = isset($_POST['dbrepair']) ? 'repair' : 'check';
-       DBCheckIntegrity($mode);
-   }
-  ?>
+  <div class="w3-padding">
+    <form action="updater.php" method="post" style="display:inline;">
+      <input type="hidden" name="db_action" value="check">
+      <button class="w3-button w3-blue" type="submit">Datenbank prüfen</button>
+    </form>
+    <form action="updater.php" method="post" style="display:inline;">
+      <input type="hidden" name="db_action" value="repair">
+      <button class="w3-button w3-orange" type="submit">Datenbank reparieren</button>
+    </form>
+  </div>
+  <div class="w3-container w3-padding">
+<?php if($dbError !== '') { ?>
+    <div class="w3-panel w3-red"><b>Fehler:</b> <?php echo htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php } ?>
+<?php if($dbReportHtml !== '') { ?>
+    <div class="w3-panel w3-pale-yellow"><b>Ergebnis (<?php echo htmlspecialchars($dbModeLabel, ENT_QUOTES, 'UTF-8'); ?>)</b></div>
+    <?php echo $dbReportHtml; ?>
+<?php } ?>
   </div>
 </div>
 
-  <?php
-include "common/footer.php";
+<?php
+include 'common/footer.php';
 ?>

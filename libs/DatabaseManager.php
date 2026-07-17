@@ -242,6 +242,7 @@ class DatabaseManager
         $this->ensureDefaultInstruments();
         $this->ensureDefaultAdmin();
         $this->migrateRegNumbers();
+        $this->ensureMailTableUtf8mb4();
         return $this->report;
     }
 
@@ -254,6 +255,7 @@ class DatabaseManager
         $this->ensureDefaultInstruments();
         $this->ensureDefaultAdmin();
         $this->migrateRegNumbers();
+        $this->ensureMailTableUtf8mb4();
         return $this->report;
     }
 
@@ -544,6 +546,50 @@ class DatabaseManager
                     $param,
                     'error',
                     'Config-Parameter konnte nicht eingefügt werden',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+            }
+        }
+    }
+
+    /**
+     * MailJob/MailOutbox need utf8mb4 for WYSIWYG HTML (TinyMCE) and Unicode.
+     */
+    private function ensureMailTableUtf8mb4() {
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        foreach(array('MailJob', 'MailOutbox') as $short) {
+            $table = new SQLtable($short);
+            if(!$table->exists()) {
+                continue;
+            }
+            $name = $GLOBALS['dbprefix'].$short;
+            $check = mysqli_query(
+                $GLOBALS['conn'],
+                "SELECT `TABLE_COLLATION` AS `c` FROM INFORMATION_SCHEMA.TABLES
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '"
+                .mysqli_real_escape_string($GLOBALS['conn'], $name)."' LIMIT 1"
+            );
+            $row = $check ? mysqli_fetch_assoc($check) : null;
+            $collation = $row && isset($row['c']) ? (string)$row['c'] : '';
+            if($collation !== '' && stripos($collation, 'utf8mb4') === 0) {
+                $this->addReport('table', $short, 'ok', 'utf8mb4 (Mail/WYSIWYG)');
+                continue;
+            }
+            $ok = mysqli_query(
+                $GLOBALS['conn'],
+                'ALTER TABLE `'.str_replace('`', '``', $name).'` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
+            );
+            if($ok) {
+                $this->addReport('table', $short, 'fixed', 'Nach utf8mb4 konvertiert (Mail/WYSIWYG)');
+            }
+            else {
+                $this->addReport(
+                    'table',
+                    $short,
+                    'error',
+                    'utf8mb4-Konvertierung fehlgeschlagen',
                     mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
                 );
             }

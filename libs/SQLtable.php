@@ -114,7 +114,14 @@ class SQLtable
 
         $sqlType = $type;
         if($collation && in_array($type, array('text', 'varchar', 'char', 'mediumtext', 'longtext'), true)) {
-            $sqlType .= " CHARACTER SET latin1 COLLATE ".$collation;
+            $charset = 'latin1';
+            if(stripos($collation, 'utf8mb4') !== false) {
+                $charset = 'utf8mb4';
+            }
+            elseif(stripos($collation, 'utf8') !== false) {
+                $charset = 'utf8';
+            }
+            $sqlType .= ' CHARACTER SET '.$charset.' COLLATE '.$collation;
         }
 
         $parts = array($sqlType);
