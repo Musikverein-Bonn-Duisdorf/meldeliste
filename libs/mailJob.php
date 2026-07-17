@@ -399,7 +399,8 @@ class MailJob
         if($subject !== '') {
             $msg .= '**'.$subject."**\n\n";
         }
-        $msg .= "Liebe Musikfreunde,\n\n".$body.$this->plainGreetingSuffix($vornameSession);
+        // BodyText already includes the closing greeting after enqueue (applyGreeting).
+        $msg .= "Liebe Musikfreunde,\n\n".$body;
         $path = (string)$this->AttachmentPath;
         if($path !== '' && is_dir($path)) {
             $files = scandir($path);
