@@ -89,10 +89,10 @@ $resolveSender = function($senderId) use (&$userNameCache) {
   <div class="w3-card w3-padding">
     <h3 class="w3-margin-top"><?php echo $subj !== '' ? $subj : '<em>(ohne Betreff)</em>'; ?></h3>
     <p class="w3-small"><?php echo $when; ?> · von <?php echo $sender; ?></p>
-    <div class="w3-padding-16"><?php echo $body; ?></div>
-    <div class="w3-padding-16">
+    <div class="w3-padding-16 mail-body-content"><?php echo $body; ?></div>
+    <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="meine-mails.php">Zur Übersicht</a>
-      <form method="post" action="meine-mails.php" style="display:inline;" onsubmit="return confirm('Nachricht ausblenden?');">
+      <form method="post" action="meine-mails.php" onsubmit="return confirm('Nachricht ausblenden?');">
         <input type="hidden" name="id" value="<?php echo (int)$viewMail->Index; ?>" />
         <button type="submit" name="delete" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?>">Ausblenden</button>
       </form>
@@ -102,21 +102,15 @@ $resolveSender = function($senderId) use (&$userNameCache) {
 <?php } ?>
 
 <div class="w3-container w3-padding">
-  <div class="w3-responsive">
-  <table class="w3-table w3-bordered w3-hoverable">
-    <thead>
-      <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-        <th>Datum</th>
-        <th>Absender</th>
-        <th>Betreff</th>
-        <th></th>
-        <th>Aktion</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="mail-list">
+    <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+      <div>Betreff</div>
+      <div></div>
+      <div>Aktion</div>
+    </div>
 <?php
 if(!$dbr || mysqli_num_rows($dbr) === 0) {
-    echo '<tr><td colspan="5">Keine Nachrichten vorhanden.</td></tr>';
+    echo '<div class="mail-list-item"><div class="mail-list-primary">Keine Nachrichten vorhanden.</div></div>';
 }
 else {
     while($row = mysqli_fetch_assoc($dbr)) {
@@ -127,31 +121,28 @@ else {
         $subject = $row['Subject'] !== '' && $row['Subject'] !== null
             ? htmlspecialchars((string)$row['Subject'], ENT_QUOTES, 'UTF-8')
             : '<em>(ohne Betreff)</em>';
-        $rowCls = $unread ? 'w3-pale-yellow' : '';
+        $rowCls = $unread ? ' mail-unread' : '';
         $neu = $unread
             ? '<span class="w3-tag '.$GLOBALS['optionsDB']['colorLogEmail'].'">neu</span>'
             : '';
         if($unread) {
             $subject = '<strong>'.$subject.'</strong>';
         }
-        echo '<tr class="'.$rowCls.'">';
-        echo '<td>'.$when.'</td>';
-        echo '<td>'.$sender.'</td>';
-        echo '<td><a href="meine-mails.php?id='.$id.'">'.$subject.'</a></td>';
-        echo '<td>'.$neu.'</td>';
-        echo '<td>';
-        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="meine-mails.php?id='.$id.'">Anzeigen</a> ';
-        echo '<form method="post" action="meine-mails.php" style="display:inline;" onsubmit="return confirm(\'Nachricht ausblenden?\');">';
+        echo '<div class="mail-list-item'.$rowCls.'">';
+        echo '<div class="mail-list-primary"><a href="meine-mails.php?id='.$id.'">'.$subject.'</a></div>';
+        echo '<div class="mail-list-meta">'.$when.' · '.$sender.'</div>';
+        echo '<div class="mail-list-status">'.$neu.'</div>';
+        echo '<div class="mail-list-actions">';
+        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="meine-mails.php?id='.$id.'">Anzeigen</a>';
+        echo '<form method="post" action="meine-mails.php" onsubmit="return confirm(\'Nachricht ausblenden?\');">';
         echo '<input type="hidden" name="id" value="'.$id.'" />';
         echo '<button type="submit" name="delete" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Ausblenden</button>';
         echo '</form>';
-        echo '</td>';
-        echo '</tr>';
+        echo '</div>';
+        echo '</div>';
     }
 }
 ?>
-    </tbody>
-  </table>
   </div>
 </div>
 <?php
