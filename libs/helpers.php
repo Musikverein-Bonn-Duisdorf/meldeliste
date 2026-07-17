@@ -1115,9 +1115,8 @@ function mailBodyToDiscordMarkdown($text) {
     $text = preg_replace('/[^\S\n]+/', ' ', $text);
     $text = preg_replace('/ *\n */', "\n", $text);
     $text = preg_replace("/\n{3,}/", "\n\n", $text);
-    // Clean empty markdown leftovers
+    // Drop empty bold markers only
     $text = preg_replace('/\*\*\s*\*\*/', '', $text);
-    $text = preg_replace('/(?<!\*)\*\s*\*(?!\*)/', '', $text);
     return trim($text);
 }
 
