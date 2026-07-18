@@ -231,7 +231,7 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
 /**
  * User lists by offset.
  * @param string $kind musiker|users|mitglied
- * @param string $sort Whitelisted column key (nachname|vorname|instrument|email|lastlogin|index)
+ * @param string $sort Whitelisted column key (nachname|vorname|instrument|email|lastlogin|lastvisit|index)
  * @param string $dir asc|desc
  */
 function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
@@ -241,7 +241,15 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     $sort = strtolower(trim((string)$sort));
     $p = $GLOBALS['dbprefix'];
 
-    $orderMusiker = function($sort, $dirSql) use ($p) {
+    $lastVisitJoin = sprintf(
+        'LEFT JOIN (SELECT `m`.`User` AS `lvUser`, MAX(`t`.`Datum`) AS `lastVisit` FROM `%sMeldungen` `m` INNER JOIN `%sTermine` `t` ON `m`.`Termin` = `t`.`Index` WHERE `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE() GROUP BY `m`.`User`) `lv` ON `lv`.`lvUser` = `%sUser`.`Index`',
+        $p,
+        $p,
+        $p
+    );
+    $lastVisitOrder = '(lastVisit IS NULL) ASC, lastVisit '.$dirSql;
+
+    $orderMusiker = function($sort, $dirSql) use ($p, $lastVisitOrder) {
         switch($sort) {
         case 'vorname':
             return '`Vorname` '.$dirSql.', `Nachname` ASC, `'.$p.'User`.`Index` ASC';
@@ -251,6 +259,8 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
             return '`Email` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
         case 'lastlogin':
             return '`LastLogin` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        case 'lastvisit':
+            return $lastVisitOrder.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
         case 'nachname':
             return '`Nachname` '.$dirSql.', `Vorname` ASC, `'.$p.'User`.`Index` ASC';
         default:
@@ -258,7 +268,7 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
         }
     };
 
-    $orderPlain = function($sort, $dirSql) {
+    $orderPlain = function($sort, $dirSql) use ($lastVisitOrder) {
         switch($sort) {
         case 'vorname':
             return '`Vorname` '.$dirSql.', `Nachname` ASC, `Index` ASC';
@@ -266,6 +276,8 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
             return '`Email` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
         case 'lastlogin':
             return '`LastLogin` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
+        case 'lastvisit':
+            return $lastVisitOrder.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
         case 'index':
             return '`Index` '.$dirSql;
         case 'instrument':
@@ -277,12 +289,16 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
         }
     };
 
+    $needLastVisit = ($sort === 'lastvisit');
+    $needInstrument = ($sort === 'instrument');
+
     switch($kind) {
     case 'musiker':
         $orderBy = $orderMusiker($sort, $dirSql);
         $sql = sprintf(
-            'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` %s WHERE `rName` != "keins" AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
             $p, $p, $p, $p, $p, $p,
+            $needLastVisit ? $lastVisitJoin : '',
             $orderBy,
             $limit + 1,
             $offset
@@ -291,10 +307,11 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
         break;
     case 'mitglied':
         $orderBy = $orderPlain($sort, $dirSql);
-        if($sort === 'instrument') {
+        if($needInstrument || $needLastVisit) {
             $sql = sprintf(
-                'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+                'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
                 $p, $p, $p, $p,
+                $needLastVisit ? $lastVisitJoin : '',
                 $orderBy,
                 $limit + 1,
                 $offset
@@ -314,13 +331,25 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     case 'users':
     default:
         $orderBy = $orderPlain($sort === 'instrument' ? 'nachname' : $sort, $dirSql);
-        $sql = sprintf(
-            'SELECT `Index` FROM `%sUser` WHERE `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-            $p,
-            $orderBy,
-            $limit + 1,
-            $offset
-        );
+        if($needLastVisit) {
+            $sql = sprintf(
+                'SELECT `%sUser`.`Index` FROM `%sUser` %s WHERE `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+                $p, $p,
+                $lastVisitJoin,
+                $orderBy,
+                $limit + 1,
+                $offset
+            );
+        }
+        else {
+            $sql = sprintf(
+                'SELECT `Index` FROM `%sUser` WHERE `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+                $p,
+                $orderBy,
+                $limit + 1,
+                $offset
+            );
+        }
         $lineMethod = 'printUserTableLine';
         break;
     }
