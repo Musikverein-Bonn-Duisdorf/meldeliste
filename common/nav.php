@@ -1,7 +1,13 @@
 <div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
   <h1 class="w3-hide-small" style="width: calc(100vw - 150px);"><?php echo $optionsDB['WebSiteName']; ?></h1>
   <h1 class="w3-hide-large w3-hide-medium" style="width: calc(100vw - 150px);"><?php echo $optionsDB['WebSiteNameShort']; ?></h1>
-  <img src="imgs/Logo.png" style="max-height:100px; max-width:100px; position: absolute; top: 10px; right: 10px;">
+  <?php if(!empty($optionsDB['MasterPage'])) { ?>
+  <a href="<?php echo htmlspecialchars($optionsDB['MasterPage'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" title="Vereinshomepage" style="position: absolute; top: 10px; right: 10px;">
+    <img src="imgs/Logo.png" alt="Vereinshomepage" style="max-height:100px; max-width:100px; display:block;">
+  </a>
+  <?php } else { ?>
+  <img src="imgs/Logo.png" alt="" style="max-height:100px; max-width:100px; position: absolute; top: 10px; right: 10px;">
+  <?php } ?>
   <p><?php
       echo $_SESSION['username'];
       if(isAdmin()) echo " (Admin)";
@@ -175,8 +181,7 @@ if($u->hasInventories()) { ?>
     </div>
   </div>
   <?php } ?>
-  <a title="Homepage des Vereins" alt="Homepage des Vereins" href="<?php echo $optionsDB['MasterPage']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>" target="_blank"><img src="<?php echo $optionsDB['MasterPageIcon']; ?>"  style="height: 1em; vertical-align: middle; margin-right: 0.3em;"/> Vereinshomepage</a>
-  <a title="Medien" alt="Medien" href="media.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fa-brands fa-youtube"></i> Medien</a>
+  <a title="Medien" alt="Medien" href="media.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-photo-film"></i></a>
   <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-circle-question"></i></a>
   <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $optionsDB['colorNav']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>
