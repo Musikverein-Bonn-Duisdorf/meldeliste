@@ -81,7 +81,7 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
     <section class="eval-panel" id="eval-ranking">
       <h3>Ranking nach Teilnahme</h3>
       <p class="w3-text-gray">Quote = Ja-Meldungen / Termine im Zeitraum. Spaltenüberschriften zum Sortieren anklicken.</p>
-      <div class="eval-table-scroll w3-responsive">
+      <div class="eval-table-scroll">
         <table id="evalRanking" class="w3-table w3-striped w3-bordered w3-hoverable">
           <thead>
             <tr class="<?php echo $titleBar; ?>">
@@ -101,7 +101,7 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
     <section class="eval-panel" id="eval-inactive">
       <h3>Inaktive Nutzer</h3>
       <p class="w3-text-gray">Musiker ohne Aktivität (Login und Teilnahme) in den letzten <?php echo (int)$inactiveDays; ?> Tagen. Schwellwert: Konfiguration <code>inactiveUsersDays</code>.</p>
-      <div class="eval-table-scroll w3-responsive">
+      <div class="eval-table-scroll">
         <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable">
           <thead>
             <tr class="<?php echo $titleBar; ?>">

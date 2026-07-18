@@ -201,36 +201,34 @@
     paint();
   }
 
-  function rankingRow(row) {
-    var tr = document.createElement('tr');
-    [
-      row.name,
-      row.yes,
-      row.no,
-      row.maybe,
-      row.termine,
-      formatQuote(row.quote)
-    ].forEach(function (val) {
+  function cellsWithLabels(tr, pairs) {
+    pairs.forEach(function (pair) {
       var td = document.createElement('td');
-      td.textContent = val == null ? '' : String(val);
+      td.setAttribute('data-label', pair[0]);
+      td.textContent = pair[1] == null ? '' : String(pair[1]);
       tr.appendChild(td);
     });
     return tr;
   }
 
+  function rankingRow(row) {
+    return cellsWithLabels(document.createElement('tr'), [
+      ['Name', row.name],
+      ['Ja', row.yes],
+      ['Nein', row.no],
+      ['Vielleicht', row.maybe],
+      ['Termine', row.termine],
+      ['Quote', formatQuote(row.quote)]
+    ]);
+  }
+
   function inactiveRow(row) {
-    var tr = document.createElement('tr');
-    [
-      row.name,
-      formatDate(row.lastLogin),
-      formatDate(row.lastAttend),
-      formatQuote(row.quote)
-    ].forEach(function (val) {
-      var td = document.createElement('td');
-      td.textContent = val == null ? '' : String(val);
-      tr.appendChild(td);
-    });
-    return tr;
+    return cellsWithLabels(document.createElement('tr'), [
+      ['Name', row.name],
+      ['Letzter Login', formatDate(row.lastLogin)],
+      ['Letzte Teilnahme', formatDate(row.lastAttend)],
+      ['Meldequote', formatQuote(row.quote)]
+    ]);
   }
 
   drawAttendance();
