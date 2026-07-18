@@ -9,7 +9,7 @@ function getConfigDefaults() {
             'Parameter' => 'styleAppmntUnpublished',
             'Value' => 'w3-opacity',
             'Type' => 'string',
-            'Description' => 'Stil f&uuml;r nicht ver&ouml;ffentlichte Termine',
+            'Description' => 'Stil f&uuml;r versteckte Termine (leere Sichtbarkeit / Admin-only)',
         ),
         array(
             'Parameter' => 'colorLogDefault',

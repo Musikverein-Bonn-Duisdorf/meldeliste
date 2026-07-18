@@ -287,6 +287,220 @@ class AudienceSpec
     }
 
     /**
+     * Labels for roles / register / named groups the user belongs to (profile display).
+     * Uses resolveUserIds (not userMatches), so empty MemberSpec ≠ everyone.
+     *
+     * @param int $userId
+     * @return array<int,array{type:string,label:string}>
+     */
+    public static function membershipForUser($userId) {
+        $userId = (int)$userId;
+        $items = array();
+        if($userId <= 0) {
+            return $items;
+        }
+
+        $groupLabels = array(
+            'musicians' => 'Alle Musiker',
+            'members' => 'Alle Vereinsmitglieder',
+            'nonmembers' => 'alle Nicht-Mitglieder',
+            'users' => 'alle User',
+        );
+        foreach(self::allowedGroupIds() as $gid) {
+            $spec = self::emptySpec();
+            $spec['groups'] = array($gid);
+            if(in_array($userId, self::resolveUserIds($spec, false), true)) {
+                $items[] = array(
+                    'type' => 'group',
+                    'label' => isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid,
+                );
+            }
+        }
+
+        $u = new User;
+        $u->load_by_id($userId);
+        if((int)$u->Index === $userId) {
+            $regName = html_entity_decode((string)$u->getRegisterName(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if($regName !== '' && strtolower(trim($regName)) !== 'keins') {
+                $items[] = array(
+                    'type' => 'register',
+                    'label' => $regName,
+                );
+            }
+        }
+
+        foreach(MailGroup::listAll() as $g) {
+            $memberIds = self::resolveUserIds($g->getMemberSpecArray(), false);
+            if(in_array($userId, $memberIds, true)) {
+                $items[] = array(
+                    'type' => 'mailGroup',
+                    'label' => (string)$g->Name,
+                );
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Human-readable audience for logs/UI (roles, registers, users, named groups).
+     *
+     * @param mixed $spec
+     * @param array $opts allowMailGroups (bool)
+     * @return string
+     */
+    public static function formatLabel($spec, $opts = array()) {
+        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $norm = self::normalize($spec, array(
+            'allowMailGroups' => $allowMailGroups,
+            'defaultGroups' => null,
+        ));
+        if(self::isEmpty($norm)) {
+            return '—';
+        }
+        $bits = array();
+        $groupLabels = array(
+            'musicians' => 'Alle Musiker',
+            'members' => 'Alle Vereinsmitglieder',
+            'nonmembers' => 'alle Nicht-Mitglieder',
+            'users' => 'Alle User',
+        );
+        if($allowMailGroups) {
+            foreach($norm['mailGroups'] as $gid) {
+                $g = new MailGroup();
+                $g->load_by_id((int)$gid);
+                if((int)$g->Index) {
+                    $bits[] = (string)$g->Name;
+                }
+            }
+        }
+        foreach($norm['groups'] as $gid) {
+            $bits[] = isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid;
+        }
+        foreach($norm['registers'] as $rid) {
+            $r = new Register();
+            $r->load_by_id((int)$rid);
+            if((int)$r->Index) {
+                $bits[] = html_entity_decode((string)$r->Name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            }
+        }
+        foreach($norm['users'] as $uid) {
+            $u = new User();
+            $u->load_by_id((int)$uid);
+            if((int)$u->Index) {
+                $bits[] = $u->getName();
+            }
+        }
+        return count($bits) ? implode(', ', $bits) : '—';
+    }
+
+    /**
+     * Chip items for read-only display (same types/labels as mailRecipients.js).
+     *
+     * @param mixed $spec
+     * @param array $opts allowMailGroups (bool)
+     * @return array<int,array{type:string,label:string}>
+     */
+    public static function chipsForSpec($spec, $opts = array()) {
+        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $norm = self::normalize($spec, array(
+            'allowMailGroups' => $allowMailGroups,
+            'defaultGroups' => null,
+        ));
+        $chips = array();
+        $groupLabels = array(
+            'musicians' => 'Alle Musiker',
+            'members' => 'Alle Vereinsmitglieder',
+            'nonmembers' => 'alle Nicht-Mitglieder',
+            'users' => 'Alle User',
+        );
+        if($allowMailGroups) {
+            foreach($norm['mailGroups'] as $gid) {
+                $g = new MailGroup();
+                $g->load_by_id((int)$gid);
+                if((int)$g->Index) {
+                    $chips[] = array('type' => 'mailGroup', 'label' => 'Gruppe: '.(string)$g->Name);
+                }
+            }
+        }
+        foreach($norm['groups'] as $gid) {
+            $chips[] = array(
+                'type' => 'group',
+                'label' => isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid,
+            );
+        }
+        foreach($norm['registers'] as $rid) {
+            $r = new Register();
+            $r->load_by_id((int)$rid);
+            if((int)$r->Index) {
+                $name = html_entity_decode((string)$r->Name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $chips[] = array('type' => 'register', 'label' => 'Register: '.$name);
+            }
+        }
+        foreach($norm['users'] as $uid) {
+            $u = new User();
+            $u->load_by_id((int)$uid);
+            if((int)$u->Index) {
+                $chips[] = array('type' => 'user', 'label' => $u->getName());
+            }
+        }
+        return $chips;
+    }
+
+    /**
+     * Read-only chip HTML (no remove buttons).
+     *
+     * @param mixed $spec
+     * @param array $opts allowMailGroups, ariaLabel, emptyHtml
+     * @return string
+     */
+    public static function renderChipsHtml($spec, $opts = array()) {
+        $chips = self::chipsForSpec($spec, $opts);
+        if(!count($chips)) {
+            return array_key_exists('emptyHtml', $opts)
+                ? (string)$opts['emptyHtml']
+                : '<span class="w3-text-gray">—</span>';
+        }
+        $aria = isset($opts['ariaLabel']) ? (string)$opts['ariaLabel'] : 'Auswahl';
+        $html = '<div class="mail-recipient-chips" aria-label="'.htmlspecialchars($aria, ENT_QUOTES, 'UTF-8').'">';
+        foreach($chips as $chip) {
+            $type = htmlspecialchars((string)$chip['type'], ENT_QUOTES, 'UTF-8');
+            $label = htmlspecialchars((string)$chip['label'], ENT_QUOTES, 'UTF-8');
+            $html .= '<span class="mail-recipient-chip mail-recipient-chip--'.$type.'">'.$label.'</span>';
+        }
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Canonical JSON for equality checks in change logs.
+     *
+     * @param mixed $spec
+     * @param array $opts allowMailGroups (bool)
+     * @return string
+     */
+    public static function canonicalJson($spec, $opts = array()) {
+        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $norm = self::normalize($spec, array(
+            'allowMailGroups' => $allowMailGroups,
+            'defaultGroups' => null,
+        ));
+        if(!$allowMailGroups) {
+            unset($norm['mailGroups']);
+            $norm['mailGroups'] = array();
+        }
+        if(self::isEmpty($norm)) {
+            return '';
+        }
+        return json_encode(array(
+            'groups' => $norm['groups'],
+            'registers' => $norm['registers'],
+            'users' => $norm['users'],
+            'mailGroups' => $norm['mailGroups'],
+        ));
+    }
+
+    /**
      * Catalog for chip autocomplete.
      *
      * @param array $opts forMail (bool), includeMailGroups (bool)

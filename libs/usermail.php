@@ -120,8 +120,6 @@ class Usermail {
             return 0;
         }
         $text = $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '');
-        $this->memberonly = (bool)$job->MemberOnly;
-        $this->register = (int)$job->Register;
         $this->recipientSpec = $job->getRecipientSpecArray();
         $groups = isset($this->recipientSpec['groups']) ? $this->recipientSpec['groups'] : array();
         $this->memberonly = in_array('members', $groups, true);
@@ -163,8 +161,6 @@ class Usermail {
             $job->Subject = $subjectBase;
             $job->BodyText = $text;
             $job->Source = $source;
-            $job->MemberOnly = $this->memberonly ? 1 : 0;
-            $job->Register = (int)$this->register;
             $job->Termin = (int)$this->termin;
             $job->ensureAttachmentDir();
         }
@@ -174,8 +170,6 @@ class Usermail {
             $job->Subject = $subjectBase;
             $job->BodyText = $text;
             $job->Source = $source;
-            $job->MemberOnly = $this->memberonly ? 1 : 0;
-            $job->Register = (int)$this->register;
             $job->Termin = (int)$this->termin;
             $job->Status = 'queued';
             $job->Total = 0;

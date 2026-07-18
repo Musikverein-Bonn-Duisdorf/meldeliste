@@ -142,7 +142,6 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo "checked"; ?>>
         <label>Anmeldung offen</label>
       </div>
-      <input type="hidden" name="published" value="1">
     </div>
     <div class="w3-margin-top">
       <label>sichtbar für</label>

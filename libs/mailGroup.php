@@ -94,6 +94,35 @@ class MailGroup
         return count(AudienceSpec::resolveUserIds($this->getMemberSpecArray(), $requireMail));
     }
 
+    public function getMemberLabel() {
+        return AudienceSpec::formatLabel($this->getMemberSpecArray(), array('allowMailGroups' => false));
+    }
+
+    public function getVars() {
+        $parts = array();
+        $parts[] = sprintf('Gruppen-ID: <b>%d</b>', (int)$this->Index);
+        $parts[] = logPart('Name', htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8'));
+        $parts[] = logPart('Mitglieder', htmlspecialchars($this->getMemberLabel(), ENT_QUOTES, 'UTF-8'));
+        return implode(', ', $parts);
+    }
+
+    public function getChanges() {
+        $old = new MailGroup();
+        $old->load_by_id((int)$this->Index);
+        $str = sprintf('Gruppen-ID: %d, <b>%s</b>', (int)$this->Index, htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8'));
+        if((string)$this->Name !== (string)$old->Name) {
+            $str .= ', Name: '.htmlspecialchars((string)$old->Name, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        $oldJson = AudienceSpec::canonicalJson($old->MemberSpec, array('allowMailGroups' => false));
+        $newJson = AudienceSpec::canonicalJson($this->MemberSpec, array('allowMailGroups' => false));
+        if($oldJson !== $newJson) {
+            $str .= ', Mitglieder: '.htmlspecialchars($old->getMemberLabel(), ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars($this->getMemberLabel(), ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        return $str;
+    }
+
     public function load_by_id($Index) {
         self::ensureSchema();
         $Index = (int)$Index;
@@ -135,9 +164,16 @@ class MailGroup
         if(!$this->is_valid()) return false;
         self::ensureSchema();
         if((int)$this->Index > 0) {
+            $logentry = new Log;
+            $logentry->DBupdate($this->getChanges());
             return $this->update();
         }
-        return $this->insert();
+        if(!$this->insert()) {
+            return false;
+        }
+        $logentry = new Log;
+        $logentry->DBinsert($this->getVars());
+        return true;
     }
 
     protected function insert() {
@@ -186,6 +222,7 @@ class MailGroup
     public function delete() {
         if(!(int)$this->Index) return false;
         self::ensureSchema();
+        $vars = $this->getVars();
         $sql = sprintf(
             'DELETE FROM `%sMailGroup` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
@@ -194,6 +231,8 @@ class MailGroup
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
+        $logentry = new Log;
+        $logentry->DBdelete($vars);
         $this->_data['Index'] = null;
         return true;
     }
