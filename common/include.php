@@ -37,6 +37,8 @@ include "libs/register.php";
 include "libs/usermail.php";
 include "libs/mailJob.php";
 include "libs/mailOutbox.php";
+include "libs/mailGroup.php";
+include "libs/audienceSpec.php";
 include "libs/ics.php";
 include "libs/usercalendar.php";
 include "libs/aushilfe.php";

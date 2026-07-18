@@ -710,101 +710,43 @@ class Usermail {
         }
 
         $spec = is_array($this->recipientSpec)
-            ? $this->recipientSpec
+            ? AudienceSpec::normalize($this->recipientSpec, array(
+                'allowMailGroups' => true,
+                'defaultGroups' => array('musicians'),
+                'legacyRegister' => (int)$this->register,
+                'legacyMemberOnly' => $this->memberonly ? 1 : 0,
+            ))
             : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register, $this->memberonly ? 1 : 0);
 
+        if(AudienceSpec::isEmpty($spec)) {
+            $spec = MailJob::defaultRecipientSpecArray();
+        }
+
+        $userIds = AudienceSpec::resolveUserIds($spec, true);
+        if(!count($userIds)) {
+            return array();
+        }
+        $sql = sprintf(
+            'SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s);',
+            $GLOBALS['dbprefix'],
+            implode(',', array_map('intval', $userIds))
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
         $byId = array();
-        $allowed = MailJob::allowedGroupIds();
-        $groups = array();
-        if(isset($spec['groups']) && is_array($spec['groups'])) {
-            foreach($spec['groups'] as $g) {
-                $g = (string)$g;
-                if(in_array($g, $allowed, true)) {
-                    $groups[] = $g;
-                }
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $byId[(int)$row['Index']] = $row;
             }
         }
-        elseif(isset($spec['audience'])) {
-            $aud = (string)$spec['audience'];
-            if(in_array($aud, $allowed, true)) {
-                $groups[] = $aud;
+        // Preserve resolveUserIds order for stable queues
+        $rows = array();
+        foreach($userIds as $uid) {
+            if(isset($byId[$uid])) {
+                $rows[] = $byId[$uid];
             }
         }
-        $groups = array_values(array_unique($groups));
-        $registerIds = isset($spec['registers']) ? $spec['registers'] : array();
-        $userIds = isset($spec['users']) ? $spec['users'] : array();
-
-        $ids = array();
-        foreach($registerIds as $rid) {
-            $rid = (int)$rid;
-            if($rid > 0) $ids[] = $rid;
-        }
-        // Nur Register ohne Gruppe → wie Musiker im Register
-        if(!count($groups) && count($ids) > 0) {
-            $groups = array('musicians');
-        }
-
-        foreach($groups as $audience) {
-            $where = $this->mailRecipientBaseWhere();
-            if($audience === 'members') {
-                $where[] = '`Mitglied` = 1';
-            }
-            elseif($audience === 'nonmembers') {
-                $where[] = '`Mitglied` != 1';
-            }
-            // musicians / users: nur Basisfilter (Verteiler + Adresse)
-
-            if(count($ids) > 0) {
-                $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE %s AND `Register` IN (%s);",
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    implode(' AND ', $where),
-                    implode(',', $ids)
-                );
-            }
-            else {
-                $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE %s;",
-                    $GLOBALS['dbprefix'],
-                    implode(' AND ', $where)
-                );
-            }
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            if($dbr) {
-                while($row = mysqli_fetch_array($dbr)) {
-                    $byId[(int)$row['Index']] = $row;
-                }
-            }
-        }
-
-        // Explizit gewählte User: ebenfalls nur Verteiler + Adresse
-        if(count($userIds) > 0) {
-            $uids = array();
-            foreach($userIds as $uid) {
-                $uid = (int)$uid;
-                if($uid > 0) $uids[] = $uid;
-            }
-            if(count($uids)) {
-                $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s) AND %s;",
-                    $GLOBALS['dbprefix'],
-                    implode(',', $uids),
-                    implode(' AND ', $this->mailRecipientBaseWhere())
-                );
-                $dbr = mysqli_query($GLOBALS['conn'], $sql);
-                sqlerror();
-                if($dbr) {
-                    while($row = mysqli_fetch_array($dbr)) {
-                        $byId[(int)$row['Index']] = $row;
-                    }
-                }
-            }
-        }
-
-        return $this->dedupeRecipients(array_values($byId));
+        return $this->dedupeRecipients($rows);
     }
 
     /**

@@ -187,52 +187,11 @@ $anrede = 'Hallo {VORNAME},';
 $postDiscord = ($discordAvailable && $job) ? ((int)$job->PostDiscord === 1) : false;
 
 // Catalog for chip autocomplete
-$mailRecipientCatalog = array(
-    'groups' => array(
-        array('id' => 'musicians', 'label' => 'Alle Musiker', 'meta' => 'Gruppe'),
-        array('id' => 'members', 'label' => 'Alle Vereinsmitglieder', 'meta' => 'Gruppe'),
-        array('id' => 'nonmembers', 'label' => 'alle Nicht-Mitglieder', 'meta' => 'Gruppe'),
-        array('id' => 'users', 'label' => 'alle User', 'meta' => 'Gruppe'),
-    ),
-    'registers' => array(),
-    'users' => array(),
-);
-$sqlReg = sprintf(
-    'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
-    $GLOBALS['dbprefix']
-);
-$dbrReg = mysqli_query($GLOBALS['conn'], $sqlReg);
-if($dbrReg) {
-    while($r = mysqli_fetch_array($dbrReg)) {
-        $mailRecipientCatalog['registers'][] = array(
-            'id' => (int)$r['Index'],
-            'label' => html_entity_decode((string)$r['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-        );
-    }
-}
-$sqlUser = sprintf(
-    'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
-     FROM `%sUser` u
-     LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
-     LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
-     WHERE u.`Deleted` != 1 AND u.`getMail` = 1 AND (u.`Email` != "" OR u.`Email2` != "")
-     ORDER BY u.`Nachname`, u.`Vorname`;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix']
-);
-$dbrUser = mysqli_query($GLOBALS['conn'], $sqlUser);
-if($dbrUser) {
-    while($u = mysqli_fetch_array($dbrUser)) {
-        $name = trim($u['Vorname'].' '.$u['Nachname']);
-        $regName = html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $mailRecipientCatalog['users'][] = array(
-            'id' => (int)$u['Index'],
-            'label' => $name,
-            'meta' => $regName,
-        );
-    }
-}
+MailGroup::ensureSchema();
+$mailRecipientCatalog = AudienceSpec::buildCatalog(array(
+    'forMail' => true,
+    'includeMailGroups' => true,
+));
 
 $allJobs = MailJob::listJobs(null, 300);
 
@@ -435,7 +394,7 @@ foreach($allJobs as $rowJob) {
     ?>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
       <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
-      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Register oder Person tippen…" autocomplete="off" />
+      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />
       <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
       <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
       <p class="w3-small w3-margin-top mail-recipient-count-line">
