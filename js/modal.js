@@ -91,11 +91,11 @@ function orchestraNextWert(wert) {
 
 function orchestraSeatVisual(wert) {
     wert = parseInt(wert, 10) || 0;
-    if(wert === 1) return {color: '#4CAF50', opacity: '1', label: 'Zusage'};
-    // Deckendes Rot → weiße Schrift (lesbarer als halbtransparent)
-    if(wert === 2) return {color: '#f42316', opacity: '1', label: 'Absage'};
-    if(wert === 3) return {color: '#2196F3', opacity: '0.6', label: 'unsicher'};
-    return {color: '#ffffff', opacity: '0.5', label: 'nicht gemeldet'};
+    if(wert === 1) return {color: '#4CAF50', opacity: '1', label: 'Zusage', textColor: null};
+    // Halbtransparentes Rot, Schrift bewusst weiß und deckend
+    if(wert === 2) return {color: '#f42316', opacity: '0.5', label: 'Absage', textColor: '#FFFFFF'};
+    if(wert === 3) return {color: '#2196F3', opacity: '0.6', label: 'unsicher', textColor: null};
+    return {color: '#ffffff', opacity: '0.5', label: 'nicht gemeldet', textColor: null};
 }
 
 /** Match PHP hexContrastText(): black or white against background luminance. */
@@ -155,7 +155,7 @@ function applyOrchestraSeatWert(seat, wert) {
         circle.setAttribute('opacity', visual.opacity);
     }
     if(text) {
-        text.setAttribute('fill', hexContrastTextOnFill(visual.color, visual.opacity));
+        text.setAttribute('fill', visual.textColor || hexContrastTextOnFill(visual.color, visual.opacity));
         text.setAttribute('opacity', '1');
     }
     if(title) {
