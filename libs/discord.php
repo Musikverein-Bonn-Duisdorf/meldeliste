@@ -32,7 +32,7 @@ class Discord
     }
 
     public function getVars() {
-        return sprintf("Discord-Post | Username: <b>%s</b>, Nachricht: <b>%s</b>",
+        return sprintf("Discord-Post | Bot: <b>%s</b>, Nachricht: <b>%s</b>",
                        htmlspecialchars((string)$this->username),
                        htmlspecialchars((string)$this->message)
         );
