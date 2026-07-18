@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-9cc8d (2026-07-18)
+
+- Sync release
+
 ## 2026-07-18-522c8 (2026-07-18)
 
 - MELD-81: Changelog und Hilfe-Seite
