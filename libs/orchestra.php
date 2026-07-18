@@ -315,7 +315,7 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $j = 0;
     }
 
-    $pad = 24;
+    $pad = 12;
     if($minX === null) {
         $vbX = 0;
         $vbY = 0;
@@ -323,21 +323,26 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $vbH = $baseHeight;
     }
     else {
-        // Never zoom in for sparse seating: keep at least the full stage.
-        // Only expand the viewBox when seats overflow the base canvas.
-        $contentMinX = $minX - $pad;
-        $contentMinY = $minY - $pad;
-        $contentMaxX = $maxX + $pad;
-        $contentMaxY = $maxY + $pad;
-        $vbX = min(0, $contentMinX);
-        $vbY = min(0, $contentMinY);
-        $vbW = max($baseWidth, $contentMaxX - $vbX);
-        $vbH = max($baseHeight, $contentMaxY - $vbY);
+        // Fit viewBox to seats (weniger Leerraum), aber Zoom deckeln,
+        // damit wenige Plätze nicht riesig werden.
+        $contentW = ($maxX - $minX) + 2 * $pad;
+        $contentH = ($maxY - $minY) + 2 * $pad;
+        $cx = ($minX + $maxX) / 2;
+        $cy = ($minY + $maxY) / 2;
+
+        // Mindest-viewBox ≈ frühere Sitzgröße bei ~1000px Breite (r=18)
+        $minViewW = 560;
+        $minViewH = 340;
+
+        $vbW = max($contentW, $minViewW);
+        $vbH = max($contentH, $minViewH);
+        $vbX = $cx - $vbW / 2;
+        $vbY = $cy - $vbH / 2;
     }
 
     $str = '<svg class="'.$svgClass.'" viewBox="'
         .htmlspecialchars(sprintf('%.2f %.2f %.2f %.2f', $vbX, $vbY, $vbW, $vbH), ENT_QUOTES, 'UTF-8')
-        .'" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Orchesterbesetzung"';
+        .'" preserveAspectRatio="xMidYMin meet" role="img" aria-label="Orchesterbesetzung"';
     if($tid && !empty($GLOBALS['cronID'])) {
         $str .= ' data-cron-id="'.htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8').'"';
     }
