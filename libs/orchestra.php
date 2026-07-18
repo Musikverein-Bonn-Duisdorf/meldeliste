@@ -391,10 +391,11 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
         $vbH = $baseHeight;
     }
     else {
-        $contentW = ($maxX - $minX) + 2 * $pad;
+        // Horizontal: center on conductor (polar origin), not seat bbox midpoint
+        $conductorX = $baseWidth / 2;
         $contentH = ($maxY - $minY) + 2 * $pad;
-        $cx = ($minX + $maxX) / 2;
         $cy = ($minY + $maxY) / 2;
+        $halfW = max($conductorX - $minX, $maxX - $conductorX) + $pad;
 
         if($tid) {
             // Meldungs-Modal: eng an Sitze
@@ -407,9 +408,9 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
             $minViewH = 480;
         }
 
-        $vbW = max($contentW, $minViewW);
+        $vbW = max(2 * $halfW, $minViewW);
         $vbH = max($contentH, $minViewH);
-        $vbX = $cx - $vbW / 2;
+        $vbX = $conductorX - $vbW / 2;
         $vbY = $cy - $vbH / 2;
     }
 
@@ -613,14 +614,13 @@ function printRegisterLayoutPreview() {
     }
 
     $pad = 12;
-    $contentW = ($maxX - $minX) + 2 * $pad;
+    // Horizontal: center on conductor (same as printOrchestra)
     $contentH = ($maxY - $minY) + 2 * $pad;
-    $midX = ($minX + $maxX) / 2.0;
     $midY = ($minY + $maxY) / 2.0;
-    // Same framing idea as printOrchestra (register/musiker view)
-    $vbW = max($contentW, 820.0);
+    $halfW = max($cx - $minX, $maxX - $cx) + $pad;
+    $vbW = max(2 * $halfW, 820.0);
     $vbH = max($contentH, 480.0);
-    $vbX = $midX - $vbW / 2.0;
+    $vbX = $cx - $vbW / 2.0;
     $vbY = $midY - $vbH / 2.0;
 
     return '<svg class="orchestra-svg register-layout-svg" viewBox="'
