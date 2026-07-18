@@ -208,7 +208,6 @@ class Termin
 	$c = new UserCalendar;
         $c->User = 0;
         $c->makeCalendar();
-        // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
     }
 
     /**
@@ -513,33 +512,6 @@ class Termin
         }
         return $meldungen;
     }
-    public function getExtMeldungenByUser($user) {
-        $sql = sprintf('SELECT * FROM `%sexternMeldungen` WHERE `Termin` = "%d" AND `User` = %d;',
-        $GLOBALS['dbprefix'],
-        $this->Index,
-        $user
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $meldungen = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            array_push($meldungen, $row['Index']);
-        }
-        return $meldungen;
-    }
-    public function getExtMeldungen() {
-        $sql = sprintf('SELECT * FROM `%sexternMeldungen` WHERE `Termin` = "%d";',
-        $GLOBALS['dbprefix'],
-        $this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $meldungen = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            array_push($meldungen, $row['Index']);
-        }
-        return $meldungen;
-    }
     public function getMeldungen() {
         $sql = sprintf('SELECT * FROM `%sMeldungen` WHERE `Termin` = "%d";',
         $GLOBALS['dbprefix'],
@@ -552,29 +524,6 @@ class Termin
             array_push($meldungen, $row['Index']);
         }
         return $meldungen;
-    }
-    public function getMeldungUsers() {
-        $users = array();
-        $meldungen = $this->getMeldungen();
-        foreach($meldungen as &$meldung) {
-            $m = new Meldung;
-            $m->load_by_id($meldung);
-            array_push($users, $m->User);
-        }
-        return $users;
-    }
-    public function getMissingUsers() {
-        $users = getActiveUsers(null);
-        $gemeldet = $this->getMeldungUsers();
-        foreach($gemeldet as &$m) {
-            $u = array_search($m, $users);
-            unset($users[$u]);
-        }
-        $r = array();
-        foreach($users as &$element) {
-            array_push($r, $element);
-        }
-        return $r;
     }
     public function getMeldungenVal($val) {
         $val = (int)$val;

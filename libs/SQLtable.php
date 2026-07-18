@@ -319,9 +319,5 @@ class SQLtable
         }
         return false;
     }
-
-    public function delete() {}
-    public function deleteColumn($columnName) {}
-    public function getStruct() {}
 };
 ?>

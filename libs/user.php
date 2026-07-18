@@ -506,24 +506,6 @@ class User
         }
     }
 
-    public function getLoans() {
-        $instrType = RegNumber::loadInstrType();
-        $instrTypeId = $instrType ? (int)$instrType->Index : 0;
-        $sql = sprintf('SELECT l.`Index` FROM `%sInventoriesLoans` l INNER JOIN `%sInventories` i ON i.`Index` = l.`Inventory` WHERE l.`User` = %d AND l.`EndDate` IS NULL AND i.`Inventory` = %d;',
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $this->Index,
-        $instrTypeId
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $loans = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            array_push($loans, $row['Index']);
-        }
-        return $loans;
-    }
-
     public function getInventoriesLoans() {
         $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `User` = %d AND `EndDate` IS NULL;',
         $GLOBALS['dbprefix'],
@@ -536,23 +518,6 @@ class User
             array_push($loans, $row['Index']);
         }
         return $loans;
-    }
-
-    public function getInstruments() {
-        $instrType = RegNumber::loadInstrType();
-        $instrTypeId = $instrType ? (int)$instrType->Index : 0;
-        $sql = sprintf('SELECT `Index` FROM `%sInventories` WHERE `Owner` = %d AND `Inventory` = %d',
-        $GLOBALS['dbprefix'],
-        $this->Index,
-        $instrTypeId
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $instruments = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            array_push($instruments, $row['Index']);
-        }
-        return $instruments;
     }
 
     public function getInventories() {
@@ -568,10 +533,6 @@ class User
             array_push($inventories, $row['Index']);
         }
         return $inventories;
-    }
-
-    public function hasInstruments() {
-        return count($this->getLoans()) + count($this->getInstruments());
     }
 
     public function hasInventories() {
