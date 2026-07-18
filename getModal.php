@@ -106,24 +106,6 @@ case 'inventory': // alias
     }
     break;
 
-case 'instrument':
-    // Insurance / instrument lists: session auth is enough; edit gated in modal
-    try {
-        $ins = new Instruments;
-        $ins->load_by_id($id);
-        if(!(int)$ins->Index) {
-            http_response_code(404);
-            echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Instrument nicht gefunden.</p></div>';
-            exit;
-        }
-        echo $ins->getModalHtml();
-    }
-    catch(Throwable $e) {
-        http_response_code(500);
-        echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Instrument-Modal: '.htmlspecialchars($e->getMessage()).'</p></div>';
-    }
-    break;
-
 default:
     http_response_code(400);
     echo '<div class="w3-container w3-padding"><p>Unbekannter Modal-Typ.</p></div>';
