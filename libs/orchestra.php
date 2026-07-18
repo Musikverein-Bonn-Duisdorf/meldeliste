@@ -434,7 +434,8 @@ function orchestraSeatVisual($wert) {
     case 1:
         return array('color' => '#4CAF50', 'opacity' => 1, 'label' => 'Zusage');
     case 2:
-        return array('color' => '#f42316', 'opacity' => 0.5, 'label' => 'Absage');
+        // Deckendes Rot → weiße Schrift (lesbarer als halbtransparent)
+        return array('color' => '#f42316', 'opacity' => 1, 'label' => 'Absage');
     case 3:
         return array('color' => '#2196F3', 'opacity' => 0.6, 'label' => 'unsicher');
     default:

@@ -92,7 +92,8 @@ function orchestraNextWert(wert) {
 function orchestraSeatVisual(wert) {
     wert = parseInt(wert, 10) || 0;
     if(wert === 1) return {color: '#4CAF50', opacity: '1', label: 'Zusage'};
-    if(wert === 2) return {color: '#f42316', opacity: '0.5', label: 'Absage'};
+    // Deckendes Rot → weiße Schrift (lesbarer als halbtransparent)
+    if(wert === 2) return {color: '#f42316', opacity: '1', label: 'Absage'};
     if(wert === 3) return {color: '#2196F3', opacity: '0.6', label: 'unsicher'};
     return {color: '#ffffff', opacity: '0.5', label: 'nicht gemeldet'};
 }
