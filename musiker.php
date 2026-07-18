@@ -14,7 +14,7 @@ if(!requirePermission('perm_showUsers')) {
         'Zugriff auf musiker.php verweigert | User-ID: <b>%d</b>',
         isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0
     ));
-    die('<div class="w3-panel w3-red w3-padding"><b>Keine Berechtigung.</b> Eigenes Profil bitte über „Mein Profil“ speichern.</div>');
+    denyAccess('Keine Berechtigung. Eigenes Profil bitte über „Mein Profil“ speichern.');
 }
 
 include_once 'libs/form-response.php';

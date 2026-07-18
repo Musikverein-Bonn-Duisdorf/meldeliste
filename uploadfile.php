@@ -1,7 +1,10 @@
 <?php
 session_start();
 include 'common/include.php';
-if(!requirePermission("perm_sendEmail")) die();
+if(!requirePermission("perm_sendEmail")) {
+    http_response_code(403);
+    die('Keine Berechtigung.');
+}
 
 $jobId = isset($_POST['job']) ? (int)$_POST['job'] : (isset($_GET['job']) ? (int)$_GET['job'] : 0);
 if($jobId < 1) {

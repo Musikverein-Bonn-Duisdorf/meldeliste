@@ -879,13 +879,49 @@ function rebuildCalendars() {
 }
 
 function requireAdmin() {
-    if(!$_SESSION['admin']) die("Admin permissions required.");
+    if(!isAdmin()) {
+        denyAccess('Admin-Zugang erforderlich.');
+    }
 }
 
 function requirePermission($perm) {
     $P = new Permissions;
     $P->load_by_user($_SESSION['userid']);
     return $P->getPermission($perm);
+}
+
+/**
+ * Deny page access with header/nav (if not yet rendered), warning panel, footer, then exit.
+ * @param string $message Plain-text warning shown to the user
+ */
+function denyAccess($message = 'Keine Berechtigung für diesen Bereich.') {
+    if(!headers_sent()) {
+        http_response_code(403);
+    }
+    if(empty($GLOBALS['mlHeaderRendered'])) {
+        include __DIR__.'/../common/header.php';
+    }
+    $color = isset($GLOBALS['optionsDB']['colorLogWarning'])
+        ? $GLOBALS['optionsDB']['colorLogWarning']
+        : 'w3-orange';
+    echo '<div class="w3-panel '.$color.' w3-padding w3-margin">'
+        .'<h3>Zugriff verweigert</h3>'
+        .'<p>'.htmlspecialchars((string)$message, ENT_QUOTES, 'UTF-8').'</p>'
+        .'</div>';
+    include __DIR__.'/../common/footer.php';
+    exit;
+}
+
+/**
+ * Require a permission or deny with a full page warning.
+ * @param string $perm
+ * @param string|null $message
+ */
+function requirePermissionOrDeny($perm, $message = null) {
+    if(requirePermission($perm)) {
+        return;
+    }
+    denyAccess($message !== null ? $message : 'Keine Berechtigung für diesen Bereich.');
 }
 
 function isAdmin() {

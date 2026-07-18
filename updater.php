@@ -9,7 +9,7 @@ mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBAL
 requireLoggedInOrRedirect();
 
 if(!requirePermission('perm_editConfig')) {
-    die();
+    denyAccess('Keine Berechtigung für den Updater.');
 }
 
 $pullOutput = null;

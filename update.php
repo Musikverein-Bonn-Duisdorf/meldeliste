@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='update';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_editConfig")) die();
+if(!requirePermission("perm_editConfig")) {
+    denyAccess('Keine Berechtigung für den Updater.');
+}
 
 $oldversion = "NULL";
 
