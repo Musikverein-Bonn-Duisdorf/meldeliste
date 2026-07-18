@@ -2,6 +2,17 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-210da (2026-07-18)
+
+- MELD-89: fix evaluate sticky header overlapping first row
+- MELD-89: card-style evaluate tables on small screens
+- MELD-89: sticky table headers while scrolling evaluate lists
+- MELD-89: section nav and two-column evaluate layout on wide screens
+- MELD-89: allow free choice of evaluation day range
+- MELD-89: dynamic evaluate stats with Chart.js ranking and inactive list
+- MELD-89: Statistik-Navigation und responsives Layout
+- MELD-89: Evaluierung dynamischer
+
 ## 2026-07-18-e1827 (2026-07-18)
 
 - MELD-94: GitHub README und Lizenz
