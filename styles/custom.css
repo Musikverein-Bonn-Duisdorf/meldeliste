@@ -763,7 +763,18 @@
   display: none !important;
 }
 
+/* Volle Modalbreite nutzen, wenn Orchester sichtbar */
+.w3-modal-content:has(.orchestra-panel) {
+  width: min(96vw, 1100px) !important;
+}
+
+.orchestra-panel.w3-container {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 .orchestra-svg-wrap {
+  width: 100%;
   max-width: 100%;
   overflow: hidden;
   box-sizing: border-box;
@@ -771,9 +782,9 @@
 
 .orchestra-svg {
   display: block;
-  width: 1000px;
-  max-width: 100%;
+  width: 100%;
   height: auto;
+  max-width: none;
 }
 
 .orchestra-svg--editable .orchestra-seat[data-editable="1"]:hover circle {
@@ -785,5 +796,9 @@
   .orchestra-panel-toggle {
     text-align: left;
     margin-top: 0.35rem;
+  }
+
+  .w3-modal-content:has(.orchestra-panel) {
+    width: auto !important;
   }
 }
