@@ -165,6 +165,17 @@ if(isset($_GET['deleted'])) {
 $memberonly = $job ? (bool)$job->MemberOnly : false;
 $register = $job ? (int)$job->Register : 0;
 $recipientSpec = $job ? $job->getRecipientSpecArray() : MailJob::defaultRecipientSpecArray();
+// Neue / leere Entwürfe: Alle Musiker vorauswählen
+if(
+    $job
+    && $job->Status === 'draft'
+    && !(int)$job->Termin
+    && !count($recipientSpec['groups'])
+    && !count($recipientSpec['registers'])
+    && !count($recipientSpec['users'])
+) {
+    $recipientSpec = MailJob::defaultRecipientSpecArray();
+}
 $termin = $job ? (int)$job->Termin : $terminParam;
 $gruss = $job ? (int)$job->Gruss : 1;
 $betreff = $job ? (string)$job->Subject : '';
@@ -176,7 +187,7 @@ $postDiscord = ($discordAvailable && $job) ? ((int)$job->PostDiscord === 1) : fa
 // Catalog for chip autocomplete
 $mailRecipientCatalog = array(
     'groups' => array(
-        array('id' => 'musicians', 'label' => 'alle Musiker', 'meta' => 'Gruppe'),
+        array('id' => 'musicians', 'label' => 'Alle Musiker', 'meta' => 'Gruppe'),
         array('id' => 'members', 'label' => 'Alle Vereinsmitglieder', 'meta' => 'Gruppe'),
         array('id' => 'nonmembers', 'label' => 'alle Nicht-Mitglieder', 'meta' => 'Gruppe'),
         array('id' => 'users', 'label' => 'alle User', 'meta' => 'Gruppe'),

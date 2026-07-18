@@ -368,7 +368,7 @@ class MailJob
 
     public static function audienceLabels() {
         return array(
-            'musicians' => 'alle Musiker',
+            'musicians' => 'Alle Musiker',
             'members' => 'Alle Vereinsmitglieder',
             'nonmembers' => 'alle Nicht-Mitglieder',
             'users' => 'alle User',
