@@ -632,6 +632,43 @@ class DatabaseManager
             return;
         }
 
+        // MELD-84: Termine-Seite entfällt; verwaiste Schalter entfernen
+        $obsoleteParams = array('entriesMainPage', 'showAppmntPage');
+        foreach($obsoleteParams as $param) {
+            $sql = sprintf(
+                "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], $param)
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $row = $dbr ? mysqli_fetch_array($dbr) : null;
+            $exists = $row && isset($row['Parameter']) && $row['Parameter'] === $param;
+            if(!$exists) {
+                continue;
+            }
+            if(!$apply) {
+                $this->addReport('config', $param, 'obsolete', 'Config-Parameter veraltet');
+                continue;
+            }
+            $delete = sprintf(
+                "DELETE FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], $param)
+            );
+            if(mysqli_query($GLOBALS['conn'], $delete)) {
+                $this->addReport('config', $param, 'removed', 'Veralteter Config-Parameter entfernt');
+            }
+            else {
+                $this->addReport(
+                    'config',
+                    $param,
+                    'error',
+                    'Veralteter Config-Parameter konnte nicht entfernt werden',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+            }
+        }
+
         foreach($defaults as $item) {
             $param = $item['Parameter'];
             $sql = sprintf(

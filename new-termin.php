@@ -30,7 +30,7 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 </div>
 
 <div class="w3-container termin-form">
-<form class="termin-form-card w3-border w3-padding <?php echo $inputBg; ?>" action="termine.php" method="POST">
+<form class="termin-form-card w3-border w3-padding <?php echo $inputBg; ?>" action="index.php" method="POST">
 
   <div class="termin-form-columns">
   <section class="termin-form-section">
@@ -176,7 +176,7 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
     </header>
     <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo $n->Name." (".germanDate($n->Datum,1); ?>)</b> l&ouml;schen wollen?</div>
     <div class="w3-container w3-mobile">
-      <form action="termine.php" method="POST">
+      <form action="index.php" method="POST">
         <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
         <div class="w3-row">
           <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>

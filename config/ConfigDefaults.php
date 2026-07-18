@@ -438,18 +438,6 @@ function getConfigDefaults() {
             'Description' => 'Hintergrundfarbe von Eingabefeldern',
         ),
         array(
-            'Parameter' => 'entriesMainPage',
-            'Value' => '5',
-            'Type' => 'uint',
-            'Description' => 'Anzahl Termine auf der Startseite',
-        ),
-        array(
-            'Parameter' => 'showAppmntPage',
-            'Value' => '1',
-            'Type' => 'bool',
-            'Description' => 'Termine-Seite in Navigation anzeigen',
-        ),
-        array(
             'Parameter' => 'showMembers',
             'Value' => '1',
             'Type' => 'bool',
