@@ -97,14 +97,14 @@ if(requirePermission("perm_showInventories")) {
     </div>
   </form>
 </div>
-<div id="listHeader" class="w3-row w3-padding w3-border-bottom w3-border-black w3-hide-small w3-hide-medium">
-  <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="regnumber" data-type="number"><b>Inventarnummer</b></div>
-  <div class="w3-col l2 m2 s2 w3-center w3-border-right list-sort" data-sort="typ" data-type="string"><b>Typ</b></div>
-  <div class="w3-col l2 m4 s4 w3-center w3-border-right list-sort" data-sort="description" data-type="string"><b>Beschreibung</b></div>
-  <div class="w3-col l2 m4 s4 w3-center w3-border-right list-sort" data-sort="comment" data-type="string"><b>Kommentar</b></div>
-  <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="purchasedate" data-type="date"><b>Kaufdatum</b></div>
-  <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="purchaseprize" data-type="number"><b>Kaufpreis</b></div>
-  <div class="w3-col l3 m2 s2 w3-center w3-border-right list-sort" data-sort="loan" data-type="string"><b>ausgeliehen an</b></div>
+<div id="listHeader" class="list-header w3-row w3-hide-small w3-hide-medium">
+  <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="regnumber" data-type="number">Inventarnummer</div>
+  <div class="w3-col l2 m2 s2 w3-center w3-border-right list-sort" data-sort="typ" data-type="string">Typ</div>
+  <div class="w3-col l2 m4 s4 w3-center w3-border-right list-sort" data-sort="description" data-type="string">Beschreibung</div>
+  <div class="w3-col l2 m4 s4 w3-center w3-border-right list-sort" data-sort="comment" data-type="string">Kommentar</div>
+  <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="purchasedate" data-type="date">Kaufdatum</div>
+  <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="purchaseprize" data-type="number">Kaufpreis</div>
+  <div class="w3-col l3 m2 s2 w3-center w3-border-right list-sort" data-sort="loan" data-type="string">ausgeliehen an</div>
 </div>
 <div id="Liste">
 <?php

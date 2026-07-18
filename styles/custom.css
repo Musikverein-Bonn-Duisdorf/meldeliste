@@ -1456,6 +1456,39 @@ body.insurance-print {
   text-decoration: underline;
 }
 
+/* Sortierbare Listenköpfe (MELD-96): Format + sticky beim Scrollen */
+#listHeader,
+.list-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0;
+  background: #009688;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  border-bottom: none !important;
+}
+
+#listHeader > div,
+.list-header > div {
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+  color: inherit;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+#listHeader .list-sort,
+.list-header .list-sort {
+  color: #fff;
+}
+
+#listHeader .list-sort:hover,
+.list-header .list-sort:hover {
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .eval-charts,
 .eval-tables {
   display: grid;
