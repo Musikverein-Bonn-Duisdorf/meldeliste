@@ -165,7 +165,7 @@ if(isset($_GET['deleted'])) {
 $memberonly = $job ? (bool)$job->MemberOnly : false;
 $register = $job ? (int)$job->Register : 0;
 $recipientSpec = $job ? $job->getRecipientSpecArray() : MailJob::defaultRecipientSpecArray();
-// Neue / leere Entwürfe: Alle Musiker vorauswählen
+// Neue / leere Entwürfe: Alle Musiker vorauswählen und im Job speichern
 if(
     $job
     && $job->Status === 'draft'
@@ -175,6 +175,8 @@ if(
     && !count($recipientSpec['users'])
 ) {
     $recipientSpec = MailJob::defaultRecipientSpecArray();
+    $job->setRecipientSpecArray($recipientSpec);
+    $job->save();
 }
 $termin = $job ? (int)$job->Termin : $terminParam;
 $gruss = $job ? (int)$job->Gruss : 1;
@@ -452,6 +454,7 @@ foreach($allJobs as $rowJob) {
       suggestEl: document.getElementById('mailRecipientSuggest'),
       hiddenEl: document.getElementById('mailRecipientSpec'),
       countEl: document.getElementById('mailRecipientCount'),
+      jobId: <?php echo (int)$job->Index; ?>,
       onChange: function() {
         if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
       }

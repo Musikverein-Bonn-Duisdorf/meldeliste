@@ -74,8 +74,11 @@
       this.hiddenEl = opts.hiddenEl;
       this.countEl = opts.countEl || null;
       this.countUrl = opts.countUrl || 'mailRecipientCount.php';
+      this.jobId = opts.jobId ? Number(opts.jobId) : 0;
+      this.saveUrl = opts.saveUrl || 'mailSaveRecipients.php';
       this.onChange = opts.onChange || function() {};
       this._countSeq = 0;
+      this._saveSeq = 0;
       this.spec = parseSpec(this.hiddenEl);
       if(this.inputEl) {
         this.inputEl.addEventListener('input', this.onInput.bind(this));
@@ -86,6 +89,8 @@
       this.render();
       this.syncHidden();
       this.scheduleCountRefresh();
+      // Persist default / current chips on open so Entwurf always has RecipientSpec
+      this.scheduleSave();
     },
 
     syncHidden: function() {
@@ -104,6 +109,32 @@
       this._countTimer = setTimeout(function() {
         self.refreshCount();
       }, 180);
+    },
+
+    scheduleSave: function() {
+      if(!(this.jobId > 0) || !this.hiddenEl) return;
+      var self = this;
+      if(this._saveTimer) clearTimeout(this._saveTimer);
+      this._saveTimer = setTimeout(function() {
+        self.saveToDraft();
+      }, 250);
+    },
+
+    saveToDraft: function() {
+      if(!(this.jobId > 0) || !this.hiddenEl) return;
+      var self = this;
+      var seq = ++this._saveSeq;
+      var body = 'id=' + encodeURIComponent(String(this.jobId))
+        + '&recipientSpec=' + encodeURIComponent(this.hiddenEl.value || '{}');
+      var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4) return;
+        if(seq !== self._saveSeq) return;
+        // silent; count refresh already reflects selection
+      };
+      xhr.open('POST', this.saveUrl, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      xhr.send(body);
     },
 
     refreshCount: function() {
@@ -138,6 +169,7 @@
       this.render();
       this.syncHidden();
       this.scheduleCountRefresh();
+      this.scheduleSave();
       this.onChange();
     },
 
