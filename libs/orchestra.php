@@ -440,3 +440,164 @@ function orchestraSeatVisual($wert) {
         return array('color' => '#ffffff', 'opacity' => 0.5, 'label' => 'nicht gemeldet');
     }
 }
+
+/**
+ * Map orchestra polar angle (same as printOrchestra seats) to SVG x/y.
+ * 0° = left, 90° = front/bottom, 180° = right.
+ */
+function orchestraPolarPoint($cx, $cy, $radius, $arcDeg) {
+    $rad = $arcDeg / 180.0 * M_PI;
+    return array(
+        $cx - $radius * cos($rad),
+        $cy + $radius * sin($rad),
+    );
+}
+
+/**
+ * Schematic SVG: register arcs by Row / ArcMin / ArcMax (edit preview).
+ */
+function printRegisterLayoutPreview() {
+    $baseWidth = 1000;
+    $cx = $baseWidth / 2.0;
+    $cy = 40.0;
+    $rowdistance = 60;
+    $minrowdistance = 150;
+    $strokeW = 28;
+
+    $sql = sprintf(
+        'SELECT * FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Row`, `Sortierung`, `Name`;',
+        $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $registers = array();
+    $maxRow = 0;
+    while($row = mysqli_fetch_array($dbr)) {
+        $registers[] = $row;
+        $maxRow = max($maxRow, (int)$row['Row']);
+    }
+
+    $lmaxradius = array(0);
+    $rmaxradius = array(0);
+    $arcsHtml = '';
+    $guidesHtml = '';
+    $minX = $cx;
+    $maxX = $cx;
+    $minY = $cy;
+    $maxY = $cy;
+
+    foreach($registers as $register) {
+        $rowNum = (int)$register['Row'];
+        while(count($lmaxradius) <= $rowNum) {
+            $lmaxradius[] = $lmaxradius[count($lmaxradius) - 1] + $rowdistance;
+            $rmaxradius[] = $rmaxradius[count($rmaxradius) - 1] + $rowdistance;
+        }
+
+        $name = html_entity_decode((string)$register['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $color = normalizeHexColor(isset($register['Color']) ? $register['Color'] : '');
+        if($color === '') {
+            $color = '#969696';
+        }
+        $textFill = hexContrastText($color);
+        $arcMin = (float)$register['ArcMin'];
+        $arcMax = (float)$register['ArcMax'];
+        $rid = (int)$register['Index'];
+
+        if($rowNum === 0) {
+            $r = 22;
+            $arcsHtml .= '<g class="register-layout-arc" data-register="'.$rid.'">'
+                .'<title>'.$safeName.' — Reihe 0 (Dirigent)</title>'
+                .'<circle cx="'.sprintf('%.1f', $cx).'" cy="'.sprintf('%.1f', $cy).'" r="'.$r
+                .'" fill="'.$color.'" stroke="#333" stroke-width="1.5"/>'
+                .'<text x="'.sprintf('%.1f', $cx).'" y="'.sprintf('%.1f', $cy)
+                .'" text-anchor="middle" dominant-baseline="central" fill="'.$textFill
+                .'" font-size="11" font-weight="600">'.$safeName.'</text>'
+                .'</g>'."\n";
+            $minX = min($minX, $cx - $r);
+            $maxX = max($maxX, $cx + $r);
+            $minY = min($minY, $cy - $r);
+            $maxY = max($maxY, $cy + $r);
+            continue;
+        }
+
+        if($arcMin < 90) {
+            $radius = $lmaxradius[$rowNum - 1] + $rowdistance;
+        }
+        else {
+            $radius = $rmaxradius[$rowNum - 1] + $rowdistance;
+        }
+        if($radius < $minrowdistance) {
+            $radius = $minrowdistance;
+        }
+
+        $span = abs($arcMax - $arcMin);
+        $steps = max(8, (int)ceil($span / 3));
+        $pts = array();
+        for($i = 0; $i <= $steps; $i++) {
+            $t = $i / $steps;
+            $arc = $arcMin + ($arcMax - $arcMin) * $t;
+            $p = orchestraPolarPoint($cx, $cy, $radius, $arc);
+            $pts[] = sprintf('%.1f,%.1f', $p[0], $p[1]);
+            $minX = min($minX, $p[0] - $strokeW);
+            $maxX = max($maxX, $p[0] + $strokeW);
+            $minY = min($minY, $p[1] - $strokeW);
+            $maxY = max($maxY, $p[1] + $strokeW);
+        }
+
+        $midArc = ($arcMin + $arcMax) / 2.0;
+        $lp = orchestraPolarPoint($cx, $cy, $radius, $midArc);
+        $title = $safeName.' — Reihe '.$rowNum.', Arc '.$arcMin.'° … '.$arcMax.'°';
+
+        $arcsHtml .= '<g class="register-layout-arc" data-register="'.$rid.'">'
+            .'<title>'.$title.'</title>'
+            .'<polyline points="'.implode(' ', $pts).'" fill="none" stroke="'.$color
+            .'" stroke-width="'.$strokeW.'" stroke-linecap="round" stroke-linejoin="round"'
+            .' stroke-opacity="0.9"/>'
+            .'<text x="'.sprintf('%.1f', $lp[0]).'" y="'.sprintf('%.1f', $lp[1])
+            .'" text-anchor="middle" dominant-baseline="central" fill="'.$textFill
+            .'" font-size="10" font-weight="600" style="paint-order:stroke;stroke:#000;stroke-width:2.5px;stroke-opacity:0.35">'
+            .$safeName.'</text>'
+            .'</g>'."\n";
+    }
+
+    for($r = 1; $r <= max(1, $maxRow); $r++) {
+        $guideR = $minrowdistance + ($r - 1) * $rowdistance;
+        $guidesHtml .= '<circle cx="'.sprintf('%.1f', $cx).'" cy="'.sprintf('%.1f', $cy)
+            .'" r="'.sprintf('%.1f', $guideR).'" fill="none" stroke="#bbb" stroke-width="1"'
+            .' stroke-dasharray="4 6" opacity="0.55"/>'."\n";
+        $guidesHtml .= '<text x="'.sprintf('%.1f', $cx + 6).'" y="'.sprintf('%.1f', $cy + $guideR - 4)
+            .'" fill="#888" font-size="9">Reihe '.$r.'</text>'."\n";
+    }
+
+    $hintR = $minrowdistance + max(0, $maxRow) * $rowdistance + 36;
+    $hints = array(
+        array(0, '0°'),
+        array(90, '90°'),
+        array(180, '180°'),
+    );
+    $hintHtml = '';
+    foreach($hints as $h) {
+        $hp = orchestraPolarPoint($cx, $cy, $hintR, $h[0]);
+        $hintHtml .= '<text x="'.sprintf('%.1f', $hp[0]).'" y="'.sprintf('%.1f', $hp[1])
+            .'" text-anchor="middle" dominant-baseline="central" fill="#666" font-size="10">'
+            .$h[1].'</text>'."\n";
+        $minX = min($minX, $hp[0] - 12);
+        $maxX = max($maxX, $hp[0] + 12);
+        $minY = min($minY, $hp[1] - 12);
+        $maxY = max($maxY, $hp[1] + 12);
+    }
+
+    $pad = 16;
+    $vbX = $minX - $pad;
+    $vbY = $minY - $pad;
+    $vbW = max(200.0, ($maxX - $minX) + 2 * $pad);
+    $vbH = max(160.0, ($maxY - $minY) + 2 * $pad);
+
+    return '<svg class="orchestra-svg register-layout-svg" viewBox="'
+        .htmlspecialchars(sprintf('%.1f %.1f %.1f %.1f', $vbX, $vbY, $vbW, $vbH), ENT_QUOTES, 'UTF-8')
+        .'" preserveAspectRatio="xMidYMin meet" role="img" aria-label="Registerpositionen im Orchester">'
+        .'<g class="register-layout-guides" pointer-events="none">'.$guidesHtml.$hintHtml.'</g>'
+        .'<g class="register-layout-arcs">'.$arcsHtml.'</g>'
+        .'</svg>';
+}

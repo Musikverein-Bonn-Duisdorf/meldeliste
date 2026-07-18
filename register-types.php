@@ -64,6 +64,16 @@ $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 <div class="w3-container w3-padding">
   <p>Register steuern Gruppierung, Orchester-Sitzplan und Farben in der <a href="register.php">Registerübersicht</a>.</p>
   <p><a href="instrument-types.php">Instrument-Typen verwalten</a></p>
+  <p class="w3-small"><b>Reihe</b> = Abstand vom Dirigenten (0 = Dirigent). <b>ArcMin/ArcMax</b> = Winkelbereich (0° links, 90° vorne, 180° rechts). Nach dem Speichern aktualisiert sich die Vorschau.</p>
+</div>
+
+<div class="w3-card w3-margin register-layout-preview">
+  <div class="w3-container w3-padding-small <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+    <b>Orchester-Positionen</b>
+  </div>
+  <div class="w3-center orchestra-svg-wrap register-layout-preview-wrap">
+    <?php echo printRegisterLayoutPreview(); ?>
+  </div>
 </div>
 
 <div class="type-edit-header type-edit-form type-edit-form--register w3-padding w3-teal">
