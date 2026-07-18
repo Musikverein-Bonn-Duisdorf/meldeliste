@@ -10,6 +10,19 @@ if(!requirePermission('perm_showInventories') && !requirePermission('perm_showIn
     denyAccess();
 }
 
+$columns = array(
+    'reg' => 'Inventarnummer',
+    'instrument' => 'Instrument',
+    'vendor' => 'Hersteller',
+    'model' => 'Modell',
+    'serial' => 'Seriennummer',
+    'purchaseDate' => 'Kaufdatum',
+    'purchasePrize' => 'Anschaffungswert',
+    'zeitwert' => 'Zeitwert',
+    'owner' => 'Besitzer',
+);
+$numCols = array('purchasePrize' => true, 'zeitwert' => true);
+
 $instrType = RegNumber::loadInstrType();
 $instrTypeId = $instrType ? (int)$instrType->Index : 0;
 $sql = sprintf(
@@ -63,6 +76,7 @@ $orgName = isset($GLOBALS['optionsDB']['orgName']) ? (string)$GLOBALS['optionsDB
 $assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
 $cssMtime = @filemtime(__DIR__ . '/styles/custom.css');
 $cssUrl = 'styles/custom.css?' . $assetV . '-' . $cssMtime;
+$colCount = count($columns);
 
 header('Content-Type: text/html; charset=utf-8');
 ?><!DOCTYPE html>
@@ -79,6 +93,18 @@ header('Content-Type: text/html; charset=utf-8');
     <button type="button" class="insurance-print-btn" onclick="window.print()">Drucken / als PDF speichern</button>
   </div>
 
+  <fieldset class="insurance-print-columns no-print">
+    <legend>Spalten</legend>
+    <div class="insurance-print-columns-list">
+<?php foreach($columns as $key => $label): ?>
+      <label class="insurance-print-col-toggle">
+        <input type="checkbox" name="col" value="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" checked>
+        <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+      </label>
+<?php endforeach; ?>
+    </div>
+  </fieldset>
+
   <header class="insurance-print-header">
     <?php if($orgName !== ''): ?>
       <p class="insurance-print-org"><?php echo htmlspecialchars($orgName, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -91,37 +117,25 @@ header('Content-Type: text/html; charset=utf-8');
     </p>
   </header>
 
-  <table class="insurance-print-table">
+  <table class="insurance-print-table" id="insurancePrintTable">
     <thead>
       <tr>
-        <th>Inventarnummer</th>
-        <th>Instrument</th>
-        <th>Hersteller</th>
-        <th>Modell</th>
-        <th>Seriennummer</th>
-        <th>Kaufdatum</th>
-        <th class="num">Anschaffungswert</th>
-        <th class="num">Zeitwert</th>
-        <th>Besitzer</th>
+<?php foreach($columns as $key => $label): ?>
+        <th data-col="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"<?php echo isset($numCols[$key]) ? ' class="num"' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></th>
+<?php endforeach; ?>
       </tr>
     </thead>
     <tbody>
 <?php if($nInstruments === 0): ?>
       <tr>
-        <td colspan="9">Keine versicherten Instrumente.</td>
+        <td colspan="<?php echo (int)$colCount; ?>" id="insuranceEmptyCell">Keine versicherten Instrumente.</td>
       </tr>
 <?php else: ?>
 <?php foreach($rows as $r): ?>
       <tr>
-        <td><?php echo htmlspecialchars($r['reg'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($r['instrument'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($r['vendor'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($r['model'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($r['serial'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars((string)$r['purchaseDate'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="num"><?php echo htmlspecialchars($r['purchasePrize'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="num"><?php echo htmlspecialchars($r['zeitwert'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars((string)$r['owner'], ENT_QUOTES, 'UTF-8'); ?></td>
+<?php foreach($columns as $key => $label): ?>
+        <td data-col="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"<?php echo isset($numCols[$key]) ? ' class="num"' : ''; ?>><?php echo htmlspecialchars((string)$r[$key], ENT_QUOTES, 'UTF-8'); ?></td>
+<?php endforeach; ?>
       </tr>
 <?php endforeach; ?>
 <?php endif; ?>
@@ -129,10 +143,24 @@ header('Content-Type: text/html; charset=utf-8');
 <?php if($nInstruments > 0): ?>
     <tfoot>
       <tr>
-        <td colspan="6"><strong>Summe</strong></td>
-        <td class="num"><strong><?php echo htmlspecialchars(sprintf('%.2f €', $sumAnschaffung), ENT_QUOTES, 'UTF-8'); ?></strong></td>
-        <td class="num"><strong><?php echo htmlspecialchars(sprintf('%.2f €', $sumZeitwert), ENT_QUOTES, 'UTF-8'); ?></strong></td>
-        <td></td>
+<?php
+$firstLabel = true;
+foreach($columns as $key => $label) {
+    $cls = isset($numCols[$key]) ? ' class="num"' : '';
+    $content = '';
+    if($key === 'purchasePrize') {
+        $content = '<strong>'.htmlspecialchars(sprintf('%.2f €', $sumAnschaffung), ENT_QUOTES, 'UTF-8').'</strong>';
+    }
+    elseif($key === 'zeitwert') {
+        $content = '<strong>'.htmlspecialchars(sprintf('%.2f €', $sumZeitwert), ENT_QUOTES, 'UTF-8').'</strong>';
+    }
+    elseif($firstLabel) {
+        $content = '<strong>Summe</strong>';
+        $firstLabel = false;
+    }
+    echo '        <td data-col="'.htmlspecialchars($key, ENT_QUOTES, 'UTF-8').'"'.$cls.'>'.$content."</td>\n";
+}
+?>
       </tr>
     </tfoot>
 <?php endif; ?>
@@ -141,5 +169,94 @@ header('Content-Type: text/html; charset=utf-8');
   <p class="insurance-print-footnote">
     Zeitwert berechnet aus Anschaffungswert und Kaufdatum (Stichtag <?php echo htmlspecialchars($stichtag, ENT_QUOTES, 'UTF-8'); ?>).
   </p>
+
+  <script>
+(function() {
+  var STORAGE_KEY = 'insurancePrintColumns';
+  var table = document.getElementById('insurancePrintTable');
+  var checks = document.querySelectorAll('.insurance-print-columns input[name="col"]');
+  var emptyCell = document.getElementById('insuranceEmptyCell');
+  if(!table || !checks.length) return;
+
+  function loadPrefs() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function savePrefs(visible) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(visible));
+    } catch (e) {}
+  }
+
+  function applyColumns() {
+    var visible = {};
+    var nVisible = 0;
+    for(var i = 0; i < checks.length; i++) {
+      var key = checks[i].value;
+      var on = !!checks[i].checked;
+      visible[key] = on;
+      if(on) nVisible++;
+      if(on) {
+        table.classList.remove('hide-col-' + key);
+      } else {
+        table.classList.add('hide-col-' + key);
+      }
+    }
+    if(emptyCell) {
+      emptyCell.colSpan = Math.max(nVisible, 1);
+    }
+    // Move "Summe" label into the first visible non-sum column
+    var foot = table.querySelector('tfoot tr');
+    if(foot) {
+      var cells = foot.querySelectorAll('td[data-col]');
+      var labelPlaced = false;
+      for(var j = 0; j < cells.length; j++) {
+        var col = cells[j].getAttribute('data-col');
+        if(col === 'purchasePrize' || col === 'zeitwert') continue;
+        if(visible[col] && !labelPlaced) {
+          cells[j].innerHTML = '<strong>Summe</strong>';
+          labelPlaced = true;
+        } else if(col !== 'purchasePrize' && col !== 'zeitwert') {
+          cells[j].innerHTML = '';
+        }
+      }
+    }
+    savePrefs(visible);
+  }
+
+  var prefs = loadPrefs();
+  if(prefs) {
+    for(var i = 0; i < checks.length; i++) {
+      if(Object.prototype.hasOwnProperty.call(prefs, checks[i].value)) {
+        checks[i].checked = !!prefs[checks[i].value];
+      }
+    }
+  }
+
+  for(var i = 0; i < checks.length; i++) {
+    checks[i].addEventListener('change', function() {
+      // Keep at least one column visible
+      var any = false;
+      for(var j = 0; j < checks.length; j++) {
+        if(checks[j].checked) { any = true; break; }
+      }
+      if(!any) {
+        this.checked = true;
+        return;
+      }
+      applyColumns();
+    });
+  }
+
+  applyColumns();
+})();
+  </script>
 </body>
 </html>
