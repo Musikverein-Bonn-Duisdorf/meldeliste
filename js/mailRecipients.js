@@ -1,14 +1,15 @@
 /**
- * MELD-60: chip picker — audience groups + registers + users.
+ * MELD-60: chip picker — groups + registers + users (all removable / multi-select).
  */
 (function(global) {
   'use strict';
 
-  var AUDIENCE_LABELS = {
+  var GROUP_LABELS = {
     musicians: 'alle Musiker',
     members: 'Alle Vereinsmitglieder',
     users: 'alle User'
   };
+  var GROUP_IDS = ['musicians', 'members', 'users'];
 
   function parseCatalog(el) {
     if(!el) return {groups: [], registers: [], users: []};
@@ -24,15 +25,27 @@
     }
   }
 
+  function normalizeGroups(list) {
+    var out = [];
+    if(!Array.isArray(list)) return out;
+    list.forEach(function(g) {
+      g = String(g);
+      if(GROUP_IDS.indexOf(g) !== -1 && out.indexOf(g) === -1) out.push(g);
+    });
+    return out;
+  }
+
   function parseSpec(el) {
-    var fallback = {audience: 'musicians', registers: [], users: []};
+    var fallback = {groups: ['musicians'], registers: [], users: []};
     if(!el) return fallback;
     try {
       var s = JSON.parse(el.value || '{}');
-      var aud = s.audience || 'musicians';
-      if(['musicians', 'members', 'users'].indexOf(aud) === -1) aud = 'musicians';
+      var groups = normalizeGroups(s.groups);
+      if(!groups.length && s.audience && GROUP_IDS.indexOf(String(s.audience)) !== -1) {
+        groups = [String(s.audience)];
+      }
       return {
-        audience: aud,
+        groups: groups,
         registers: Array.isArray(s.registers) ? s.registers.map(Number).filter(function(n) { return n > 0; }) : [],
         users: Array.isArray(s.users) ? s.users.map(Number).filter(function(n) { return n > 0; }) : []
       };
@@ -67,10 +80,18 @@
     syncHidden: function() {
       if(!this.hiddenEl) return;
       this.hiddenEl.value = JSON.stringify({
-        audience: this.spec.audience || 'musicians',
+        groups: this.spec.groups.slice(),
         registers: this.spec.registers.slice(),
         users: this.spec.users.slice()
       });
+    },
+
+    labelForGroup: function(id) {
+      var list = this.catalog.groups;
+      for(var i = 0; i < list.length; i++) {
+        if(String(list[i].id) === String(id)) return list[i].label;
+      }
+      return GROUP_LABELS[id] || id;
     },
 
     labelForRegister: function(id) {
@@ -95,17 +116,18 @@
       if(!this.chipsEl) return;
       this.chipsEl.innerHTML = '';
       var self = this;
-      var aud = this.spec.audience || 'musicians';
-      this.chipsEl.appendChild(this.makeChip('audience', aud, AUDIENCE_LABELS[aud] || aud, true));
+      this.spec.groups.forEach(function(id) {
+        self.chipsEl.appendChild(self.makeChip('group', id, self.labelForGroup(id)));
+      });
       this.spec.registers.forEach(function(id) {
-        self.chipsEl.appendChild(self.makeChip('register', id, 'Register: ' + self.labelForRegister(id), false));
+        self.chipsEl.appendChild(self.makeChip('register', id, 'Register: ' + self.labelForRegister(id)));
       });
       this.spec.users.forEach(function(id) {
-        self.chipsEl.appendChild(self.makeChip('user', id, self.labelForUser(id), false));
+        self.chipsEl.appendChild(self.makeChip('user', id, self.labelForUser(id)));
       });
     },
 
-    makeChip: function(type, id, label, locked) {
+    makeChip: function(type, id, label) {
       var chip = document.createElement('span');
       chip.className = 'mail-recipient-chip mail-recipient-chip--' + type;
       chip.setAttribute('data-type', type);
@@ -113,28 +135,30 @@
       var text = document.createElement('span');
       text.textContent = label;
       chip.appendChild(text);
-      if(!locked) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'mail-recipient-chip-remove';
-        btn.setAttribute('aria-label', 'Entfernen');
-        btn.innerHTML = '&times;';
-        var self = this;
-        btn.addEventListener('click', function() {
-          self.removeChip(type, id);
-        });
-        chip.appendChild(btn);
-      }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mail-recipient-chip-remove';
+      btn.setAttribute('aria-label', 'Entfernen');
+      btn.innerHTML = '&times;';
+      var self = this;
+      btn.addEventListener('click', function() {
+        self.removeChip(type, id);
+      });
+      chip.appendChild(btn);
       return chip;
     },
 
     removeChip: function(type, id) {
-      if(type === 'audience') return;
-      id = Number(id);
-      if(type === 'register') {
+      if(type === 'group' || type === 'audience') {
+        var gid = String(id);
+        this.spec.groups = this.spec.groups.filter(function(x) { return x !== gid; });
+      }
+      else if(type === 'register') {
+        id = Number(id);
         this.spec.registers = this.spec.registers.filter(function(x) { return x !== id; });
       }
       else {
+        id = Number(id);
         this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
       }
       this.render();
@@ -143,10 +167,10 @@
     },
 
     addChip: function(type, id) {
-      if(type === 'audience' || type === 'group') {
+      if(type === 'group' || type === 'audience') {
         var aud = String(id);
-        if(['musicians', 'members', 'users'].indexOf(aud) === -1) return;
-        this.spec.audience = aud;
+        if(GROUP_IDS.indexOf(aud) === -1) return;
+        if(this.spec.groups.indexOf(aud) === -1) this.spec.groups.push(aud);
         this.hideSuggest();
         if(this.inputEl) this.inputEl.value = '';
         this.render();
@@ -176,13 +200,13 @@
       var groups = this.catalog.groups.length
         ? this.catalog.groups
         : [
-            {id: 'musicians', label: AUDIENCE_LABELS.musicians, meta: 'Gruppe'},
-            {id: 'members', label: AUDIENCE_LABELS.members, meta: 'Gruppe'},
-            {id: 'users', label: AUDIENCE_LABELS.users, meta: 'Gruppe'}
+            {id: 'musicians', label: GROUP_LABELS.musicians, meta: 'Gruppe'},
+            {id: 'members', label: GROUP_LABELS.members, meta: 'Gruppe'},
+            {id: 'users', label: GROUP_LABELS.users, meta: 'Gruppe'}
           ];
 
       groups.forEach(function(g) {
-        if(String(g.id) === String(self.spec.audience)) return;
+        if(self.spec.groups.indexOf(String(g.id)) !== -1) return;
         if(q === '' || normalize(g.label).indexOf(q) !== -1) {
           items.push({type: 'group', id: g.id, label: g.label, meta: g.meta || 'Gruppe'});
         }
@@ -259,6 +283,9 @@
         }
         else if(this.spec.registers.length) {
           this.removeChip('register', this.spec.registers[this.spec.registers.length - 1]);
+        }
+        else if(this.spec.groups.length) {
+          this.removeChip('group', this.spec.groups[this.spec.groups.length - 1]);
         }
       }
     },

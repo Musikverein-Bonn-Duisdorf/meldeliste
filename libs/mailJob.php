@@ -232,7 +232,7 @@ class MailJob
 
     /**
      * Normalize recipient JSON for chip UI.
-     * @return array{audience:string,registers:int[],users:int[]}
+     * @return array{groups:string[],registers:int[],users:int[]}
      */
     public function getRecipientSpecArray() {
         return self::parseRecipientSpec($this->RecipientSpec, (int)$this->Register, (int)$this->MemberOnly);
@@ -242,11 +242,12 @@ class MailJob
      * @param string|null $json
      * @param int $legacyRegister
      * @param int $legacyMemberOnly
-     * @return array{audience:string,registers:int[],users:int[]}
+     * @return array{groups:string[],registers:int[],users:int[]}
      */
     public static function parseRecipientSpec($json, $legacyRegister = 0, $legacyMemberOnly = 0) {
+        $allowed = array('musicians', 'members', 'users');
         $out = array(
-            'audience' => 'musicians',
+            'groups' => array(),
             'registers' => array(),
             'users' => array(),
         );
@@ -254,15 +255,23 @@ class MailJob
         if($raw !== '') {
             $decoded = json_decode($raw, true);
             if(is_array($decoded)) {
-                $aud = isset($decoded['audience']) ? (string)$decoded['audience'] : '';
-                if($aud === '' && array_key_exists('allRegisters', $decoded)) {
-                    // Older POC JSON without audience
-                    $aud = !empty($legacyMemberOnly) ? 'members' : 'musicians';
+                if(isset($decoded['groups']) && is_array($decoded['groups'])) {
+                    foreach($decoded['groups'] as $g) {
+                        $g = (string)$g;
+                        if(in_array($g, $allowed, true)) {
+                            $out['groups'][] = $g;
+                        }
+                    }
                 }
-                if(!in_array($aud, array('musicians', 'members', 'users'), true)) {
-                    $aud = 'musicians';
+                elseif(isset($decoded['audience'])) {
+                    $aud = (string)$decoded['audience'];
+                    if(in_array($aud, $allowed, true)) {
+                        $out['groups'][] = $aud;
+                    }
                 }
-                $out['audience'] = $aud;
+                elseif(array_key_exists('allRegisters', $decoded)) {
+                    $out['groups'][] = !empty($legacyMemberOnly) ? 'members' : 'musicians';
+                }
                 if(isset($decoded['registers']) && is_array($decoded['registers'])) {
                     foreach($decoded['registers'] as $id) {
                         $id = (int)$id;
@@ -279,13 +288,14 @@ class MailJob
                         if($id > 0) $out['users'][] = $id;
                     }
                 }
+                $out['groups'] = array_values(array_unique($out['groups']));
                 $out['registers'] = array_values(array_unique($out['registers']));
                 $out['users'] = array_values(array_unique($out['users']));
                 return $out;
             }
         }
         // Legacy columns only
-        $out['audience'] = ((int)$legacyMemberOnly) ? 'members' : 'musicians';
+        $out['groups'] = array(((int)$legacyMemberOnly) ? 'members' : 'musicians');
         if((int)$legacyRegister > 0) {
             $out['registers'] = array((int)$legacyRegister);
         }
@@ -296,10 +306,23 @@ class MailJob
      * @param array $spec
      */
     public function setRecipientSpecArray($spec) {
-        $aud = isset($spec['audience']) ? (string)$spec['audience'] : 'musicians';
-        if(!in_array($aud, array('musicians', 'members', 'users'), true)) {
-            $aud = 'musicians';
+        $allowed = array('musicians', 'members', 'users');
+        $groups = array();
+        if(isset($spec['groups']) && is_array($spec['groups'])) {
+            foreach($spec['groups'] as $g) {
+                $g = (string)$g;
+                if(in_array($g, $allowed, true)) {
+                    $groups[] = $g;
+                }
+            }
         }
+        elseif(isset($spec['audience'])) {
+            $aud = (string)$spec['audience'];
+            if(in_array($aud, $allowed, true)) {
+                $groups[] = $aud;
+            }
+        }
+        $groups = array_values(array_unique($groups));
         $registers = array();
         $users = array();
         if(isset($spec['registers']) && is_array($spec['registers'])) {
@@ -317,12 +340,12 @@ class MailJob
         $registers = array_values(array_unique($registers));
         $users = array_values(array_unique($users));
         $payload = array(
-            'audience' => $aud,
+            'groups' => $groups,
             'registers' => $registers,
             'users' => $users,
         );
         $this->RecipientSpec = json_encode($payload);
-        $this->MemberOnly = ($aud === 'members') ? 1 : 0;
+        $this->MemberOnly = in_array('members', $groups, true) ? 1 : 0;
         if(count($registers) === 1) {
             $this->Register = $registers[0];
         }
@@ -333,7 +356,7 @@ class MailJob
 
     public static function defaultRecipientSpecArray() {
         return array(
-            'audience' => 'musicians',
+            'groups' => array('musicians'),
             'registers' => array(),
             'users' => array(),
         );

@@ -123,7 +123,8 @@ class Usermail {
         $this->memberonly = (bool)$job->MemberOnly;
         $this->register = (int)$job->Register;
         $this->recipientSpec = $job->getRecipientSpecArray();
-        $this->memberonly = ($this->recipientSpec['audience'] === 'members');
+        $groups = isset($this->recipientSpec['groups']) ? $this->recipientSpec['groups'] : array();
+        $this->memberonly = in_array('members', $groups, true);
         $this->termin = (int)$job->Termin;
         $this->User = 0;
         $this->subject = (string)$job->Subject;
@@ -673,51 +674,70 @@ class Usermail {
             : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register, $this->memberonly ? 1 : 0);
 
         $byId = array();
-        $audience = isset($spec['audience']) ? (string)$spec['audience'] : 'musicians';
-        if(!in_array($audience, array('musicians', 'members', 'users'), true)) {
-            $audience = 'musicians';
+        $allowed = array('musicians', 'members', 'users');
+        $groups = array();
+        if(isset($spec['groups']) && is_array($spec['groups'])) {
+            foreach($spec['groups'] as $g) {
+                $g = (string)$g;
+                if(in_array($g, $allowed, true)) {
+                    $groups[] = $g;
+                }
+            }
         }
+        elseif(isset($spec['audience'])) {
+            $aud = (string)$spec['audience'];
+            if(in_array($aud, $allowed, true)) {
+                $groups[] = $aud;
+            }
+        }
+        $groups = array_values(array_unique($groups));
         $registerIds = isset($spec['registers']) ? $spec['registers'] : array();
         $userIds = isset($spec['users']) ? $spec['users'] : array();
-
-        $where = array('`Deleted` != 1', "`Email` != ''");
-        if($audience === 'members') {
-            $where[] = '`Mitglied` = 1';
-            $where[] = '`getMail` = 1';
-        }
-        elseif($audience === 'musicians') {
-            $where[] = '`getMail` = 1';
-        }
-        // audience users: all with email
 
         $ids = array();
         foreach($registerIds as $rid) {
             $rid = (int)$rid;
             if($rid > 0) $ids[] = $rid;
         }
+        // Nur Register ohne Gruppe → wie Musiker im Register
+        if(!count($groups) && count($ids) > 0) {
+            $groups = array('musicians');
+        }
 
-        if(count($ids) > 0) {
-            $sql = sprintf(
-                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE %s AND `Register` IN (%s);",
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                $GLOBALS['dbprefix'],
-                implode(' AND ', $where),
-                implode(',', $ids)
-            );
-        }
-        else {
-            $sql = sprintf(
-                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE %s;",
-                $GLOBALS['dbprefix'],
-                implode(' AND ', $where)
-            );
-        }
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if($dbr) {
-            while($row = mysqli_fetch_array($dbr)) {
-                $byId[(int)$row['Index']] = $row;
+        foreach($groups as $audience) {
+            $where = array('`Deleted` != 1', "`Email` != ''");
+            if($audience === 'members') {
+                $where[] = '`Mitglied` = 1';
+                $where[] = '`getMail` = 1';
+            }
+            elseif($audience === 'musicians') {
+                $where[] = '`getMail` = 1';
+            }
+            // users: alle mit Email
+
+            if(count($ids) > 0) {
+                $sql = sprintf(
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE %s AND `Register` IN (%s);",
+                    $GLOBALS['dbprefix'],
+                    $GLOBALS['dbprefix'],
+                    $GLOBALS['dbprefix'],
+                    implode(' AND ', $where),
+                    implode(',', $ids)
+                );
+            }
+            else {
+                $sql = sprintf(
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE %s;",
+                    $GLOBALS['dbprefix'],
+                    implode(' AND ', $where)
+                );
+            }
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if($dbr) {
+                while($row = mysqli_fetch_array($dbr)) {
+                    $byId[(int)$row['Index']] = $row;
+                }
             }
         }
 
