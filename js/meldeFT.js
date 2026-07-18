@@ -10,9 +10,19 @@ function meldeFT(cronID, user, termin) {
     xmlhttp.onreadystatechange=function() {
 	if (xmlhttp.readyState==4 && xmlhttp.status==200) {
             var oldel = document.getElementById("entry"+termin+"_user"+user);
-            var newel = document.createElement('div');
-            newel.innerHTML = xmlhttp.responseText;
-            oldel.parentNode.replaceChild(newel, oldel);
+            if(oldel && oldel.parentNode && xmlhttp.responseText) {
+                if(typeof replaceElementWithHtml === 'function') {
+                    replaceElementWithHtml(oldel, xmlhttp.responseText);
+                }
+                else {
+                    var newel = document.createElement('div');
+                    newel.innerHTML = xmlhttp.responseText;
+                    var replacement = newel.firstElementChild || newel.firstChild;
+                    if(replacement) {
+                        oldel.parentNode.replaceChild(replacement, oldel);
+                    }
+                }
+            }
 	}
     }
     var FreeText = document.getElementById("FreeText"+termin);
