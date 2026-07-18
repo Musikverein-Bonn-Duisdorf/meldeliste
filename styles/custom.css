@@ -1456,12 +1456,13 @@ body.insurance-print {
   text-decoration: underline;
 }
 
-/* Sortierbare Listenköpfe (MELD-96): Format + sticky beim Scrollen */
+/* Sortierbare Listenköpfe (MELD-96): Format + sticky beim Scrollen
+   z-index unter Nav/Admin-Dropdowns (admin-nav: 10/12), damit Menüs nicht verdeckt werden */
 #listHeader,
 .list-header {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 2;
   margin: 0;
   background: #009688;
   color: #fff;
