@@ -41,6 +41,21 @@ class AudienceSpec
     }
 
     /**
+     * True when spec is exactly the „Alle User“ role chip (no registers/users/groups extras).
+     *
+     * @param mixed $spec
+     * @return bool
+     */
+    public static function isAlleUserSpec($spec) {
+        $norm = self::normalize($spec, array('allowMailGroups' => true, 'defaultGroups' => null));
+        return count($norm['groups']) === 1
+            && $norm['groups'][0] === 'users'
+            && empty($norm['registers'])
+            && empty($norm['users'])
+            && empty($norm['mailGroups']);
+    }
+
+    /**
      * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
      */
     public static function emptySpec() {
