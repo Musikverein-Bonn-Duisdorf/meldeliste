@@ -1,7 +1,7 @@
 <?php
 /**
  * Expected DB schema version number (MELD-51).
- * Bump when DBconfig.json or DatabaseManager migrations change.
+ * Bump when DBconfig.json, DatabaseManager migrations, or ConfigDefaults.php change.
  */
-return 6;
+return 7;
 ?>
