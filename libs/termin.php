@@ -93,7 +93,7 @@ class Termin
             $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
         }
         if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
-        if(boolsDiffer($this->Auftritt, $old->Auftritt)) $str.=", Auftritt: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
+        if(boolsDiffer($this->Auftritt, $old->Auftritt)) $str.=", Besetzung: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
         if(boolsDiffer($this->Shifts, $old->Shifts)) $str.=", Schichten: ".bool2string($old->Shifts)." &rArr; <b>".bool2string($this->Shifts)."</b>";
         if($this->Ort1 != $old->Ort1) $str.=", Ort1: ".$old->Ort1." &rArr; <b>".$this->Ort1."</b>";
         if($this->Ort2 != $old->Ort2) $str.=", Ort2: ".$old->Ort2." &rArr; <b>".$this->Ort2."</b>";
@@ -149,7 +149,7 @@ class Termin
             $parts[] = sprintf("max. Teilnehmer: <b>%d</b>", (int)$this->Capacity);
         }
         if($this->Auftritt) {
-            $parts[] = "Auftritt: <b>".bool2string($this->Auftritt)."</b>";
+            $parts[] = "Besetzung: <b>".bool2string($this->Auftritt)."</b>";
         }
         if($this->Ort1 !== null && $this->Ort1 !== '') {
             $parts[] = sprintf("Ort1: <b>%s</b>", $this->Ort1);
@@ -1629,7 +1629,7 @@ class Termin
             $str=$str."</div>\n";
         }
         $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Auftritt:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>\n";
+        $str=$str."<div class=\"w3-col l3\">Besetzung:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>\n";
         $str=$str."</div>\n";
         $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
         $str=$str."<div class=\"w3-col l3\">Schichten zu besetzen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Shifts)."</b></div>\n";
@@ -1647,7 +1647,7 @@ class Termin
                 if($m->Instrument) $instrument = $m->Instrument;
             }
 
-            $str=$str."<div class=\"w3-col l3\">Instrument f&uuml;r diesen Auftritt:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
+            $str=$str."<div class=\"w3-col l3\">Instrument f&uuml;r diesen Termin:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
             $str=$str."<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument('".$GLOBALS['cronID']."', ".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
             $str=$str."</div>\n";
         }
