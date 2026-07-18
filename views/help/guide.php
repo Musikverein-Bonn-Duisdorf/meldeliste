@@ -110,6 +110,7 @@ $sections[] = array(
     'body' => '
 <p>Unter <b>Mein Profil</b> pflegst du deine Kontaktdaten, E-Mail-Adressen und weitere Angaben.</p>
 <p>Halte insbesondere E-Mail und Instrument aktuell – davon hängen Benachrichtigungen und die Orchesterdarstellung ab.</p>
+<p>Unter <b>Gruppenzugehörigkeit</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 '
 );
@@ -174,6 +175,7 @@ $sections[] = array(
     'body' => '
 <p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
+<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis (Standard: <b>Alle User</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles.</p>
 <p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar). Aushilfen können am Termin ergänzt bzw. gelöscht werden, sofern freigegeben.</p>
 '
 );
@@ -184,6 +186,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_sendEmail'),
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
+<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen.</p>
 <p>Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '

@@ -157,16 +157,7 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
 
             $visible = true;
             if($mode === 'future' && $render === 'basic') {
-                $visible = false;
-                if($M->published > 0) {
-                    $visible = true;
-                }
-                elseif(requirePermission('perm_showHiddenAppmnts')) {
-                    $visible = true;
-                }
-                elseif($userId > 0 && $M->getMeldungenByUser($userId)) {
-                    $visible = true;
-                }
+                $visible = $M->isVisibleToUser((int)$userId);
             }
 
             if(!$visible) {

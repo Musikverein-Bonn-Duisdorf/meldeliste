@@ -21,7 +21,7 @@ function evaluateNormalizeDays($days) {
 }
 
 /**
- * SQL fragment for published non-shift termines in the window.
+ * SQL fragment for listed (non-hidden) non-shift termines in the window.
  *
  * @param int $days
  * @param bool $besetzungOnly
@@ -33,10 +33,10 @@ function evaluateTerminWindowSql($days, $besetzungOnly, $alias = '') {
     $a = $alias;
     $extra = $besetzungOnly ? ' AND '.$a.'`Auftritt` = 1' : '';
     return sprintf(
-        '%s`Shifts` = 0 AND %s`published` = 1'
+        '%s`Shifts` = 0 AND %s'
         .' AND %s`Datum` BETWEEN (CURRENT_DATE() - INTERVAL %d DAY) AND CURRENT_DATE()%s',
         $a,
-        $a,
+        Termin::sqlIsListed($a),
         $a,
         $days,
         $extra

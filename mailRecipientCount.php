@@ -33,6 +33,23 @@ if($specRaw !== '') {
     }
 }
 
-$count = Usermail::countFromRecipientSpec($spec, $termin);
+$requireMail = true;
+if(isset($_REQUEST['requireMail']) && (string)$_REQUEST['requireMail'] === '0') {
+    $requireMail = false;
+}
+
+if($termin > 0) {
+    $count = Usermail::countFromRecipientSpec($spec, $termin);
+}
+elseif($requireMail) {
+    $count = Usermail::countFromRecipientSpec($spec, 0);
+}
+else {
+    $norm = AudienceSpec::normalize($spec, array(
+        'allowMailGroups' => true,
+        'defaultGroups' => null,
+    ));
+    $count = count(AudienceSpec::resolveUserIds($norm, false));
+}
 echo json_encode(array('count' => (int)$count));
 ?>
