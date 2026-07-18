@@ -2493,7 +2493,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $orchestraLarge = '';
         $orchestraMedium = '';
         $orchestraSmall = '';
-        $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']);
+        $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt;
         if($showOrchestra) {
             $orchestraLarge = printOrchestra($this->Index, 1);
             $orchestraMedium = printOrchestra($this->Index, 0.6);
