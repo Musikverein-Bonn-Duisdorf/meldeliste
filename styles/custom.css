@@ -916,3 +916,165 @@
     width: auto !important;
   }
 }
+
+/* Instrument-/Register-Typen editieren (MELD-85): responsives Grid statt w3-col Floats */
+.type-edit-row {
+  overflow-x: hidden;
+}
+
+.type-edit-form {
+  display: grid;
+  gap: 0.5rem 0.75rem;
+  align-items: end;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.type-edit-field {
+  min-width: 0;
+}
+
+.type-edit-field .w3-input,
+.type-edit-field .w3-select,
+.type-edit-field input[type="color"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.type-edit-field input[type="color"] {
+  min-height: 2.4rem;
+  padding: 0.15rem;
+}
+
+.type-edit-field--check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.type-edit-field--actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.type-edit-field--actions .w3-button {
+  margin: 0;
+}
+
+.type-edit-label {
+  display: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.type-edit-label--always {
+  display: block;
+}
+
+.type-edit-form--create .type-edit-label--always {
+  display: block;
+}
+
+/* Desktop: Spaltenlayout, Kopfzeile sichtbar */
+@media (min-width: 993px) {
+  .type-edit-form--instrument {
+    grid-template-columns:
+      3.25rem
+      minmax(8rem, 2fr)
+      minmax(7rem, 1.5fr)
+      4.5rem
+      4.25rem
+      minmax(6rem, 1fr)
+      auto;
+  }
+
+  .type-edit-form--register {
+    grid-template-columns:
+      3.25rem
+      minmax(7rem, 1.5fr)
+      4.25rem
+      4.25rem
+      4.5rem
+      4.5rem
+      minmax(6rem, 1fr)
+      auto;
+  }
+
+  .type-edit-form--create.type-edit-form--instrument {
+    grid-template-columns:
+      minmax(8rem, 2fr)
+      minmax(7rem, 1.5fr)
+      5rem
+      3.25rem
+      5rem
+      auto;
+  }
+
+  .type-edit-form--create.type-edit-form--register {
+    grid-template-columns:
+      minmax(8rem, 1.5fr)
+      5rem
+      5rem
+      5rem
+      5rem
+      3.25rem
+      auto;
+  }
+
+  .type-edit-header .type-edit-label,
+  .type-edit-form:not(.type-edit-form--create) .type-edit-label:not(.type-edit-label--always) {
+    display: none;
+  }
+}
+
+/* Tablet: 2 Spalten, Labels sichtbar, Kopfzeile aus */
+@media (max-width: 992px) {
+  .type-edit-header {
+    display: none !important;
+  }
+
+  .type-edit-form {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .type-edit-label,
+  .type-edit-field--meta .type-edit-label {
+    display: block;
+  }
+
+  .type-edit-field--grow,
+  .type-edit-field--actions,
+  .type-edit-field--meta {
+    grid-column: 1 / -1;
+  }
+
+  .type-edit-field--check {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Phone: eine Spalte */
+@media (max-width: 600px) {
+  .type-edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .type-edit-field--grow,
+  .type-edit-field--actions,
+  .type-edit-field--meta {
+    grid-column: auto;
+  }
+
+  .type-edit-row {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
