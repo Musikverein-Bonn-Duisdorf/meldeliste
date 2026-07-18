@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-a5965 (2026-07-18)
+
+- MELD-92: option to always show the branch banner
+
 ## 2026-07-18-7bfe4 (2026-07-18)
 
 - Fix: meldungen.php crasht bei Schichten — fehlende Tabelle AushilfenShift
