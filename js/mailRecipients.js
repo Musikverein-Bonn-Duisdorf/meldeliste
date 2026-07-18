@@ -193,8 +193,13 @@
             self.countEl.textContent = n === 1 ? '1 Mitglied' : (n + ' Mitglieder');
           }
           else if(label === 'sichtbar für') {
-            self.countEl.textContent = n === 0 && self.allowEmpty
-              ? 'sichtbar für: alle'
+            var emptySpec = self.allowEmpty
+              && !(self.spec.groups && self.spec.groups.length)
+              && !(self.spec.registers && self.spec.registers.length)
+              && !(self.spec.users && self.spec.users.length)
+              && !(self.spec.mailGroups && self.spec.mailGroups.length);
+            self.countEl.textContent = emptySpec
+              ? 'versteckt (nur Recht „Versteckte Termine“)'
               : (n === 1 ? 'sichtbar für 1 Person' : ('sichtbar für ' + n + ' Personen'));
           }
         } catch(e) {
