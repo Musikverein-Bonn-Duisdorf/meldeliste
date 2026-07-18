@@ -33,8 +33,9 @@ if(!requirePermission("perm_showInventories") && !requirePermission("perm_showIn
   <h2>Versicherte Instrumente (<?php echo $nInstruments; ?>)</h2>
 </div>
 
-<div class="w3-row">
-  <input class="w3-input w3-border w3-padding w3-col l6 m12 s12" type="text" placeholder="Nach Instrument suchen..." id="filterString" onkeyup="filterMusiker()">
+<div class="w3-row w3-padding-small" style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+  <input class="w3-input w3-border w3-padding w3-col l6 m12 s12" type="text" placeholder="Nach Instrument suchen..." id="filterString" onkeyup="filterMusiker()" style="flex:1 1 16rem;">
+  <a class="w3-button w3-border <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="insuranceExport.php" target="_blank" rel="noopener">Übersicht für Versicherung</a>
 </div>
   <div class="w3-row w3-padding w3-border-bottom w3-border-black w3-hide-small w3-hide-medium">
   <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Inventarnummer</b></div>
