@@ -323,10 +323,16 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $vbH = $baseHeight;
     }
     else {
-        $vbX = $minX - $pad;
-        $vbY = $minY - $pad;
-        $vbW = max(1, ($maxX - $minX) + 2 * $pad);
-        $vbH = max(1, ($maxY - $minY) + 2 * $pad);
+        // Never zoom in for sparse seating: keep at least the full stage.
+        // Only expand the viewBox when seats overflow the base canvas.
+        $contentMinX = $minX - $pad;
+        $contentMinY = $minY - $pad;
+        $contentMaxX = $maxX + $pad;
+        $contentMaxY = $maxY + $pad;
+        $vbX = min(0, $contentMinX);
+        $vbY = min(0, $contentMinY);
+        $vbW = max($baseWidth, $contentMaxX - $vbX);
+        $vbH = max($baseHeight, $contentMaxY - $vbY);
     }
 
     $str = '<svg class="'.$svgClass.'" viewBox="'

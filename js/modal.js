@@ -79,13 +79,13 @@ function toggleActiveOrchestra(checkbox) {
     }
 }
 
-/** Cycle: unsicher → Absage → Zusage → unsicher (MELD-64). Unset → unsicher. */
+/** Cycle: keine Meldung → Ja → Nein → vielleicht → Ja … (MELD-64). */
 function orchestraNextWert(wert) {
     wert = parseInt(wert, 10) || 0;
-    if(wert === 3) return 2;
-    if(wert === 2) return 1;
-    if(wert === 1) return 3;
-    return 3;
+    if(wert === 1) return 2;
+    if(wert === 2) return 3;
+    if(wert === 3) return 1;
+    return 1;
 }
 
 function orchestraSeatVisual(wert) {
