@@ -1,71 +1,19 @@
 <?php
+ob_start();
 session_start();
 $_SESSION['page']='inventories';
 $_SESSION['adminpage']=true;
+
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+requireLoggedInOrRedirect();
+
+if(handleInventoriesMutations()) {
+    redirectAfterPost('inventories.php');
+}
+
 include "common/header.php";
 
-$mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['insert'])
-    || isset($_POST['update']) || isset($_POST['delete']);
-if($mutating && !requirePermission('perm_editInventories')) {
-    denyAccess('Keine Berechtigung zum Ändern von Inventar.');
-}
-
-if(isset($_POST['newLoan'])) {
-    $n = new InventoriesLoan;
-    $n->fill_from_array($_POST);
-    $n->save();
-}
-if(isset($_POST['endLoan'])) {
-    $n = new InventoriesLoan;
-    $loanId = isset($_POST['LoanIndex']) ? $_POST['LoanIndex'] : $_POST['Index'];
-    $n->load_by_id($loanId);
-    $n->EndDate = $_POST['EndDate'];
-    $n->save();
-}
-if(isset($_POST['insert'])) {
-    $n = new Inventories;
-    $n->fill_from_array($_POST);
-    if(empty($_POST['Insurance'])) $n->Insurance = 0;
-    $type = RegNumber::loadType((int)$n->Inventory);
-    if(!$type || RegNumber::normalizePrefix($type->Prefix) !== RegNumber::DEFAULT_INSTR_PREFIX) {
-        $n->Instrument = 0;
-    }
-    $n->save();
-}
-if(isset($_POST['update'])) {
-    $id = isset($_POST['InventoriesIndex']) ? (int)$_POST['InventoriesIndex'] : (int)$_POST['Index'];
-    $n = new Inventories;
-    $n->load_by_id($id);
-    if($n->Index) {
-        // Keep type FK; do not let loan-form field "Inventory" overwrite it
-        $typeId = (int)$n->Inventory;
-        $n->RegNumber = isset($_POST['RegNumber']) ? $_POST['RegNumber'] : $n->RegNumber;
-        $n->Description = isset($_POST['Description']) ? $_POST['Description'] : $n->Description;
-        $n->Vendor = isset($_POST['Vendor']) ? $_POST['Vendor'] : $n->Vendor;
-        $n->Model = isset($_POST['Model']) ? $_POST['Model'] : $n->Model;
-        $n->SerialNr = isset($_POST['SerialNr']) ? $_POST['SerialNr'] : $n->SerialNr;
-        $n->PurchaseDate = isset($_POST['PurchaseDate']) ? $_POST['PurchaseDate'] : $n->PurchaseDate;
-        $n->PurchasePrize = isset($_POST['PurchasePrize']) ? $_POST['PurchasePrize'] : $n->PurchasePrize;
-        $n->Owner = isset($_POST['Owner']) ? $_POST['Owner'] : $n->Owner;
-        $n->Insurance = isset($_POST['Insurance']) ? (int)$_POST['Insurance'] : 0;
-        $n->Comment = isset($_POST['Comment']) ? $_POST['Comment'] : $n->Comment;
-        $n->Inventory = $typeId;
-        $type = RegNumber::loadType($typeId);
-        if($type && RegNumber::normalizePrefix($type->Prefix) === RegNumber::DEFAULT_INSTR_PREFIX) {
-            $n->Instrument = isset($_POST['Instrument']) ? (int)$_POST['Instrument'] : (int)$n->Instrument;
-        }
-        else {
-            $n->Instrument = 0;
-        }
-        $n->save();
-    }
-}
-if(isset($_POST['delete'])) {
-    $id = isset($_POST['InventoriesIndex']) ? (int)$_POST['InventoriesIndex'] : (int)$_POST['Index'];
-    $n = new Inventories;
-    $n->load_by_id($id);
-    $n->delete();
-}
 if(requirePermission("perm_showInventories")) {
     $sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sInventories`;',
     $GLOBALS['dbprefix']

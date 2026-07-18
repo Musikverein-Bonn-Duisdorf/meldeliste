@@ -1,7 +1,17 @@
 <?php
+ob_start();
 session_start();
 $_SESSION['page']='insurance';
 $_SESSION['adminpage']=true;
+
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+requireLoggedInOrRedirect();
+
+if(handleInventoriesMutations()) {
+    redirectAfterPost('insurance.php');
+}
+
 include "common/header.php";
 
 if(!requirePermission("perm_showInventories") && !requirePermission("perm_showInstruments")) {
