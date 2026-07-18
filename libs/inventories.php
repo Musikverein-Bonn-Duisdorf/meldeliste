@@ -473,11 +473,12 @@ class Inventories
         );
 
         if($canEdit) {
+            $insured = !empty($row['Insurance']) || !empty($this->Insurance);
             $insHtml = '<input type="hidden" name="Insurance" value="0">'
-                .'<label><input class="w3-check" type="checkbox" name="Insurance" value="1"'.(!empty($this->Insurance) ? ' checked' : '').'> ja</label>';
+                .'<input class="w3-check" type="checkbox" name="Insurance" value="1"'.($insured ? ' checked' : '').'>';
         }
         else {
-            $insHtml = $this->modalDisplayText(bool2string(!empty($this->Insurance)));
+            $insHtml = $this->modalDisplayText(bool2string(!empty($row['Insurance']) || !empty($this->Insurance)));
         }
         $str .= $this->modalDetailRow($indent, 'Versichert', $insHtml);
 
