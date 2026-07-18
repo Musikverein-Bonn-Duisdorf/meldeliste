@@ -673,7 +673,7 @@ function logConfigChange($parameter, $oldValue, $newValue, $type = '') {
     ));
 }
 
-function printOrchestra($tid, $scale) {
+function printOrchestra($tid, $scale, $activeOnly = false) {
     $width=1000*$scale;
     $height=600*$scale;
     $rowdistance=60*$scale;
@@ -805,6 +805,18 @@ function printOrchestra($tid, $scale) {
             }
         }
         $allMusiker = $allSorted;
+
+        // Active seating: only ja (1) / vielleicht (3) — layout packs without empty seats.
+        if($tid && $activeOnly) {
+            $activeMusiker = array();
+            foreach($allMusiker as $m) {
+                $w = (int)$m['Wert'];
+                if($w === 1 || $w === 3) {
+                    $activeMusiker[] = $m;
+                }
+            }
+            $allMusiker = $activeMusiker;
+        }
 
         // Row 0 (Dirigent): aktiv = ja/vielleicht auf diesem Platz.
         // Sonst Fallback: fester Dirigent (Stamm-Instrument), auch bei Nein/ohne Stimme.

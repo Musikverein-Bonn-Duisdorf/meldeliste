@@ -139,7 +139,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
 <p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine.</p>
-<p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen. Die Orchesterübersicht zeigt die Besetzung farbig nach Meldestatus. Mit <b>Nur aktive Besetzung</b> blendest du Absagen und fehlende Meldungen aus – übrig bleiben ja und vielleicht.</p>
+<p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen. Die Orchesterübersicht zeigt die Besetzung farbig nach Meldestatus. Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
 '
 );
 

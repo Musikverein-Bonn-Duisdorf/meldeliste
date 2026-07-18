@@ -735,7 +735,7 @@
   }
 }
 
-/* Orchestra: filter to active responses (ja / vielleicht) */
+/* Orchestra: full vs packed active seating toggle */
 .orchestra-panel-header {
   margin-bottom: 0.5rem;
   align-items: baseline;
@@ -749,8 +749,8 @@
   cursor: pointer;
 }
 
-.orchestra-view--active-only .orchestra-seat:not([data-wert="1"]):not([data-wert="3"]) {
-  display: none;
+.orchestra-layout[hidden] {
+  display: none !important;
 }
 
 @media (max-width: 600px) {
