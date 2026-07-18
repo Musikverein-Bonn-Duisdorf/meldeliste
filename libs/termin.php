@@ -563,7 +563,7 @@ class Termin
     public function getVisibilityLabel() {
         $spec = $this->getVisibilitySpecArray();
         if(AudienceSpec::isEmpty($spec)) {
-            return 'alle';
+            return 'versteckt (nur Recht „Versteckte Termine“)';
         }
         $bits = array();
         $groupLabels = array(
@@ -596,14 +596,14 @@ class Termin
                 $bits[] = $u->getName();
             }
         }
-        return count($bits) ? implode(', ', $bits) : 'alle';
+        return count($bits) ? implode(', ', $bits) : 'versteckt (nur Recht „Versteckte Termine“)';
     }
 
     /**
      * List visibility for a user (MELD-61).
-     * published=0: only hidden-permission or existing meldung (viewer mode) — legacy drafts.
-     * published=1 + empty VisibilitySpec: everyone.
-     * published=1 + spec: matching users (+ viewer overrides).
+     * Empty VisibilitySpec: only perm_showHiddenAppmnts (versteckt).
+     * Non-empty spec: matching users (+ showHidden / existing meldung overrides in viewer mode).
+     * published=0: legacy drafts — same as empty for viewers.
      *
      * @param int $userId
      * @param array $opts asViewer (bool, default true) — admin/meldung overrides for UI
@@ -612,32 +612,22 @@ class Termin
     public function isVisibleToUser($userId, $opts = array()) {
         $userId = (int)$userId;
         $asViewer = !array_key_exists('asViewer', $opts) || !empty($opts['asViewer']);
-        if($this->published > 0) {
-            $spec = $this->getVisibilitySpecArray();
-            if(AudienceSpec::isEmpty($spec)) {
-                return true;
-            }
-            if($userId > 0 && AudienceSpec::userMatches($userId, $spec)) {
-                return true;
-            }
-            if($asViewer) {
-                if(requirePermission('perm_showHiddenAppmnts')) {
-                    return true;
-                }
-                if($userId > 0 && $this->getMeldungenByUser($userId)) {
-                    return true;
-                }
-            }
-            return false;
+        $spec = $this->getVisibilitySpecArray();
+        $isHiddenAudience = AudienceSpec::isEmpty($spec) || !((int)$this->published > 0);
+
+        if($isHiddenAudience) {
+            return $asViewer && requirePermission('perm_showHiddenAppmnts');
         }
-        if(!$asViewer) {
-            return false;
-        }
-        if(requirePermission('perm_showHiddenAppmnts')) {
+        if($userId > 0 && AudienceSpec::userMatches($userId, $spec)) {
             return true;
         }
-        if($userId > 0 && $this->getMeldungenByUser($userId)) {
-            return true;
+        if($asViewer) {
+            if(requirePermission('perm_showHiddenAppmnts')) {
+                return true;
+            }
+            if($userId > 0 && $this->getMeldungenByUser($userId)) {
+                return true;
+            }
         }
         return false;
     }
