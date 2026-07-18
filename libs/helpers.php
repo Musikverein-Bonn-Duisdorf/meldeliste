@@ -815,6 +815,14 @@ function printOrchestra($tid, $scale) {
                 }
                 if($user['Instrument'] != $instrument) continue;
                 if($skip) continue;
+                // Dirigentenplatz (Row 0): nur ja/vielleicht — damit Nein/ohne Stimme
+                // den Platz freigibt und Ersatz-Dirigenten sichtbar werden.
+                if($tid && (int)$register['Row'] === 0) {
+                    $w = (int)$user['Wert'];
+                    if($w !== 1 && $w !== 3) {
+                        continue;
+                    }
+                }
                 
                 $short=$user['short'];
                 if($register['Row']==0) {
