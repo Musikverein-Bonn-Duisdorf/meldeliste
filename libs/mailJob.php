@@ -480,11 +480,6 @@ class MailJob
             ? trim((string)$GLOBALS['optionsDB']['DiscordWebHookURL'])
             : '';
         if($webhookUrl === '') {
-            $logentry = new Log;
-            $logentry->warning(sprintf(
-                'Discord-Post übersprungen (kein Webhook) | Email-ID: <b>%d</b>',
-                (int)$this->Index
-            ));
             return false;
         }
         $botname = isset($GLOBALS['optionsDB']['DiscordBotName'])

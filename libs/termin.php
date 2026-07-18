@@ -168,7 +168,7 @@ class Termin
     }
 
     /**
-     * Post appointment to Discord when published. Never echoes; logs skip/errors.
+     * Post appointment to Discord when published. Never echoes; logs errors only.
      * @param bool $isUpdate true for update message, false for new appointment
      */
     private function publishToDiscord($isUpdate) {
@@ -176,12 +176,6 @@ class Termin
             ? trim((string)$GLOBALS['optionsDB']['DiscordWebHookURL'])
             : '';
         if($webhookUrl === '') {
-            $logentry = new Log;
-            $logentry->warning(sprintf(
-                'Discord-Post übersprungen (kein Webhook) | Termin-ID: <b>%d</b>, Name: <b>%s</b>',
-                (int)$this->Index,
-                htmlspecialchars((string)$this->Name)
-            ));
             return;
         }
         $botname = isset($GLOBALS['optionsDB']['DiscordBotName'])
@@ -191,12 +185,6 @@ class Termin
         try {
             $discord = new Discord($webhookUrl);
             if(!$discord->hasValidWebhookUrl()) {
-                $logentry = new Log;
-                $logentry->warning(sprintf(
-                    'Discord-Post übersprungen (ungültiger Webhook) | Termin-ID: <b>%d</b>, Name: <b>%s</b>',
-                    (int)$this->Index,
-                    htmlspecialchars((string)$this->Name)
-                ));
                 return;
             }
             $discord->sendMessage($message, $botname);
