@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'PostDiscord' => 0);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
     /** @var int|null */
@@ -34,6 +34,7 @@ class Termin
 	    case 'new':
         case 'defaultFreeText':
         case 'VisibilitySpec':
+        case 'PostDiscord':
             return $this->_data[$key];
             break;
         default:
@@ -48,6 +49,7 @@ class Termin
 	    case 'Children':
 	    case 'Guests':
         case 'Capacity':
+        case 'PostDiscord':
             $this->_data[$key] = (int)$val;
             break;
 	    case 'Datum':
@@ -111,6 +113,9 @@ class Termin
         if($oldVis !== $newVis) {
             $str.=", sichtbar für: ".htmlspecialchars($old->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')
                 ." &rArr; <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
+        }
+        if(boolsDiffer($this->PostDiscord, $old->PostDiscord)) {
+            $str.=", Discord: ".bool2string($old->PostDiscord)." &rArr; <b>".bool2string($this->PostDiscord)."</b>";
         }
         if(boolsDiffer($this->open, $old->open)) $str.=", open: ".bool2string($old->open)." &rArr; <b>".bool2string($this->open)."</b>";
         if(boolsDiffer($this->new, $old->new)) $str.=", neu: ".bool2string($old->new)." &rArr; <b>".bool2string($this->new)."</b>";
@@ -181,6 +186,9 @@ class Termin
             $parts[] = "Schichten: <b>".bool2string($this->Shifts)."</b>";
         }
         $parts[] = "sichtbar für: <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
+        if((int)$this->PostDiscord) {
+            $parts[] = "Discord: <b>".bool2string($this->PostDiscord)."</b>";
+        }
         $parts[] = "offen: <b>".bool2string($this->open)."</b>";
         if($this->defaultFreeText !== null && $this->defaultFreeText !== '') {
             $parts[] = sprintf("FreeText: <b>%s</b>", $this->defaultFreeText);
@@ -195,7 +203,7 @@ class Termin
             $logentry->DBupdate($this->getChanges());
             $this->update();
 
-            if($this->isListed()) {
+            if($this->shouldPublishToDiscord()) {
                 $this->publishToDiscord(true);
             }
         }
@@ -207,6 +215,8 @@ class Termin
             if($this->isListed()) {
 	        $this->makeAlwaysYes();
         	$this->makeAlwaysMaybe();
+            }
+            if($this->shouldPublishToDiscord()) {
                 $this->publishToDiscord(false);
             }
         }
@@ -216,10 +226,29 @@ class Termin
     }
 
     /**
-     * Post appointment to Discord when listed (non-empty VisibilitySpec). Never echoes; logs errors only.
+     * Discord when listed and (Alle User visibility or PostDiscord checkbox).
+     */
+    public function shouldPublishToDiscord() {
+        if(!$this->isListed()) {
+            return false;
+        }
+        if(!class_exists('Discord') || !Discord::isConfigured()) {
+            return false;
+        }
+        if(AudienceSpec::isAlleUserSpec($this->getVisibilitySpecArray())) {
+            return true;
+        }
+        return (int)$this->PostDiscord > 0;
+    }
+
+    /**
+     * Post appointment to Discord when shouldPublishToDiscord(). Never echoes; logs errors only.
      * @param bool $isUpdate true for update message, false for new appointment
      */
     private function publishToDiscord($isUpdate) {
+        if(!$this->shouldPublishToDiscord()) {
+            return;
+        }
         $webhookUrl = isset($GLOBALS['optionsDB']['DiscordWebHookURL'])
             ? trim((string)$GLOBALS['optionsDB']['DiscordWebHookURL'])
             : '';
@@ -259,7 +288,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s);',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -278,7 +307,8 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
                        $this->open,
                        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
-                       $this->sqlVisibilitySpec()
+                       $this->sqlVisibilitySpec(),
+                       (int)$this->PostDiscord
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -422,7 +452,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `PostDiscord` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -443,6 +473,7 @@ class Termin
         $this->new,
                        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
                        $this->sqlVisibilitySpec(),
+                       (int)$this->PostDiscord,
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);

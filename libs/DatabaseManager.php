@@ -631,86 +631,128 @@ class DatabaseManager
     }
 
     /**
-     * MELD-61: fold legacy Termine.published and MailJob.MemberOnly/Register into Spec JSON
-     * before those columns are dropped.
+     * MELD-61: fold legacy Termine.published into VisibilitySpec (Alle User / versteckt).
+     * Idempotent via config flag; recovers if published was already dropped with empty specs.
      */
     private function migrateAudienceLegacyColumns() {
         if(!class_exists('AudienceSpec')) {
             require_once dirname(__DIR__).'/libs/audienceSpec.php';
         }
 
+        $flag = 'visibilitySpecFromPublishedMigrated';
         $termine = new SQLtable('Termine');
         if($termine->exists() && $termine->columnExists('VisibilitySpec')) {
-            $hasPublished = $termine->columnExists('published');
-            $sql = sprintf(
-                'SELECT `Index`, `VisibilitySpec`%s FROM `%sTermine`;',
-                $hasPublished ? ', `published`' : '',
-                $GLOBALS['dbprefix']
-            );
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            $updated = 0;
-            if($dbr) {
+            $already = $this->getConfigFlag($flag);
+            if($already) {
+                $this->addReport('data', 'Termine.VisibilitySpec', 'ok', 'Sichtbarkeit bereits aus published migriert');
+            }
+            else {
+                $hasPublished = $termine->columnExists('published');
                 $defaultJson = json_encode(AudienceSpec::defaultVisibilitySpec());
-                while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
-                    $id = (int)$row['Index'];
-                    if(!$hasPublished) {
-                        continue;
-                    }
-                    $spec = AudienceSpec::normalize(
-                        isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : null,
-                        array('allowMailGroups' => true, 'defaultGroups' => null)
+                $sql = sprintf(
+                    'SELECT `Index`, `VisibilitySpec`%s FROM `%sTermine`;',
+                    $hasPublished ? ', `published`' : '',
+                    $GLOBALS['dbprefix']
+                );
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                $toAlleUser = 0;
+                $toHidden = 0;
+                $errors = 0;
+                if(!$dbr) {
+                    $this->addReport(
+                        'data',
+                        'Termine.VisibilitySpec',
+                        'error',
+                        'Migration konnte Termine nicht lesen',
+                        mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
                     );
-                    $published = (int)$row['published'];
-                    $want = null;
-                    if($published > 0) {
-                        if(AudienceSpec::isEmpty($spec)) {
-                            $want = $defaultJson;
-                        }
-                    }
-                    else {
-                        // unpublished → hidden (empty VisibilitySpec)
+                }
+                else {
+                    while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+                        $id = (int)$row['Index'];
                         $rawVis = isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : null;
-                        if($rawVis !== null && $rawVis !== '') {
-                            $want = '';
+                        $spec = AudienceSpec::normalize($rawVis, array(
+                            'allowMailGroups' => true,
+                            'defaultGroups' => null,
+                        ));
+                        $isEmpty = AudienceSpec::isEmpty($spec);
+
+                        $wantAlleUser = false;
+                        $wantHidden = false;
+                        if($hasPublished) {
+                            $published = (int)$row['published'];
+                            if($published > 0) {
+                                if($isEmpty) {
+                                    $wantAlleUser = true;
+                                }
+                            }
+                            else {
+                                // unpublished → versteckt
+                                if($rawVis !== null && $rawVis !== '') {
+                                    $wantHidden = true;
+                                }
+                            }
                         }
-                    }
-                    if($want === null) {
-                        continue;
-                    }
-                    if($want === '') {
-                        $update = sprintf(
-                            'UPDATE `%sTermine` SET `VisibilitySpec` = NULL WHERE `Index` = %d;',
-                            $GLOBALS['dbprefix'],
-                            $id
-                        );
-                    }
-                    else {
-                        $update = sprintf(
-                            'UPDATE `%sTermine` SET `VisibilitySpec` = "%s" WHERE `Index` = %d;',
-                            $GLOBALS['dbprefix'],
-                            mysqli_real_escape_string($GLOBALS['conn'], $want),
-                            $id
-                        );
-                    }
-                    if(mysqli_query($GLOBALS['conn'], $update)) {
-                        $updated++;
-                    }
-                    else {
-                        $this->addReport(
-                            'data',
-                            'Termine.VisibilitySpec',
-                            'error',
-                            'Migration Termin #'.$id.' fehlgeschlagen',
-                            mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
-                        );
+                        else {
+                            // Recovery: published already gone — empty Spec was former „sichtbar“
+                            if($isEmpty) {
+                                $wantAlleUser = true;
+                            }
+                        }
+
+                        if(!$wantAlleUser && !$wantHidden) {
+                            continue;
+                        }
+                        if($wantHidden) {
+                            $update = sprintf(
+                                'UPDATE `%sTermine` SET `VisibilitySpec` = NULL WHERE `Index` = %d;',
+                                $GLOBALS['dbprefix'],
+                                $id
+                            );
+                        }
+                        else {
+                            $update = sprintf(
+                                'UPDATE `%sTermine` SET `VisibilitySpec` = \'%s\' WHERE `Index` = %d;',
+                                $GLOBALS['dbprefix'],
+                                mysqli_real_escape_string($GLOBALS['conn'], $defaultJson),
+                                $id
+                            );
+                        }
+                        if(mysqli_query($GLOBALS['conn'], $update)) {
+                            if($wantHidden) {
+                                $toHidden++;
+                            }
+                            else {
+                                $toAlleUser++;
+                            }
+                        }
+                        else {
+                            $errors++;
+                            $this->addReport(
+                                'data',
+                                'Termine.VisibilitySpec',
+                                'error',
+                                'Migration Termin #'.$id.' fehlgeschlagen',
+                                mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                            );
+                        }
                     }
                 }
-            }
-            if($updated > 0) {
-                $this->addReport('data', 'Termine.VisibilitySpec', 'fixed', $updated.' Termin(e) VisibilitySpec migriert');
-            }
-            elseif($hasPublished) {
-                $this->addReport('data', 'Termine.VisibilitySpec', 'ok', 'VisibilitySpec bereits migriert');
+
+                if($errors === 0) {
+                    $this->setConfigFlag($flag, true, 'published/VisibilitySpec-Migration (MELD-61) erledigt');
+                    $this->addReport(
+                        'data',
+                        'Termine.VisibilitySpec',
+                        ($toAlleUser + $toHidden) > 0 ? 'fixed' : 'ok',
+                        sprintf(
+                            'Sichtbarkeit migriert: %d → Alle User, %d → versteckt%s',
+                            $toAlleUser,
+                            $toHidden,
+                            $hasPublished ? '' : ' (Recovery ohne published-Spalte)'
+                        )
+                    );
+                }
             }
         }
 
@@ -753,7 +795,7 @@ class DatabaseManager
                             'mailGroups' => $spec['mailGroups'],
                         ));
                         $update = sprintf(
-                            'UPDATE `%sMailJob` SET `RecipientSpec` = "%s" WHERE `Index` = %d;',
+                            'UPDATE `%sMailJob` SET `RecipientSpec` = \'%s\' WHERE `Index` = %d;',
                             $GLOBALS['dbprefix'],
                             mysqli_real_escape_string($GLOBALS['conn'], $payload),
                             $id
@@ -780,6 +822,69 @@ class DatabaseManager
                 }
             }
         }
+    }
+
+    /**
+     * @param string $param
+     * @return bool
+     */
+    private function getConfigFlag($param) {
+        $configTable = new SQLtable('config');
+        if(!$configTable->exists()) {
+            return false;
+        }
+        $sql = sprintf(
+            "SELECT `Value` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], $param)
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if(!$row || !isset($row['Value'])) {
+            return false;
+        }
+        return (string)$row['Value'] === '1' || (string)$row['Value'] === 'true';
+    }
+
+    /**
+     * @param string $param
+     * @param bool $value
+     * @param string $description
+     */
+    private function setConfigFlag($param, $value, $description = '') {
+        $configTable = new SQLtable('config');
+        if(!$configTable->exists()) {
+            return;
+        }
+        $val = $value ? '1' : '0';
+        $escParam = mysqli_real_escape_string($GLOBALS['conn'], $param);
+        $escDesc = mysqli_real_escape_string($GLOBALS['conn'], $description);
+        $sql = sprintf(
+            "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+            $GLOBALS['dbprefix'],
+            $escParam
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if($row && isset($row['Parameter'])) {
+            $update = sprintf(
+                "UPDATE `%sconfig` SET `Value` = '%s'%s WHERE `Parameter` = '%s';",
+                $GLOBALS['dbprefix'],
+                $val,
+                $description !== '' ? ", `Description` = '".$escDesc."'" : '',
+                $escParam
+            );
+            mysqli_query($GLOBALS['conn'], $update);
+            return;
+        }
+        $insert = sprintf(
+            "INSERT INTO `%sconfig` (`Parameter`, `Value`, `Type`, `Description`) VALUES ('%s', '%s', 'bool', '%s');",
+            $GLOBALS['dbprefix'],
+            $escParam,
+            $val,
+            $escDesc !== '' ? $escDesc : $escParam
+        );
+        mysqli_query($GLOBALS['conn'], $insert);
     }
 
     /**
