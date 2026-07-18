@@ -22,18 +22,6 @@ if(isset($_POST['delete'])) {
     $n->fill_from_array($_POST);
     $n->delete();
 }
-if(isset($_POST['meldung'])) {
-    $m = new Meldung;
-
-    $m->load_by_user_event($user, $_POST['Index']);
-    if($m->User < 1) {
-        $m = new Meldung;
-        $m->User = $user;
-        $m->Termin = $_POST['Index'];
-    }
-    $m->Wert = $_POST['meldung'];
-    $m->save();
-}
 if(isset($_POST['insertAushilfe'])) {
         $aushilfe = new Aushilfe;
         $aushilfe->fill_from_array($_POST);
