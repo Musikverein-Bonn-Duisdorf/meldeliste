@@ -17,6 +17,45 @@ class AudienceSpec
     }
 
     /**
+     * Canonical UI labels for role chips (consistent capitalization).
+     *
+     * @return array<string,string>
+     */
+    public static function groupLabels() {
+        return array(
+            'musicians' => 'Alle Musiker',
+            'members' => 'Alle Vereinsmitglieder',
+            'nonmembers' => 'Alle Nicht-Mitglieder',
+            'users' => 'Alle User',
+        );
+    }
+
+    /**
+     * @param string $groupId
+     * @return string
+     */
+    public static function groupLabel($groupId) {
+        $labels = self::groupLabels();
+        $groupId = (string)$groupId;
+        return isset($labels[$groupId]) ? $labels[$groupId] : $groupId;
+    }
+
+    /**
+     * True when spec is exactly the „Alle User“ role chip (no registers/users/groups extras).
+     *
+     * @param mixed $spec
+     * @return bool
+     */
+    public static function isAlleUserSpec($spec) {
+        $norm = self::normalize($spec, array('allowMailGroups' => true, 'defaultGroups' => null));
+        return count($norm['groups']) === 1
+            && $norm['groups'][0] === 'users'
+            && empty($norm['registers'])
+            && empty($norm['users'])
+            && empty($norm['mailGroups']);
+    }
+
+    /**
      * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
      */
     public static function emptySpec() {
@@ -300,19 +339,13 @@ class AudienceSpec
             return $items;
         }
 
-        $groupLabels = array(
-            'musicians' => 'Alle Musiker',
-            'members' => 'Alle Vereinsmitglieder',
-            'nonmembers' => 'alle Nicht-Mitglieder',
-            'users' => 'alle User',
-        );
         foreach(self::allowedGroupIds() as $gid) {
             $spec = self::emptySpec();
             $spec['groups'] = array($gid);
             if(in_array($userId, self::resolveUserIds($spec, false), true)) {
                 $items[] = array(
                     'type' => 'group',
-                    'label' => isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid,
+                    'label' => self::groupLabel($gid),
                 );
             }
         }
@@ -324,7 +357,7 @@ class AudienceSpec
             if($regName !== '' && strtolower(trim($regName)) !== 'keins') {
                 $items[] = array(
                     'type' => 'register',
-                    'label' => $regName,
+                    'label' => 'Register: '.$regName,
                 );
             }
         }
@@ -334,7 +367,7 @@ class AudienceSpec
             if(in_array($userId, $memberIds, true)) {
                 $items[] = array(
                     'type' => 'mailGroup',
-                    'label' => (string)$g->Name,
+                    'label' => 'Gruppe: '.(string)$g->Name,
                 );
             }
         }
@@ -359,29 +392,24 @@ class AudienceSpec
             return '—';
         }
         $bits = array();
-        $groupLabels = array(
-            'musicians' => 'Alle Musiker',
-            'members' => 'Alle Vereinsmitglieder',
-            'nonmembers' => 'alle Nicht-Mitglieder',
-            'users' => 'Alle User',
-        );
         if($allowMailGroups) {
             foreach($norm['mailGroups'] as $gid) {
                 $g = new MailGroup();
                 $g->load_by_id((int)$gid);
                 if((int)$g->Index) {
-                    $bits[] = (string)$g->Name;
+                    $bits[] = 'Gruppe: '.(string)$g->Name;
                 }
             }
         }
         foreach($norm['groups'] as $gid) {
-            $bits[] = isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid;
+            $bits[] = self::groupLabel($gid);
         }
         foreach($norm['registers'] as $rid) {
             $r = new Register();
             $r->load_by_id((int)$rid);
             if((int)$r->Index) {
-                $bits[] = html_entity_decode((string)$r->Name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $name = html_entity_decode((string)$r->Name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $bits[] = 'Register: '.$name;
             }
         }
         foreach($norm['users'] as $uid) {
@@ -408,12 +436,6 @@ class AudienceSpec
             'defaultGroups' => null,
         ));
         $chips = array();
-        $groupLabels = array(
-            'musicians' => 'Alle Musiker',
-            'members' => 'Alle Vereinsmitglieder',
-            'nonmembers' => 'alle Nicht-Mitglieder',
-            'users' => 'Alle User',
-        );
         if($allowMailGroups) {
             foreach($norm['mailGroups'] as $gid) {
                 $g = new MailGroup();
@@ -426,7 +448,7 @@ class AudienceSpec
         foreach($norm['groups'] as $gid) {
             $chips[] = array(
                 'type' => 'group',
-                'label' => isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid,
+                'label' => self::groupLabel($gid),
             );
         }
         foreach($norm['registers'] as $rid) {
@@ -511,16 +533,14 @@ class AudienceSpec
         $includeMailGroups = !array_key_exists('includeMailGroups', $opts) || !empty($opts['includeMailGroups']);
 
         $catalog = array(
-            'groups' => array(
-                array('id' => 'musicians', 'label' => 'Alle Musiker', 'meta' => 'Rolle'),
-                array('id' => 'members', 'label' => 'Alle Vereinsmitglieder', 'meta' => 'Rolle'),
-                array('id' => 'nonmembers', 'label' => 'alle Nicht-Mitglieder', 'meta' => 'Rolle'),
-                array('id' => 'users', 'label' => 'alle User', 'meta' => 'Rolle'),
-            ),
+            'groups' => array(),
             'registers' => array(),
             'users' => array(),
             'mailGroups' => array(),
         );
+        foreach(self::groupLabels() as $id => $label) {
+            $catalog['groups'][] = array('id' => $id, 'label' => $label, 'meta' => 'Rolle');
+        }
 
         $sqlReg = sprintf(
             'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',

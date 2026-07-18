@@ -195,7 +195,8 @@
 	"open": {"Type": "int", "Default": 1},
 	"new": {"Type": "int", "Default": 1},
 	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
-	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
+	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"PostDiscord": {"Type": "tinyint", "Default": 0}
     },
     "User": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
