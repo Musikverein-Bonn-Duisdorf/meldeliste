@@ -103,16 +103,18 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     if($job->Termin) {
         $job->MemberOnly = 0;
         $job->Register = 0;
+        $job->RecipientSpec = null;
         $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
     else {
-        $job->MemberOnly = (isset($_POST['to']) && $_POST['to'] === 'aktiv') ? 1 : 0;
-        if(!isset($_POST['allReg'])) {
-            $job->Register = isset($_POST['register']) ? (int)$_POST['register'] : 0;
+        $specIn = MailJob::defaultRecipientSpecArray();
+        if(isset($_POST['recipientSpec'])) {
+            $decoded = json_decode((string)$_POST['recipientSpec'], true);
+            if(is_array($decoded)) {
+                $specIn = $decoded;
+            }
         }
-        else {
-            $job->Register = 0;
-        }
+        $job->setRecipientSpecArray($specIn);
         $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
     $job->ensureAttachmentDir();
@@ -162,14 +164,75 @@ if(isset($_GET['deleted'])) {
 
 $memberonly = $job ? (bool)$job->MemberOnly : false;
 $register = $job ? (int)$job->Register : 0;
+$recipientSpec = $job ? $job->getRecipientSpecArray() : MailJob::defaultRecipientSpecArray();
+// Neue / leere Entwürfe: Alle Musiker vorauswählen und im Job speichern
+if(
+    $job
+    && $job->Status === 'draft'
+    && !(int)$job->Termin
+    && !count($recipientSpec['groups'])
+    && !count($recipientSpec['registers'])
+    && !count($recipientSpec['users'])
+) {
+    $recipientSpec = MailJob::defaultRecipientSpecArray();
+    $job->setRecipientSpecArray($recipientSpec);
+    $job->save();
+}
 $termin = $job ? (int)$job->Termin : $terminParam;
 $gruss = $job ? (int)$job->Gruss : 1;
 $betreff = $job ? (string)$job->Subject : '';
 $textRaw = $job ? (string)$job->BodyText : '';
 $textPreview = $job ? $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '') : '';
 $anrede = 'Hallo {VORNAME},';
-$allReg = ($register === 0);
 $postDiscord = ($discordAvailable && $job) ? ((int)$job->PostDiscord === 1) : false;
+
+// Catalog for chip autocomplete
+$mailRecipientCatalog = array(
+    'groups' => array(
+        array('id' => 'musicians', 'label' => 'Alle Musiker', 'meta' => 'Gruppe'),
+        array('id' => 'members', 'label' => 'Alle Vereinsmitglieder', 'meta' => 'Gruppe'),
+        array('id' => 'nonmembers', 'label' => 'alle Nicht-Mitglieder', 'meta' => 'Gruppe'),
+        array('id' => 'users', 'label' => 'alle User', 'meta' => 'Gruppe'),
+    ),
+    'registers' => array(),
+    'users' => array(),
+);
+$sqlReg = sprintf(
+    'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
+    $GLOBALS['dbprefix']
+);
+$dbrReg = mysqli_query($GLOBALS['conn'], $sqlReg);
+if($dbrReg) {
+    while($r = mysqli_fetch_array($dbrReg)) {
+        $mailRecipientCatalog['registers'][] = array(
+            'id' => (int)$r['Index'],
+            'label' => html_entity_decode((string)$r['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+        );
+    }
+}
+$sqlUser = sprintf(
+    'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
+     FROM `%sUser` u
+     LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
+     LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+     WHERE u.`Deleted` != 1 AND u.`getMail` = 1 AND (u.`Email` != "" OR u.`Email2` != "")
+     ORDER BY u.`Nachname`, u.`Vorname`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+);
+$dbrUser = mysqli_query($GLOBALS['conn'], $sqlUser);
+if($dbrUser) {
+    while($u = mysqli_fetch_array($dbrUser)) {
+        $name = trim($u['Vorname'].' '.$u['Nachname']);
+        $regName = html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $mailRecipientCatalog['users'][] = array(
+            'id' => (int)$u['Index'],
+            'label' => $name,
+            'meta' => $regName,
+        );
+    }
+}
 
 $allJobs = MailJob::listJobs(null, 300);
 
@@ -345,81 +408,94 @@ foreach($allJobs as $rowJob) {
              $t=new Termin;
              $t->load_by_id($termin);
     ?>
-             <div class="w3-mobile w3-margin-bottom w3-padding">Alle Teilnehmer von <?php echo htmlspecialchars($t->Name." (".$t->getGermanDate().")", ENT_QUOTES, 'UTF-8'); ?></div>
+             <div class="w3-mobile w3-margin-bottom w3-padding">Alle Teilnehmer von <?php echo htmlspecialchars($t->Name." (".$t->getGermanDate().")", ENT_QUOTES, 'UTF-8'); ?>
+               <span id="mailRecipientCount" class="mail-recipient-count" data-termin="<?php echo (int)$termin; ?>" aria-live="polite"></span>
+             </div>
     <input type="hidden" name="termin" value="<?php echo (int)$termin; ?>" />
+    <script>
+    (function() {
+      var el = document.getElementById('mailRecipientCount');
+      if(!el) return;
+      var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4 || xhr.status !== 200) return;
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var n = data && typeof data.count === 'number' ? data.count : 0;
+          el.textContent = n === 1 ? '1 Empfänger' : (n + ' Empfänger');
+        } catch(e) {}
+      };
+      xhr.open('GET', 'mailRecipientCount.php?termin=' + encodeURIComponent(el.getAttribute('data-termin') || '0'), true);
+      xhr.send();
+    })();
+    </script>
     <?php
          }
          else {
     ?>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
-      <div class="w3-mobile">
-	<input class="w3-radio w3-mobile" type="radio" name="to" value="aktiv" <?php if($memberonly) echo "checked"; ?> />
-	<label>aktive Vereinsmitglieder</label>
+      <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
+      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Register oder Person tippen…" autocomplete="off" />
+      <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
+      <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
+      <p class="w3-small w3-margin-top mail-recipient-count-line">
+        <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
+      </p>
     </div>
-    <div class="w3-mobile">
-	<input class="w3-radio w3-mobile" type="radio" name="to" value="all" <?php if(!$memberonly) echo "checked"; ?> />
-	<label>alle Musiker</label>
-      </div>
-    </div>
-    <label>Register</label>
-    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
-    <input class="w3-check" type="checkbox" name="allReg" <?php if($allReg) echo "checked"; ?>>
-    <label>alle Register</label>
-    <select id="register" class="w3-select w3-margin-top" name="register" <?php if($allReg) echo 'style="display:none"'; ?>>
-    <?php RegisterOption($register); ?>
-    </select>
-    </div>
-<script>
-    var rad = document.mailform.allReg;
-    var select = document.getElementById("register");
-    rad.onclick = function () {
-	if(this.checked) {
-	    select.style.display = 'none';
-	}
-	else {
-	    select.style.display = 'block';
-	}
-	if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
-    };
-</script>
-<?php } ?>
-<?php if($discordAvailable) { ?>
+<script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($mailRecipientCatalog, JSON_UNESCAPED_UNICODE); ?></script>
+<script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
 <script>
 (function() {
-  var form = document.mailform;
-  var cb = document.getElementById('postDiscord');
-  if(!form || !cb) return;
-  var isTermin = <?php echo $termin ? 'true' : 'false'; ?>;
-
-  window.syncDiscordDefault = function() {
-    if(isTermin) {
-      cb.checked = false;
-      return;
-    }
-    var toAll = form.to && form.to.value === 'all';
-    // radio NodeList
-    if(form.to && form.to.length) {
-      toAll = false;
-      for(var i = 0; i < form.to.length; i++) {
-        if(form.to[i].value === 'all' && form.to[i].checked) toAll = true;
+  if(typeof MailRecipientChips !== 'undefined') {
+    MailRecipientChips.init({
+      catalogEl: document.getElementById('mailRecipientCatalog'),
+      chipsEl: document.getElementById('mailRecipientChips'),
+      inputEl: document.getElementById('mailRecipientInput'),
+      suggestEl: document.getElementById('mailRecipientSuggest'),
+      hiddenEl: document.getElementById('mailRecipientSpec'),
+      countEl: document.getElementById('mailRecipientCount'),
+      jobId: <?php echo (int)$job->Index; ?>,
+      onChange: function() {
+        if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
       }
-    }
-    var allReg = form.allReg ? !!form.allReg.checked : true;
-    cb.checked = !!(toAll && allReg);
-  };
-
-  if(form.to) {
-    var radios = form.to.length ? form.to : [form.to];
-    for(var i = 0; i < radios.length; i++) {
-      radios[i].addEventListener('change', window.syncDiscordDefault);
-    }
-  }
-  if(form.register) {
-    form.register.addEventListener('change', window.syncDiscordDefault);
+    });
   }
 })();
 </script>
-<?php } else { ?>
+<script>
+(function() {
+  var form = document.mailform;
+  if(!form) return;
+  window.syncDiscordDefault = function() {
+    var cb = document.getElementById('postDiscord');
+    if(!cb) return;
+    var isTermin = <?php echo $termin ? 'true' : 'false'; ?>;
+    if(isTermin) { cb.checked = false; return; }
+    var specEl = document.getElementById('mailRecipientSpec');
+    try {
+      var spec = JSON.parse(specEl ? specEl.value : '{}');
+      var isDefaultAll = Array.isArray(spec.groups)
+        && spec.groups.length === 1
+        && spec.groups[0] === 'musicians'
+        && (!spec.registers || !spec.registers.length)
+        && (!spec.users || !spec.users.length);
+      cb.checked = !!isDefaultAll;
+    } catch(e) {
+      cb.checked = false;
+    }
+  };
+  window.syncDiscordDefault();
+})();
+</script>
+<?php } ?>
+<?php if($discordAvailable && $termin) { ?>
+<script>
+window.syncDiscordDefault = function() {
+  var cb = document.getElementById('postDiscord');
+  if(cb) cb.checked = false;
+};
+</script>
+<?php } elseif(!$termin && !$discordAvailable) { ?>
 <script>
 window.syncDiscordDefault = function() {};
 </script>
