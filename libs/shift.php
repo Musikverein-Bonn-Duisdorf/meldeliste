@@ -34,24 +34,40 @@ class Shift
             break;
         }	
     }
-    public function getVars() {
-        $sql = sprintf('SELECT * FROM `%sSchichten` WHERE `Index` = %d;',
-        $GLOBALS['dbprefix'],
-        $this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $row = mysqli_fetch_array($dbr);
+    public function getChanges() {
+        $old = new Shift;
+        $old->load_by_id($this->Index);
 
-        return sprintf("Schicht: %d, Termin: <b>%d</b>, Name: <b>%s</b>, Start: <b>%s</b>, Ende: <b>%s</b>, Bedarf: <b>%d</b>",
-        $this->Index,
-        $this->Termin,
-        $this->Name,
-        $this->Start,
-        $this->End,
-        $this->Bedarf
+        $str = sprintf('Schicht: %d, Termin: <b>%d</b>, Name: <b>%s</b>',
+            (int)$this->Index,
+            (int)$this->Termin,
+            (string)$this->Name
         );
+        if($this->Termin != $old->Termin) $str .= ', Termin: '.$old->Termin.' &rArr; <b>'.$this->Termin.'</b>';
+        if($this->Name != $old->Name) $str .= ', Name: '.$old->Name.' &rArr; <b>'.$this->Name.'</b>';
+        if($this->Start != $old->Start) $str .= ', Start: '.$old->Start.' &rArr; <b>'.$this->Start.'</b>';
+        if($this->End != $old->End) $str .= ', Ende: '.$old->End.' &rArr; <b>'.$this->End.'</b>';
+        if($this->Bedarf != $old->Bedarf) $str .= ', Bedarf: '.$old->Bedarf.' &rArr; <b>'.$this->Bedarf.'</b>';
+        return $str;
     }
+
+    public function getVars() {
+        $parts = array();
+        $parts[] = sprintf('Schicht: %d', (int)$this->Index);
+        $parts[] = logPart('Termin', (string)(int)$this->Termin);
+        logAppendFilled($parts, 'Name', $this->Name, (string)$this->Name);
+        if(logValueFilled($this->Start) && $this->Start !== '00:00:00') {
+            $parts[] = logPart('Start', (string)$this->Start);
+        }
+        if(logValueFilled($this->End) && $this->End !== '00:00:00') {
+            $parts[] = logPart('Ende', (string)$this->End);
+        }
+        if((int)$this->Bedarf > 0) {
+            $parts[] = logPart('Bedarf', (string)(int)$this->Bedarf);
+        }
+        return implode(', ', $parts);
+    }
+
     public function getTime() {
         if($this->Start == "00:00:00" && $this->End == "00:00:00") return "&nbsp;";
         if($this->End) {
@@ -135,9 +151,9 @@ class Shift
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();

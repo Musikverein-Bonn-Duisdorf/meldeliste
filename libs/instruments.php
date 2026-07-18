@@ -51,6 +51,51 @@ class Instruments
         return true;
     }
 
+    public function getChanges() {
+        $old = new Instruments;
+        $old->load_by_id($this->Index);
+
+        $sql = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = %d;',
+        $GLOBALS['dbprefix'],
+        (int)$this->Instrument
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        $Instrument = ($row && isset($row['Name'])) ? $row['Name'] : '?';
+
+        $str = sprintf('Instrument-ID: %d, <b>%s</b> %s',
+            (int)$this->Index,
+            $Instrument,
+            RegNumber::displayInstrument($this->RegNumber)
+        );
+        if($this->Instrument != $old->Instrument) {
+            $oldName = '?';
+            $sqlOld = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = %d;',
+                $GLOBALS['dbprefix'],
+                (int)$old->Instrument
+            );
+            $dbrOld = mysqli_query($GLOBALS['conn'], $sqlOld);
+            sqlerror();
+            $rowOld = $dbrOld ? mysqli_fetch_array($dbrOld) : null;
+            if($rowOld && isset($rowOld['Name'])) $oldName = $rowOld['Name'];
+            $str .= ', Instrument: '.$oldName.' &rArr; <b>'.$Instrument.'</b>';
+        }
+        if($this->RegNumber != $old->RegNumber) {
+            $str .= ', Inventarnummer: '.RegNumber::displayInstrument($old->RegNumber)
+                .' &rArr; <b>'.RegNumber::displayInstrument($this->RegNumber).'</b>';
+        }
+        if($this->Vendor != $old->Vendor) $str .= ', Hersteller: '.$old->Vendor.' &rArr; <b>'.$this->Vendor.'</b>';
+        if($this->Model != $old->Model) $str .= ', Model: '.$old->Model.' &rArr; <b>'.$this->Model.'</b>';
+        if($this->SerialNr != $old->SerialNr) $str .= ', Seriennummer: '.$old->SerialNr.' &rArr; <b>'.$this->SerialNr.'</b>';
+        if($this->PurchaseDate != $old->PurchaseDate) $str .= ', Kaufdatum: '.germanDate($old->PurchaseDate,0).' &rArr; <b>'.germanDate($this->PurchaseDate,0).'</b>';
+        if($this->PurchasePrize != $old->PurchasePrize) $str .= ', Kaufpreis: '.mkPrize($old->PurchasePrize).' &rArr; <b>'.mkPrize($this->PurchasePrize).'</b>';
+        if($this->Owner != $old->Owner) $str .= ', Besitzer: '.getOwner((int)$old->Owner).' &rArr; <b>'.getOwner((int)$this->Owner).'</b>';
+        if($this->Insurance != $old->Insurance) $str .= ', Versichert: '.bool2string($old->Insurance).' &rArr; <b>'.bool2string($this->Insurance).'</b>';
+        if($this->Comment != $old->Comment) $str .= ', Kommentar: '.$old->Comment.' &rArr; <b>'.$this->Comment.'</b>';
+        return $str;
+    }
+
     public function getVars() {
         $sql = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = %d;',
         $GLOBALS['dbprefix'],
@@ -61,27 +106,31 @@ class Instruments
         $row = $dbr ? mysqli_fetch_array($dbr) : null;
         $Instrument = ($row && isset($row['Name'])) ? $row['Name'] : '?';
 
-        return sprintf("Instrument-ID: %d, Instrument: <b>%s</b>, Inventarnummer: <b>%s</b>, Hersteller: <b>%s</b>, Model: <b>%s</b>, Seriennummer: <b>%s</b>, Kaufdatum: <b>%s</b>, Kaufpreis: <b>%s</b>, Besitzer: <b>%s</b>, Versichert: <b>%s</b>, Kommentar: <b>%s</b>",
-        (int)$this->Index,
-        $Instrument,
-        RegNumber::displayInstrument($this->RegNumber),
-        (string)$this->Vendor,
-        (string)$this->Model,
-        (string)$this->SerialNr,
-        germanDate($this->PurchaseDate,0),
-        mkPrize($this->PurchasePrize),
-        getOwner((int)$this->Owner),
-        bool2string($this->Insurance),
-        (string)$this->Comment
-        );
+        $parts = array();
+        $parts[] = sprintf('Instrument-ID: %d', (int)$this->Index);
+        $parts[] = logPart('Instrument', $Instrument);
+        $parts[] = logPart('Inventarnummer', RegNumber::displayInstrument($this->RegNumber));
+        logAppendFilled($parts, 'Hersteller', $this->Vendor, (string)$this->Vendor);
+        logAppendFilled($parts, 'Model', $this->Model, (string)$this->Model);
+        logAppendFilled($parts, 'Seriennummer', $this->SerialNr, (string)$this->SerialNr);
+        $pdate = germanDate($this->PurchaseDate, 0);
+        logAppendFilled($parts, 'Kaufdatum', $pdate, (string)$pdate);
+        $prize = mkPrize($this->PurchasePrize);
+        logAppendFilled($parts, 'Kaufpreis', $prize, (string)$prize);
+        if((int)$this->Owner > 0) {
+            $parts[] = logPart('Besitzer', getOwner((int)$this->Owner));
+        }
+        logAppendTrue($parts, 'Versichert', $this->Insurance);
+        logAppendFilled($parts, 'Kommentar', $this->Comment, (string)$this->Comment);
+        return implode(', ', $parts);
     }
 
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            if(!$this->update()) return false;
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            if(!$this->update()) return false;
             return true;
         }
         if(!$this->insert()) return false;

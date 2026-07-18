@@ -69,17 +69,17 @@ class InventoriesLoan
 
         $u = new User;
         $u->load_by_id($this->User);
-        
-        return sprintf("InventoriesLoan-ID: %d, Inventory: (%d) <b>%s</b>, User: (%d) <b>%s</b>, StartDate: <b>%s</b>, EndDate: <b>%s</b>, ContractFile: <b>%s</b>",
-        $this->Index,
-        $this->Inventory,
-        $Inventory->getInventoryType(),
-        $this->User,
-        $u->getName(),
-        germanDate($this->StartDate,0),
-        germanDate($this->EndDate,0),
-        $Inventory->ContractFile
-        );
+
+        $parts = array();
+        $parts[] = sprintf('InventoriesLoan-ID: %d', (int)$this->Index);
+        $parts[] = sprintf('Inventory: (%d) <b>%s</b>', (int)$this->Inventory, $Inventory->getInventoryType());
+        $parts[] = sprintf('User: (%d) <b>%s</b>', (int)$this->User, $u->getName());
+        $start = germanDate($this->StartDate, 0);
+        logAppendFilled($parts, 'StartDate', $start, (string)$start);
+        $end = germanDate($this->EndDate, 0);
+        logAppendFilled($parts, 'EndDate', $end, (string)$end);
+        logAppendFilled($parts, 'ContractFile', $this->ContractFile, (string)$this->ContractFile);
+        return implode(', ', $parts);
     }
 
     public function save() {

@@ -115,7 +115,7 @@ class User
     }
     
     public function getVars() {
-        if(!$this->iName) {
+        if(!$this->iName && (int)$this->Instrument > 0) {
             $sql = sprintf('SELECT `Name` FROM `%sInstrument` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             (int)$this->Instrument
@@ -127,22 +127,23 @@ class User
                 $this->iName = $row['Name'];
             }
         }
-        return sprintf("User-ID: %d, Vorname: <b>%s</b>, Nachname: <b>%s</b>, RefID: <b>%s</b>, Login: <b>%s</b>, Mitglied: <b>%s</b>, Instrument: <b>%s</b>, Email: <b>%s</b>, Email2: <b>%s</b>, Geburtstag: <b>%s</b>, Mailverteiler: <b>%s</b>, Admin: <b>%s</b>, RegisterLead: <b>%s</b>, LastLogin: <b>%s</b>",
-        (int)$this->Index,
-        (string)$this->Vorname,
-        (string)$this->Nachname,
-        $this->RefID === null || $this->RefID === '' ? '-' : (string)$this->RefID,
-        (string)$this->login,
-        bool2string($this->Mitglied),
-        (string)$this->iName,
-        (string)$this->Email,
-        (string)$this->Email2,
-        germanDate($this->Birthday, true),
-        bool2string($this->getMail),
-        bool2string($this->Admin),
-        bool2string($this->RegisterLead),
-        (string)$this->LastLogin
-        );
+        $parts = array();
+        $parts[] = sprintf('User-ID: %d', (int)$this->Index);
+        logAppendFilled($parts, 'Vorname', $this->Vorname, (string)$this->Vorname);
+        logAppendFilled($parts, 'Nachname', $this->Nachname, (string)$this->Nachname);
+        logAppendFilled($parts, 'RefID', $this->RefID, (string)$this->RefID);
+        logAppendFilled($parts, 'Login', $this->login, (string)$this->login);
+        $parts[] = logPart('Mitglied', bool2string($this->Mitglied));
+        logAppendFilled($parts, 'Instrument', $this->iName, (string)$this->iName);
+        logAppendFilled($parts, 'Email', $this->Email, (string)$this->Email);
+        logAppendFilled($parts, 'Email2', $this->Email2, (string)$this->Email2);
+        $bday = germanDate($this->Birthday, true);
+        logAppendFilled($parts, 'Geburtstag', $bday, (string)$bday);
+        $parts[] = logPart('Mailverteiler', bool2string($this->getMail));
+        logAppendTrue($parts, 'Admin', $this->Admin);
+        logAppendTrue($parts, 'RegisterLead', $this->RegisterLead);
+        logAppendFilled($parts, 'LastLogin', $this->LastLogin, (string)$this->LastLogin);
+        return implode(', ', $parts);
     }
     public function getShort() {
         if(strlen($this->Vorname) >=2) {

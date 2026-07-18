@@ -35,6 +35,43 @@ class ExternMeldung
             break;
         }	
     }
+    public function getChanges() {
+        $old = new ExternMeldung;
+        $old->load_by_id($this->Index);
+
+        $t = new Termin;
+        $t->load_by_id($this->Termin);
+        $u = new User;
+        $u->load_by_id($this->User);
+
+        $str = sprintf('extMelde-ID: %d, Termin: (%d) <b>%s</b>, Name: <b>%s</b>',
+            (int)$this->Index,
+            (int)$this->Termin,
+            $t->Name,
+            (string)$this->Name
+        );
+        if($this->Termin != $old->Termin) {
+            $ot = new Termin;
+            $ot->load_by_id($old->Termin);
+            $str .= ', Termin: '.$ot->Name.' &rArr; <b>'.$t->Name.'</b>';
+        }
+        if($this->User != $old->User) {
+            $ou = new User;
+            $ou->load_by_id($old->User);
+            $str .= ', eingetragen von: '.$ou->getName().' &rArr; <b>'.$u->getName().'</b>';
+        }
+        if($this->Name != $old->Name) $str .= ', Name: '.$old->Name.' &rArr; <b>'.$this->Name.'</b>';
+        if($this->Instrument != $old->Instrument) {
+            $oi = new Instrument;
+            $oi->load_by_id($old->Instrument);
+            $ni = new Instrument;
+            $ni->load_by_id($this->Instrument);
+            $str .= ', Instrument: '.$oi->Name.' &rArr; <b>'.$ni->Name.'</b>';
+        }
+        if($this->Wert != $old->Wert) $str .= ', Wert: '.meldeWert($old->Wert).' &rArr; <b>'.meldeWert($this->Wert).'</b>';
+        return $str;
+    }
+
     public function getVars() {
         $t = new Termin;
         $t->load_by_id($this->Termin);
@@ -42,23 +79,22 @@ class ExternMeldung
         $i->load_by_id($this->Instrument);
         $u = new User;
         $u->load_by_id($this->User);
-        $str = sprintf("extMelde-ID: %d, eingetragen von: <b>%s</b>, Termin: (%d) <b>%s</b>, Name: <b>%s</b>, Instrument: <b>%s</b>, Wert: <b>%s</b>",
-        $this->Index,
-        $u->getName(),
-        $this->Termin,
-        $t->Name,
-        $this->Name,
-        $i->Name,
-        meldeWert($this->Wert)
-        );
-        return $str;
+        $parts = array();
+        $parts[] = sprintf('extMelde-ID: %d', (int)$this->Index);
+        logAppendFilled($parts, 'eingetragen von', $u->getName(), $u->getName());
+        $parts[] = sprintf('Termin: (%d) <b>%s</b>', (int)$this->Termin, $t->Name);
+        logAppendFilled($parts, 'Name', $this->Name, (string)$this->Name);
+        logAppendFilled($parts, 'Instrument', $i->Name, (string)$i->Name);
+        $parts[] = logPart('Wert', meldeWert($this->Wert));
+        return implode(', ', $parts);
     }
+
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $this->update();
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
+            $this->update();
         }
         else {
             $this->insert();
