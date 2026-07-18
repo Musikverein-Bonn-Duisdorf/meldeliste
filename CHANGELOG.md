@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-6d27d (2026-07-18)
+
+- MELD-104: show distribution chips on sent mail detail view
+- MELD-104: Versendete Mails zeigen Verteiler
+
 ## 2026-07-18-adf8c (2026-07-18)
 
 - MELD-103: align Status/Aktion columns in mail list grids
