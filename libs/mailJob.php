@@ -366,15 +366,6 @@ class MailJob
         return array('musicians', 'members', 'nonmembers', 'users');
     }
 
-    public static function audienceLabels() {
-        return array(
-            'musicians' => 'Alle Musiker',
-            'members' => 'Alle Vereinsmitglieder',
-            'nonmembers' => 'alle Nicht-Mitglieder',
-            'users' => 'alle User',
-        );
-    }
-
     public function load_by_id($Index) {
         self::ensureSchema();
         $Index = (int)$Index;
@@ -756,10 +747,6 @@ class MailJob
             $rows[] = $row;
         }
         return $rows;
-    }
-
-    public static function listDrafts() {
-        return self::listJobs('draft');
     }
 
     /**

@@ -176,46 +176,6 @@ function getAdminPage($string) {
     }
 }
 
-function getBirthdays($date1, $date2) {
-    $begin = new DateTime($date1);
-    $end   = new DateTime($date2);
-
-    $users = array();
-    $birthdays = array();
-    $ages = array();
-    
-    for($i = $begin; $i <= $end; $i->modify('+1 day')) {
-        $date=$i->format("-m-d");
-        $sql = sprintf('SELECT `Index`, `Birthday` FROM `%sUser` WHERE `Birthday` LIKE "%%%s" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
-                       $GLOBALS['dbprefix'],
-                       $date
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        while($row = mysqli_fetch_array($dbr)) {
-            array_push($users, $row['Index']);
-            array_push($birthdays, $row['Birthday']);
-            $bday = new DateTime($row['Birthday']);
-            $age=intval($i->format("Y"))-intval($bday->format("Y"));
-            array_push($ages, $age);
-        }
-    }
-    for($i = 0; $i < sizeof($users); $i++) {
-        $day = new DateTime($birthdays[$i]);
-        $u = new User;
-        $u->load_by_id($users[$i]);
-        echo "<div><i class=\"fa-solid fa-cake-candles\"></i> <b>".$u->getName()."</b> wird am <b>".$day->format("d.m.")."</b> ".$ages[$i].".</div>\n";
-    }
-}
-
-function getCurrentBirthdays() {
-    return getBirthdays(date('d.m.Y',strtotime("-7 days")), date("Y-m-d"));
-}
-
-function getNextRegNumber() {
-    return RegNumber::nextForInstruments();
-}
-
 function getNextRegInventoryNumber($inventoryTypeId = 0) {
     $inventoryTypeId = (int)$inventoryTypeId;
     if($inventoryTypeId < 1) {
@@ -737,12 +697,6 @@ function rebuildCalendars() {
     }
 }
 
-function requireAdmin() {
-    if(!isAdmin()) {
-        denyAccess('Admin-Zugang erforderlich.');
-    }
-}
-
 function requirePermission($perm) {
     $P = new Permissions;
     $P->load_by_user($_SESSION['userid']);
@@ -776,18 +730,6 @@ function denyAccess($message = 'Keine Berechtigung für diesen Bereich.') {
         .'</div>';
     include __DIR__.'/../common/footer.php';
     exit;
-}
-
-/**
- * Require a permission or deny with a full page warning.
- * @param string $perm
- * @param string|null $message
- */
-function requirePermissionOrDeny($perm, $message = null) {
-    if(requirePermission($perm)) {
-        return;
-    }
-    denyAccess($message !== null ? $message : 'Keine Berechtigung für diesen Bereich.');
 }
 
 function isAdmin() {
@@ -824,12 +766,6 @@ function string2gDate($string) {
     $m = substr($string, 5, 2);
     $d = substr($string, 8, 2);
     return "new Date(".intval($y).", ".(intval($m)-1).", ".intval($d).")";
-}
-
-function string2Date($string) {
-    $y = substr($string, 0, 3);
-    $m = substr($string, 5, 6);
-    $d = substr($string, 8, 9);
 }
 
 function UserOptionAll($val) {
