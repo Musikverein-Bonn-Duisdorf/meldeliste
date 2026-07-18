@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-7bfe4 (2026-07-18)
+
+- Fix: meldungen.php crasht bei Schichten — fehlende Tabelle AushilfenShift
+- Fix: Schicht-Meldungen DOM-Replace und Kartenfarbe
+
 ## 2026-07-18-ec116 (2026-07-18)
 
 - MELD-87: ungenutzte Dateien und tote Methoden entfernen
