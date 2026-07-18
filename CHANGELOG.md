@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-e1827 (2026-07-18)
+
+- MELD-94: GitHub README und Lizenz
+- MELD-94: add proprietary LICENSE and project README
+
 ## 2026-07-18-3095d (2026-07-18)
 
 - MELD-93: bump schema version when config defaults change
