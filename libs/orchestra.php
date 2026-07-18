@@ -1,5 +1,67 @@
 <?php
 /**
+ * Load shared orchestra datasets once (for full + activeOnly render).
+ * @param int $tid
+ * @return array{meldungen:array,aushilfen:array,users:array,instruments:array}
+ */
+function loadOrchestraData($tid) {
+    $tid = (int)$tid;
+    $aMeldungen = array();
+    $aAushilfen = array();
+    $aUser = array();
+    $aInstrument = array();
+    if($tid) {
+        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = %d ORDER BY `Instrument`, `Nachname`, `Vorname`;",
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $GLOBALS['dbprefix'],
+                       $tid
+        );
+        $dbMeldungen = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbMeldungen) {
+            while($row = mysqli_fetch_array($dbMeldungen)) {
+                $aMeldungen[] = $row;
+            }
+        }
+
+        $sql = sprintf("SELECT * FROM `%sAushilfen` WHERE `Termin` = %d;",
+        $GLOBALS['dbprefix'],
+        $tid
+        );
+        $dbAushilfe = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbAushilfe) {
+            while($row = mysqli_fetch_array($dbAushilfe)) {
+                $aAushilfen[] = $row;
+            }
+        }
+    }
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;",
+                   $GLOBALS['dbprefix']
+    );
+    $dbUser = mysqli_query($GLOBALS['conn'], $sql);
+    if($dbUser) {
+        while($row = mysqli_fetch_array($dbUser)) {
+            $aUser[] = $row;
+        }
+    }
+    $sql = sprintf("SELECT * FROM `%sInstrument`;",
+                   $GLOBALS['dbprefix']
+    );
+    $dbInstrument = mysqli_query($GLOBALS['conn'], $sql);
+    if($dbInstrument) {
+        while($row = mysqli_fetch_array($dbInstrument)) {
+            $aInstrument[] = $row;
+        }
+    }
+    return array(
+        'meldungen' => $aMeldungen,
+        'aushilfen' => $aAushilfen,
+        'users' => $aUser,
+        'instruments' => $aInstrument,
+    );
+}
+
+/**
  * Render orchestra seating SVG.
  *
  * Always uses logical coordinates with viewBox so CSS can scale to the container
@@ -8,8 +70,9 @@
  * @param int  $tid        Termin id (0 = static register colors, no responses)
  * @param float $scale     Unused for sizing (compat)
  * @param bool $activeOnly Packed layout: only ja/vielleicht
+ * @param array|null $data Optional preload from loadOrchestraData()
  */
-function printOrchestra($tid, $scale = 1, $activeOnly = false) {
+function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
     unset($scale); // sizing is CSS/viewBox based
     $baseWidth = 1000;
     $baseHeight = 600;
@@ -32,45 +95,13 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $svgClass .= ' orchestra-svg--register-bands';
     }
 
-    $aMeldungen = array();
-    $aAushilfen = array();
-    $aInstrument = array();
-    $aUser = array();
-    if($tid) {
-        $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = %d ORDER BY `Instrument`, `Nachname`, `Vorname`;",
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $tid
-        );
-        $dbMeldungen = mysqli_query($GLOBALS['conn'], $sql);
-        while($row = mysqli_fetch_array($dbMeldungen)) {
-            $aMeldungen[] = $row;
-        }
-
-        $sql = sprintf("SELECT * FROM `%sAushilfen` WHERE `Termin` = %d;",
-        $GLOBALS['dbprefix'],
-        $tid
-        );
-        $dbAushilfe = mysqli_query($GLOBALS['conn'], $sql);
-        while($row = mysqli_fetch_array($dbAushilfe)) {
-            $aAushilfen[] = $row;
-        }
+    if(!is_array($data)) {
+        $data = loadOrchestraData($tid);
     }
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;",
-                   $GLOBALS['dbprefix']
-    );
-    $dbUser = mysqli_query($GLOBALS['conn'], $sql);
-    while($row = mysqli_fetch_array($dbUser)) {
-        $aUser[] = $row;
-    }
-    $sql = sprintf("SELECT * FROM `%sInstrument`;",
-                   $GLOBALS['dbprefix']
-    );
-    $dbInstrument = mysqli_query($GLOBALS['conn'], $sql);
-    while($row = mysqli_fetch_array($dbInstrument)) {
-        $aInstrument[] = $row;
-    }
+    $aMeldungen = isset($data['meldungen']) ? $data['meldungen'] : array();
+    $aAushilfen = isset($data['aushilfen']) ? $data['aushilfen'] : array();
+    $aUser = isset($data['users']) ? $data['users'] : array();
+    $aInstrument = isset($data['instruments']) ? $data['instruments'] : array();
 
     $meldungByUser = array();
     foreach($aMeldungen as $meldung) {
