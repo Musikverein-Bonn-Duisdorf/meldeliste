@@ -1,137 +1,110 @@
 <?php
 session_start();
-$_SESSION['page']='evaluate';
-$_SESSION['adminpage']=true;
+$_SESSION['page'] = 'evaluate';
+$_SESSION['adminpage'] = true;
 include "common/header.php";
 if(!requirePermission("perm_showLog")) {
     denyAccess();
 }
+
+require_once __DIR__.'/libs/evaluateStats.php';
+
+$days = evaluateNormalizeDays(isset($_GET['days']) ? (int)$_GET['days'] : 90);
+$besetzungOnly = !empty($_GET['besetzung']);
+$inactiveDays = isset($GLOBALS['optionsDB']['inactiveUsersDays'])
+    ? max(1, (int)$GLOBALS['optionsDB']['inactiveUsersDays'])
+    : 90;
+
+$attendance = evaluateAttendanceSeries($days, $besetzungOnly);
+$logSeries = evaluateLogSeries($days);
+$ranking = evaluateAttendanceRanking($days, $besetzungOnly);
+$inactive = evaluateInactiveUsers($inactiveDays);
+
+$assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
+$jsMtime = @filemtime(__DIR__.'/js/evaluate.js');
+$evaluateJs = htmlspecialchars('js/evaluate.js?'.$assetV.'-'.$jsMtime, ENT_QUOTES, 'UTF-8');
+
+$payload = array(
+    'attendance' => $attendance,
+    'log' => $logSeries,
+    'ranking' => $ranking,
+    'inactive' => $inactive,
+    'logLabels' => array('FATAL', 'ERROR', 'WARNING', 'DBDELETE', 'DBINSERT', 'DBUPDATE', 'EMAIL', 'INFO'),
+);
 ?>
 <div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<h2>Datenauswertung</h2>
+  <h2>Datenauswertung</h2>
 </div>
-<?php
-$now = date("Y-m-d");
-$sql = sprintf('SELECT DATE(`Timestamp`) AS `LogDate`, COUNT(CASE WHEN `Type` = 0 THEN 1 END) AS `NumLogs0`, COUNT(CASE WHEN `Type` = 1 THEN 1 END) AS `NumLogs1`, COUNT(CASE WHEN `Type` = 2 THEN 1 END) AS `NumLogs2`, COUNT(CASE WHEN `Type` = 3 THEN 1 END) AS `NumLogs3`, COUNT(CASE WHEN `Type` = 4 THEN 1 END) AS `NumLogs4`, COUNT(CASE WHEN `Type` = 5 THEN 1 END) AS `NumLogs5`, COUNT(CASE WHEN `Type` = 6 THEN 1 END) AS `NumLogs6`, COUNT(CASE WHEN `Type` = 7 THEN 1 END) AS `NumLogs7` FROM  `%sLog` GROUP BY DATE(`Timestamp`) ORDER BY `LogDate` DESC LIMIT %d;',
-$GLOBALS['dbprefix'],
-$GLOBALS['optionsDB']['numberOfDaysInHistory']
-);
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-$plotline = "[";
-while($row = mysqli_fetch_array($dbr)) {
-    $plotline = $plotline."[".string2gDate($row['LogDate']).",".$row['NumLogs0'].",".$row['NumLogs1'].",".$row['NumLogs2'].",".$row['NumLogs3'].",".$row['NumLogs4'].",".$row['NumLogs5'].",".$row['NumLogs6'].",".$row['NumLogs7']."],\n";
-}
-$plotline = $plotline."]";
 
-?>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script>
-    google.charts.load('current', {packages: ['corechart', 'line'], 'language': 'de'});
-google.charts.setOnLoadCallback(drawBasic);
+<div class="w3-container w3-margin-top w3-margin-bottom">
+  <form method="get" action="evaluate.php" class="w3-bar w3-mobile" style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
+    <label for="eval-days"><b>Zeitraum</b></label>
+    <input id="eval-days" name="days" type="number" min="1" max="3650" step="1" value="<?php echo (int)$days; ?>" class="w3-input w3-border w3-mobile" style="max-width:6rem;" required>
+    <span>Tage</span>
+    <button type="submit" class="w3-button w3-border <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>">Anzeigen</button>
+    <label class="w3-mobile">
+      <input type="checkbox" name="besetzung" value="1"<?php echo $besetzungOnly ? ' checked' : ''; ?> onchange="this.form.submit()">
+      nur Besetzung
+    </label>
+  </form>
+</div>
 
-function drawBasic() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('date', 'Datum');
-    data.addColumn('number', 'FATAL');
-    data.addColumn('number', 'ERROR');
-    data.addColumn('number', 'WARNING');
-    data.addColumn('number', 'DBDELETE');
-    data.addColumn('number', 'DBINSERT');
-    data.addColumn('number', 'DBUPDATE');
-    data.addColumn('number', 'EMAIL');
-    data.addColumn('number', 'INFO');
-    
-    data.addRows(<?php echo $plotline; ?>);
+<div class="w3-container w3-margin-bottom">
+  <h3>Teilnahme über Zeit</h3>
+  <p class="w3-text-gray">Veröffentlichte Termine ohne Schichten<?php echo $besetzungOnly ? ' (nur Besetzung)' : ''; ?> der letzten <?php echo (int)$days; ?> Tage.</p>
+  <div class="w3-responsive" style="position:relative;height:320px;">
+    <canvas id="chartAttendance" aria-label="Teilnahme-Diagramm"></canvas>
+  </div>
+</div>
 
-    var options = {
-        hAxis: {
-            title: 'Datum'
-        },
-        vAxis: {
-            title: 'Anzahl'
-        },
-        height: 450,
-        timeline: {
-          groupByRowLabel: true
-        },
-        bar: {
-          groupWidth: '100%',
-        },
-        isStacked: true,
-    };
+<div class="w3-container w3-margin-bottom">
+  <h3>System-Log</h3>
+  <div class="w3-responsive" style="position:relative;height:320px;">
+    <canvas id="chartLog" aria-label="Log-Diagramm"></canvas>
+  </div>
+</div>
 
-    var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+<div class="w3-container w3-margin-bottom">
+  <h3>Ranking nach Teilnahme</h3>
+  <p class="w3-text-gray">Quote = Ja-Meldungen / Termine im Zeitraum. Spaltenüberschriften zum Sortieren anklicken.</p>
+  <div class="w3-responsive">
+    <table id="evalRanking" class="w3-table w3-striped w3-bordered w3-hoverable">
+      <thead>
+        <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+          <th class="eval-sort" data-sort="name" data-type="string" style="cursor:pointer;">Name</th>
+          <th class="eval-sort" data-sort="yes" data-type="number" style="cursor:pointer;">Ja</th>
+          <th class="eval-sort" data-sort="no" data-type="number" style="cursor:pointer;">Nein</th>
+          <th class="eval-sort" data-sort="maybe" data-type="number" style="cursor:pointer;">Vielleicht</th>
+          <th class="eval-sort" data-sort="termine" data-type="number" style="cursor:pointer;">Termine</th>
+          <th class="eval-sort" data-sort="quote" data-type="number" style="cursor:pointer;">Quote</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
-    chart.draw(data, options);
-}
+<div class="w3-container w3-margin-bottom">
+  <h3>Inaktive Nutzer</h3>
+  <p class="w3-text-gray">Musiker ohne Aktivität (Login und Teilnahme) in den letzten <?php echo (int)$inactiveDays; ?> Tagen. Schwellwert: Konfiguration <code>inactiveUsersDays</code>.</p>
+  <div class="w3-responsive">
+    <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable">
+      <thead>
+        <tr class="<?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+          <th class="eval-sort" data-sort="name" data-type="string" style="cursor:pointer;">Name</th>
+          <th class="eval-sort" data-sort="lastLogin" data-type="string" style="cursor:pointer;">Letzter Login</th>
+          <th class="eval-sort" data-sort="lastAttend" data-type="string" style="cursor:pointer;">Letzte Teilnahme</th>
+          <th class="eval-sort" data-sort="quote" data-type="number" style="cursor:pointer;">Meldequote</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
-     </script>
-                                     
-  <div id="chart_div"></div>
-
-
-<?php
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `Shifts` = 0 AND `published` = 1 AND `Datum` BETWEEN NOW() - INTERVAL %d DAY AND NOW() ORDER BY `Datum`;",
-    $GLOBALS['dbprefix'],
-    $GLOBALS['optionsDB']['numberOfDaysInHistory']
-    );
-$dbr = mysqli_query($GLOBALS['conn'], $sql);
-sqlerror();
-$str = "";
-while($row = mysqli_fetch_array($dbr)) {
-    $t = new Termin;
-    $t->load_by_id($row['Index']);
-    /* $str=$str."[".string2gDate($t->Datum).", ".($t->getMeldungRatio()*100)."],\n"; */
-    $yes = $t->getMeldungenVal(1);
-    $no = $t->getMeldungenVal(2);
-    $maybe = $t->getMeldungenVal(3);
-    $all = $yes + $no + $maybe;
-    $str=$str."[".string2gDate($t->Datum).", ".$yes.", ".$no.", ".$maybe."],\n";
-}
-    ?>
-
-    <script>
-
-google.charts.load('current', {packages: ['corechart'], 'language': 'de'});
-google.charts.setOnLoadCallback(drawBasic);
-
-function drawBasic() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('date', 'Datum');
-    data.addColumn('number', 'ja');
-    data.addColumn('number', 'nein');
-    data.addColumn('number', 'vielleicht');
-    
-    data.addRows(<?php echo "[".$str."]"; ?>);
-
-    var options = {
-        hAxis: {
-            title: 'Datum'
-        },
-        vAxis: {
-          title: 'Meldungen',
-          minValue: 0,
-          /* maxValue: 100, */
-        },
-        height: 450,
-        /* timeline: { */
-        /*   groupByRowLabel: true */
-        /* }, */
-        bar: {
-          groupWidth: '50%',
-        },
-        legend: 'true',
-        isStacked: true
-    };
-
-    var chart = new google.visualization.ColumnChart(document.getElementById('chart_rate'));
-
-    chart.draw(data, options);
-}
-
-     </script>
-<div id="chart_rate"></div>
+<script type="application/json" id="evaluate-data"><?php echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS); ?></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script src="<?php echo $evaluateJs; ?>"></script>
 
 <?php
 include "common/footer.php";
