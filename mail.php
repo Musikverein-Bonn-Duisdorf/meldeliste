@@ -178,6 +178,7 @@ $mailRecipientCatalog = array(
     'groups' => array(
         array('id' => 'musicians', 'label' => 'alle Musiker', 'meta' => 'Gruppe'),
         array('id' => 'members', 'label' => 'Alle Vereinsmitglieder', 'meta' => 'Gruppe'),
+        array('id' => 'nonmembers', 'label' => 'alle Nicht-Mitglieder', 'meta' => 'Gruppe'),
         array('id' => 'users', 'label' => 'alle User', 'meta' => 'Gruppe'),
     ),
     'registers' => array(),

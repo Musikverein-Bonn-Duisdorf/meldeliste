@@ -674,7 +674,7 @@ class Usermail {
             : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register, $this->memberonly ? 1 : 0);
 
         $byId = array();
-        $allowed = array('musicians', 'members', 'users');
+        $allowed = MailJob::allowedGroupIds();
         $groups = array();
         if(isset($spec['groups']) && is_array($spec['groups'])) {
             foreach($spec['groups'] as $g) {
@@ -708,6 +708,10 @@ class Usermail {
             $where = array('`Deleted` != 1', "`Email` != ''");
             if($audience === 'members') {
                 $where[] = '`Mitglied` = 1';
+                $where[] = '`getMail` = 1';
+            }
+            elseif($audience === 'nonmembers') {
+                $where[] = '`Mitglied` != 1';
                 $where[] = '`getMail` = 1';
             }
             elseif($audience === 'musicians') {
