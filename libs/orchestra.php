@@ -473,7 +473,8 @@ function orchestraSeatVisual($wert) {
     case 3:
         return array('color' => '#2196F3', 'opacity' => 0.6, 'label' => 'unsicher', 'textColor' => null);
     default:
-        return array('color' => '#ffffff', 'opacity' => 0.5, 'label' => 'nicht gemeldet', 'textColor' => null);
+        // Deckend weiß, damit Register-Bänder nicht durchscheinen (MELD-98)
+        return array('color' => '#ffffff', 'opacity' => 1, 'label' => 'nicht gemeldet', 'textColor' => null);
     }
 }
 

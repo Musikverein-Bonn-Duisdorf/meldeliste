@@ -95,7 +95,8 @@ function orchestraSeatVisual(wert) {
     // Halbtransparentes Rot, Schrift bewusst weiß und deckend
     if(wert === 2) return {color: '#f42316', opacity: '0.5', label: 'Absage', textColor: '#FFFFFF'};
     if(wert === 3) return {color: '#2196F3', opacity: '0.6', label: 'unsicher', textColor: null};
-    return {color: '#ffffff', opacity: '0.5', label: 'nicht gemeldet', textColor: null};
+    // Deckend weiß, damit Register-Bänder nicht durchscheinen (MELD-98)
+    return {color: '#ffffff', opacity: '1', label: 'nicht gemeldet', textColor: null};
 }
 
 /** Match PHP hexContrastText(): black or white against background luminance. */
