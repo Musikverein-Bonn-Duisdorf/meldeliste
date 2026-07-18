@@ -657,11 +657,25 @@ class Usermail {
     }
 
     /**
+     * Bulk/mail-job recipients: Mailverteiler + mindestens eine Adresse.
+     * @return string SQL AND-clauses without leading AND
+     */
+    protected function mailRecipientBaseWhere($alias = '') {
+        $p = $alias !== '' ? $alias.'.' : '';
+        return array(
+            $p.'`Deleted` != 1',
+            $p.'`getMail` = 1',
+            '('.$p."`Email` != '' OR ".$p."`Email2` != '')",
+        );
+    }
+
+    /**
      * @return array list of user rows with Index, Vorname, Nachname, Email, Email2, activeLink
      */
     protected function resolveRecipients() {
         $rows = array();
         if($this->User > 0) {
+            // Einzelversand (System/Benachrichtigung): keine Verteiler-Pflicht
             $sql = sprintf(
                 "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` = %d AND `Deleted` != 1;",
                 $GLOBALS['dbprefix'],
@@ -677,7 +691,7 @@ class Usermail {
         }
         if($this->termin) {
             $sql = sprintf(
-                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2;",
+                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname`, `getMail`, `Deleted` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2 AND `getMail` = 1 AND `Deleted` != 1 AND (`Email` != '' OR `Email2` != '');",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
@@ -731,19 +745,14 @@ class Usermail {
         }
 
         foreach($groups as $audience) {
-            $where = array('`Deleted` != 1', "`Email` != ''");
+            $where = $this->mailRecipientBaseWhere();
             if($audience === 'members') {
                 $where[] = '`Mitglied` = 1';
-                $where[] = '`getMail` = 1';
             }
             elseif($audience === 'nonmembers') {
                 $where[] = '`Mitglied` != 1';
-                $where[] = '`getMail` = 1';
             }
-            elseif($audience === 'musicians') {
-                $where[] = '`getMail` = 1';
-            }
-            // users: alle mit Email
+            // musicians / users: nur Basisfilter (Verteiler + Adresse)
 
             if(count($ids) > 0) {
                 $sql = sprintf(
@@ -771,7 +780,7 @@ class Usermail {
             }
         }
 
-        // Explizit gewählte User (Union); Email Pflicht
+        // Explizit gewählte User: ebenfalls nur Verteiler + Adresse
         if(count($userIds) > 0) {
             $uids = array();
             foreach($userIds as $uid) {
@@ -780,9 +789,10 @@ class Usermail {
             }
             if(count($uids)) {
                 $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s) AND `Deleted` != 1 AND `Email` != '';",
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s) AND %s;",
                     $GLOBALS['dbprefix'],
-                    implode(',', $uids)
+                    implode(',', $uids),
+                    implode(' AND ', $this->mailRecipientBaseWhere())
                 );
                 $dbr = mysqli_query($GLOBALS['conn'], $sql);
                 sqlerror();
