@@ -15,25 +15,13 @@
     </div>
   </div>
   <div class="orchestra-layout orchestra-layout--full">
-    <div class="w3-container w3-hide-small w3-hide-medium orchestra-svg-wrap">
-<?php echo $orchestraLarge; ?>
-    </div>
-    <div class="w3-container w3-hide-small w3-hide-large orchestra-svg-wrap">
-<?php echo $orchestraMedium; ?>
-    </div>
-    <div class="w3-container w3-hide-large w3-hide-medium orchestra-svg-wrap">
-<?php echo $orchestraSmall; ?>
+    <div class="orchestra-svg-wrap">
+<?php echo $orchestraFull; ?>
     </div>
   </div>
   <div class="orchestra-layout orchestra-layout--active" hidden>
-    <div class="w3-container w3-hide-small w3-hide-medium orchestra-svg-wrap">
-<?php echo $orchestraActiveLarge; ?>
-    </div>
-    <div class="w3-container w3-hide-small w3-hide-large orchestra-svg-wrap">
-<?php echo $orchestraActiveMedium; ?>
-    </div>
-    <div class="w3-container w3-hide-large w3-hide-medium orchestra-svg-wrap">
-<?php echo $orchestraActiveSmall; ?>
+    <div class="orchestra-svg-wrap">
+<?php echo $orchestraActive; ?>
     </div>
   </div>
 </div>

@@ -8,6 +8,7 @@ if(isset($GLOBALS['conn']) && $GLOBALS['conn']) {
 include "config/ConfigDefaults.php";
 include "config/SchemaVersion.php";
 include "libs/helpers.php";
+include "libs/orchestra.php";
 include "libs/colorschemes.php";
 $optionsDB = loadconfig();
 global $optionsDB;

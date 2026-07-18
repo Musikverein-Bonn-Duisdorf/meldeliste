@@ -10,6 +10,15 @@ if($_GET['id'] != $GLOBALS['cronID']) {
 }
 switch($_GET['cmd']) {
 case "save":
+    if(!isset($_SESSION['userid'])) {
+        http_response_code(403);
+        die('forbidden');
+    }
+    $targetUser = isset($_GET['user']) ? (int)$_GET['user'] : 0;
+    if($targetUser !== (int)$_SESSION['userid'] && !requirePermission('perm_editResponse')) {
+        http_response_code(403);
+        die('forbidden');
+    }
     $m = new Meldung;
     $m->load_by_user_event($_GET['user'], $_GET['termin']);
     if($m->User < 1) {
@@ -18,8 +27,12 @@ case "save":
         $m->Termin = $_GET['termin'];
     }
     $m->Wert = $_GET['wert'];
-    $m->Children = $_GET['Children'];
-    $m->Guests = $_GET['Guests'];
+    if(isset($_GET['Children'])) {
+        $m->Children = $_GET['Children'];
+    }
+    if(isset($_GET['Guests'])) {
+        $m->Guests = $_GET['Guests'];
+    }
     $m->save();
 
     $t = new Termin;

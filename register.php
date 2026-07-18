@@ -13,11 +13,8 @@ if(!requirePermission("perm_showUsers")) {
 </div>
 
 <?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
-<div class="w3-center w3-container w3-hide-small">
-<?php echo printOrchestra(0, 1); ?>
-</div>
-<div class="w3-center w3-container w3-hide-large w3-hide-medium">
-<?php echo printOrchestra(0, 0.4); ?>
+<div class="w3-center orchestra-svg-wrap">
+<?php echo printOrchestra(0); ?>
 </div>
 <?php } ?>
 
