@@ -24,6 +24,23 @@ Details zum Schema und zur Erstinstallation liefert die Install-Seite selbst.
 | `dev` | Staging / Vorschau |
 | `MELD-<n>-…` | Feature-Branches |
 
+## Backup
+
+Datenbank-Backup als ZIP (`manifest.json` mit Software-/Schema-Version + `database.sql`).
+
+- Admin-UI: **System → Backup** (Recht Konfiguration)
+- Remote-Abruf (Cron auf einem anderen Server):
+
+```bash
+curl -fsS "https://HOST/cron.php?id=CRONID&cmd=backup" -o "backup-$(date +%F).zip"
+```
+
+CLI-Restore (destruktiv, nur mit `--yes`):
+
+```bash
+php scripts/restoreBackup.php /path/to/backup.zip --yes
+```
+
 ## Tests
 
 Automatisierte Integrationstests liegen im privaten Sibling-Repository [meldeliste-tests](https://github.com/Musikverein-Bonn-Duisdorf/meldeliste-tests) (Checkout neben `meldeliste/`). Setup und Ausführung sind dort dokumentiert.
