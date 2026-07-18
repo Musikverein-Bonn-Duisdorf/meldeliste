@@ -1092,3 +1092,24 @@
     padding-right: 0.75rem;
   }
 }
+
+/* Register-Positionsvorschau (MELD-85) */
+.register-layout-preview {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.register-layout-preview-wrap {
+  padding: 0.5rem 0.75rem 1rem;
+  max-width: 100%;
+}
+
+.register-layout-svg .register-layout-arc {
+  cursor: default;
+}
+
+.register-layout-svg .register-layout-arc:hover polyline {
+  stroke-opacity: 1;
+  filter: brightness(1.05);
+}
