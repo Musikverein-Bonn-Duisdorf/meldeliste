@@ -165,7 +165,7 @@ $sections[] = array(
     'title' => 'Admin: Termine',
     'visible' => isAdmin() && requirePermission('perm_editAppmnts'),
     'body' => '
-<p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an (Datum, Ort, Sichtbarkeit, Anmeldung offen, …).</p>
+<p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen) und nutzt die volle Breite – auf Smartphone einspaltig, auf Tablet/PC mit Nebeneinander-Feldern.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
 <p>Im <b>Archiv: Termine</b> findest du vergangene Termine. Aushilfen können am Termin ergänzt bzw. gelöscht werden, sofern freigegeben.</p>
 '
