@@ -1515,52 +1515,81 @@ function requireLoggedInOrRedirect() {
 }
 
 /**
- * Render CHANGELOG.md (simple ## / - markdown) as HTML for the Info page.
+ * Parse CHANGELOG.md into structured release entries.
+ * @return array<int,array{version:string,date:string,notes:string[]}>
  */
-function renderChangelogHtml() {
+function parseChangelogEntries() {
     $path = dirname(__DIR__).'/CHANGELOG.md';
     if(!is_file($path)) {
-        return '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
+        return array();
     }
     $lines = file($path, FILE_IGNORE_NEW_LINES);
     if($lines === false) {
-        return '<p class="w3-text-gray">Changelog konnte nicht gelesen werden.</p>';
+        return array();
     }
-    $html = '';
-    $inList = false;
+    $entries = array();
+    $current = null;
     foreach($lines as $line) {
         $line = rtrim($line);
-        if($line === '' || $line === '# Changelog') {
-            if($inList) {
-                $html .= "</ul>\n";
-                $inList = false;
+        if(preg_match('/^##\s+(\S+)\s+\((\d{4}-\d{2}-\d{2})\)\s*$/', $line, $m)) {
+            if($current !== null) {
+                $entries[] = $current;
             }
+            $current = array(
+                'version' => $m[1],
+                'date' => $m[2],
+                'notes' => array()
+            );
             continue;
         }
-        if(strpos($line, 'Automatisch aus Git-Release-Commits') === 0) {
-            continue;
-        }
-        if(preg_match('/^##\s+(.+)$/', $line, $m)) {
-            if($inList) {
-                $html .= "</ul>\n";
-                $inList = false;
-            }
-            $html .= '<h3 class="w3-margin-top">'.htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8')."</h3>\n";
+        if($current === null) {
             continue;
         }
         if(preg_match('/^-\s+(.+)$/', $line, $m)) {
-            if(!$inList) {
-                $html .= "<ul>\n";
-                $inList = true;
-            }
-            $html .= '<li>'.htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8')."</li>\n";
-            continue;
+            $current['notes'][] = $m[1];
         }
     }
-    if($inList) {
-        $html .= "</ul>\n";
+    if($current !== null) {
+        $entries[] = $current;
     }
-    return $html !== '' ? $html : '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
+    return $entries;
+}
+
+/**
+ * Render CHANGELOG.md as an HTML table for the Info page.
+ */
+function renderChangelogHtml() {
+    $entries = parseChangelogEntries();
+    if(!$entries) {
+        return '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
+    }
+    $html = '<div class="help-changelog-wrap">'."\n";
+    $html .= '<table class="w3-table w3-striped w3-bordered help-changelog-table">'."\n";
+    $html .= '<thead><tr>'
+        .'<th>Version</th>'
+        .'<th>Datum</th>'
+        .'<th>&Auml;nderungen</th>'
+        .'</tr></thead>'."\n<tbody>\n";
+    foreach($entries as $entry) {
+        $notes = $entry['notes'];
+        if(!$notes) {
+            $notes = array('(keine weiteren Notizen)');
+        }
+        $html .= '<tr>';
+        $html .= '<td class="help-changelog-version"><code>'
+            .htmlspecialchars($entry['version'], ENT_QUOTES, 'UTF-8')
+            .'</code></td>';
+        $html .= '<td class="help-changelog-date">'
+            .htmlspecialchars($entry['date'], ENT_QUOTES, 'UTF-8')
+            .'</td>';
+        $html .= '<td class="help-changelog-notes"><ul class="help-changelog-list">';
+        foreach($notes as $note) {
+            $html .= '<li>'.htmlspecialchars($note, ENT_QUOTES, 'UTF-8').'</li>';
+        }
+        $html .= '</ul></td></tr>'."\n";
+    }
+    $html .= "</tbody></table>\n</div>\n";
+    return $html;
 }
 
 /**
