@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-adf8c (2026-07-18)
+
+- MELD-103: align Status/Aktion columns in mail list grids
+- MELD-103: Mailübersicht Status/Aktion-Spalten ausrichten
+
 ## 2026-07-18-eacd2 (2026-07-18)
 
 - MELD-102: keep mailGroups when applying default draft recipients
