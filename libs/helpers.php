@@ -375,6 +375,32 @@ function hexContrastText($hex) {
     return ($luma > 0.55) ? '#000000' : '#FFFFFF';
 }
 
+/**
+ * Contrast text for a fill that may be translucent over a light page background.
+ * Blends fill with $bgHex by $opacity before choosing black/white.
+ */
+function hexContrastTextOnFill($hex, $opacity = 1.0, $bgHex = '#FFFFFF') {
+    $hex = normalizeHexColor($hex);
+    $bgHex = normalizeHexColor($bgHex);
+    if($hex === '') return '#000000';
+    if($bgHex === '') $bgHex = '#FFFFFF';
+    $opacity = max(0.0, min(1.0, (float)$opacity));
+    if($opacity >= 0.999) {
+        return hexContrastText($hex);
+    }
+    $fr = hexdec(substr($hex, 1, 2));
+    $fg = hexdec(substr($hex, 3, 2));
+    $fb = hexdec(substr($hex, 5, 2));
+    $br = hexdec(substr($bgHex, 1, 2));
+    $bg = hexdec(substr($bgHex, 3, 2));
+    $bb = hexdec(substr($bgHex, 5, 2));
+    $r = (int)round($fr * $opacity + $br * (1.0 - $opacity));
+    $g = (int)round($fg * $opacity + $bg * (1.0 - $opacity));
+    $b = (int)round($fb * $opacity + $bb * (1.0 - $opacity));
+    $luma = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+    return ($luma > 0.55) ? '#000000' : '#FFFFFF';
+}
+
 function w3ColorToHex($class) {
     static $map = array(
         'w3-mvd-blue' => '#345A95',
