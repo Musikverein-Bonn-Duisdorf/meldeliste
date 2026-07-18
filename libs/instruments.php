@@ -450,7 +450,7 @@ class Instruments
         // Versichert
         if($canEdit) {
             $insHtml = '<input type="hidden" name="Insurance" value="0">'
-                .'<label><input class="w3-check" type="checkbox" name="Insurance" value="1"'.($this->Insurance ? ' checked' : '').'> ja</label>';
+                .'<input class="w3-check" type="checkbox" name="Insurance" value="1"'.($this->Insurance ? ' checked' : '').'>';
         }
         else {
             $insHtml = $this->modalDisplayText(bool2string($this->Insurance));
