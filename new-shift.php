@@ -65,26 +65,30 @@ if($GLOBALS['optionsDB']['showTravelTime']) {
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Ort3" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort3."\""; ?>>
     <label>Stadt</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Ort4" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort4."\""; ?>>
-    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
-    <input type="hidden" name="Auftritt" value="0">
-    <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
-    <label>Besetzung</label>
-    <div class="w3-small w3-text-gray">Registeraufschlüsselung und Orchesterdarstellung</div>
+    <div class="w3-row w3-margin-bottom">
+      <div class="w3-col s12">
+        <input type="hidden" name="Auftritt" value="0">
+        <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
+        <label>Besetzung</label>
+        <span class="w3-small w3-text-gray"> — Registeraufschlüsselung und Orchesterdarstellung</span>
+      </div>
     </div>
-    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
-    <input type="hidden" name="Shifts" value="0">
-    <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo "checked"; ?>>
-    <label>Schichtdienst</label>
-    </div>
-    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
-    <input type="hidden" name="published" value="0">
-    <input class="w3-check" type="checkbox" name="published" value="1" <?php if($fill && (bool)$n->published) echo "checked"; ?>>
-    <label>sichtbar</label>
-    </div>
-    <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
-    <input type="hidden" name="open" value="0">
-    <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo "checked"; ?>>
-    <label>Anmeldung offen</label>
+    <div class="w3-row w3-margin-bottom">
+      <div class="w3-col l4 m4 s12 w3-margin-bottom">
+        <input type="hidden" name="Shifts" value="0">
+        <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo "checked"; ?>>
+        <label>Schichtdienst</label>
+      </div>
+      <div class="w3-col l4 m4 s12 w3-margin-bottom">
+        <input type="hidden" name="published" value="0">
+        <input class="w3-check" type="checkbox" name="published" value="1" <?php if($fill && (bool)$n->published) echo "checked"; ?>>
+        <label>sichtbar</label>
+      </div>
+      <div class="w3-col l4 m4 s12 w3-margin-bottom">
+        <input type="hidden" name="open" value="0">
+        <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo "checked"; ?>>
+        <label>Anmeldung offen</label>
+      </div>
     </div>
     <input class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="insert" value="speichern">
     <?php
