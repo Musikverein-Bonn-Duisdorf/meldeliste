@@ -394,10 +394,11 @@
         return;
       }
       var self = this;
-      items.forEach(function(item) {
+      items.forEach(function(item, idx) {
         var row = document.createElement('button');
         row.type = 'button';
         row.className = 'mail-recipient-suggest-item';
+        row.setAttribute('data-suggest-index', String(idx));
         row.innerHTML = '<span class="mail-recipient-suggest-label"></span>'
           + '<span class="mail-recipient-suggest-meta"></span>';
         row.querySelector('.mail-recipient-suggest-label').textContent = item.label;
@@ -406,10 +407,16 @@
           e.preventDefault();
           self.addChip(item.type, item.id);
         });
+        row.addEventListener('mouseenter', function() {
+          self._suggestIndex = idx;
+          self.updateSuggestHighlight(false);
+        });
         self.suggestEl.appendChild(row);
       });
       this._suggestItems = items;
+      this._suggestIndex = 0;
       this.suggestEl.hidden = false;
+      this.updateSuggestHighlight(false);
     },
 
     hideSuggest: function() {
@@ -418,14 +425,52 @@
         this.suggestEl.innerHTML = '';
       }
       this._suggestItems = [];
+      this._suggestIndex = -1;
+    },
+
+    updateSuggestHighlight: function(scrollIntoView) {
+      if(!this.suggestEl) return;
+      var rows = this.suggestEl.querySelectorAll('.mail-recipient-suggest-item');
+      for(var i = 0; i < rows.length; i++) {
+        var active = i === this._suggestIndex;
+        if(active) {
+          rows[i].classList.add('mail-recipient-suggest-item--active');
+          if(scrollIntoView) {
+            rows[i].scrollIntoView({block: 'nearest'});
+          }
+        }
+        else {
+          rows[i].classList.remove('mail-recipient-suggest-item--active');
+        }
+      }
     },
 
     onKeydown: function(e) {
-      if(e.key === 'Enter') {
+      var items = this._suggestItems || [];
+      var open = this.suggestEl && !this.suggestEl.hidden && items.length > 0;
+
+      if(e.key === 'ArrowDown') {
+        if(!open) return;
         e.preventDefault();
-        if(this._suggestItems && this._suggestItems.length) {
-          var first = this._suggestItems[0];
-          this.addChip(first.type, first.id);
+        this._suggestIndex = this._suggestIndex < 0
+          ? 0
+          : Math.min(items.length - 1, this._suggestIndex + 1);
+        this.updateSuggestHighlight(true);
+      }
+      else if(e.key === 'ArrowUp') {
+        if(!open) return;
+        e.preventDefault();
+        this._suggestIndex = this._suggestIndex <= 0
+          ? 0
+          : this._suggestIndex - 1;
+        this.updateSuggestHighlight(true);
+      }
+      else if(e.key === 'Enter') {
+        e.preventDefault();
+        if(open) {
+          var idx = this._suggestIndex >= 0 ? this._suggestIndex : 0;
+          var pick = items[idx];
+          if(pick) this.addChip(pick.type, pick.id);
         }
       }
       else if(e.key === 'Escape') {
