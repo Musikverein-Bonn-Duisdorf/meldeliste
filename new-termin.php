@@ -168,7 +168,6 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         <input type="hidden" name="PostDiscord" value="0">
         <input class="w3-check" type="checkbox" name="PostDiscord" id="terminPostDiscord" value="1" <?php if($postDiscordChecked) echo "checked"; ?>>
         <label for="terminPostDiscord">Auch auf Discord posten</label>
-        <span class="w3-small w3-text-gray termin-form-hint"> — bei <b>Alle User</b> automatisch; sonst nur wenn angehakt</span>
       </div>
 <?php } ?>
     </div>
