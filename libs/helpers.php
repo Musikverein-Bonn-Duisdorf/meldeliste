@@ -898,12 +898,19 @@ function denyAccess($message = 'Keine Berechtigung für diesen Bereich.') {
     if(!headers_sent()) {
         http_response_code(403);
     }
+    // header/nav/footer expect classic page-scope vars; including from a function
+    // would otherwise leave $sql/$optionsDB undefined and yield a blank page.
+    foreach(array('sql', 'optionsDB', 'conn') as $k) {
+        if(array_key_exists($k, $GLOBALS)) {
+            $$k = $GLOBALS[$k];
+        }
+    }
     if(empty($GLOBALS['mlHeaderRendered'])) {
         include __DIR__.'/../common/header.php';
     }
-    $color = isset($GLOBALS['optionsDB']['colorLogWarning'])
-        ? $GLOBALS['optionsDB']['colorLogWarning']
-        : 'w3-orange';
+    $color = isset($optionsDB['colorLogWarning'])
+        ? $optionsDB['colorLogWarning']
+        : (isset($GLOBALS['optionsDB']['colorLogWarning']) ? $GLOBALS['optionsDB']['colorLogWarning'] : 'w3-orange');
     echo '<div class="w3-panel '.$color.' w3-padding w3-margin">'
         .'<h3>Zugriff verweigert</h3>'
         .'<p>'.htmlspecialchars((string)$message, ENT_QUOTES, 'UTF-8').'</p>'
