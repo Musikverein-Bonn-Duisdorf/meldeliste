@@ -319,6 +319,30 @@ class Termin
         if(!$this->EndDatum) return germanDate($this->Datum, 1);
         return germanDateSpan($this->Datum, $this->EndDatum);
     }
+
+    /**
+     * Plain text used by client-side Termin/Rückmeldungen search (data-search).
+     */
+    public function getSearchText() {
+        $parts = array(
+            (string)$this->Name,
+            (string)$this->Beschreibung,
+            (string)$this->getOrt(),
+            (string)$this->getGermanDate(),
+            (string)$this->Datum,
+            (string)$this->EndDatum,
+            (string)$this->Uhrzeit,
+            (string)$this->Uhrzeit2,
+        );
+        $parts = array_filter($parts, function($p) {
+            return $p !== '';
+        });
+        return preg_replace('/\s+/u', ' ', trim(implode(' ', $parts)));
+    }
+
+    public function getSearchDataAttr() {
+        return 'data-search="'.htmlspecialchars($this->getSearchText(), ENT_QUOTES, 'UTF-8').'"';
+    }
     protected function makeAlwaysYes() {
         if($this->Shifts) return;
         $users = explode(",", $GLOBALS['optionsDB']['alwaysYesNewAppmnts']);
@@ -1273,6 +1297,7 @@ class Termin
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
         if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
+        $main->extraAttrs = $this->getSearchDataAttr();
         $str=$str.$main->open();
 
         $indent++;
@@ -1795,6 +1820,7 @@ class Termin
         $containerdiv->id="responseLine".$this->Index;
         $containerdiv->class="w3-margin-top w3-border w3-border-black w3-card";
         $containerdiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
+        $containerdiv->extraAttrs = $this->getSearchDataAttr();
         $str=$str.$containerdiv->open();
         $indent++;
         
@@ -2187,7 +2213,7 @@ ORDER BY `Nachname`, `Vorname`;",
         }
 
         $modalOpen = "openModal('terminResponse', ".$this->Index.($filterregister ? ", ".$filterregister : "").")";
-        $str = "<div id=\"responseLine".$this->Index."\" data-termin=\"".$this->Index."\" data-register=\"".$filterregister."\" class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
+        $str = "<div id=\"responseLine".$this->Index."\" data-termin=\"".$this->Index."\" data-register=\"".$filterregister."\" ".$this->getSearchDataAttr()." class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
         $str=$str."<div onclick=\"".$modalOpen."\" class=\"w3-container w3-margin-bottom\">\n";
 
         if($this->Auftritt) {
