@@ -191,7 +191,7 @@ $sections[] = array(
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
 <li><b>Inventar</b> – Bestände anzeigen, Details und Ausleihen</li>
-<li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal</li>
+<li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar-Typen</b> – Typen und Nummernkreise pflegen</li>
