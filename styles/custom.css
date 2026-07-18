@@ -787,6 +787,11 @@
   max-width: none;
 }
 
+.orchestra-svg text {
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
 .orchestra-svg--editable .orchestra-seat[data-editable="1"]:hover circle {
   stroke-width: 3;
   filter: brightness(0.95);
