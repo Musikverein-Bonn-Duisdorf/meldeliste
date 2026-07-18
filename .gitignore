@@ -5,3 +5,4 @@ uploads/*
 calendars/*.ics
 php.ini
 error-log.php
+.cursor/
