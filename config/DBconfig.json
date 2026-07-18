@@ -11,6 +11,12 @@
 	"Name": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"Instrument": {"Type": "int", "Null": "YES"}
     },
+    "AushilfenShift": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Shift": {"Type": "int"},
+	"Name": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"Instrument": {"Type": "int", "Null": "YES"}
+    },
     "config": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Parameter": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
