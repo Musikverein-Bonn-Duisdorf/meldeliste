@@ -33,26 +33,42 @@ class AushilfeShift
         }	
     }
 
-    public function getVars() {
-        this->getInstrumentName();
-        return sprintf("AushilfenShift-ID: %d, Name: <b>%s</b>, Instrument: <b>%s</b>",
-        $this->Index,
-        $this->getName(),
-        $this->iName
+    public function getChanges() {
+        $old = new AushilfeShift;
+        $old->load_by_id($this->Index);
+
+        $str = sprintf('AushilfenShift-ID: %d, Name: <b>%s</b>',
+            (int)$this->Index,
+            $this->getName()
         );
+        if($this->Name != $old->Name) $str .= ', Name: '.$old->Name.' &rArr; <b>'.$this->Name.'</b>';
+        if($this->Shift != $old->Shift) $str .= ', Shift: '.$old->Shift.' &rArr; <b>'.$this->Shift.'</b>';
+        if($this->Instrument != $old->Instrument) {
+            $str .= ', Instrument: '.$old->getInstrumentName().' &rArr; <b>'.$this->getInstrumentName().'</b>';
+        }
+        return $str;
+    }
+
+    public function getVars() {
+        $this->getInstrumentName();
+        $parts = array();
+        $parts[] = sprintf('AushilfenShift-ID: %d', (int)$this->Index);
+        logAppendFilled($parts, 'Name', $this->getName(), $this->getName());
+        logAppendFilled($parts, 'Instrument', $this->iName, (string)$this->iName);
+        return implode(', ', $parts);
     }
 
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
             $logentry = new Log;
-            $logentry->DBupdate($this->getVars());
+            $logentry->DBupdate($this->getChanges());
             $this->update();
         }
         else {
+            $this->insert();
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
-            $this->insert();
         }
     }
 
