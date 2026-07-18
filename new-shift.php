@@ -24,6 +24,7 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 <div class="w3-container termin-form">
 <form class="termin-form-card w3-border w3-padding <?php echo $inputBg; ?>" action="termine.php" method="POST">
 
+  <div class="termin-form-columns">
   <section class="termin-form-section">
     <h3 class="termin-form-heading">Was</h3>
     <label>Veranstaltung</label>
@@ -102,15 +103,13 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 
   <section class="termin-form-section">
     <h3 class="termin-form-heading">Optionen</h3>
-    <div class="w3-row w3-margin-bottom">
-      <div class="w3-col s12">
+    <div class="w3-row termin-form-checks">
+      <div class="w3-col s12 termin-form-check">
         <input type="hidden" name="Auftritt" value="0">
         <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
         <label>Besetzung</label>
-        <span class="w3-small w3-text-gray"> — Registeraufschlüsselung und Orchesterdarstellung</span>
+        <span class="w3-small w3-text-gray termin-form-hint"> — Registeraufschlüsselung und Orchesterdarstellung</span>
       </div>
-    </div>
-    <div class="w3-row termin-form-checks">
       <div class="w3-col s12 m4 l4 termin-form-check">
         <input type="hidden" name="Shifts" value="0">
         <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo "checked"; ?>>
@@ -128,6 +127,7 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
       </div>
     </div>
   </section>
+  </div>
 
   <div class="termin-form-actions w3-row">
     <div class="w3-col s12 <?php echo $fill ? 'm6 l6' : 'm12 l12'; ?> termin-form-action">

@@ -608,6 +608,7 @@
 .termin-form-section {
   margin-bottom: 1.25rem;
   padding-bottom: 0.25rem;
+  min-width: 0;
 }
 
 .termin-form-heading {
@@ -642,6 +643,13 @@
 
 .termin-form-check {
   margin-bottom: 0.65rem;
+  line-height: 1.6;
+}
+
+.termin-form-check .w3-check {
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  top: 0;
 }
 
 .termin-form-actions {
@@ -652,6 +660,61 @@
 
 .termin-form-action {
   margin-bottom: 0.5rem;
+}
+
+/* Tablet: zwei Spalten (Was|Wann / Wo|Optionen) */
+@media (min-width: 601px) and (max-width: 992px) {
+  .termin-form {
+    max-width: 100%;
+  }
+
+  .termin-form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.25rem;
+    align-items: start;
+  }
+
+  .termin-form-section {
+    margin-bottom: 0;
+  }
+}
+
+/* PC: vier Spalten Was | Wann | Wo | Optionen */
+@media (min-width: 993px) {
+  .termin-form {
+    max-width: 1280px;
+  }
+
+  .termin-form-columns {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
+    align-items: start;
+  }
+
+  .termin-form-section {
+    margin-bottom: 0;
+  }
+
+  /* In Spalten: Felder untereinander (w3-col Floats zurücksetzen) */
+  .termin-form-columns .w3-row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .termin-form-columns .termin-form-field,
+  .termin-form-columns .termin-form-check {
+    float: none;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .termin-form-hint {
+    display: block;
+    margin: 0.15rem 0 0 1.9rem;
+  }
 }
 
 @media (max-width: 600px) {
