@@ -20,6 +20,8 @@ if(!requirePermission('perm_sendEmail')) {
 
 MailJob::ensureSchema();
 
+$discordAvailable = Discord::isConfigured();
+
 $msg = '';
 $preview = false;
 $job = null;
@@ -101,7 +103,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     if($job->Termin) {
         $job->MemberOnly = 0;
         $job->Register = 0;
-        $job->PostDiscord = isset($_POST['postDiscord']) ? 1 : 0;
+        $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
     else {
         $job->MemberOnly = (isset($_POST['to']) && $_POST['to'] === 'aktiv') ? 1 : 0;
@@ -111,7 +113,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
         else {
             $job->Register = 0;
         }
-        $job->PostDiscord = isset($_POST['postDiscord']) ? 1 : 0;
+        $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
     $job->ensureAttachmentDir();
     $job->save();
@@ -167,7 +169,7 @@ $textRaw = $job ? (string)$job->BodyText : '';
 $textPreview = $job ? $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '') : '';
 $anrede = 'Hallo {VORNAME},';
 $allReg = ($register === 0);
-$postDiscord = $job ? ((int)$job->PostDiscord === 1) : false;
+$postDiscord = ($discordAvailable && $job) ? ((int)$job->PostDiscord === 1) : false;
 
 $allJobs = MailJob::listJobs(null, 300);
 
@@ -381,6 +383,7 @@ foreach($allJobs as $rowJob) {
     };
 </script>
 <?php } ?>
+<?php if($discordAvailable) { ?>
 <script>
 (function() {
   var form = document.mailform;
@@ -416,6 +419,11 @@ foreach($allJobs as $rowJob) {
   }
 })();
 </script>
+<?php } else { ?>
+<script>
+window.syncDiscordDefault = function() {};
+</script>
+<?php } ?>
     <label>Betreff</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Betreff" placeholder="Hier Betreff einfügen" value="<?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?>"/>
 
@@ -429,10 +437,12 @@ foreach($allJobs as $rowJob) {
       <option value="3" <?php if($gruss==3) echo "selected"; ?>>Viele Grüße, <?php echo htmlspecialchars($GLOBALS['optionsDB']['MailGreetings'], ENT_QUOTES, 'UTF-8'); ?></option>
       <option value="4" <?php if($gruss==4) echo "selected"; ?>><?php echo htmlspecialchars($_SESSION['Vorname'], ENT_QUOTES, 'UTF-8'); ?></option>
     </select>
+    <?php if($discordAvailable) { ?>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
       <input class="w3-check" type="checkbox" name="postDiscord" id="postDiscord" value="1" <?php if($postDiscord) echo "checked"; ?>>
       <label for="postDiscord">Auch auf Discord posten</label>
     </div>
+    <?php } ?>
     <div class="mail-compose-actions">
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?> w3-margin-bottom w3-mobile" name="save" value="1">Entwurf speichern</button>
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-bottom w3-mobile" name="preview" value="1">Vorschau</button>
