@@ -18,6 +18,7 @@ class Usermail {
         'attachments' => false,
         'source' => 'mail',
         'quiet' => false,
+        'recipientSpec' => null,
     );
 
     public function __get($key) {
@@ -32,6 +33,7 @@ class Usermail {
         case 'attachments':
         case 'source':
         case 'quiet':
+        case 'recipientSpec':
             return $this->_data[$key];
         default:
             return null;
@@ -48,6 +50,9 @@ class Usermail {
         case 'Text':
         case 'subject':
         case 'source':
+            $this->_data[$key] = $val;
+            break;
+        case 'recipientSpec':
             $this->_data[$key] = $val;
             break;
         case 'memberonly':
@@ -117,6 +122,7 @@ class Usermail {
         $text = $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '');
         $this->memberonly = (bool)$job->MemberOnly;
         $this->register = (int)$job->Register;
+        $this->recipientSpec = $job->getRecipientSpecArray();
         $this->termin = (int)$job->Termin;
         $this->User = 0;
         $this->subject = (string)$job->Subject;
@@ -614,8 +620,15 @@ class Usermail {
                 $GLOBALS['dbprefix'],
                 (int)$this->User
             );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if(!$dbr) return $rows;
+            while($row = mysqli_fetch_array($dbr)) {
+                $rows[] = $row;
+            }
+            return $rows;
         }
-        elseif($this->termin) {
+        if($this->termin) {
             $sql = sprintf(
                 "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2;",
                 $GLOBALS['dbprefix'],
@@ -623,55 +636,91 @@ class Usermail {
                 $GLOBALS['dbprefix'],
                 (int)$this->termin
             );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if(!$dbr) return $rows;
+            while($row = mysqli_fetch_array($dbr)) {
+                if(!isset($row['Index']) && isset($row['uIndex'])) {
+                    $row['Index'] = $row['uIndex'];
+                }
+                $rows[] = $row;
+            }
+            return $rows;
         }
-        else {
-            $register = '';
-            if($this->register > 0) {
-                $register = sprintf("AND `Register` = %d", (int)$this->register);
-                if($this->memberonly) {
-                    $sql = sprintf(
-                        "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1 %s;",
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $register
-                    );
-                }
-                else {
-                    $sql = sprintf(
-                        "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1 %s;",
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $register
-                    );
+
+        $spec = is_array($this->recipientSpec)
+            ? $this->recipientSpec
+            : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register);
+
+        $byId = array();
+        $memberSql = $this->memberonly ? ' AND `Mitglied` = 1' : '';
+        $allRegisters = !empty($spec['allRegisters']);
+        $registerIds = isset($spec['registers']) ? $spec['registers'] : array();
+        $userIds = isset($spec['users']) ? $spec['users'] : array();
+
+        if($allRegisters) {
+            $sql = sprintf(
+                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1%s;",
+                $GLOBALS['dbprefix'],
+                $memberSql
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if($dbr) {
+                while($row = mysqli_fetch_array($dbr)) {
+                    $byId[(int)$row['Index']] = $row;
                 }
             }
-            elseif($this->memberonly) {
-                $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1;",
-                    $GLOBALS['dbprefix']
-                );
+        }
+        elseif(count($registerIds) > 0) {
+            $ids = array();
+            foreach($registerIds as $rid) {
+                $rid = (int)$rid;
+                if($rid > 0) $ids[] = $rid;
             }
-            else {
+            if(count($ids)) {
                 $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1;",
-                    $GLOBALS['dbprefix']
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1%s AND `Register` IN (%s);",
+                    $GLOBALS['dbprefix'],
+                    $GLOBALS['dbprefix'],
+                    $GLOBALS['dbprefix'],
+                    $memberSql,
+                    implode(',', $ids)
                 );
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                sqlerror();
+                if($dbr) {
+                    while($row = mysqli_fetch_array($dbr)) {
+                        $byId[(int)$row['Index']] = $row;
+                    }
+                }
             }
         }
 
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if(!$dbr) return $rows;
-        while($row = mysqli_fetch_array($dbr)) {
-            // Normalize Index for termin join
-            if(!isset($row['Index']) && isset($row['uIndex'])) {
-                $row['Index'] = $row['uIndex'];
+        // Explizit gewählte User (Union); Email Pflicht, getMail nicht zwingend
+        if(count($userIds) > 0) {
+            $ids = array();
+            foreach($userIds as $uid) {
+                $uid = (int)$uid;
+                if($uid > 0) $ids[] = $uid;
             }
-            $rows[] = $row;
+            if(count($ids)) {
+                $sql = sprintf(
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s) AND `Deleted` != 1 AND `Email` != '';",
+                    $GLOBALS['dbprefix'],
+                    implode(',', $ids)
+                );
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                sqlerror();
+                if($dbr) {
+                    while($row = mysqli_fetch_array($dbr)) {
+                        $byId[(int)$row['Index']] = $row;
+                    }
+                }
+            }
         }
-        return $rows;
+
+        return array_values($byId);
     }
 }
 ?>

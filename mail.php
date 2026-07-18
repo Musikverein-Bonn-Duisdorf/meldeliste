@@ -103,16 +103,26 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     if($job->Termin) {
         $job->MemberOnly = 0;
         $job->Register = 0;
+        $job->RecipientSpec = null;
         $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
     else {
         $job->MemberOnly = (isset($_POST['to']) && $_POST['to'] === 'aktiv') ? 1 : 0;
-        if(!isset($_POST['allReg'])) {
-            $job->Register = isset($_POST['register']) ? (int)$_POST['register'] : 0;
+        $specIn = array('allRegisters' => true, 'registers' => array(), 'users' => array());
+        if(isset($_POST['recipientSpec'])) {
+            $decoded = json_decode((string)$_POST['recipientSpec'], true);
+            if(is_array($decoded)) {
+                $specIn = $decoded;
+            }
         }
-        else {
-            $job->Register = 0;
+        elseif(isset($_POST['allReg'])) {
+            $specIn['allRegisters'] = true;
         }
+        elseif(isset($_POST['register'])) {
+            $specIn['allRegisters'] = false;
+            $specIn['registers'] = array((int)$_POST['register']);
+        }
+        $job->setRecipientSpecArray($specIn);
         $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
     $job->ensureAttachmentDir();
@@ -162,14 +172,54 @@ if(isset($_GET['deleted'])) {
 
 $memberonly = $job ? (bool)$job->MemberOnly : false;
 $register = $job ? (int)$job->Register : 0;
+$recipientSpec = $job ? $job->getRecipientSpecArray() : array('allRegisters' => true, 'registers' => array(), 'users' => array());
 $termin = $job ? (int)$job->Termin : $terminParam;
 $gruss = $job ? (int)$job->Gruss : 1;
 $betreff = $job ? (string)$job->Subject : '';
 $textRaw = $job ? (string)$job->BodyText : '';
 $textPreview = $job ? $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '') : '';
 $anrede = 'Hallo {VORNAME},';
-$allReg = ($register === 0);
+$allReg = !empty($recipientSpec['allRegisters']);
 $postDiscord = ($discordAvailable && $job) ? ((int)$job->PostDiscord === 1) : false;
+
+// Catalog for chip autocomplete (POC)
+$mailRecipientCatalog = array('registers' => array(), 'users' => array());
+$sqlReg = sprintf(
+    'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
+    $GLOBALS['dbprefix']
+);
+$dbrReg = mysqli_query($GLOBALS['conn'], $sqlReg);
+if($dbrReg) {
+    while($r = mysqli_fetch_array($dbrReg)) {
+        $mailRecipientCatalog['registers'][] = array(
+            'id' => (int)$r['Index'],
+            'label' => html_entity_decode((string)$r['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+        );
+    }
+}
+$sqlUser = sprintf(
+    'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
+     FROM `%sUser` u
+     LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
+     LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+     WHERE u.`Deleted` != 1 AND u.`Email` != ""
+     ORDER BY u.`Nachname`, u.`Vorname`;',
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix'],
+    $GLOBALS['dbprefix']
+);
+$dbrUser = mysqli_query($GLOBALS['conn'], $sqlUser);
+if($dbrUser) {
+    while($u = mysqli_fetch_array($dbrUser)) {
+        $name = trim($u['Vorname'].' '.$u['Nachname']);
+        $regName = html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $mailRecipientCatalog['users'][] = array(
+            'id' => (int)$u['Index'],
+            'label' => $name,
+            'meta' => $regName,
+        );
+    }
+}
 
 $allJobs = MailJob::listJobs(null, 300);
 
@@ -361,65 +411,83 @@ foreach($allJobs as $rowJob) {
 	<label>alle Musiker</label>
       </div>
     </div>
-    <label>Register</label>
+    <label>Empfänger-Auswahl</label>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
-    <input class="w3-check" type="checkbox" name="allReg" <?php if($allReg) echo "checked"; ?>>
-    <label>alle Register</label>
-    <select id="register" class="w3-select w3-margin-top" name="register" <?php if($allReg) echo 'style="display:none"'; ?>>
-    <?php RegisterOption($register); ?>
-    </select>
+      <label class="w3-margin-bottom" style="display:block;">
+        <input class="w3-check" type="checkbox" name="allRegistersUi" id="mailAllRegisters" <?php echo $allReg ? 'checked' : ''; ?> />
+        alle Register (Mailverteiler)
+      </label>
+      <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
+      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Register oder Person tippen…" autocomplete="off" />
+      <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
+      <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
+      <p class="w3-small w3-text-gray w3-margin-top">Mehrere Register und einzelne Personen kombinierbar. Explizite Personen werden immer ergänzt.</p>
     </div>
+<script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($mailRecipientCatalog, JSON_UNESCAPED_UNICODE); ?></script>
+<script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
 <script>
-    var rad = document.mailform.allReg;
-    var select = document.getElementById("register");
-    rad.onclick = function () {
-	if(this.checked) {
-	    select.style.display = 'none';
-	}
-	else {
-	    select.style.display = 'block';
-	}
-	if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
-    };
+(function() {
+  if(typeof MailRecipientChips !== 'undefined') {
+    MailRecipientChips.init({
+      catalogEl: document.getElementById('mailRecipientCatalog'),
+      chipsEl: document.getElementById('mailRecipientChips'),
+      inputEl: document.getElementById('mailRecipientInput'),
+      suggestEl: document.getElementById('mailRecipientSuggest'),
+      hiddenEl: document.getElementById('mailRecipientSpec'),
+      allRegistersEl: document.getElementById('mailAllRegisters'),
+      onChange: function() {
+        if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
+      }
+    });
+  }
+})();
 </script>
-<?php } ?>
-<?php if($discordAvailable) { ?>
 <script>
 (function() {
   var form = document.mailform;
-  var cb = document.getElementById('postDiscord');
-  if(!form || !cb) return;
-  var isTermin = <?php echo $termin ? 'true' : 'false'; ?>;
-
+  if(!form) return;
+  // Discord default: alle Musiker + alle Register
+  var prevSync = window.syncDiscordDefault;
   window.syncDiscordDefault = function() {
-    if(isTermin) {
-      cb.checked = false;
-      return;
-    }
-    var toAll = form.to && form.to.value === 'all';
-    // radio NodeList
+    var cb = document.getElementById('postDiscord');
+    if(!cb) return;
+    var isTermin = <?php echo $termin ? 'true' : 'false'; ?>;
+    if(isTermin) { cb.checked = false; return; }
+    var toAll = false;
     if(form.to && form.to.length) {
-      toAll = false;
       for(var i = 0; i < form.to.length; i++) {
         if(form.to[i].value === 'all' && form.to[i].checked) toAll = true;
       }
     }
-    var allReg = form.allReg ? !!form.allReg.checked : true;
-    cb.checked = !!(toAll && allReg);
+    var allRegEl = document.getElementById('mailAllRegisters');
+    var allReg = allRegEl ? !!allRegEl.checked : true;
+    var specEl = document.getElementById('mailRecipientSpec');
+    var usersExtra = false;
+    try {
+      var spec = JSON.parse(specEl ? specEl.value : '{}');
+      usersExtra = spec.users && spec.users.length > 0;
+      if(!allReg && spec.registers && spec.registers.length) allReg = false;
+    } catch(e) {}
+    cb.checked = !!(toAll && allReg && !usersExtra);
   };
-
   if(form.to) {
     var radios = form.to.length ? form.to : [form.to];
     for(var i = 0; i < radios.length; i++) {
       radios[i].addEventListener('change', window.syncDiscordDefault);
     }
   }
-  if(form.register) {
-    form.register.addEventListener('change', window.syncDiscordDefault);
-  }
+  if(typeof prevSync === 'function') { /* replaced */ }
 })();
 </script>
-<?php } else { ?>
+<?php } ?>
+<?php if($discordAvailable && $termin) { ?>
+<script>
+window.syncDiscordDefault = function() {
+  var cb = document.getElementById('postDiscord');
+  if(cb) cb.checked = false;
+};
+</script>
+<?php } elseif(!$termin && !$discordAvailable) { ?>
 <script>
 window.syncDiscordDefault = function() {};
 </script>

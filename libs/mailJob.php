@@ -10,6 +10,7 @@ class MailJob
         'Source' => 'mail',
         'MemberOnly' => 0,
         'Register' => 0,
+        'RecipientSpec' => null,
         'Termin' => 0,
         'Gruss' => 1,
         'PostDiscord' => 0,
@@ -49,6 +50,7 @@ class MailJob
         case 'Status':
         case 'Created':
         case 'QueueCreated':
+        case 'RecipientSpec':
             $this->_data[$key] = $val === null ? null : trim((string)$val);
             break;
         default:
@@ -82,6 +84,7 @@ class MailJob
         $needs = !$table->exists() || !$outbox->exists()
             || !$table->columnExists('Gruss')
             || !$table->columnExists('PostDiscord')
+            || !$table->columnExists('RecipientSpec')
             || !$outbox->columnExists('ReadAt')
             || !$outbox->columnExists('LockedAt');
         if($needs) {
@@ -161,7 +164,7 @@ class MailJob
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sMailJob` (`CreatedBy`, `Subject`, `BodyText`, `Source`, `MemberOnly`, `Register`, `Termin`, `Gruss`, `PostDiscord`, `AttachmentPath`, `Status`, `Total`, `Sent`, `Failed`) VALUES (%d, "%s", "%s", "%s", %d, %d, %d, %d, %d, %s, "%s", %d, %d, %d);',
+            'INSERT INTO `%sMailJob` (`CreatedBy`, `Subject`, `BodyText`, `Source`, `MemberOnly`, `Register`, `RecipientSpec`, `Termin`, `Gruss`, `PostDiscord`, `AttachmentPath`, `Status`, `Total`, `Sent`, `Failed`) VALUES (%d, "%s", "%s", "%s", %d, %d, %s, %d, %d, %d, %s, "%s", %d, %d, %d);',
             $GLOBALS['dbprefix'],
             (int)$this->CreatedBy,
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Subject),
@@ -169,6 +172,7 @@ class MailJob
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Source),
             (int)$this->MemberOnly,
             (int)$this->Register,
+            $this->sqlRecipientSpec(),
             (int)$this->Termin,
             (int)$this->Gruss,
             (int)$this->PostDiscord,
@@ -189,7 +193,7 @@ class MailJob
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailJob` SET `CreatedBy`=%d, `Subject`="%s", `BodyText`="%s", `Source`="%s", `MemberOnly`=%d, `Register`=%d, `Termin`=%d, `Gruss`=%d, `PostDiscord`=%d, `AttachmentPath`=%s, `Status`="%s", `Total`=%d, `Sent`=%d, `Failed`=%d WHERE `Index`=%d;',
+            'UPDATE `%sMailJob` SET `CreatedBy`=%d, `Subject`="%s", `BodyText`="%s", `Source`="%s", `MemberOnly`=%d, `Register`=%d, `RecipientSpec`=%s, `Termin`=%d, `Gruss`=%d, `PostDiscord`=%d, `AttachmentPath`=%s, `Status`="%s", `Total`=%d, `Sent`=%d, `Failed`=%d WHERE `Index`=%d;',
             $GLOBALS['dbprefix'],
             (int)$this->CreatedBy,
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Subject),
@@ -197,6 +201,7 @@ class MailJob
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Source),
             (int)$this->MemberOnly,
             (int)$this->Register,
+            $this->sqlRecipientSpec(),
             (int)$this->Termin,
             (int)$this->Gruss,
             (int)$this->PostDiscord,
@@ -212,6 +217,110 @@ class MailJob
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         return (bool)$dbr;
+    }
+
+    protected function sqlRecipientSpec() {
+        $raw = $this->RecipientSpec;
+        if($raw === null || $raw === '') {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$raw).'"';
+    }
+
+    /**
+     * Normalize recipient JSON for POC chip UI.
+     * @return array{allRegisters:bool,registers:int[],users:int[]}
+     */
+    public function getRecipientSpecArray() {
+        return self::parseRecipientSpec($this->RecipientSpec, (int)$this->Register);
+    }
+
+    /**
+     * @param string|null $json
+     * @param int $legacyRegister
+     * @return array{allRegisters:bool,registers:int[],users:int[]}
+     */
+    public static function parseRecipientSpec($json, $legacyRegister = 0) {
+        $out = array(
+            'allRegisters' => true,
+            'registers' => array(),
+            'users' => array(),
+        );
+        $raw = trim((string)$json);
+        if($raw !== '') {
+            $decoded = json_decode($raw, true);
+            if(is_array($decoded)) {
+                if(array_key_exists('allRegisters', $decoded)) {
+                    $out['allRegisters'] = !empty($decoded['allRegisters']);
+                }
+                elseif(isset($decoded['registers']) && is_array($decoded['registers'])) {
+                    $out['allRegisters'] = false;
+                }
+                if(isset($decoded['registers']) && is_array($decoded['registers'])) {
+                    foreach($decoded['registers'] as $id) {
+                        $id = (int)$id;
+                        if($id > 0) $out['registers'][] = $id;
+                    }
+                }
+                if(isset($decoded['users']) && is_array($decoded['users'])) {
+                    foreach($decoded['users'] as $id) {
+                        $id = (int)$id;
+                        if($id > 0) $out['users'][] = $id;
+                    }
+                }
+                $out['registers'] = array_values(array_unique($out['registers']));
+                $out['users'] = array_values(array_unique($out['users']));
+                if($out['allRegisters']) {
+                    $out['registers'] = array();
+                }
+                return $out;
+            }
+        }
+        // Legacy: Register column only
+        if((int)$legacyRegister > 0) {
+            $out['allRegisters'] = false;
+            $out['registers'] = array((int)$legacyRegister);
+        }
+        return $out;
+    }
+
+    /**
+     * @param array $spec
+     */
+    public function setRecipientSpecArray($spec) {
+        $all = !empty($spec['allRegisters']);
+        $registers = array();
+        $users = array();
+        if(!$all && isset($spec['registers']) && is_array($spec['registers'])) {
+            foreach($spec['registers'] as $id) {
+                $id = (int)$id;
+                if($id > 0) $registers[] = $id;
+            }
+        }
+        if(isset($spec['users']) && is_array($spec['users'])) {
+            foreach($spec['users'] as $id) {
+                $id = (int)$id;
+                if($id > 0) $users[] = $id;
+            }
+        }
+        $registers = array_values(array_unique($registers));
+        $users = array_values(array_unique($users));
+        $payload = array(
+            'allRegisters' => $all,
+            'registers' => $registers,
+            'users' => $users,
+        );
+        $this->RecipientSpec = json_encode($payload);
+        // Keep legacy Register in sync for older code paths
+        if($all) {
+            $this->Register = 0;
+        }
+        elseif(count($registers) === 1) {
+            $this->Register = $registers[0];
+        }
+        else {
+            $this->Register = 0;
+        }
     }
 
     public function load_by_id($Index) {
@@ -787,6 +896,7 @@ class MailJob
         $copy->Source = 'mail';
         $copy->MemberOnly = (int)$this->MemberOnly;
         $copy->Register = (int)$this->Register;
+        $copy->RecipientSpec = $this->RecipientSpec;
         $copy->Termin = (int)$this->Termin;
         $copy->Gruss = (int)$this->Gruss;
         $copy->PostDiscord = (int)$this->PostDiscord;
