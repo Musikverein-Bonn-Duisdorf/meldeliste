@@ -219,6 +219,7 @@ $sections[] = array(
 <ul class="help-list">
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …</li>
+<li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
 <li><b>Updater</b> – Software-Update und Datenbank-Reparatur / Schema-Stand</li>
 <li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; Remote-Abruf auch per <code>cron.php?cmd=backup</code></li>
 ' : '').'

@@ -175,6 +175,14 @@
 	"Timestamp": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
 	"Wert": {"Type": "int"}
     },
+    "SsoTicket": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Token": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"User": {"Type": "int"},
+	"Target": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"Expires": {"Type": "timestamp", "Null": "YES", "Default": null},
+	"Used": {"Type": "tinyint", "Default": 0}
+    },
     "Termine": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Datum": {"Type": "date"},

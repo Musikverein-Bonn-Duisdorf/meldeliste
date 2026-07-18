@@ -70,6 +70,17 @@ if($u->hasInventories()) { ?>
     <input type="hidden" name="mode" value="useredit" />
   </form>
   <a title="Medien" alt="Medien" href="media.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-photo-film"></i></a>
+<?php
+if(!empty($optionsDB['urlNotenarchiv'])) {
+    $ssoArchiv = 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlNotenarchiv']));
+?>
+  <a title="Notenarchiv" href="<?php echo htmlspecialchars($ssoArchiv, ENT_QUOTES, 'UTF-8'); ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-book"></i></a>
+<?php }
+if(!empty($optionsDB['urlMitgliederverwaltung'])) {
+    $ssoMit = 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlMitgliederverwaltung']));
+?>
+  <a title="Mitgliederverwaltung" href="<?php echo htmlspecialchars($ssoMit, ENT_QUOTES, 'UTF-8'); ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-id-card"></i></a>
+<?php } ?>
   <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-circle-question"></i></a>
   <?php if(isAdmin()) {
     $showMeldungen = requirePermission("perm_showResponse");
