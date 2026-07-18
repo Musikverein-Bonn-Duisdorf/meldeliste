@@ -17,7 +17,7 @@ else {
 </div>
       <div class="w3-row">
                <div class="w3-panel w3-col l3 w3-left"></div>
-                        <div class="w3-col l6 s12 m12">
+                        <div class="w3-col l6 s12 m12" id="Liste" data-cron-id="<?php echo htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8'); ?>">
 <?php
 $now = date("Y-m-d");
 $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',

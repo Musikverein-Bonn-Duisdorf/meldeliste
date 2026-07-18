@@ -58,7 +58,7 @@ if(isset($_POST['proxy'])) {
 $chunkUser = isset($user) ? (int)$user : (int)$_SESSION['userid'];
 $chunk = listChunkTermine('future', 'basic', '', 50, $chunkUser);
 ?>
-<div id="Liste">
+<div id="Liste" data-cron-id="<?php echo htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8'); ?>">
 <?php echo $chunk['html']; ?>
 <?php echo listChunkRenderSentinel('termine', $chunk['nextCursor'], $chunk['hasMore'], '', ' data-extra="user='.$chunkUser.'"'); ?>
 </div>

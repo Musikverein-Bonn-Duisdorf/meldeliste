@@ -10,9 +10,24 @@ function melde(cronID, user, termin, wert, Children, Guests) {
     xmlhttp.onreadystatechange=function() {
 	if (xmlhttp.readyState==4 && xmlhttp.status==200) {
             var oldel = document.getElementById("entry"+termin+"_user"+user);
-            var newel = document.createElement('div');
-            newel.innerHTML = xmlhttp.responseText;
-            oldel.parentNode.replaceChild(newel, oldel);
+            if(oldel && oldel.parentNode && xmlhttp.responseText) {
+                var newel = document.createElement('div');
+                newel.innerHTML = xmlhttp.responseText;
+                var replacement = newel.firstElementChild || newel.firstChild;
+                if(replacement) {
+                    oldel.parentNode.replaceChild(replacement, oldel);
+                }
+            }
+            if(typeof scheduleRefreshOpenTerminResponseModal === 'function') {
+                scheduleRefreshOpenTerminResponseModal(termin);
+            }
+            else if(typeof invalidateTerminResponseModalCache === 'function') {
+                invalidateTerminResponseModalCache(termin);
+            }
+            // Weitere Einträge desselben Termins (z. B. Zähler) nachziehen
+            if(typeof scheduleRefreshMainPageTerminEntries === 'function') {
+                scheduleRefreshMainPageTerminEntries(termin, cronID);
+            }
 	}
     }
     if(Children == -1) {

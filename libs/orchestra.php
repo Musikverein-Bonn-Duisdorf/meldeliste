@@ -190,18 +190,7 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
 
         $allMusiker = $allMusikerBase;
 
-        $allSorted = array();
-        foreach($allMusiker as $m) {
-            if($m['Wert'] != 1) {
-                $allSorted[] = $m;
-            }
-        }
-        foreach($allMusiker as $m) {
-            if($m['Wert'] == 1) {
-                $allSorted[] = $m;
-            }
-        }
-        $allMusiker = $allSorted;
+        // Reihenfolge stabil halten (Instrument-Sortierung + Name), nicht nach Meldewert umsortieren.
 
         if($tid && $activeOnly) {
             $activeMusiker = array();
