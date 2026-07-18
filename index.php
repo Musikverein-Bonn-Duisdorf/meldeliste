@@ -58,10 +58,14 @@ if(isset($_POST['proxy'])) {
 $chunkUser = isset($user) ? (int)$user : (int)$_SESSION['userid'];
 $chunk = listChunkTermine('future', 'basic', '', 50, $chunkUser);
 ?>
+<div class="w3-container w3-padding-16" style="clear:both;">
+<input class="w3-input w3-border w3-padding" type="text" placeholder="Termine suchen (Titel, Ort, Datum, Beschreibung)…" id="filterString" onkeyup="filterTermine()">
+</div>
 <div id="Liste" data-cron-id="<?php echo htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8'); ?>">
 <?php echo $chunk['html']; ?>
-<?php echo listChunkRenderSentinel('termine', $chunk['nextCursor'], $chunk['hasMore'], '', ' data-extra="user='.$chunkUser.'"'); ?>
+<?php echo listChunkRenderSentinel('termine', $chunk['nextCursor'], $chunk['hasMore'], 'filterTermine', ' data-extra="user='.$chunkUser.'"'); ?>
 </div>
+<script src="js/filterTermine.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php
 include "common/footer.php";
