@@ -313,7 +313,9 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
                     $fillColor = $style['color'];
                     $fillOpacity = (float)$style['opacity'];
-                    $textFill = hexContrastTextOnFill($fillColor, $fillOpacity);
+                    $textFill = !empty($style['textColor'])
+                        ? $style['textColor']
+                        : hexContrastTextOnFill($fillColor, $fillOpacity);
                     $seatsHtml .= '<circle opacity="'.$style['opacity'].'" cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$fillColor."\" />\n";
                     $seatsHtml .= '<text text-anchor="middle" dominant-baseline="middle" fill="'.$textFill.'" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                     $seatsHtml .= "</g>\n";
@@ -432,14 +434,14 @@ function orchestraRegisterRibbonSvg($points, $haloR, $color, $title = '') {
 function orchestraSeatVisual($wert) {
     switch((int)$wert) {
     case 1:
-        return array('color' => '#4CAF50', 'opacity' => 1, 'label' => 'Zusage');
+        return array('color' => '#4CAF50', 'opacity' => 1, 'label' => 'Zusage', 'textColor' => null);
     case 2:
-        // Deckendes Rot → weiße Schrift (lesbarer als halbtransparent)
-        return array('color' => '#f42316', 'opacity' => 1, 'label' => 'Absage');
+        // Halbtransparentes Rot, Schrift bewusst weiß und deckend
+        return array('color' => '#f42316', 'opacity' => 0.5, 'label' => 'Absage', 'textColor' => '#FFFFFF');
     case 3:
-        return array('color' => '#2196F3', 'opacity' => 0.6, 'label' => 'unsicher');
+        return array('color' => '#2196F3', 'opacity' => 0.6, 'label' => 'unsicher', 'textColor' => null);
     default:
-        return array('color' => '#ffffff', 'opacity' => 0.5, 'label' => 'nicht gemeldet');
+        return array('color' => '#ffffff', 'opacity' => 0.5, 'label' => 'nicht gemeldet', 'textColor' => null);
     }
 }
 
