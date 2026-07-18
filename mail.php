@@ -162,13 +162,12 @@ if(isset($_GET['deleted'])) {
 
 $recipientSpec = $job ? $job->getRecipientSpecArray() : MailJob::defaultRecipientSpecArray();
 // Neue / leere Entwürfe: Alle Musiker vorauswählen und im Job speichern
+// (mailGroups zählen mit — sonst würden reine Gruppen-Chips überschrieben)
 if(
     $job
     && $job->Status === 'draft'
     && !(int)$job->Termin
-    && !count($recipientSpec['groups'])
-    && !count($recipientSpec['registers'])
-    && !count($recipientSpec['users'])
+    && AudienceSpec::isEmpty($recipientSpec)
 ) {
     $recipientSpec = MailJob::defaultRecipientSpecArray();
     $job->setRecipientSpecArray($recipientSpec);
