@@ -3,6 +3,26 @@ session_start();
 $_SESSION['page'] = 'backup';
 $_SESSION['adminpage'] = true;
 
+// Download must run before any HTML output (header.php)
+if(isset($_GET['download']) && $_GET['download'] === '1') {
+    include_once 'common/include.php';
+    mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+    requireLoggedInOrRedirect();
+    if(!requirePermission('perm_editConfig')) {
+        denyAccess('Keine Berechtigung für Backup/Restore.');
+    }
+    require_once __DIR__.'/libs/backup.php';
+    try {
+        sendBackupDownload();
+    }
+    catch(Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Backup failed: '.$e->getMessage()."\n";
+        exit(1);
+    }
+}
+
 include_once 'common/header.php';
 
 if(!requirePermission('perm_editConfig')) {
@@ -13,15 +33,6 @@ require_once __DIR__.'/libs/backup.php';
 
 $flash = null;
 $restoreResult = null;
-
-if(isset($_GET['download']) && $_GET['download'] === '1') {
-    try {
-        sendBackupDownload();
-    }
-    catch(Throwable $e) {
-        $flash = array('type' => 'error', 'message' => 'Download fehlgeschlagen: '.$e->getMessage());
-    }
-}
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_confirm'])) {
     if(empty($_POST['confirm_text']) || trim((string)$_POST['confirm_text']) !== 'RESTORE') {
