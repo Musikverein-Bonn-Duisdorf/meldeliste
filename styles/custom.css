@@ -1234,6 +1234,45 @@ body.insurance-print {
   background: #e8e8e8;
 }
 
+.insurance-print-columns {
+  margin: 0 0 1.25rem;
+  padding: 0.65rem 0.85rem 0.75rem;
+  border: 1px solid #ccc;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.9rem;
+}
+
+.insurance-print-columns legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.insurance-print-columns-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.insurance-print-col-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.insurance-print-table.hide-col-reg [data-col="reg"],
+.insurance-print-table.hide-col-instrument [data-col="instrument"],
+.insurance-print-table.hide-col-vendor [data-col="vendor"],
+.insurance-print-table.hide-col-model [data-col="model"],
+.insurance-print-table.hide-col-serial [data-col="serial"],
+.insurance-print-table.hide-col-purchaseDate [data-col="purchaseDate"],
+.insurance-print-table.hide-col-purchasePrize [data-col="purchasePrize"],
+.insurance-print-table.hide-col-zeitwert [data-col="zeitwert"],
+.insurance-print-table.hide-col-owner [data-col="owner"] {
+  display: none;
+}
+
 .insurance-print-header {
   margin-bottom: 1.25rem;
   border-bottom: 2px solid #222;
