@@ -213,7 +213,7 @@ $sqlUser = sprintf(
      FROM `%sUser` u
      LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
      LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
-     WHERE u.`Deleted` != 1 AND u.`Email` != ""
+     WHERE u.`Deleted` != 1 AND u.`getMail` = 1 AND (u.`Email` != "" OR u.`Email2` != "")
      ORDER BY u.`Nachname`, u.`Vorname`;',
     $GLOBALS['dbprefix'],
     $GLOBALS['dbprefix'],
@@ -438,7 +438,7 @@ foreach($allJobs as $rowJob) {
       <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
       <p class="w3-small w3-margin-top mail-recipient-count-line">
         <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
-        <span class="w3-text-gray"> — Gruppen, Register und Personen als Chips; Mehrfachauswahl wird vereinigt, höchstens eine Mail pro Person.</span>
+        <span class="w3-text-gray"> — nur Mailverteiler mit Adresse; Mehrfachauswahl vereinigt, höchstens eine Mail pro Person.</span>
       </p>
     </div>
 <script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($mailRecipientCatalog, JSON_UNESCAPED_UNICODE); ?></script>
