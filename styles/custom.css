@@ -763,6 +763,24 @@
   display: none !important;
 }
 
+.orchestra-svg-wrap {
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.orchestra-svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.orchestra-svg--editable .orchestra-seat[data-editable="1"]:hover circle {
+  stroke-width: 3;
+  filter: brightness(0.95);
+}
+
 @media (max-width: 600px) {
   .orchestra-panel-toggle {
     text-align: left;

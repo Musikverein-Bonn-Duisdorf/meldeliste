@@ -2490,20 +2490,12 @@ ORDER BY `Nachname`, `Vorname`;",
         $colsize = $lists['colsize'];
         $bus = $lists['bus'];
 
-        $orchestraLarge = '';
-        $orchestraMedium = '';
-        $orchestraSmall = '';
-        $orchestraActiveLarge = '';
-        $orchestraActiveMedium = '';
-        $orchestraActiveSmall = '';
+        $orchestraFull = '';
+        $orchestraActive = '';
         $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt;
         if($showOrchestra) {
-            $orchestraLarge = printOrchestra($this->Index, 1, false);
-            $orchestraMedium = printOrchestra($this->Index, 0.6, false);
-            $orchestraSmall = printOrchestra($this->Index, 0.4, false);
-            $orchestraActiveLarge = printOrchestra($this->Index, 1, true);
-            $orchestraActiveMedium = printOrchestra($this->Index, 0.6, true);
-            $orchestraActiveSmall = printOrchestra($this->Index, 0.4, true);
+            $orchestraFull = printOrchestra($this->Index, 1, false);
+            $orchestraActive = printOrchestra($this->Index, 1, true);
         }
 
         $missingUsers = array();
@@ -2522,12 +2514,8 @@ ORDER BY `Nachname`, `Vorname`;",
         return render('termin/response_modal', array(
             'terminName' => $this->Name,
             'showOrchestra' => $showOrchestra,
-            'orchestraLarge' => $orchestraLarge,
-            'orchestraMedium' => $orchestraMedium,
-            'orchestraSmall' => $orchestraSmall,
-            'orchestraActiveLarge' => $orchestraActiveLarge,
-            'orchestraActiveMedium' => $orchestraActiveMedium,
-            'orchestraActiveSmall' => $orchestraActiveSmall,
+            'orchestraFull' => $orchestraFull,
+            'orchestraActive' => $orchestraActive,
             'colsize' => $colsize,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
