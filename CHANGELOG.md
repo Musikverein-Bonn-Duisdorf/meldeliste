@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-25865 (2026-07-18)
+
+- MELD-95: searchable Termine and Rückmeldungen lists
+- MELD-95: Termine und Rückmeldungen durchsuchbar
+
 ## 2026-07-18-dfa1d (2026-07-18)
 
 - MELD-90: send backup ZIP before HTML so browser downloads the file
