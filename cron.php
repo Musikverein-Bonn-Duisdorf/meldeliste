@@ -50,8 +50,9 @@ case "newAppmnts":
     }
     $datetime = new DateTime('today');
     $today = $datetime->format('Y-m-d');
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND `published` > 0 AND `Datum` >= '%s';",
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND %s AND `Datum` >= '%s';",
     $GLOBALS['dbprefix'],
+    Termin::sqlIsListed(),
     $today);
     $dbr = mysqli_query($conn, $sql);
     sqlerror();
@@ -86,8 +87,9 @@ case "tomorrow":
 	$datetime = new DateTime('tomorrow');
 	$tomorrow = $datetime->format('Y-m-d');
 
-	$sql = sprintf("SELECT * FROM `%sTermine` WHERE `published` = 1 AND `Datum` = '%s';",
+	$sql = sprintf("SELECT * FROM `%sTermine` WHERE %s AND `Datum` = '%s';",
     $GLOBALS['dbprefix'],
+    Termin::sqlIsListed(),
     $tomorrow);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
@@ -134,10 +136,11 @@ case "reminder":
 	}
 	$datetime = new DateTime('today');
 	$today = $datetime->format('Y-m-d');
-	$sql = sprintf("SELECT * FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s' AND `Shifts` = 0;",
+	$sql = sprintf("SELECT * FROM `%sTermine` WHERE %s AND `Datum` >= '%s' AND `Shifts` = 0;",
     $GLOBALS['dbprefix'],
+    Termin::sqlIsListed(),
     $today
-	);
+    );
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
     if(!$dbr) break;

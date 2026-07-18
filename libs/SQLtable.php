@@ -239,6 +239,53 @@ class SQLtable
     }
 
     /**
+     * @return string[] column names
+     */
+    public function listColumns() {
+        $schema = $this->escapeIdent($this->schemaName());
+        $name = $this->escapeIdent($this->Name);
+        $sql = sprintf(
+            "SELECT `COLUMN_NAME` AS `ColumnName` FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s' ORDER BY `ORDINAL_POSITION`;",
+            $schema,
+            $name
+        );
+        $dbr = $this->query($sql);
+        $out = array();
+        if(!$dbr) return $out;
+        while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+            if(isset($row['ColumnName'])) {
+                $out[] = $row['ColumnName'];
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * @param string $columnName
+     * @return bool
+     */
+    public function dropColumn($columnName) {
+        if(!$this->columnExists($columnName)) return true;
+        $sql = sprintf(
+            "ALTER TABLE `%s` DROP COLUMN `%s`;",
+            $this->Name,
+            mysqli_real_escape_string($GLOBALS['conn'], $columnName)
+        );
+        $this->query($sql);
+        return !$this->columnExists($columnName);
+    }
+
+    /**
+     * @return bool
+     */
+    public function dropTable() {
+        if(!$this->exists()) return true;
+        $sql = sprintf("DROP TABLE `%s`;", $this->Name);
+        $this->query($sql);
+        return !$this->exists();
+    }
+
+    /**
      * Compare current DB settings to desired definition for keys present in $definition.
      * Returns array of mismatched keys => [expected, actual] or empty array if ok.
      */

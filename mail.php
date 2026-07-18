@@ -101,8 +101,6 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     $job->Gruss = isset($_POST['gruss']) ? (int)$_POST['gruss'] : 1;
     $job->Termin = isset($_POST['termin']) ? (int)$_POST['termin'] : (int)$job->Termin;
     if($job->Termin) {
-        $job->MemberOnly = 0;
-        $job->Register = 0;
         $job->RecipientSpec = null;
         $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
@@ -162,8 +160,6 @@ if(isset($_GET['deleted'])) {
     $job = null;
 }
 
-$memberonly = $job ? (bool)$job->MemberOnly : false;
-$register = $job ? (int)$job->Register : 0;
 $recipientSpec = $job ? $job->getRecipientSpecArray() : MailJob::defaultRecipientSpecArray();
 // Neue / leere Entwürfe: Alle Musiker vorauswählen und im Job speichern
 if(

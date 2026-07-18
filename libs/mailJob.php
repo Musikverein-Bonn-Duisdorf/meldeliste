@@ -8,8 +8,6 @@ class MailJob
         'Subject' => null,
         'BodyText' => null,
         'Source' => 'mail',
-        'MemberOnly' => 0,
-        'Register' => 0,
         'RecipientSpec' => null,
         'Termin' => 0,
         'Gruss' => 1,
@@ -33,8 +31,6 @@ class MailJob
         switch($key) {
         case 'Index':
         case 'CreatedBy':
-        case 'MemberOnly':
-        case 'Register':
         case 'Termin':
         case 'Gruss':
         case 'PostDiscord':
@@ -167,14 +163,12 @@ class MailJob
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sMailJob` (`CreatedBy`, `Subject`, `BodyText`, `Source`, `MemberOnly`, `Register`, `RecipientSpec`, `Termin`, `Gruss`, `PostDiscord`, `AttachmentPath`, `Status`, `Total`, `Sent`, `Failed`) VALUES (%d, "%s", "%s", "%s", %d, %d, %s, %d, %d, %d, %s, "%s", %d, %d, %d);',
+            'INSERT INTO `%sMailJob` (`CreatedBy`, `Subject`, `BodyText`, `Source`, `RecipientSpec`, `Termin`, `Gruss`, `PostDiscord`, `AttachmentPath`, `Status`, `Total`, `Sent`, `Failed`) VALUES (%d, "%s", "%s", "%s", %s, %d, %d, %d, %s, "%s", %d, %d, %d);',
             $GLOBALS['dbprefix'],
             (int)$this->CreatedBy,
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Subject),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->BodyText),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Source),
-            (int)$this->MemberOnly,
-            (int)$this->Register,
             $this->sqlRecipientSpec(),
             (int)$this->Termin,
             (int)$this->Gruss,
@@ -196,14 +190,12 @@ class MailJob
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailJob` SET `CreatedBy`=%d, `Subject`="%s", `BodyText`="%s", `Source`="%s", `MemberOnly`=%d, `Register`=%d, `RecipientSpec`=%s, `Termin`=%d, `Gruss`=%d, `PostDiscord`=%d, `AttachmentPath`=%s, `Status`="%s", `Total`=%d, `Sent`=%d, `Failed`=%d WHERE `Index`=%d;',
+            'UPDATE `%sMailJob` SET `CreatedBy`=%d, `Subject`="%s", `BodyText`="%s", `Source`="%s", `RecipientSpec`=%s, `Termin`=%d, `Gruss`=%d, `PostDiscord`=%d, `AttachmentPath`=%s, `Status`="%s", `Total`=%d, `Sent`=%d, `Failed`=%d WHERE `Index`=%d;',
             $GLOBALS['dbprefix'],
             (int)$this->CreatedBy,
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Subject),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->BodyText),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Source),
-            (int)$this->MemberOnly,
-            (int)$this->Register,
             $this->sqlRecipientSpec(),
             (int)$this->Termin,
             (int)$this->Gruss,
@@ -235,7 +227,7 @@ class MailJob
      * @return array{groups:string[],registers:int[],users:int[]}
      */
     public function getRecipientSpecArray() {
-        return self::parseRecipientSpec($this->RecipientSpec, (int)$this->Register, (int)$this->MemberOnly);
+        return self::parseRecipientSpec($this->RecipientSpec);
     }
 
     /**
@@ -268,13 +260,6 @@ class MailJob
             'mailGroups' => $norm['mailGroups'],
         );
         $this->RecipientSpec = json_encode($payload);
-        $this->MemberOnly = in_array('members', $norm['groups'], true) ? 1 : 0;
-        if(count($norm['registers']) === 1) {
-            $this->Register = $norm['registers'][0];
-        }
-        else {
-            $this->Register = 0;
-        }
     }
 
     public static function defaultRecipientSpecArray() {
@@ -857,8 +842,6 @@ class MailJob
         $copy->Subject = $subject;
         $copy->BodyText = $this->bodyTextWithoutGreeting();
         $copy->Source = 'mail';
-        $copy->MemberOnly = (int)$this->MemberOnly;
-        $copy->Register = (int)$this->Register;
         $copy->RecipientSpec = $this->RecipientSpec;
         $copy->Termin = (int)$this->Termin;
         $copy->Gruss = (int)$this->Gruss;
