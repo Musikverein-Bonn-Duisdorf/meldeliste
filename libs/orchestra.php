@@ -17,6 +17,9 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
     $minrowdistance = 150;
     $seatR = 18;
 
+    // Lokal testen: Registerbereiche farbig hinterlegen (ohne Push entscheiden).
+    $showRegisterBands = true;
+
     $editable = false;
     if($tid) {
         $editable = requirePermission('perm_editResponse');
@@ -25,6 +28,9 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
     $svgClass = 'orchestra-svg';
     if($editable) {
         $svgClass .= ' orchestra-svg--editable';
+    }
+    if($showRegisterBands) {
+        $svgClass .= ' orchestra-svg--register-bands';
     }
 
     $aMeldungen = array();
@@ -72,6 +78,11 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $meldungByUser[(int)$meldung['User']] = $meldung;
     }
 
+    $instrumentNameById = array();
+    foreach($aInstrument as $instRow) {
+        $instrumentNameById[(int)$instRow['Index']] = html_entity_decode((string)$instRow['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
     // Build musician roster once (not per register).
     $allMusikerBase = array();
     foreach($aUser as $user) {
@@ -91,12 +102,14 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
             $children = (int)$meldung['Children'];
             $guests = (int)$meldung['Guests'];
         }
+        $instrId = (int)$instr;
         $allMusikerBase[] = array(
             'userId' => $uid,
             'aushilfe' => false,
             'short' => $short,
             'name' => $fullName,
             'Instrument' => $instr,
+            'instrumentName' => isset($instrumentNameById[$instrId]) ? $instrumentNameById[$instrId] : '',
             'homeInstrument' => $user['Instrument'],
             'Wert' => $wert,
             'Children' => $children,
@@ -106,12 +119,14 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
     if($tid) {
         foreach($aAushilfen as $user) {
             $short = getShortAushilfe($user['Name']);
+            $instrId = (int)$user['Instrument'];
             $allMusikerBase[] = array(
                 'userId' => 0,
                 'aushilfe' => true,
                 'short' => $short,
                 'name' => (string)$user['Name'],
                 'Instrument' => $user['Instrument'],
+                'instrumentName' => isset($instrumentNameById[$instrId]) ? $instrumentNameById[$instrId] : '',
                 'homeInstrument' => $user['Instrument'],
                 'Wert' => 1,
                 'Children' => 0,
@@ -135,6 +150,7 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
     array_push($rmaxradius, 0);
 
     $seatsHtml = '';
+    $bandsHtml = '';
     $minX = null;
     $minY = null;
     $maxX = null;
@@ -211,6 +227,8 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
             }
         }
 
+        $regSeatPoints = array();
+
         foreach($sortedInstruments as $instrument) {
             foreach($allMusiker as $user) {
                 if($user['Instrument'] != $instrument) continue;
@@ -263,6 +281,8 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                 $x = $baseWidth/2-$radius*cos($arc/180*pi());
                 $y = 40+$radius*sin($arc/180*pi());
 
+                $regSeatPoints[] = array($x, $y);
+
                 if($minX === null) {
                     $minX = $x - $seatR;
                     $maxX = $x + $seatR;
@@ -277,17 +297,19 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                 }
 
                 $safeShort = htmlspecialchars((string)$short, ENT_QUOTES, 'UTF-8');
+                $instrLabel = isset($user['instrumentName']) ? trim((string)$user['instrumentName']) : '';
                 if($tid) {
                     $style = orchestraSeatVisual($match);
                     $wertAttr = (int)$match;
                     if($wertAttr < 0) {
                         $wertAttr = 0;
                     }
-                    $titleText = htmlspecialchars(
-                        $user['name'].' — '.$style['label'],
-                        ENT_QUOTES,
-                        'UTF-8'
-                    );
+                    $titleParts = array($user['name']);
+                    if($instrLabel !== '') {
+                        $titleParts[] = $instrLabel;
+                    }
+                    $titleParts[] = $style['label'];
+                    $titleText = htmlspecialchars(implode("\n", $titleParts), ENT_QUOTES, 'UTF-8');
                     $seatEditable = $editable && !$user['aushilfe'] && (int)$user['userId'] > 0;
                     $seatsHtml .= '<g class="orchestra-seat"'
                         .' data-wert="'.$wertAttr.'"'
@@ -295,22 +317,42 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                         .' data-termin="'.(int)$tid.'"'
                         .' data-children="'.(int)$user['Children'].'"'
                         .' data-guests="'.(int)$user['Guests'].'"'
+                        .' data-name="'.htmlspecialchars((string)$user['name'], ENT_QUOTES, 'UTF-8').'"'
                         .' data-editable="'.($seatEditable ? '1' : '0').'"'
+                        .($instrLabel !== '' ? ' data-instrument="'.htmlspecialchars($instrLabel, ENT_QUOTES, 'UTF-8').'"' : '')
                         .($seatEditable ? ' style="cursor:pointer"' : '')
                         .">\n";
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
                     $seatsHtml .= '<circle opacity="'.$style['opacity'].'" cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$style['color']."\" />\n";
-                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" dominant-baseline="central" dy="0.05em" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" dominant-baseline="middle" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                     $seatsHtml .= "</g>\n";
                 }
                 else {
+                    $titleParts = array($user['name']);
+                    if($instrLabel !== '') {
+                        $titleParts[] = $instrLabel;
+                    }
+                    $titleText = htmlspecialchars(implode("\n", $titleParts), ENT_QUOTES, 'UTF-8');
+                    $seatsHtml .= '<g class="orchestra-seat"'
+                        .' data-name="'.htmlspecialchars((string)$user['name'], ENT_QUOTES, 'UTF-8').'"'
+                        .($instrLabel !== '' ? ' data-instrument="'.htmlspecialchars($instrLabel, ENT_QUOTES, 'UTF-8').'"' : '')
+                        .'>'."\n";
+                    $seatsHtml .= '<title>'.$titleText."</title>\n";
                     $seatsHtml .= '<circle cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$register['Color']."\" />\n";
-                    $seatsHtml .= '<text text-anchor="middle" dominant-baseline="central" dy="0.05em" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= '<text text-anchor="middle" dominant-baseline="middle" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= "</g>\n";
                 }
 
                 $k++;
             }
         }
+
+        if($showRegisterBands && count($regSeatPoints) > 0) {
+            $bandColor = isset($register['Color']) ? (string)$register['Color'] : '#cccccc';
+            $safeName = htmlspecialchars(html_entity_decode((string)$register['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+            $bandsHtml .= orchestraRegisterRibbonSvg($regSeatPoints, $seatR + 8, $bandColor, $safeName);
+        }
+
         $k = 0;
         $j = 0;
     }
@@ -323,16 +365,21 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $vbH = $baseHeight;
     }
     else {
-        // Fit viewBox to seats (weniger Leerraum), aber Zoom deckeln,
-        // damit wenige Plätze nicht riesig werden.
         $contentW = ($maxX - $minX) + 2 * $pad;
         $contentH = ($maxY - $minY) + 2 * $pad;
         $cx = ($minX + $maxX) / 2;
         $cy = ($minY + $maxY) / 2;
 
-        // Mindest-viewBox ≈ frühere Sitzgröße bei ~1000px Breite (r=18)
-        $minViewW = 560;
-        $minViewH = 340;
+        if($tid) {
+            // Meldungs-Modal: eng an Sitze
+            $minViewW = 560;
+            $minViewH = 340;
+        }
+        else {
+            // Register/Musiker: Mittelding zwischen Vollbühne und Modal-Zoom
+            $minViewW = 820;
+            $minViewH = 480;
+        }
 
         $vbW = max($contentW, $minViewW);
         $vbH = max($contentH, $minViewH);
@@ -347,9 +394,46 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
         $str .= ' data-cron-id="'.htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8').'"';
     }
     $str .= '>';
+    if($bandsHtml !== '') {
+        $str .= '<g class="orchestra-register-bands" pointer-events="none">'.$bandsHtml.'</g>';
+    }
     $str .= $seatsHtml;
     $str .= '</svg>';
     return $str;
+}
+
+/**
+ * Register highlight: round ribbon along seat placement order only.
+ */
+function orchestraRegisterRibbonSvg($points, $haloR, $color, $title = '') {
+    $n = count($points);
+    if($n < 1) {
+        return '';
+    }
+
+    $fill = htmlspecialchars($color, ENT_QUOTES, 'UTF-8');
+    $html = '<g class="orchestra-register-band">';
+    if($title !== '') {
+        $html .= '<title>'.$title.'</title>';
+    }
+
+    if($n === 1) {
+        // Einzelplatz: kleiner Punkt statt Halo-Kreis um den Sitz
+        $html .= '<circle cx="'.sprintf('%.2f', $points[0][0]).'" cy="'.sprintf('%.2f', $points[0][1]).'" r="'
+            .sprintf('%.2f', $haloR * 0.55).'" fill="'.$fill.'" opacity="0.4"/>';
+    }
+    else {
+        $ptsAttr = '';
+        foreach($points as $p) {
+            $ptsAttr .= sprintf('%.2f,%.2f ', $p[0], $p[1]);
+        }
+        $html .= '<polyline points="'.trim($ptsAttr).'" fill="none" stroke="'.$fill
+            .'" stroke-opacity="0.45" stroke-width="'.sprintf('%.2f', $haloR * 1.7)
+            .'" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    $html .= '</g>'."\n";
+    return $html;
 }
 
 function orchestraSeatVisual($wert) {

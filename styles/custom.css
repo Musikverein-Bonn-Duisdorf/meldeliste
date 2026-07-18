@@ -775,9 +775,15 @@
 
 .orchestra-svg-wrap {
   width: 100%;
-  max-width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.w3-modal-content .orchestra-svg-wrap {
+  max-width: 100%;
 }
 
 .orchestra-svg {
@@ -789,7 +795,79 @@
 
 .orchestra-svg text {
   text-anchor: middle;
-  dominant-baseline: central;
+  dominant-baseline: middle;
+}
+
+.orchestra-register-band {
+  pointer-events: none;
+}
+
+.orchestra-seat-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10020;
+  background: #fff;
+  border-top: 1px solid #bbb;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.18);
+  padding: 0.85rem 1rem 1.1rem;
+  padding-bottom: max(1.1rem, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.orchestra-seat-sheet[hidden] {
+  display: none !important;
+}
+
+.orchestra-seat-sheet-close {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.4rem;
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #333;
+  padding: 0.25rem 0.5rem;
+}
+
+.orchestra-seat-sheet-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-right: 2rem;
+}
+
+.orchestra-seat-sheet-instrument,
+.orchestra-seat-sheet-status {
+  margin-top: 0.2rem;
+  color: #444;
+}
+
+.orchestra-seat-sheet-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.orchestra-seat-sheet-actions[hidden] {
+  display: none !important;
+}
+
+.orchestra-seat-sheet-btn {
+  flex: 1 1 auto;
+  min-width: 5rem;
+}
+
+.orchestra-seat-sheet-btn--active {
+  outline: 2px solid #333;
+  font-weight: 700;
+}
+
+.orchestra-svg--editable .orchestra-seat[data-editable="1"] {
+  cursor: pointer;
 }
 
 .orchestra-svg--editable .orchestra-seat[data-editable="1"]:hover circle {

@@ -7,6 +7,7 @@ var modalLoadingKey = null;
 function closeModal() {
     var host = document.getElementById('ajaxModalHost');
     if(host) host.style.display = 'none';
+    if(typeof closeOrchestraSeatSheet === 'function') closeOrchestraSeatSheet();
 }
 
 function openModal(type, id, register) {
@@ -111,8 +112,19 @@ function applyOrchestraSeatWert(seat, wert) {
         text.setAttribute('opacity', visual.opacity);
     }
     if(title) {
-        var name = title.textContent.split(' — ')[0] || title.textContent;
-        title.textContent = name + ' — ' + visual.label;
+        var instrument = seat.getAttribute('data-instrument') || '';
+        var raw = title.textContent || '';
+        var parts = raw.split(/\n| — /);
+        var name = (parts[0] || '').trim() || raw;
+        if(!instrument && parts.length >= 3) {
+            instrument = (parts[1] || '').trim();
+        }
+        var lines = [name];
+        if(instrument) {
+            lines.push(instrument);
+        }
+        lines.push(visual.label);
+        title.textContent = lines.join('\n');
     }
 }
 
@@ -154,6 +166,12 @@ function getOrchestraCronId(seat) {
 
 function cycleOrchestraSeat(seat) {
     if(!seat || seat.getAttribute('data-editable') !== '1') return;
+    var wert = parseInt(seat.getAttribute('data-wert'), 10) || 0;
+    saveOrchestraSeatWert(seat, orchestraNextWert(wert));
+}
+
+function saveOrchestraSeatWert(seat, next) {
+    if(!seat || seat.getAttribute('data-editable') !== '1') return;
     if(seat.getAttribute('data-busy') === '1') return;
 
     var user = parseInt(seat.getAttribute('data-user'), 10) || 0;
@@ -161,12 +179,12 @@ function cycleOrchestraSeat(seat) {
     var wert = parseInt(seat.getAttribute('data-wert'), 10) || 0;
     var children = parseInt(seat.getAttribute('data-children'), 10) || 0;
     var guests = parseInt(seat.getAttribute('data-guests'), 10) || 0;
-    if(!user || !termin) return;
+    next = parseInt(next, 10) || 0;
+    if(!user || !termin || next < 1 || next > 3) return;
 
     var cronID = getOrchestraCronId(seat);
     if(!cronID) return;
 
-    var next = orchestraNextWert(wert);
     seat.setAttribute('data-busy', '1');
     applyOrchestraSeatWert(seat, next);
 
@@ -183,6 +201,7 @@ function cycleOrchestraSeat(seat) {
         if(xhr.status >= 200 && xhr.status < 300) {
             syncOrchestraSeatsForUser(termin, user, next);
             invalidateTerminResponseModalCache(termin);
+            refreshOrchestraSeatSheetIfOpen(seat);
             var oldel = document.getElementById('entry'+termin+'_user'+user);
             if(oldel && xhr.responseText) {
                 var wrap = document.createElement('div');
@@ -195,6 +214,7 @@ function cycleOrchestraSeat(seat) {
         }
         else {
             applyOrchestraSeatWert(seat, wert);
+            refreshOrchestraSeatSheetIfOpen(seat);
         }
     };
 
@@ -205,12 +225,198 @@ function cycleOrchestraSeat(seat) {
     xhr.send();
 }
 
+var orchestraSheetSeat = null;
+var orchestraLongPressTimer = null;
+var orchestraLongPressSeat = null;
+var orchestraSuppressClick = false;
+var ORCHESTRA_LONG_PRESS_MS = 450;
+
+function ensureOrchestraSeatSheet() {
+    var sheet = document.getElementById('orchestraSeatSheet');
+    if(sheet) return sheet;
+
+    sheet = document.createElement('div');
+    sheet.id = 'orchestraSeatSheet';
+    sheet.className = 'orchestra-seat-sheet';
+    sheet.setAttribute('hidden', 'hidden');
+    sheet.innerHTML =
+        '<button type="button" class="orchestra-seat-sheet-close" aria-label="Schließen">&times;</button>'
+        + '<div class="orchestra-seat-sheet-name"></div>'
+        + '<div class="orchestra-seat-sheet-instrument"></div>'
+        + '<div class="orchestra-seat-sheet-status"></div>'
+        + '<div class="orchestra-seat-sheet-actions" hidden>'
+        +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="1">Ja</button>'
+        +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="2">Nein</button>'
+        +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="3">Vielleicht</button>'
+        + '</div>';
+    document.body.appendChild(sheet);
+
+    sheet.querySelector('.orchestra-seat-sheet-close').addEventListener('click', function(ev) {
+        ev.preventDefault();
+        closeOrchestraSeatSheet();
+    });
+    sheet.querySelectorAll('.orchestra-seat-sheet-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if(!orchestraSheetSeat) return;
+            var w = parseInt(btn.getAttribute('data-wert'), 10);
+            saveOrchestraSeatWert(orchestraSheetSeat, w);
+        });
+    });
+    return sheet;
+}
+
+function getOrchestraSeatInfo(seat) {
+    var name = seat.getAttribute('data-name') || '';
+    var instrument = seat.getAttribute('data-instrument') || '';
+    var wert = parseInt(seat.getAttribute('data-wert'), 10);
+    if(isNaN(wert)) wert = -1;
+    var visual = orchestraSeatVisual(wert);
+    if(!name) {
+        var title = seat.querySelector('title');
+        if(title) {
+            var parts = (title.textContent || '').split(/\n/);
+            name = (parts[0] || '').trim();
+            if(!instrument && parts.length >= 2) instrument = (parts[1] || '').trim();
+        }
+    }
+    return {
+        name: name,
+        instrument: instrument,
+        wert: wert,
+        statusLabel: visual.label,
+        editable: seat.getAttribute('data-editable') === '1'
+    };
+}
+
+function openOrchestraSeatSheet(seat) {
+    if(!seat) return;
+    var sheet = ensureOrchestraSeatSheet();
+    var info = getOrchestraSeatInfo(seat);
+    orchestraSheetSeat = seat;
+    sheet.querySelector('.orchestra-seat-sheet-name').textContent = info.name || 'Musiker';
+    var instrEl = sheet.querySelector('.orchestra-seat-sheet-instrument');
+    if(info.instrument) {
+        instrEl.textContent = info.instrument;
+        instrEl.removeAttribute('hidden');
+    }
+    else {
+        instrEl.textContent = '';
+        instrEl.setAttribute('hidden', 'hidden');
+    }
+    var statusEl = sheet.querySelector('.orchestra-seat-sheet-status');
+    if(seat.getAttribute('data-wert') !== null && seat.hasAttribute('data-wert')) {
+        statusEl.textContent = info.statusLabel;
+        statusEl.removeAttribute('hidden');
+    }
+    else {
+        statusEl.textContent = '';
+        statusEl.setAttribute('hidden', 'hidden');
+    }
+    var actions = sheet.querySelector('.orchestra-seat-sheet-actions');
+    if(info.editable) {
+        actions.removeAttribute('hidden');
+        actions.querySelectorAll('.orchestra-seat-sheet-btn').forEach(function(btn) {
+            var w = parseInt(btn.getAttribute('data-wert'), 10);
+            if(w === info.wert) {
+                btn.classList.add('orchestra-seat-sheet-btn--active');
+            }
+            else {
+                btn.classList.remove('orchestra-seat-sheet-btn--active');
+            }
+        });
+    }
+    else {
+        actions.setAttribute('hidden', 'hidden');
+    }
+    sheet.removeAttribute('hidden');
+}
+
+function refreshOrchestraSeatSheetIfOpen(seat) {
+    if(!orchestraSheetSeat || !seat) return;
+    if(orchestraSheetSeat === seat
+        || (orchestraSheetSeat.getAttribute('data-user') === seat.getAttribute('data-user')
+            && orchestraSheetSeat.getAttribute('data-termin') === seat.getAttribute('data-termin'))) {
+        openOrchestraSeatSheet(seat);
+    }
+}
+
+function closeOrchestraSeatSheet() {
+    var sheet = document.getElementById('orchestraSeatSheet');
+    if(sheet) sheet.setAttribute('hidden', 'hidden');
+    orchestraSheetSeat = null;
+}
+
+function clearOrchestraLongPress() {
+    if(orchestraLongPressTimer) {
+        clearTimeout(orchestraLongPressTimer);
+        orchestraLongPressTimer = null;
+    }
+    orchestraLongPressSeat = null;
+}
+
 document.addEventListener('click', function(ev) {
+    var t = ev.target;
+    if(!t || !t.closest) return;
+
+    var sheet = document.getElementById('orchestraSeatSheet');
+    if(sheet && !sheet.hasAttribute('hidden')) {
+        if(sheet.contains(t)) return;
+        if(!t.closest('.orchestra-seat')) {
+            closeOrchestraSeatSheet();
+        }
+    }
+
+    var seat = t.closest('.orchestra-seat');
+    if(!seat) return;
+
+    if(orchestraSuppressClick) {
+        orchestraSuppressClick = false;
+        ev.preventDefault();
+        ev.stopPropagation();
+        return;
+    }
+
+    // Klick/Tipp: Meldung wechseln (wenn erlaubt)
+    if(seat.getAttribute('data-editable') === '1') {
+        ev.preventDefault();
+        cycleOrchestraSeat(seat);
+    }
+});
+
+document.addEventListener('touchstart', function(ev) {
     var t = ev.target;
     if(!t || !t.closest) return;
     var seat = t.closest('.orchestra-seat');
     if(!seat) return;
-    if(seat.getAttribute('data-editable') !== '1') return;
-    ev.preventDefault();
-    cycleOrchestraSeat(seat);
+    clearOrchestraLongPress();
+    orchestraLongPressSeat = seat;
+    orchestraLongPressTimer = setTimeout(function() {
+        orchestraLongPressTimer = null;
+        if(orchestraLongPressSeat === seat) {
+            orchestraSuppressClick = true;
+            openOrchestraSeatSheet(seat);
+        }
+    }, ORCHESTRA_LONG_PRESS_MS);
+}, {passive: true});
+
+document.addEventListener('touchend', function() {
+    clearOrchestraLongPress();
+}, {passive: true});
+
+document.addEventListener('touchcancel', function() {
+    clearOrchestraLongPress();
+}, {passive: true});
+
+document.addEventListener('touchmove', function() {
+    clearOrchestraLongPress();
+}, {passive: true});
+
+document.addEventListener('contextmenu', function(ev) {
+    var t = ev.target;
+    if(!t || !t.closest) return;
+    if(t.closest('.orchestra-seat')) {
+        ev.preventDefault();
+    }
 });
