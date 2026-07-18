@@ -229,43 +229,95 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
 }
 
 /**
- * User lists by offset (stable ORDER BY Nachname, Vorname, Index).
+ * User lists by offset.
  * @param string $kind musiker|users|mitglied
+ * @param string $sort Whitelisted column key (nachname|vorname|instrument|email|lastlogin|index)
+ * @param string $dir asc|desc
  */
-function listChunkUsers($kind, $offset, $limit) {
+function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     $limit = listChunkLimit($limit);
     $offset = max(0, (int)$offset);
+    $dirSql = (strtolower((string)$dir) === 'desc') ? 'DESC' : 'ASC';
+    $sort = strtolower(trim((string)$sort));
+    $p = $GLOBALS['dbprefix'];
+
+    $orderMusiker = function($sort, $dirSql) use ($p) {
+        switch($sort) {
+        case 'vorname':
+            return '`Vorname` '.$dirSql.', `Nachname` ASC, `'.$p.'User`.`Index` ASC';
+        case 'instrument':
+            return '`iName` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        case 'email':
+            return '`Email` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        case 'lastlogin':
+            return '`LastLogin` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        case 'nachname':
+            return '`Nachname` '.$dirSql.', `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        default:
+            return '`Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        }
+    };
+
+    $orderPlain = function($sort, $dirSql) {
+        switch($sort) {
+        case 'vorname':
+            return '`Vorname` '.$dirSql.', `Nachname` ASC, `Index` ASC';
+        case 'email':
+            return '`Email` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
+        case 'lastlogin':
+            return '`LastLogin` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
+        case 'index':
+            return '`Index` '.$dirSql;
+        case 'instrument':
+            return '`iName` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
+        case 'nachname':
+            return '`Nachname` '.$dirSql.', `Vorname` ASC, `Index` ASC';
+        default:
+            return '`Nachname` ASC, `Vorname` ASC, `Index` ASC';
+        }
+    };
 
     switch($kind) {
     case 'musiker':
+        $orderBy = $orderMusiker($sort, $dirSql);
         $sql = sprintf(
-            'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`, `%sUser`.`Index` LIMIT %d OFFSET %d;',
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
+            'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            $p, $p, $p, $p, $p, $p,
+            $orderBy,
             $limit + 1,
             $offset
         );
         $lineMethod = 'printTableLine';
         break;
     case 'mitglied':
-        $sql = sprintf(
-            'SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY `Nachname`, `Vorname`, `Index` LIMIT %d OFFSET %d;',
-            $GLOBALS['dbprefix'],
-            $limit + 1,
-            $offset
-        );
+        $orderBy = $orderPlain($sort, $dirSql);
+        if($sort === 'instrument') {
+            $sql = sprintf(
+                'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+                $p, $p, $p, $p,
+                $orderBy,
+                $limit + 1,
+                $offset
+            );
+        }
+        else {
+            $sql = sprintf(
+                'SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+                $p,
+                $orderBy,
+                $limit + 1,
+                $offset
+            );
+        }
         $lineMethod = 'printTableLine';
         break;
     case 'users':
     default:
+        $orderBy = $orderPlain($sort === 'instrument' ? 'nachname' : $sort, $dirSql);
         $sql = sprintf(
-            'SELECT `Index` FROM `%sUser` WHERE `Deleted` != 1 ORDER BY `Nachname`, `Vorname`, `Index` LIMIT %d OFFSET %d;',
-            $GLOBALS['dbprefix'],
+            'SELECT `Index` FROM `%sUser` WHERE `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            $p,
+            $orderBy,
             $limit + 1,
             $offset
         );

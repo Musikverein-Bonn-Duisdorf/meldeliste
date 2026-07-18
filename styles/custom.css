@@ -1446,6 +1446,16 @@ body.insurance-print {
   white-space: nowrap;
 }
 
+.list-sort {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.list-sort:hover {
+  text-decoration: underline;
+}
+
 .eval-charts,
 .eval-tables {
   display: grid;

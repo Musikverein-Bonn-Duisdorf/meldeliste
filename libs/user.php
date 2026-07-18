@@ -564,17 +564,25 @@ class User
     }
 
     public function printTableLine() {
+        $lastVisit = $this->getLastVisit();
+        $attrs = ' data-sort-nachname="'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-vorname="'.htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-name="'.htmlspecialchars(trim($this->Vorname.' '.$this->Nachname), ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-instrument="'.htmlspecialchars((string)$this->iName, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-email="'.htmlspecialchars((string)$this->Email, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-lastlogin="'.htmlspecialchars((string)$this->LastLogin, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-lastvisit="'.htmlspecialchars((string)$lastVisit, ENT_QUOTES, 'UTF-8').'"';
         if($this->Mitglied) {
-            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
+            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\"".$attrs.">\n";
         }
         else {
-            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\">\n";
+            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\"".$attrs.">\n";
         }
         echo "  <div onclick=\"openModal('user', ".$this->Index.")\" class=\"w3-col l3 m6 s12 w3-container list-primary\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
         echo "  <div class=\"w3-col l2 m6 s12 w3-container list-secondary\">".$this->iName."</div>\n";
         echo "  <div class=\"w3-col l3 m12 s12 w3-container list-secondary\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
         echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->getLastVisit(), 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($lastVisit, 1)."</div>\n";
         echo "</div>\n";
     }
 
@@ -586,12 +594,20 @@ class User
         if(!$this->Instrument) {
             $main->class=$GLOBALS['optionsDB']['colorDisabled'];
         }
+        $lastVisit = $this->getLastVisit();
+        $main->extraAttrs = 'data-sort-index="'.htmlspecialchars((string)(int)$this->Index, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-nachname="'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-vorname="'.htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-name="'.htmlspecialchars(trim($this->Vorname.' '.$this->Nachname), ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-email="'.htmlspecialchars((string)$this->Email, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-lastlogin="'.htmlspecialchars((string)$this->LastLogin, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-lastvisit="'.htmlspecialchars((string)$lastVisit, ENT_QUOTES, 'UTF-8').'"';
         echo $main->open();
         echo "  <div class=\"w3-col l1 m2 s12 w3-container list-meta\">".$this->Index."</div>\n";
         echo "  <div class=\"w3-col l3 m5 s12 w3-container list-primary\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
         echo "  <div class=\"w3-col l3 m5 s12 w3-container list-secondary\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
         echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->getLastVisit(), 1)."</div>\n";
+        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($lastVisit, 1)."</div>\n";
         echo $main->close();
     }
 };
