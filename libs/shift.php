@@ -105,42 +105,65 @@ class Shift
         return $aushilfen;
     }
     public function getAushilfenVal() {
-        $meldungen = $this->getAushilfen();
-        return count($meldungen);
+        $sql = sprintf(
+            'SELECT COUNT(*) AS `c` FROM `%sAushilfenShift` WHERE `Shift` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        return ($row && isset($row['c'])) ? (int)$row['c'] : 0;
     }
     public function getMeldungenUser($val) {
         $user = array();
-        $meldungen = $this->getMeldungen();
-        for($i=0; $i<count($meldungen); $i++) {
-            $m = new Shiftmeldung;
-            $m->load_by_id($meldungen[$i]);
-            if($m->Wert == $val) {
-                $u = new User;
-                $u->load_by_id($m->User);
-                array_push($user, $u->getName());
+        $sql = sprintf(
+            'SELECT u.`Vorname`, u.`Nachname`
+             FROM `%sSchichtmeldung` m
+             INNER JOIN `%sUser` u ON m.`User` = u.`Index`
+             WHERE m.`Shift` = %d AND m.`Wert` = %d
+             ORDER BY u.`Nachname`, u.`Vorname`;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            (int)$this->Index,
+            (int)$val
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $user[] = trim($row['Vorname'].' '.$row['Nachname']);
             }
         }
         return $user;
     }
     public function getMeldungenAushilfenShift() {
         $user = array();
-        $meldungen = $this->getAushilfen();
-        for($i=0; $i<count($meldungen); $i++) {
-            $m = new AushilfeShift;
-            $m->load_by_id($meldungen[$i]);
-            array_push($user, $m->getName());
+        $sql = sprintf(
+            'SELECT `Name` FROM `%sAushilfenShift` WHERE `Shift` = %d ORDER BY `Name`;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $user[] = $row['Name'];
+            }
         }
         return $user;
     }
     public function getMeldungenVal($val) {
-        $r = 0;
-        $meldungen = $this->getMeldungen();
-        for($i=0; $i<count($meldungen); $i++) {
-            $m = new Shiftmeldung;
-            $m->load_by_id($meldungen[$i]);
-            if($m->Wert == $val) $r++;
-        }
-        return $r;
+        $sql = sprintf(
+            'SELECT COUNT(*) AS `c` FROM `%sSchichtmeldung` WHERE `Shift` = %d AND `Wert` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index,
+            (int)$val
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        return ($row && isset($row['c'])) ? (int)$row['c'] : 0;
     }
     
     public function getResponseString() {
