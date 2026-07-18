@@ -673,6 +673,32 @@ function delFile(hash) {
     </div>
   </div>
 
+<?php
+    $jobTerminId = (int)$job->Termin;
+    $recipientSpecView = $job->getRecipientSpecArray();
+    $verteilerHtml = '';
+    if($jobTerminId > 0) {
+        $tView = new Termin;
+        $tView->load_by_id($jobTerminId);
+        if($tView->Index) {
+            $verteilerHtml = 'Alle Teilnehmer von '
+                .htmlspecialchars($tView->Name.' ('.$tView->getGermanDate().')', ENT_QUOTES, 'UTF-8');
+        }
+        else {
+            $verteilerHtml = 'Alle Teilnehmer von Termin #'.$jobTerminId;
+        }
+    }
+    else {
+        $verteilerHtml = AudienceSpec::renderChipsHtml($recipientSpecView, array(
+            'allowMailGroups' => true,
+            'ariaLabel' => 'Verteiler',
+            'emptyHtml' => '<span class="w3-text-gray">—</span>',
+        ));
+    }
+?>
+  <h4>Verteiler</h4>
+  <div class="w3-margin-bottom w3-padding-small"><?php echo $verteilerHtml; ?></div>
+
   <h4>Empfänger</h4>
   <div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
