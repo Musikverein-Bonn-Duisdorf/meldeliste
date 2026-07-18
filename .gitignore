@@ -6,3 +6,4 @@ calendars/*.ics
 php.ini
 error-log.php
 .cursor/
+__pycache__/
