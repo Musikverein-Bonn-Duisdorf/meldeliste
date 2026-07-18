@@ -14,6 +14,11 @@ Release: <?php echo "<b>".$GLOBALS['version']['String']."</b> (".$GLOBALS['versi
 <a href="mailto:<?php echo $GLOBALS['optionsDB']['AdminEmail']; ?>">Nachricht an Admin</a>
 </div>
 
+<div class="w3-container w3-margin-top">
+<h2>Changelog</h2>
+<?php echo renderChangelogHtml(); ?>
+</div>
+
 <div class="w3-container w3-margin-top"><p><b>Kurzanleitung:</b></p>
 
 <ul>

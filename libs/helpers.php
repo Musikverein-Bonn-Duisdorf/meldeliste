@@ -1515,6 +1515,55 @@ function requireLoggedInOrRedirect() {
 }
 
 /**
+ * Render CHANGELOG.md (simple ## / - markdown) as HTML for the Info page.
+ */
+function renderChangelogHtml() {
+    $path = dirname(__DIR__).'/CHANGELOG.md';
+    if(!is_file($path)) {
+        return '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES);
+    if($lines === false) {
+        return '<p class="w3-text-gray">Changelog konnte nicht gelesen werden.</p>';
+    }
+    $html = '';
+    $inList = false;
+    foreach($lines as $line) {
+        $line = rtrim($line);
+        if($line === '' || $line === '# Changelog') {
+            if($inList) {
+                $html .= "</ul>\n";
+                $inList = false;
+            }
+            continue;
+        }
+        if(strpos($line, 'Automatisch aus Git-Release-Commits') === 0) {
+            continue;
+        }
+        if(preg_match('/^##\s+(.+)$/', $line, $m)) {
+            if($inList) {
+                $html .= "</ul>\n";
+                $inList = false;
+            }
+            $html .= '<h3 class="w3-margin-top">'.htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8')."</h3>\n";
+            continue;
+        }
+        if(preg_match('/^-\s+(.+)$/', $line, $m)) {
+            if(!$inList) {
+                $html .= "<ul>\n";
+                $inList = true;
+            }
+            $html .= '<li>'.htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8')."</li>\n";
+            continue;
+        }
+    }
+    if($inList) {
+        $html .= "</ul>\n";
+    }
+    return $html !== '' ? $html : '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
+}
+
+/**
  * Render a PHP view from views/ and return the HTML.
  * Convention: SQL/data in libs/, markup in views/, behaviour in js/.
  *
