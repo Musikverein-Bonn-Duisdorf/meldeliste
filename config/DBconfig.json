@@ -175,6 +175,14 @@
 	"Timestamp": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
 	"Wert": {"Type": "int"}
     },
+    "SsoTicket": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Token": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"User": {"Type": "int"},
+	"Target": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"Expires": {"Type": "timestamp", "Null": "YES", "Default": null},
+	"Used": {"Type": "tinyint", "Default": 0}
+    },
     "Termine": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Datum": {"Type": "date"},
@@ -197,6 +205,14 @@
 	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"PostDiscord": {"Type": "tinyint", "Default": 0}
+    },
+    "UserVoice": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"User": {"Type": "int"},
+	"Instrument": {"Type": "int"},
+	"VoiceLabel": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"Priority": {"Type": "int", "Default": 0},
+	"Active": {"Type": "tinyint", "Default": 1}
     },
     "User": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

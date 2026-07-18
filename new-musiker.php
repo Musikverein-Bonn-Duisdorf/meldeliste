@@ -146,6 +146,9 @@ $formAction = '';
   }
 ?>
     </select>
+<?php if($fill && (int)$n->Index > 0) { ?>
+    <p class="w3-left-align w3-small"><a href="user-voice.php?user=<?php echo (int)$n->Index; ?>">Stimme / Fallbacks (Notenarchiv)</a></p>
+<?php } ?>
 <?php if($fill && (int)$n->Index > 0) {
     $membership = AudienceSpec::membershipForUser((int)$n->Index);
     if(count($membership)) {
