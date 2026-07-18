@@ -581,6 +581,24 @@ function getConfigDefaults() {
             'Type' => 'int',
             'Description' => 'Installierte DB-Schema-Version (Soll: config/SchemaVersion.php)',
         ),
+        array(
+            'Parameter' => 'ssoRedirectAllowlist',
+            'Value' => '',
+            'Type' => 'string',
+            'Description' => 'SSO-Weiterleitung: kommagetrennte Host-Suffixe oder Pfad-Pr&auml;fixe (leer = nur eigener Host)',
+        ),
+        array(
+            'Parameter' => 'urlNotenarchiv',
+            'Value' => '',
+            'Type' => 'string',
+            'Description' => 'Basis-URL Notenarchiv (Nav-Link via SSO; leer = ausgeblendet)',
+        ),
+        array(
+            'Parameter' => 'urlMitgliederverwaltung',
+            'Value' => '',
+            'Type' => 'string',
+            'Description' => 'Basis-URL Mitgliederverwaltung (Nav-Link via SSO; leer = ausgeblendet)',
+        ),
     );
 }
 ?>
