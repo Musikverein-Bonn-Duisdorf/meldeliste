@@ -82,15 +82,15 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
       <h3>Ranking nach Teilnahme</h3>
       <p class="w3-text-gray">Quote = Ja-Meldungen / Termine im Zeitraum. Spaltenüberschriften zum Sortieren anklicken.</p>
       <div class="eval-table-scroll">
-        <table id="evalRanking" class="w3-table w3-striped w3-bordered w3-hoverable">
+        <table id="evalRanking" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
           <thead>
-            <tr class="<?php echo $titleBar; ?>">
-              <th class="eval-sort" data-sort="name" data-type="string">Name</th>
-              <th class="eval-sort" data-sort="yes" data-type="number">Ja</th>
-              <th class="eval-sort" data-sort="no" data-type="number">Nein</th>
-              <th class="eval-sort" data-sort="maybe" data-type="number">Vielleicht</th>
-              <th class="eval-sort" data-sort="termine" data-type="number">Termine</th>
-              <th class="eval-sort" data-sort="quote" data-type="number">Quote</th>
+            <tr>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="name" data-type="string">Name</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="yes" data-type="number">Ja</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="no" data-type="number">Nein</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="maybe" data-type="number">Vielleicht</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="termine" data-type="number">Termine</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="quote" data-type="number">Quote</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -102,13 +102,13 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
       <h3>Inaktive Nutzer</h3>
       <p class="w3-text-gray">Musiker ohne Aktivität (Login und Teilnahme) in den letzten <?php echo (int)$inactiveDays; ?> Tagen. Schwellwert: Konfiguration <code>inactiveUsersDays</code>.</p>
       <div class="eval-table-scroll">
-        <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable">
+        <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
           <thead>
-            <tr class="<?php echo $titleBar; ?>">
-              <th class="eval-sort" data-sort="name" data-type="string">Name</th>
-              <th class="eval-sort" data-sort="lastLogin" data-type="string">Letzter Login</th>
-              <th class="eval-sort" data-sort="lastAttend" data-type="string">Letzte Teilnahme</th>
-              <th class="eval-sort" data-sort="quote" data-type="number">Meldequote</th>
+            <tr>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="name" data-type="string">Name</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="lastLogin" data-type="string">Letzter Login</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="lastAttend" data-type="string">Letzte Teilnahme</th>
+              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="quote" data-type="number">Meldequote</th>
             </tr>
           </thead>
           <tbody></tbody>

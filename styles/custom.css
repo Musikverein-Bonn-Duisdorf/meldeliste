@@ -1425,17 +1425,19 @@ body.insurance-print {
   border-radius: 0.25rem;
 }
 
-.eval-table-scroll table {
+.eval-table-scroll table.eval-data-table {
   width: 100%;
   min-width: 28rem;
   margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .eval-table-scroll thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 
 .eval-sort {
@@ -1464,7 +1466,7 @@ body.insurance-print {
     border-radius: 0;
   }
 
-  .eval-table-scroll table {
+  .eval-table-scroll table.eval-data-table {
     min-width: 0;
     width: 100%;
     border-collapse: separate;
@@ -1533,6 +1535,29 @@ body.insurance-print {
     padding-bottom: 0.45rem;
     margin-bottom: 0.25rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+
+@media (min-width: 701px) {
+  .eval-table-scroll thead {
+    display: table-header-group;
+  }
+
+  .eval-table-scroll tbody {
+    display: table-row-group;
+  }
+
+  .eval-table-scroll tr {
+    display: table-row;
+  }
+
+  .eval-table-scroll th,
+  .eval-table-scroll td {
+    display: table-cell;
+  }
+
+  .eval-table-scroll tbody td::before {
+    content: none;
   }
 }
 
