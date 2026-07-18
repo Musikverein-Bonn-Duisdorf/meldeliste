@@ -1515,6 +1515,91 @@ function requireLoggedInOrRedirect() {
 }
 
 /**
+ * Parse CHANGELOG.md into structured release entries.
+ * @return array<int,array{version:string,date:string,notes:string[]}>
+ */
+function parseChangelogEntries() {
+    $path = dirname(__DIR__).'/CHANGELOG.md';
+    if(!is_file($path)) {
+        return array();
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES);
+    if($lines === false) {
+        return array();
+    }
+    $entries = array();
+    $current = null;
+    foreach($lines as $line) {
+        $line = rtrim($line);
+        if(preg_match('/^##\s+(\S+)\s+\((\d{4}-\d{2}-\d{2})\)\s*$/', $line, $m)) {
+            if($current !== null) {
+                $entries[] = $current;
+            }
+            $current = array(
+                'version' => $m[1],
+                'date' => $m[2],
+                'notes' => array()
+            );
+            continue;
+        }
+        if($current === null) {
+            continue;
+        }
+        if(preg_match('/^-\s+(.+)$/', $line, $m)) {
+            $current['notes'][] = $m[1];
+        }
+    }
+    if($current !== null) {
+        $entries[] = $current;
+    }
+    return $entries;
+}
+
+/**
+ * Render CHANGELOG.md as an HTML table for the Info page.
+ */
+function renderChangelogHtml() {
+    $entries = parseChangelogEntries();
+    if(!$entries) {
+        return '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
+    }
+    $current = isset($GLOBALS['version']['String']) ? (string)$GLOBALS['version']['String'] : '';
+    $html = '<div class="help-changelog-wrap">'."\n";
+    $html .= '<table class="w3-table w3-striped w3-bordered help-changelog-table">'."\n";
+    $html .= '<thead><tr>'
+        .'<th>Version</th>'
+        .'<th>Datum</th>'
+        .'<th>&Auml;nderungen</th>'
+        .'</tr></thead>'."\n<tbody>\n";
+    foreach($entries as $entry) {
+        $notes = $entry['notes'];
+        if(!$notes) {
+            $notes = array('(keine weiteren Notizen)');
+        }
+        $isCurrent = ($current !== '' && $entry['version'] === $current);
+        $rowClass = $isCurrent ? ' class="help-changelog-current"' : '';
+        $html .= '<tr'.$rowClass.'>';
+        $html .= '<td class="help-changelog-version"><code>'
+            .htmlspecialchars($entry['version'], ENT_QUOTES, 'UTF-8')
+            .'</code>';
+        if($isCurrent) {
+            $html .= ' <span class="help-changelog-badge">aktuell</span>';
+        }
+        $html .= '</td>';
+        $html .= '<td class="help-changelog-date">'
+            .htmlspecialchars($entry['date'], ENT_QUOTES, 'UTF-8')
+            .'</td>';
+        $html .= '<td class="help-changelog-notes"><ul class="help-changelog-list">';
+        foreach($notes as $note) {
+            $html .= '<li>'.htmlspecialchars($note, ENT_QUOTES, 'UTF-8').'</li>';
+        }
+        $html .= '</ul></td></tr>'."\n";
+    }
+    $html .= "</tbody></table>\n</div>\n";
+    return $html;
+}
+
+/**
  * Render a PHP view from views/ and return the HTML.
  * Convention: SQL/data in libs/, markup in views/, behaviour in js/.
  *
