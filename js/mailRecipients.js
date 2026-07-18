@@ -5,7 +5,7 @@
   'use strict';
 
   var GROUP_LABELS = {
-    musicians: 'alle Musiker',
+    musicians: 'Alle Musiker',
     members: 'Alle Vereinsmitglieder',
     nonmembers: 'alle Nicht-Mitglieder',
     users: 'alle User'
@@ -45,10 +45,16 @@
       if(!groups.length && s.audience && GROUP_IDS.indexOf(String(s.audience)) !== -1) {
         groups = [String(s.audience)];
       }
+      var registers = Array.isArray(s.registers) ? s.registers.map(Number).filter(function(n) { return n > 0; }) : [];
+      var users = Array.isArray(s.users) ? s.users.map(Number).filter(function(n) { return n > 0; }) : [];
+      // Komplett leer → Standard wie neue Mail
+      if(!groups.length && !registers.length && !users.length) {
+        groups = ['musicians'];
+      }
       return {
         groups: groups,
-        registers: Array.isArray(s.registers) ? s.registers.map(Number).filter(function(n) { return n > 0; }) : [],
-        users: Array.isArray(s.users) ? s.users.map(Number).filter(function(n) { return n > 0; }) : []
+        registers: registers,
+        users: users
       };
     } catch(e) {
       return fallback;
