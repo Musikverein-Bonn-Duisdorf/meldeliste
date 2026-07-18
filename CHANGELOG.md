@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-3095d (2026-07-18)
+
+- MELD-93: bump schema version when config defaults change
+
 ## 2026-07-18-a5965 (2026-07-18)
 
 - MELD-92: option to always show the branch banner
