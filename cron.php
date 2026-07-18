@@ -1,4 +1,15 @@
 <?php
+// CLI: php cron.php <cronId> <cmd>
+if(PHP_SAPI === 'cli') {
+    global $argv;
+    if(!isset($argv[1], $argv[2])) {
+        fwrite(STDERR, "Usage: php cron.php <cronId> <cmd>\n");
+        exit(1);
+    }
+    $_GET['id'] = (string)$argv[1];
+    $_GET['cmd'] = (string)$argv[2];
+}
+
 session_start();
 include 'common/include.php';
 
@@ -29,7 +40,12 @@ if($cmd === 'backup') {
     }
 }
 
-echo date("Y-m-d H:i:s")."<br />\n";
+if(PHP_SAPI === 'cli') {
+    echo date("Y-m-d H:i:s")."\n";
+}
+else {
+    echo date("Y-m-d H:i:s")."<br />\n";
+}
 mkAdmin();
 
 switch($cmd) {
