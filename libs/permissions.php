@@ -67,25 +67,18 @@ class Permissions
     public function getVars() {
         $u = new User;
         $u->load_by_id($this->User);
-        return sprintf("Permission-ID: %d, User: (%d) <b>%s</b>, perm_showHiddenAppmnts: <b>%s</b>, perm_showUsers: <b>%s</b>, perm_editUsers: <b>%s</b>, perm_editAppmnts: <b>%s</b>, perm_showLog: <b>%s</b>, perm_showInstruments: <b>%s</b>, perm_editInstruments: <b>%s</b>, perm_showInventories: <b>%s</b>, perm_editInventories: <b>%s</b>, perm_sendEmail: <b>%s</b>, perm_showResponse: <b>%s</b>, perm_editResponse: <b>%s</b>, perm_editConfig: <b>%s</b>, perm_editPermissions: <b>%s</b>",
-        $this->Index,
-        $this->User,
-        $u->getName(),
-        bool2string($this->perm_showHiddenAppmnts),
-        bool2string($this->perm_showUsers),
-        bool2string($this->perm_editUsers),
-        bool2string($this->perm_editAppmnts),
-        bool2string($this->perm_showLog),
-        bool2string($this->perm_showInstruments),
-        bool2string($this->perm_editInstruments),
-        bool2string($this->perm_showInventories),
-        bool2string($this->perm_editInventories),
-        bool2string($this->perm_sendEmail),
-        bool2string($this->perm_showResponse),
-        bool2string($this->perm_editResponse),
-        bool2string($this->perm_editConfig),
-        bool2string($this->perm_editPermissions)
-        );        
+        $parts = array();
+        $parts[] = sprintf('Permission-ID: %d', (int)$this->Index);
+        $parts[] = sprintf('User: (%d) <b>%s</b>', (int)$this->User, $u->getName());
+        $labels = self::permissionLabels();
+        foreach(self::permissionKeys() as $key) {
+            if(!$this->$key) {
+                continue;
+            }
+            $short = isset($labels[$key]['short']) ? $labels[$key]['short'] : $key;
+            $parts[] = logPart($short, bool2string($this->$key));
+        }
+        return implode(', ', $parts);
     }
     
     public function save() {

@@ -15,6 +15,11 @@ function bool2string($val) {
     return "nein";
 }
 
+/** Compare two values as booleans (avoids null/"0" false-positive diffs). */
+function boolsDiffer($a, $b) {
+    return (bool)$a !== (bool)$b;
+}
+
 function bool2color($val) {
     if($val) return "w3-light-green";
     return "";
@@ -584,6 +589,59 @@ function mkPrize($val) {
     if((float)$val != 0) {
         return sprintf("%.2f &euro;", $val);
     }
+}
+
+/**
+ * True if a value should appear in an INSERT/DELETE log (non-empty).
+ * Empty string, null, and whitespace-only are skipped. Numeric 0 is empty
+ * unless $allowZero is true. Booleans: use logPartTrue for true-only.
+ */
+function logValueFilled($value, $allowZero = false) {
+    if($value === null) {
+        return false;
+    }
+    if(is_bool($value)) {
+        return $value;
+    }
+    if(is_int($value) || is_float($value)) {
+        if(!$allowZero && (float)$value == 0) {
+            return false;
+        }
+        return true;
+    }
+    $s = trim((string)$value);
+    if($s === '' || $s === '-') {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Build one log fragment: "Label: <b>value</b>".
+ * $valueHtml is inserted as-is (already escaped/formatted by caller if needed).
+ */
+function logPart($label, $valueHtml) {
+    return $label.': <b>'.$valueHtml.'</b>';
+}
+
+/**
+ * Append logPart to $parts if value is filled.
+ */
+function logAppendFilled(array &$parts, $label, $value, $valueHtml = null, $allowZero = false) {
+    if(!logValueFilled($value, $allowZero)) {
+        return;
+    }
+    $parts[] = logPart($label, $valueHtml !== null ? $valueHtml : htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'));
+}
+
+/**
+ * Append logPart for a boolean only when true.
+ */
+function logAppendTrue(array &$parts, $label, $value) {
+    if(!$value) {
+        return;
+    }
+    $parts[] = logPart($label, bool2string($value));
 }
 
 /**
