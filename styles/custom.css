@@ -1130,6 +1130,12 @@
   border-color: #c9b87a;
 }
 
+.mail-recipient-chip--audience {
+  background: #345a95;
+  border-color: #345a95;
+  color: #fff;
+}
+
 .mail-recipient-chip-remove {
   border: 0;
   background: transparent;
