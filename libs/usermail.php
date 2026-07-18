@@ -589,8 +589,9 @@ class Usermail {
     }
 
     /**
-     * Close the HTTP response (e.g. after a redirect), then process one queue batch.
-     * Used so Absenden can start SMTP without delaying the overview reload (MELD-66).
+     * Close the HTTP response (e.g. after a redirect), then start one queue batch
+     * without blocking the browser. Prefer a background CLI worker; fall back to
+     * in-request processing after fastcgi_finish_request / flush (MELD-66).
      */
     public static function finishResponseThenProcessQueue() {
         ignore_user_abort(true);
@@ -598,20 +599,70 @@ class Usermail {
             session_write_close();
         }
 
+        $spawned = self::spawnMailQueueWorker();
+
         if(function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
-        }
-        else {
-            if(!headers_sent()) {
-                header('Content-Length: 0');
-                header('Connection: close');
+            if(!$spawned) {
+                self::runProcessQueueSafe();
             }
-            while(ob_get_level() > 0) {
-                ob_end_flush();
-            }
-            flush();
+            return;
         }
 
+        if(!headers_sent()) {
+            header('Connection: close');
+        }
+        while(ob_get_level() > 0) {
+            @ob_end_flush();
+        }
+        @flush();
+
+        // Without FPM, flush often does not disconnect the client — only process
+        // in-request if we could not spawn a background worker.
+        if(!$spawned) {
+            self::runProcessQueueSafe();
+        }
+    }
+
+    /**
+     * Start cron.php processMailQueue in the background (non-blocking).
+     * @return bool true if a spawn command was issued
+     */
+    protected static function spawnMailQueueWorker() {
+        if(empty($GLOBALS['cronID'])) {
+            return false;
+        }
+        if(!function_exists('exec')) {
+            return false;
+        }
+        $disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
+        if(in_array('exec', $disabled, true)) {
+            return false;
+        }
+
+        $cron = dirname(__DIR__).DIRECTORY_SEPARATOR.'cron.php';
+        if(!is_readable($cron)) {
+            return false;
+        }
+
+        $php = (defined('PHP_BINARY') && PHP_BINARY !== '' && strpos(PHP_BINARY, 'php') !== false)
+            ? PHP_BINARY
+            : 'php';
+        $cmd = escapeshellarg($php)
+            .' '.escapeshellarg($cron)
+            .' '.escapeshellarg((string)$GLOBALS['cronID'])
+            .' '.escapeshellarg('processMailQueue');
+
+        if(strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+            @pclose(@popen('start /B '.$cmd, 'r'));
+            return true;
+        }
+
+        @exec($cmd.' > /dev/null 2>&1 &');
+        return true;
+    }
+
+    protected static function runProcessQueueSafe() {
         try {
             self::processQueue();
         }
