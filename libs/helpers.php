@@ -15,6 +15,11 @@ function bool2string($val) {
     return "nein";
 }
 
+/** Compare two values as booleans (avoids null/"0" false-positive diffs). */
+function boolsDiffer($a, $b) {
+    return (bool)$a !== (bool)$b;
+}
+
 function bool2color($val) {
     if($val) return "w3-light-green";
     return "";

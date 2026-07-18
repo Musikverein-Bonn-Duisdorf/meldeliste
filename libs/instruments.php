@@ -91,7 +91,7 @@ class Instruments
         if($this->PurchaseDate != $old->PurchaseDate) $str .= ', Kaufdatum: '.germanDate($old->PurchaseDate,0).' &rArr; <b>'.germanDate($this->PurchaseDate,0).'</b>';
         if($this->PurchasePrize != $old->PurchasePrize) $str .= ', Kaufpreis: '.mkPrize($old->PurchasePrize).' &rArr; <b>'.mkPrize($this->PurchasePrize).'</b>';
         if($this->Owner != $old->Owner) $str .= ', Besitzer: '.getOwner((int)$old->Owner).' &rArr; <b>'.getOwner((int)$this->Owner).'</b>';
-        if($this->Insurance != $old->Insurance) $str .= ', Versichert: '.bool2string($old->Insurance).' &rArr; <b>'.bool2string($this->Insurance).'</b>';
+        if(boolsDiffer($this->Insurance, $old->Insurance)) $str .= ', Versichert: '.bool2string($old->Insurance).' &rArr; <b>'.bool2string($this->Insurance).'</b>';
         if($this->Comment != $old->Comment) $str .= ', Kommentar: '.$old->Comment.' &rArr; <b>'.$this->Comment.'</b>';
         return $str;
     }

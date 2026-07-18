@@ -93,18 +93,20 @@ class Termin
             $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
         }
         if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
-        if($this->Auftritt != $old->Auftritt) $str.=", Auftritt: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
+        if(boolsDiffer($this->Auftritt, $old->Auftritt)) $str.=", Auftritt: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
+        if(boolsDiffer($this->Shifts, $old->Shifts)) $str.=", Schichten: ".bool2string($old->Shifts)." &rArr; <b>".bool2string($this->Shifts)."</b>";
         if($this->Ort1 != $old->Ort1) $str.=", Ort1: ".$old->Ort1." &rArr; <b>".$this->Ort1."</b>";
         if($this->Ort2 != $old->Ort2) $str.=", Ort2: ".$old->Ort2." &rArr; <b>".$this->Ort2."</b>";
         if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
         if($this->Ort4 != $old->Ort4) $str.=", Ort4: ".$old->Ort4." &rArr; <b>".$this->Ort4."</b>";
         if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
-        if($this->published != $old->published) $str.=", sichtbar: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
-        if($this->open != $old->open) $str.=", open: ".$old->open." &rArr; <b>".$this->open."</b>";
-        if($GLOBALS['optionsDB']['showChildOption']) {
+        if(boolsDiffer($this->published, $old->published)) $str.=", sichtbar: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
+        if(boolsDiffer($this->open, $old->open)) $str.=", open: ".bool2string($old->open)." &rArr; <b>".bool2string($this->open)."</b>";
+        if(boolsDiffer($this->new, $old->new)) $str.=", neu: ".bool2string($old->new)." &rArr; <b>".bool2string($this->new)."</b>";
+        if(!empty($GLOBALS['optionsDB']['showChildOption'])) {
             if($this->Children != $old->Children) $str.=", Children: ".$old->Children." &rArr; <b>".$this->Children."</b>";
         }
-        if($GLOBALS['optionsDB']['showGuestOption']) {
+        if(!empty($GLOBALS['optionsDB']['showGuestOption'])) {
             if($this->Guests != $old->Guests) $str.=", Guests: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
         }
         if($this->defaultFreeText != $old->defaultFreeText) $str.=", Ort4: ".$old->defaultFreeText." &rArr; <b>".$this->defaultFreeText."</b>"; 

@@ -94,13 +94,13 @@ class User
         if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
         if($this->Passhash != $old->Passhash) $str.=", Passhash: ".$old->Passhash." &rArr; <b>".$this->Passhash."</b>";
         if($this->activeLink != $old->activeLink) $str.=", activeLink: ".$old->activeLink." &rArr; <b>".$this->activeLink."</b>";
-        if($this->Mitglied != $old->Mitglied) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
+        if(boolsDiffer($this->Mitglied, $old->Mitglied)) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
         if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
         if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
         if($this->Birthday != $old->Birthday) $str.=", Geburtstag: ".germanDate($old->Birthday, true)." &rArr; <b>".germanDate($this->Birthday, true)."</b>";
-        if($this->getMail != $old->getMail) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
-        if($this->Admin != $old->Admin) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
-        if($this->RegisterLead != $old->RegisterLead) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
+        if(boolsDiffer($this->getMail, $old->getMail)) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
+        if(boolsDiffer($this->Admin, $old->Admin)) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
+        if(boolsDiffer($this->RegisterLead, $old->RegisterLead)) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
         if($this->Instrument != $old->Instrument) {
             $newinstr = new Instrument;
             $newinstr->load_by_id($this->Instrument);

@@ -92,14 +92,17 @@ if($GLOBALS['optionsDB']['showTravelTime']) {
     <label>Freitext-Rückmeldung (optional)</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="defaultFreeText" type="text" <?php if($fill) echo "value=\"".$n->defaultFreeText."\""; ?>>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
+    <input type="hidden" name="Auftritt" value="0">
     <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
     <label>Auftritt</label>
     </div>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
+    <input type="hidden" name="Shifts" value="0">
     <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo "checked"; ?>>
     <label>Schichtdienst</label>
     </div>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
+    <input type="hidden" name="published" value="0">
     <input class="w3-check" type="checkbox" name="published" value="1" <?php if($fill && (bool)$n->published) echo "checked"; ?>>
     <label>sichtbar</label>
     </div>
