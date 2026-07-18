@@ -243,11 +243,10 @@ function ensureOrchestraSeatSheet() {
         '<button type="button" class="orchestra-seat-sheet-close" aria-label="Schließen">&times;</button>'
         + '<div class="orchestra-seat-sheet-name"></div>'
         + '<div class="orchestra-seat-sheet-instrument"></div>'
-        + '<div class="orchestra-seat-sheet-status"></div>'
         + '<div class="orchestra-seat-sheet-actions" hidden>'
-        +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="1">Ja</button>'
-        +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="2">Nein</button>'
-        +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="3">Vielleicht</button>'
+        +   '<button type="button" class="w3-btn w3-border w3-border-black w3-center orchestra-seat-sheet-btn" data-wert="1" title="Zusage">&#10004;</button>'
+        +   '<button type="button" class="w3-btn w3-border w3-border-black w3-center orchestra-seat-sheet-btn" data-wert="2" title="Absage">&#10008;</button>'
+        +   '<button type="button" class="w3-btn w3-border w3-border-black w3-center orchestra-seat-sheet-btn" data-wert="3" title="unsicher"><b>?</b></button>'
         + '</div>';
 
     var host = document.getElementById('ajaxModalHost');
@@ -278,13 +277,47 @@ function ensureOrchestraSeatSheet() {
     return sheet;
 }
 
+function getOrchestraMeldeButtonStyles() {
+    var panel = document.querySelector('#ajaxModalContent .orchestra-panel')
+        || document.querySelector('.orchestra-panel');
+    return {
+        yes: (panel && panel.getAttribute('data-color-yes')) || 'w3-green',
+        no: (panel && panel.getAttribute('data-color-no')) || 'w3-red',
+        maybe: (panel && panel.getAttribute('data-color-maybe')) || 'w3-blue',
+        disabled: (panel && panel.getAttribute('data-color-disabled')) || 'w3-light-grey'
+    };
+}
+
+function addOrchestraClassTokens(el, classStr) {
+    String(classStr || '').split(/\s+/).forEach(function(token) {
+        if(token) el.classList.add(token);
+    });
+}
+
+function styleOrchestraSeatSheetButtons(sheet, currentWert) {
+    var styles = getOrchestraMeldeButtonStyles();
+    var colorByWert = {1: styles.yes, 2: styles.no, 3: styles.maybe};
+    currentWert = parseInt(currentWert, 10) || 0;
+    sheet.querySelectorAll('.orchestra-seat-sheet-btn').forEach(function(btn) {
+        var w = parseInt(btn.getAttribute('data-wert'), 10);
+        btn.className = 'w3-btn w3-border w3-border-black w3-center orchestra-seat-sheet-btn';
+        // Wie Termin-Seite: aktuelle Auswahl bzw. alle bei keiner Meldung in Farbe,
+        // sonst disabled.
+        if(currentWert && currentWert !== w) {
+            addOrchestraClassTokens(btn, styles.disabled);
+        }
+        else {
+            addOrchestraClassTokens(btn, colorByWert[w] || styles.disabled);
+        }
+    });
+}
+
 function getOrchestraSeatInfo(seat) {
     var name = seat.getAttribute('data-name') || '';
     var instrument = seat.getAttribute('data-instrument') || '';
     var wertRaw = seat.getAttribute('data-wert');
     var wert = wertRaw === null ? -1 : parseInt(wertRaw, 10);
     if(isNaN(wert)) wert = -1;
-    var visual = orchestraSeatVisual(wert);
     if(!name) {
         var title = seat.querySelector('title');
         if(title) {
@@ -297,8 +330,6 @@ function getOrchestraSeatInfo(seat) {
         name: name,
         instrument: instrument,
         wert: wert,
-        hasWert: wertRaw !== null,
-        statusLabel: visual.label,
         editable: seat.getAttribute('data-editable') === '1'
     };
 }
@@ -318,28 +349,10 @@ function openOrchestraSeatSheet(seat) {
         instrEl.textContent = '';
         instrEl.setAttribute('hidden', 'hidden');
     }
-    var statusEl = sheet.querySelector('.orchestra-seat-sheet-status');
-    // Immer Status zeigen, sobald ein Wert-Attribut existiert (inkl. 0 = nicht gemeldet)
-    if(info.hasWert || info.editable) {
-        statusEl.textContent = 'Status: ' + info.statusLabel;
-        statusEl.removeAttribute('hidden');
-    }
-    else {
-        statusEl.textContent = '';
-        statusEl.setAttribute('hidden', 'hidden');
-    }
     var actions = sheet.querySelector('.orchestra-seat-sheet-actions');
     if(info.editable) {
         actions.removeAttribute('hidden');
-        actions.querySelectorAll('.orchestra-seat-sheet-btn').forEach(function(btn) {
-            var w = parseInt(btn.getAttribute('data-wert'), 10);
-            if(w === info.wert) {
-                btn.classList.add('orchestra-seat-sheet-btn--active');
-            }
-            else {
-                btn.classList.remove('orchestra-seat-sheet-btn--active');
-            }
-        });
+        styleOrchestraSeatSheetButtons(sheet, info.wert);
     }
     else {
         actions.setAttribute('hidden', 'hidden');

@@ -768,6 +768,22 @@
   width: min(96vw, 1100px) !important;
 }
 
+/* × (w3-display-topright) darf die Modal-Überschrift nicht überdecken */
+#ajaxModalContent > header,
+#ajaxModalContent header.w3-container,
+.w3-modal-content > header {
+  padding-right: 3rem;
+}
+
+#ajaxModalContent > header h2,
+#ajaxModalContent header.w3-container h2,
+.w3-modal-content > header h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
 .orchestra-panel.w3-container {
   padding-left: 8px;
   padding-right: 8px;
@@ -855,8 +871,7 @@
   margin-right: 2rem;
 }
 
-.orchestra-seat-sheet-instrument,
-.orchestra-seat-sheet-status {
+.orchestra-seat-sheet-instrument {
   margin-top: 0.35rem;
   color: #444;
   font-size: 0.95rem;
@@ -875,13 +890,9 @@
 
 .orchestra-seat-sheet-btn {
   flex: 1 1 auto;
-  min-width: 5rem;
-}
-
-.orchestra-seat-sheet-btn--active {
-  outline: 2px solid #111;
-  font-weight: 700;
-  box-shadow: inset 0 0 0 1px #111;
+  min-width: 3.5rem;
+  font-size: 1.15rem;
+  line-height: 1.2;
 }
 
 .orchestra-svg--editable .orchestra-seat[data-editable="1"] {

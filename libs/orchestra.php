@@ -17,8 +17,7 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
     $minrowdistance = 150;
     $seatR = 18;
 
-    // Lokal testen: Registerbereiche farbig hinterlegen (ohne Push entscheiden).
-    $showRegisterBands = true;
+    $showRegisterBands = !empty($GLOBALS['optionsDB']['showOrchestraRegisterBands']);
 
     $editable = false;
     if($tid) {

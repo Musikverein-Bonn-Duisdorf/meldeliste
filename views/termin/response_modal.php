@@ -4,7 +4,11 @@
 </header>
 <div>
 <?php if($showOrchestra) { ?>
-<div class="orchestra-panel w3-container w3-margin-top">
+<div class="orchestra-panel w3-container w3-margin-top"
+     data-color-yes="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnYes'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-color-no="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnNo'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-color-maybe="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnMaybe'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-color-disabled="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorDisabled'], ENT_QUOTES, 'UTF-8'); ?>">
   <div class="orchestra-panel-header w3-row">
     <div class="w3-col s12 m6 l6"><b>Besetzung</b></div>
     <div class="w3-col s12 m6 l6 orchestra-panel-toggle">
