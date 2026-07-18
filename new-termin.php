@@ -138,19 +138,15 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         <label>Schichtdienst</label>
       </div>
       <div class="w3-col s12 m4 l4 termin-form-check">
-        <input type="hidden" name="published" value="0">
-        <input class="w3-check" type="checkbox" name="published" value="1" <?php if($fill && (bool)$n->published) echo "checked"; ?>>
-        <label>sichtbar</label>
-      </div>
-      <div class="w3-col s12 m4 l4 termin-form-check">
         <input type="hidden" name="open" value="0">
         <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo "checked"; ?>>
         <label>Anmeldung offen</label>
       </div>
+      <input type="hidden" name="published" value="1">
     </div>
     <div class="w3-margin-top">
       <label>sichtbar für</label>
-      <p class="w3-small w3-text-gray">Standard: Alle User. Chips entfernen/ändern für einen kleineren Kreis; ohne Chips = für alle.</p>
+      <p class="w3-small w3-text-gray">Standard: Alle User. Chips anpassen für einen kleineren Kreis; ohne Chips = für alle.</p>
       <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputBg; ?>">
         <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
         <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo $inputBg; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />

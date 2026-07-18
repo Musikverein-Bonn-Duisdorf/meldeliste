@@ -177,7 +177,7 @@ class Termin
         if($this->Shifts) {
             $parts[] = "Schichten: <b>".bool2string($this->Shifts)."</b>";
         }
-        $parts[] = "sichtbar: <b>".bool2string($this->published)."</b>";
+        $parts[] = "sichtbar für: <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
         $parts[] = "offen: <b>".bool2string($this->open)."</b>";
         if($this->defaultFreeText !== null && $this->defaultFreeText !== '') {
             $parts[] = sprintf("FreeText: <b>%s</b>", $this->defaultFreeText);
@@ -557,8 +557,51 @@ class Termin
     }
 
     /**
+     * Human-readable visibility audience for logs/admin UI.
+     * @return string
+     */
+    public function getVisibilityLabel() {
+        $spec = $this->getVisibilitySpecArray();
+        if(AudienceSpec::isEmpty($spec)) {
+            return 'alle';
+        }
+        $bits = array();
+        $groupLabels = array(
+            'musicians' => 'Alle Musiker',
+            'members' => 'Alle Vereinsmitglieder',
+            'nonmembers' => 'alle Nicht-Mitglieder',
+            'users' => 'Alle User',
+        );
+        foreach($spec['mailGroups'] as $gid) {
+            $g = new MailGroup();
+            $g->load_by_id((int)$gid);
+            if((int)$g->Index) {
+                $bits[] = (string)$g->Name;
+            }
+        }
+        foreach($spec['groups'] as $gid) {
+            $bits[] = isset($groupLabels[$gid]) ? $groupLabels[$gid] : $gid;
+        }
+        foreach($spec['registers'] as $rid) {
+            $r = new Register();
+            $r->load_by_id((int)$rid);
+            if((int)$r->Index) {
+                $bits[] = html_entity_decode((string)$r->Name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            }
+        }
+        foreach($spec['users'] as $uid) {
+            $u = new User();
+            $u->load_by_id((int)$uid);
+            if((int)$u->Index) {
+                $bits[] = $u->getName();
+            }
+        }
+        return count($bits) ? implode(', ', $bits) : 'alle';
+    }
+
+    /**
      * List visibility for a user (MELD-61).
-     * published=0: only hidden-permission or existing meldung (viewer mode).
+     * published=0: only hidden-permission or existing meldung (viewer mode) — legacy drafts.
      * published=1 + empty VisibilitySpec: everyone.
      * published=1 + spec: matching users (+ viewer overrides).
      *
@@ -1776,7 +1819,7 @@ class Termin
         }
         if(requirePermission("perm_editAppmnts")) {
             $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">sichtbar:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>\n";
+            $str=$str."<div class=\"w3-col l3\">sichtbar für:</div>\n<div class=\"w3-col l9\"><b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b></div>\n";
             $str=$str."</div>\n";
             $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."<div class=\"w3-col l3\">Anmeldung offen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->open)."</b></div>\n";
