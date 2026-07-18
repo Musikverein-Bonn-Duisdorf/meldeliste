@@ -786,6 +786,15 @@ class Instruments
         }
         $line->class=$GLOBALS['optionsDB']['HoverEffect'];
         $line->class="w3-mobile w3-border-bottom w3-border-black";
+        $zeitwert = $this->getCurrentValue($row['PurchasePrize']);
+        $owner = getOwner($row['Owner']);
+        $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-instrument="'.htmlspecialchars((string)$row['iName'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-vendor="'.htmlspecialchars((string)$row['Vendor'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-model="'.htmlspecialchars((string)$row['Model'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-serial="'.htmlspecialchars((string)$row['SerialNr'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-zeitwert="'.htmlspecialchars((string)$zeitwert, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-owner="'.htmlspecialchars((string)$owner, ENT_QUOTES, 'UTF-8').'"';
         $str=$str.$line->open();
         
         $indent++;
@@ -828,14 +837,14 @@ class Instruments
         $field->indent=$indent;
         $field->class="w3-center w3-border-right list-secondary";
         $field->col(1,3,12);
-        $field->body=mkPrize($this->getCurrentValue($row['PurchasePrize']));
+        $field->body=mkPrize($zeitwert);
         $str=$str.$field->print();
 
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right list-meta w3-hide-medium";
         $field->col(2,1,12);
-        $field->body=getOwner($row['Owner']);
+        $field->body=$owner;
         $str=$str.$field->print();
 
         $str=$str.$line->close();

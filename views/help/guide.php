@@ -156,7 +156,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showUsers') ? '
-<li><b>Registerübersicht / Musikerliste / Userliste</b> – Personen suchen, filtern und öffnen (Register-Überschrift in Registerfarbe)</li>
+<li><b>Registerübersicht / Musikerliste / Userliste</b> – Personen suchen, filtern und öffnen (Register-Überschrift in Registerfarbe); Spaltenköpfe sortieren die Liste</li>
 '.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
@@ -196,8 +196,8 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Bestände anzeigen, Details und Ausleihen</li>
-<li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
+<li><b>Inventar</b> – Bestände anzeigen, Details und Ausleihen; Spaltenköpfe sortieren die Liste</li>
+<li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal; Spalten sortierbar; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar-Typen</b> – Typen und Nummernkreise pflegen</li>

@@ -14,6 +14,8 @@ if(!isset($_SESSION['userid']) || !(int)$_SESSION['userid']) {
 $type = isset($_GET['type']) ? (string)$_GET['type'] : '';
 $cursor = isset($_GET['cursor']) ? (string)$_GET['cursor'] : '';
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
+$sort = isset($_GET['sort']) ? (string)$_GET['sort'] : '';
+$dir = isset($_GET['dir']) ? (string)$_GET['dir'] : 'asc';
 
 $result = array('html' => '', 'nextCursor' => $cursor, 'hasMore' => false);
 
@@ -60,7 +62,7 @@ case 'musiker':
         header('X-Has-More: 0');
         exit;
     }
-    $result = listChunkUsers('musiker', $cursor !== '' ? (int)$cursor : 0, $limit);
+    $result = listChunkUsers('musiker', $cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
     break;
 
 case 'users':
@@ -69,7 +71,7 @@ case 'users':
         header('X-Has-More: 0');
         exit;
     }
-    $result = listChunkUsers('users', $cursor !== '' ? (int)$cursor : 0, $limit);
+    $result = listChunkUsers('users', $cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
     break;
 
 case 'mitglied':
@@ -78,7 +80,7 @@ case 'mitglied':
         header('X-Has-More: 0');
         exit;
     }
-    $result = listChunkUsers('mitglied', $cursor !== '' ? (int)$cursor : 0, $limit);
+    $result = listChunkUsers('mitglied', $cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
     break;
 
 default:

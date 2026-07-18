@@ -33,6 +33,13 @@ $nMusiker = $row['Count'];
 <div>
 <input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterMusiker()">
 </div>
+<div id="listHeader" class="w3-row w3-padding w3-border-bottom w3-border-black w3-hide-small">
+  <div class="w3-col l3 m6 s12 w3-container list-sort" data-sort="nachname" data-type="string"><b>Name</b></div>
+  <div class="w3-col l2 m6 s12 w3-container list-sort" data-sort="instrument" data-type="string"><b>Instrument</b></div>
+  <div class="w3-col l3 m12 s12 w3-container list-sort" data-sort="email" data-type="string"><b>E-Mail</b></div>
+  <div class="w3-col l2 m6 s12 w3-container list-sort" data-sort="lastlogin" data-type="date"><b>Letzter Login</b></div>
+  <div class="w3-col l2 m6 s12 w3-container"><b>Letzte Teilnahme</b></div>
+</div>
 <div id="Liste">
 <?php
 $chunk = listChunkUsers('mitglied', 0, 50);
@@ -41,7 +48,9 @@ echo listChunkRenderSentinel('mitglied', $chunk['nextCursor'], $chunk['hasMore']
 ?>
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/sortList.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script>bindListSort({ headerId: 'listHeader', mode: 'server', defaultKey: 'nachname', defaultDir: 'asc', defaultType: 'string' });</script>
 
 <?php
 include 'common/footer.php';
