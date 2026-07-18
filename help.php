@@ -23,7 +23,6 @@ $helpUser->load_by_id((int)$_SESSION['userid']);
   <div class="w3-col l5 m12 s12 help-col-changelog" id="help-changelog">
     <div class="w3-container w3-margin-top">
       <h2>Changelog</h2>
-      <p class="w3-small w3-text-gray">Aus Release-Commits erzeugt; bei jedem Software-Release aktualisiert.</p>
       <?php echo renderChangelogHtml(); ?>
     </div>
   </div>

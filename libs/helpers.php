@@ -1563,6 +1563,7 @@ function renderChangelogHtml() {
     if(!$entries) {
         return '<p class="w3-text-gray">Kein Changelog vorhanden.</p>';
     }
+    $current = isset($GLOBALS['version']['String']) ? (string)$GLOBALS['version']['String'] : '';
     $html = '<div class="help-changelog-wrap">'."\n";
     $html .= '<table class="w3-table w3-striped w3-bordered help-changelog-table">'."\n";
     $html .= '<thead><tr>'
@@ -1575,10 +1576,16 @@ function renderChangelogHtml() {
         if(!$notes) {
             $notes = array('(keine weiteren Notizen)');
         }
-        $html .= '<tr>';
+        $isCurrent = ($current !== '' && $entry['version'] === $current);
+        $rowClass = $isCurrent ? ' class="help-changelog-current"' : '';
+        $html .= '<tr'.$rowClass.'>';
         $html .= '<td class="help-changelog-version"><code>'
             .htmlspecialchars($entry['version'], ENT_QUOTES, 'UTF-8')
-            .'</code></td>';
+            .'</code>';
+        if($isCurrent) {
+            $html .= ' <span class="help-changelog-badge">aktuell</span>';
+        }
+        $html .= '</td>';
         $html .= '<td class="help-changelog-date">'
             .htmlspecialchars($entry['date'], ENT_QUOTES, 'UTF-8')
             .'</td>';
