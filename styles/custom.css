@@ -1366,3 +1366,82 @@ body.insurance-print {
     page-break-inside: avoid;
   }
 }
+
+/* MELD-89: evaluate.php layout */
+.eval-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.eval-filter #eval-days {
+  max-width: 6rem;
+}
+
+.eval-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  background: inherit;
+}
+
+.eval-toc a {
+  text-decoration: none;
+}
+
+.eval-panel {
+  margin-bottom: 1.25rem;
+  scroll-margin-top: 3.5rem;
+}
+
+.eval-panel h3 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding-bottom: 0.25rem;
+}
+
+.eval-chart-wrap {
+  position: relative;
+  height: 320px;
+}
+
+.eval-table-scroll {
+  max-height: 28rem;
+  overflow: auto;
+}
+
+.eval-sort {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.eval-charts,
+.eval-tables {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 993px) {
+  .eval-charts,
+  .eval-tables {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .eval-chart-wrap {
+    height: 360px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .eval-chart-wrap {
+    height: 400px;
+  }
+}
