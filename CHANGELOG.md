@@ -2,6 +2,14 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-633dd (2026-07-18)
+
+- MELD-96: keep sticky list headers below admin nav menus
+- MELD-96: allow sorting musician lists by last attendance
+- MELD-96: style and sticky-fix sortable list headers
+- MELD-96: sortable columns for musician and inventory lists
+- MELD-96: Tabellen sortierbar machen
+
 ## 2026-07-18-25865 (2026-07-18)
 
 - MELD-95: searchable Termine and Rückmeldungen lists
