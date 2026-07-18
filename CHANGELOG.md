@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-bd064 (2026-07-18)
+
+- fix: Absage wieder halbtransparent, Schrift weiß und deckend
+- fix: Absage-Sitze deckend rot mit weißer Schrift testen
+- fix: Orchester-Sitzkürzel bei Absage/unsicher lesbar halten
+
 ## 2026-07-18-c7933 (2026-07-18)
 
 - MELD-85: Instrumente/Register editierbar inkl. Farben und Positionsvorschau
