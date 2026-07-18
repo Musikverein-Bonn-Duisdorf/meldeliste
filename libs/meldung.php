@@ -97,10 +97,10 @@ class Meldung
         $u->getName(),
         $instr->Name
         );
-        if($GLOBALS['optionsDB']['showChildOption']) {
+        if(!empty($GLOBALS['optionsDB']['showChildOption']) && (int)$this->Children > 0) {
             $str=$str.", Kinder: ".$this->Children;
         }
-        if($GLOBALS['optionsDB']['showGuestOption']) {
+        if(!empty($GLOBALS['optionsDB']['showGuestOption']) && (int)$this->Guests > 0) {
             $str=$str.", G&auml;ste: ".$this->Guests;
         }
         return $str;

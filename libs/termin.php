@@ -112,7 +112,7 @@ class Termin
     }
     
     public function getVars() {
-        if(!empty($GLOBALS['optionsDB']['showVehicle']) && !$this->vName) {
+        if(!empty($GLOBALS['optionsDB']['showVehicle']) && !$this->vName && $this->Vehicle) {
             $sql = sprintf('SELECT * FROM `%svehicle` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             $this->Vehicle
@@ -120,35 +120,59 @@ class Termin
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
             $row = mysqli_fetch_array($dbr);
-            $this->vName = $row['Name'];
+            $this->vName = $row ? $row['Name'] : '';
         }
-        $str = sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>",
-                       $this->Index,
-                       $this->getDate(),
-                       $this->Uhrzeit,
-                       $this->Uhrzeit2
-        );
-        if(!empty($GLOBALS['optionsDB']['showTravelTime'])) {
-            $str .= sprintf(", Abfahrt: <b>%s</b>", $this->Abfahrt);
+        $parts = array();
+        $parts[] = sprintf("Termin-ID: <b>%d</b>", $this->Index);
+        if($this->Name !== null && $this->Name !== '') {
+            $parts[] = sprintf("Name: <b>%s</b>", $this->Name);
         }
-        if(!empty($GLOBALS['optionsDB']['showVehicle'])) {
-            $str .= sprintf(", mit: <b>%s</b>", $this->vName);
+        $dateStr = $this->getDate();
+        if($dateStr !== null && $dateStr !== '') {
+            $parts[] = sprintf("Datum: <b>%s</b>", $dateStr);
         }
-        $str .= sprintf(", max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>, FreeText: <b>%s</b>",
-                       $this->Capacity,
-                       $this->Name,
-                       bool2string($this->Auftritt),
-                       $this->Ort1,
-                       $this->Ort2,
-                       $this->Ort3,
-                       $this->Ort4,
-                       $this->Beschreibung,
-                       bool2string($this->Shifts),
-                       bool2string($this->published),
-                       bool2string($this->open),
-                       $this->defaultFreeText
-        );
-        return $str;
+        if($this->Uhrzeit !== null && $this->Uhrzeit !== '') {
+            $parts[] = sprintf("Beginn: <b>%s</b>", $this->Uhrzeit);
+        }
+        if($this->Uhrzeit2 !== null && $this->Uhrzeit2 !== '') {
+            $parts[] = sprintf("Ende: <b>%s</b>", $this->Uhrzeit2);
+        }
+        if(!empty($GLOBALS['optionsDB']['showTravelTime']) && $this->Abfahrt !== null && $this->Abfahrt !== '') {
+            $parts[] = sprintf("Abfahrt: <b>%s</b>", $this->Abfahrt);
+        }
+        if(!empty($GLOBALS['optionsDB']['showVehicle']) && $this->vName !== null && $this->vName !== '') {
+            $parts[] = sprintf("mit: <b>%s</b>", $this->vName);
+        }
+        if((int)$this->Capacity > 0) {
+            $parts[] = sprintf("max. Teilnehmer: <b>%d</b>", (int)$this->Capacity);
+        }
+        if($this->Auftritt) {
+            $parts[] = "Auftritt: <b>".bool2string($this->Auftritt)."</b>";
+        }
+        if($this->Ort1 !== null && $this->Ort1 !== '') {
+            $parts[] = sprintf("Ort1: <b>%s</b>", $this->Ort1);
+        }
+        if($this->Ort2 !== null && $this->Ort2 !== '') {
+            $parts[] = sprintf("Ort2: <b>%s</b>", $this->Ort2);
+        }
+        if($this->Ort3 !== null && $this->Ort3 !== '') {
+            $parts[] = sprintf("Ort3: <b>%s</b>", $this->Ort3);
+        }
+        if($this->Ort4 !== null && $this->Ort4 !== '') {
+            $parts[] = sprintf("Ort4: <b>%s</b>", $this->Ort4);
+        }
+        if($this->Beschreibung !== null && $this->Beschreibung !== '') {
+            $parts[] = sprintf("Beschreibung: <b>%s</b>", $this->Beschreibung);
+        }
+        if($this->Shifts) {
+            $parts[] = "Schichten: <b>".bool2string($this->Shifts)."</b>";
+        }
+        $parts[] = "sichtbar: <b>".bool2string($this->published)."</b>";
+        $parts[] = "offen: <b>".bool2string($this->open)."</b>";
+        if($this->defaultFreeText !== null && $this->defaultFreeText !== '') {
+            $parts[] = sprintf("FreeText: <b>%s</b>", $this->defaultFreeText);
+        }
+        return implode(', ', $parts);
     }
     public function save() {
         if(!$this->is_valid()) return false;
