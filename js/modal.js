@@ -249,20 +249,31 @@ function ensureOrchestraSeatSheet() {
         +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="2">Nein</button>'
         +   '<button type="button" class="w3-btn w3-border orchestra-seat-sheet-btn" data-wert="3">Vielleicht</button>'
         + '</div>';
-    document.body.appendChild(sheet);
 
-    sheet.querySelector('.orchestra-seat-sheet-close').addEventListener('click', function(ev) {
+    var host = document.getElementById('ajaxModalHost');
+    if(host) {
+        host.appendChild(sheet);
+    }
+    else {
+        document.body.appendChild(sheet);
+    }
+
+    function onClose(ev) {
         ev.preventDefault();
+        ev.stopPropagation();
         closeOrchestraSeatSheet();
-    });
+    }
+    function onAction(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var btn = ev.currentTarget;
+        if(!orchestraSheetSeat) return;
+        var w = parseInt(btn.getAttribute('data-wert'), 10);
+        saveOrchestraSeatWert(orchestraSheetSeat, w);
+    }
+    sheet.querySelector('.orchestra-seat-sheet-close').addEventListener('click', onClose);
     sheet.querySelectorAll('.orchestra-seat-sheet-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            if(!orchestraSheetSeat) return;
-            var w = parseInt(btn.getAttribute('data-wert'), 10);
-            saveOrchestraSeatWert(orchestraSheetSeat, w);
-        });
+        btn.addEventListener('click', onAction);
     });
     return sheet;
 }
@@ -270,7 +281,8 @@ function ensureOrchestraSeatSheet() {
 function getOrchestraSeatInfo(seat) {
     var name = seat.getAttribute('data-name') || '';
     var instrument = seat.getAttribute('data-instrument') || '';
-    var wert = parseInt(seat.getAttribute('data-wert'), 10);
+    var wertRaw = seat.getAttribute('data-wert');
+    var wert = wertRaw === null ? -1 : parseInt(wertRaw, 10);
     if(isNaN(wert)) wert = -1;
     var visual = orchestraSeatVisual(wert);
     if(!name) {
@@ -285,6 +297,7 @@ function getOrchestraSeatInfo(seat) {
         name: name,
         instrument: instrument,
         wert: wert,
+        hasWert: wertRaw !== null,
         statusLabel: visual.label,
         editable: seat.getAttribute('data-editable') === '1'
     };
@@ -306,8 +319,9 @@ function openOrchestraSeatSheet(seat) {
         instrEl.setAttribute('hidden', 'hidden');
     }
     var statusEl = sheet.querySelector('.orchestra-seat-sheet-status');
-    if(seat.getAttribute('data-wert') !== null && seat.hasAttribute('data-wert')) {
-        statusEl.textContent = info.statusLabel;
+    // Immer Status zeigen, sobald ein Wert-Attribut existiert (inkl. 0 = nicht gemeldet)
+    if(info.hasWert || info.editable) {
+        statusEl.textContent = 'Status: ' + info.statusLabel;
         statusEl.removeAttribute('hidden');
     }
     else {
@@ -331,6 +345,7 @@ function openOrchestraSeatSheet(seat) {
         actions.setAttribute('hidden', 'hidden');
     }
     sheet.removeAttribute('hidden');
+    orchestraSuppressClick = false;
 }
 
 function refreshOrchestraSeatSheetIfOpen(seat) {
@@ -346,6 +361,7 @@ function closeOrchestraSeatSheet() {
     var sheet = document.getElementById('orchestraSeatSheet');
     if(sheet) sheet.setAttribute('hidden', 'hidden');
     orchestraSheetSeat = null;
+    orchestraSuppressClick = false;
 }
 
 function clearOrchestraLongPress() {
@@ -402,17 +418,20 @@ document.addEventListener('click', function(ev) {
 });
 
 var orchestraLongPressStart = null;
+var orchestraLongPressOpened = false;
 
 document.addEventListener('touchstart', function(ev) {
     var seat = findOrchestraSeat(ev.target);
     if(!seat) return;
     clearOrchestraLongPress();
+    orchestraLongPressOpened = false;
     var touch = ev.touches && ev.touches[0];
     orchestraLongPressStart = touch ? {x: touch.clientX, y: touch.clientY} : null;
     orchestraLongPressSeat = seat;
     orchestraLongPressTimer = setTimeout(function() {
         orchestraLongPressTimer = null;
         if(orchestraLongPressSeat !== seat) return;
+        orchestraLongPressOpened = true;
         orchestraSuppressClick = true;
         clearDomTextSelection();
         openOrchestraSeatSheet(seat);
@@ -437,14 +456,22 @@ document.addEventListener('touchmove', function(ev) {
 }, {passive: true});
 
 document.addEventListener('touchend', function(ev) {
-    if(orchestraSuppressClick) {
+    // Nur den Ghost-Click nach Long-Press unterdrücken, Flag danach zurücksetzen
+    if(orchestraLongPressOpened || orchestraSuppressClick) {
         ev.preventDefault();
         ev.stopPropagation();
+        orchestraLongPressOpened = false;
+        // Kurz gesetzt lassen, falls noch ein click folgt — dann in click-Handler löschen
+        setTimeout(function() {
+            orchestraSuppressClick = false;
+        }, 50);
     }
     clearOrchestraLongPress();
 }, {passive: false});
 
 document.addEventListener('touchcancel', function() {
+    orchestraLongPressOpened = false;
+    orchestraSuppressClick = false;
     clearOrchestraLongPress();
 }, {passive: true});
 

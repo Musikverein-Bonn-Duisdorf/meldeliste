@@ -2511,8 +2511,21 @@ ORDER BY `Nachname`, `Vorname`;",
             }
         }
 
+        $titleParts = array($this->Name);
+        if($this->Datum) {
+            $when = germanDate($this->Datum, 1);
+            if($this->Uhrzeit) {
+                $when .= ', '.sql2time($this->Uhrzeit);
+                if($this->Uhrzeit2) {
+                    $when .= ' – '.sql2time($this->Uhrzeit2);
+                }
+            }
+            $titleParts[] = $when;
+        }
+        $terminTitle = implode(' — ', array_filter($titleParts));
+
         return render('termin/response_modal', array(
-            'terminName' => $this->Name,
+            'terminName' => $terminTitle,
             'showOrchestra' => $showOrchestra,
             'orchestraFull' => $orchestraFull,
             'orchestraActive' => $orchestraActive,
