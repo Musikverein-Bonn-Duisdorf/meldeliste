@@ -1197,3 +1197,133 @@
   font-size: 0.8rem;
   white-space: nowrap;
 }
+
+/* Insurance print / PDF overview (MELD-88) */
+body.insurance-print {
+  margin: 0;
+  padding: 1.25rem 1.5rem 2rem;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 11pt;
+  line-height: 1.35;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+.insurance-print-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.insurance-print-btn {
+  display: inline-block;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  text-decoration: none;
+  color: #111;
+  background: #f5f5f5;
+  border: 1px solid #888;
+  border-radius: 2px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+.insurance-print-btn:hover {
+  background: #e8e8e8;
+}
+
+.insurance-print-header {
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid #222;
+  padding-bottom: 0.75rem;
+}
+
+.insurance-print-org {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.insurance-print-header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.insurance-print-meta {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.insurance-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+}
+
+.insurance-print-table th,
+.insurance-print-table td {
+  border: 1px solid #bbb;
+  padding: 0.35rem 0.45rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.insurance-print-table thead th {
+  background: #efefef;
+  font-weight: 700;
+  border-bottom-width: 2px;
+}
+
+.insurance-print-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.insurance-print-table .num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.insurance-print-table tfoot td {
+  background: #f0f0f0;
+  border-top-width: 2px;
+}
+
+.insurance-print-footnote {
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+@media print {
+  body.insurance-print {
+    padding: 0;
+    font-size: 10pt;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .insurance-print-table {
+    font-size: 8.5pt;
+  }
+
+  .insurance-print-table th,
+  .insurance-print-table td {
+    border-color: #888;
+  }
+
+  .insurance-print-table thead {
+    display: table-header-group;
+  }
+
+  .insurance-print-table tr {
+    page-break-inside: avoid;
+  }
+}
