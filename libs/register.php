@@ -100,7 +100,7 @@ class Register
         if($hex === '') {
             return '';
         }
-        return 'background-color:'.$hex.';';
+        return 'background-color:'.$hex.';color:'.hexContrastText($hex).';';
     }
 
     public function getMembers() {

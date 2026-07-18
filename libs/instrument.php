@@ -200,13 +200,13 @@ class Instrument
         return true;
     }
 
-    /** CSS-safe background for overview headers. */
+    /** CSS-safe background (+ contrast text) for overview headers. */
     public function headerStyle() {
         $hex = normalizeHexColor($this->Color);
         if($hex === '') {
             return '';
         }
-        return 'background-color:'.$hex.';';
+        return 'background-color:'.$hex.';color:'.hexContrastText($hex).';';
     }
 };
 ?>
