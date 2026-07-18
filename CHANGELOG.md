@@ -2,6 +2,19 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-7943e (2026-07-18)
+
+- MELD-64: Besetzung live aktualisieren, Sitzreihenfolge stabil, „nicht gemeldet“ entfernt
+- MELD-64: Info-Sheet-Buttons wie Termin-Melde, Register-Bögen konfigurierbar, Modal-Titel-Abstand
+- MELD-64: Datum/Uhrzeit im Meldungs-Modal-Titel; Info-Sheet-Klicks reparieren
+- MELD-64: Long-Press-Info-Sheet auf Smartphone zuverlässiger machen
+- MELD-64: Register-Bänder, Info-Sheet, Zoom und Tooltips
+- MELD-64: SVG-Text mit dominant-baseline mittig setzen
+- MELD-64: Schrift in Orchester-Kreisen vertikal zentrieren
+- MELD-64: Orchester-viewBox an Sitze anpassen, Zoom deckeln
+- MELD-64: Orchester wieder ~1000px, ohne Zoom bei wenigen Plätzen
+- MELD-64: Orchester-SVG skalieren, klickbar und performanter
+
 ## 2026-07-18-1d665 (2026-07-18)
 
 - MELD-84: Redirect-Stub und Legacy-Meldungs-POST entfernen
