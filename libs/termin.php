@@ -147,14 +147,7 @@ class Termin
             $this->update();
 
             if($this->published) {
-                $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
-                $discord = new Discord($webhookUrl);
-                $botname = $GLOBALS['optionsDB']['DiscordBotName'];
-                try {
-                    $response = $discord->sendMessage($this->DiscordMessageUpdate(), $botname);
-                } catch (Exception $e) {
-                    echo "Error: " . $e->getMessage();
-                }
+                $this->publishToDiscord(true);
             }
         }
         else {
@@ -165,20 +158,57 @@ class Termin
             if($this->published) {
 	        $this->makeAlwaysYes();
         	$this->makeAlwaysMaybe();
-                $webhookUrl = $GLOBALS['optionsDB']['DiscordWebHookURL'];
-                $discord = new Discord($webhookUrl);
-                $botname = $GLOBALS['optionsDB']['DiscordBotName'];
-                try {
-                    $response = $discord->sendMessage($this->DiscordMessage(), $botname);
-                } catch (Exception $e) {
-                    echo "Error: " . $e->getMessage();
-                }
+                $this->publishToDiscord(false);
             }
         }
 	$c = new UserCalendar;
         $c->User = 0;
         $c->makeCalendar();
         // exec("php cron.php&id=".$GLOBALS['cronID']."&cmd=calendar > /dev/null 2>&1 &");
+    }
+
+    /**
+     * Post appointment to Discord when published. Never echoes; logs skip/errors.
+     * @param bool $isUpdate true for update message, false for new appointment
+     */
+    private function publishToDiscord($isUpdate) {
+        $webhookUrl = isset($GLOBALS['optionsDB']['DiscordWebHookURL'])
+            ? trim((string)$GLOBALS['optionsDB']['DiscordWebHookURL'])
+            : '';
+        if($webhookUrl === '') {
+            $logentry = new Log;
+            $logentry->warning(sprintf(
+                'Discord-Post übersprungen (kein Webhook) | Termin-ID: <b>%d</b>, Name: <b>%s</b>',
+                (int)$this->Index,
+                htmlspecialchars((string)$this->Name)
+            ));
+            return;
+        }
+        $botname = isset($GLOBALS['optionsDB']['DiscordBotName'])
+            ? (string)$GLOBALS['optionsDB']['DiscordBotName']
+            : 'Bot';
+        $message = $isUpdate ? $this->DiscordMessageUpdate() : $this->DiscordMessage();
+        try {
+            $discord = new Discord($webhookUrl);
+            if(!$discord->hasValidWebhookUrl()) {
+                $logentry = new Log;
+                $logentry->warning(sprintf(
+                    'Discord-Post übersprungen (ungültiger Webhook) | Termin-ID: <b>%d</b>, Name: <b>%s</b>',
+                    (int)$this->Index,
+                    htmlspecialchars((string)$this->Name)
+                ));
+                return;
+            }
+            $discord->sendMessage($message, $botname);
+        } catch (Exception $e) {
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                'Discord-Post fehlgeschlagen | Termin-ID: <b>%d</b>, Name: <b>%s</b>, Exception: <b>%s</b>',
+                (int)$this->Index,
+                htmlspecialchars((string)$this->Name),
+                htmlspecialchars($e->getMessage())
+            ));
+        }
     }
     public function is_valid() {
         if(!$this->Datum) return false;

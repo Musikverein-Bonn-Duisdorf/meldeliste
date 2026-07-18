@@ -5,7 +5,7 @@ class Discord
     private $_data = array('message' => null, 'username' => null);
     
     public function __construct($webhookUrl) {
-        $this->webhookUrl = $webhookUrl;
+        $this->webhookUrl = trim((string)$webhookUrl);
     }
 
     public function __get($key) {
@@ -39,16 +39,33 @@ class Discord
         );
     }
 
+    /**
+     * True if webhook looks like a usable http(s) URL.
+     */
+    public function hasValidWebhookUrl() {
+        if($this->webhookUrl === '') {
+            return false;
+        }
+        return (bool)filter_var($this->webhookUrl, FILTER_VALIDATE_URL)
+            && preg_match('#^https?://#i', $this->webhookUrl);
+    }
+
     public function sendMessage($message, $username = "Bot", $embed = NULL) {
         $this->message = $message;
         $this->username = $username;
         if(!$this->is_valid()) return false;
+        if(!$this->hasValidWebhookUrl()) {
+            return false;
+        }
         $logentry = new Log;
         $logentry->DBinsert($this->getVars());
+        $avatar = isset($GLOBALS['optionsDB']['DiscordAvatarURL'])
+            ? (string)$GLOBALS['optionsDB']['DiscordAvatarURL']
+            : '';
         if($embed) {
             $payload = json_encode([
                 "username" => $username,
-                "avatar_url" => $GLOBALS['optionsDB']['DiscordAvatarURL'],
+                "avatar_url" => $avatar,
                 "content" => $message,
                 "embeds" => $embed
             ]);
@@ -56,13 +73,16 @@ class Discord
         else {
             $payload = json_encode([
                 "username" => $username,
-                "avatar_url" => $GLOBALS['optionsDB']['DiscordAvatarURL'],
+                "avatar_url" => $avatar,
                 "content" => $message
             ]);
         }
         
         // Initialize cURL
         $ch = curl_init($this->webhookUrl);
+        if($ch === false) {
+            throw new Exception('cURL Error: could not initialize request');
+        }
         
         // Set cURL options
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
