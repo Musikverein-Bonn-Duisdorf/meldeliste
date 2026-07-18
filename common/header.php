@@ -46,6 +46,13 @@
               <?php
               die("<div class=\"w3-panel ".$optionsDB['colorLogWarning']."\"><h2>Passwort &auml;ndern...</h2></div>");
           }
+          // Proxy für AJAX-Modals (getModal) über die Seitenaufrufe hinweg merken
+          if(isset($_POST['proxy']) && (int)$_POST['proxy'] > 0) {
+              $_SESSION['proxy'] = (int)$_POST['proxy'];
+          }
+          else {
+              unset($_SESSION['proxy']);
+          }
       ?>
       <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>

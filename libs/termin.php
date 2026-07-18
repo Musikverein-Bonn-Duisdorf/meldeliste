@@ -351,6 +351,9 @@ class Termin
         elseif(isset($_GET['user'])) {
             $user = $_GET['user'];
         }
+        elseif(isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) {
+            $user = (int)$_SESSION['proxy'];
+        }
         elseif(isset($_SESSION['userid'])) {
             $user = $_SESSION['userid'];
         }
