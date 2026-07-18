@@ -190,7 +190,13 @@ class Usermail {
         }
 
         $count = 0;
+        $queuedEmails = array();
+        $queuedUsers = array();
         foreach($recipients as $row) {
+            $uid = (int)$row['Index'];
+            if($uid > 0 && isset($queuedUsers[$uid])) {
+                continue;
+            }
             $emails = array();
             if(!empty($row['Email'])) {
                 $emails[] = trim($row['Email']);
@@ -199,8 +205,21 @@ class Usermail {
                 $emails[] = trim($row['Email2']);
             }
             $emails = array_values(array_unique(array_filter($emails)));
-            if(!$emails) {
+            // Skip addresses already queued for this job (same mailbox via another user)
+            $fresh = array();
+            foreach($emails as $em) {
+                $key = strtolower($em);
+                if(isset($queuedEmails[$key])) {
+                    continue;
+                }
+                $queuedEmails[$key] = true;
+                $fresh[] = $em;
+            }
+            if(!$fresh) {
                 continue;
+            }
+            if($uid > 0) {
+                $queuedUsers[$uid] = true;
             }
 
             if(function_exists('mailBodyLooksLikeHtml') && mailBodyLooksLikeHtml($text)) {
@@ -212,8 +231,8 @@ class Usermail {
             }
             $out = new MailOutbox;
             $out->Job = $job->Index;
-            $out->User = (int)$row['Index'];
-            $out->ToEmail = implode(', ', $emails);
+            $out->User = $uid;
+            $out->ToEmail = implode(', ', $fresh);
             $out->Subject = $subjectFull;
             $out->BodyText = $bodyStored;
             $out->Status = 'pending';
@@ -646,7 +665,7 @@ class Usermail {
                 }
                 $rows[] = $row;
             }
-            return $rows;
+            return $this->dedupeRecipients($rows);
         }
 
         $spec = is_array($this->recipientSpec)
@@ -725,7 +744,38 @@ class Usermail {
             }
         }
 
-        return array_values($byId);
+        return $this->dedupeRecipients(array_values($byId));
+    }
+
+    /**
+     * One recipient row per user id and per primary email (case-insensitive).
+     * @param array $rows
+     * @return array
+     */
+    protected function dedupeRecipients($rows) {
+        $out = array();
+        $seenUsers = array();
+        $seenEmails = array();
+        foreach($rows as $row) {
+            $uid = isset($row['Index']) ? (int)$row['Index'] : 0;
+            if($uid > 0) {
+                if(isset($seenUsers[$uid])) {
+                    continue;
+                }
+            }
+            $emailKey = strtolower(trim((string)(isset($row['Email']) ? $row['Email'] : '')));
+            if($emailKey !== '' && isset($seenEmails[$emailKey])) {
+                continue;
+            }
+            if($uid > 0) {
+                $seenUsers[$uid] = true;
+            }
+            if($emailKey !== '') {
+                $seenEmails[$emailKey] = true;
+            }
+            $out[] = $row;
+        }
+        return $out;
     }
 }
 ?>
