@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-fb78d (2026-07-18)
+
+- MELD-62: Rückmeldungs-Auswertung ohne N+1-Abfragen
+- MELD-62: Auswertung Rückmeldungen optimieren
+
 ## 2026-07-18-fa3a4 (2026-07-18)
 
 - MELD-60: Empfänger-Chips automatisch im Entwurf speichern
