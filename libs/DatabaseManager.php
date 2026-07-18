@@ -48,7 +48,7 @@ class DatabaseManager
 
     public function hasChanges() {
         foreach($this->report as $entry) {
-            if(in_array($entry['status'], array('created', 'fixed', 'missing', 'mismatch'), true)) {
+            if(in_array($entry['status'], array('created', 'fixed', 'missing', 'mismatch', 'removed'), true)) {
                 return true;
             }
         }
@@ -229,6 +229,7 @@ class DatabaseManager
     public function check() {
         $this->report = array();
         $this->processSchema(false, false);
+        $this->pruneObsoleteSchema(false);
         $this->checkConfigDefaults(false);
         return $this->report;
     }
@@ -236,6 +237,8 @@ class DatabaseManager
     public function create() {
         $this->report = array();
         $this->processSchema(true, false);
+        $this->migrateAudienceLegacyColumns();
+        $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
         $this->ensureDefaultRegisters();
@@ -252,6 +255,8 @@ class DatabaseManager
     public function repair() {
         $this->report = array();
         $this->processSchema(true, true);
+        $this->migrateAudienceLegacyColumns();
+        $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
         $this->ensureDefaultRegisters();
@@ -621,6 +626,219 @@ class DatabaseManager
                 else {
                     $this->addReport('column', $target, 'mismatch', 'Spalte weicht ab', $diffs);
                 }
+            }
+        }
+    }
+
+    /**
+     * MELD-61: fold legacy Termine.published and MailJob.MemberOnly/Register into Spec JSON
+     * before those columns are dropped.
+     */
+    private function migrateAudienceLegacyColumns() {
+        if(!class_exists('AudienceSpec')) {
+            require_once dirname(__DIR__).'/libs/audienceSpec.php';
+        }
+
+        $termine = new SQLtable('Termine');
+        if($termine->exists() && $termine->columnExists('VisibilitySpec')) {
+            $hasPublished = $termine->columnExists('published');
+            $sql = sprintf(
+                'SELECT `Index`, `VisibilitySpec`%s FROM `%sTermine`;',
+                $hasPublished ? ', `published`' : '',
+                $GLOBALS['dbprefix']
+            );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            $updated = 0;
+            if($dbr) {
+                $defaultJson = json_encode(AudienceSpec::defaultVisibilitySpec());
+                while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+                    $id = (int)$row['Index'];
+                    if(!$hasPublished) {
+                        continue;
+                    }
+                    $spec = AudienceSpec::normalize(
+                        isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : null,
+                        array('allowMailGroups' => true, 'defaultGroups' => null)
+                    );
+                    $published = (int)$row['published'];
+                    $want = null;
+                    if($published > 0) {
+                        if(AudienceSpec::isEmpty($spec)) {
+                            $want = $defaultJson;
+                        }
+                    }
+                    else {
+                        // unpublished → hidden (empty VisibilitySpec)
+                        $rawVis = isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : null;
+                        if($rawVis !== null && $rawVis !== '') {
+                            $want = '';
+                        }
+                    }
+                    if($want === null) {
+                        continue;
+                    }
+                    if($want === '') {
+                        $update = sprintf(
+                            'UPDATE `%sTermine` SET `VisibilitySpec` = NULL WHERE `Index` = %d;',
+                            $GLOBALS['dbprefix'],
+                            $id
+                        );
+                    }
+                    else {
+                        $update = sprintf(
+                            'UPDATE `%sTermine` SET `VisibilitySpec` = "%s" WHERE `Index` = %d;',
+                            $GLOBALS['dbprefix'],
+                            mysqli_real_escape_string($GLOBALS['conn'], $want),
+                            $id
+                        );
+                    }
+                    if(mysqli_query($GLOBALS['conn'], $update)) {
+                        $updated++;
+                    }
+                    else {
+                        $this->addReport(
+                            'data',
+                            'Termine.VisibilitySpec',
+                            'error',
+                            'Migration Termin #'.$id.' fehlgeschlagen',
+                            mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                        );
+                    }
+                }
+            }
+            if($updated > 0) {
+                $this->addReport('data', 'Termine.VisibilitySpec', 'fixed', $updated.' Termin(e) VisibilitySpec migriert');
+            }
+            elseif($hasPublished) {
+                $this->addReport('data', 'Termine.VisibilitySpec', 'ok', 'VisibilitySpec bereits migriert');
+            }
+        }
+
+        $mailJob = new SQLtable('MailJob');
+        if($mailJob->exists() && $mailJob->columnExists('RecipientSpec')) {
+            $hasMemberOnly = $mailJob->columnExists('MemberOnly');
+            $hasRegister = $mailJob->columnExists('Register');
+            if($hasMemberOnly || $hasRegister) {
+                $cols = '`Index`, `RecipientSpec`';
+                if($hasMemberOnly) $cols .= ', `MemberOnly`';
+                if($hasRegister) $cols .= ', `Register`';
+                $sql = sprintf('SELECT %s FROM `%sMailJob`;', $cols, $GLOBALS['dbprefix']);
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                $updated = 0;
+                if($dbr) {
+                    while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+                        $id = (int)$row['Index'];
+                        $legacyRegister = $hasRegister ? (int)$row['Register'] : 0;
+                        $legacyMemberOnly = $hasMemberOnly ? (int)$row['MemberOnly'] : 0;
+                        $spec = AudienceSpec::normalize(
+                            isset($row['RecipientSpec']) ? $row['RecipientSpec'] : null,
+                            array(
+                                'allowMailGroups' => true,
+                                'defaultGroups' => null,
+                                'legacyRegister' => $legacyRegister,
+                                'legacyMemberOnly' => $legacyMemberOnly,
+                            )
+                        );
+                        $raw = isset($row['RecipientSpec']) ? trim((string)$row['RecipientSpec']) : '';
+                        if($raw !== '' && !AudienceSpec::isEmpty(AudienceSpec::normalize($raw, array('allowMailGroups' => true, 'defaultGroups' => null)))) {
+                            continue;
+                        }
+                        if(AudienceSpec::isEmpty($spec) && $legacyRegister <= 0 && !$legacyMemberOnly) {
+                            continue;
+                        }
+                        $payload = json_encode(array(
+                            'groups' => $spec['groups'],
+                            'registers' => $spec['registers'],
+                            'users' => $spec['users'],
+                            'mailGroups' => $spec['mailGroups'],
+                        ));
+                        $update = sprintf(
+                            'UPDATE `%sMailJob` SET `RecipientSpec` = "%s" WHERE `Index` = %d;',
+                            $GLOBALS['dbprefix'],
+                            mysqli_real_escape_string($GLOBALS['conn'], $payload),
+                            $id
+                        );
+                        if(mysqli_query($GLOBALS['conn'], $update)) {
+                            $updated++;
+                        }
+                        else {
+                            $this->addReport(
+                                'data',
+                                'MailJob.RecipientSpec',
+                                'error',
+                                'Migration MailJob #'.$id.' fehlgeschlagen',
+                                mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                            );
+                        }
+                    }
+                }
+                if($updated > 0) {
+                    $this->addReport('data', 'MailJob.RecipientSpec', 'fixed', $updated.' MailJob(s) RecipientSpec migriert');
+                }
+                else {
+                    $this->addReport('data', 'MailJob.RecipientSpec', 'ok', 'RecipientSpec bereits migriert');
+                }
+            }
+        }
+    }
+
+    /**
+     * Drop columns / tables that are no longer in DBconfig (or known obsolete leftovers).
+     *
+     * @param bool $apply
+     */
+    private function pruneObsoleteSchema($apply) {
+        foreach($this->schema as $tableName => $columns) {
+            $SQL = new SQLtable($tableName);
+            if(!$SQL->exists()) {
+                continue;
+            }
+            $defined = array_keys($columns);
+            foreach($SQL->listColumns() as $columnName) {
+                if(in_array($columnName, $defined, true)) {
+                    continue;
+                }
+                $target = $tableName.'.'.$columnName;
+                if(!$apply) {
+                    $this->addReport('column', $target, 'obsolete', 'Spalte nicht mehr in DBconfig');
+                    continue;
+                }
+                if($SQL->dropColumn($columnName)) {
+                    $this->addReport('column', $target, 'removed', 'Veraltete Spalte entfernt');
+                }
+                else {
+                    $this->addReport(
+                        'column',
+                        $target,
+                        'error',
+                        'Veraltete Spalte konnte nicht entfernt werden',
+                        $SQL->getLastError()
+                    );
+                }
+            }
+        }
+
+        // Leftover tables after inventory migration (also dropped by RegNumber::migrateInstruments).
+        foreach(array('Instruments', 'Loans') as $obsoleteTable) {
+            $SQL = new SQLtable($obsoleteTable);
+            if(!$SQL->exists()) {
+                continue;
+            }
+            if(!$apply) {
+                $this->addReport('table', $obsoleteTable, 'obsolete', 'Tabelle nicht mehr benötigt');
+                continue;
+            }
+            if($SQL->dropTable()) {
+                $this->addReport('table', $obsoleteTable, 'removed', 'Veraltete Tabelle entfernt');
+            }
+            else {
+                $this->addReport(
+                    'table',
+                    $obsoleteTable,
+                    'error',
+                    'Veraltete Tabelle konnte nicht entfernt werden',
+                    $SQL->getLastError()
+                );
             }
         }
     }

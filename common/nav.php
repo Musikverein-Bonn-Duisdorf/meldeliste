@@ -139,6 +139,7 @@ if($u->hasInventories()) { ?>
         <button type="button" class="w3-button w3-mobile w3-block w3-left-align">Kommunikation <i class="fas fa-caret-right admin-nav-caret"></i></button>
         <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
           <a title="Email versenden" alt="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mail');?>"><i class="fas fa-envelope-open-text"></i> Email versenden</a>
+          <a title="Gruppen" alt="Gruppen" href="groups.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('groups');?>"><i class="fas fa-users"></i> Gruppen</a>
         </div>
       </div>
       <?php } ?>

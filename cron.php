@@ -50,8 +50,9 @@ case "newAppmnts":
     }
     $datetime = new DateTime('today');
     $today = $datetime->format('Y-m-d');
-    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND `published` > 0 AND `Datum` >= '%s';",
+    $sql = sprintf("SELECT * FROM `%sTermine` WHERE `new` = 1 AND %s AND `Datum` >= '%s';",
     $GLOBALS['dbprefix'],
+    Termin::sqlIsListed(),
     $today);
     $dbr = mysqli_query($conn, $sql);
     sqlerror();
@@ -86,8 +87,9 @@ case "tomorrow":
 	$datetime = new DateTime('tomorrow');
 	$tomorrow = $datetime->format('Y-m-d');
 
-	$sql = sprintf("SELECT * FROM `%sTermine` WHERE `published` = 1 AND `Datum` = '%s';",
+	$sql = sprintf("SELECT * FROM `%sTermine` WHERE %s AND `Datum` = '%s';",
     $GLOBALS['dbprefix'],
+    Termin::sqlIsListed(),
     $tomorrow);
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
@@ -134,16 +136,20 @@ case "reminder":
 	}
 	$datetime = new DateTime('today');
 	$today = $datetime->format('Y-m-d');
-	$sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sTermine` WHERE `published` = 1 AND `Datum` >= '%s' AND `Shifts` = 0;",
+	$sql = sprintf("SELECT * FROM `%sTermine` WHERE %s AND `Datum` >= '%s' AND `Shifts` = 0;",
     $GLOBALS['dbprefix'],
+    Termin::sqlIsListed(),
     $today
-	);
+    );
 	$dbr = mysqli_query($conn, $sql);
 	sqlerror();
     if(!$dbr) break;
-	$row = mysqli_fetch_array($dbr);
-	$Nappmnts = $row['cnt'];
-
+	$publishedTermines = array();
+	while($row = mysqli_fetch_array($dbr)) {
+        $t = new Termin;
+        $t->load_by_id($row['Index']);
+        $publishedTermines[] = $t;
+	}
 
 	$sql = sprintf("SELECT * FROM `%sUser` WHERE `getMail` = 1;",
     $GLOBALS['dbprefix']
@@ -155,18 +161,33 @@ case "reminder":
         $u = new User;
         $u->load_by_id($user['Index']);
         if($u->getRegisterName() == 'keins') continue;
-        $sql = sprintf("SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `tIndex`, `Datum`, `published`, `Shifts` FROM `%sTermine`) `Termine` ON `Termin` = `tIndex` WHERE `published` = 1 AND `Datum` >= '%s' AND `User` = '%d' AND `Shifts` = 0;",
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $today,
-        $user['Index']
-        );
-        $dbr2 = mysqli_query($conn, $sql);
-        if(!$dbr2) continue;
-        sqlerror();
-        $row2 = mysqli_fetch_array($dbr2);
-        $missing = $Nappmnts - $row2['cnt'];
-        echo $u->getName()." (".$u->getRegisterName().") ".$row2['cnt']."/".$Nappmnts.", missing: ".$missing."<br />\n";
+        $visibleIds = array();
+        foreach($publishedTermines as $t) {
+            if($t->isVisibleToUser((int)$u->Index, array('asViewer' => false))) {
+                $visibleIds[] = (int)$t->Index;
+            }
+        }
+        $Nappmnts = count($visibleIds);
+        if($Nappmnts <= 0) {
+            continue;
+        }
+        $meldungenCount = 0;
+        if(count($visibleIds)) {
+            $sql = sprintf(
+                "SELECT COUNT(`Index`) AS `cnt` FROM `%sMeldungen` WHERE `User` = %d AND `Termin` IN (%s);",
+                $GLOBALS['dbprefix'],
+                (int)$u->Index,
+                implode(',', $visibleIds)
+            );
+            $dbr2 = mysqli_query($conn, $sql);
+            if($dbr2) {
+                sqlerror();
+                $row2 = mysqli_fetch_array($dbr2);
+                $meldungenCount = (int)$row2['cnt'];
+            }
+        }
+        $missing = $Nappmnts - $meldungenCount;
+        echo $u->getName()." (".$u->getRegisterName().") ".$meldungenCount."/".$Nappmnts.", missing: ".$missing."<br />\n";
         if($missing > 0) {
             $mail = new Usermail;
             $mail->source = 'cron_reminder';

@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
     /** @var int|null */
@@ -26,7 +26,6 @@ class Termin
 	    case 'Ort4':
 	    case 'Beschreibung':
         case 'Shifts':
-	    case 'published':
 	    case 'open':
 	    case 'Wert':
 	    case 'Children':
@@ -34,6 +33,7 @@ class Termin
 	    case 'vName':
 	    case 'new':
         case 'defaultFreeText':
+        case 'VisibilitySpec':
             return $this->_data[$key];
             break;
         default:
@@ -56,7 +56,8 @@ class Termin
 	    case 'Uhrzeit2':
 	    case 'Abfahrt':
         case 'defaultFreeText':
-            $this->_data[$key] = trim($val);
+        case 'VisibilitySpec':
+            $this->_data[$key] = trim((string)$val);
             break;
 	    case 'Name':
 	    case 'Beschreibung':
@@ -69,7 +70,6 @@ class Termin
             break;
 	    case 'Auftritt':
 	    case 'Shifts':
-	    case 'published':
 	    case 'open':
 	    case 'new':
             $this->_data[$key] = (bool)$val;
@@ -106,7 +106,12 @@ class Termin
         if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
         if($this->Ort4 != $old->Ort4) $str.=", Ort4: ".$old->Ort4." &rArr; <b>".$this->Ort4."</b>";
         if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
-        if(boolsDiffer($this->published, $old->published)) $str.=", sichtbar: ".bool2string($old->published)." &rArr; <b>".bool2string($this->published)."</b>";
+        $oldVis = AudienceSpec::canonicalJson($old->VisibilitySpec, array('allowMailGroups' => true));
+        $newVis = AudienceSpec::canonicalJson($this->VisibilitySpec, array('allowMailGroups' => true));
+        if($oldVis !== $newVis) {
+            $str.=", sichtbar für: ".htmlspecialchars($old->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')
+                ." &rArr; <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
+        }
         if(boolsDiffer($this->open, $old->open)) $str.=", open: ".bool2string($old->open)." &rArr; <b>".bool2string($this->open)."</b>";
         if(boolsDiffer($this->new, $old->new)) $str.=", neu: ".bool2string($old->new)." &rArr; <b>".bool2string($this->new)."</b>";
         if(!empty($GLOBALS['optionsDB']['showChildOption'])) {
@@ -175,7 +180,7 @@ class Termin
         if($this->Shifts) {
             $parts[] = "Schichten: <b>".bool2string($this->Shifts)."</b>";
         }
-        $parts[] = "sichtbar: <b>".bool2string($this->published)."</b>";
+        $parts[] = "sichtbar für: <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
         $parts[] = "offen: <b>".bool2string($this->open)."</b>";
         if($this->defaultFreeText !== null && $this->defaultFreeText !== '') {
             $parts[] = sprintf("FreeText: <b>%s</b>", $this->defaultFreeText);
@@ -190,7 +195,7 @@ class Termin
             $logentry->DBupdate($this->getChanges());
             $this->update();
 
-            if($this->published) {
+            if($this->isListed()) {
                 $this->publishToDiscord(true);
             }
         }
@@ -199,7 +204,7 @@ class Termin
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
 
-            if($this->published) {
+            if($this->isListed()) {
 	        $this->makeAlwaysYes();
         	$this->makeAlwaysMaybe();
                 $this->publishToDiscord(false);
@@ -211,7 +216,7 @@ class Termin
     }
 
     /**
-     * Post appointment to Discord when published. Never echoes; logs errors only.
+     * Post appointment to Discord when listed (non-empty VisibilitySpec). Never echoes; logs errors only.
      * @param bool $isUpdate true for update message, false for new appointment
      */
     private function publishToDiscord($isUpdate) {
@@ -254,7 +259,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`, `defaultFreeText`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d", "%s");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s);',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -271,9 +276,9 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
-        $this->published,
                        $this->open,
-                       $this->defaultFreeText
+                       mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
+                       $this->sqlVisibilitySpec()
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -417,7 +422,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -434,10 +439,10 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort2),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort3),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
-        $this->published,
         $this->open,
         $this->new,
-                       $this->defaultFreeText,
+                       mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
+                       $this->sqlVisibilitySpec(),
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -486,9 +491,144 @@ class Termin
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-            $this->_data[$key] = $val;
+            if($key === 'VisibilitySpec' || $key === 'visibilitySpec') {
+                continue;
+            }
+            if(array_key_exists($key, $this->_data)) {
+                $this->_data[$key] = $val;
+            }
+        }
+        if(isset($row['VisibilitySpec']) || isset($row['visibilitySpec'])) {
+            $raw = isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : $row['visibilitySpec'];
+            if(is_array($raw)) {
+                $this->setVisibilitySpecArray($raw);
+            }
+            elseif(is_string($raw) || $raw === null) {
+                $this->setVisibilitySpecArray($raw);
+            }
         }
     }
+
+    /**
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     */
+    public function getVisibilitySpecArray() {
+        return AudienceSpec::normalize($this->VisibilitySpec, array(
+            'allowMailGroups' => true,
+            'defaultGroups' => null,
+        ));
+    }
+
+    /**
+     * @param array $spec
+     */
+    public function setVisibilitySpecArray($spec) {
+        $norm = AudienceSpec::normalize($spec, array(
+            'allowMailGroups' => true,
+            'defaultGroups' => null,
+        ));
+        if(AudienceSpec::isEmpty($norm)) {
+            $this->VisibilitySpec = null;
+            return;
+        }
+        $this->VisibilitySpec = json_encode(array(
+            'groups' => $norm['groups'],
+            'registers' => $norm['registers'],
+            'users' => $norm['users'],
+            'mailGroups' => $norm['mailGroups'],
+        ));
+    }
+
+    protected function sqlVisibilitySpec() {
+        $raw = $this->VisibilitySpec;
+        if($raw === null || $raw === '') {
+            return 'NULL';
+        }
+        $norm = AudienceSpec::normalize($raw, array('allowMailGroups' => true, 'defaultGroups' => null));
+        if(AudienceSpec::isEmpty($norm)) {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode(array(
+            'groups' => $norm['groups'],
+            'registers' => $norm['registers'],
+            'users' => $norm['users'],
+            'mailGroups' => $norm['mailGroups'],
+        ))).'"';
+    }
+
+    /**
+     * Human-readable visibility audience for logs/admin UI.
+     * @return string
+     */
+    public function getVisibilityLabel() {
+        return AudienceSpec::formatLabel($this->getVisibilitySpecArray(), array('allowMailGroups' => true));
+    }
+
+    /**
+     * True when VisibilitySpec targets an audience (not versteckt).
+     */
+    public function isListed() {
+        return !AudienceSpec::isEmpty($this->getVisibilitySpecArray());
+    }
+
+    /**
+     * SQL fragment: termin has a non-empty VisibilitySpec (listed, not versteckt).
+     *
+     * @param string $alias Table alias including trailing dot, e.g. "`t`." or ""
+     * @return string
+     */
+    public static function sqlIsListed($alias = '') {
+        return $alias.'`VisibilitySpec` IS NOT NULL AND '.$alias.'`VisibilitySpec` != \'\'';
+    }
+
+    /**
+     * List visibility for a user (MELD-61).
+     * Empty VisibilitySpec: only perm_showHiddenAppmnts (versteckt).
+     * Non-empty spec: matching users (+ showHidden / existing meldung overrides in viewer mode).
+     *
+     * @param int $userId
+     * @param array $opts asViewer (bool, default true) — admin/meldung overrides for UI
+     * @return bool
+     */
+    public function isVisibleToUser($userId, $opts = array()) {
+        $userId = (int)$userId;
+        $asViewer = !array_key_exists('asViewer', $opts) || !empty($opts['asViewer']);
+        $spec = $this->getVisibilitySpecArray();
+        $isHiddenAudience = AudienceSpec::isEmpty($spec);
+
+        if($isHiddenAudience) {
+            return $asViewer && requirePermission('perm_showHiddenAppmnts');
+        }
+        if($userId > 0 && AudienceSpec::userMatches($userId, $spec)) {
+            return true;
+        }
+        if($asViewer) {
+            if(requirePermission('perm_showHiddenAppmnts')) {
+                return true;
+            }
+            if($userId > 0 && $this->getMeldungenByUser($userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gray out list cards when the current user is outside the intended audience
+     * (empty VisibilitySpec, or only visible via perm_showHiddenAppmnts).
+     */
+    public function shouldStyleAsUnpublished($userId = null) {
+        if($userId === null) {
+            $userId = $this->getUser();
+        }
+        $userId = (int)$userId;
+        $spec = $this->getVisibilitySpecArray();
+        if(AudienceSpec::isEmpty($spec)) {
+            return true;
+        }
+        return !($userId > 0 && AudienceSpec::userMatches($userId, $spec));
+    }
+
     public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `%sTermine` INNER JOIN (SELECT `Index` AS `vIndex`, `Name` AS `vName` FROM `%svehicle`) `%svehicle` ON `vIndex` = `Vehicle` WHERE `Index` = "%d";',
@@ -1296,7 +1436,7 @@ class Termin
         $main->class="w3-card-4 w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
-        if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
+        if($this->shouldStyleAsUnpublished($user)) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
         $main->extraAttrs = $this->getSearchDataAttr();
         $str=$str.$main->open();
 
@@ -1667,7 +1807,12 @@ class Termin
         }
         if(requirePermission("perm_editAppmnts")) {
             $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">sichtbar:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->published)."</b></div>\n";
+            $str=$str."<div class=\"w3-col l3\">sichtbar für:</div>\n<div class=\"w3-col l9\">"
+                .AudienceSpec::renderChipsHtml($this->getVisibilitySpecArray(), array(
+                    'allowMailGroups' => true,
+                    'ariaLabel' => 'sichtbar für',
+                ))
+                ."</div>\n";
             $str=$str."</div>\n";
             $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
             $str=$str."<div class=\"w3-col l3\">Anmeldung offen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->open)."</b></div>\n";
@@ -2624,7 +2769,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $main->class="w3-card-4 w3-margin";
         $main->class=$this->mainColor();
         $main->class=$this->mainHover();
-        if(!$this->published) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
+        if($this->shouldStyleAsUnpublished($user)) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
         $str=$str.$main->open();
 
         $indent++;

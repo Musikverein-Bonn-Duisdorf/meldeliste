@@ -145,6 +145,23 @@ $formAction = '';
   }
 ?>
     </select>
+<?php if($fill && (int)$n->Index > 0) {
+    $membership = AudienceSpec::membershipForUser((int)$n->Index);
+    if(count($membership)) {
+?>
+    <label>Gruppenzugehörigkeit</label>
+    <div class="mail-recipient-chips w3-margin-bottom" aria-label="Gruppenzugehörigkeit">
+<?php
+        foreach($membership as $chip) {
+            $type = htmlspecialchars((string)$chip['type'], ENT_QUOTES, 'UTF-8');
+            $label = htmlspecialchars((string)$chip['label'], ENT_QUOTES, 'UTF-8');
+            echo '<span class="mail-recipient-chip mail-recipient-chip--'.$type.'">'.$label.'</span>';
+        }
+?>
+    </div>
+<?php
+    }
+} ?>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
       <input type="hidden" name="getMail" value="0">
       <input class="w3-check" type="checkbox" name="getMail" value="1" <?php if($fill && (bool)$n->getMail) echo "checked "; ?>>

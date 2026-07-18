@@ -33,17 +33,10 @@ sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     $M = new Termin;
     $M->load_by_id($row['Index']);
-    $meldung = $M->getMeldungenByUser($user);
-    if($M->published > 0) {        
-        echo $M->printMyResponseLine();
+    if(!$M->isVisibleToUser((int)$user)) {
+        continue;
     }
-    elseif(requirePermission("perm_showHiddenAppmnts")) {
-        echo $M->printMyResponseLine();
-    }
-    elseif($meldung) {
-        echo $M->printMyResponseLine();
-    }
-
+    echo $M->printMyResponseLine();
 }
 ?>
 </div>
