@@ -32,8 +32,7 @@ class Discord
     }
 
     public function getVars() {
-        return sprintf("DiscordWebhook: <b>%s</b>, Username: <b>%s</b>, Nachricht: <b>%s</b>",
-                       htmlspecialchars((string)$this->webhookUrl),
+        return sprintf("Discord-Post | Username: <b>%s</b>, Nachricht: <b>%s</b>",
                        htmlspecialchars((string)$this->username),
                        htmlspecialchars((string)$this->message)
         );
