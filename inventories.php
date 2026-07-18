@@ -4,6 +4,13 @@ $_SESSION['page']='inventories';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 
+$mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['insert'])
+    || isset($_POST['update']) || isset($_POST['delete']);
+if($mutating && !requirePermission('perm_editInventories')) {
+    http_response_code(403);
+    die('Keine Berechtigung.');
+}
+
 if(isset($_POST['newLoan'])) {
     $n = new InventoriesLoan;
     $n->fill_from_array($_POST);

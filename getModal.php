@@ -83,13 +83,18 @@ case 'user':
 
 case 'inventar':
 case 'inventory': // alias
-    // Any logged-in user may open (e.g. myinventories); edit UI gated by $editable
+    // View: perm_showInventories OR owner/active loan; edit UI gated by perm_editInventories
     try {
         $inv = new Inventories;
         $inv->load_by_id($id);
         if(!(int)$inv->Index) {
             http_response_code(404);
             echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Inventar nicht gefunden.</p></div>';
+            exit;
+        }
+        if(!requirePermission('perm_showInventories') && !$inv->userMayView((int)$_SESSION['userid'])) {
+            http_response_code(403);
+            echo '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Keine Berechtigung.</p></div>';
             exit;
         }
         $editable = requirePermission('perm_editInventories');
