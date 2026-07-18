@@ -311,8 +311,10 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                         .($seatEditable ? ' style="cursor:pointer"' : '')
                         .">\n";
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
-                    $seatsHtml .= '<circle opacity="'.$style['opacity'].'" cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$style['color']."\" />\n";
-                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" dominant-baseline="middle" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $fillColor = $style['color'];
+                    $textFill = hexContrastText($fillColor);
+                    $seatsHtml .= '<circle opacity="'.$style['opacity'].'" cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$fillColor."\" />\n";
+                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" dominant-baseline="middle" fill="'.$textFill.'" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                     $seatsHtml .= "</g>\n";
                 }
                 else {
@@ -321,13 +323,15 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                         $titleParts[] = $instrLabel;
                     }
                     $titleText = htmlspecialchars(implode("\n", $titleParts), ENT_QUOTES, 'UTF-8');
+                    $fillColor = isset($register['Color']) ? (string)$register['Color'] : '#cccccc';
+                    $textFill = hexContrastText($fillColor);
                     $seatsHtml .= '<g class="orchestra-seat"'
                         .' data-name="'.htmlspecialchars((string)$user['name'], ENT_QUOTES, 'UTF-8').'"'
                         .($instrLabel !== '' ? ' data-instrument="'.htmlspecialchars($instrLabel, ENT_QUOTES, 'UTF-8').'"' : '')
                         .'>'."\n";
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
-                    $seatsHtml .= '<circle cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$register['Color']."\" />\n";
-                    $seatsHtml .= '<text text-anchor="middle" dominant-baseline="middle" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= '<circle cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$fillColor."\" />\n";
+                    $seatsHtml .= '<text text-anchor="middle" dominant-baseline="middle" fill="'.$textFill.'" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                     $seatsHtml .= "</g>\n";
                 }
 
