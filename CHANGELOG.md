@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-522c8 (2026-07-18)
+
+- MELD-81: Changelog und Hilfe-Seite
+- Sync release 2026-07-18-47d71
+
 ## 2026-07-18-47d71 (2026-07-18)
 
 - MELD-79: Dynamischer Dirigent in Orchester-Übersicht
