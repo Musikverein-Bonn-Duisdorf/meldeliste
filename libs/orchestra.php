@@ -300,12 +300,12 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                         .">\n";
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
                     $seatsHtml .= '<circle opacity="'.$style['opacity'].'" cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$style['color']."\" />\n";
-                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" alignment-baseline="central" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" dominant-baseline="central" dy="0.05em" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                     $seatsHtml .= "</g>\n";
                 }
                 else {
                     $seatsHtml .= '<circle cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$register['Color']."\" />\n";
-                    $seatsHtml .= '<text text-anchor="middle" alignment-baseline="central" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= '<text text-anchor="middle" dominant-baseline="central" dy="0.05em" fill="#000000" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                 }
 
                 $k++;
