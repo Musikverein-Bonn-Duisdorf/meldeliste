@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-c7933 (2026-07-18)
+
+- MELD-85: Instrumente/Register editierbar inkl. Farben und Positionsvorschau
+
 ## 2026-07-18-a8e61 (2026-07-18)
 
 - MELD-85: Register-Vorschau zentrieren und Reihenabstand korrigieren
