@@ -92,8 +92,8 @@ function orchestraNextWert(wert) {
 function orchestraSeatVisual(wert) {
     wert = parseInt(wert, 10) || 0;
     if(wert === 1) return {color: '#4CAF50', opacity: '1', label: 'Zusage', textColor: null};
-    // Halbtransparentes Rot, Schrift bewusst weiß und deckend
-    if(wert === 2) return {color: '#f42316', opacity: '0.5', label: 'Absage', textColor: '#FFFFFF'};
+    // Deckend, aber weich wie früher 50% #f42316 über Weiß (kein Register-Durchscheinen)
+    if(wert === 2) return {color: '#fa918a', opacity: '1', label: 'Absage', textColor: null};
     if(wert === 3) return {color: '#2196F3', opacity: '0.6', label: 'unsicher', textColor: null};
     // Deckend weiß, damit Register-Bänder nicht durchscheinen (MELD-98)
     return {color: '#ffffff', opacity: '1', label: 'nicht gemeldet', textColor: null};
