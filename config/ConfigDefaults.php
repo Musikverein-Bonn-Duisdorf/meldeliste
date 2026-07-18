@@ -234,6 +234,12 @@ function getConfigDefaults() {
             'Description' => 'Zeige einen Sitzplan des Orchesters in allen Meldungen',
         ),
         array(
+            'Parameter' => 'showOrchestraRegisterBands',
+            'Value' => '0',
+            'Type' => 'bool',
+            'Description' => 'Hinterlege Registerbereiche im Orchester-Sitzplan mit farbigen B&ouml;gen',
+        ),
+        array(
             'Parameter' => 'MessageOfTheDay',
             'Value' => '',
             'Type' => 'text',
