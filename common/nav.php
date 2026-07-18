@@ -80,6 +80,8 @@ if($u->hasInventories()) { ?>
     <input type="hidden" name="id" value="<?php echo $_SESSION['userid']; ?>" />
     <input type="hidden" name="mode" value="useredit" />
   </form>
+  <a title="Medien" alt="Medien" href="media.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-photo-film"></i></a>
+  <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-circle-question"></i></a>
   <?php if(isAdmin()) {
     $showMeldungen = requirePermission("perm_showResponse");
     $showPersonen = requirePermission("perm_showUsers") || requirePermission("perm_editPermissions");
@@ -181,8 +183,6 @@ if($u->hasInventories()) { ?>
     </div>
   </div>
   <?php } ?>
-  <a title="Medien" alt="Medien" href="media.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-photo-film"></i></a>
-  <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-circle-question"></i></a>
   <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $optionsDB['colorNav']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
 </div>
 <?php
