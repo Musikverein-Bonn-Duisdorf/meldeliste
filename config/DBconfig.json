@@ -206,6 +206,14 @@
 	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"PostDiscord": {"Type": "tinyint", "Default": 0}
     },
+    "UserVoice": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"User": {"Type": "int"},
+	"Instrument": {"Type": "int"},
+	"VoiceLabel": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"Priority": {"Type": "int", "Default": 0},
+	"Active": {"Type": "tinyint", "Default": 1}
+    },
     "User": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Vorname": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},

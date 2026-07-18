@@ -162,6 +162,7 @@ $sections[] = array(
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
 '.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – neue Person anlegen und Rechte/Instrument setzen</li>' : '').'
+'.(requirePermission('perm_editUsers') ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 '.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
 '.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix der Rechte pro User (Autosave)</li>' : '').'
 </ul>
