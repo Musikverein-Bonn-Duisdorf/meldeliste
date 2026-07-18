@@ -38,7 +38,7 @@ $nMusiker = $row['Count'];
   <div class="w3-col l3 m5 s12 w3-container list-sort" data-sort="nachname" data-type="string">Name</div>
   <div class="w3-col l3 m5 s12 w3-container list-sort" data-sort="email" data-type="string">E-Mail</div>
   <div class="w3-col l2 m6 s12 w3-container list-sort" data-sort="lastlogin" data-type="date">Letzter Login</div>
-  <div class="w3-col l2 m6 s12 w3-container">Letzte Teilnahme</div>
+  <div class="w3-col l2 m6 s12 w3-container list-sort" data-sort="lastvisit" data-type="date">Letzte Teilnahme</div>
 </div>
 <div id="Liste">
 <?php
