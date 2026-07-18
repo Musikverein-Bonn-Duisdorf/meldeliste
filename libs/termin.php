@@ -965,7 +965,7 @@ class Termin
     }
     protected function mainColor() {
         $c = $this->globalShiftColor();
-        if($c) return;
+        if($c) return $c;
         if(!$this->Shifts) {
         switch($this->Wert) {
         case 1:
