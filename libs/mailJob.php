@@ -245,7 +245,7 @@ class MailJob
      * @return array{groups:string[],registers:int[],users:int[]}
      */
     public static function parseRecipientSpec($json, $legacyRegister = 0, $legacyMemberOnly = 0) {
-        $allowed = array('musicians', 'members', 'users');
+        $allowed = self::allowedGroupIds();
         $out = array(
             'groups' => array(),
             'registers' => array(),
@@ -306,7 +306,7 @@ class MailJob
      * @param array $spec
      */
     public function setRecipientSpecArray($spec) {
-        $allowed = array('musicians', 'members', 'users');
+        $allowed = self::allowedGroupIds();
         $groups = array();
         if(isset($spec['groups']) && is_array($spec['groups'])) {
             foreach($spec['groups'] as $g) {
@@ -362,10 +362,15 @@ class MailJob
         );
     }
 
+    public static function allowedGroupIds() {
+        return array('musicians', 'members', 'nonmembers', 'users');
+    }
+
     public static function audienceLabels() {
         return array(
             'musicians' => 'alle Musiker',
             'members' => 'Alle Vereinsmitglieder',
+            'nonmembers' => 'alle Nicht-Mitglieder',
             'users' => 'alle User',
         );
     }

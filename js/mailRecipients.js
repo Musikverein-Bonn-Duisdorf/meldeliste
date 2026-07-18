@@ -7,9 +7,10 @@
   var GROUP_LABELS = {
     musicians: 'alle Musiker',
     members: 'Alle Vereinsmitglieder',
+    nonmembers: 'alle Nicht-Mitglieder',
     users: 'alle User'
   };
-  var GROUP_IDS = ['musicians', 'members', 'users'];
+  var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
 
   function parseCatalog(el) {
     if(!el) return {groups: [], registers: [], users: []};
@@ -202,6 +203,7 @@
         : [
             {id: 'musicians', label: GROUP_LABELS.musicians, meta: 'Gruppe'},
             {id: 'members', label: GROUP_LABELS.members, meta: 'Gruppe'},
+            {id: 'nonmembers', label: GROUP_LABELS.nonmembers, meta: 'Gruppe'},
             {id: 'users', label: GROUP_LABELS.users, meta: 'Gruppe'}
           ];
 
