@@ -768,6 +768,27 @@ class Inventories
         }
     }
 
+    /**
+     * Whether $userId may view this inventory without perm_showInventories
+     * (owner or active loan recipient).
+     */
+    public function userMayView($userId) {
+        $userId = (int)$userId;
+        if($userId < 1 || !(int)$this->Index) {
+            return false;
+        }
+        if((int)$this->Owner === $userId) {
+            return true;
+        }
+        $loanId = $this->getActiveLoan();
+        if(!$loanId) {
+            return false;
+        }
+        $loan = new InventoriesLoan;
+        $loan->load_by_id($loanId);
+        return (int)$loan->User === $userId;
+    }
+
     public function getActiveLoanName() {
         $loan = $this->getActiveLoan();
         if($loan) {
