@@ -2,6 +2,24 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-96c65 (2026-07-18)
+
+- MELD-61: remove Discord checkbox hint on termin form
+- MELD-61: Discord for termines only if Alle User or PostDiscord checkbox
+- MELD-61: unify role group labels (Alle … capitalization)
+- MELD-61: recover VisibilitySpec migration when published already dropped
+- MELD-61: profile membership, logging, modal chips, drop legacy columns
+- MELD-61: remove sichtbar-für explanatory UI strings
+- MELD-61: empty visibility means hidden (showHidden only)
+- MELD-61: drop sichtbar checkbox; always publish, chips only
+- MELD-61: save groups before HTML output so redirect works
+- MELD-61: rename Empfängergruppen UI to Gruppen
+- MELD-61: default termin visibility to Alle User
+- MELD-61: load AudienceSpec before mail helpers
+- MELD-61: named recipient groups and termin visibility chips
+- MELD-61: Visibility-Migration, Labels, Discord-Checkbox
+- MELD-61: Gruppen und Termin-Sichtbarkeit
+
 ## 2026-07-18-6f040 (2026-07-18)
 
 - MELD-98: paint unanswered orchestra seats opaque white
