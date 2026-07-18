@@ -2,6 +2,21 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-fa3a4 (2026-07-18)
+
+- MELD-60: Empfänger-Chips automatisch im Entwurf speichern
+- MELD-60: Erklärtext bei Empfänger-Chips entfernen
+- MELD-60: Versand nur an Mailverteiler mit E-Mail-Adresse
+- MELD-60: Styles für Empfängeranzahl
+- MELD-60: Empfängeranzahl dynamisch zur Chip-Auswahl anzeigen
+- MELD-60: Alle Musiker bei neuen/leeren Entwürfen vorauswählen
+- MELD-60: Gruppe „alle Nicht-Mitglieder“ ergänzen
+- MELD-60: Gruppen wie Register/Personen als Chips wählbar
+- MELD-60: Empfänger nach User und E-Mail deduplizieren
+- MELD-60: Empfänger nur noch Chip-Modell mit dynamischen Gruppen
+- MELD-60: POC dynamischer Mail-Verteiler mit Register-/User-Chips
+- MELD-60: dynamischer Email-Verteiler
+
 ## 2026-07-18-bd064 (2026-07-18)
 
 - fix: Absage wieder halbtransparent, Schrift weiß und deckend
