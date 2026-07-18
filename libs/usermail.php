@@ -123,6 +123,7 @@ class Usermail {
         $this->memberonly = (bool)$job->MemberOnly;
         $this->register = (int)$job->Register;
         $this->recipientSpec = $job->getRecipientSpecArray();
+        $this->memberonly = ($this->recipientSpec['audience'] === 'members');
         $this->termin = (int)$job->Termin;
         $this->User = 0;
         $this->subject = (string)$job->Subject;
@@ -650,65 +651,69 @@ class Usermail {
 
         $spec = is_array($this->recipientSpec)
             ? $this->recipientSpec
-            : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register);
+            : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register, $this->memberonly ? 1 : 0);
 
         $byId = array();
-        $memberSql = $this->memberonly ? ' AND `Mitglied` = 1' : '';
-        $allRegisters = !empty($spec['allRegisters']);
+        $audience = isset($spec['audience']) ? (string)$spec['audience'] : 'musicians';
+        if(!in_array($audience, array('musicians', 'members', 'users'), true)) {
+            $audience = 'musicians';
+        }
         $registerIds = isset($spec['registers']) ? $spec['registers'] : array();
         $userIds = isset($spec['users']) ? $spec['users'] : array();
 
-        if($allRegisters) {
-            $sql = sprintf(
-                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1%s;",
-                $GLOBALS['dbprefix'],
-                $memberSql
-            );
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            if($dbr) {
-                while($row = mysqli_fetch_array($dbr)) {
-                    $byId[(int)$row['Index']] = $row;
-                }
-            }
+        $where = array('`Deleted` != 1', "`Email` != ''");
+        if($audience === 'members') {
+            $where[] = '`Mitglied` = 1';
+            $where[] = '`getMail` = 1';
         }
-        elseif(count($registerIds) > 0) {
-            $ids = array();
-            foreach($registerIds as $rid) {
-                $rid = (int)$rid;
-                if($rid > 0) $ids[] = $rid;
-            }
-            if(count($ids)) {
-                $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1%s AND `Register` IN (%s);",
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $GLOBALS['dbprefix'],
-                    $memberSql,
-                    implode(',', $ids)
-                );
-                $dbr = mysqli_query($GLOBALS['conn'], $sql);
-                sqlerror();
-                if($dbr) {
-                    while($row = mysqli_fetch_array($dbr)) {
-                        $byId[(int)$row['Index']] = $row;
-                    }
-                }
+        elseif($audience === 'musicians') {
+            $where[] = '`getMail` = 1';
+        }
+        // audience users: all with email
+
+        $ids = array();
+        foreach($registerIds as $rid) {
+            $rid = (int)$rid;
+            if($rid > 0) $ids[] = $rid;
+        }
+
+        if(count($ids) > 0) {
+            $sql = sprintf(
+                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE %s AND `Register` IN (%s);",
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                implode(' AND ', $where),
+                implode(',', $ids)
+            );
+        }
+        else {
+            $sql = sprintf(
+                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE %s;",
+                $GLOBALS['dbprefix'],
+                implode(' AND ', $where)
+            );
+        }
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $byId[(int)$row['Index']] = $row;
             }
         }
 
-        // Explizit gewählte User (Union); Email Pflicht, getMail nicht zwingend
+        // Explizit gewählte User (Union); Email Pflicht
         if(count($userIds) > 0) {
-            $ids = array();
+            $uids = array();
             foreach($userIds as $uid) {
                 $uid = (int)$uid;
-                if($uid > 0) $ids[] = $uid;
+                if($uid > 0) $uids[] = $uid;
             }
-            if(count($ids)) {
+            if(count($uids)) {
                 $sql = sprintf(
                     "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s) AND `Deleted` != 1 AND `Email` != '';",
                     $GLOBALS['dbprefix'],
-                    implode(',', $ids)
+                    implode(',', $uids)
                 );
                 $dbr = mysqli_query($GLOBALS['conn'], $sql);
                 sqlerror();
