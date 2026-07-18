@@ -465,3 +465,129 @@
     max-width: 100%;
   }
 }
+
+/* Help / Info page */
+.help-layout {
+  align-items: flex-start;
+}
+
+.help-col-guide,
+.help-col-changelog {
+  box-sizing: border-box;
+}
+
+.help-toc {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.help-toc-list {
+  margin: 0.25rem 0 0.5rem 1.25rem;
+  padding: 0;
+}
+
+.help-toc-list a {
+  text-decoration: none;
+}
+
+.help-toc-list a:hover {
+  text-decoration: underline;
+}
+
+.help-section h3 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding-bottom: 0.25rem;
+  scroll-margin-top: 1rem;
+}
+
+.help-list {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+  padding: 0;
+}
+
+.help-legend {
+  margin: 0.5rem 0 1rem 0;
+  border-collapse: separate;
+  border-spacing: 0 0.25rem;
+}
+
+.help-legend-swatch {
+  width: 100px;
+}
+
+.help-legend-swatch-wide {
+  width: 200px;
+  padding: 0.35rem 0.5rem;
+}
+
+.help-changelog-wrap {
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+}
+
+.help-changelog-table {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.help-changelog-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #009688;
+  color: #fff;
+  font-weight: 600;
+}
+
+.help-changelog-version {
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.help-changelog-date {
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.help-changelog-notes {
+  vertical-align: top;
+}
+
+.help-changelog-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.help-changelog-list li {
+  margin: 0.15rem 0;
+}
+
+.help-changelog-table tbody tr.help-changelog-current {
+  background: rgba(0, 150, 136, 0.18) !important;
+  box-shadow: inset 3px 0 0 #009688;
+}
+
+.help-changelog-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #009688;
+  border-radius: 0.2rem;
+  vertical-align: middle;
+}
+
+@media (max-width: 992px) {
+  .help-col-changelog {
+    margin-top: 1rem;
+  }
+
+  .help-changelog-wrap {
+    max-height: none;
+  }
+}
