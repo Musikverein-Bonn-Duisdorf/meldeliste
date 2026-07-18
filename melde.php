@@ -39,6 +39,52 @@ case "save":
     $t->load_by_id($_GET['termin']);
     echo $t->printBasicTableLine();
     break;
+case "reload":
+    if(!isset($_SESSION['userid'])) {
+        http_response_code(403);
+        die('forbidden');
+    }
+    $targetUser = isset($_GET['user']) ? (int)$_GET['user'] : 0;
+    $sessionUser = (int)$_SESSION['userid'];
+    $proxyUser = (isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) ? (int)$_SESSION['proxy'] : 0;
+    if($targetUser < 1) {
+        http_response_code(400);
+        die('invalid user');
+    }
+    if($targetUser !== $sessionUser && $targetUser !== $proxyUser && !requirePermission('perm_editResponse')) {
+        http_response_code(403);
+        die('forbidden');
+    }
+    if(!isset($_GET['termin']) || (int)$_GET['termin'] < 1) {
+        http_response_code(400);
+        die('invalid termin');
+    }
+    $t = new Termin;
+    $t->load_by_id($_GET['termin']);
+    if(!(int)$t->Index) {
+        http_response_code(404);
+        die('not found');
+    }
+    echo $t->printBasicTableLine();
+    break;
+case "responseLine":
+    if(!isset($_SESSION['userid'])) {
+        http_response_code(403);
+        die('forbidden');
+    }
+    if(!isset($_GET['termin']) || (int)$_GET['termin'] < 1) {
+        http_response_code(400);
+        die('invalid termin');
+    }
+    $t = new Termin;
+    $t->load_by_id($_GET['termin']);
+    if(!(int)$t->Index) {
+        http_response_code(404);
+        die('not found');
+    }
+    $filter = isset($_GET['register']) ? (int)$_GET['register'] : 0;
+    echo $t->getResponseLine($filter);
+    break;
 case "instrument":
     $m = new Meldung;
     $m->load_by_user_event($_GET['user'], $_GET['termin']);

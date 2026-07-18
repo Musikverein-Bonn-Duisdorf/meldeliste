@@ -771,12 +771,14 @@
 /* × (w3-display-topright) darf die Modal-Überschrift nicht überdecken */
 #ajaxModalContent > header,
 #ajaxModalContent header.w3-container,
+#ajaxModalContent .termin-response-modal > header,
 .w3-modal-content > header {
   padding-right: 3rem;
 }
 
 #ajaxModalContent > header h2,
 #ajaxModalContent header.w3-container h2,
+#ajaxModalContent .termin-response-modal > header h2,
 .w3-modal-content > header h2 {
   margin-top: 0;
   margin-bottom: 0;

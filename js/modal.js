@@ -128,6 +128,119 @@ function applyOrchestraSeatWert(seat, wert) {
     }
 }
 
+function getPageCronId() {
+    var liste = document.getElementById('Liste');
+    if(liste && liste.getAttribute('data-cron-id')) {
+        return liste.getAttribute('data-cron-id');
+    }
+    var meta = document.querySelector('meta[name="cron-id"]');
+    if(meta && meta.getAttribute('content')) {
+        return meta.getAttribute('content');
+    }
+    if(typeof window.cronID !== 'undefined' && window.cronID) {
+        return window.cronID;
+    }
+    var svg = document.querySelector('.orchestra-svg[data-cron-id]');
+    if(svg && svg.getAttribute('data-cron-id')) {
+        return svg.getAttribute('data-cron-id');
+    }
+    var withOnclick = document.querySelector('[onclick*="melde("], [onclick*="track("]');
+    if(withOnclick) {
+        var raw = withOnclick.getAttribute('onclick') || '';
+        var m = /(?:melde|track)\('([^']+)'/.exec(raw);
+        if(m) return m[1];
+    }
+    return null;
+}
+
+function replaceElementWithHtml(el, html) {
+    if(!el || !el.parentNode || !html) return null;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = html;
+    var replacement = wrap.firstElementChild;
+    if(!replacement) return null;
+    el.parentNode.replaceChild(replacement, el);
+    return replacement;
+}
+
+var mainPageTerminRefreshTimer = null;
+var mainPageTerminRefreshSeq = 0;
+
+function scheduleRefreshMainPageTerminEntries(terminId, cronID) {
+    terminId = parseInt(terminId, 10) || 0;
+    if(!terminId) return;
+    if(mainPageTerminRefreshTimer) {
+        clearTimeout(mainPageTerminRefreshTimer);
+    }
+    mainPageTerminRefreshTimer = setTimeout(function() {
+        mainPageTerminRefreshTimer = null;
+        refreshMainPageTerminEntries(terminId, cronID);
+    }, 200);
+}
+
+function refreshMainPageTerminEntries(terminId, cronID) {
+    terminId = parseInt(terminId, 10) || 0;
+    if(!terminId) return;
+    cronID = cronID || getPageCronId();
+    if(!cronID) return;
+
+    var seq = ++mainPageTerminRefreshSeq;
+
+    function getXhr() {
+        if(window.XMLHttpRequest) return new XMLHttpRequest();
+        return new ActiveXObject('Microsoft.XMLHTTP');
+    }
+
+    // Rückmeldungs-Karten (meldungen.php / mein-register.php)
+    var responseEl = document.getElementById('responseLine' + terminId);
+    if(responseEl) {
+        (function(el) {
+            var register = el.getAttribute('data-register') || '0';
+            var xhr = getXhr();
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState !== 4) return;
+                if(seq !== mainPageTerminRefreshSeq) return;
+                if(xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return;
+                replaceElementWithHtml(el, xhr.responseText);
+            };
+            xhr.open(
+                'GET',
+                'melde.php?cmd=responseLine&id=' + encodeURIComponent(cronID)
+                    + '&termin=' + encodeURIComponent(terminId)
+                    + '&register=' + encodeURIComponent(register),
+                true
+            );
+            xhr.send();
+        })(responseEl);
+    }
+
+    // Persönliche Melde-Karten (index.php / termine-archiv)
+    var nodes = document.querySelectorAll('[id^="entry"]');
+    for(var i = 0; i < nodes.length; i++) {
+        (function(el) {
+            var m = /^entry(\d+)_user(\d+)$/.exec(el.id);
+            if(!m) return;
+            if(parseInt(m[1], 10) !== terminId) return;
+            var userId = m[2];
+            var xhr = getXhr();
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState !== 4) return;
+                if(seq !== mainPageTerminRefreshSeq) return;
+                if(xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return;
+                replaceElementWithHtml(el, xhr.responseText);
+            };
+            xhr.open(
+                'GET',
+                'melde.php?cmd=reload&id=' + encodeURIComponent(cronID)
+                    + '&user=' + encodeURIComponent(userId)
+                    + '&termin=' + encodeURIComponent(terminId),
+                true
+            );
+            xhr.send();
+        })(nodes[i]);
+    }
+}
+
 function invalidateTerminResponseModalCache(terminId) {
     var prefix = 'terminResponse:' + terminId;
     Object.keys(modalCache).forEach(function(key) {
@@ -135,6 +248,99 @@ function invalidateTerminResponseModalCache(terminId) {
             delete modalCache[key];
         }
     });
+}
+
+function getOpenTerminResponseContext() {
+    var host = document.getElementById('ajaxModalHost');
+    var content = document.getElementById('ajaxModalContent');
+    if(!host || !content || host.style.display === 'none') return null;
+    var root = content.querySelector('.termin-response-modal');
+    if(!root) return null;
+    var terminId = parseInt(root.getAttribute('data-termin-id'), 10) || 0;
+    if(!terminId) return null;
+    var register = parseInt(root.getAttribute('data-register'), 10) || 0;
+    var activeCb = content.querySelector('.orchestra-panel-toggle input[type="checkbox"]');
+    return {
+        terminId: terminId,
+        register: register,
+        activeOnly: !!(activeCb && activeCb.checked)
+    };
+}
+
+var terminResponseRefreshTimer = null;
+var terminResponseRefreshSeq = 0;
+var terminResponseRefreshXhr = null;
+
+function scheduleRefreshOpenTerminResponseModal(terminId) {
+    terminId = parseInt(terminId, 10) || 0;
+    if(!terminId) return;
+    invalidateTerminResponseModalCache(terminId);
+    if(terminResponseRefreshTimer) {
+        clearTimeout(terminResponseRefreshTimer);
+    }
+    terminResponseRefreshTimer = setTimeout(function() {
+        terminResponseRefreshTimer = null;
+        refreshOpenTerminResponseModal(terminId);
+    }, 280);
+}
+
+function refreshOpenTerminResponseModal(terminId) {
+    terminId = parseInt(terminId, 10) || 0;
+    var ctx = getOpenTerminResponseContext();
+    if(!ctx) return;
+    if(terminId && ctx.terminId !== terminId) return;
+
+    var host = document.getElementById('ajaxModalHost');
+    var content = document.getElementById('ajaxModalContent');
+    if(!host || !content) return;
+
+    var scrollTop = host.scrollTop || 0;
+    var activeOnly = ctx.activeOnly;
+    var register = ctx.register;
+    var key = 'terminResponse:' + ctx.terminId;
+    if(register) key += ':' + register;
+
+    if(terminResponseRefreshXhr && terminResponseRefreshXhr.abort) {
+        try { terminResponseRefreshXhr.abort(); } catch(e) {}
+    }
+    var seq = ++terminResponseRefreshSeq;
+    if(typeof closeOrchestraSeatSheet === 'function') {
+        closeOrchestraSeatSheet();
+    }
+
+    var xhr;
+    if(window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    }
+    else {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    terminResponseRefreshXhr = xhr;
+    xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4) return;
+        if(seq !== terminResponseRefreshSeq) return;
+        terminResponseRefreshXhr = null;
+        if(xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return;
+
+        // Modal inzwischen geschlossen oder anderer Termin?
+        var still = getOpenTerminResponseContext();
+        if(!still || still.terminId !== ctx.terminId) return;
+
+        modalCache[key] = xhr.responseText;
+        content.innerHTML = xhr.responseText;
+        if(activeOnly) {
+            var cb = content.querySelector('.orchestra-panel-toggle input[type="checkbox"]');
+            if(cb) {
+                cb.checked = true;
+                toggleActiveOrchestra(cb);
+            }
+        }
+        host.scrollTop = scrollTop;
+    };
+    var url = 'getModal.php?type=terminResponse&id=' + encodeURIComponent(ctx.terminId);
+    if(register) url += '&register=' + encodeURIComponent(register);
+    xhr.open('GET', url, true);
+    xhr.send();
 }
 
 function syncOrchestraSeatsForUser(terminId, userId, wert) {
@@ -200,17 +406,15 @@ function saveOrchestraSeatWert(seat, next) {
         seat.removeAttribute('data-busy');
         if(xhr.status >= 200 && xhr.status < 300) {
             syncOrchestraSeatsForUser(termin, user, next);
-            invalidateTerminResponseModalCache(termin);
-            refreshOrchestraSeatSheetIfOpen(seat);
-            var oldel = document.getElementById('entry'+termin+'_user'+user);
-            if(oldel && xhr.responseText) {
-                var wrap = document.createElement('div');
-                wrap.innerHTML = xhr.responseText;
-                var replacement = wrap.firstElementChild || wrap.firstChild;
-                if(replacement && oldel.parentNode) {
-                    oldel.parentNode.replaceChild(replacement, oldel);
-                }
+            var openCtx = getOpenTerminResponseContext();
+            if(openCtx && openCtx.terminId === termin) {
+                scheduleRefreshOpenTerminResponseModal(termin);
             }
+            else {
+                invalidateTerminResponseModalCache(termin);
+                refreshOrchestraSeatSheetIfOpen(seat);
+            }
+            scheduleRefreshMainPageTerminEntries(termin, cronID);
         }
         else {
             applyOrchestraSeatWert(seat, wert);

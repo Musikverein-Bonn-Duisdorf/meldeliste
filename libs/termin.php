@@ -2125,7 +2125,7 @@ ORDER BY `Nachname`, `Vorname`;",
         }
 
         $modalOpen = "openModal('terminResponse', ".$this->Index.((int)$filterregister ? ", ".(int)$filterregister : "").")";
-        $str = "<div class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
+        $str = "<div id=\"responseLine".$this->Index."\" data-termin=\"".$this->Index."\" data-register=\"".(int)$filterregister."\" class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
         $str=$str."<div onclick=\"".$modalOpen."\" class=\"w3-container w3-margin-bottom\">\n";
 
         $aushilfen=array();
@@ -2498,19 +2498,6 @@ ORDER BY `Nachname`, `Vorname`;",
             $orchestraActive = printOrchestra($this->Index, 1, true);
         }
 
-        $missingUsers = array();
-        $canEditResponse = requirePermission("perm_editResponse");
-        if($canEditResponse) {
-            foreach($this->getMissingUsers() as &$missing) {
-                $u = new User;
-                $u->load_by_id($missing);
-                $missingUsers[] = array(
-                    'id' => $u->Index,
-                    'name' => $u->getName(),
-                );
-            }
-        }
-
         $titleParts = array($this->Name);
         if($this->Datum) {
             $when = germanDate($this->Datum, 1);
@@ -2525,6 +2512,8 @@ ORDER BY `Nachname`, `Vorname`;",
         $terminTitle = implode(' — ', array_filter($titleParts));
 
         return render('termin/response_modal', array(
+            'terminId' => (int)$this->Index,
+            'filterRegister' => (int)$filterregister,
             'terminName' => $terminTitle,
             'showOrchestra' => $showOrchestra,
             'orchestraFull' => $orchestraFull,
@@ -2535,8 +2524,6 @@ ORDER BY `Nachname`, `Vorname`;",
             'whoYesHtml' => $this->renderResponseEntries($lists['whoYes'], $colsize),
             'whoMaybeHtml' => $this->renderResponseEntries($lists['whoMaybe'], $colsize),
             'whoNoHtml' => $this->renderResponseEntries($lists['whoNo'], $colsize),
-            'canEditResponse' => $canEditResponse,
-            'missingUsers' => $missingUsers,
         ));
     }
 
