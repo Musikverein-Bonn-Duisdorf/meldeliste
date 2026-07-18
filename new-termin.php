@@ -149,14 +149,28 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
         <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo $inputBg; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />
         <div id="terminVisibilitySuggest" class="mail-recipient-suggest" hidden></div>
+<?php
+  $visSpec = $fill ? $n->getVisibilitySpecArray() : AudienceSpec::defaultVisibilitySpec();
+?>
         <input type="hidden" name="visibilitySpec" id="terminVisibilitySpec" value="<?php
-          $visSpec = $fill ? $n->getVisibilitySpecArray() : AudienceSpec::defaultVisibilitySpec();
           echo htmlspecialchars(json_encode($visSpec), ENT_QUOTES, 'UTF-8');
         ?>" />
         <p class="w3-small w3-margin-top mail-recipient-count-line">
           <span id="terminVisibilityCount" class="mail-recipient-count" aria-live="polite">…</span>
         </p>
       </div>
+<?php if(Discord::isConfigured()) {
+    $postDiscordChecked = $fill
+      ? ((int)$n->PostDiscord > 0 || AudienceSpec::isAlleUserSpec($visSpec))
+      : true;
+?>
+      <div class="w3-margin-top termin-form-check">
+        <input type="hidden" name="PostDiscord" value="0">
+        <input class="w3-check" type="checkbox" name="PostDiscord" id="terminPostDiscord" value="1" <?php if($postDiscordChecked) echo "checked"; ?>>
+        <label for="terminPostDiscord">Auch auf Discord posten</label>
+        <span class="w3-small w3-text-gray termin-form-hint"> — bei <b>Alle User</b> automatisch; sonst nur wenn angehakt</span>
+      </div>
+<?php } ?>
     </div>
   </section>
   </div>
@@ -246,6 +260,28 @@ $terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
     defaultGroups: [],
     jobId: 0
   });
+  var discordCb = document.getElementById('terminPostDiscord');
+  if(!discordCb) return;
+  function isAlleUserSpec(spec) {
+    return spec
+      && Array.isArray(spec.groups)
+      && spec.groups.length === 1
+      && spec.groups[0] === 'users'
+      && (!spec.registers || !spec.registers.length)
+      && (!spec.users || !spec.users.length)
+      && (!spec.mailGroups || !spec.mailGroups.length);
+  }
+  function syncTerminDiscordDefault() {
+    try {
+      discordCb.checked = isAlleUserSpec(MailRecipientChips.spec);
+    } catch(e) {}
+  }
+  var origRender = MailRecipientChips.render.bind(MailRecipientChips);
+  MailRecipientChips.render = function() {
+    origRender();
+    syncTerminDiscordDefault();
+  };
+  syncTerminDiscordDefault();
 })();
 </script>
 
