@@ -220,12 +220,10 @@ $sections[] = array(
 
 $sections[] = array(
     'id' => 'kontakt',
-    'title' => 'Kontakt &amp; Version',
+    'title' => 'Kontakt',
     'body' => '
-<p>Aktuelle Version: <b>'.htmlspecialchars($GLOBALS['version']['String'], ENT_QUOTES, 'UTF-8').'</b>
-('.htmlspecialchars($GLOBALS['version']['Date'], ENT_QUOTES, 'UTF-8').')</p>
 <p><a href="mailto:'.htmlspecialchars($optionsDB['AdminEmail'], ENT_QUOTES, 'UTF-8').'">Nachricht an Admin</a></p>
-<p>Änderungen der Software findest du im Changelog rechts bzw. darunter.</p>
+<p>Die installierte Version ist im Changelog markiert (rechts bzw. darunter).</p>
 '
 );
 

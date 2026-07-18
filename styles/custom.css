@@ -563,6 +563,25 @@
   margin: 0.15rem 0;
 }
 
+.help-changelog-table tbody tr.help-changelog-current {
+  background: rgba(0, 150, 136, 0.18) !important;
+  box-shadow: inset 3px 0 0 #009688;
+}
+
+.help-changelog-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #009688;
+  border-radius: 0.2rem;
+  vertical-align: middle;
+}
+
 @media (max-width: 992px) {
   .help-col-changelog {
     margin-top: 1rem;
