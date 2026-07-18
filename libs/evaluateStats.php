@@ -4,21 +4,18 @@
  */
 
 /**
- * @return int[]
- */
-function evaluateAllowedDayOptions() {
-    return array(30, 90, 180, 365);
-}
-
-/**
+ * Clamp evaluation window to a positive day count (default 90).
+ *
  * @param int $days
  * @return int
  */
 function evaluateNormalizeDays($days) {
     $days = (int)$days;
-    $allowed = evaluateAllowedDayOptions();
-    if(!in_array($days, $allowed, true)) {
+    if($days < 1) {
         return 90;
+    }
+    if($days > 3650) {
+        return 3650;
     }
     return $days;
 }
