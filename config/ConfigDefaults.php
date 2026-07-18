@@ -570,6 +570,12 @@ function getConfigDefaults() {
             'Description' => 'Instrument-RegNumbers dem INSTR-Kreis zugeordnet',
         ),
         array(
+            'Parameter' => 'visibilitySpecFromPublishedMigrated',
+            'Value' => '0',
+            'Type' => 'bool',
+            'Description' => 'Termine.published nach VisibilitySpec (Alle User) migriert',
+        ),
+        array(
             'Parameter' => 'SchemaVersion',
             'Value' => '0',
             'Type' => 'int',
