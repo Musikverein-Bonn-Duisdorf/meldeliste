@@ -37,7 +37,8 @@
 	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"Register": {"Type": "int"},
 	"Sortierung": {"Type": "int", "Default": 1},
-	"Spielbar": {"Type": "int", "Default": 1}
+	"Spielbar": {"Type": "int", "Default": 1},
+	"Color": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "Inventories": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
