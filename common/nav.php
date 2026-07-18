@@ -165,6 +165,7 @@ if($u->hasInventories()) { ?>
           <?php if(requirePermission("perm_editConfig")) { ?>
           <a title="Konfiguration" alt="Konfiguration" href="config-menu.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('config');?>"><i class="fas fa-cogs"></i> Konfiguration</a>
           <a title="Updater" alt="Updater" href="updater.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('updater');?>"><i class="fas fa-code-branch"></i> Updater</a>
+          <a title="Backup" alt="Backup" href="backup.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('backup');?>"><i class="fas fa-database"></i> Backup</a>
           <?php } ?>
           <?php if(requirePermission("perm_showLog")) { ?>
           <a title="Statistik" alt="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('evaluate');?>"><i class="fas fa-chart-pie"></i> Statistik</a>
