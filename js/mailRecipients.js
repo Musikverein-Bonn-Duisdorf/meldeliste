@@ -72,7 +72,10 @@
       this.inputEl = opts.inputEl;
       this.suggestEl = opts.suggestEl;
       this.hiddenEl = opts.hiddenEl;
+      this.countEl = opts.countEl || null;
+      this.countUrl = opts.countUrl || 'mailRecipientCount.php';
       this.onChange = opts.onChange || function() {};
+      this._countSeq = 0;
       this.spec = parseSpec(this.hiddenEl);
       if(this.inputEl) {
         this.inputEl.addEventListener('input', this.onInput.bind(this));
@@ -82,6 +85,7 @@
       }
       this.render();
       this.syncHidden();
+      this.scheduleCountRefresh();
     },
 
     syncHidden: function() {
@@ -91,6 +95,50 @@
         registers: this.spec.registers.slice(),
         users: this.spec.users.slice()
       });
+    },
+
+    scheduleCountRefresh: function() {
+      if(!this.countEl) return;
+      var self = this;
+      if(this._countTimer) clearTimeout(this._countTimer);
+      this._countTimer = setTimeout(function() {
+        self.refreshCount();
+      }, 180);
+    },
+
+    refreshCount: function() {
+      if(!this.countEl) return;
+      var self = this;
+      var seq = ++this._countSeq;
+      this.countEl.classList.add('mail-recipient-count--loading');
+      var body = 'recipientSpec=' + encodeURIComponent(this.hiddenEl ? this.hiddenEl.value : '{}');
+      var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4) return;
+        if(seq !== self._countSeq) return;
+        self.countEl.classList.remove('mail-recipient-count--loading');
+        if(xhr.status !== 200) {
+          self.countEl.textContent = 'Empfänger: ?';
+          return;
+        }
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var n = data && typeof data.count === 'number' ? data.count : 0;
+          self.countEl.textContent = n === 1 ? '1 Empfänger' : (n + ' Empfänger');
+        } catch(e) {
+          self.countEl.textContent = 'Empfänger: ?';
+        }
+      };
+      xhr.open('POST', this.countUrl, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      xhr.send(body);
+    },
+
+    notifyChanged: function() {
+      this.render();
+      this.syncHidden();
+      this.scheduleCountRefresh();
+      this.onChange();
     },
 
     labelForGroup: function(id) {
@@ -168,9 +216,7 @@
         id = Number(id);
         this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
       }
-      this.render();
-      this.syncHidden();
-      this.onChange();
+      this.notifyChanged();
     },
 
     addChip: function(type, id) {
@@ -180,9 +226,7 @@
         if(this.spec.groups.indexOf(aud) === -1) this.spec.groups.push(aud);
         this.hideSuggest();
         if(this.inputEl) this.inputEl.value = '';
-        this.render();
-        this.syncHidden();
-        this.onChange();
+        this.notifyChanged();
         return;
       }
       id = Number(id);
@@ -195,9 +239,7 @@
       }
       this.hideSuggest();
       if(this.inputEl) this.inputEl.value = '';
-      this.render();
-      this.syncHidden();
-      this.onChange();
+      this.notifyChanged();
     },
 
     onInput: function() {

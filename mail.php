@@ -406,8 +406,27 @@ foreach($allJobs as $rowJob) {
              $t=new Termin;
              $t->load_by_id($termin);
     ?>
-             <div class="w3-mobile w3-margin-bottom w3-padding">Alle Teilnehmer von <?php echo htmlspecialchars($t->Name." (".$t->getGermanDate().")", ENT_QUOTES, 'UTF-8'); ?></div>
+             <div class="w3-mobile w3-margin-bottom w3-padding">Alle Teilnehmer von <?php echo htmlspecialchars($t->Name." (".$t->getGermanDate().")", ENT_QUOTES, 'UTF-8'); ?>
+               <span id="mailRecipientCount" class="mail-recipient-count" data-termin="<?php echo (int)$termin; ?>" aria-live="polite"></span>
+             </div>
     <input type="hidden" name="termin" value="<?php echo (int)$termin; ?>" />
+    <script>
+    (function() {
+      var el = document.getElementById('mailRecipientCount');
+      if(!el) return;
+      var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4 || xhr.status !== 200) return;
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var n = data && typeof data.count === 'number' ? data.count : 0;
+          el.textContent = n === 1 ? '1 Empfänger' : (n + ' Empfänger');
+        } catch(e) {}
+      };
+      xhr.open('GET', 'mailRecipientCount.php?termin=' + encodeURIComponent(el.getAttribute('data-termin') || '0'), true);
+      xhr.send();
+    })();
+    </script>
     <?php
          }
          else {
@@ -417,7 +436,10 @@ foreach($allJobs as $rowJob) {
       <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Register oder Person tippen…" autocomplete="off" />
       <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
       <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
-      <p class="w3-small w3-text-gray w3-margin-top">Gruppen (z. B. alle Musiker), Register und Personen als Chips wählen. Mehrfachauswahl wird vereinigt; jede Person erhält höchstens eine Mail.</p>
+      <p class="w3-small w3-margin-top mail-recipient-count-line">
+        <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
+        <span class="w3-text-gray"> — Gruppen, Register und Personen als Chips; Mehrfachauswahl wird vereinigt, höchstens eine Mail pro Person.</span>
+      </p>
     </div>
 <script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($mailRecipientCatalog, JSON_UNESCAPED_UNICODE); ?></script>
 <script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
@@ -430,6 +452,7 @@ foreach($allJobs as $rowJob) {
       inputEl: document.getElementById('mailRecipientInput'),
       suggestEl: document.getElementById('mailRecipientSuggest'),
       hiddenEl: document.getElementById('mailRecipientSpec'),
+      countEl: document.getElementById('mailRecipientCount'),
       onChange: function() {
         if(typeof window.syncDiscordDefault === 'function') window.syncDiscordDefault();
       }

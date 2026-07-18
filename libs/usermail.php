@@ -631,6 +631,32 @@ class Usermail {
     }
 
     /**
+     * Count unique recipients for a chip spec or termin (same rules as enqueue).
+     * @param array|string|null $spec
+     * @param int $termin
+     * @return int
+     */
+    public static function countFromRecipientSpec($spec = null, $termin = 0) {
+        $mail = new self;
+        $mail->quiet = true;
+        $mail->User = 0;
+        $mail->termin = (int)$termin;
+        if((int)$termin > 0) {
+            $mail->recipientSpec = null;
+        }
+        elseif(is_array($spec)) {
+            $mail->recipientSpec = MailJob::parseRecipientSpec(json_encode($spec));
+        }
+        elseif(is_string($spec) && trim($spec) !== '') {
+            $mail->recipientSpec = MailJob::parseRecipientSpec($spec);
+        }
+        else {
+            $mail->recipientSpec = MailJob::defaultRecipientSpecArray();
+        }
+        return count($mail->resolveRecipients());
+    }
+
+    /**
      * @return array list of user rows with Index, Vorname, Nachname, Email, Email2, activeLink
      */
     protected function resolveRecipients() {
