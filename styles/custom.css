@@ -285,12 +285,16 @@
 
 /* Email-Listen und -Ansicht (MELD-59 Follow-up) */
 .mail-list {
-  display: block;
+  display: grid;
+  /* Shared tracks so header Status/Aktion align with every row */
+  grid-template-columns: minmax(0, 1fr) 10.5rem 22rem;
+  column-gap: 1rem;
 }
 
 .mail-list-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) 10.5rem 22rem;
+  grid-column: 1 / -1;
   grid-template-areas:
     "primary status actions"
     "meta status actions";
@@ -320,6 +324,7 @@
   grid-area: status;
   white-space: nowrap;
   text-align: right;
+  justify-self: stretch;
 }
 
 .mail-list-actions {
@@ -329,6 +334,7 @@
   gap: 0.35rem;
   justify-content: flex-end;
   align-items: center;
+  justify-self: stretch;
 }
 
 .mail-list-actions form {
@@ -338,10 +344,28 @@
 
 .mail-list-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) 10.5rem 22rem;
+  grid-column: 1 / -1;
   gap: 0.25rem 1rem;
   padding: 0.5rem;
   font-weight: bold;
+  align-items: center;
+}
+
+.mail-list-header > div:nth-child(2),
+.mail-list-header > div:nth-child(3) {
+  text-align: right;
+}
+
+@supports (grid-template-columns: subgrid) {
+  .mail-list {
+    grid-template-columns: minmax(0, 1fr) max-content max-content;
+  }
+
+  .mail-list-header,
+  .mail-list-item {
+    grid-template-columns: subgrid;
+  }
 }
 
 .mail-body-content {
