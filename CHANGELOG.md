@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-1d665 (2026-07-18)
+
+- MELD-84: Redirect-Stub und Legacy-Meldungs-POST entfernen
+- MELD-84: Home und Termine zu einer Terminliste zusammenführen
+
 ## 2026-07-18-a5462 (2026-07-18)
 
 - MELD-82: Admin in der Nav vor Ausloggen einordnen
