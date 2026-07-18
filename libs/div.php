@@ -1,7 +1,7 @@
 <?php
 class div
 {
-    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'step' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null, 'checked' => null);
+    private $_data = array('indent' => 0, 'tag' => 'div', 'name' => null, 'class' => null, 'body' => null, 'id' => null, 'style' => null, 'onclick' => null, 'bold' => false, 'value' => null, 'type' => null, 'min' => null, 'step' => null, 'default' => null, 'emptyBody' => false, 'href' => null, 'action' => null, 'method' => null, 'placeholder' => null, 'checked' => null, 'extraAttrs' => null);
     public function __get($key) {
         switch($key) {
 	    case 'indent':
@@ -24,6 +24,7 @@ class div
         case 'method':
         case 'placeholder':
         case 'checked':
+        case 'extraAttrs':
             return $this->_data[$key];
             break;
         default:
@@ -59,6 +60,7 @@ class div
         case 'method':
         case 'placeholder':
         case 'default':
+        case 'extraAttrs':
             if($val) {
                 $this->_data[$key] = trim($val);
             }
@@ -147,6 +149,9 @@ class div
         }
         if($this->checked) {
             $str=$str." checked";
+        }
+        if($this->extraAttrs) {
+            $str=$str." ".$this->extraAttrs;
         }
         $str=$str.">\n";
         if($this->body) {

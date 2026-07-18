@@ -59,6 +59,9 @@ $sections[] = array(
     'title' => 'Zu Terminen melden',
     'body' => '
 <p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
+<ul>
+<li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung (auch im Termin-Archiv).</li>
+</ul>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
 <p><b>Tipp:</b> Auch „vielleicht“ oder „nein“ sind wertvoll – offene Einträge erschweren die Planung.</p>
@@ -73,6 +76,9 @@ $sections[] = array(
     'title' => 'Mein Register',
     'body' => '
 <p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben:</p>
+<ul>
+<li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung.</li>
+</ul>
 '.$registerLegend.'
 <p>So erkennst du schnell Lücken in der Besetzung deines Registers.</p>
 '
@@ -137,7 +143,7 @@ $sections[] = array(
     'title' => 'Admin: Meldungen',
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
-<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine.</p>
+<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung).</p>
 <p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen. Die Orchesterübersicht skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
 '.(requirePermission('perm_editResponse') ? '<p>Mit Recht <b>Rückmeldungen bearbeiten</b> kannst du im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
 '
@@ -168,7 +174,7 @@ $sections[] = array(
     'body' => '
 <p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
-<p>Im <b>Archiv: Termine</b> findest du vergangene Termine. Aushilfen können am Termin ergänzt bzw. gelöscht werden, sofern freigegeben.</p>
+<p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar). Aushilfen können am Termin ergänzt bzw. gelöscht werden, sofern freigegeben.</p>
 '
 );
 
