@@ -3,6 +3,8 @@
  * Expects #Liste and #listSentinel with data-list-type, data-cursor, data-has-more.
  * Optional data-filter-fn: name of global filter function to re-run after append.
  * Optional data-extra: query string fragment (e.g. user=123).
+ * Optional data-sort / data-dir: server-side sort for user lists (MELD-96).
+ * Exposes window.listInfiniteReload(sort, dir) to reset and reload from offset 0.
  */
 (function() {
     var loading = false;
@@ -81,6 +83,33 @@
         }
     }
 
+    function clearRows(list, sentinel) {
+        var nodes = [];
+        var i;
+        for(i = 0; i < list.children.length; i++) {
+            nodes.push(list.children[i]);
+        }
+        for(i = 0; i < nodes.length; i++) {
+            if(nodes[i] !== sentinel) {
+                list.removeChild(nodes[i]);
+            }
+        }
+    }
+
+    function buildUrl(sentinel, cursor) {
+        var type = sentinel.getAttribute('data-list-type') || '';
+        var url = 'getList.php?type=' + encodeURIComponent(type)
+            + '&cursor=' + encodeURIComponent(cursor)
+            + '&limit=50';
+        var extra = sentinel.getAttribute('data-extra');
+        if(extra) url += '&' + extra;
+        var sort = sentinel.getAttribute('data-sort');
+        var dir = sentinel.getAttribute('data-dir');
+        if(sort) url += '&sort=' + encodeURIComponent(sort);
+        if(dir) url += '&dir=' + encodeURIComponent(dir);
+        return url;
+    }
+
     function loadMore() {
         var sentinel = getSentinel();
         var list = getList();
@@ -94,12 +123,6 @@
         loading = true;
         if(observer) observer.unobserve(sentinel);
         setStatus(MSG_LOADING, true);
-
-        var url = 'getList.php?type=' + encodeURIComponent(type)
-            + '&cursor=' + encodeURIComponent(cursor)
-            + '&limit=50';
-        var extra = sentinel.getAttribute('data-extra');
-        if(extra) url += '&' + extra;
 
         var xhr;
         if(window.XMLHttpRequest) {
@@ -148,9 +171,25 @@
                 }, 100);
             }
         };
-        xhr.open('GET', url, true);
+        xhr.open('GET', buildUrl(sentinel, cursor), true);
         xhr.send();
     }
+
+    function reloadFromStart(sort, dir) {
+        var sentinel = getSentinel();
+        var list = getList();
+        if(!sentinel || !list) return;
+        if(observer) observer.unobserve(sentinel);
+        loading = false;
+        if(sort) sentinel.setAttribute('data-sort', sort);
+        if(dir) sentinel.setAttribute('data-dir', dir);
+        clearRows(list, sentinel);
+        sentinel.setAttribute('data-cursor', '0');
+        sentinel.setAttribute('data-has-more', '1');
+        loadMore();
+    }
+
+    window.listInfiniteReload = reloadFromStart;
 
     function init() {
         var sentinel = getSentinel();

@@ -336,6 +336,15 @@ class Inventories
         }
         $line->class=$GLOBALS['optionsDB']['HoverEffect'];
         $line->class="w3-mobile w3-border-bottom w3-border-black";
+        $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
+        $loanName = $this->getActiveLoanNameShort();
+        $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-typ="'.htmlspecialchars((string)$typLabel, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-description="'.htmlspecialchars((string)$row['Description'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-comment="'.htmlspecialchars((string)$row['Comment'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-purchasedate="'.htmlspecialchars((string)$row['PurchaseDate'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-purchaseprize="'.htmlspecialchars((string)$row['PurchasePrize'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-loan="'.htmlspecialchars((string)$loanName, ENT_QUOTES, 'UTF-8').'"';
         $str=$str.$line->open();
         
         $indent++;
@@ -346,7 +355,6 @@ class Inventories
         $field->body='<b>'.RegNumber::displayInventory($row['Inventory'], $row['RegNumber']).'</b>';
         $str=$str.$field->print();
 
-        $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
         $field = new div;
         $field->indent=$indent;
         $field->class="w3-center w3-border-right list-secondary";
@@ -392,7 +400,7 @@ class Inventories
         $field->indent=$indent;
         $field->class="w3-center list-secondary";
         $field->col(2,2,12);
-        $field->body=$this->getActiveLoanNameShort();
+        $field->body=$loanName;
         $str=$str.$field->print();
 
         $field = new div;
