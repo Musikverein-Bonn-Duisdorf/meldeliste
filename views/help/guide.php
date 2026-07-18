@@ -48,7 +48,7 @@ $sections[] = array(
 <li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen</li>
 <li><i class="fa-brands fa-youtube"></i> <b>Medien</b> – Links zu Aufnahmen und Medien</li>
 <li>Vereinshomepage – öffnet die Vereinsseite in einem neuen Tab</li>
-<li><i class="fas fa-info"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
+<li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
 <li><i class="fas fa-sign-out-alt"></i> <b>Ausloggen</b> – Sitzung beenden</li>
 '.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü (nur mit Admin-Zugang und entsprechenden Rechten)</li>' : '').'
 </ul>
