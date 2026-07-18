@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 $_SESSION['page'] = 'permissions';
 $_SESSION['adminpage'] = true;
 include "common/header.php";

@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 $_SESSION['page'] = 'backup';
 $_SESSION['adminpage'] = true;
 
@@ -35,7 +36,10 @@ $flash = null;
 $restoreResult = null;
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_confirm'])) {
-    if(empty($_POST['confirm_text']) || trim((string)$_POST['confirm_text']) !== 'RESTORE') {
+    if(!csrf_verify(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
+        $flash = array('type' => 'error', 'message' => 'Ungültiges Sicherheits-Token.');
+    }
+    elseif(empty($_POST['confirm_text']) || trim((string)$_POST['confirm_text']) !== 'RESTORE') {
         $flash = array('type' => 'error', 'message' => 'Bitte zur Bestätigung RESTORE eintippen.');
     }
     elseif(empty($_FILES['backup_zip']) || !is_uploaded_file($_FILES['backup_zip']['tmp_name'])) {
@@ -93,8 +97,9 @@ $schema = $manifest['schemaVersion'];
   <div class="w3-card w3-padding w3-margin-bottom">
     <h3>Backup herunterladen</h3>
     <p>ZIP mit <code>manifest.json</code> (Versionsinfo) und <code>database.sql</code> (alle Tabellen mit DB-Prefix).</p>
-    <p>Remote-Cron-Beispiel:</p>
-    <pre class="w3-code w3-border w3-padding" style="white-space:pre-wrap;">curl -fsS "https://HOST/cron.php?id=CRONID&amp;cmd=backup" -o "backup-$(date +%F).zip"</pre>
+    <p>CLI-Backup (Cron):</p>
+    <pre class="w3-code w3-border w3-padding" style="white-space:pre-wrap;">php cron.php CRONID backup &gt; backup-$(date +%F).zip</pre>
+    <p>Im Browser: Backup über die Schaltfläche unten (Benötigt Berechtigung „Konfiguration bearbeiten“).</p>
     <p><a class="w3-button w3-border <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="backup.php?download=1"><i class="fas fa-download"></i> Backup jetzt laden</a></p>
   </div>
 
@@ -102,6 +107,7 @@ $schema = $manifest['schemaVersion'];
     <h3>Restore (destruktiv)</h3>
     <p><b>Achtung:</b> Überschreibt die Datenbanktabellen mit dem Prefix. Vorher ein aktuelles Backup ziehen.</p>
     <form method="post" enctype="multipart/form-data" action="backup.php" onsubmit="return confirm('Wirklich Restore ausführen? Die aktuelle Datenbank wird überschrieben.');">
+      <?php echo csrf_field(); ?>
       <input type="hidden" name="restore_confirm" value="1">
       <label>Backup-ZIP</label>
       <input class="w3-input w3-border w3-margin-bottom" type="file" name="backup_zip" accept=".zip,application/zip" required>

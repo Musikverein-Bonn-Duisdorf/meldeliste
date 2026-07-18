@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 include 'common/include.php';
 
 header('Content-Type: text/html; charset=utf-8');

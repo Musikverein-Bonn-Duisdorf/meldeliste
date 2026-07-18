@@ -502,6 +502,49 @@ function loadPermissions($user) {
     return $p;
 }
 
+function meldeRequest($key, $default = null) {
+    if(isset($_POST[$key])) {
+        return $_POST[$key];
+    }
+    if(isset($_GET[$key])) {
+        return $_GET[$key];
+    }
+    return $default;
+}
+
+function requireEditResponseAuth($targetUser) {
+    if(!loggedIn()) {
+        http_response_code(403);
+        die('forbidden');
+    }
+    $targetUser = (int)$targetUser;
+    $sessionUser = (int)$_SESSION['userid'];
+    $proxyUser = (isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) ? (int)$_SESSION['proxy'] : 0;
+    if($targetUser !== $sessionUser && $targetUser !== $proxyUser && !requirePermission('perm_editResponse')) {
+        http_response_code(403);
+        die('forbidden');
+    }
+}
+
+function csrf_token() {
+    if(empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_verify($token) {
+    if(!isset($_SESSION['csrf_token']) || !is_string($token)) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function csrf_field() {
+    return '<input type="hidden" name="csrf_token" value="'
+        .htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8').'">';
+}
+
 function loggedIn() {
     if(!isset($_SESSION['userid'])) {
 	session_destroy();
@@ -790,9 +833,15 @@ function UserOptionAll($val) {
 
 function validateLink($hash) {
     $_SESSION['userid'] = 0;
+    $hash = trim((string)$hash);
+    if($hash === '' || !preg_match('/^[a-zA-Z0-9]+$/', $hash)) {
+        $logentry = new Log;
+        $logentry->error("Login not successful. Invalid hash for login via link.");
+        return false;
+    }
     $sql = sprintf("SELECT * FROM `%sUser` WHERE `activeLink` = '%s';",
 		   $GLOBALS['dbprefix'],
-		   $hash
+		   mysqli_real_escape_string($GLOBALS['conn'], $hash)
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
