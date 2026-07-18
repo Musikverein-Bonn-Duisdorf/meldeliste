@@ -86,7 +86,12 @@ class Termin
         if($this->Uhrzeit != $old->Uhrzeit) $str.=", Uhrzeit: ".$old->Uhrzeit." &rArr; <b>".$this->Uhrzeit."</b>";
         if($this->Uhrzeit2 != $old->Uhrzeit2) $str.=", Uhrzeit2: ".$old->Uhrzeit2." &rArr; <b>".$this->Uhrzeit2."</b>";
         if($this->Capacity != $old->Capacity) $str.=", Capacity: ".$old->Capacity." &rArr; <b>".$this->Capacity."</b>";
-        if($this->Vehicle != $old->Vehicle) $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
+        if(!empty($GLOBALS['optionsDB']['showTravelTime']) && $this->Abfahrt != $old->Abfahrt) {
+            $str.=", Abfahrt: ".$old->Abfahrt." &rArr; <b>".$this->Abfahrt."</b>";
+        }
+        if(!empty($GLOBALS['optionsDB']['showVehicle']) && $this->Vehicle != $old->Vehicle) {
+            $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
+        }
         if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
         if($this->Auftritt != $old->Auftritt) $str.=", Auftritt: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
         if($this->Ort1 != $old->Ort1) $str.=", Ort1: ".$old->Ort1." &rArr; <b>".$this->Ort1."</b>";
@@ -107,7 +112,7 @@ class Termin
     }
     
     public function getVars() {
-        if(!$this->vName) {
+        if(!empty($GLOBALS['optionsDB']['showVehicle']) && !$this->vName) {
             $sql = sprintf('SELECT * FROM `%svehicle` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             $this->Vehicle
@@ -117,13 +122,19 @@ class Termin
             $row = mysqli_fetch_array($dbr);
             $this->vName = $row['Name'];
         }
-        return sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>, Abfahrt: <b>%s</b>, mit: <b>%s</b>, max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>, FreeText: <b>%s</b>",
+        $str = sprintf("Termin-ID: <b>%d</b>, Datum: <b>%s</b>, Beginn: <b>%s</b>, Ende: <b>%s</b>",
                        $this->Index,
                        $this->getDate(),
                        $this->Uhrzeit,
-                       $this->Uhrzeit2,
-                       $this->Abfahrt,
-                       $this->vName,
+                       $this->Uhrzeit2
+        );
+        if(!empty($GLOBALS['optionsDB']['showTravelTime'])) {
+            $str .= sprintf(", Abfahrt: <b>%s</b>", $this->Abfahrt);
+        }
+        if(!empty($GLOBALS['optionsDB']['showVehicle'])) {
+            $str .= sprintf(", mit: <b>%s</b>", $this->vName);
+        }
+        $str .= sprintf(", max. Teilnehmer: <b>%d</b>, Name: <b>%s</b>, Auftritt: <b>%s</b>, Ort1: <b>%s</b>, Ort2: <b>%s</b>, Ort3: <b>%s</b>, Ort4: <b>%s</b>, Beschreibung: <b>%s</b>, Schichten: <b>%s</b>, sichtbar: <b>%s</b>, offen: <b>%s</b>, FreeText: <b>%s</b>",
                        $this->Capacity,
                        $this->Name,
                        bool2string($this->Auftritt),
@@ -137,6 +148,7 @@ class Termin
                        bool2string($this->open),
                        $this->defaultFreeText
         );
+        return $str;
     }
     public function save() {
         if(!$this->is_valid()) return false;

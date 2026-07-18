@@ -16,10 +16,12 @@ if(empty($_SESSION['admin'])) {
 }
 
 $pullOutput = null;
+$checkOutput = null;
 $dbReportHtml = '';
 $dbError = '';
 $dbModeLabel = '';
 $schemaInfo = '';
+$branchName = getBranchName();
 
 $schemaMgr = new DatabaseManager();
 $schemaInfo = sprintf(
@@ -29,20 +31,25 @@ $schemaInfo = sprintf(
     $schemaMgr->isSchemaOutdated() ? ' — <span class="w3-text-orange"><b>Update nötig</b></span>' : ' — aktuell'
 );
 
-if(isset($_POST['pull'])) {
-    $vCurrent = trim((string)shell_exec('git rev-parse --short HEAD 2>&1'));
-    $pullLines = explode("\n", (string)shell_exec('git pull origin '.getBranchName().' 2>&1'));
-    $vNew = trim((string)shell_exec('git rev-parse --short HEAD 2>&1'));
+$gitAction = isset($_POST['git_action']) ? (string)$_POST['git_action'] : '';
+if($gitAction === 'check') {
+    $check = gitCheckForUpdates($branchName);
+    $_SESSION['updater_check_output'] = $check;
+    redirectAfterPost('updater.php');
+}
+
+if($gitAction === 'update' || isset($_POST['pull'])) {
+    $pull = gitPullOrigin($branchName);
     $pullOutput = array(
-        'lines' => $pullLines,
-        'vCurrent' => $vCurrent,
-        'vNew' => $vNew,
-        'updated' => ($vCurrent !== $vNew),
+        'lines' => $pull['lines'],
+        'vCurrent' => $pull['vCurrent'],
+        'vNew' => $pull['vNew'],
+        'updated' => $pull['updated'],
         'dbRepaired' => false,
     );
     if($pullOutput['updated']) {
         $logentry = new Log;
-        $logentry->info('<b>Software Update</b> from version <b>'.$vCurrent.'</b> to <b>'.$vNew.'</b>');
+        $logentry->info('<b>Software Update</b> from version <b>'.$pullOutput['vCurrent'].'</b> to <b>'.$pullOutput['vNew'].'</b>');
     }
 
     // After pull: resolve DB schema if outdated (re-read version file from disk)
@@ -66,6 +73,8 @@ if(isset($_POST['pull'])) {
         }
         redirectAfterPost('updater.php');
     }
+    $_SESSION['updater_pull_output'] = $pullOutput;
+    redirectAfterPost('updater.php');
 }
 
 $dbAction = isset($_POST['db_action']) ? (string)$_POST['db_action'] : '';
@@ -94,12 +103,16 @@ if(isset($_SESSION['updater_pull_output']) && is_array($_SESSION['updater_pull_o
     $pullOutput = $_SESSION['updater_pull_output'];
     unset($_SESSION['updater_pull_output']);
 }
+if(isset($_SESSION['updater_check_output']) && is_array($_SESSION['updater_check_output'])) {
+    $checkOutput = $_SESSION['updater_check_output'];
+    unset($_SESSION['updater_check_output']);
+}
 
 if(isset($_SESSION['db_integrity_report_html'])) {
     $dbReportHtml = (string)$_SESSION['db_integrity_report_html'];
     $dbMode = isset($_SESSION['db_integrity_mode']) ? (string)$_SESSION['db_integrity_mode'] : '';
     $dbModeLabel = ($dbMode === 'repair')
-        ? ($afterPull ? 'Reparatur nach Pull' : 'Reparatur')
+        ? ($afterPull ? 'Reparatur nach Update' : 'Reparatur')
         : 'Prüfung';
     unset($_SESSION['db_integrity_report_html'], $_SESSION['db_integrity_mode']);
 }
@@ -133,62 +146,29 @@ include 'common/header.php';
     <i class="fas fa-exclamation-triangle"></i>
   </div>
 </div>
-<div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
-  <?php echo 'Aktueller Branch: <b>'.htmlspecialchars(getBranchName(), ENT_QUOTES, 'UTF-8').'</b>'; ?>
-</div>
-<div class="w3-padding w3-light-grey"><i class="fas fa-database"></i>
-  <?php echo $schemaInfo; ?>
-</div>
-<?php if($pullOutput !== null) { ?>
-<div class="w3-card-4 w3-margin">
-  <div class="w3-container w3-teal"><h3>git pull</h3></div>
-  <div class="w3-padding w3-code">
-  <?php
-    foreach($pullOutput['lines'] as $line) {
-        echo '<div>'.htmlspecialchars($line, ENT_QUOTES, 'UTF-8').'</div>';
-    }
-  ?>
-  </div>
-<?php if($pullOutput['updated']) { ?>
-  <div class="w3-container w3-yellow w3-padding">updated <b><?php echo htmlspecialchars($pullOutput['vCurrent'], ENT_QUOTES, 'UTF-8'); ?></b> -&gt; <b><?php echo htmlspecialchars($pullOutput['vNew'], ENT_QUOTES, 'UTF-8'); ?></b></div>
-<?php } ?>
-</div>
-<?php } ?>
 
 <div class="w3-card-4 w3-margin">
-  <div class="w3-container w3-teal"><h3>git status</h3></div>
-  <div class="w3-padding w3-code">
-    <?php
-      $status = explode("\n", (string)shell_exec('git remote -v update origin 2>&1'));
-      foreach($status as $line) {
-          $found = strpos($line, 'origin/'.getBranchName());
-          if($found !== false) {
-              echo '<div class="w3-yellow"><b>'.htmlspecialchars($line, ENT_QUOTES, 'UTF-8').'</b></div>';
-          }
-          else {
-              echo '<div>'.htmlspecialchars($line, ENT_QUOTES, 'UTF-8').'</div>';
-          }
-      }
-    ?>
+  <div class="w3-container w3-teal"><h3>Software &amp; Datenbank</h3></div>
+  <div class="w3-padding w3-yellow"><i class="fas fa-code-branch"></i>
+    <?php echo 'Aktueller Branch: <b>'.htmlspecialchars($branchName, ENT_QUOTES, 'UTF-8').'</b>'; ?>
   </div>
-</div>
-
-<div class="w3-card-4 w3-margin">
-  <div class="w3-container w3-teal"><h3>git pull</h3></div>
-  <div class="w3-padding">
-    <p>Nach dem Pull wird die Datenbank automatisch repariert, falls die Schema-Version veraltet ist.</p>
-  </div>
-  <form action="updater.php" method="post" class="w3-padding">
-    <button class="w3-button w3-blue" type="submit" name="pull" value="1">pull</button>
-  </form>
-</div>
-
-<div class="w3-card-4 w3-margin">
-  <div class="w3-container w3-teal"><h3>Datenbank Integrität</h3></div>
-  <div class="w3-padding">
-    <p>Prüfen meldet Abweichungen ohne Änderungen. Reparieren legt fehlende Tabellen/Spalten an und gleicht abweichende Spalten-Definitionen an. Bei Erfolg wird die Schema-Version aktualisiert.</p>
+  <div class="w3-padding w3-light-grey"><i class="fas fa-database"></i>
+    <?php echo $schemaInfo; ?>
   </div>
   <div class="w3-padding">
+    <p>„Auf Updates prüfen“ holt den Remote-Stand und zeigt, ob Commits verfügbar sind.
+      „Update durchführen“ zieht die Änderungen und repariert die Datenbank bei veraltetem Schema automatisch.
+      Datenbank prüfen/reparieren kann unabhängig davon ausgeführt werden.</p>
+  </div>
+  <div class="w3-padding">
+    <form action="updater.php" method="post" style="display:inline;">
+      <input type="hidden" name="git_action" value="check">
+      <button class="w3-button w3-blue" type="submit">Auf Updates prüfen</button>
+    </form>
+    <form action="updater.php" method="post" style="display:inline;">
+      <input type="hidden" name="git_action" value="update">
+      <button class="w3-button w3-green" type="submit">Update durchführen</button>
+    </form>
     <form action="updater.php" method="post" style="display:inline;">
       <input type="hidden" name="db_action" value="check">
       <button class="w3-button w3-blue" type="submit">Datenbank prüfen</button>
@@ -198,6 +178,84 @@ include 'common/header.php';
       <button class="w3-button w3-orange" type="submit">Datenbank reparieren</button>
     </form>
   </div>
+
+<?php if($checkOutput !== null) {
+    $st = isset($checkOutput['status']) && is_array($checkOutput['status']) ? $checkOutput['status'] : array();
+    $behind = isset($st['behind']) ? (int)$st['behind'] : 0;
+    $ahead = isset($st['ahead']) ? (int)$st['ahead'] : 0;
+    $localSha = isset($st['localSha']) ? (string)$st['localSha'] : '';
+    $remoteSha = isset($st['remoteSha']) ? (string)$st['remoteSha'] : '';
+    $checkError = isset($st['error']) ? $st['error'] : null;
+    $logLines = isset($st['logLines']) && is_array($st['logLines']) ? $st['logLines'] : array();
+?>
+  <div class="w3-container w3-padding">
+    <div class="w3-panel w3-pale-blue"><b>Ergebnis (Updates prüfen)</b></div>
+<?php if($checkError) { ?>
+    <div class="w3-panel w3-red"><b>Fehler:</b> <?php echo htmlspecialchars((string)$checkError, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php } else { ?>
+    <div class="w3-padding">
+      Lokal: <b><?php echo htmlspecialchars($localSha, ENT_QUOTES, 'UTF-8'); ?></b>
+      &nbsp;|&nbsp;
+      Remote: <b><?php echo htmlspecialchars($remoteSha, ENT_QUOTES, 'UTF-8'); ?></b>
+    </div>
+<?php if($behind > 0) { ?>
+    <div class="w3-panel w3-yellow"><b><?php echo (int)$behind; ?> Commit<?php echo $behind === 1 ? '' : 's'; ?> verfügbar</b>
+      <?php if($ahead > 0) { echo ' (lokal '.$ahead.' Commit'.($ahead === 1 ? '' : 's').' voraus)'; } ?>
+    </div>
+<?php if(count($logLines) > 0) { ?>
+    <div class="w3-padding w3-code">
+<?php foreach($logLines as $line) { ?>
+      <div><?php echo htmlspecialchars($line, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php } ?>
+    </div>
+<?php } ?>
+<?php } elseif($ahead > 0) { ?>
+    <div class="w3-panel w3-pale-yellow"><b>Aktuell</b> — lokal <?php echo (int)$ahead; ?> Commit<?php echo $ahead === 1 ? '' : 's'; ?> voraus</div>
+<?php } else { ?>
+    <div class="w3-panel w3-pale-green"><b>Aktuell</b> — keine Remote-Updates</div>
+<?php } ?>
+<?php } ?>
+  </div>
+<?php } ?>
+
+<?php if($pullOutput !== null) {
+    $pullLines = isset($pullOutput['lines']) && is_array($pullOutput['lines']) ? $pullOutput['lines'] : array();
+    $pullUpdated = !empty($pullOutput['updated']);
+    $alreadyUpToDate = false;
+    foreach($pullLines as $line) {
+        if(stripos($line, 'Already up to date') !== false || stripos($line, 'Bereits aktuell') !== false) {
+            $alreadyUpToDate = true;
+            break;
+        }
+    }
+?>
+  <div class="w3-container w3-padding">
+    <div class="w3-panel w3-pale-blue"><b>Ergebnis (Update)</b></div>
+<?php if($pullUpdated) { ?>
+    <div class="w3-panel w3-yellow">aktualisiert <b><?php echo htmlspecialchars($pullOutput['vCurrent'], ENT_QUOTES, 'UTF-8'); ?></b> &rarr; <b><?php echo htmlspecialchars($pullOutput['vNew'], ENT_QUOTES, 'UTF-8'); ?></b>
+      <?php if(!empty($pullOutput['dbRepaired'])) { echo ' — Datenbank repariert'; } ?>
+    </div>
+<?php } elseif($alreadyUpToDate) { ?>
+    <div class="w3-panel w3-pale-green"><b>Bereits aktuell</b></div>
+<?php } ?>
+<?php if(count($pullLines) > 0) { ?>
+    <div class="w3-padding w3-code">
+<?php foreach($pullLines as $line) {
+    $cls = '';
+    if(stripos($line, 'error') !== false || stripos($line, 'fatal') !== false || stripos($line, 'conflict') !== false) {
+        $cls = 'w3-pale-red';
+    }
+    elseif(stripos($line, 'Already up to date') !== false || stripos($line, 'Bereits aktuell') !== false) {
+        $cls = 'w3-pale-green';
+    }
+?>
+      <div class="<?php echo $cls; ?>"><?php echo htmlspecialchars($line, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php } ?>
+    </div>
+<?php } ?>
+  </div>
+<?php } ?>
+
   <div class="w3-container w3-padding">
 <?php if($dbError !== '') { ?>
     <div class="w3-panel w3-red"><b>Fehler:</b> <?php echo htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8'); ?></div>
