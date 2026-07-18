@@ -438,7 +438,6 @@ foreach($allJobs as $rowJob) {
       <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
       <p class="w3-small w3-margin-top mail-recipient-count-line">
         <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
-        <span class="w3-text-gray"> — nur Mailverteiler mit Adresse; Mehrfachauswahl vereinigt, höchstens eine Mail pro Person.</span>
       </p>
     </div>
 <script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($mailRecipientCatalog, JSON_UNESCAPED_UNICODE); ?></script>
