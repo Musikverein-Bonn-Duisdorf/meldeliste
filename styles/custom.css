@@ -796,6 +796,20 @@
 .orchestra-svg text {
   text-anchor: middle;
   dominant-baseline: middle;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.orchestra-svg .orchestra-seat {
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.orchestra-svg .orchestra-seat title {
+  pointer-events: none;
 }
 
 .orchestra-register-band {

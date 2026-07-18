@@ -354,21 +354,37 @@ function clearOrchestraLongPress() {
         orchestraLongPressTimer = null;
     }
     orchestraLongPressSeat = null;
+    orchestraLongPressStart = null;
+}
+
+function findOrchestraSeat(el) {
+    while(el && el !== document) {
+        if(el.classList && el.classList.contains('orchestra-seat')) {
+            return el;
+        }
+        el = el.parentNode || el.parentElement;
+    }
+    return null;
+}
+
+function clearDomTextSelection() {
+    var sel = window.getSelection ? window.getSelection() : null;
+    if(sel && sel.removeAllRanges) sel.removeAllRanges();
 }
 
 document.addEventListener('click', function(ev) {
     var t = ev.target;
-    if(!t || !t.closest) return;
+    if(!t) return;
 
     var sheet = document.getElementById('orchestraSeatSheet');
     if(sheet && !sheet.hasAttribute('hidden')) {
         if(sheet.contains(t)) return;
-        if(!t.closest('.orchestra-seat')) {
+        if(!findOrchestraSeat(t)) {
             closeOrchestraSeatSheet();
         }
     }
 
-    var seat = t.closest('.orchestra-seat');
+    var seat = findOrchestraSeat(t);
     if(!seat) return;
 
     if(orchestraSuppressClick) {
@@ -385,38 +401,55 @@ document.addEventListener('click', function(ev) {
     }
 });
 
+var orchestraLongPressStart = null;
+
 document.addEventListener('touchstart', function(ev) {
-    var t = ev.target;
-    if(!t || !t.closest) return;
-    var seat = t.closest('.orchestra-seat');
+    var seat = findOrchestraSeat(ev.target);
     if(!seat) return;
     clearOrchestraLongPress();
+    var touch = ev.touches && ev.touches[0];
+    orchestraLongPressStart = touch ? {x: touch.clientX, y: touch.clientY} : null;
     orchestraLongPressSeat = seat;
     orchestraLongPressTimer = setTimeout(function() {
         orchestraLongPressTimer = null;
-        if(orchestraLongPressSeat === seat) {
-            orchestraSuppressClick = true;
-            openOrchestraSeatSheet(seat);
+        if(orchestraLongPressSeat !== seat) return;
+        orchestraSuppressClick = true;
+        clearDomTextSelection();
+        openOrchestraSeatSheet(seat);
+        if(navigator.vibrate) {
+            try { navigator.vibrate(20); } catch(e) {}
         }
     }, ORCHESTRA_LONG_PRESS_MS);
 }, {passive: true});
 
-document.addEventListener('touchend', function() {
-    clearOrchestraLongPress();
+document.addEventListener('touchmove', function(ev) {
+    if(!orchestraLongPressSeat || !orchestraLongPressStart) return;
+    var touch = ev.touches && ev.touches[0];
+    if(!touch) {
+        clearOrchestraLongPress();
+        return;
+    }
+    var dx = touch.clientX - orchestraLongPressStart.x;
+    var dy = touch.clientY - orchestraLongPressStart.y;
+    if((dx * dx + dy * dy) > 100) { // ~10px
+        clearOrchestraLongPress();
+    }
 }, {passive: true});
+
+document.addEventListener('touchend', function(ev) {
+    if(orchestraSuppressClick) {
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+    clearOrchestraLongPress();
+}, {passive: false});
 
 document.addEventListener('touchcancel', function() {
     clearOrchestraLongPress();
 }, {passive: true});
 
-document.addEventListener('touchmove', function() {
-    clearOrchestraLongPress();
-}, {passive: true});
-
 document.addEventListener('contextmenu', function(ev) {
-    var t = ev.target;
-    if(!t || !t.closest) return;
-    if(t.closest('.orchestra-seat')) {
+    if(findOrchestraSeat(ev.target)) {
         ev.preventDefault();
     }
 });
