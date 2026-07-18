@@ -1,6 +1,6 @@
 <?php
 /**
- * Named recipient / visibility groups (MELD-61).
+ * Named audience groups for mail and termin visibility (MELD-61).
  * MemberSpec uses AudienceSpec shape without nested mailGroups.
  */
 class MailGroup

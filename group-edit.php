@@ -1,6 +1,6 @@
 <?php
 session_start();
-$_SESSION['page'] = 'mail-groups';
+$_SESSION['page'] = 'groups';
 $_SESSION['adminpage'] = true;
 include 'common/header.php';
 if(!requirePermission('perm_sendEmail')) {
@@ -32,7 +32,7 @@ if(isset($_POST['save'])) {
         $err = 'Name ist Pflicht.';
     }
     elseif($g->save()) {
-        header('Location: mail-group-edit.php?id='.(int)$g->Index.'&saved=1');
+        header('Location: group-edit.php?id='.(int)$g->Index.'&saved=1');
         exit;
     }
     else {
@@ -52,13 +52,13 @@ $catalog = AudienceSpec::buildCatalog(array(
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2><?php echo (int)$g->Index ? 'Gruppe bearbeiten' : 'Neue Empfängergruppe'; ?></h2>
+  <h2><?php echo (int)$g->Index ? 'Gruppe bearbeiten' : 'Neue Gruppe'; ?></h2>
 </div>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 
 <div class="w3-container w3-padding">
-  <a href="mail-groups.php">← Zur Übersicht</a>
+  <a href="groups.php">← Zur Übersicht</a>
 </div>
 
 <form method="post" class="w3-container w3-padding">
