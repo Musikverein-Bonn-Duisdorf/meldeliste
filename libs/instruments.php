@@ -259,7 +259,7 @@ class Instruments
         $line = new div;
         $line->indent=$indent;
         $line->class="w3-row list-row w3-padding";
-        $line->onclick="openModal('instrument', ".$this->Index.")";
+        $line->onclick="openModal('inventar', ".$this->Index.")";
         if($this->Insurance) {
             $line->class=$GLOBALS['optionsDB']['colorUserMember'];
         }
@@ -731,7 +731,7 @@ class Instruments
         $line = new div;
         $line->indent=$indent;
         $line->class="w3-row list-row w3-padding";
-        $line->onclick="document.getElementById('".$this->Index."').style.display='block'";
+        $line->onclick="openModal('inventar', ".$this->Index.")";
         if($this->Insurance) {
             /* $line->class=$GLOBALS['optionsDB']['colorUserMember']; */
         }
