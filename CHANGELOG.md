@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-ec116 (2026-07-18)
+
+- MELD-87: ungenutzte Dateien und tote Methoden entfernen
+
 ## 2026-07-18-786b4 (2026-07-18)
 
 - MELD-88: Spalten in Versicherungsübersicht per Checkbox wählbar
