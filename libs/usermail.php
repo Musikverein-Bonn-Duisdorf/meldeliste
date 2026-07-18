@@ -18,6 +18,7 @@ class Usermail {
         'attachments' => false,
         'source' => 'mail',
         'quiet' => false,
+        'recipientSpec' => null,
     );
 
     public function __get($key) {
@@ -32,6 +33,7 @@ class Usermail {
         case 'attachments':
         case 'source':
         case 'quiet':
+        case 'recipientSpec':
             return $this->_data[$key];
         default:
             return null;
@@ -48,6 +50,9 @@ class Usermail {
         case 'Text':
         case 'subject':
         case 'source':
+            $this->_data[$key] = $val;
+            break;
+        case 'recipientSpec':
             $this->_data[$key] = $val;
             break;
         case 'memberonly':
@@ -117,6 +122,9 @@ class Usermail {
         $text = $job->applyGreeting(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '');
         $this->memberonly = (bool)$job->MemberOnly;
         $this->register = (int)$job->Register;
+        $this->recipientSpec = $job->getRecipientSpecArray();
+        $groups = isset($this->recipientSpec['groups']) ? $this->recipientSpec['groups'] : array();
+        $this->memberonly = in_array('members', $groups, true);
         $this->termin = (int)$job->Termin;
         $this->User = 0;
         $this->subject = (string)$job->Subject;
@@ -183,7 +191,13 @@ class Usermail {
         }
 
         $count = 0;
+        $queuedEmails = array();
+        $queuedUsers = array();
         foreach($recipients as $row) {
+            $uid = (int)$row['Index'];
+            if($uid > 0 && isset($queuedUsers[$uid])) {
+                continue;
+            }
             $emails = array();
             if(!empty($row['Email'])) {
                 $emails[] = trim($row['Email']);
@@ -192,8 +206,21 @@ class Usermail {
                 $emails[] = trim($row['Email2']);
             }
             $emails = array_values(array_unique(array_filter($emails)));
-            if(!$emails) {
+            // Skip addresses already queued for this job (same mailbox via another user)
+            $fresh = array();
+            foreach($emails as $em) {
+                $key = strtolower($em);
+                if(isset($queuedEmails[$key])) {
+                    continue;
+                }
+                $queuedEmails[$key] = true;
+                $fresh[] = $em;
+            }
+            if(!$fresh) {
                 continue;
+            }
+            if($uid > 0) {
+                $queuedUsers[$uid] = true;
             }
 
             if(function_exists('mailBodyLooksLikeHtml') && mailBodyLooksLikeHtml($text)) {
@@ -205,8 +232,8 @@ class Usermail {
             }
             $out = new MailOutbox;
             $out->Job = $job->Index;
-            $out->User = (int)$row['Index'];
-            $out->ToEmail = implode(', ', $emails);
+            $out->User = $uid;
+            $out->ToEmail = implode(', ', $fresh);
             $out->Subject = $subjectFull;
             $out->BodyText = $bodyStored;
             $out->Status = 'pending';
@@ -604,74 +631,211 @@ class Usermail {
     }
 
     /**
+     * Count unique recipients for a chip spec or termin (same rules as enqueue).
+     * @param array|string|null $spec
+     * @param int $termin
+     * @return int
+     */
+    public static function countFromRecipientSpec($spec = null, $termin = 0) {
+        $mail = new self;
+        $mail->quiet = true;
+        $mail->User = 0;
+        $mail->termin = (int)$termin;
+        if((int)$termin > 0) {
+            $mail->recipientSpec = null;
+        }
+        elseif(is_array($spec)) {
+            $mail->recipientSpec = MailJob::parseRecipientSpec(json_encode($spec));
+        }
+        elseif(is_string($spec) && trim($spec) !== '') {
+            $mail->recipientSpec = MailJob::parseRecipientSpec($spec);
+        }
+        else {
+            $mail->recipientSpec = MailJob::defaultRecipientSpecArray();
+        }
+        return count($mail->resolveRecipients());
+    }
+
+    /**
+     * Bulk/mail-job recipients: Mailverteiler + mindestens eine Adresse.
+     * @return string SQL AND-clauses without leading AND
+     */
+    protected function mailRecipientBaseWhere($alias = '') {
+        $p = $alias !== '' ? $alias.'.' : '';
+        return array(
+            $p.'`Deleted` != 1',
+            $p.'`getMail` = 1',
+            '('.$p."`Email` != '' OR ".$p."`Email2` != '')",
+        );
+    }
+
+    /**
      * @return array list of user rows with Index, Vorname, Nachname, Email, Email2, activeLink
      */
     protected function resolveRecipients() {
         $rows = array();
         if($this->User > 0) {
+            // Einzelversand (System/Benachrichtigung): keine Verteiler-Pflicht
             $sql = sprintf(
                 "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` = %d AND `Deleted` != 1;",
                 $GLOBALS['dbprefix'],
                 (int)$this->User
             );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if(!$dbr) return $rows;
+            while($row = mysqli_fetch_array($dbr)) {
+                $rows[] = $row;
+            }
+            return $rows;
         }
-        elseif($this->termin) {
+        if($this->termin) {
             $sql = sprintf(
-                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2;",
+                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname`, `getMail`, `Deleted` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2 AND `getMail` = 1 AND `Deleted` != 1 AND (`Email` != '' OR `Email2` != '');",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 (int)$this->termin
             );
-        }
-        else {
-            $register = '';
-            if($this->register > 0) {
-                $register = sprintf("AND `Register` = %d", (int)$this->register);
-                if($this->memberonly) {
-                    $sql = sprintf(
-                        "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1 %s;",
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $register
-                    );
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if(!$dbr) return $rows;
+            while($row = mysqli_fetch_array($dbr)) {
+                if(!isset($row['Index']) && isset($row['uIndex'])) {
+                    $row['Index'] = $row['uIndex'];
                 }
-                else {
-                    $sql = sprintf(
-                        "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1 %s;",
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $GLOBALS['dbprefix'],
-                        $register
-                    );
+                $rows[] = $row;
+            }
+            return $this->dedupeRecipients($rows);
+        }
+
+        $spec = is_array($this->recipientSpec)
+            ? $this->recipientSpec
+            : MailJob::parseRecipientSpec($this->recipientSpec, (int)$this->register, $this->memberonly ? 1 : 0);
+
+        $byId = array();
+        $allowed = MailJob::allowedGroupIds();
+        $groups = array();
+        if(isset($spec['groups']) && is_array($spec['groups'])) {
+            foreach($spec['groups'] as $g) {
+                $g = (string)$g;
+                if(in_array($g, $allowed, true)) {
+                    $groups[] = $g;
                 }
             }
-            elseif($this->memberonly) {
+        }
+        elseif(isset($spec['audience'])) {
+            $aud = (string)$spec['audience'];
+            if(in_array($aud, $allowed, true)) {
+                $groups[] = $aud;
+            }
+        }
+        $groups = array_values(array_unique($groups));
+        $registerIds = isset($spec['registers']) ? $spec['registers'] : array();
+        $userIds = isset($spec['users']) ? $spec['users'] : array();
+
+        $ids = array();
+        foreach($registerIds as $rid) {
+            $rid = (int)$rid;
+            if($rid > 0) $ids[] = $rid;
+        }
+        // Nur Register ohne Gruppe → wie Musiker im Register
+        if(!count($groups) && count($ids) > 0) {
+            $groups = array('musicians');
+        }
+
+        foreach($groups as $audience) {
+            $where = $this->mailRecipientBaseWhere();
+            if($audience === 'members') {
+                $where[] = '`Mitglied` = 1';
+            }
+            elseif($audience === 'nonmembers') {
+                $where[] = '`Mitglied` != 1';
+            }
+            // musicians / users: nur Basisfilter (Verteiler + Adresse)
+
+            if(count($ids) > 0) {
                 $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Mitglied` = 1 AND `Deleted` != 1;",
-                    $GLOBALS['dbprefix']
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE %s AND `Register` IN (%s);",
+                    $GLOBALS['dbprefix'],
+                    $GLOBALS['dbprefix'],
+                    $GLOBALS['dbprefix'],
+                    implode(' AND ', $where),
+                    implode(',', $ids)
                 );
             }
             else {
                 $sql = sprintf(
-                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `getMail` = 1 AND `Email` != '' AND `Deleted` != 1;",
-                    $GLOBALS['dbprefix']
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE %s;",
+                    $GLOBALS['dbprefix'],
+                    implode(' AND ', $where)
                 );
+            }
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if($dbr) {
+                while($row = mysqli_fetch_array($dbr)) {
+                    $byId[(int)$row['Index']] = $row;
+                }
             }
         }
 
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if(!$dbr) return $rows;
-        while($row = mysqli_fetch_array($dbr)) {
-            // Normalize Index for termin join
-            if(!isset($row['Index']) && isset($row['uIndex'])) {
-                $row['Index'] = $row['uIndex'];
+        // Explizit gewählte User: ebenfalls nur Verteiler + Adresse
+        if(count($userIds) > 0) {
+            $uids = array();
+            foreach($userIds as $uid) {
+                $uid = (int)$uid;
+                if($uid > 0) $uids[] = $uid;
             }
-            $rows[] = $row;
+            if(count($uids)) {
+                $sql = sprintf(
+                    "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s) AND %s;",
+                    $GLOBALS['dbprefix'],
+                    implode(',', $uids),
+                    implode(' AND ', $this->mailRecipientBaseWhere())
+                );
+                $dbr = mysqli_query($GLOBALS['conn'], $sql);
+                sqlerror();
+                if($dbr) {
+                    while($row = mysqli_fetch_array($dbr)) {
+                        $byId[(int)$row['Index']] = $row;
+                    }
+                }
+            }
         }
-        return $rows;
+
+        return $this->dedupeRecipients(array_values($byId));
+    }
+
+    /**
+     * One recipient row per user id and per primary email (case-insensitive).
+     * @param array $rows
+     * @return array
+     */
+    protected function dedupeRecipients($rows) {
+        $out = array();
+        $seenUsers = array();
+        $seenEmails = array();
+        foreach($rows as $row) {
+            $uid = isset($row['Index']) ? (int)$row['Index'] : 0;
+            if($uid > 0) {
+                if(isset($seenUsers[$uid])) {
+                    continue;
+                }
+            }
+            $emailKey = strtolower(trim((string)(isset($row['Email']) ? $row['Email'] : '')));
+            if($emailKey !== '' && isset($seenEmails[$emailKey])) {
+                continue;
+            }
+            if($uid > 0) {
+                $seenUsers[$uid] = true;
+            }
+            if($emailKey !== '') {
+                $seenEmails[$emailKey] = true;
+            }
+            $out[] = $row;
+        }
+        return $out;
     }
 }
 ?>
