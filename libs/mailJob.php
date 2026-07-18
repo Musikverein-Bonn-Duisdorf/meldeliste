@@ -136,7 +136,7 @@ class MailJob
         $job->Termin = (int)$termin;
         $job->Status = 'draft';
         $job->Gruss = 1;
-        $job->PostDiscord = ((int)$termin === 0) ? 1 : 0;
+        $job->PostDiscord = ((int)$termin === 0 && Discord::isConfigured()) ? 1 : 0;
         if(!$job->save()) {
             return null;
         }

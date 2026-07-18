@@ -40,6 +40,20 @@ class Discord
     }
 
     /**
+     * True if DiscordWebHookURL in config is a usable http(s) URL.
+     */
+    public static function isConfigured() {
+        $url = isset($GLOBALS['optionsDB']['DiscordWebHookURL'])
+            ? trim((string)$GLOBALS['optionsDB']['DiscordWebHookURL'])
+            : '';
+        if($url === '') {
+            return false;
+        }
+        $discord = new self($url);
+        return $discord->hasValidWebhookUrl();
+    }
+
+    /**
      * True if webhook looks like a usable http(s) URL.
      */
     public function hasValidWebhookUrl() {
