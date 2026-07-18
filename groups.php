@@ -55,8 +55,8 @@ foreach($groups as $g) {
 ?>
     <div class="mail-list-item">
       <div class="mail-list-primary"><?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?></div>
-      <div><?php echo $count; ?> <span class="w3-small w3-text-gray">(<?php echo $countMail; ?> mit Mail)</span></div>
-      <div>
+      <div class="mail-list-status"><?php echo $count; ?> <span class="w3-small w3-text-gray">(<?php echo $countMail; ?> mit Mail)</span></div>
+      <div class="mail-list-actions">
         <a class="w3-button w3-small w3-blue" href="group-edit.php?id=<?php echo $id; ?>">Bearbeiten</a>
         <form method="post" style="display:inline;" onsubmit="return confirm('Gruppe wirklich löschen?');">
           <input type="hidden" name="Index" value="<?php echo $id; ?>" />
