@@ -81,7 +81,7 @@ if($u->hasInventories()) { ?>
   <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-circle-question"></i></a>
   <?php if(isAdmin()) {
     $showMeldungen = requirePermission("perm_showResponse");
-    $showPersonen = requirePermission("perm_showUsers") || requirePermission("perm_editPermissions");
+    $showPersonen = requirePermission("perm_showUsers") || requirePermission("perm_editPermissions") || requirePermission("perm_editInstruments");
     $showTermine = requirePermission("perm_editAppmnts");
     $showKommunikation = requirePermission("perm_sendEmail");
     $showInventar = requirePermission("perm_showInventories") || requirePermission("perm_editInventories");
@@ -120,6 +120,10 @@ if($u->hasInventories()) { ?>
           <?php if(requirePermission("perm_editUsers")) { ?>
           <a title="neuen Musiker anlegen" alt="neuen Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('newmusiker');?>"><i class="fas fa-plus-circle"></i> Musiker anlegen</a>
           <?php } ?>
+          <?php } ?>
+          <?php if(requirePermission("perm_editInstruments")) { ?>
+          <a title="Instrument-Typen" alt="Instrument-Typen" href="instrument-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('instrument-types');?>"><i class="fas fa-guitar"></i> Instrument-Typen</a>
+          <a title="Register" alt="Register" href="register-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('register-types');?>"><i class="fas fa-layer-group"></i> Register</a>
           <?php } ?>
           <?php if(requirePermission("perm_editPermissions")) { ?>
           <a title="Berechtigungen" alt="Berechtigungen" href="permissions.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('permissions');?>"><i class="fas fa-lock"></i> Berechtigungen</a>

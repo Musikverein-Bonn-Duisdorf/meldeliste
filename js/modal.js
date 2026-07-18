@@ -97,6 +97,21 @@ function orchestraSeatVisual(wert) {
     return {color: '#ffffff', opacity: '0.5', label: 'nicht gemeldet'};
 }
 
+/** Match PHP hexContrastText(): black or white against background luminance. */
+function hexContrastText(hex) {
+    if(!hex || typeof hex !== 'string') return '#000000';
+    var h = hex.trim().replace(/^#/, '');
+    if(h.length === 3) {
+        h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    }
+    if(!/^[0-9a-fA-F]{6}$/.test(h)) return '#000000';
+    var r = parseInt(h.slice(0, 2), 16);
+    var g = parseInt(h.slice(2, 4), 16);
+    var b = parseInt(h.slice(4, 6), 16);
+    var luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return luma > 0.55 ? '#000000' : '#FFFFFF';
+}
+
 function applyOrchestraSeatWert(seat, wert) {
     wert = parseInt(wert, 10) || 0;
     seat.setAttribute('data-wert', String(wert));
@@ -109,6 +124,7 @@ function applyOrchestraSeatWert(seat, wert) {
         circle.setAttribute('opacity', visual.opacity);
     }
     if(text) {
+        text.setAttribute('fill', hexContrastText(visual.color));
         text.setAttribute('opacity', visual.opacity);
     }
     if(title) {

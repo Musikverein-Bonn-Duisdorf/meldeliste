@@ -146,15 +146,16 @@ $sections[] = array(
 $sections[] = array(
     'id' => 'admin-personen',
     'title' => 'Admin: Personen',
-    'visible' => isAdmin() && (requirePermission('perm_showUsers') || requirePermission('perm_editPermissions')),
+    'visible' => isAdmin() && (requirePermission('perm_showUsers') || requirePermission('perm_editPermissions') || requirePermission('perm_editInstruments')),
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showUsers') ? '
-<li><b>Registerübersicht / Musikerliste / Userliste</b> – Personen suchen, filtern und öffnen</li>
+<li><b>Registerübersicht / Musikerliste / Userliste</b> – Personen suchen, filtern und öffnen (Register-Überschrift in Registerfarbe)</li>
 '.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
 '.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – neue Person anlegen und Rechte/Instrument setzen</li>' : '').'
+'.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
 '.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix der Rechte pro User (Autosave)</li>' : '').'
 </ul>
 '

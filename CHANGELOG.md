@@ -2,6 +2,17 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-a8e61 (2026-07-18)
+
+- MELD-85: Register-Vorschau zentrieren und Reihenabstand korrigieren
+- MELD-85: SVG-Vorschau der Registerpositionen auf der Editierseite
+- MELD-85: Editierzeilen mit fester Spaltenbreite ausrichten
+- MELD-85: Instrument-/Register-Editierseiten responsiv layouten
+- MELD-85: Kontrastschrift auch beim Orchester-Sitzwechsel per JS
+- MELD-85: Kontrastschrift zu Register-/Instrumentenfarben
+- MELD-85: Register-/Instrumentenfarben aus Markenpalette ableiten
+- MELD-85: Instrument-Typen und Register editierbar inkl. Farben
+
 ## 2026-07-18-7943e (2026-07-18)
 
 - MELD-64: Besetzung live aktualisieren, Sitzreihenfolge stabil, „nicht gemeldet“ entfernt
