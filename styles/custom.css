@@ -1130,9 +1130,15 @@
   border-color: #c9b87a;
 }
 
-.mail-recipient-chip--audience {
+.mail-recipient-chip--audience,
+.mail-recipient-chip--group {
   background: #345a95;
   border-color: #345a95;
+  color: #fff;
+}
+
+.mail-recipient-chip--audience .mail-recipient-chip-remove,
+.mail-recipient-chip--group .mail-recipient-chip-remove {
   color: #fff;
 }
 

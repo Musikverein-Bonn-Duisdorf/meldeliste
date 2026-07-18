@@ -405,7 +405,7 @@ foreach($allJobs as $rowJob) {
       <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Register oder Person tippen…" autocomplete="off" />
       <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
       <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
-      <p class="w3-small w3-text-gray w3-margin-top">Eine Basisgruppe (Standard: alle Musiker), optional Register und einzelne Personen. Personen werden immer ergänzt.</p>
+      <p class="w3-small w3-text-gray w3-margin-top">Gruppen (z. B. alle Musiker), Register und Personen als Chips wählen. Mehrfachauswahl wird vereinigt; jede Person erhält höchstens eine Mail.</p>
     </div>
 <script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($mailRecipientCatalog, JSON_UNESCAPED_UNICODE); ?></script>
 <script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
@@ -437,7 +437,9 @@ foreach($allJobs as $rowJob) {
     var specEl = document.getElementById('mailRecipientSpec');
     try {
       var spec = JSON.parse(specEl ? specEl.value : '{}');
-      var isDefaultAll = spec.audience === 'musicians'
+      var isDefaultAll = Array.isArray(spec.groups)
+        && spec.groups.length === 1
+        && spec.groups[0] === 'musicians'
         && (!spec.registers || !spec.registers.length)
         && (!spec.users || !spec.users.length);
       cb.checked = !!isDefaultAll;
