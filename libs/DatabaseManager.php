@@ -480,14 +480,18 @@ class DatabaseManager
                 $skipped++;
                 continue;
             }
+            $color = isset($row['Color']) && $row['Color'] !== ''
+                ? '"'.mysqli_real_escape_string($GLOBALS['conn'], $row['Color']).'"'
+                : 'NULL';
             $insert = sprintf(
-                'INSERT INTO `%sInstrument` (`Index`, `Name`, `Register`, `Sortierung`, `Spielbar`) VALUES (%d, "%s", %d, %d, %d);',
+                'INSERT INTO `%sInstrument` (`Index`, `Name`, `Register`, `Sortierung`, `Spielbar`, `Color`) VALUES (%d, "%s", %d, %d, %d, %s);',
                 $GLOBALS['dbprefix'],
                 $id,
                 mysqli_real_escape_string($GLOBALS['conn'], $row['Name']),
                 (int)$row['Register'],
                 (int)$row['Sortierung'],
-                (int)$row['Spielbar']
+                (int)$row['Spielbar'],
+                $color
             );
             if(mysqli_query($GLOBALS['conn'], $insert)) {
                 $created++;
