@@ -1,7 +1,17 @@
 <?php
+ob_start();
 session_start();
 $_SESSION['page']='myinventories';
 $_SESSION['adminpage']=false;
+
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+requireLoggedInOrRedirect();
+
+if(handleInventoriesMutations()) {
+    redirectAfterPost('myinventories.php');
+}
+
 include "common/header.php";
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
