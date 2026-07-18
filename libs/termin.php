@@ -2,6 +2,12 @@
 class Termin
 {
     private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null);
+    /** @var array<int,int>|null */
+    private $_meldungenCountsByWert = null;
+    /** @var int|null */
+    private $_aushilfenCount = null;
+    /** @var array<int,string>|null */
+    private $_freeTextByUser = null;
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -571,18 +577,52 @@ class Termin
         return $r;
     }
     public function getMeldungenVal($val) {
-        $r = 0;
-        $meldungen = $this->getMeldungen();
-        for($i=0; $i<count($meldungen); $i++) {
-            $m = new Meldung;
-            $m->load_by_id($meldungen[$i]);
-            if($m->Wert == $val) $r++;
-        }
-        if($val == 1) {
-            $aushilfen = $this->getAushilfen();
-            $r += count($aushilfen);
+        $val = (int)$val;
+        $counts = $this->getMeldungenCountsByWert();
+        $r = isset($counts[$val]) ? (int)$counts[$val] : 0;
+        if($val === 1) {
+            $r += $this->getAushilfenCount();
         }
         return $r;
+    }
+
+    /**
+     * @return array<int,int> Wert => count
+     */
+    protected function getMeldungenCountsByWert() {
+        if(isset($this->_meldungenCountsByWert) && is_array($this->_meldungenCountsByWert)) {
+            return $this->_meldungenCountsByWert;
+        }
+        $this->_meldungenCountsByWert = array();
+        $sql = sprintf(
+            'SELECT `Wert`, COUNT(*) AS `c` FROM `%sMeldungen` WHERE `Termin` = %d GROUP BY `Wert`;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $this->_meldungenCountsByWert[(int)$row['Wert']] = (int)$row['c'];
+            }
+        }
+        return $this->_meldungenCountsByWert;
+    }
+
+    protected function getAushilfenCount() {
+        if(isset($this->_aushilfenCount)) {
+            return (int)$this->_aushilfenCount;
+        }
+        $sql = sprintf(
+            'SELECT COUNT(*) AS `c` FROM `%sAushilfen` WHERE `Termin` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        $this->_aushilfenCount = ($row && isset($row['c'])) ? (int)$row['c'] : 0;
+        return $this->_aushilfenCount;
     }
     public function getMeldungRatio() {
         $Nusers = count(getActiveUsers(NULL));
@@ -2014,7 +2054,7 @@ class Termin
     }
 
     public function getAushilfenRegister($filterregister) {
-        $sql = sprintf("SELECT * FROM `%sAushilfen` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Termin` = \"%d\" AND `Register` = \"%d\";",
+        $sql = sprintf("SELECT * FROM `%sAushilfen` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Termin` = \"%d\" AND `Register` = \"%d\";",
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
                        $GLOBALS['dbprefix'],
@@ -2028,6 +2068,60 @@ class Termin
             $aushilfen[] = $row;
         }
         return $aushilfen;
+    }
+
+    /**
+     * All aushilfen for this termin with Register + instrument name (one query).
+     * @return array keyed by register id => list of rows
+     */
+    protected function getAushilfenByRegister() {
+        $sql = sprintf(
+            "SELECT a.`Index`, a.`Termin`, a.`Name`, a.`Instrument`, i.`Register`, i.`Name` AS `iName`
+             FROM `%sAushilfen` a
+             INNER JOIN `%sInstrument` i ON a.`Instrument` = i.`Index`
+             WHERE a.`Termin` = %d;",
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $byReg = array();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $rid = (int)$row['Register'];
+                if(!isset($byReg[$rid])) {
+                    $byReg[$rid] = array();
+                }
+                $byReg[$rid][] = $row;
+            }
+        }
+        return $byReg;
+    }
+
+    /**
+     * Active member counts per register (Deleted != 1).
+     * @return array<int,int>
+     */
+    protected function getRegisterMemberCounts() {
+        $sql = sprintf(
+            'SELECT i.`Register` AS `Register`, COUNT(*) AS `c`
+             FROM `%sUser` u
+             INNER JOIN `%sInstrument` i ON u.`Instrument` = i.`Index`
+             WHERE u.`Deleted` != 1
+             GROUP BY i.`Register`;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $counts = array();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $counts[(int)$row['Register']] = (int)$row['c'];
+            }
+        }
+        return $counts;
     }
 
     public function getAushilfen() {
@@ -2055,7 +2149,11 @@ class Termin
         return $str;
     }
 
-    public function getResponseLine($filterregister) {
+    /**
+     * Shared UNION for response aggregation / name lists.
+     * @return array
+     */
+    protected function fetchResponseMeldungenRows() {
         $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
@@ -2095,10 +2193,17 @@ ORDER BY `Nachname`, `Vorname`;",
         $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $aMeldungen = array();
-        while($row = mysqli_fetch_array($dbr2)) {
-            $aMeldungen[] = $row;
-        }      
-        
+        if($dbr2) {
+            while($row = mysqli_fetch_array($dbr2)) {
+                $aMeldungen[] = $row;
+            }
+        }
+        return $aMeldungen;
+    }
+
+    public function getResponseLine($filterregister) {
+        $filterregister = (int)$filterregister;
+
         if($this->vName == "Bus") {
             $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
             $bus=true;
@@ -2124,11 +2229,10 @@ ORDER BY `Nachname`, `Vorname`;",
             break;
         }
 
-        $modalOpen = "openModal('terminResponse', ".$this->Index.((int)$filterregister ? ", ".(int)$filterregister : "").")";
-        $str = "<div id=\"responseLine".$this->Index."\" data-termin=\"".$this->Index."\" data-register=\"".(int)$filterregister."\" class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
+        $modalOpen = "openModal('terminResponse', ".$this->Index.($filterregister ? ", ".$filterregister : "").")";
+        $str = "<div id=\"responseLine".$this->Index."\" data-termin=\"".$this->Index."\" data-register=\"".$filterregister."\" class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
         $str=$str."<div onclick=\"".$modalOpen."\" class=\"w3-container w3-margin-bottom\">\n";
 
-        $aushilfen=array();
         if($this->Auftritt) {
             if($filterregister) {
                 $lists = $this->buildResponseLists($filterregister);
@@ -2137,18 +2241,21 @@ ORDER BY `Nachname`, `Vorname`;",
                     .$this->renderResponseEntries($lists['whoMaybe'], $lists['colsize']);
             }
             else {
+                $aMeldungen = $this->fetchResponseMeldungenRows();
                 if($GLOBALS['optionsDB']['showConductor']) {
-                    $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                    $sql = sprintf("SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
                     $GLOBALS['dbprefix']
                     );
                 }
                 else {
-                    $sql = sprintf("SELECT * FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
+                    $sql = sprintf("SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
                     $GLOBALS['dbprefix']
                     );
                 }
                 $dbr = mysqli_query($GLOBALS['conn'], $sql);
                 sqlerror();
+                $memberCounts = $this->getRegisterMemberCounts();
+                $aushilfenByReg = $this->getAushilfenByRegister();
                 $sja=0;
                 $sall=0;
                 $snReg=0;
@@ -2159,16 +2266,14 @@ ORDER BY `Nachname`, `Vorname`;",
                 $childrenMaybe=0;
                 $guestsMaybe=0;
                 while($row = mysqli_fetch_array($dbr)) {
-                    $register = new Register();
-                    $register->load_by_id($row['Index']);
-                    $aushilfen = $this->getAushilfenRegister($row['Index']);
-                    $nReg = $register->members();
+                    $regId = (int)$row['Index'];
+                    $nReg = isset($memberCounts[$regId]) ? (int)$memberCounts[$regId] : 0;
                     $snReg+=$nReg;
                     $ja=0;
                     $nein=0;
                     $vielleicht=0;
                     foreach($aMeldungen as $row2) {
-                        if($row2['rIndex'] != $row['Index']) continue;
+                        if((int)$row2['rIndex'] != $regId) continue;
                         switch($row2['Wert']) {
                         case 1:
                             $ja++;
@@ -2199,12 +2304,10 @@ ORDER BY `Nachname`, `Vorname`;",
                         }
                     }
 
-                    foreach($aushilfen as &$aushilfe) {
-                        $A = new Aushilfe;
-                        $A->load_by_id($aushilfe['Index']);
-                        $ja++;
-                        $sja++;
-                    }
+                    $aushilfen = isset($aushilfenByReg[$regId]) ? $aushilfenByReg[$regId] : array();
+                    $nAus = count($aushilfen);
+                    $ja += $nAus;
+                    $sja += $nAus;
                     $all = $ja+$nein+$vielleicht;
                     $sall=$sall+$all;
                     $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\">".$row['Name']."</div>\n<div class=\"w3-col l2 m2 s2\">".$all." / ".sprintf("%02d", $nReg)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div>\n</div>\n";
@@ -2261,12 +2364,7 @@ ORDER BY `Nachname`, `Vorname`;",
                     break;
                 }
             }
-            $aushilfen = $this->getAushilfen();
-            foreach($aushilfen as &$aushilfe) {
-                $A = new Aushilfe;
-                $A->load_by_id($aushilfe);
-                $ja++;
-            }
+            $ja += $this->getAushilfenCount();
 
             if($bus && $GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
@@ -2301,13 +2399,39 @@ ORDER BY `Nachname`, `Vorname`;",
             $entry['guests'] = ($wert == 2) ? false : (int)$guests;
         }
         if(($wert == 1 || $wert == 3) && $this->defaultFreeText && isAdmin() && $userId) {
-            $ft = new AppmntFreeTextResponse;
-            $ft->load_by_user_event($userId, $this->Index);
-            if($ft->Text) {
-                $entry['freeText'] = $ft->Text;
+            $map = $this->getFreeTextByUser();
+            $uid = (int)$userId;
+            if(isset($map[$uid]) && $map[$uid] !== '') {
+                $entry['freeText'] = $map[$uid];
             }
         }
         return $entry;
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    protected function getFreeTextByUser() {
+        if(is_array($this->_freeTextByUser)) {
+            return $this->_freeTextByUser;
+        }
+        $this->_freeTextByUser = array();
+        $sql = sprintf(
+            'SELECT `User`, `Text` FROM `%sAppmntFreeTextResponse` WHERE `Termin` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $text = isset($row['Text']) ? (string)$row['Text'] : '';
+                if($text !== '') {
+                    $this->_freeTextByUser[(int)$row['User']] = $text;
+                }
+            }
+        }
+        return $this->_freeTextByUser;
     }
 
     private function renderResponseEntries($entries, $colsize) {
@@ -2322,48 +2446,7 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     private function buildResponseLists($filterregister) {
-        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
-WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` = '0')
-
-UNION
-
-(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
-INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
-INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
-WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` != '0')
-
-ORDER BY `Nachname`, `Vorname`;",
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $this->Index,
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $this->Index,
-                       $GLOBALS['dbprefix']
-        );
-        $dbr2 = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $aMeldungen = array();
-        while($row = mysqli_fetch_array($dbr2)) {
-            $aMeldungen[] = $row;
-        }
+        $aMeldungen = $this->fetchResponseMeldungenRows();
 
         if($this->vName == "Bus") {
             $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
@@ -2395,6 +2478,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $whoMaybe = array();
 
         if($this->Auftritt) {
+            $filterregister = (int)$filterregister;
             if($filterregister) {
                 $registerIds = array($filterregister);
             }
@@ -2416,10 +2500,11 @@ ORDER BY `Nachname`, `Vorname`;",
                     $registerIds[] = $row['Index'];
                 }
             }
+            $aushilfenByReg = $this->getAushilfenByRegister();
             foreach($registerIds as $registerId) {
-                $aushilfen = $this->getAushilfenRegister($registerId);
+                $registerId = (int)$registerId;
                 foreach($aMeldungen as $row2) {
-                    if($row2['rIndex'] != $registerId) continue;
+                    if((int)$row2['rIndex'] != $registerId) continue;
                     $name = $row2['Vorname']." ".$row2['Nachname'];
                     $instrument = $row2['iName'];
                     switch($row2['Wert']) {
@@ -2436,10 +2521,11 @@ ORDER BY `Nachname`, `Vorname`;",
                         break;
                     }
                 }
-                foreach($aushilfen as &$aushilfe) {
-                    $A = new Aushilfe;
-                    $A->load_by_id($aushilfe['Index']);
-                    $whoYes[] = $this->makeResponseEntry(1, $A->getName(), $A->getInstrumentName(), 0, 0, 0, false);
+                $aushilfen = isset($aushilfenByReg[$registerId]) ? $aushilfenByReg[$registerId] : array();
+                foreach($aushilfen as $aushilfe) {
+                    $aName = isset($aushilfe['Name']) ? $aushilfe['Name'] : '';
+                    $iName = isset($aushilfe['iName']) ? $aushilfe['iName'] : '';
+                    $whoYes[] = $this->makeResponseEntry(1, $aName, $iName, 0, 0, 0, false);
                 }
             }
         }
@@ -2468,11 +2554,17 @@ ORDER BY `Nachname`, `Vorname`;",
                     break;
                 }
             }
-            $aushilfen = $this->getAushilfen();
-            foreach($aushilfen as &$aushilfe) {
-                $A = new Aushilfe;
-                $A->load_by_id($aushilfe);
-                $whoYes[] = $this->makeResponseEntry(1, $A->getName(), '', 0, 0, 0, false);
+            $sql = sprintf(
+                "SELECT a.`Name` FROM `%sAushilfen` a WHERE a.`Termin` = %d ORDER BY a.`Name`;",
+                $GLOBALS['dbprefix'],
+                (int)$this->Index
+            );
+            $dbrA = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            if($dbrA) {
+                while($row = mysqli_fetch_array($dbrA)) {
+                    $whoYes[] = $this->makeResponseEntry(1, $row['Name'], '', 0, 0, 0, false);
+                }
             }
         }
 
@@ -2494,8 +2586,9 @@ ORDER BY `Nachname`, `Vorname`;",
         $orchestraActive = '';
         $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt;
         if($showOrchestra) {
-            $orchestraFull = printOrchestra($this->Index, 1, false);
-            $orchestraActive = printOrchestra($this->Index, 1, true);
+            $orchestraData = loadOrchestraData($this->Index);
+            $orchestraFull = printOrchestra($this->Index, 1, false, $orchestraData);
+            $orchestraActive = printOrchestra($this->Index, 1, true, $orchestraData);
         }
 
         $titleParts = array($this->Name);
