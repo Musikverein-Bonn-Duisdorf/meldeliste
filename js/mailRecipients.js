@@ -7,8 +7,8 @@
   var GROUP_LABELS = {
     musicians: 'Alle Musiker',
     members: 'Alle Vereinsmitglieder',
-    nonmembers: 'alle Nicht-Mitglieder',
-    users: 'alle User'
+    nonmembers: 'Alle Nicht-Mitglieder',
+    users: 'Alle User'
   };
   var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
 
