@@ -1,21 +1,45 @@
 <?php
-echo date("Y-m-d H:i:s")."<br />\n";
-
 session_start();
 include 'common/include.php';
-if(!isset($_GET['id'])) die("no ID specified\n");
-if(!$_GET['id']==$GLOBALS['cronID']) die("ID invalid\n");
-if(!isset($_GET['cmd'])) die("no command specified\n");
+
+if(!isset($_GET['id'])) {
+    die("no ID specified\n");
+}
+if($_GET['id'] != $GLOBALS['cronID']) {
+    die("ID invalid\n");
+}
+if(!isset($_GET['cmd'])) {
+    die("no command specified\n");
+}
+
+$cmd = (string)$_GET['cmd'];
+
+// Binary download: no HTML preamble
+if($cmd === 'backup') {
+    require_once __DIR__.'/libs/backup.php';
+    mkAdmin();
+    try {
+        sendBackupDownload();
+    }
+    catch(Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "Backup failed: ".$e->getMessage()."\n";
+        exit(1);
+    }
+}
+
+echo date("Y-m-d H:i:s")."<br />\n";
 mkAdmin();
 
-switch($_GET['cmd']) {
+switch($cmd) {
 case "newAppmnts":
     echo "newAppmnts...\n";
     if($GLOBALS['optionsDB']['cronSendnewAppmnts'] == 0) {
         echo "new Appmnts not activated.\n";
         break;
     }
-    if(!checkCronDate($GLOBALS['optionsDB']['cronSendnewAppmntsDays'])) { 
+    if(!checkCronDate($GLOBALS['optionsDB']['cronSendnewAppmntsDays'])) {
         echo "No sendnewAppmnts today\n";
         break;
     }
@@ -100,7 +124,7 @@ case "reminder":
         echo "Reminder not activated.\n";
         break;
 	}
-	if(!checkCronDate($GLOBALS['optionsDB']['cronSendReminderDays'])) { 
+	if(!checkCronDate($GLOBALS['optionsDB']['cronSendReminderDays'])) {
         break;
 	}
 	$time = date("H:i");
@@ -120,7 +144,7 @@ case "reminder":
 	$row = mysqli_fetch_array($dbr);
 	$Nappmnts = $row['cnt'];
 
-	
+
 	$sql = sprintf("SELECT * FROM `%sUser` WHERE `getMail` = 1;",
     $GLOBALS['dbprefix']
 	);
