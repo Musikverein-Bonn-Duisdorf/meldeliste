@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-6f040 (2026-07-18)
+
+- MELD-98: paint unanswered orchestra seats opaque white
+- MELD-98: Weiße Kreise in der Orchesteransicht
+
 ## 2026-07-18-633dd (2026-07-18)
 
 - MELD-96: keep sticky list headers below admin nav menus
