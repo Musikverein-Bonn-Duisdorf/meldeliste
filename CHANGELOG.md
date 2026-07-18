@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-dfa1d (2026-07-18)
+
+- MELD-90: send backup ZIP before HTML so browser downloads the file
+- MELD-90: database backup export and restore via cron and admin UI
+- MELD-90: Backup export/restore via cron and admin UI
+
 ## 2026-07-18-210da (2026-07-18)
 
 - MELD-89: fix evaluate sticky header overlapping first row
