@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-a5462 (2026-07-18)
+
+- MELD-82: Admin in der Nav vor Ausloggen einordnen
+- MELD-82: Logo zur Homepage, Medien-Seite aus Konfiguration
+
 ## 2026-07-18-eecda (2026-07-18)
 
 - MELD-83: Aktive Besetzung als gedrängter Sitzplan ohne Lücken
