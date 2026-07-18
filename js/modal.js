@@ -112,6 +112,36 @@ function hexContrastText(hex) {
     return luma > 0.55 ? '#000000' : '#FFFFFF';
 }
 
+/** Match PHP hexContrastTextOnFill(): account for translucent seat fills over white. */
+function hexContrastTextOnFill(hex, opacity, bgHex) {
+    opacity = parseFloat(opacity);
+    if(isNaN(opacity)) opacity = 1;
+    if(opacity >= 0.999) return hexContrastText(hex);
+    if(!hex || typeof hex !== 'string') return '#000000';
+    var h = hex.trim().replace(/^#/, '');
+    if(h.length === 3) {
+        h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    }
+    if(!/^[0-9a-fA-F]{6}$/.test(h)) return '#000000';
+    var bg = (bgHex && typeof bgHex === 'string') ? bgHex.trim().replace(/^#/, '') : 'FFFFFF';
+    if(bg.length === 3) {
+        bg = bg[0] + bg[0] + bg[1] + bg[1] + bg[2] + bg[2];
+    }
+    if(!/^[0-9a-fA-F]{6}$/.test(bg)) bg = 'FFFFFF';
+    opacity = Math.max(0, Math.min(1, opacity));
+    var fr = parseInt(h.slice(0, 2), 16);
+    var fg = parseInt(h.slice(2, 4), 16);
+    var fb = parseInt(h.slice(4, 6), 16);
+    var br = parseInt(bg.slice(0, 2), 16);
+    var bgc = parseInt(bg.slice(2, 4), 16);
+    var bb = parseInt(bg.slice(4, 6), 16);
+    var r = Math.round(fr * opacity + br * (1 - opacity));
+    var g = Math.round(fg * opacity + bgc * (1 - opacity));
+    var b = Math.round(fb * opacity + bb * (1 - opacity));
+    var luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return luma > 0.55 ? '#000000' : '#FFFFFF';
+}
+
 function applyOrchestraSeatWert(seat, wert) {
     wert = parseInt(wert, 10) || 0;
     seat.setAttribute('data-wert', String(wert));
@@ -124,8 +154,8 @@ function applyOrchestraSeatWert(seat, wert) {
         circle.setAttribute('opacity', visual.opacity);
     }
     if(text) {
-        text.setAttribute('fill', hexContrastText(visual.color));
-        text.setAttribute('opacity', visual.opacity);
+        text.setAttribute('fill', hexContrastTextOnFill(visual.color, visual.opacity));
+        text.setAttribute('opacity', '1');
     }
     if(title) {
         var instrument = seat.getAttribute('data-instrument') || '';

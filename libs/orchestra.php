@@ -312,9 +312,10 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false) {
                         .">\n";
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
                     $fillColor = $style['color'];
-                    $textFill = hexContrastText($fillColor);
+                    $fillOpacity = (float)$style['opacity'];
+                    $textFill = hexContrastTextOnFill($fillColor, $fillOpacity);
                     $seatsHtml .= '<circle opacity="'.$style['opacity'].'" cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$fillColor."\" />\n";
-                    $seatsHtml .= '<text opacity="'.$style['opacity'].'" text-anchor="middle" dominant-baseline="middle" fill="'.$textFill.'" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
+                    $seatsHtml .= '<text text-anchor="middle" dominant-baseline="middle" fill="'.$textFill.'" font-size="10" x="'.$x.'" y="'.$y.'">'.$safeShort."</text>\n";
                     $seatsHtml .= "</g>\n";
                 }
                 else {
