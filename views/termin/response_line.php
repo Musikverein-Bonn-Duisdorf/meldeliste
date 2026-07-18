@@ -33,7 +33,7 @@ if($entry['guests'] !== null) {
     $actcol++;
 }
 if($entry['freeText'] !== null && $entry['freeText'] !== '') {
-    echo '<div class="w3-col l'.$col[$actcol].' m'.$col[$actcol].' s'.$col[$actcol].'">'.$entry['freeText'].'</div>';
+    echo '<div class="w3-col l'.$col[$actcol].' m'.$col[$actcol].' s'.$col[$actcol].'">'.htmlspecialchars((string)$entry['freeText'], ENT_QUOTES, 'UTF-8').'</div>';
 }
 ?>
 </div>

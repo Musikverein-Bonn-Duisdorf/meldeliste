@@ -1,4 +1,4 @@
-function track(cronID, user, termin, wert, Children, Guests) {
+function track(user, termin, wert, Children, Guests) {
     if (window.XMLHttpRequest) {
 	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	xmlhttp=new XMLHttpRequest();
@@ -33,7 +33,12 @@ function track(cronID, user, termin, wert, Children, Guests) {
         var GuestInput = document.getElementById("Guests"+user);
         Guests = GuestInput.value;
     }
-    var str = "track.php?cmd=save&id="+cronID+"&user="+user+"&termin="+termin+"&wert="+wert+"&Children="+Children+"&Guests="+Guests;
-    xmlhttp.open("GET",str,true);
-    xmlhttp.send();
+    var body = "cmd=save&user="+encodeURIComponent(user)
+        +"&termin="+encodeURIComponent(termin)
+        +"&wert="+encodeURIComponent(wert)
+        +"&Children="+encodeURIComponent(Children)
+        +"&Guests="+encodeURIComponent(Guests);
+    xmlhttp.open("POST", "track.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }

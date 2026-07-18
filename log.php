@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 $_SESSION['page']='log';
 $_SESSION['adminpage']=true;
 include "common/header.php";
@@ -69,9 +70,10 @@ function getLog() {
             }
 	}
     }
-    var str = "getLog.php?id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&maxIndex="+maxIndex;
-    xmlhttp.open("GET", str, true);
-    xmlhttp.send();
+    var body = "maxIndex="+encodeURIComponent(maxIndex);
+    xmlhttp.open("POST", "getLog.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }
 var interval = setInterval(getLog, 1000);
 </script>

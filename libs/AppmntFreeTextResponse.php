@@ -82,11 +82,12 @@ class AppmntFreeTextResponse
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sAppmntFreeTextResponse` (`Termin`, `User`, `Text`) VALUES ("%d", "%d", "%s");',
+        $textSql = $this->Text === null ? 'NULL' : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Text).'"';
+        $sql = sprintf('INSERT INTO `%sAppmntFreeTextResponse` (`Termin`, `User`, `Text`) VALUES ("%d", "%d", %s);',
                        $GLOBALS['dbprefix'],
                        $this->Termin,
                        $this->User,
-                       $this->Text
+                       $textSql
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -111,11 +112,12 @@ class AppmntFreeTextResponse
     }
 
     protected function update() {
-        $sql = sprintf('UPDATE `%sAppmntFreeTextResponse` SET `Termin` = "%d", `User` = "%d", `Text` = "%s" WHERE `Index` = "%d";',
+        $textSql = $this->Text === null ? 'NULL' : '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Text).'"';
+        $sql = sprintf('UPDATE `%sAppmntFreeTextResponse` SET `Termin` = "%d", `User` = "%d", `Text` = %s WHERE `Index` = "%d";',
                        $GLOBALS['dbprefix'],
                        $this->Termin,
                        $this->User,
-                       $this->Text,
+                       $textSql,
                        $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);

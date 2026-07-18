@@ -176,31 +176,6 @@ function applyOrchestraSeatWert(seat, wert) {
     }
 }
 
-function getPageCronId() {
-    var liste = document.getElementById('Liste');
-    if(liste && liste.getAttribute('data-cron-id')) {
-        return liste.getAttribute('data-cron-id');
-    }
-    var meta = document.querySelector('meta[name="cron-id"]');
-    if(meta && meta.getAttribute('content')) {
-        return meta.getAttribute('content');
-    }
-    if(typeof window.cronID !== 'undefined' && window.cronID) {
-        return window.cronID;
-    }
-    var svg = document.querySelector('.orchestra-svg[data-cron-id]');
-    if(svg && svg.getAttribute('data-cron-id')) {
-        return svg.getAttribute('data-cron-id');
-    }
-    var withOnclick = document.querySelector('[onclick*="melde("], [onclick*="track("]');
-    if(withOnclick) {
-        var raw = withOnclick.getAttribute('onclick') || '';
-        var m = /(?:melde|track)\('([^']+)'/.exec(raw);
-        if(m) return m[1];
-    }
-    return null;
-}
-
 function replaceElementWithHtml(el, html) {
     if(!el || !el.parentNode || !html) return null;
     var wrap = document.createElement('div');
@@ -214,7 +189,7 @@ function replaceElementWithHtml(el, html) {
 var mainPageTerminRefreshTimer = null;
 var mainPageTerminRefreshSeq = 0;
 
-function scheduleRefreshMainPageTerminEntries(terminId, cronID) {
+function scheduleRefreshMainPageTerminEntries(terminId) {
     terminId = parseInt(terminId, 10) || 0;
     if(!terminId) return;
     if(mainPageTerminRefreshTimer) {
@@ -222,15 +197,13 @@ function scheduleRefreshMainPageTerminEntries(terminId, cronID) {
     }
     mainPageTerminRefreshTimer = setTimeout(function() {
         mainPageTerminRefreshTimer = null;
-        refreshMainPageTerminEntries(terminId, cronID);
+        refreshMainPageTerminEntries(terminId);
     }, 200);
 }
 
-function refreshMainPageTerminEntries(terminId, cronID) {
+function refreshMainPageTerminEntries(terminId) {
     terminId = parseInt(terminId, 10) || 0;
     if(!terminId) return;
-    cronID = cronID || getPageCronId();
-    if(!cronID) return;
 
     var seq = ++mainPageTerminRefreshSeq;
 
@@ -251,13 +224,8 @@ function refreshMainPageTerminEntries(terminId, cronID) {
                 if(xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return;
                 replaceElementWithHtml(el, xhr.responseText);
             };
-            xhr.open(
-                'GET',
-                'melde.php?cmd=responseLine&id=' + encodeURIComponent(cronID)
-                    + '&termin=' + encodeURIComponent(terminId)
-                    + '&register=' + encodeURIComponent(register),
-                true
-            );
+            xhr.open('GET', 'melde.php?cmd=responseLine&termin=' + encodeURIComponent(terminId)
+                + '&register=' + encodeURIComponent(register), true);
             xhr.send();
         })(responseEl);
     }
@@ -277,13 +245,8 @@ function refreshMainPageTerminEntries(terminId, cronID) {
                 if(xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return;
                 replaceElementWithHtml(el, xhr.responseText);
             };
-            xhr.open(
-                'GET',
-                'melde.php?cmd=reload&id=' + encodeURIComponent(cronID)
-                    + '&user=' + encodeURIComponent(userId)
-                    + '&termin=' + encodeURIComponent(terminId),
-                true
-            );
+            xhr.open('GET', 'melde.php?cmd=reload&user=' + encodeURIComponent(userId)
+                + '&termin=' + encodeURIComponent(terminId), true);
             xhr.send();
         })(nodes[i]);
     }
@@ -407,17 +370,6 @@ function syncOrchestraSeatsForUser(terminId, userId, wert) {
     }
 }
 
-function getOrchestraCronId(seat) {
-    var svg = seat.ownerSVGElement;
-    if(svg && svg.getAttribute('data-cron-id')) {
-        return svg.getAttribute('data-cron-id');
-    }
-    var meta = document.querySelector('meta[name="cron-id"]');
-    if(meta) return meta.getAttribute('content');
-    if(typeof window.cronID !== 'undefined' && window.cronID) return window.cronID;
-    return null;
-}
-
 function cycleOrchestraSeat(seat) {
     if(!seat || seat.getAttribute('data-editable') !== '1') return;
     var wert = parseInt(seat.getAttribute('data-wert'), 10) || 0;
@@ -435,9 +387,6 @@ function saveOrchestraSeatWert(seat, next) {
     var guests = parseInt(seat.getAttribute('data-guests'), 10) || 0;
     next = parseInt(next, 10) || 0;
     if(!user || !termin || next < 1 || next > 3) return;
-
-    var cronID = getOrchestraCronId(seat);
-    if(!cronID) return;
 
     seat.setAttribute('data-busy', '1');
     applyOrchestraSeatWert(seat, next);
@@ -462,7 +411,7 @@ function saveOrchestraSeatWert(seat, next) {
                 invalidateTerminResponseModalCache(termin);
                 refreshOrchestraSeatSheetIfOpen(seat);
             }
-            scheduleRefreshMainPageTerminEntries(termin, cronID);
+            scheduleRefreshMainPageTerminEntries(termin);
         }
         else {
             applyOrchestraSeatWert(seat, wert);
@@ -470,11 +419,11 @@ function saveOrchestraSeatWert(seat, next) {
         }
     };
 
-    var str = 'melde.php?cmd=save&id='+encodeURIComponent(cronID)
-        +'&user='+user+'&termin='+termin+'&wert='+next
+    var body = 'cmd=save&user='+user+'&termin='+termin+'&wert='+next
         +'&Children='+children+'&Guests='+guests;
-    xhr.open('GET', str, true);
-    xhr.send();
+    xhr.open('POST', 'melde.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(body);
 }
 
 var orchestraSheetSeat = null;

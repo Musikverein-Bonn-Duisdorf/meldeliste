@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 $_SESSION['page'] = 'insurance';
 $_SESSION['adminpage'] = true;
 include_once 'common/include.php';

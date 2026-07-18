@@ -1,6 +1,7 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 
 include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));

@@ -1,4 +1,4 @@
-function melde(cronID, user, termin, wert, Children, Guests) {
+function melde(user, termin, wert, Children, Guests) {
     if (window.XMLHttpRequest) {
 	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	xmlhttp=new XMLHttpRequest();
@@ -26,7 +26,7 @@ function melde(cronID, user, termin, wert, Children, Guests) {
             }
             // Weitere Einträge desselben Termins (z. B. Zähler) nachziehen
             if(typeof scheduleRefreshMainPageTerminEntries === 'function') {
-                scheduleRefreshMainPageTerminEntries(termin, cronID);
+                scheduleRefreshMainPageTerminEntries(termin);
             }
 	}
     }
@@ -41,7 +41,12 @@ function melde(cronID, user, termin, wert, Children, Guests) {
     if(user == 0) return;
     if(isNaN(wert) || wert > 3 || wert < 0) return;
     if(termin == 0) return;
-    var str = "melde.php?cmd=save&id="+cronID+"&user="+user+"&termin="+termin+"&wert="+wert+"&Children="+Children+"&Guests="+Guests;
-    xmlhttp.open("GET",str,true);
-    xmlhttp.send();
+    var body = "cmd=save&user="+encodeURIComponent(user)
+        +"&termin="+encodeURIComponent(termin)
+        +"&wert="+encodeURIComponent(wert)
+        +"&Children="+encodeURIComponent(Children)
+        +"&Guests="+encodeURIComponent(Guests);
+    xmlhttp.open("POST", "melde.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }

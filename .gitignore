@@ -2,6 +2,7 @@
 common/config.php
 uploads/*
 !uploads/README
+!uploads/.htaccess
 calendars/*.ics
 php.ini
 error-log.php

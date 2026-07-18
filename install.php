@@ -3,7 +3,8 @@
  * First-time database setup for IONOS / empty instances.
  * Open without login while no admin users exist; otherwise requires Admin session.
  */
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 
 $configFile = __DIR__.'/common/config.php';
 if(!is_readable($configFile)) {
