@@ -1,4 +1,4 @@
-function changeInstrument(cronID, user, termin) {
+function changeInstrument(user, termin) {
     if (window.XMLHttpRequest) {
 	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	xmlhttp=new XMLHttpRequest();
@@ -9,7 +9,10 @@ function changeInstrument(cronID, user, termin) {
     }
     var e = document.getElementById("iSelect"+termin);
     var instrument = e.options[e.selectedIndex].value;
-    var str = "melde.php?cmd=instrument&id="+cronID+"&user="+user+"&termin="+termin+"&instrument="+instrument;
-    xmlhttp.open("GET",str,true);
-    xmlhttp.send();
+    var body = "cmd=instrument&user="+encodeURIComponent(user)
+        +"&termin="+encodeURIComponent(termin)
+        +"&instrument="+encodeURIComponent(instrument);
+    xmlhttp.open("POST", "melde.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }

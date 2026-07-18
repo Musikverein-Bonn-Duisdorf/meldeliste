@@ -1,4 +1,4 @@
-function meldeShift(cronID, user, shift, termin, wert) {
+function meldeShift(user, shift, termin, wert) {
     if (window.XMLHttpRequest) {
 	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	xmlhttp=new XMLHttpRequest();
@@ -24,13 +24,17 @@ function meldeShift(cronID, user, shift, termin, wert) {
                 }
             }
             if(typeof scheduleRefreshMainPageTerminEntries === 'function') {
-                scheduleRefreshMainPageTerminEntries(termin, cronID);
+                scheduleRefreshMainPageTerminEntries(termin);
             }
 	}
     }
     if(shift == 0) return;
     if(user == 0) return;
-    var str = "meldeshift.php?cmd=save&id="+cronID+"&user="+user+"&termin="+termin+"&wert="+wert+"&shift="+shift;
-    xmlhttp.open("GET",str,true);
-    xmlhttp.send();
+    var body = "cmd=save&user="+encodeURIComponent(user)
+        +"&termin="+encodeURIComponent(termin)
+        +"&wert="+encodeURIComponent(wert)
+        +"&shift="+encodeURIComponent(shift);
+    xmlhttp.open("POST", "meldeshift.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }

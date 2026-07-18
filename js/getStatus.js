@@ -1,4 +1,4 @@
-function getStatus(cronID, user, termin) {
+function getStatus(user, termin) {
     if (window.XMLHttpRequest) {
 	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	xmlhttp=new XMLHttpRequest();
@@ -7,7 +7,8 @@ function getStatus(cronID, user, termin) {
 	// AJAX mit IE6, IE5
 	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
     }
-    var str = "melde.php?cmd=status&id="+cronID+"&user="+user+"&termin="+termin;
-    xmlhttp.open("GET",str,true);
-    xmlhttp.send();    
+    var body = "cmd=status&user="+encodeURIComponent(user)+"&termin="+encodeURIComponent(termin);
+    xmlhttp.open("POST", "melde.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }

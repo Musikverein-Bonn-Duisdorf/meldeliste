@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 $_SESSION['page']='meinregister';
 $_SESSION['adminpage']=false;
 include "common/header.php";
@@ -21,7 +22,7 @@ else {
 <div class="w3-container w3-padding-16" style="clear:both;">
 <input class="w3-input w3-border w3-padding" type="text" placeholder="Termine suchen (Titel, Ort, Datum, Beschreibung)…" id="filterString" onkeyup="filterTermine()">
 </div>
-<div id="Liste" data-cron-id="<?php echo htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8'); ?>">
+<div id="Liste">
 <?php
 $now = date("Y-m-d");
 $sql = sprintf('SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Uhrzeit`;',

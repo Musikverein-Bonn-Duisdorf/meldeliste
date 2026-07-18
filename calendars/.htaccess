@@ -1,0 +1,4 @@
+# Aggregate calendar must not be public (MELD-105)
+<Files "MVDcal_all.ics">
+    Require all denied
+</Files>

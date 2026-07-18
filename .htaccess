@@ -1,0 +1,11 @@
+# Webroot hardening (MELD-105)
+RedirectMatch 403 /\.git
+RedirectMatch 403 /scripts/
+
+<FilesMatch "\.php~$">
+    Require all denied
+</FilesMatch>
+
+<Files "config.php">
+    Require all denied
+</Files>

@@ -1,23 +1,28 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 include 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
-if(!isset($_GET['id'])) {
-    die('no ID specified');
+
+if(!loggedIn()) {
+    http_response_code(403);
+    die('forbidden');
 }
-if($_GET['id'] != $GLOBALS['cronID']) {
-    die('invalid ID');
+if(!requirePermission('perm_editConfig')) {
+    http_response_code(403);
+    die('forbidden');
 }
 
 header('Content-Type: text/plain; charset=utf-8');
 
-switch($_GET['cmd']) {
+$cmd = (string)meldeRequest('cmd', '');
+switch($cmd) {
 case "change":
-    if(!isset($_GET['para']) || !isset($_GET['value'])) {
+    if(!meldeRequest('para') || meldeRequest('value') === null) {
         die('missing para/value');
     }
-    $para = (string)$_GET['para'];
-    $value = (string)$_GET['value'];
+    $para = (string)meldeRequest('para');
+    $value = (string)meldeRequest('value');
 
     if($para === 'colorSchemeActive') {
         ensureColorSchemesStored();
@@ -99,7 +104,7 @@ case "change":
     break;
 
 case "schemeName":
-    if(!isset($_GET['value'])) {
+    if(!meldeRequest('value')) {
         die('missing value');
     }
     ensureColorSchemesStored();
@@ -109,7 +114,7 @@ case "schemeName":
     if(isset($schemes[$activeId]['name'])) {
         $oldName = (string)$schemes[$activeId]['name'];
     }
-    $newName = trim((string)$_GET['value']);
+    $newName = trim((string)meldeRequest('value'));
     if(!renameActiveColorScheme($newName)) {
         die('rename failed');
     }
@@ -138,6 +143,6 @@ case "schemeReset":
     break;
 
 default:
-    break;
+    die('invalid command');
 }
 ?>

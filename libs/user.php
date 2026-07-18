@@ -332,7 +332,7 @@ class User
         return true;
     }
     protected function generateLink() {
-        $this->activeLink = uniqid();
+        $this->activeLink = bin2hex(random_bytes(16));
     }
     public function getLink() {
         return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
