@@ -213,7 +213,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung)</li>
-<li><b>Statistik</b> – Auswertungen: Zeitraum wählen, Teilnahme- und Log-Diagramme, Ranking nach Teilnahme (sortierbar), Liste inaktiver Musiker (Login/Teilnahme)</li>
+<li><b>Statistik</b> – Auswertungen: Zeitraum in Tagen frei wählen, Teilnahme- und Log-Diagramme, Ranking nach Teilnahme (sortierbar), Liste inaktiver Musiker (Login/Teilnahme)</li>
 ' : '').'
 </ul>
 '

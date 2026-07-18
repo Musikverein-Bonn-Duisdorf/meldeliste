@@ -39,11 +39,9 @@ $payload = array(
 <div class="w3-container w3-margin-top w3-margin-bottom">
   <form method="get" action="evaluate.php" class="w3-bar w3-mobile" style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
     <label for="eval-days"><b>Zeitraum</b></label>
-    <select id="eval-days" name="days" class="w3-select w3-border w3-mobile" style="max-width:10rem;" onchange="this.form.submit()">
-      <?php foreach(evaluateAllowedDayOptions() as $opt): ?>
-      <option value="<?php echo (int)$opt; ?>"<?php echo $days === $opt ? ' selected' : ''; ?>><?php echo (int)$opt; ?> Tage</option>
-      <?php endforeach; ?>
-    </select>
+    <input id="eval-days" name="days" type="number" min="1" max="3650" step="1" value="<?php echo (int)$days; ?>" class="w3-input w3-border w3-mobile" style="max-width:6rem;" required>
+    <span>Tage</span>
+    <button type="submit" class="w3-button w3-border <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>">Anzeigen</button>
     <label class="w3-mobile">
       <input type="checkbox" name="besetzung" value="1"<?php echo $besetzungOnly ? ' checked' : ''; ?> onchange="this.form.submit()">
       nur Besetzung
