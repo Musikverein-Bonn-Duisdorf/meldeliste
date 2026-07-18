@@ -1142,6 +1142,19 @@
   color: #fff;
 }
 
+.mail-recipient-count-line {
+  margin-bottom: 0;
+}
+
+.mail-recipient-count {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.mail-recipient-count--loading {
+  opacity: 0.55;
+}
+
 .mail-recipient-chip-remove {
   border: 0;
   background: transparent;
