@@ -1,6 +1,6 @@
 <?php
 session_start();
-$_SESSION['page'] = 'mail-groups';
+$_SESSION['page'] = 'groups';
 $_SESSION['adminpage'] = true;
 include 'common/header.php';
 if(!requirePermission('perm_sendEmail')) {
@@ -26,14 +26,14 @@ if(isset($_POST['delete']) && isset($_POST['Index'])) {
 $groups = MailGroup::listAll();
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Empfängergruppen</h2>
+  <h2>Gruppen</h2>
 </div>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 
 <div class="w3-container w3-padding">
   <p>Benannte Gruppen mit Rollen, Registern und Personen – nutzbar beim Mailversand und bei der Termin-Sichtbarkeit.</p>
-  <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail-group-edit.php">Neue Gruppe</a>
+  <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="group-edit.php">Neue Gruppe</a>
   <a class="w3-button w3-margin-left" href="mail.php">Email versenden</a>
 </div>
 
@@ -57,7 +57,7 @@ foreach($groups as $g) {
       <div class="mail-list-primary"><?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?></div>
       <div><?php echo $count; ?> <span class="w3-small w3-text-gray">(<?php echo $countMail; ?> mit Mail)</span></div>
       <div>
-        <a class="w3-button w3-small w3-blue" href="mail-group-edit.php?id=<?php echo $id; ?>">Bearbeiten</a>
+        <a class="w3-button w3-small w3-blue" href="group-edit.php?id=<?php echo $id; ?>">Bearbeiten</a>
         <form method="post" style="display:inline;" onsubmit="return confirm('Gruppe wirklich löschen?');">
           <input type="hidden" name="Index" value="<?php echo $id; ?>" />
           <button class="w3-button w3-small w3-red" type="submit" name="delete" value="1">Löschen</button>
