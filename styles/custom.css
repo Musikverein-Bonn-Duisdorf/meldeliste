@@ -828,6 +828,7 @@
   padding: 0.85rem 1rem 1.1rem;
   padding-bottom: max(1.1rem, env(safe-area-inset-bottom));
   box-sizing: border-box;
+  pointer-events: auto;
 }
 
 .orchestra-seat-sheet[hidden] {
@@ -845,6 +846,7 @@
   cursor: pointer;
   color: #333;
   padding: 0.25rem 0.5rem;
+  z-index: 1;
 }
 
 .orchestra-seat-sheet-name {
@@ -855,8 +857,9 @@
 
 .orchestra-seat-sheet-instrument,
 .orchestra-seat-sheet-status {
-  margin-top: 0.2rem;
+  margin-top: 0.35rem;
   color: #444;
+  font-size: 0.95rem;
 }
 
 .orchestra-seat-sheet-actions {
@@ -876,8 +879,9 @@
 }
 
 .orchestra-seat-sheet-btn--active {
-  outline: 2px solid #333;
+  outline: 2px solid #111;
   font-weight: 700;
+  box-shadow: inset 0 0 0 1px #111;
 }
 
 .orchestra-svg--editable .orchestra-seat[data-editable="1"] {
