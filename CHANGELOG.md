@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-71bb9 (2026-07-18)
+
+- MELD-86: Orchester-View horizontal um den Dirigenten zentrieren
+
 ## 2026-07-18-fb78d (2026-07-18)
 
 - MELD-62: Rückmeldungs-Auswertung ohne N+1-Abfragen
