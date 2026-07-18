@@ -65,7 +65,7 @@ if($showGuestsHeader) {
 </div>
 <?php if($canEditResponse) { ?>
 <div class="w3-container w3-margin-top"><b>noch nicht gemeldet</b></div>
-<form class="w3-container w3-row" action="termine.php" method="POST">
+<form class="w3-container w3-row" action="index.php" method="POST">
 <?php foreach($missingUsers as $missing) { ?>
 <button class="w3-btn w3-border w3-margin-top w3-border-black w3-col s12 l4 m6 <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" type="submit" name="proxy" value="<?php echo $missing['id']; ?>"><?php echo $missing['name']; ?></button>
 <?php } ?>

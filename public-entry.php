@@ -34,7 +34,7 @@ if(isset($_POST['letter'])) {
     <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
 	<h3>Name</h3>
     </div>
-    <form class="w3-container w3-row" action="termine.php" method="POST">
+    <form class="w3-container w3-row" action="index.php" method="POST">
 	<?php
 	$sql = sprintf('SELECT * FROM `%sUser` WHERE `Nachname` LIKE "%s%%" AND `Deleted` = 0;',
     $GLOBALS['dbprefix'],

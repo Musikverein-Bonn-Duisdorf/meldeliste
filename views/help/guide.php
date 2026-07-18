@@ -40,9 +40,8 @@ $sections[] = array(
     'title' => 'Navigation',
     'body' => '
 <ul class="help-list">
-<li><i class="fas fa-home"></i> <b>Home</b> – nächste Termine und schnelles Melden</li>
+<li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
-'.(!empty($optionsDB['showAppmntPage']) ? '<li><i class="far fa-calendar-alt"></i> <b>Termine</b> – alle zukünftigen Termine</li>' : '').'
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
 <li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen</li>
@@ -59,13 +58,13 @@ $sections[] = array(
     'id' => 'melden',
     'title' => 'Zu Terminen melden',
     'body' => '
-<p>Auf <b>Home</b>'.(!empty($optionsDB['showAppmntPage']) ? ' und unter <b>Termine</b>' : '').' kannst du dich zu Terminen eintragen:</p>
+<p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
 <p><b>Tipp:</b> Auch „vielleicht“ oder „nein“ sind wertvoll – offene Einträge erschweren die Planung.</p>
 <p>Bei Terminen mit <b>Besetzung</b> kannst du im Termin-Detail ggf. das <b>Instrument für diesen Termin</b> anpassen (z.&nbsp;B. Dirigat übernehmen). Speichern mit dem Speicher-Button neben der Auswahl.</p>
 <p>Über das Info-Symbol <i class="fa fa-info-circle"></i> öffnest du die Termin-Details (Ort, Uhrzeit, Orchesterübersicht, …).</p>
-'.(!empty($optionsDB['showAppmntPage']) ? '<p>Über <i class="fa fa-calendar-plus"></i> kannst du einen Termin als ICS-Datei in deinen Kalender (Google, Outlook, …) importieren.</p>' : '').'
+<p>Über <i class="fa fa-calendar-plus"></i> kannst du einen Termin als ICS-Datei in deinen Kalender (Google, Outlook, …) importieren.</p>
 '
 );
 

@@ -47,7 +47,7 @@ if(requirePermission('perm_editConfig')) {
 ?>
 <div class="w3-bar <?php echo $optionsDB['colorNav']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
-  <a title="Home" alt="Home" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="fas fa-home"></i></a>
+  <a title="Termine" alt="Termine" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="far fa-calendar-alt"></i></a>
   <?php
   $mailUnread = 0;
   if(isset($_SESSION['userid'])) {
@@ -63,9 +63,6 @@ if(requirePermission('perm_editConfig')) {
             .'</span>';
     }
     ?></a>
-  <?php if($GLOBALS['optionsDB']['showAppmntPage']) { ?>
-  <a title="Termine" alt="Termine" href="termine.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('termine');?>"><i class="far fa-calendar-alt"></i></a>
-  <?php } ?>
   <a title="Mein Register" alt="Mein Register" href="mein-register.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinregister');?>"><i class="fas fa-users"></i></a>
 <?php
 $u = new User;
