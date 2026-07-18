@@ -150,13 +150,17 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
     </div>
     <div class="w3-margin-top">
       <label>sichtbar für</label>
-      <p class="w3-small w3-text-gray">Leer = für alle. Sonst nur der gewählte Kreis (Rollen, Empfängergruppen, Register, Personen).</p>
+      <p class="w3-small w3-text-gray">Standard: Alle User. Chips entfernen/ändern für einen kleineren Kreis; ohne Chips = für alle.</p>
       <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputBg; ?>">
         <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
         <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo $inputBg; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />
         <div id="terminVisibilitySuggest" class="mail-recipient-suggest" hidden></div>
         <input type="hidden" name="visibilitySpec" id="terminVisibilitySpec" value="<?php
-          $visSpec = $fill ? $n->getVisibilitySpecArray() : AudienceSpec::emptySpec();
+          $visSpec = $fill ? $n->getVisibilitySpecArray() : AudienceSpec::defaultVisibilitySpec();
+          // Legacy / leere Spec beim Bearbeiten: wie neu → Alle User
+          if($fill && AudienceSpec::isEmpty($visSpec)) {
+              $visSpec = AudienceSpec::defaultVisibilitySpec();
+          }
           echo htmlspecialchars(json_encode($visSpec), ENT_QUOTES, 'UTF-8');
         ?>" />
         <p class="w3-small w3-margin-top mail-recipient-count-line">

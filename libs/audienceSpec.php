@@ -29,6 +29,20 @@ class AudienceSpec
     }
 
     /**
+     * Default termin visibility: chip „Alle User“.
+     *
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     */
+    public static function defaultVisibilitySpec() {
+        return array(
+            'groups' => array('users'),
+            'registers' => array(),
+            'users' => array(),
+            'mailGroups' => array(),
+        );
+    }
+
+    /**
      * @param mixed $input array or JSON string
      * @param array $opts allowMailGroups (bool), defaultGroups (string[]|null), legacyRegister, legacyMemberOnly
      * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
