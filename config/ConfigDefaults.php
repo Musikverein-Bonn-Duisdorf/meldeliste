@@ -318,6 +318,12 @@ function getConfigDefaults() {
             'Description' => 'Anzeigename des Discord Bots',
         ),
         array(
+            'Parameter' => 'showBranchBannerAlways',
+            'Value' => '0',
+            'Type' => 'bool',
+            'Description' => 'Branch-Banner auch auf master anzeigen',
+        ),
+        array(
             'Parameter' => 'WebSiteName',
             'Value' => 'Meldeliste - Musikverein Bonn-Duisdorf',
             'Type' => 'string',

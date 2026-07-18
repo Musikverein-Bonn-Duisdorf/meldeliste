@@ -13,9 +13,9 @@
       if(isAdmin()) echo " (Admin)";
       ?></p>
 </div>
-<?php if(getBranchName() != "master") { ?>
+<?php if(getBranchName() != "master" || !empty($optionsDB['showBranchBannerAlways'])) { ?>
 <div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
-<?php echo "development branch: <b>".getBranchName()."</b>"; ?>
+<?php echo "branch: <b>".htmlspecialchars(getBranchName(), ENT_QUOTES, 'UTF-8')."</b>"; ?>
 </div>
 <?php } ?>
 <?php
