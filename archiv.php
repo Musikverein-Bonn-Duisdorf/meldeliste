@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='archiv';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_showResponse")) die();
+if(!requirePermission("perm_showResponse")) {
+    denyAccess();
+}
 
 $chunk = listChunkTermine('past', 'response', '', 50, (int)$_SESSION['userid']);
 ?>

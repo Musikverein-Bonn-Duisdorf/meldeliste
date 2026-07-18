@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='log';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_showLog")) die();
+if(!requirePermission("perm_showLog")) {
+    denyAccess();
+}
 
 // Buffer chunk build so any echo cannot appear above the search field
 ob_start();

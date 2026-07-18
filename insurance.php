@@ -5,11 +5,7 @@ $_SESSION['adminpage']=true;
 include "common/header.php";
 
 if(!requirePermission("perm_showInventories") && !requirePermission("perm_showInstruments")) {
- ?>
-<meta http-equiv="refresh" content="0; URL=index.php" />
-<?php
-    include "common/footer.php";
-    exit;
+    denyAccess();
 }
 
     $instrType = RegNumber::loadInstrType();

@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page'] = 'permissions';
 $_SESSION['adminpage'] = true;
 include "common/header.php";
-if(!requirePermission("perm_editPermissions")) die();
+if(!requirePermission("perm_editPermissions")) {
+    denyAccess();
+}
 
 $permKeys = Permissions::permissionKeys();
 $permLabels = Permissions::permissionLabels();

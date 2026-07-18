@@ -5,8 +5,7 @@ $_SESSION['adminpage']=true;
 include "common/include.php";
 
 if(!requirePermission("perm_showInventories") && !requirePermission("perm_showInstruments")) {
-    header('Location: index.php');
-    exit;
+    denyAccess();
 }
 
 $instrType = RegNumber::loadInstrType();

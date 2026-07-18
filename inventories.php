@@ -7,8 +7,7 @@ include "common/header.php";
 $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['insert'])
     || isset($_POST['update']) || isset($_POST['delete']);
 if($mutating && !requirePermission('perm_editInventories')) {
-    http_response_code(403);
-    die('Keine Berechtigung.');
+    denyAccess('Keine Berechtigung zum Ändern von Inventar.');
 }
 
 if(isset($_POST['newLoan'])) {
@@ -220,9 +219,7 @@ if(sel) {
 
 <?php }
     else {
- ?>
-<meta http-equiv="refresh" content="0; URL=index.php" />
-<?php
+        denyAccess();
     }
 
  include "common/footer.php";

@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='inventory-types';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_editInventories")) die();
+if(!requirePermission("perm_editInventories")) {
+    denyAccess();
+}
 
 $msg = '';
 $err = '';

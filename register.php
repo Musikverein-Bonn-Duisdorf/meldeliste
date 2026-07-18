@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='register';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_showUsers")) die();
+if(!requirePermission("perm_showUsers")) {
+    denyAccess();
+}
 
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">

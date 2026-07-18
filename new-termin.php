@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='newtermin';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_editAppmnts")) die();
+if(!requirePermission("perm_editAppmnts")) {
+    denyAccess();
+}
 
 $fill = false;
 if(isset($_POST['id'])) {

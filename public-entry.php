@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='public-entry';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_editResponse")) die();
+if(!requirePermission("perm_editResponse")) {
+    denyAccess();
+}
 
 $state = 1;
 

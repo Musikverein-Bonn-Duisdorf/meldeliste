@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='config';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_editConfig")) die();
+if(!requirePermission("perm_editConfig")) {
+    denyAccess('Keine Berechtigung für die Konfiguration.');
+}
 
 $fill = false;
 if(isset($_POST['save'])) {

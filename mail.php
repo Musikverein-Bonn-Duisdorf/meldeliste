@@ -15,7 +15,7 @@ if(!empty($_SESSION['singleUsePW'])) {
     exit;
 }
 if(!requirePermission('perm_sendEmail')) {
-    die('Keine Berechtigung.');
+    denyAccess('Keine Berechtigung für den Email-Versand.');
 }
 
 MailJob::ensureSchema();

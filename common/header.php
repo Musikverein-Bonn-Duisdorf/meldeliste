@@ -52,4 +52,5 @@
   <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?>">
 <?php
 include "common/nav.php";
+$GLOBALS['mlHeaderRendered'] = true;
 ?>

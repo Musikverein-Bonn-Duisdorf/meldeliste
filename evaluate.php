@@ -3,7 +3,9 @@ session_start();
 $_SESSION['page']='evaluate';
 $_SESSION['adminpage']=true;
 include "common/header.php";
-if(!requirePermission("perm_showLog")) die();
+if(!requirePermission("perm_showLog")) {
+    denyAccess();
+}
 ?>
 <div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
 <h2>Datenauswertung</h2>

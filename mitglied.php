@@ -9,7 +9,7 @@ mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBAL
 requireLoggedInOrRedirect();
 
 if(!requirePermission('perm_showUsers')) {
-    die();
+    denyAccess();
 }
 
 include_once 'libs/form-response.php';
