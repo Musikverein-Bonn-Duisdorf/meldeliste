@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-d3dd3 (2026-07-18)
+
+- MELD-101: opaque soft red for orchestra absences (no register bleed)
+- MELD-101: Orchester Absage-Rot ohne Register-Durchscheinen
+
 ## 2026-07-18-70675 (2026-07-18)
 
 - MELD-100: arrow-key navigation in chip suggestion list
