@@ -351,18 +351,18 @@ class Termin
     }
     protected function getUser() {
         if(isset($_POST['proxy'])) {
-            $user = $_POST['proxy'];
+            return $_POST['proxy'];
         }
-        elseif(isset($_GET['user'])) {
-            $user = $_GET['user'];
+        if(isset($_GET['user'])) {
+            return $_GET['user'];
         }
-        elseif(isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) {
-            $user = (int)$_SESSION['proxy'];
+        if(isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) {
+            return (int)$_SESSION['proxy'];
         }
-        elseif(isset($_SESSION['userid'])) {
-            $user = $_SESSION['userid'];
+        if(isset($_SESSION['userid'])) {
+            return $_SESSION['userid'];
         }
-        return $user;
+        return 0;
     }
     public function getShiftsStatus() {
         $user=$this->getUser();
@@ -965,7 +965,7 @@ class Termin
     }
     protected function mainColor() {
         $c = $this->globalShiftColor();
-        if($c) return;
+        if($c) return $c;
         if(!$this->Shifts) {
         switch($this->Wert) {
         case 1:
@@ -1792,6 +1792,7 @@ class Termin
 
         $containerdiv = new div;
         $containerdiv->indent=$indent;
+        $containerdiv->id="responseLine".$this->Index;
         $containerdiv->class="w3-margin-top w3-border w3-border-black w3-card";
         $containerdiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
         $str=$str.$containerdiv->open();
@@ -1827,6 +1828,13 @@ class Termin
         $indent++;
         
         $shifts = $this->getShifts();
+        if(count($shifts) === 0) {
+            $empty = new div;
+            $empty->indent=$indent;
+            $empty->class="w3-padding w3-text-gray";
+            $empty->body="Noch keine Schichten angelegt.";
+            $str=$str.$empty->print();
+        }
         for($i=0; $i<count($shifts); $i++) {
             $s = new Shift;
             $s->load_by_id($shifts[$i]);
