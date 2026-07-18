@@ -56,8 +56,12 @@ class Meldung
         );
         if($this->Wert != $old->Wert) $str.=meldeSymbol($this->Wert)." (vorher:".meldeWert($old->Wert)."), ";
 		$str.=$strGeneral;
-        if($this->Children != $old->Children) $str.=", Kinder: ".$old->Children." &rArr; <b>".$this->Children."</b>";
-        if($this->Guests != $old->Guests) $str.=", G&auml;ste: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
+        if(!empty($GLOBALS['optionsDB']['showChildOption']) && $this->Children != $old->Children) {
+            $str.=", Kinder: ".$old->Children." &rArr; <b>".$this->Children."</b>";
+        }
+        if(!empty($GLOBALS['optionsDB']['showGuestOption']) && $this->Guests != $old->Guests) {
+            $str.=", G&auml;ste: ".$old->Guests." &rArr; <b>".$this->Guests."</b>";
+        }
         if($this->Instrument != $old->Instrument) {
             $newinstrument = $this->Instrument;
             if($newinstrument == 0) $newinstrument = $u->Instrument;

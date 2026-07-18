@@ -30,7 +30,7 @@ if(requirePermission('perm_editConfig')) {
             echo '<div class="w3-orange w3-padding"><i class="fas fa-database"></i> '
                 .'Neue Datenbank-Version verfügbar (installiert: <b>'.$inst.'</b>, Soll: <b>'.$exp.'</b>). '
                 .'Bitte im <a href="updater.php"><b>Updater</b></a> „Datenbank reparieren“ ausführen '
-                .'oder einen git pull (aktualisiert die DB bei Bedarf mit).'
+                .'oder „Update durchführen“ (aktualisiert die DB bei Bedarf mit).'
                 .'</div>';
         }
     }
