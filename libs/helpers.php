@@ -782,13 +782,13 @@ function printOrchestra($tid, $scale) {
                 break;
             }
 
-            $line = array("short" => $short, "Instrument" => $instr, "Wert" => $wert);
+            $line = array("short" => $short, "Instrument" => $instr, "homeInstrument" => $user['Instrument'], "Wert" => $wert);
             $allMusiker[] = $line;
         }
         if($tid) {
             foreach($aAushilfen as $user) {
                 $short=getShortAushilfe($user['Name']);
-                $line = array("short" => $short, "Instrument" => $user['Instrument'], "Wert" => 1);
+                $line = array("short" => $short, "Instrument" => $user['Instrument'], "homeInstrument" => $user['Instrument'], "Wert" => 1);
                 $allMusiker[] = $line;
             }
         }
@@ -804,7 +804,21 @@ function printOrchestra($tid, $scale) {
                 $allSorted[] = $m;
             }
         }
-        $allMusiker = $allSorted;        
+        $allMusiker = $allSorted;
+
+        // Row 0 (Dirigent): aktiv = ja/vielleicht auf diesem Platz.
+        // Sonst Fallback: fester Dirigent (Stamm-Instrument), auch bei Nein/ohne Stimme.
+        $hasActiveDirigent = false;
+        if($tid && (int)$register['Row'] === 0) {
+            foreach($allMusiker as $m) {
+                if(!in_array($m['Instrument'], $sortedInstruments)) continue;
+                $w = (int)$m['Wert'];
+                if($w === 1 || $w === 3) {
+                    $hasActiveDirigent = true;
+                    break;
+                }
+            }
+        }
         
         foreach($sortedInstruments as $instrument) {
             $skip = false;
@@ -815,11 +829,14 @@ function printOrchestra($tid, $scale) {
                 }
                 if($user['Instrument'] != $instrument) continue;
                 if($skip) continue;
-                // Dirigentenplatz (Row 0): nur ja/vielleicht — damit Nein/ohne Stimme
-                // den Platz freigibt und Ersatz-Dirigenten sichtbar werden.
                 if($tid && (int)$register['Row'] === 0) {
                     $w = (int)$user['Wert'];
-                    if($w !== 1 && $w !== 3) {
+                    if($hasActiveDirigent) {
+                        if($w !== 1 && $w !== 3) {
+                            continue;
+                        }
+                    }
+                    elseif(!in_array($user['homeInstrument'], $sortedInstruments)) {
                         continue;
                     }
                 }
