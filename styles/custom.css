@@ -1193,7 +1193,8 @@
   cursor: pointer;
 }
 
-.mail-recipient-suggest-item:hover {
+.mail-recipient-suggest-item:hover,
+.mail-recipient-suggest-item--active {
   background: #f3f6fa;
 }
 
