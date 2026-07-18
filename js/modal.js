@@ -58,7 +58,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 /**
- * Toggle orchestra SVG: show only ja (1) / vielleicht (3) seats.
+ * Toggle between full seating plan and packed active-only (ja/vielleicht) layout.
  */
 function toggleActiveOrchestra(checkbox) {
     var panel = checkbox;
@@ -66,10 +66,15 @@ function toggleActiveOrchestra(checkbox) {
         panel = panel.parentNode;
     }
     if(!panel) return;
+    var full = panel.querySelector('.orchestra-layout--full');
+    var active = panel.querySelector('.orchestra-layout--active');
+    if(!full || !active) return;
     if(checkbox.checked) {
-        panel.classList.add('orchestra-view--active-only');
+        full.setAttribute('hidden', 'hidden');
+        active.removeAttribute('hidden');
     }
     else {
-        panel.classList.remove('orchestra-view--active-only');
+        active.setAttribute('hidden', 'hidden');
+        full.removeAttribute('hidden');
     }
 }

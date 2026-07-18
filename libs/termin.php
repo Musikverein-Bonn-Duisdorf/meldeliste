@@ -2493,11 +2493,17 @@ ORDER BY `Nachname`, `Vorname`;",
         $orchestraLarge = '';
         $orchestraMedium = '';
         $orchestraSmall = '';
+        $orchestraActiveLarge = '';
+        $orchestraActiveMedium = '';
+        $orchestraActiveSmall = '';
         $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt;
         if($showOrchestra) {
-            $orchestraLarge = printOrchestra($this->Index, 1);
-            $orchestraMedium = printOrchestra($this->Index, 0.6);
-            $orchestraSmall = printOrchestra($this->Index, 0.4);
+            $orchestraLarge = printOrchestra($this->Index, 1, false);
+            $orchestraMedium = printOrchestra($this->Index, 0.6, false);
+            $orchestraSmall = printOrchestra($this->Index, 0.4, false);
+            $orchestraActiveLarge = printOrchestra($this->Index, 1, true);
+            $orchestraActiveMedium = printOrchestra($this->Index, 0.6, true);
+            $orchestraActiveSmall = printOrchestra($this->Index, 0.4, true);
         }
 
         $missingUsers = array();
@@ -2519,6 +2525,9 @@ ORDER BY `Nachname`, `Vorname`;",
             'orchestraLarge' => $orchestraLarge,
             'orchestraMedium' => $orchestraMedium,
             'orchestraSmall' => $orchestraSmall,
+            'orchestraActiveLarge' => $orchestraActiveLarge,
+            'orchestraActiveMedium' => $orchestraActiveMedium,
+            'orchestraActiveSmall' => $orchestraActiveSmall,
             'colsize' => $colsize,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
