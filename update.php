@@ -4,7 +4,7 @@ $_SESSION['page']='update';
 $_SESSION['adminpage']=true;
 include "common/header.php";
 if(!requirePermission("perm_editConfig")) die();
-if(empty($_SESSION['admin'])) {
+if(!isAdmin()) {
     die("<div class=\"w3-panel w3-red w3-padding\"><b>Admin-Zugang erforderlich.</b></div>");
 }
 

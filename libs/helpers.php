@@ -963,12 +963,12 @@ function validateLink($hash) {
         $_SESSION['Vorname'] = $row['Vorname'];
         $_SESSION['Nachname'] = $row['Nachname'];
         $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
-        $_SESSION['admin'] = (bool)$row['Admin'];
         $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
         $logentry = new Log;
         $logentry->info("Login via Link.");
         recordLogin();
         $_SESSION['permissions'] = loadPermissions($row['Index']);
+        $_SESSION['admin'] = isAdmin() ? 1 : 0;
         return true;
     }
     $logentry = new Log;
@@ -996,12 +996,12 @@ function validateUser($login, $password) {
             $_SESSION['Vorname'] = $row['Vorname'];
             $_SESSION['Nachname'] = $row['Nachname'];
             $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
-            $_SESSION['admin'] = (bool)$row['Admin'];
             $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
             $logentry = new Log;
             $logentry->info("Login via Password.");
             recordLogin();
             $_SESSION['permissions'] = loadPermissions($row['Index']);
+            $_SESSION['admin'] = isAdmin() ? 1 : 0;
             return true;
         }
     }
