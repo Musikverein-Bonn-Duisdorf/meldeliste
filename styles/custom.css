@@ -734,3 +734,28 @@
     margin-bottom: 0.85rem;
   }
 }
+
+/* Orchestra: filter to active responses (ja / vielleicht) */
+.orchestra-panel-header {
+  margin-bottom: 0.5rem;
+  align-items: baseline;
+}
+
+.orchestra-panel-toggle {
+  text-align: right;
+}
+
+.orchestra-panel-toggle label {
+  cursor: pointer;
+}
+
+.orchestra-view--active-only .orchestra-seat:not([data-wert="1"]):not([data-wert="3"]) {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .orchestra-panel-toggle {
+    text-align: left;
+    margin-top: 0.35rem;
+  }
+}
