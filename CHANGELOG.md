@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-eecda (2026-07-18)
+
+- MELD-83: Aktive Besetzung als gedrängter Sitzplan ohne Lücken
+- MELD-83: Hinweis ja/vielleicht am Besetzung-Toggle entfernen
+- MELD-83: Umschalter für aktive Besetzung in der Orchesteransicht
+
 ## 2026-07-18-9cc8d (2026-07-18)
 
 - MELD-80: Formular-Spalten am PC und Checkbox-Ausrichtung
