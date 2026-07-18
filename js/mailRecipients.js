@@ -199,7 +199,7 @@
               && !(self.spec.users && self.spec.users.length)
               && !(self.spec.mailGroups && self.spec.mailGroups.length);
             self.countEl.textContent = emptySpec
-              ? 'versteckt (nur Recht „Versteckte Termine“)'
+              ? '—'
               : (n === 1 ? 'sichtbar für 1 Person' : ('sichtbar für ' + n + ' Personen'));
           }
         } catch(e) {
