@@ -455,14 +455,16 @@ function orchestraPolarPoint($cx, $cy, $radius, $arcDeg) {
 
 /**
  * Schematic SVG: register arcs by Row / ArcMin / ArcMax (edit preview).
+ * Uses clear per-row radii (no seat spillover), so rows do not collapse onto minrowdistance.
  */
 function printRegisterLayoutPreview() {
     $baseWidth = 1000;
     $cx = $baseWidth / 2.0;
     $cy = 40.0;
-    $rowdistance = 60;
+    // Preview spacing: wide enough that thick arcs on adjacent rows do not overlap.
+    $rowGap = 52;
     $minrowdistance = 150;
-    $strokeW = 28;
+    $strokeW = 22;
 
     $sql = sprintf(
         'SELECT * FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Row`, `Sortierung`, `Name`;',
@@ -477,22 +479,16 @@ function printRegisterLayoutPreview() {
         $maxRow = max($maxRow, (int)$row['Row']);
     }
 
-    $lmaxradius = array(0);
-    $rmaxradius = array(0);
     $arcsHtml = '';
     $guidesHtml = '';
     $minX = $cx;
     $maxX = $cx;
     $minY = $cy;
     $maxY = $cy;
+    $halfStroke = $strokeW / 2.0;
 
     foreach($registers as $register) {
         $rowNum = (int)$register['Row'];
-        while(count($lmaxradius) <= $rowNum) {
-            $lmaxradius[] = $lmaxradius[count($lmaxradius) - 1] + $rowdistance;
-            $rmaxradius[] = $rmaxradius[count($rmaxradius) - 1] + $rowdistance;
-        }
-
         $name = html_entity_decode((string)$register['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
         $color = normalizeHexColor(isset($register['Color']) ? $register['Color'] : '');
@@ -521,15 +517,8 @@ function printRegisterLayoutPreview() {
             continue;
         }
 
-        if($arcMin < 90) {
-            $radius = $lmaxradius[$rowNum - 1] + $rowdistance;
-        }
-        else {
-            $radius = $rmaxradius[$rowNum - 1] + $rowdistance;
-        }
-        if($radius < $minrowdistance) {
-            $radius = $minrowdistance;
-        }
+        // One clear radius per Reihe (same for left/right) so rows stay separated.
+        $radius = $minrowdistance + ($rowNum - 1) * $rowGap;
 
         $span = abs($arcMax - $arcMin);
         $steps = max(8, (int)ceil($span / 3));
@@ -539,10 +528,10 @@ function printRegisterLayoutPreview() {
             $arc = $arcMin + ($arcMax - $arcMin) * $t;
             $p = orchestraPolarPoint($cx, $cy, $radius, $arc);
             $pts[] = sprintf('%.1f,%.1f', $p[0], $p[1]);
-            $minX = min($minX, $p[0] - $strokeW);
-            $maxX = max($maxX, $p[0] + $strokeW);
-            $minY = min($minY, $p[1] - $strokeW);
-            $maxY = max($maxY, $p[1] + $strokeW);
+            $minX = min($minX, $p[0] - $halfStroke);
+            $maxX = max($maxX, $p[0] + $halfStroke);
+            $minY = min($minY, $p[1] - $halfStroke);
+            $maxY = max($maxY, $p[1] + $halfStroke);
         }
 
         $midArc = ($arcMin + $arcMax) / 2.0;
@@ -553,7 +542,7 @@ function printRegisterLayoutPreview() {
             .'<title>'.$title.'</title>'
             .'<polyline points="'.implode(' ', $pts).'" fill="none" stroke="'.$color
             .'" stroke-width="'.$strokeW.'" stroke-linecap="round" stroke-linejoin="round"'
-            .' stroke-opacity="0.9"/>'
+            .' stroke-opacity="0.92"/>'
             .'<text x="'.sprintf('%.1f', $lp[0]).'" y="'.sprintf('%.1f', $lp[1])
             .'" text-anchor="middle" dominant-baseline="central" fill="'.$textFill
             .'" font-size="10" font-weight="600" style="paint-order:stroke;stroke:#000;stroke-width:2.5px;stroke-opacity:0.35">'
@@ -562,7 +551,7 @@ function printRegisterLayoutPreview() {
     }
 
     for($r = 1; $r <= max(1, $maxRow); $r++) {
-        $guideR = $minrowdistance + ($r - 1) * $rowdistance;
+        $guideR = $minrowdistance + ($r - 1) * $rowGap;
         $guidesHtml .= '<circle cx="'.sprintf('%.1f', $cx).'" cy="'.sprintf('%.1f', $cy)
             .'" r="'.sprintf('%.1f', $guideR).'" fill="none" stroke="#bbb" stroke-width="1"'
             .' stroke-dasharray="4 6" opacity="0.55"/>'."\n";
@@ -570,7 +559,7 @@ function printRegisterLayoutPreview() {
             .'" fill="#888" font-size="9">Reihe '.$r.'</text>'."\n";
     }
 
-    $hintR = $minrowdistance + max(0, $maxRow) * $rowdistance + 36;
+    $hintR = $minrowdistance + max(0, $maxRow - 1) * $rowGap + 40;
     $hints = array(
         array(0, '0°'),
         array(90, '90°'),
@@ -588,11 +577,16 @@ function printRegisterLayoutPreview() {
         $maxY = max($maxY, $hp[1] + 12);
     }
 
-    $pad = 16;
-    $vbX = $minX - $pad;
-    $vbY = $minY - $pad;
-    $vbW = max(200.0, ($maxX - $minX) + 2 * $pad);
-    $vbH = max(160.0, ($maxY - $minY) + 2 * $pad);
+    $pad = 12;
+    $contentW = ($maxX - $minX) + 2 * $pad;
+    $contentH = ($maxY - $minY) + 2 * $pad;
+    $midX = ($minX + $maxX) / 2.0;
+    $midY = ($minY + $maxY) / 2.0;
+    // Same framing idea as printOrchestra (register/musiker view)
+    $vbW = max($contentW, 820.0);
+    $vbH = max($contentH, 480.0);
+    $vbX = $midX - $vbW / 2.0;
+    $vbY = $midY - $vbH / 2.0;
 
     return '<svg class="orchestra-svg register-layout-svg" viewBox="'
         .htmlspecialchars(sprintf('%.1f %.1f %.1f %.1f', $vbX, $vbY, $vbW, $vbH), ENT_QUOTES, 'UTF-8')
