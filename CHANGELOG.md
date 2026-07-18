@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-eacd2 (2026-07-18)
+
+- MELD-102: keep mailGroups when applying default draft recipients
+- MELD-102: Mail-Entwurf behält Gruppen-Empfänger
+
 ## 2026-07-18-d3dd3 (2026-07-18)
 
 - MELD-101: opaque soft red for orchestra absences (no register bleed)
