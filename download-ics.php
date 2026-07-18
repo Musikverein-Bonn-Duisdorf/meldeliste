@@ -2,7 +2,6 @@
 include 'common/include.php';
 session_start();
 
-/* include 'libs/ics.php'; */
 if(isset($_POST['appID'])) {
 
     $n = new Termin;
