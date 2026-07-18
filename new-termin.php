@@ -146,7 +146,6 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
     </div>
     <div class="w3-margin-top">
       <label>sichtbar für</label>
-      <p class="w3-small w3-text-gray">Standard: Alle User. Ohne Chips = versteckt (nur Recht „Versteckte Termine anzeigen“).</p>
       <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputBg; ?>">
         <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
         <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo $inputBg; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />

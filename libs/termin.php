@@ -563,7 +563,7 @@ class Termin
     public function getVisibilityLabel() {
         $spec = $this->getVisibilitySpecArray();
         if(AudienceSpec::isEmpty($spec)) {
-            return 'versteckt (nur Recht „Versteckte Termine“)';
+            return '—';
         }
         $bits = array();
         $groupLabels = array(
@@ -596,7 +596,7 @@ class Termin
                 $bits[] = $u->getName();
             }
         }
-        return count($bits) ? implode(', ', $bits) : 'versteckt (nur Recht „Versteckte Termine“)';
+        return count($bits) ? implode(', ', $bits) : '—';
     }
 
     /**
