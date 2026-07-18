@@ -94,7 +94,8 @@ if($GLOBALS['optionsDB']['showTravelTime']) {
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
     <input type="hidden" name="Auftritt" value="0">
     <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
-    <label>Auftritt</label>
+    <label>Besetzung</label>
+    <div class="w3-small w3-text-gray">Registeraufschlüsselung und Orchesterdarstellung (Proben und Auftritte). Ohne Haken z.&nbsp;B. Grillfest/Radtour (nur Manpower).</div>
     </div>
     <div class="w3-col l6 m6 s12 w3-mobile w3-margin-bottom w3-left">
     <input type="hidden" name="Shifts" value="0">
