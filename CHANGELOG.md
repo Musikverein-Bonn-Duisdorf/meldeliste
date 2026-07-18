@@ -2,6 +2,14 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-3b5b8 (2026-07-18)
+
+- MELD-88: Druck-/PDF-Übersicht für Instrumentenversicherung
+
+## 2026-07-18-71bb9: (2026-07-18)
+
+- (keine weiteren Notizen)
+
 ## 2026-07-18-71bb9 (2026-07-18)
 
 - MELD-86: Orchester-View horizontal um den Dirigenten zentrieren
