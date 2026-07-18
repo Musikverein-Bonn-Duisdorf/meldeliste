@@ -2,7 +2,18 @@
 session_start();
 $_SESSION['page'] = 'groups';
 $_SESSION['adminpage'] = true;
-include 'common/header.php';
+
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+
+if(!loggedIn()) {
+    header('Location: login.php');
+    exit;
+}
+if(!empty($_SESSION['singleUsePW'])) {
+    header('Location: changePW.php');
+    exit;
+}
 if(!requirePermission('perm_sendEmail')) {
     denyAccess();
 }
@@ -17,6 +28,7 @@ if($editId > 0) {
     $g->load_by_id($editId);
 }
 
+// Speichern vor HTML-Ausgabe (Redirect)
 if(isset($_POST['save'])) {
     $g->Name = isset($_POST['Name']) ? $_POST['Name'] : '';
     $specRaw = isset($_POST['memberSpec']) ? $_POST['memberSpec'] : '{}';
@@ -49,6 +61,8 @@ $catalog = AudienceSpec::buildCatalog(array(
     'forMail' => false,
     'includeMailGroups' => false,
 ));
+
+include 'common/header.php';
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
