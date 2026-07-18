@@ -916,3 +916,184 @@
     width: auto !important;
   }
 }
+
+/* Instrument-/Register-Typen editieren (MELD-85): responsives Grid statt w3-col Floats */
+.type-edit-row {
+  overflow-x: hidden;
+}
+
+.type-edit-form {
+  display: grid;
+  gap: 0.5rem 0.75rem;
+  align-items: end;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Hidden fields must not occupy a grid track (avoids column shift / wrap). */
+.type-edit-form > input[type="hidden"] {
+  position: absolute;
+  left: -9999px;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+
+.type-edit-field {
+  min-width: 0;
+}
+
+.type-edit-field .w3-input,
+.type-edit-field .w3-select,
+.type-edit-field input[type="color"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.type-edit-field input[type="color"] {
+  min-height: 2.4rem;
+  padding: 0.15rem;
+}
+
+.type-edit-field--check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.type-edit-field--actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.type-edit-field--actions .w3-button {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.type-edit-label {
+  display: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.type-edit-label--always {
+  display: block;
+}
+
+.type-edit-form--create .type-edit-label--always {
+  display: block;
+}
+
+/* Desktop: feste Track-Breiten (minmax(0,fr)), Aktions-Spalte immer gleich breit */
+@media (min-width: 993px) {
+  .type-edit-form--instrument {
+    grid-template-columns:
+      3rem
+      minmax(0, 2fr)
+      minmax(0, 1.4fr)
+      4.25rem
+      3.5rem
+      minmax(0, 1fr)
+      12.5rem;
+  }
+
+  .type-edit-form--register {
+    grid-template-columns:
+      3rem
+      minmax(0, 1.6fr)
+      4rem
+      4rem
+      4.25rem
+      4.25rem
+      minmax(0, 1fr)
+      12.5rem;
+  }
+
+  .type-edit-form--create.type-edit-form--instrument {
+    grid-template-columns:
+      minmax(0, 2fr)
+      minmax(0, 1.4fr)
+      4.5rem
+      3rem
+      4.5rem
+      8rem;
+  }
+
+  .type-edit-form--create.type-edit-form--register {
+    grid-template-columns:
+      minmax(0, 1.6fr)
+      4.5rem
+      4.5rem
+      4.5rem
+      4.5rem
+      3rem
+      8rem;
+  }
+
+  .type-edit-header .type-edit-label,
+  .type-edit-form:not(.type-edit-form--create) .type-edit-label:not(.type-edit-label--always) {
+    display: none;
+  }
+}
+
+/* Tablet: 2 Spalten, Labels sichtbar, Kopfzeile aus */
+@media (max-width: 992px) {
+  .type-edit-header {
+    display: none !important;
+  }
+
+  .type-edit-form {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .type-edit-label,
+  .type-edit-field--meta .type-edit-label {
+    display: block;
+  }
+
+  .type-edit-field--grow,
+  .type-edit-field--actions,
+  .type-edit-field--meta {
+    grid-column: 1 / -1;
+  }
+
+  .type-edit-field--check {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Phone: eine Spalte */
+@media (max-width: 600px) {
+  .type-edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .type-edit-field--grow,
+  .type-edit-field--actions,
+  .type-edit-field--meta {
+    grid-column: auto;
+  }
+
+  .type-edit-row {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+.register-layout-svg .register-layout-arc:hover polyline {
+  stroke-opacity: 1;
+  filter: brightness(1.05);
+}
