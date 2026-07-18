@@ -10,7 +10,8 @@ if(PHP_SAPI === 'cli') {
     $_GET['cmd'] = (string)$argv[2];
 }
 
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 include 'common/include.php';
 
 if(!isset($_GET['id'])) {
@@ -25,8 +26,13 @@ if(!isset($_GET['cmd'])) {
 
 $cmd = (string)$_GET['cmd'];
 
-// Binary download: no HTML preamble
+// Binary download: CLI only (HTTP backup via backup.php)
 if($cmd === 'backup') {
+    if(PHP_SAPI !== 'cli') {
+        http_response_code(403);
+        header('Content-Type: text/plain; charset=utf-8');
+        die("Backup via HTTP disabled; use backup.php or CLI: php cron.php <cronId> backup\n");
+    }
     require_once __DIR__.'/libs/backup.php';
     mkAdmin();
     try {

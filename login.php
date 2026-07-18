@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -39,6 +40,14 @@ if(loggedIn()) {
     <meta http-equiv="refresh" content="0; URL='changePW.php'" />
     <?php
         die("<div class=\"w3-panel ".$GLOBALS['optionsDB']['colorLogWarning']."\"><h2>Passwort &auml;ndern...</h2></div>");
+    }
+    if(!empty($_SESSION['login_return']) && strpos((string)$_SESSION['login_return'], 'sso.php') === 0) {
+        $ret = $_SESSION['login_return'];
+        unset($_SESSION['login_return']);
+      ?>
+    <meta http-equiv="refresh" content="0; URL='<?php echo htmlspecialchars($ret, ENT_QUOTES, 'UTF-8'); ?>'" />
+    <?php
+        die("<div class=\"w3-panel ".$GLOBALS['optionsDB']['colorSuccess']."\"><h2>Login erfolgreich.</h2></div>");
     }
       ?>
     <meta http-equiv="refresh" content="0; URL='index.php'" />

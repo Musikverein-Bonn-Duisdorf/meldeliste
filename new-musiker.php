@@ -1,6 +1,7 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 
 include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
@@ -145,6 +146,9 @@ $formAction = '';
   }
 ?>
     </select>
+<?php if($fill && (int)$n->Index > 0) { ?>
+    <p class="w3-left-align w3-small"><a href="user-voice.php?user=<?php echo (int)$n->Index; ?>">Stimme / Fallbacks (Notenarchiv)</a></p>
+<?php } ?>
 <?php if($fill && (int)$n->Index > 0) {
     $membership = AudienceSpec::membershipForUser((int)$n->Index);
     if(count($membership)) {

@@ -1,4 +1,4 @@
-function meldeFT(cronID, user, termin) {
+function meldeFT(user, termin) {
     if (window.XMLHttpRequest) {
 	// AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
 	xmlhttp=new XMLHttpRequest();
@@ -29,7 +29,10 @@ function meldeFT(cronID, user, termin) {
     FreeText = FreeText.value;
     if(user == 0) return;
     if(termin == 0) return;
-    var str = "melde.php?cmd=freetext&id="+cronID+"&user="+user+"&termin="+termin+"&freeText="+FreeText;
-    xmlhttp.open("GET",str,true);
-    xmlhttp.send();
+    var body = "cmd=freetext&user="+encodeURIComponent(user)
+        +"&termin="+encodeURIComponent(termin)
+        +"&freeText="+encodeURIComponent(FreeText);
+    xmlhttp.open("POST", "melde.php", true);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send(body);
 }

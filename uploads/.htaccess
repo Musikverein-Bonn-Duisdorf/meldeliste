@@ -1,0 +1,5 @@
+# Disable PHP execution in upload directories (MELD-105)
+php_flag engine off
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>

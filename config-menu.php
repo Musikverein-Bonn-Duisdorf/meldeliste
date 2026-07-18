@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 $_SESSION['page']='config';
 $_SESSION['adminpage']=true;
 include "common/header.php";
@@ -9,6 +10,9 @@ if(!requirePermission("perm_editConfig")) {
 
 $fill = false;
 if(isset($_POST['save'])) {
+    if(!csrf_verify(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
+        denyAccess('Ungültiges Sicherheits-Token.');
+    }
     $sql = sprintf('SELECT * FROM `%sconfig`;',
     $GLOBALS['dbprefix']
     );
@@ -97,9 +101,10 @@ function savePara(Parameter, Value, reload) {
 	        }
 	    }
 	};
-	var str = "savePara.php?cmd=change&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&para="+encodeURIComponent(Parameter)+"&value="+encodeURIComponent(Value);
-	xmlhttp.open("GET",str,true);
-	xmlhttp.send();
+	var body = "cmd=change&para="+encodeURIComponent(Parameter)+"&value="+encodeURIComponent(Value);
+	xmlhttp.open("POST", "savePara.php", true);
+	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlhttp.send(body);
 }
 function clearColor(Parameter, inputId, labelId) {
     savePara(Parameter, '', false);
@@ -118,9 +123,10 @@ function renameColorScheme(name) {
 	else {
 	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 	}
-	var str = "savePara.php?cmd=schemeName&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>+"&value="+encodeURIComponent(name);
-	xmlhttp.open("GET",str,true);
-	xmlhttp.send();
+	var body = "cmd=schemeName&value="+encodeURIComponent(name);
+	xmlhttp.open("POST", "savePara.php", true);
+	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlhttp.send(body);
 }
 function resetColorScheme() {
     if(!confirm('Aktives Farbschema auf Werkseinstellung zurücksetzen?')) return;
@@ -135,9 +141,10 @@ function resetColorScheme() {
 	        window.location.reload();
 	    }
 	};
-	var str = "savePara.php?cmd=schemeReset&id="+<?php echo "\"".$GLOBALS['cronID']."\""; ?>;
-	xmlhttp.open("GET",str,true);
-	xmlhttp.send();
+	var body = "cmd=schemeReset";
+	xmlhttp.open("POST", "savePara.php", true);
+	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlhttp.send(body);
 }
 </script>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
@@ -187,6 +194,7 @@ $activeSchemeName = isset($colorSchemes[$activeSchemeId]['name'])
   </div>
 </div>
 <form action="config-menu.php" method="POST">
+<?php echo csrf_field(); ?>
 <div class="w3-container w3-padding w3-border-bottom w3-border-black">
     <div class="w3-col l3"><b>Parameter</b></div>
     <div class="w3-col l5"><b>Beschreibung</b></div>

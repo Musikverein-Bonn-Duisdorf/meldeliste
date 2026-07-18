@@ -417,9 +417,6 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
     $str = '<svg class="'.$svgClass.'" viewBox="'
         .htmlspecialchars(sprintf('%.2f %.2f %.2f %.2f', $vbX, $vbY, $vbW, $vbH), ENT_QUOTES, 'UTF-8')
         .'" preserveAspectRatio="xMidYMin meet" role="img" aria-label="Orchesterbesetzung"';
-    if($tid && !empty($GLOBALS['cronID'])) {
-        $str .= ' data-cron-id="'.htmlspecialchars((string)$GLOBALS['cronID'], ENT_QUOTES, 'UTF-8').'"';
-    }
     $str .= '>';
     if($bandsHtml !== '') {
         $str .= '<g class="orchestra-register-bands" pointer-events="none">'.$bandsHtml.'</g>';

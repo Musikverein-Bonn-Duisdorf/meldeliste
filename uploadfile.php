@@ -1,10 +1,13 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 include 'common/include.php';
 if(!requirePermission("perm_sendEmail")) {
     http_response_code(403);
     die('Keine Berechtigung.');
 }
+
+$allowedExtensions = array('pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'ics');
 
 $jobId = isset($_POST['job']) ? (int)$_POST['job'] : (isset($_GET['job']) ? (int)$_GET['job'] : 0);
 if($jobId < 1) {
@@ -37,7 +40,19 @@ for ($i=0; $i < $filecount; $i++) {
     $tmpfile = $_FILES["attachment"]['tmp_name'][$i];
     $filesize = $_FILES["attachment"]['size'][$i];
 
-    $target_file = $target_dir.basename($file);
+    $baseName = basename((string)$file);
+    $baseName = preg_replace('/[^A-Za-z0-9._-]+/', '_', $baseName);
+    if($baseName === '' || $baseName === '.' || $baseName === '..') {
+        echo "<div class=\"w3-row w3-red\">Ungültiger Dateiname.</div>";
+        continue;
+    }
+    $ext = strtolower(pathinfo($baseName, PATHINFO_EXTENSION));
+    if($ext === '' || !in_array($ext, $allowedExtensions, true)) {
+        echo "<div class=\"w3-row w3-red\">Dateityp nicht erlaubt: ".htmlspecialchars($file)."</div>";
+        continue;
+    }
+
+    $target_file = $target_dir.$baseName;
     $uploadOk = 1;
 
     if ($filesize > 20e6) {
@@ -50,7 +65,7 @@ for ($i=0; $i < $filecount; $i++) {
     }
     if (move_uploaded_file($tmpfile, $target_file)) {
         $hash = md5_file($target_file);
-        echo "<div class=\"mail-attach-row\" id=\"".$hash."\"><div class=\"w3-green w3-padding mail-attach-name\">".htmlspecialchars($file)."</div><button type=\"button\" class=\"w3-text-red fas fa-times w3-padding\" onclick=\"delFile('".$hash."')\" aria-label=\"Anhang entfernen\"></button></div>\n";
+        echo "<div class=\"mail-attach-row\" id=\"".$hash."\"><div class=\"w3-green w3-padding mail-attach-name\">".htmlspecialchars($baseName)."</div><button type=\"button\" class=\"w3-text-red fas fa-times w3-padding\" onclick=\"delFile('".$hash."')\" aria-label=\"Anhang entfernen\"></button></div>\n";
     } else {
         echo "<div class=\"w3-row w3-red\">Upload fehlgeschlagen: ".htmlspecialchars($file)."</div>";
     }

@@ -1,28 +1,32 @@
 <?php
-session_start();
+require_once __DIR__.'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 include 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
-if(!isset($_GET['id'])) {
-    die('no ID specified');
+
+if(!loggedIn()) {
+    http_response_code(403);
+    die('forbidden');
 }
-if($_GET['id'] != $GLOBALS['cronID']) {
-    die('invalid ID');
-}
-switch($_GET['cmd']) {
+
+$cmd = (string)meldeRequest('cmd', '');
+switch($cmd) {
 case "save":
+    requireEditResponseAuth(meldeRequest('user', 0));
     $m = new Shiftmeldung;
-    $m->load_by_user_event($_GET['user'], $_GET['shift']);
+    $m->load_by_user_event(meldeRequest('user'), meldeRequest('shift'));
     if($m->User < 1) {
-        $m->User = $_GET['user'];
-        $m->Shift = $_GET['shift'];
+        $m->User = meldeRequest('user');
+        $m->Shift = meldeRequest('shift');
     }
-    $m->Wert = $_GET['wert'];
+    $m->Wert = meldeRequest('wert');
     $m->save();
     $t = new Termin;
-    $t->load_by_id($_GET['termin']);
+    $t->load_by_id(meldeRequest('termin'));
     echo $t->printBasicTableLine();
     break;
 default:
-    break;
+    http_response_code(400);
+    die('invalid command');
 }
 ?>

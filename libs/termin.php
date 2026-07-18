@@ -1261,7 +1261,7 @@ class Termin
                 $btn->class=$colors[$i-1];
             }
             if($val != $i) {
-                $btn->onclick="melde('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
+                $btn->onclick="melde(".$user.", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
                 $btn->name="meldung";
                 $btn->value=$i;
             }
@@ -1306,7 +1306,7 @@ class Termin
                 $btn->class=$colors[$i-1];
             }
             if($val != $i) {
-                $btn->onclick="track('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
+                $btn->onclick="track(".$user.", ".$this->Index.", ".$i.", ".(int)$this->Children.", ".(int)$this->Guests.")";
                 $btn->name="meldung";
                 $btn->value=$i;
             }
@@ -1352,7 +1352,7 @@ class Termin
                 $btn->class=$colors[$i-1];
             }
             if($val != $i) {
-                $btn->onclick="meldeShift('".$GLOBALS['cronID']."', ".$user.", ".$shift.", ".$this->Index.", ".$i.")";
+                $btn->onclick="meldeShift(".$user.", ".$shift.", ".$this->Index.", ".$i.")";
                 $btn->name="meldungShift";
                 $btn->value=$i;
             }
@@ -1401,7 +1401,7 @@ class Termin
                 $btn->class=$colors[$i-1];
             }
             if($val != $i) {
-                $btn->onclick="meldeExtShift('".$GLOBALS['cronID']."', ".$this->getUser().", ".$shift.", ".$this->Index.", ".$i.")";
+                $btn->onclick="meldeExtShift(".$this->getUser().", ".$shift.", ".$this->Index.", ".$i.")";
                 $btn->name="meldungExtShift";
                 $btn->value=$i;
             }
@@ -1424,7 +1424,7 @@ class Termin
             $admStatusDiv->class="w3-border";
             $admStatusDiv->class="w3-border-black";
             $admStatusDiv->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $admStatusDiv->onclick="getStatus('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.")";
+            $admStatusDiv->onclick="getStatus(".$user.", ".$this->Index.")";
             $admStatusDiv->body="Status per Mail";
         }
         else {
@@ -1576,7 +1576,7 @@ class Termin
             $FreeTextSaveBtn->col(2, 12, 12);
             $FreeTextSaveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
             $FreeTextSaveBtn->name="saveFreeText";
-            $FreeTextSaveBtn->onclick="meldeFT('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.")";
+            $FreeTextSaveBtn->onclick="meldeFT(".$user.", ".$this->Index.")";
             $FreeTextSaveBtn->bold();
             $FreeTextSaveBtn->body="speichern";
             $str=$str.$FreeTextSaveBtn->print();
@@ -1677,7 +1677,7 @@ class Termin
             $saveBtn->col(2, 12, 12);
             $saveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
             $saveBtn->name="meldungGC";
-            $saveBtn->onclick="melde('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
+            $saveBtn->onclick="melde(".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
             $saveBtn->bold();
             $saveBtn->body="speichern";
             $str=$str.$saveBtn->print();
@@ -1833,7 +1833,7 @@ class Termin
             }
 
             $str=$str."<div class=\"w3-col l3\">Instrument f&uuml;r diesen Termin:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
-            $str=$str."<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument('".$GLOBALS['cronID']."', ".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
+            $str=$str."<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument(".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
             $str=$str."</div>\n";
         }
         if(requirePermission("perm_editAppmnts")) {
@@ -2941,7 +2941,7 @@ ORDER BY `Nachname`, `Vorname`;",
             $saveBtn->col(2, 12, 12);
             $saveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
             $saveBtn->name="meldungGC";
-            $saveBtn->onclick="track('".$GLOBALS['cronID']."', ".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
+            $saveBtn->onclick="track(".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
             $saveBtn->bold();
             $saveBtn->body="speichern";
             $str=$str.$saveBtn->print();
