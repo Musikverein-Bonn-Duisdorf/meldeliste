@@ -46,8 +46,8 @@ $sections[] = array(
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
 <li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen</li>
-<li><i class="fa-brands fa-youtube"></i> <b>Medien</b> – Links zu Aufnahmen und Medien</li>
-<li>Vereinshomepage – öffnet die Vereinsseite in einem neuen Tab</li>
+<li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
+<li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
 <li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
 <li><i class="fas fa-sign-out-alt"></i> <b>Ausloggen</b> – Sitzung beenden</li>
 '.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü (nur mit Admin-Zugang und entsprechenden Rechten)</li>' : '').'
@@ -113,8 +113,8 @@ $sections[] = array(
     'id' => 'medien',
     'title' => 'Medien &amp; Vereinshomepage',
     'body' => '
-<p><b>Medien</b> sammelt Links zu Konzertaufnahmen und weiteren Medien.</p>
-<p>Die <b>Vereinshomepage</b> öffnet die öffentliche Website des Vereins in einem neuen Tab.</p>
+<p>Unter <b>Medien</b> (Icon <i class="fas fa-photo-film"></i>) findest du die konfigurierten Links zu Discord, YouTube, Instagram, Facebook sowie Fotos, Videos und Audio – leere Einträge in der Konfiguration werden ausgeblendet.</p>
+<p>Das <b>Logo</b> oben rechts öffnet die Vereinshomepage in einem neuen Tab (kein eigener Nav-Button mehr).</p>
 '
 );
 
