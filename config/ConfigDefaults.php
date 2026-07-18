@@ -288,6 +288,12 @@ function getConfigDefaults() {
             'Description' => 'Anzahl der Tage in der Statistikberechnung',
         ),
         array(
+            'Parameter' => 'inactiveUsersDays',
+            'Value' => '90',
+            'Type' => 'uint',
+            'Description' => 'Nutzer gelten in der Statistik als inaktiv, wenn letzter Login und letzte Teilnahme älter sind (Tage)',
+        ),
+        array(
             'Parameter' => 'calendarPastDays',
             'Value' => '0',
             'Type' => 'uint',
