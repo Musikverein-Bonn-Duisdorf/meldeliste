@@ -1,5 +1,5 @@
 /**
- * MELD-60: chip picker — groups + registers + users (all removable / multi-select).
+ * MELD-60/61: chip picker — roles + registers + users + named mailGroups.
  */
 (function(global) {
   'use strict';
@@ -13,16 +13,17 @@
   var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
 
   function parseCatalog(el) {
-    if(!el) return {groups: [], registers: [], users: []};
+    if(!el) return {groups: [], registers: [], users: [], mailGroups: []};
     try {
       var c = JSON.parse(el.textContent || '{}');
       return {
         groups: Array.isArray(c.groups) ? c.groups : [],
         registers: Array.isArray(c.registers) ? c.registers : [],
-        users: Array.isArray(c.users) ? c.users : []
+        users: Array.isArray(c.users) ? c.users : [],
+        mailGroups: Array.isArray(c.mailGroups) ? c.mailGroups : []
       };
     } catch(e) {
-      return {groups: [], registers: [], users: []};
+      return {groups: [], registers: [], users: [], mailGroups: []};
     }
   }
 
@@ -36,8 +37,25 @@
     return out;
   }
 
-  function parseSpec(el) {
-    var fallback = {groups: ['musicians'], registers: [], users: []};
+  function normalizeIdList(list) {
+    if(!Array.isArray(list)) return [];
+    return list.map(Number).filter(function(n) { return n > 0; }).filter(function(n, i, a) {
+      return a.indexOf(n) === i;
+    });
+  }
+
+  function emptySpec() {
+    return {groups: [], registers: [], users: [], mailGroups: []};
+  }
+
+  function parseSpec(el, opts) {
+    opts = opts || {};
+    var allowEmpty = !!opts.allowEmpty;
+    var defaultGroups = Array.isArray(opts.defaultGroups) ? opts.defaultGroups.slice() : ['musicians'];
+    var fallback = emptySpec();
+    if(!allowEmpty && defaultGroups.length) {
+      fallback.groups = normalizeGroups(defaultGroups);
+    }
     if(!el) return fallback;
     try {
       var s = JSON.parse(el.value || '{}');
@@ -45,16 +63,19 @@
       if(!groups.length && s.audience && GROUP_IDS.indexOf(String(s.audience)) !== -1) {
         groups = [String(s.audience)];
       }
-      var registers = Array.isArray(s.registers) ? s.registers.map(Number).filter(function(n) { return n > 0; }) : [];
-      var users = Array.isArray(s.users) ? s.users.map(Number).filter(function(n) { return n > 0; }) : [];
-      // Komplett leer → Standard wie neue Mail
-      if(!groups.length && !registers.length && !users.length) {
-        groups = ['musicians'];
+      var registers = normalizeIdList(s.registers);
+      var users = normalizeIdList(s.users);
+      var mailGroups = normalizeIdList(s.mailGroups);
+      if(!groups.length && !registers.length && !users.length && !mailGroups.length) {
+        if(!allowEmpty && defaultGroups.length) {
+          groups = normalizeGroups(defaultGroups);
+        }
       }
       return {
         groups: groups,
         registers: registers,
-        users: users
+        users: users,
+        mailGroups: mailGroups
       };
     } catch(e) {
       return fallback;
@@ -74,12 +95,18 @@
       this.hiddenEl = opts.hiddenEl;
       this.countEl = opts.countEl || null;
       this.countUrl = opts.countUrl || 'mailRecipientCount.php';
+      this.countLabel = opts.countLabel || 'Empfänger';
       this.jobId = opts.jobId ? Number(opts.jobId) : 0;
       this.saveUrl = opts.saveUrl || 'mailSaveRecipients.php';
+      this.allowEmpty = !!opts.allowEmpty;
+      this.defaultGroups = Array.isArray(opts.defaultGroups) ? opts.defaultGroups : ['musicians'];
       this.onChange = opts.onChange || function() {};
       this._countSeq = 0;
       this._saveSeq = 0;
-      this.spec = parseSpec(this.hiddenEl);
+      this.spec = parseSpec(this.hiddenEl, {
+        allowEmpty: this.allowEmpty,
+        defaultGroups: this.defaultGroups
+      });
       if(this.inputEl) {
         this.inputEl.addEventListener('input', this.onInput.bind(this));
         this.inputEl.addEventListener('keydown', this.onKeydown.bind(this));
@@ -89,7 +116,6 @@
       this.render();
       this.syncHidden();
       this.scheduleCountRefresh();
-      // Persist default / current chips on open so Entwurf always has RecipientSpec
       this.scheduleSave();
     },
 
@@ -98,7 +124,8 @@
       this.hiddenEl.value = JSON.stringify({
         groups: this.spec.groups.slice(),
         registers: this.spec.registers.slice(),
-        users: this.spec.users.slice()
+        users: this.spec.users.slice(),
+        mailGroups: this.spec.mailGroups.slice()
       });
     },
 
@@ -130,7 +157,6 @@
       xhr.onreadystatechange = function() {
         if(xhr.readyState !== 4) return;
         if(seq !== self._saveSeq) return;
-        // silent; count refresh already reflects selection
       };
       xhr.open('POST', this.saveUrl, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -143,21 +169,36 @@
       var seq = ++this._countSeq;
       this.countEl.classList.add('mail-recipient-count--loading');
       var body = 'recipientSpec=' + encodeURIComponent(this.hiddenEl ? this.hiddenEl.value : '{}');
+      if(this.allowEmpty) {
+        body += '&requireMail=0';
+      }
       var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
       xhr.onreadystatechange = function() {
         if(xhr.readyState !== 4) return;
         if(seq !== self._countSeq) return;
         self.countEl.classList.remove('mail-recipient-count--loading');
         if(xhr.status !== 200) {
-          self.countEl.textContent = 'Empfänger: ?';
+          self.countEl.textContent = self.countLabel + ': ?';
           return;
         }
         try {
           var data = JSON.parse(xhr.responseText);
           var n = data && typeof data.count === 'number' ? data.count : 0;
-          self.countEl.textContent = n === 1 ? '1 Empfänger' : (n + ' Empfänger');
+          var label = self.countLabel;
+          self.countEl.textContent = n === 1 ? ('1 ' + label.replace(/en$/, '').replace(/er$/, '')) : (n + ' ' + label);
+          if(label === 'Empfänger') {
+            self.countEl.textContent = n === 1 ? '1 Empfänger' : (n + ' Empfänger');
+          }
+          else if(label === 'Mitglieder') {
+            self.countEl.textContent = n === 1 ? '1 Mitglied' : (n + ' Mitglieder');
+          }
+          else if(label === 'sichtbar für') {
+            self.countEl.textContent = n === 0 && self.allowEmpty
+              ? 'sichtbar für: alle'
+              : (n === 1 ? 'sichtbar für 1 Person' : ('sichtbar für ' + n + ' Personen'));
+          }
         } catch(e) {
-          self.countEl.textContent = 'Empfänger: ?';
+          self.countEl.textContent = self.countLabel + ': ?';
         }
       };
       xhr.open('POST', this.countUrl, true);
@@ -199,10 +240,21 @@
       return 'User #' + id;
     },
 
+    labelForMailGroup: function(id) {
+      var list = this.catalog.mailGroups || [];
+      for(var i = 0; i < list.length; i++) {
+        if(Number(list[i].id) === Number(id)) return list[i].label;
+      }
+      return 'Gruppe #' + id;
+    },
+
     render: function() {
       if(!this.chipsEl) return;
       this.chipsEl.innerHTML = '';
       var self = this;
+      (this.spec.mailGroups || []).forEach(function(id) {
+        self.chipsEl.appendChild(self.makeChip('mailGroup', id, 'Gruppe: ' + self.labelForMailGroup(id)));
+      });
       this.spec.groups.forEach(function(id) {
         self.chipsEl.appendChild(self.makeChip('group', id, self.labelForGroup(id)));
       });
@@ -244,6 +296,10 @@
         id = Number(id);
         this.spec.registers = this.spec.registers.filter(function(x) { return x !== id; });
       }
+      else if(type === 'mailGroup') {
+        id = Number(id);
+        this.spec.mailGroups = (this.spec.mailGroups || []).filter(function(x) { return x !== id; });
+      }
       else {
         id = Number(id);
         this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
@@ -266,6 +322,10 @@
       if(type === 'register') {
         if(this.spec.registers.indexOf(id) === -1) this.spec.registers.push(id);
       }
+      else if(type === 'mailGroup') {
+        if(!this.spec.mailGroups) this.spec.mailGroups = [];
+        if(this.spec.mailGroups.indexOf(id) === -1) this.spec.mailGroups.push(id);
+      }
       else if(this.spec.users.indexOf(id) === -1) {
         this.spec.users.push(id);
       }
@@ -281,23 +341,30 @@
       var groups = this.catalog.groups.length
         ? this.catalog.groups
         : [
-            {id: 'musicians', label: GROUP_LABELS.musicians, meta: 'Gruppe'},
-            {id: 'members', label: GROUP_LABELS.members, meta: 'Gruppe'},
-            {id: 'nonmembers', label: GROUP_LABELS.nonmembers, meta: 'Gruppe'},
-            {id: 'users', label: GROUP_LABELS.users, meta: 'Gruppe'}
+            {id: 'musicians', label: GROUP_LABELS.musicians, meta: 'Rolle'},
+            {id: 'members', label: GROUP_LABELS.members, meta: 'Rolle'},
+            {id: 'nonmembers', label: GROUP_LABELS.nonmembers, meta: 'Rolle'},
+            {id: 'users', label: GROUP_LABELS.users, meta: 'Rolle'}
           ];
+
+      (this.catalog.mailGroups || []).forEach(function(g) {
+        if((self.spec.mailGroups || []).indexOf(Number(g.id)) !== -1) return;
+        if(q === '' || normalize(g.label).indexOf(q) !== -1) {
+          items.push({type: 'mailGroup', id: g.id, label: g.label, meta: g.meta || 'Gruppe'});
+        }
+      });
 
       groups.forEach(function(g) {
         if(self.spec.groups.indexOf(String(g.id)) !== -1) return;
         if(q === '' || normalize(g.label).indexOf(q) !== -1) {
-          items.push({type: 'group', id: g.id, label: g.label, meta: g.meta || 'Gruppe'});
+          items.push({type: 'group', id: g.id, label: g.label, meta: g.meta || 'Rolle'});
         }
       });
 
       this.catalog.registers.forEach(function(r) {
         if(self.spec.registers.indexOf(Number(r.id)) !== -1) return;
         if(q !== '' && normalize(r.label).indexOf(q) === -1) return;
-        if(q === '') return; // registers only after typing
+        if(q === '') return;
         items.push({type: 'register', id: r.id, label: r.label, meta: 'Register'});
       });
 
@@ -368,6 +435,9 @@
         }
         else if(this.spec.groups.length) {
           this.removeChip('group', this.spec.groups[this.spec.groups.length - 1]);
+        }
+        else if(this.spec.mailGroups && this.spec.mailGroups.length) {
+          this.removeChip('mailGroup', this.spec.mailGroups[this.spec.mailGroups.length - 1]);
         }
       }
     },

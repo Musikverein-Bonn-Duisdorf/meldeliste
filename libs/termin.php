@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'published' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
     /** @var int|null */
@@ -34,6 +34,7 @@ class Termin
 	    case 'vName':
 	    case 'new':
         case 'defaultFreeText':
+        case 'VisibilitySpec':
             return $this->_data[$key];
             break;
         default:
@@ -56,7 +57,8 @@ class Termin
 	    case 'Uhrzeit2':
 	    case 'Abfahrt':
         case 'defaultFreeText':
-            $this->_data[$key] = trim($val);
+        case 'VisibilitySpec':
+            $this->_data[$key] = trim((string)$val);
             break;
 	    case 'Name':
 	    case 'Beschreibung':
@@ -254,7 +256,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`, `defaultFreeText`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d", "%s");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `published`, `open`, `defaultFreeText`, `VisibilitySpec`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%d", "%s", %s);',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -273,7 +275,8 @@ class Termin
         mysqli_real_escape_string($GLOBALS['conn'], $this->Ort4),
         $this->published,
                        $this->open,
-                       $this->defaultFreeText
+                       mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
+                       $this->sqlVisibilitySpec()
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -417,7 +420,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `published` = "%d", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -437,7 +440,8 @@ class Termin
         $this->published,
         $this->open,
         $this->new,
-                       $this->defaultFreeText,
+                       mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
+                       $this->sqlVisibilitySpec(),
         $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -486,8 +490,113 @@ class Termin
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-            $this->_data[$key] = $val;
+            if($key === 'VisibilitySpec' && is_array($val)) {
+                $this->setVisibilitySpecArray($val);
+                continue;
+            }
+            if(array_key_exists($key, $this->_data)) {
+                $this->_data[$key] = $val;
+            }
         }
+        if(isset($row['visibilitySpec']) && !isset($row['VisibilitySpec'])) {
+            $raw = $row['visibilitySpec'];
+            if(is_array($raw)) {
+                $this->setVisibilitySpecArray($raw);
+            }
+            elseif(is_string($raw)) {
+                $this->VisibilitySpec = $raw;
+            }
+        }
+    }
+
+    /**
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     */
+    public function getVisibilitySpecArray() {
+        return AudienceSpec::normalize($this->VisibilitySpec, array(
+            'allowMailGroups' => true,
+            'defaultGroups' => null,
+        ));
+    }
+
+    /**
+     * @param array $spec
+     */
+    public function setVisibilitySpecArray($spec) {
+        $norm = AudienceSpec::normalize($spec, array(
+            'allowMailGroups' => true,
+            'defaultGroups' => null,
+        ));
+        if(AudienceSpec::isEmpty($norm)) {
+            $this->VisibilitySpec = null;
+            return;
+        }
+        $this->VisibilitySpec = json_encode(array(
+            'groups' => $norm['groups'],
+            'registers' => $norm['registers'],
+            'users' => $norm['users'],
+            'mailGroups' => $norm['mailGroups'],
+        ));
+    }
+
+    protected function sqlVisibilitySpec() {
+        $raw = $this->VisibilitySpec;
+        if($raw === null || $raw === '') {
+            return 'NULL';
+        }
+        $norm = AudienceSpec::normalize($raw, array('allowMailGroups' => true, 'defaultGroups' => null));
+        if(AudienceSpec::isEmpty($norm)) {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode(array(
+            'groups' => $norm['groups'],
+            'registers' => $norm['registers'],
+            'users' => $norm['users'],
+            'mailGroups' => $norm['mailGroups'],
+        ))).'"';
+    }
+
+    /**
+     * List visibility for a user (MELD-61).
+     * published=0: only hidden-permission or existing meldung (viewer mode).
+     * published=1 + empty VisibilitySpec: everyone.
+     * published=1 + spec: matching users (+ viewer overrides).
+     *
+     * @param int $userId
+     * @param array $opts asViewer (bool, default true) — admin/meldung overrides for UI
+     * @return bool
+     */
+    public function isVisibleToUser($userId, $opts = array()) {
+        $userId = (int)$userId;
+        $asViewer = !array_key_exists('asViewer', $opts) || !empty($opts['asViewer']);
+        if($this->published > 0) {
+            $spec = $this->getVisibilitySpecArray();
+            if(AudienceSpec::isEmpty($spec)) {
+                return true;
+            }
+            if($userId > 0 && AudienceSpec::userMatches($userId, $spec)) {
+                return true;
+            }
+            if($asViewer) {
+                if(requirePermission('perm_showHiddenAppmnts')) {
+                    return true;
+                }
+                if($userId > 0 && $this->getMeldungenByUser($userId)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if(!$asViewer) {
+            return false;
+        }
+        if(requirePermission('perm_showHiddenAppmnts')) {
+            return true;
+        }
+        if($userId > 0 && $this->getMeldungenByUser($userId)) {
+            return true;
+        }
+        return false;
     }
     public function load_by_id($Index) {
         $Index = (int) $Index;

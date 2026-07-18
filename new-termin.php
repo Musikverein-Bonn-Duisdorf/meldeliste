@@ -148,6 +148,22 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         <label>Anmeldung offen</label>
       </div>
     </div>
+    <div class="w3-margin-top">
+      <label>sichtbar für</label>
+      <p class="w3-small w3-text-gray">Leer = für alle. Sonst nur der gewählte Kreis (Rollen, Empfängergruppen, Register, Personen).</p>
+      <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputBg; ?>">
+        <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
+        <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo $inputBg; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />
+        <div id="terminVisibilitySuggest" class="mail-recipient-suggest" hidden></div>
+        <input type="hidden" name="visibilitySpec" id="terminVisibilitySpec" value="<?php
+          $visSpec = $fill ? $n->getVisibilitySpecArray() : AudienceSpec::emptySpec();
+          echo htmlspecialchars(json_encode($visSpec), ENT_QUOTES, 'UTF-8');
+        ?>" />
+        <p class="w3-small w3-margin-top mail-recipient-count-line">
+          <span id="terminVisibilityCount" class="mail-recipient-count" aria-live="polite">…</span>
+        </p>
+      </div>
+    </div>
   </section>
   </div>
 
@@ -210,6 +226,33 @@ function clearInput(name) {
     x[i].value = '';
   }
 }
+</script>
+<?php
+MailGroup::ensureSchema();
+$terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
+    'forMail' => false,
+    'includeMailGroups' => true,
+));
+?>
+<script type="application/json" id="terminVisibilityCatalog"><?php echo json_encode($terminVisibilityCatalog, JSON_UNESCAPED_UNICODE); ?></script>
+<script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
+<script>
+(function() {
+  if(typeof MailRecipientChips === 'undefined') return;
+  MailRecipientChips.init({
+    catalogEl: document.getElementById('terminVisibilityCatalog'),
+    chipsEl: document.getElementById('terminVisibilityChips'),
+    inputEl: document.getElementById('terminVisibilityInput'),
+    suggestEl: document.getElementById('terminVisibilitySuggest'),
+    hiddenEl: document.getElementById('terminVisibilitySpec'),
+    countEl: document.getElementById('terminVisibilityCount'),
+    countUrl: 'mailRecipientCount.php',
+    countLabel: 'sichtbar für',
+    allowEmpty: true,
+    defaultGroups: [],
+    jobId: 0
+  });
+})();
 </script>
 
 <?php

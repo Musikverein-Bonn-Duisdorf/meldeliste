@@ -174,6 +174,7 @@ $sections[] = array(
     'body' => '
 <p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
+<p>Mit <b>sichtbar</b> und dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis: leer = für alle; sonst nur Rollen, Empfängergruppen, Register oder einzelne Personen. Admins mit Recht „Versteckte Termine“ sehen weiterhin alles.</p>
 <p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar). Aushilfen können am Termin ergänzt bzw. gelöscht werden, sofern freigegeben.</p>
 '
 );
@@ -184,6 +185,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_sendEmail'),
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
+<p>Unter Admin → <b>Empfängergruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen.</p>
 <p>Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '

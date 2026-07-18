@@ -83,6 +83,13 @@
 	"Type": {"Type": "int"},
 	"Message": {"Type": "text", "Collation": "utf8mb4_unicode_ci"}
     },
+    "MailGroup": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"MemberSpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"CreatedBy": {"Type": "int", "Default": 0},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
+    },
     "MailJob": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
@@ -190,7 +197,8 @@
 	"published": {"Type": "int", "Default": 0},
 	"open": {"Type": "int", "Default": 1},
 	"new": {"Type": "int", "Default": 1},
-	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
+	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "User": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
