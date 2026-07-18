@@ -568,6 +568,12 @@
   box-shadow: inset 3px 0 0 #009688;
 }
 
+.help-changelog-table tbody tr.help-changelog-unreleased.help-changelog-current,
+.help-changelog-table tbody tr.help-changelog-unreleased {
+  background: rgba(245, 124, 0, 0.16) !important;
+  box-shadow: inset 3px 0 0 #f57c00;
+}
+
 .help-changelog-badge {
   display: inline-block;
   margin-left: 0.35rem;
@@ -580,6 +586,10 @@
   background: #009688;
   border-radius: 0.2rem;
   vertical-align: middle;
+}
+
+.help-changelog-badge-unreleased {
+  background: #f57c00;
 }
 
 @media (max-width: 992px) {
