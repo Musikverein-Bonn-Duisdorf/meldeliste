@@ -12,7 +12,6 @@
         <input type="checkbox" class="w3-check" onchange="toggleActiveOrchestra(this)">
         Nur aktive Besetzung
       </label>
-      <span class="w3-tiny w3-text-gray"> (ja / vielleicht)</span>
     </div>
   </div>
   <div class="w3-container w3-hide-small w3-hide-medium orchestra-svg-wrap">
