@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-18-70675 (2026-07-18)
+
+- MELD-100: arrow-key navigation in chip suggestion list
+- MELD-100: Chip-Picker Pfeiltasten in Vorschlagsliste
+
 ## 2026-07-18-96c65 (2026-07-18)
 
 - MELD-61: remove Discord checkbox hint on termin form
