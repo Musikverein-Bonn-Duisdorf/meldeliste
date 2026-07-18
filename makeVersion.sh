@@ -22,7 +22,9 @@ global \$version;
 ?>
 EOF
 
+./scripts/generateChangelog.sh --pending "$VERSION"
 git add VERSION HASH
 git add common/version.php
+git add CHANGELOG.md
 git commit -m "release $VERSION"
 echo -e "new commit generated"
