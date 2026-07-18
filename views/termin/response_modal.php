@@ -4,15 +4,26 @@
 </header>
 <div>
 <?php if($showOrchestra) { ?>
-<div class="w3-container w3-margin-top"><b>Besetzung</b></div>
-<div class="w3-container w3-hide-small w3-hide-medium">
+<div class="orchestra-panel w3-container w3-margin-top">
+  <div class="orchestra-panel-header w3-row">
+    <div class="w3-col s12 m6 l6"><b>Besetzung</b></div>
+    <div class="w3-col s12 m6 l6 orchestra-panel-toggle">
+      <label class="w3-small">
+        <input type="checkbox" class="w3-check" onchange="toggleActiveOrchestra(this)">
+        Nur aktive Besetzung
+      </label>
+      <span class="w3-tiny w3-text-gray"> (ja / vielleicht)</span>
+    </div>
+  </div>
+  <div class="w3-container w3-hide-small w3-hide-medium orchestra-svg-wrap">
 <?php echo $orchestraLarge; ?>
-</div>
-<div class="w3-container w3-hide-small w3-hide-large">
+  </div>
+  <div class="w3-container w3-hide-small w3-hide-large orchestra-svg-wrap">
 <?php echo $orchestraMedium; ?>
-</div>
-<div class="w3-container w3-hide-large w3-hide-medium">
+  </div>
+  <div class="w3-container w3-hide-large w3-hide-medium orchestra-svg-wrap">
 <?php echo $orchestraSmall; ?>
+  </div>
 </div>
 <?php } ?>
 </div>

@@ -56,3 +56,20 @@ function openModal(type, id, register) {
 document.addEventListener('keydown', function(e) {
     if(e.key === 'Escape') closeModal();
 });
+
+/**
+ * Toggle orchestra SVG: show only ja (1) / vielleicht (3) seats.
+ */
+function toggleActiveOrchestra(checkbox) {
+    var panel = checkbox;
+    while(panel && !(panel.classList && panel.classList.contains('orchestra-panel'))) {
+        panel = panel.parentNode;
+    }
+    if(!panel) return;
+    if(checkbox.checked) {
+        panel.classList.add('orchestra-view--active-only');
+    }
+    else {
+        panel.classList.remove('orchestra-view--active-only');
+    }
+}
