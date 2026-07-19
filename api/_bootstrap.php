@@ -4,6 +4,7 @@
  */
 require_once dirname(__DIR__).'/libs/sessionBootstrap.php';
 meldeConfigureSession();
+chdir(dirname(__DIR__)); // project root so relative includes in common/ work
 require_once dirname(__DIR__).'/common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 
