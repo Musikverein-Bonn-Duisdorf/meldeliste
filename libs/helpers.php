@@ -502,6 +502,17 @@ function loadPermissions($user) {
     return $p;
 }
 
+/**
+ * Cache-busting URL for static assets (release hash + file mtime).
+ * Needed so JS/CSS reload after_dev deploys without a new makeVersion HASH.
+ */
+function assetUrl($rel) {
+    $rel = ltrim(str_replace('\\', '/', (string)$rel), '/');
+    $hash = isset($GLOBALS['version']['Hash']) ? (string)$GLOBALS['version']['Hash'] : '0';
+    $mtime = @filemtime(dirname(__DIR__).'/'.$rel);
+    return htmlspecialchars($rel.'?'.$hash.'-'.$mtime, ENT_QUOTES, 'UTF-8');
+}
+
 function meldeRequest($key, $default = null) {
     if(isset($_POST[$key])) {
         return $_POST[$key];

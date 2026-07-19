@@ -8,7 +8,13 @@ function melde(user, termin, wert, Children, Guests) {
 	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
     }
     xmlhttp.onreadystatechange=function() {
-	if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+	if (xmlhttp.readyState!=4) return;
+	if (xmlhttp.status!=200) {
+            if (typeof console !== 'undefined' && console.warn) {
+                console.warn('Meldung fehlgeschlagen:', xmlhttp.status, xmlhttp.responseText);
+            }
+            return;
+	}
             var oldel = document.getElementById("entry"+termin+"_user"+user);
             if(oldel && oldel.parentNode && xmlhttp.responseText) {
                 var newel = document.createElement('div');
@@ -28,7 +34,6 @@ function melde(user, termin, wert, Children, Guests) {
             if(typeof scheduleRefreshMainPageTerminEntries === 'function') {
                 scheduleRefreshMainPageTerminEntries(termin);
             }
-	}
     }
     if(Children == -1) {
         var ChildInput = document.getElementById("Children"+termin);

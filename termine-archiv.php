@@ -36,10 +36,10 @@ if(isset($_POST['deleteAushilfe'])) {
         }
 }
 ?>
-<script src="js/getStatus.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
-<script src="js/melde.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
-<script src="js/meldeshift.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
-<script src="js/changeInstrument.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="<?php echo assetUrl('js/getStatus.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/melde.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/meldeshift.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/changeInstrument.js'); ?>"></script>
 
 <?php
 if(isset($_POST['proxy'])) {
@@ -64,8 +64,8 @@ $chunk = listChunkTermine('past', 'basic', '', 50, isset($user) ? (int)$user : (
 <?php echo $chunk['html']; ?>
 <?php echo listChunkRenderSentinel('termineArchiv', $chunk['nextCursor'], $chunk['hasMore'], 'filterTermine'); ?>
 </div>
-<script src="js/filterTermine.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
-<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="<?php echo assetUrl('js/filterTermine.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/infiniteScroll.js'); ?>"></script>
 <?php
 include "common/footer.php";
 ?>
