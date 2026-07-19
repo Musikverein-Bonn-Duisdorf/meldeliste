@@ -856,18 +856,8 @@ function validateLink($hash) {
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        $_SESSION['userid'] = $row['Index'];
-        $_SESSION['Vorname'] = $row['Vorname'];
-        $_SESSION['Nachname'] = $row['Nachname'];
-        $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
-        $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
-        $logentry = new Log;
-        $logentry->info("Login via Link.");
-        recordLogin();
-        $_SESSION['permissions'] = loadPermissions($row['Index']);
-        $_SESSION['admin'] = isAdmin() ? 1 : 0;
-        return true;
+    while($row = mysqli_fetch_assoc($dbr)) {
+        return establishSessionFromUserRow($row, 'Link');
     }
     $logentry = new Log;
     $logentry->error("Login not successful. Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");
@@ -890,17 +880,7 @@ function validateUser($login, $password) {
     while($row = mysqli_fetch_assoc($dbr)) {
         $hash = (string)$row['Passhash'];
         if($hash !== '' && password_verify($password, $hash)) {
-            $_SESSION['userid'] = $row['Index'];
-            $_SESSION['Vorname'] = $row['Vorname'];
-            $_SESSION['Nachname'] = $row['Nachname'];
-            $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
-            $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
-            $logentry = new Log;
-            $logentry->info("Login via Password.");
-            recordLogin();
-            $_SESSION['permissions'] = loadPermissions($row['Index']);
-            $_SESSION['admin'] = isAdmin() ? 1 : 0;
-            return true;
+            return establishSessionFromUserRow($row, 'Password');
         }
     }
     $logentry = new Log;
