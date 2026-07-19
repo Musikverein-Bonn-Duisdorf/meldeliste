@@ -6,9 +6,9 @@ Keine native Termine-/Melde-UI und keine große Domain-JSON-API im MVP.
 
 **Jira:** [MELD-49](https://musikverein-bonn-duisdorf.atlassian.net/browse/MELD-49)  
 **App-Repo:** `MVDApp` (Branch `feature/MELD-49-app-token-notify`)  
-**Backend-Branch (Entwurf):** `feature/MELD-49-app-api`
+**Backend-Branch:** `MELD-49-App-API`
 
-Nach Deploy: Schema-Repair/Updater ausführen (Schema-Version ≥ 13).
+Nach Deploy: Schema-Repair/Updater ausführen (Schema-Version ≥ **14**).
 
 ---
 
@@ -30,7 +30,7 @@ Die Website bleibt die UI. Die App lädt `https://meldeliste.…` im WebView, so
 ## Schema: `AppTokens`
 
 Eintrag in `config/DBconfig.json` (physisch `{dbprefix}AppTokens`).  
-`config/schema_version_number.php` auf **13** (oder höher) setzen, dann Repair.
+`config/schema_version_number.php` auf **14** (oder höher) setzen, dann Repair.
 
 | Spalte | Typ | Bedeutung |
 |--------|-----|-----------|
@@ -62,12 +62,13 @@ Referenz-Implementierung (Entwurf): `libs/appToken.php`.
 
 Stil wie bestehende JSON-Scripts (`mailStatus.php`):
 
-1. `session_start()`
+1. `meldeConfigureSession()` (über `api/_bootstrap.php`)
 2. `common/include.php`
 3. Header `Content-Type: application/json; charset=UTF-8`
 4. `Cache-Control: no-store, no-cache, must-revalidate`
 
 Pfade mit `.php` (kein URL-Rewrite nötig).
+Token nur per `Authorization: Bearer` oder JSON/Form-Body — **nicht** per Query-String.
 
 ### `POST /api/auth/login.php`
 
