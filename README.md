@@ -22,7 +22,13 @@ Details zum Schema und zur Erstinstallation liefert die Install-Seite selbst.
 |--------|------------|
 | `master` | Produktion |
 | `dev` | Staging / Vorschau |
-| `MELD-<n>-…` | Feature-Branches |
+| `MELD-<n>-…` / `feature/MELD-<n>-…` | Feature-Branches |
+
+## Mobile App (Android)
+
+Die WebView-App **MVDApp** braucht schlanke JSON-Endpunkte für Token-Login und Notify-Poll (MELD-49).
+
+→ Spezifikation: [docs/app-api.md](docs/app-api.md)
 
 ## Backup
 
