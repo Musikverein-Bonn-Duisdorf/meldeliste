@@ -220,6 +220,16 @@
 	"Deleted": {"Type": "int", "Default": 0},
 	"DeletedOn": {"Type": "timestamp", "Null": "YES"}
     },
+    "AppTokens": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"User": {"Type": "int"},
+	"TokenHash": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"DeviceLabel": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
+	"LastUsed": {"Type": "timestamp", "Null": "YES", "Default": null},
+	"Expires": {"Type": "timestamp", "Null": "YES", "Default": null},
+	"Revoked": {"Type": "tinyint", "Default": 0}
+    },
     "vehicle": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"}
