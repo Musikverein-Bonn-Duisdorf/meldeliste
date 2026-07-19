@@ -149,9 +149,7 @@ function readAppTokenFromRequest() {
     if(isset($_POST['token'])) {
         return (string)$_POST['token'];
     }
-    if(isset($_GET['token'])) {
-        return (string)$_GET['token'];
-    }
+    // Do not accept tokens via GET (logs, Referer leakage).
     return '';
 }
 

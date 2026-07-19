@@ -2,7 +2,8 @@
 /**
  * Shared bootstrap for JSON API endpoints (MELD-49).
  */
-session_start();
+require_once dirname(__DIR__).'/libs/sessionBootstrap.php';
+meldeConfigureSession();
 require_once dirname(__DIR__).'/common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 
