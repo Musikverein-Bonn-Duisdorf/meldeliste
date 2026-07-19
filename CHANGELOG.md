@@ -2,6 +2,14 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-19-c2910 (2026-07-19)
+
+- MELD-105: cache-bust Melde-JS after deploys without makeVersion
+- MELD-117: UserVoice for Notenarchiv Stimmsatz
+- MELD-111: SSO one-time ticket for sibling modules
+- MELD-105: harden auth, SQLi, uploads, session
+- MELD-105/111/117: Security, SSO, UserVoice
+
 ## 2026-07-18-c0c09 (2026-07-18)
 
 - MELD-106: start mail queue in background so send redirect is instant
