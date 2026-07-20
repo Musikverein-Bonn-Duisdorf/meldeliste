@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-20-1d8ee (2026-07-20)
+
+- MELD-123: register Play upload-key SHA in assetlinks.json
+
 ## 2026-07-20-d62b6 (2026-07-20)
 
 - MELD-123: move App-Login QR below the profile form.
