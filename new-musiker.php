@@ -196,36 +196,40 @@ $formAction = '';
 <?php if($fill && $canEditUsers) { ?>
 <button class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
 <?php } ?>
+</div>
+<div class="w3-panel w3-mobile w3-center w3-col s3 l4">
+</div>
 <?php
-// App-Login-Link + QR (MELD-123): own profile or admin view of a user
+// App-Login QR below the profile form so it does not break the card layout (MELD-123)
 $showAppLoginLink = $fill && (int)$n->Index > 0
     && ($isSelfProfileEdit || (int)$n->Index === $userid || $canEditUsers);
 if($showAppLoginLink) {
     $appLoginUrl = $n->getLink();
 ?>
-  <div class="w3-container w3-margin-top w3-margin-bottom w3-padding w3-left-align w3-border">
+<div class="w3-row w3-margin-top">
+  <div class="w3-col s3 l4">&nbsp;</div>
+  <div class="w3-col s6 l4 w3-center w3-padding w3-border w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
     <h3><i class="fas fa-qrcode" aria-hidden="true"></i> App-Login</h3>
     <p class="w3-small">Mit der Meldeliste-App scannen oder Link öffnen. Den Link kannst du auch manuell in der App einfügen.</p>
-    <div id="app-login-qr" class="w3-margin-bottom" data-alink-url="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"></div>
-    <div class="w3-row w3-small"><a href="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?></a></div>
+    <div id="app-login-qr" class="w3-margin-bottom" style="display:inline-block;" data-alink-url="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"></div>
+    <div class="w3-small w3-break"><a href="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?></a></div>
 <?php if($canEditUsers) { ?>
-    <div class="w3-row w3-small w3-margin-top"><a href="<?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?></a></div>
+    <div class="w3-small w3-margin-top w3-break"><a href="<?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?></a></div>
 <?php } ?>
   </div>
-  <script src="js/qrcode.min.js"></script>
-  <script>
-  (function () {
-    var el = document.getElementById('app-login-qr');
-    if (!el || typeof QRCode === 'undefined') return;
-    var url = el.getAttribute('data-alink-url') || '';
-    if (!url) return;
-    new QRCode(el, { text: url, width: 192, height: 192, correctLevel: QRCode.CorrectLevel.M });
-  })();
-  </script>
+  <div class="w3-col s3 l4">&nbsp;</div>
+</div>
+<script src="js/qrcode.min.js"></script>
+<script>
+(function () {
+  var el = document.getElementById('app-login-qr');
+  if (!el || typeof QRCode === 'undefined') return;
+  var url = el.getAttribute('data-alink-url') || '';
+  if (!url) return;
+  new QRCode(el, { text: url, width: 192, height: 192, correctLevel: QRCode.CorrectLevel.M });
+})();
+</script>
 <?php } ?>
-</div>
-<div class="w3-panel w3-mobile w3-center w3-col s3 l4">
-</div>
 <?php if($fill && $canEditUsers) { ?>
     <div id="delmodal" class="w3-modal">
     <div class="w3-modal-content w3-card">
