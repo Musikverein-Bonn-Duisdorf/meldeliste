@@ -1183,7 +1183,16 @@ function allowedReturnUrls() {
         'mitglied.php',
         'no-mitglied.php',
         'new-musiker.php',
+        'register.php',
+        'mein-register.php',
         'index.php',
+        'user-voice.php',
+        'groups.php',
+        'group-edit.php',
+        'inventories.php',
+        'myinventories.php',
+        'mail.php',
+        'meine-mails.php',
     );
 }
 
@@ -1195,27 +1204,46 @@ function pageToReturnUrl($page) {
         'mitglied' => 'mitglied.php',
         'nomitglied' => 'no-mitglied.php',
         'newmusiker' => 'new-musiker.php',
+        'register' => 'register.php',
+        'meinregister' => 'mein-register.php',
+        'user-voice' => 'user-voice.php',
+        'groups' => 'groups.php',
+        'inventories' => 'inventories.php',
+        'myinventories' => 'myinventories.php',
+        'mail' => 'mail.php',
+        'meinemails' => 'meine-mails.php',
+        'home' => 'index.php',
         'me' => 'index.php',
     );
     $page = (string)$page;
     return isset($map[$page]) ? $map[$page] : 'index.php';
 }
 
-/** Whitelist local PHP page; prevents open redirects. */
+/**
+ * Whitelist local PHP page; prevents open redirects.
+ * Keeps a safe query string (only simple key=value pairs, no fragments/hosts).
+ */
 function safeReturnUrl($url, $default = 'index.php') {
     $allowed = allowedReturnUrls();
     $url = trim((string)$url);
     if($url === '') {
         return $default;
     }
-    if($url !== basename($url) || strpos($url, '..') !== false) {
+    if(strpos($url, '://') !== false || strpos($url, '//') === 0 || strpos($url, '..') !== false) {
         return $default;
     }
-    $base = strtok($url, '?');
-    if(in_array($base, $allowed, true)) {
+    // Only a local script name (+ optional query), never a path.
+    if(!preg_match('/^([a-zA-Z0-9_-]+\.php)(?:\?([a-zA-Z0-9_&=%-]*))?$/', $url, $m)) {
+        return $default;
+    }
+    $base = $m[1];
+    if(!in_array($base, $allowed, true)) {
+        return $default;
+    }
+    if(empty($m[2])) {
         return $base;
     }
-    return $default;
+    return $base.'?'.$m[2];
 }
 
 function setFlash($type, $message) {
