@@ -134,7 +134,8 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
             if((int)$job->PostDiscord) {
                 $job->publishToDiscord(isset($_SESSION['Vorname']) ? $_SESSION['Vorname'] : '');
             }
-            header('Location: mail.php?queued='.(int)$job->Index.'&n='.$count);
+            // No success banner (MELD-121) — status is visible in the mail table.
+            header('Location: mail.php');
             // First batch immediately; overview must not wait for SMTP (MELD-66).
             Usermail::finishResponseThenProcessQueue();
             exit;
@@ -145,9 +146,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
 }
 
 if(isset($_GET['queued'])) {
-    $n = isset($_GET['n']) ? (int)$_GET['n'] : 0;
-    $qid = (int)$_GET['queued'];
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>'.$n.' Nachrichten aus Email-ID '.$qid.' in die Warteschlange gestellt.</h3></div>';
+    // Legacy redirect param: drop banner, show overview (MELD-121).
     $job = null;
 }
 if(isset($_GET['cancelled'])) {

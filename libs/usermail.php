@@ -250,12 +250,17 @@ class Usermail {
 
         $logentry = new Log;
         if($count > 0) {
+            $specLabel = AudienceSpec::formatLabel(
+                $job->getRecipientSpecArray(),
+                array('allowMailGroups' => true)
+            );
             $logentry->email(sprintf(
-                "In Warteschlange gestellt | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Empfänger: <b>%d</b>, Quelle: <b>%s</b>",
+                "In Warteschlange gestellt | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Empfänger: <b>%d</b>, Quelle: <b>%s</b>, Auswahl: <b>%s</b>",
                 (int)$job->Index,
                 htmlspecialchars($subjectFull),
                 $count,
-                htmlspecialchars($source)
+                htmlspecialchars($source),
+                htmlspecialchars($specLabel)
             ));
         }
         else {
@@ -267,13 +272,9 @@ class Usermail {
             ));
         }
 
-        if(!$this->quiet) {
-            if($count > 0) {
-                echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogEmail']." w3-mobile\"><h3>".$count." Nachrichten in die Warteschlange gestellt (Email-ID ".$job->Index."). </h3></div>";
-            }
-            else {
-                echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>Keine gültigen Emailadressen gefunden. Kein Versand möglich.</h3></div>";
-            }
+        // Success banner removed (MELD-121); overview table shows queue status.
+        if(!$this->quiet && $count === 0) {
+            echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>Keine gültigen Emailadressen gefunden. Kein Versand möglich.</h3></div>";
         }
 
         return $count;
@@ -293,10 +294,9 @@ class Usermail {
             $outbox->save();
             $logentry = new Log;
             $logentry->error(sprintf(
-                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Job fehlt, An: <b>%s</b>, Betreff: <b>%s</b>',
+                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Job fehlt, User-ID: <b>%d</b>',
                 (int)$outbox->Index,
-                htmlspecialchars((string)$outbox->ToEmail),
-                htmlspecialchars((string)$outbox->Subject)
+                (int)$outbox->User
             ));
             return false;
         }
@@ -306,10 +306,10 @@ class Usermail {
             $outbox->save();
             $logentry = new Log;
             $logentry->warning(sprintf(
-                'Email-Versand übersprungen (Job abgebrochen) | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s</b>',
+                'Email-Versand übersprungen (Job abgebrochen) | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User-ID: <b>%d</b>',
                 (int)$outbox->Index,
                 (int)$job->Index,
-                htmlspecialchars((string)$outbox->ToEmail)
+                (int)$outbox->User
             ));
             return false;
         }
@@ -365,11 +365,10 @@ class Usermail {
             $outbox->save();
             $logentry = new Log;
             $logentry->error(sprintf(
-                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User: <b>%s %s</b> — keine gültige Empfängeradresse',
+                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User-ID: <b>%d</b> — keine gültige Empfängeradresse',
                 (int)$outbox->Index,
                 (int)$job->Index,
-                htmlspecialchars($vorname),
-                htmlspecialchars($nachname)
+                (int)$outbox->User
             ));
             $job->refreshCounts();
             return false;
@@ -426,10 +425,10 @@ class Usermail {
             if(!$markOk || mysqli_affected_rows($GLOBALS['conn']) !== 1) {
                 $logentry = new Log;
                 $logentry->warning(sprintf(
-                    'Email möglicherweise doppelt vermieden | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s</b> — Status war nicht mehr sending nach Send()',
+                    'Email möglicherweise doppelt vermieden | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User-ID: <b>%d</b> — Status war nicht mehr sending nach Send()',
                     (int)$outbox->Index,
                     (int)$job->Index,
-                    htmlspecialchars(implode(', ', $addrs))
+                    (int)$outbox->User
                 ));
                 $job->refreshCounts();
                 return false;
@@ -438,16 +437,7 @@ class Usermail {
             $outbox->SentAt = date('Y-m-d H:i:s');
             $outbox->LastError = null;
 
-            $logentry = new Log;
-            $logentry->email(sprintf(
-                'Email versendet | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s %s</b> &lt;%s&gt;, Betreff: <b>%s</b>',
-                (int)$outbox->Index,
-                (int)$job->Index,
-                htmlspecialchars($vorname),
-                htmlspecialchars($nachname),
-                htmlspecialchars(implode(', ', $addrs)),
-                htmlspecialchars((string)$outbox->Subject)
-            ));
+            // Successful sends are not logged individually (MELD-118).
             $job->refreshCounts();
             usleep(100000);
             return true;
@@ -470,14 +460,11 @@ class Usermail {
 
             $logentry = new Log;
             $msg = sprintf(
-                'Email-Versand %s | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, An: <b>%s %s</b> &lt;%s&gt;, Betreff: <b>%s</b>, Versuch: <b>%d</b>/%d, PHPMailer: <b>%s</b>, Exception: <b>%s</b>',
+                'Email-Versand %s | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User-ID: <b>%d</b>, Versuch: <b>%d</b>/%d, PHPMailer: <b>%s</b>, Exception: <b>%s</b>',
                 $final ? 'endgültig fehlgeschlagen' : 'fehlgeschlagen (wird erneut versucht)',
                 (int)$outbox->Index,
                 (int)$job->Index,
-                htmlspecialchars($vorname),
-                htmlspecialchars($nachname),
-                htmlspecialchars(implode(', ', $addrs)),
-                htmlspecialchars((string)$outbox->Subject),
+                (int)$outbox->User,
                 (int)$outbox->Attempts,
                 $maxAttempts,
                 htmlspecialchars((string)$mail->ErrorInfo),
@@ -564,14 +551,21 @@ class Usermail {
 
             if($reclaimed > 0 || count($items) > 0) {
                 $logentry = new Log;
-                $summary = sprintf(
-                    'Mail-Queue Lauf | Batch: <b>%d</b>, beansprucht: <b>%d</b>, gesendet: <b>%d</b>, fehlgeschlagen/übersprungen: <b>%d</b>, hängende sending zurückgeholt: <b>%d</b>',
-                    $batchSize,
-                    count($items),
-                    $sent,
-                    $failed,
-                    $reclaimed
+                $parts = array(
+                    sprintf(
+                        'Mail-Queue Lauf | Batch: <b>%d</b>, beansprucht: <b>%d</b>, gesendet: <b>%d</b>',
+                        $batchSize,
+                        count($items),
+                        $sent
+                    ),
                 );
+                if($failed > 0) {
+                    $parts[] = sprintf('fehlgeschlagen/übersprungen: <b>%d</b>', $failed);
+                }
+                if($reclaimed > 0) {
+                    $parts[] = sprintf('hängende sending zurückgeholt: <b>%d</b>', $reclaimed);
+                }
+                $summary = implode(', ', $parts);
                 if($failed > 0) {
                     $logentry->warning($summary);
                 }
