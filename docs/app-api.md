@@ -19,6 +19,7 @@ App (Login)  →  POST /api/auth/login.php     →  App-Token speichern + Sessio
 App (Start)  →  POST /api/auth/session.php   →  Token → PHP-Session → WebView
 App (Poll)   →  GET  /api/notify/poll.php    →  lokale Notifications (WorkManager)
 App (Logout) →  POST /api/auth/revoke.php    →  Token widerrufen
+App (UI)     →  GET  /api/branding.php       →  Statusleisten-/Chrome-Farben (öffentlich)
 ```
 
 Die Website bleibt die UI. Die App lädt `https://meldeliste.…` im WebView, sobald die Session steht.
@@ -69,6 +70,34 @@ Stil wie bestehende JSON-Scripts (`mailStatus.php`):
 
 Pfade mit `.php` (kein URL-Rewrite nötig).
 Token nur per `Authorization: Bearer` oder JSON/Form-Body — **nicht** per Query-String.
+
+### `GET /api/branding.php`
+
+Öffentliche Chrome-Farben aus der Site-Config (kein Auth).  
+Für native Statusleiste / Splash; Quelle: DB-Config `colorTitle`, `colorTitleBar`, `colorNav`, `colorBackground`.
+
+**Erfolg (200):**
+
+```json
+{
+  "themeColor": "#FDF9E7",
+  "themeColorOn": "#000000",
+  "colorTitle": "#FDF9E7",
+  "colorTitleBar": "#345A95",
+  "colorNav": "#969696",
+  "colorBackground": "#FDFFFC",
+  "siteName": "Meldeliste"
+}
+```
+
+| Feld | Bedeutung |
+|------|-----------|
+| `themeColor` | Statusleiste / `theme-color` (= `colorTitle`, Titelstreifen) |
+| `themeColorOn` | Kontrastschrift zu `themeColor` (`#000000` / `#FFFFFF`) |
+| `colorTitle` / `colorTitleBar` / `colorNav` / `colorBackground` | Roh-Hex aus Config |
+| `siteName` | `WebSiteName` |
+
+**Fehler:** `405` bei anderem als `GET`.
 
 ### `POST /api/auth/login.php`
 
@@ -194,3 +223,4 @@ Die App speichert `serverTime` als nächsten `since`-Cursor und zeigt lokale Not
 | `api/auth/session.php` | Session-Exchange |
 | `api/auth/revoke.php` | Widerruf |
 | `api/notify/poll.php` | Notify-Poll |
+| `api/branding.php` | Öffentliche Chrome-Farben |
