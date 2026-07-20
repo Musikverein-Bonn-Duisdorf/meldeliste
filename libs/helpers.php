@@ -844,20 +844,31 @@ function UserOptionAll($val) {
 
 function validateLink($hash) {
     $_SESSION['userid'] = 0;
-    $hash = trim((string)$hash);
+    $hash = function_exists('normalizeAlinkInput')
+        ? normalizeAlinkInput($hash)
+        : trim((string)$hash);
     if($hash === '' || !preg_match('/^[a-zA-Z0-9]+$/', $hash)) {
         $logentry = new Log;
         $logentry->error("Login not successful. Invalid hash for login via link.");
         return false;
     }
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `activeLink` = '%s';",
-		   $GLOBALS['dbprefix'],
-		   mysqli_real_escape_string($GLOBALS['conn'], $hash)
-    );
-    $dbr = mysqli_query($GLOBALS['conn'], $sql);
-    sqlerror();
-    while($row = mysqli_fetch_assoc($dbr)) {
-        return establishSessionFromUserRow($row, 'Link');
+    if(function_exists('findUserByActiveLink')) {
+        $row = findUserByActiveLink($hash);
+        if($row) {
+            return establishSessionFromUserRow($row, 'Link');
+        }
+    } else {
+        $sql = sprintf(
+            "SELECT * FROM `%sUser` WHERE `activeLink` = '%s' AND `Deleted` != 1 LIMIT 1;",
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], $hash)
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = mysqli_fetch_assoc($dbr);
+        if($row) {
+            return establishSessionFromUserRow($row, 'Link');
+        }
     }
     $logentry = new Log;
     $logentry->error("Login not successful. Invalid hash for login via link <b>".htmlspecialchars($hash)."</b>.");

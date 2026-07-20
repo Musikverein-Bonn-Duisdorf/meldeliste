@@ -196,9 +196,32 @@ $formAction = '';
 <?php if($fill && $canEditUsers) { ?>
 <button class="w3-btn w3-col l6 m6 s12 <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
 <?php } ?>
-<?php if($fill && $canEditUsers) { ?>
-          <div class="w3-row"><a href="<?php echo htmlspecialchars($n->getLink()); ?>"><?php echo htmlspecialchars($n->getLink()); ?></a></div>
-          <div class="w3-row"><a href="<?php echo htmlspecialchars($n->getCalendarLink()); ?>"><?php echo htmlspecialchars($n->getCalendarLink()); ?></a></div>
+<?php
+// App-Login-Link + QR (MELD-123): own profile or admin view of a user
+$showAppLoginLink = $fill && (int)$n->Index > 0
+    && ($isSelfProfileEdit || (int)$n->Index === $userid || $canEditUsers);
+if($showAppLoginLink) {
+    $appLoginUrl = $n->getLink();
+?>
+  <div class="w3-container w3-margin-top w3-margin-bottom w3-padding w3-left-align w3-border">
+    <h3><i class="fas fa-qrcode" aria-hidden="true"></i> App-Login</h3>
+    <p class="w3-small">Mit der Meldeliste-App scannen oder Link öffnen. Den Link kannst du auch manuell in der App einfügen.</p>
+    <div id="app-login-qr" class="w3-margin-bottom" data-alink-url="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"></div>
+    <div class="w3-row w3-small"><a href="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?></a></div>
+<?php if($canEditUsers) { ?>
+    <div class="w3-row w3-small w3-margin-top"><a href="<?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?></a></div>
+<?php } ?>
+  </div>
+  <script src="js/qrcode.min.js"></script>
+  <script>
+  (function () {
+    var el = document.getElementById('app-login-qr');
+    if (!el || typeof QRCode === 'undefined') return;
+    var url = el.getAttribute('data-alink-url') || '';
+    if (!url) return;
+    new QRCode(el, { text: url, width: 192, height: 192, correctLevel: QRCode.CorrectLevel.M });
+  })();
+  </script>
 <?php } ?>
 </div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4">
