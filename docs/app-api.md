@@ -16,6 +16,7 @@ Nach Deploy: Schema-Repair/Updater ausführen (Schema-Version ≥ **14**).
 
 ```
 App (Login)  →  POST /api/auth/login.php     →  App-Token speichern + Session-Cookie
+App (Link)   →  POST /api/auth/alink.php     →  activeLink / Mail-URL → App-Token (MELD-123)
 App (Start)  →  POST /api/auth/session.php   →  Token → PHP-Session → WebView
 App (Poll)   →  GET  /api/notify/poll.php    →  lokale Notifications (WorkManager)
 App (Logout) →  POST /api/auth/revoke.php    →  Token widerrufen
@@ -125,6 +126,37 @@ Für native Statusleiste / Splash; Quelle: DB-Config `colorTitle`, `colorTitleBa
 
 **Fehler:** `401` `{ "error": "invalid_credentials" }`
 
+### `POST /api/auth/alink.php` (MELD-123)
+
+Login über denselben Mail-/Profil-Link (`User.activeLink`).
+
+**Body** (JSON oder Form):
+
+| Feld | Pflicht | Beschreibung |
+|------|---------|--------------|
+| `alink` | ja | Hash **oder** volle URL `…/login.php?alink=…` |
+| `device` | nein | Gerätebezeichnung |
+
+**Erfolg (200):** wie `login.php` — Session-Cookie + neues App-Token.
+
+```json
+{
+  "token": "<raw-token>",
+  "user": {
+    "id": 1,
+    "name": "Max Mustermann",
+    "singleUsePW": false
+  },
+  "expires": null
+}
+```
+
+**Fehler:** `401` `{ "error": "invalid_alink" }`
+
+Android App Links: Datei [`.well-known/assetlinks.json`](../.well-known/assetlinks.json) muss unter
+`https://<host>/.well-known/assetlinks.json` erreichbar sein (Prod + Dev).
+Bei neuem Release-Signing-Cert den SHA-256-Fingerprint dort ergänzen.
+
 ### `POST /api/auth/session.php`
 
 Token → PHP-Session (Auto-Login beim App-Start).
@@ -220,6 +252,7 @@ Die App speichert `serverTime` als nächsten `since`-Cursor und zeigt lokale Not
 | `libs/helpers.php` | Login nutzt gemeinsame Session-Funktion |
 | `api/_bootstrap.php` | JSON-Bootstrap |
 | `api/auth/login.php` | Login |
+| `api/auth/alink.php` | Login via activeLink / Mail-URL (MELD-123) |
 | `api/auth/session.php` | Session-Exchange |
 | `api/auth/revoke.php` | Widerruf |
 | `api/notify/poll.php` | Notify-Poll |

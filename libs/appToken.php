@@ -26,6 +26,51 @@ function establishSessionFromUserRow($row, $via = 'Password') {
 }
 
 /**
+ * Normalize an alink value: accept raw hash or full login.php?alink=… URL.
+ * Returns the hash or empty string if invalid.
+ */
+function normalizeAlinkInput($value) {
+    $value = trim((string)$value);
+    if($value === '') {
+        return '';
+    }
+    if(preg_match('/^[a-zA-Z0-9]+$/', $value)) {
+        return $value;
+    }
+    // Full URL or query fragment containing alink=
+    if(preg_match('/[?&]alink=([a-zA-Z0-9]+)/', $value, $m)) {
+        return $m[1];
+    }
+    $parts = @parse_url($value);
+    if(is_array($parts) && !empty($parts['query'])) {
+        parse_str($parts['query'], $query);
+        if(isset($query['alink']) && preg_match('/^[a-zA-Z0-9]+$/', (string)$query['alink'])) {
+            return (string)$query['alink'];
+        }
+    }
+    return '';
+}
+
+/**
+ * Look up a non-deleted user by activeLink hash. Returns user row or null.
+ */
+function findUserByActiveLink($alinkHash) {
+    $alinkHash = trim((string)$alinkHash);
+    if($alinkHash === '' || !preg_match('/^[a-zA-Z0-9]+$/', $alinkHash)) {
+        return null;
+    }
+    $sql = sprintf(
+        "SELECT * FROM `%sUser` WHERE `activeLink` = '%s' AND `Deleted` != 1 LIMIT 1;",
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($GLOBALS['conn'], $alinkHash)
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $row = mysqli_fetch_assoc($dbr);
+    return $row ? $row : null;
+}
+
+/**
  * Create a new app token for a user. Returns the raw token (store client-side only).
  */
 function createAppToken($userId, $deviceLabel = '') {
