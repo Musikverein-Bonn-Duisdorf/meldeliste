@@ -68,6 +68,7 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
     <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächstes Jahr" aria-label="Späteres Jahr"><i class="fas fa-chevron-down"></i></a>
   </div>
   <a class="w3-button w3-border meld-cal-nav-today" href="calendar.php" title="Aktueller Monat">Heute</a>
+  <a class="w3-button w3-border" href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>" title="Terminkalender drucken" target="_blank" rel="noopener"><i class="fas fa-print" aria-hidden="true"></i> Drucken</a>
 </div>
 <script>
 (function() {
