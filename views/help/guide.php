@@ -223,7 +223,7 @@ $sections[] = array(
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …</li>
 <li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
 <li><b>Updater</b> – Software-Update und Datenbank-Reparatur / Schema-Stand</li>
-<li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code> (HTTP-Abruf über <code>cron.php</code> ist deaktiviert)</li>
+<li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID</li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung)</li>
