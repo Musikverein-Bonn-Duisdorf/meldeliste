@@ -19,6 +19,8 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
   background: #fff; overflow: hidden;
 }
 .meld-cal-cell--out { opacity: 0.45; background: #f5f5f5; }
+.meld-cal-cell--weekend { background: #f0f3f7; }
+.meld-cal-cell--out.meld-cal-cell--weekend { background: #e8ecf1; }
 .meld-cal-cell--today { outline: 2px solid #345A95; outline-offset: -2px; }
 .meld-cal-daynum { font-size: 0.8em; font-weight: bold; margin-bottom: 2px; }
 .meld-cal-chip {
@@ -50,9 +52,13 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
     $key = $cursor->format('Y-m-d');
     $inMonth = ($key >= $monthStart && $key <= $monthEnd);
     $isToday = ($key === $today);
+    $dow = (int)$cursor->format('N'); // 6=Sa, 7=So
     $classes = 'meld-cal-cell';
     if(!$inMonth) {
         $classes .= ' meld-cal-cell--out';
+    }
+    if($dow >= 6) {
+        $classes .= ' meld-cal-cell--weekend';
     }
     if($isToday) {
         $classes .= ' meld-cal-cell--today';
