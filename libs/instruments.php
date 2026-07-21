@@ -314,6 +314,33 @@ class Instruments
         }
         $line->class=$GLOBALS['optionsDB']['HoverEffect'];
         $line->class="w3-mobile w3-border-bottom w3-border-black";
+        $ownerName = getOwner($row['Owner']);
+        $loanFull = (string)($this->getActiveLoanName() ?? '');
+        $loanShort = (string)($this->getActiveLoanNameShort() ?? '');
+        $regDisplay = RegNumber::displayInstrument($row['RegNumber']);
+        $searchParts = array(
+            $regDisplay,
+            (string)(int)$row['RegNumber'],
+            (string)$row['iName'],
+            (string)$row['rName'],
+            (string)$row['Vendor'],
+            (string)$row['Model'],
+            (string)$row['SerialNr'],
+            (string)$row['PurchaseDate'],
+            (string)$row['PurchasePrize'],
+            (string)$row['Comment'],
+            $ownerName,
+            $loanFull,
+            $loanShort,
+        );
+        $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-instrument="'.htmlspecialchars((string)$row['iName'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-vendor="'.htmlspecialchars((string)$row['Vendor'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-model="'.htmlspecialchars((string)$row['Model'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-serial="'.htmlspecialchars((string)$row['SerialNr'], ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-owner="'.htmlspecialchars((string)$ownerName, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-loan="'.htmlspecialchars($loanFull !== '' ? $loanFull : $loanShort, ENT_QUOTES, 'UTF-8').'"'
+            .' data-search="'.htmlspecialchars(trim(implode(' ', $searchParts)), ENT_QUOTES, 'UTF-8').'"';
         $str=$str.$line->open();
         
         $indent++;
@@ -790,6 +817,22 @@ class Instruments
         $owner = getOwner($row['Owner']);
         $loanFull = (string)($this->getActiveLoanName() ?? '');
         $loanShort = (string)($this->getActiveLoanNameShort() ?? '');
+        $regDisplay = RegNumber::displayInstrument($row['RegNumber']);
+        $searchParts = array(
+            $regDisplay,
+            (string)(int)$row['RegNumber'],
+            (string)$row['iName'],
+            (string)$row['rName'],
+            (string)$row['Vendor'],
+            (string)$row['Model'],
+            (string)$row['SerialNr'],
+            (string)$zeitwert,
+            (string)$row['PurchasePrize'],
+            (string)$row['Comment'],
+            $owner,
+            $loanFull,
+            $loanShort,
+        );
         $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-instrument="'.htmlspecialchars((string)$row['iName'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-vendor="'.htmlspecialchars((string)$row['Vendor'], ENT_QUOTES, 'UTF-8').'"'
@@ -798,7 +841,7 @@ class Instruments
             .' data-sort-zeitwert="'.htmlspecialchars((string)$zeitwert, ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-owner="'.htmlspecialchars((string)$owner, ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-loan="'.htmlspecialchars($loanFull !== '' ? $loanFull : $loanShort, ENT_QUOTES, 'UTF-8').'"'
-            .' data-search="'.htmlspecialchars(trim($loanFull.' '.$loanShort), ENT_QUOTES, 'UTF-8').'"';
+            .' data-search="'.htmlspecialchars(trim(implode(' ', $searchParts)), ENT_QUOTES, 'UTF-8').'"';
         $str=$str.$line->open();
         
         $indent++;
