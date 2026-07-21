@@ -1770,6 +1770,57 @@ class Termin
         return $str;
     }
 
+    /**
+     * Compact melde prompt for calendar clicks (MELD-126).
+     * Ja/Nein/Vielleicht like the list; „Weitere Optionen“ opens the detail modal.
+     */
+    public function getCalendarMeldeModalHtml() {
+        $user = (int)$this->getUser();
+        $name = htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8');
+        $timeInfo = htmlspecialchars($this->makeTimeInfo(), ENT_QUOTES, 'UTF-8');
+        $ort = htmlspecialchars((string)$this->Ort1, ENT_QUOTES, 'UTF-8');
+
+        $str = '<div class="calendar-melde-modal" data-termin-id="'.(int)$this->Index.'">';
+        $str .= '<header class="w3-container '.$GLOBALS['optionsDB']['colorTitleBar'].'">';
+        $str .= '<span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span>';
+        $str .= '<h2>'.$name.'</h2>';
+        $str .= '</header>';
+        $str .= '<div class="w3-container w3-padding">';
+        $str .= '<p class="w3-margin-bottom"><b>'.$timeInfo.'</b>';
+        if($ort !== '') {
+            $str .= '<br>'.$ort;
+        }
+        $str .= '</p>';
+
+        if($this->Shifts) {
+            $str .= '<p class="w3-padding w3-border">Dieser Termin hat Schichten. Bitte unter <b>Weitere Optionen</b> melden.</p>';
+        }
+        else {
+            $str .= '<p class="w3-margin-bottom">Deine Rückmeldung:</p>';
+            $str .= '<div class="w3-row w3-margin-bottom" id="calendarMeldeBtns'.(int)$this->Index.'">';
+            if($this->Capacity) {
+                if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || requirePermission('perm_editResponse')) {
+                    $str .= $this->makeButtons(2, 0, $this->Wert);
+                }
+                else {
+                    $str .= '<div class="w3-padding">Alle Plätze belegt</div>';
+                }
+            }
+            else {
+                $str .= $this->makeButtons(3, 0, $this->Wert);
+            }
+            $str .= '</div>';
+        }
+
+        $str .= '<div class="w3-margin-top w3-margin-bottom">';
+        $str .= '<button type="button" class="w3-button w3-border '.$GLOBALS['optionsDB']['colorBtnEdit'].'" '
+            .'onclick="openModal(\'termin\', '.(int)$this->Index.')">'
+            .'<i class="fas fa-info-circle"></i> Weitere Optionen</button>';
+        $str .= '</div>';
+        $str .= '</div></div>';
+        return $str;
+    }
+
     public function getDetailModalHtml() {
         $str="";
         $str=$str."<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">\n";

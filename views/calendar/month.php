@@ -36,7 +36,11 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
 }
 </style>
 
-<div class="w3-container w3-padding-small meld-cal-wrap">
+<div class="w3-container w3-padding-small meld-cal-wrap"
+     data-color-yes="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnYes'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-color-no="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnNo'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-color-maybe="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnMaybe'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-color-none="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnEdit'], ENT_QUOTES, 'UTF-8'); ?>">
   <div class="meld-cal-grid" role="grid" aria-label="Monatskalender">
 <?php foreach($weekdays as $wd) { ?>
     <div class="meld-cal-head" role="columnheader"><?php echo htmlspecialchars($wd, ENT_QUOTES, 'UTF-8'); ?></div>
@@ -70,8 +74,10 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
 ?>
         <button type="button"
           class="meld-cal-chip <?php echo $color; ?>"
+          data-termin-id="<?php echo (int)$ev['id']; ?>"
+          data-melde-wert="<?php echo $ev['wert'] === null ? '' : (int)$ev['wert']; ?>"
           title="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>"
-          onclick="openModal('termin', <?php echo (int)$ev['id']; ?>)">
+          onclick="openModal('calendarMelde', <?php echo (int)$ev['id']; ?>)">
           <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
         </button>
 <?php

@@ -21,6 +21,7 @@ include 'common/header.php';
 <script src="<?php echo assetUrl('js/meldeshift.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/getStatus.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/changeInstrument.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/calendarMelde.js'); ?>"></script>
 
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Kalender</h2>
