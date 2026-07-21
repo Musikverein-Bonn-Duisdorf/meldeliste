@@ -1,6 +1,6 @@
 <?php
 /**
- * Printable appointment table for a month (MELD-9).
+ * Printable appointment table — all upcoming visible events (MELD-9).
  */
 require_once __DIR__.'/libs/sessionBootstrap.php';
 meldeConfigureSession();
@@ -14,11 +14,20 @@ requireLoggedInOrRedirect();
 $userId = (int)$_SESSION['userid'];
 $ym = calendarParseYearMonth(isset($_GET['ym']) ? $_GET['ym'] : null);
 $bounds = calendarMonthBounds($ym);
-$events = calendarLoadEventsForUser($userId, $bounds['monthStart'], $bounds['monthEnd']);
-$events = calendarEventsOverlappingRange($events, $bounds['monthStart'], $bounds['monthEnd']);
+
+$window = icalFeedDateWindow();
+$fromDate = date('Y-m-d');
+$toDate = $window['to'];
+if($toDate < $fromDate) {
+    $toDate = $fromDate;
+}
+
+$events = calendarLoadEventsForUser($userId, $fromDate, $toDate);
+$events = calendarEventsOverlappingRange($events, $fromDate, $toDate);
 
 $orgName = isset($GLOBALS['optionsDB']['orgName']) ? (string)$GLOBALS['optionsDB']['orgName'] : '';
 $printDate = germanDate(date('Y-m-d'), 1);
+$rangeLabel = 'ab '.germanDate($fromDate, 1).' bis '.germanDate($toDate, 1);
 $nEvents = count($events);
 $assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
 $cssMtime = @filemtime(__DIR__.'/styles/custom.css');
@@ -31,7 +40,7 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Terminkalender – <?php echo htmlspecialchars($bounds['label'], ENT_QUOTES, 'UTF-8'); ?></title>
+  <title>Terminkalender – kommende Termine</title>
   <link rel="stylesheet" href="<?php echo htmlspecialchars($cssUrl, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
 <body class="meld-cal-print">

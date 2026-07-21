@@ -1,6 +1,6 @@
 <?php
 /**
- * Print table partial (MELD-9). Expects: $bounds, $events, $orgName, $printDate, $nEvents
+ * Print table partial (MELD-9). Expects: $events, $orgName, $printDate, $nEvents, $rangeLabel
  */
 ?>
   <header class="meld-cal-print-header">
@@ -9,7 +9,7 @@
 <?php } ?>
     <h1>Terminkalender</h1>
     <p class="meld-cal-print-meta">
-      <strong><?php echo htmlspecialchars($bounds['label'], ENT_QUOTES, 'UTF-8'); ?></strong>
+      <strong><?php echo htmlspecialchars((string)$rangeLabel, ENT_QUOTES, 'UTF-8'); ?></strong>
       &middot;
       gedruckt am <?php echo htmlspecialchars((string)$printDate, ENT_QUOTES, 'UTF-8'); ?>
       &middot;
@@ -18,7 +18,7 @@
   </header>
 
 <?php if($nEvents === 0) { ?>
-  <p class="meld-cal-print-empty">Keine Termine in diesem Monat.</p>
+  <p class="meld-cal-print-empty">Keine kommenden Termine.</p>
 <?php } else { ?>
   <table class="meld-cal-print-table">
     <thead>
