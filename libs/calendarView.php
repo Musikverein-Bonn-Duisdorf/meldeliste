@@ -23,10 +23,23 @@ function calendarParseYearMonth($ym) {
 }
 
 /**
+ * German month names (1–12).
+ *
+ * @return array<int,string>
+ */
+function calendarMonthNames() {
+    return array(
+        1 => 'Januar', 2 => 'Februar', 3 => 'März', 4 => 'April',
+        5 => 'Mai', 6 => 'Juni', 7 => 'Juli', 8 => 'August',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Dezember',
+    );
+}
+
+/**
  * First Monday on/before the 1st of the month through last Sunday on/after the last day.
  *
  * @param string $ym YYYY-MM
- * @return array{ym:string,monthStart:string,monthEnd:string,gridStart:string,gridEnd:string,prevYm:string,nextYm:string,label:string}
+ * @return array{ym:string,year:int,month:int,monthStart:string,monthEnd:string,gridStart:string,gridEnd:string,prevYm:string,nextYm:string,prevYearYm:string,nextYearYm:string,label:string}
  */
 function calendarMonthBounds($ym) {
     $ym = calendarParseYearMonth($ym);
@@ -45,23 +58,26 @@ function calendarMonthBounds($ym) {
 
     $prev = $monthStart->modify('-1 month');
     $next = $monthStart->modify('+1 month');
+    $prevYear = $monthStart->modify('-1 year');
+    $nextYear = $monthStart->modify('+1 year');
 
-    $monthsDe = array(
-        1 => 'Januar', 2 => 'Februar', 3 => 'März', 4 => 'April',
-        5 => 'Mai', 6 => 'Juni', 7 => 'Juli', 8 => 'August',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Dezember',
-    );
+    $monthsDe = calendarMonthNames();
     $mi = (int)$monthStart->format('n');
-    $label = $monthsDe[$mi].' '.$monthStart->format('Y');
+    $yi = (int)$monthStart->format('Y');
+    $label = $monthsDe[$mi].' '.$yi;
 
     return array(
         'ym' => $ym,
+        'year' => $yi,
+        'month' => $mi,
         'monthStart' => $monthStart->format('Y-m-d'),
         'monthEnd' => $monthEnd->format('Y-m-d'),
         'gridStart' => $gridStart->format('Y-m-d'),
         'gridEnd' => $gridEnd->format('Y-m-d'),
         'prevYm' => $prev->format('Y-m'),
         'nextYm' => $next->format('Y-m'),
+        'prevYearYm' => $prevYear->format('Y-m'),
+        'nextYearYm' => $nextYear->format('Y-m'),
         'label' => $label,
     );
 }
