@@ -7,7 +7,7 @@ function filterMusiker() {
     for (i = 0; i < tr.length; i++) {
 	if(tr[i].className=="w3-modal" || tr[i].className=="w3-modal-content") continue;
 	if(tr[i].parentNode !== table) continue;
-	txtValue = tr[i].textContent || tr[i].innerText;
+	txtValue = (typeof listRowSearchText === 'function' ? listRowSearchText(tr[i]) : (tr[i].textContent || tr[i].innerText));
 	if (txtValue.toUpperCase().indexOf(filter) > -1) {
 	    tr[i].style.display = "";
 	    tr[i].classList.remove("list-filtered-out");

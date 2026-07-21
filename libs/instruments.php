@@ -788,13 +788,15 @@ class Instruments
         $line->class="w3-mobile w3-border-bottom w3-border-black";
         $zeitwert = $this->getCurrentValue($row['PurchasePrize']);
         $owner = getOwner($row['Owner']);
+        $loanName = (string)($this->getActiveLoanName() ?? '');
         $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-instrument="'.htmlspecialchars((string)$row['iName'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-vendor="'.htmlspecialchars((string)$row['Vendor'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-model="'.htmlspecialchars((string)$row['Model'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-serial="'.htmlspecialchars((string)$row['SerialNr'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-zeitwert="'.htmlspecialchars((string)$zeitwert, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-owner="'.htmlspecialchars((string)$owner, ENT_QUOTES, 'UTF-8').'"';
+            .' data-sort-owner="'.htmlspecialchars((string)$owner, ENT_QUOTES, 'UTF-8').'"'
+            .' data-sort-loan="'.htmlspecialchars($loanName, ENT_QUOTES, 'UTF-8').'"';
         $str=$str.$line->open();
         
         $indent++;
