@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-97850 (2026-07-22)
+
+- MELD-131: Remote-Backup über eigenes backupToken
+
 ## 2026-07-22-53410 (2026-07-22)
 
 - MELD-130: Leihe löschen und Leihen-UI neu aufbauen
