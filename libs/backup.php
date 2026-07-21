@@ -272,6 +272,31 @@ function backupDownloadVia() {
 }
 
 /**
+ * Format a byte size for log display (B / KB / MB / GB).
+ *
+ * @param int $bytes
+ * @return string
+ */
+function backupFormatBytes($bytes) {
+    $bytes = max(0, (int)$bytes);
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
+    $value = (float)$bytes;
+    $unit = 0;
+    while($value >= 1024 && $unit < count($units) - 1) {
+        $value /= 1024;
+        $unit++;
+    }
+    if($unit === 0) {
+        return ((int)$value).' B';
+    }
+    $rounded = round($value, 1);
+    if(abs($rounded - round($rounded)) < 0.05) {
+        return ((int)round($rounded)).' '.$units[$unit];
+    }
+    return number_format($rounded, 1, '.', '').' '.$units[$unit];
+}
+
+/**
  * Confirm a backup ZIP is readable and non-empty, then write an info Log entry.
  * On failure writes an error Log entry and throws.
  *
@@ -294,7 +319,7 @@ function confirmAndLogBackupSuccess($backup, $via = null) {
 
     $logentry = new Log;
     $logentry->info('<b>Database backup</b> '.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8')
-        .' ('.$size.' bytes, via '.$viaLabel.')');
+        .' ('.backupFormatBytes((int)$size).', via '.$viaLabel.')');
     return (int)$size;
 }
 
