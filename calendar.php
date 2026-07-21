@@ -52,8 +52,13 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
     position: absolute; left: 0; top: 50%; transform: translateY(-50%);
   }
 }
-.meld-cal-nav-icon {
-  margin: 0; padding: 8px 12px; line-height: 1; min-width: 2.5rem; text-align: center;
+.meld-cal-nav-icon,
+a.w3-button.meld-cal-nav-icon,
+button.w3-button.meld-cal-nav-icon {
+  margin: 0; padding: 0; line-height: 1;
+  width: 2.5rem; height: 2.5rem; min-width: 2.5rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50% !important; box-sizing: border-box;
 }
 .meld-cal-spinner { display: inline-flex; flex-direction: column; align-items: center; min-width: 9rem; }
 .meld-cal-spinner select {
@@ -116,21 +121,6 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
     }
     if(monthSel) monthSel.addEventListener('change', goYm);
     if(yearSel) yearSel.addEventListener('change', goYm);
-
-    var toggle = document.getElementById('calSubscribeToggle');
-    var panel = document.getElementById('calSubscribePanel');
-    if(toggle && panel) {
-        toggle.addEventListener('click', function () {
-            var open = panel.hasAttribute('hidden');
-            if(open) {
-                panel.removeAttribute('hidden');
-                toggle.setAttribute('aria-expanded', 'true');
-            } else {
-                panel.setAttribute('hidden', '');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
 })();
 </script>
 
@@ -144,6 +134,23 @@ if($showCalendarSubscribe) {
 <div id="calSubscribePanel" class="w3-container w3-padding-16" style="max-width:40rem;margin:0 auto;" hidden>
 <?php include __DIR__.'/views/calendar/subscribe.php'; ?>
 </div>
+<script>
+(function() {
+    var toggle = document.getElementById('calSubscribeToggle');
+    var panel = document.getElementById('calSubscribePanel');
+    if(!toggle || !panel) return;
+    toggle.addEventListener('click', function () {
+        var open = panel.hasAttribute('hidden');
+        if(open) {
+            panel.removeAttribute('hidden');
+            toggle.setAttribute('aria-expanded', 'true');
+        } else {
+            panel.setAttribute('hidden', '');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+})();
+</script>
 <?php
 }
 
