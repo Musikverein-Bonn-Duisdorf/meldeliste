@@ -20,7 +20,7 @@ $columns = array(
     'purchaseDate' => 'Kaufdatum',
     'purchasePrize' => 'Anschaffungswert',
     'zeitwert' => 'Zeitwert',
-    'owner' => 'Besitzer',
+    'owner' => 'Eigentümer',
 );
 $numCols = array('purchasePrize' => true, 'zeitwert' => true);
 
