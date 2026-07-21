@@ -62,7 +62,7 @@ $sections[] = array(
 <p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung (auch im Termin-Archiv).</li>
-<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Oben links: Info-Button für den Abo-Link, Drucken-Button für die Monatstabelle (PDF/Ausdruck).</li>
+<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Über dem Monat: Info öffnet das Abo-Fenster, Drucken die Monatstabelle.</li>
 </ul>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
@@ -123,7 +123,7 @@ $sections[] = array(
     'id' => 'kalender-abo',
     'title' => 'Kalender abonnieren',
     'body' => '
-<p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b> hinter dem Info-Button (oben links).</p>
+<p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b> im Info-Dialog (runde Buttons über der Monatsauswahl).</p>
 <p><b>Einweg:</b> Termine und dein Melde-Status (zugesagt / vielleicht / ohne) werden in den Kalender übernommen. Zu- und Absagen änderst du weiterhin in der Meldeliste — nicht in der Kalender-App.</p>
 <p><b>Aktualisierung:</b> Wie oft der Feed neu geladen wird, steuert dein Kalender-Anbieter (oft erst nach einigen Stunden). Darauf hat die Meldeliste keinen Einfluss.</p>
 <ul>

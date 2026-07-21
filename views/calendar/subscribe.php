@@ -2,6 +2,7 @@
 /**
  * Personal calendar subscription block (MELD-127).
  * Expects $n = User with activeLink, or $calendarHttps / $calendarWebcal strings.
+ * Set $calendarSubscribeInModal = true to omit outer panel (content for a modal).
  */
 if(!isset($calendarHttps) || !isset($calendarWebcal)) {
     if(!isset($n) || !is_object($n) || !(int)$n->Index) {
@@ -19,9 +20,12 @@ if($calendarHttps === '') {
     return;
 }
 $uid = isset($calendarSubscribeUid) ? (string)$calendarSubscribeUid : 'cal-sub';
+$inModal = !empty($calendarSubscribeInModal);
+if(!$inModal) {
 ?>
 <div class="w3-panel w3-border w3-padding w3-margin-top <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorInputBackground'], ENT_QUOTES, 'UTF-8'); ?>">
   <h3><i class="fas fa-calendar-plus" aria-hidden="true"></i> Kalender abonnieren</h3>
+<?php } ?>
   <p class="w3-small">
     Trage den Link in Google Kalender, Apple Kalender oder Outlook als <b>Kalender-URL / Abonnement</b> ein.
     Neue und geänderte Termine erscheinen automatisch — das Aktualisierungsintervall steuert dein Kalender (oft erst nach einigen Stunden).
@@ -40,10 +44,14 @@ $uid = isset($calendarSubscribeUid) ? (string)$calendarSubscribeUid : 'cal-sub';
     <button type="button" class="w3-button w3-border" data-copy-target="<?php echo htmlspecialchars($uid, ENT_QUOTES, 'UTF-8'); ?>-webcal">webcal kopieren</button>
   </p>
   <p class="w3-small"><a href="help.php#help-kalender-abo">Hilfe: Kalender abonnieren</a></p>
+<?php if(!$inModal) { ?>
 </div>
+<?php } ?>
 <script>
 (function () {
   document.querySelectorAll('[data-copy-target]').forEach(function (btn) {
+    if(btn.getAttribute('data-copy-bound') === '1') return;
+    btn.setAttribute('data-copy-bound', '1');
     btn.addEventListener('click', function () {
       var id = btn.getAttribute('data-copy-target');
       var el = id ? document.getElementById(id) : null;

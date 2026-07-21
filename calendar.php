@@ -39,54 +39,85 @@ $yearFrom = max(1970, min($calYear, (int)date('Y')) - 10);
 $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
 ?>
 <style>
+.meld-cal-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem 1.25rem 0.35rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
 .meld-cal-nav {
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start;
-  gap: 1rem 1.5rem; position: relative;
-}
-.meld-cal-nav-actions {
-  display: inline-flex; align-items: center; gap: 0.35rem;
-  align-self: center;
-}
-@media (min-width: 901px) {
-  .meld-cal-nav-actions {
-    position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  }
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1rem 1.5rem;
+  padding: 0.75rem 1.25rem 1rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 .meld-cal-nav-icon,
 a.w3-button.meld-cal-nav-icon,
 button.w3-button.meld-cal-nav-icon {
-  margin: 0; padding: 0; line-height: 1;
-  width: 2.5rem; height: 2.5rem; min-width: 2.5rem;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 50% !important; box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  box-sizing: border-box;
 }
-.meld-cal-spinner { display: inline-flex; flex-direction: column; align-items: center; min-width: 9rem; }
+.meld-cal-spinner {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 9rem;
+}
 .meld-cal-spinner select {
-  text-align: center; text-align-last: center; font-weight: bold;
-  padding: 8px 6px; margin: 0; border-radius: 0; width: 100%;
+  text-align: center;
+  text-align-last: center;
+  font-weight: bold;
+  padding: 8px 6px;
+  margin: 0;
+  border-radius: 0;
+  width: 100%;
 }
 .meld-cal-spinner .meld-cal-step {
-  margin: 0; padding: 4px 10px; width: auto; min-width: 2.25rem;
+  margin: 0;
+  padding: 4px 10px;
+  width: auto;
+  min-width: 2.25rem;
   line-height: 1;
 }
 .meld-cal-nav-today { align-self: center; }
-#calSubscribePanel[hidden] { display: none !important; }
+#calSubscribeModal .w3-modal-content {
+  max-width: 36rem;
+  margin: 4vh auto;
+}
 </style>
 
-<div class="w3-container w3-padding-16 meld-cal-nav">
-  <div class="meld-cal-nav-actions">
+<div class="meld-cal-toolbar" role="toolbar" aria-label="Kalender-Aktionen">
 <?php if($showCalendarSubscribe) { ?>
-    <button type="button" id="calSubscribeToggle" class="w3-button w3-border meld-cal-nav-icon"
-            title="Kalender abonnieren" aria-label="Kalender abonnieren" aria-expanded="false" aria-controls="calSubscribePanel">
-      <i class="fas fa-info-circle" aria-hidden="true"></i>
-    </button>
+  <button type="button" id="calSubscribeToggle" class="w3-button w3-border meld-cal-nav-icon"
+          title="Kalender abonnieren" aria-label="Kalender abonnieren" aria-haspopup="dialog" aria-controls="calSubscribeModal">
+    <i class="fas fa-info-circle" aria-hidden="true"></i>
+  </button>
 <?php } ?>
-    <a class="w3-button w3-border meld-cal-nav-icon"
-       href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>"
-       title="Terminkalender drucken" aria-label="Terminkalender drucken" target="_blank" rel="noopener">
-      <i class="fas fa-print" aria-hidden="true"></i>
-    </a>
-  </div>
+  <a class="w3-button w3-border meld-cal-nav-icon"
+     href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>"
+     title="Terminkalender drucken" aria-label="Terminkalender drucken" target="_blank" rel="noopener">
+    <i class="fas fa-print" aria-hidden="true"></i>
+  </a>
+</div>
+
+<div class="meld-cal-nav">
   <div class="meld-cal-spinner" role="group" aria-label="Monat">
     <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriger Monat" aria-label="Früherer Monat"><i class="fas fa-chevron-up"></i></a>
     <select id="calMonthSelect" class="w3-select w3-border" aria-label="Monat wählen">
@@ -130,24 +161,32 @@ include __DIR__.'/views/calendar/month.php';
 if($showCalendarSubscribe) {
     $n = $calUser;
     $calendarSubscribeUid = 'page-cal';
+    $calendarSubscribeInModal = true;
 ?>
-<div id="calSubscribePanel" class="w3-container w3-padding-16" style="max-width:40rem;margin:0 auto;" hidden>
+<div id="calSubscribeModal" class="w3-modal" role="dialog" aria-modal="true" aria-labelledby="calSubscribeModalTitle" style="display:none;"
+     onclick="if(event.target===this){ this.style.display='none'; }">
+  <div class="w3-modal-content w3-card">
+    <header class="w3-container <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorTitleBar'], ENT_QUOTES, 'UTF-8'); ?>">
+      <button type="button" class="w3-button w3-display-topright" id="calSubscribeClose" aria-label="Schließen">&times;</button>
+      <h2 id="calSubscribeModalTitle"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Kalender abonnieren</h2>
+    </header>
+    <div class="w3-container w3-padding">
 <?php include __DIR__.'/views/calendar/subscribe.php'; ?>
+    </div>
+  </div>
 </div>
 <script>
 (function() {
     var toggle = document.getElementById('calSubscribeToggle');
-    var panel = document.getElementById('calSubscribePanel');
-    if(!toggle || !panel) return;
-    toggle.addEventListener('click', function () {
-        var open = panel.hasAttribute('hidden');
-        if(open) {
-            panel.removeAttribute('hidden');
-            toggle.setAttribute('aria-expanded', 'true');
-        } else {
-            panel.setAttribute('hidden', '');
-            toggle.setAttribute('aria-expanded', 'false');
-        }
+    var modal = document.getElementById('calSubscribeModal');
+    var closeBtn = document.getElementById('calSubscribeClose');
+    if(!toggle || !modal) return;
+    function openSub() { modal.style.display = 'block'; }
+    function closeSub() { modal.style.display = 'none'; }
+    toggle.addEventListener('click', openSub);
+    if(closeBtn) closeBtn.addEventListener('click', closeSub);
+    document.addEventListener('keydown', function (e) {
+        if(e.key === 'Escape' && modal.style.display === 'block') closeSub();
     });
 })();
 </script>
