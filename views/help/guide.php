@@ -41,7 +41,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
-<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); Drucken als Tabelle; unten Link zum Abonnieren in Google/Apple/Outlook</li>
+<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); Info-Button für Abo-Link, Drucken-Button für die Monatstabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
@@ -62,7 +62,7 @@ $sections[] = array(
 <p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung (auch im Termin-Archiv).</li>
-<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Mit <b>Drucken</b> öffnest du eine Tabelle des Monats zum Ausdrucken oder Speichern als PDF.</li>
+<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Oben links: Info-Button für den Abo-Link, Drucken-Button für die Monatstabelle (PDF/Ausdruck).</li>
 </ul>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
@@ -123,7 +123,7 @@ $sections[] = array(
     'id' => 'kalender-abo',
     'title' => 'Kalender abonnieren',
     'body' => '
-<p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b>.</p>
+<p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b> hinter dem Info-Button (oben links).</p>
 <p><b>Einweg:</b> Termine und dein Melde-Status (zugesagt / vielleicht / ohne) werden in den Kalender übernommen. Zu- und Absagen änderst du weiterhin in der Meldeliste — nicht in der Kalender-App.</p>
 <p><b>Aktualisierung:</b> Wie oft der Feed neu geladen wird, steuert dein Kalender-Anbieter (oft erst nach einigen Stunden). Darauf hat die Meldeliste keinen Einfluss.</p>
 <ul>

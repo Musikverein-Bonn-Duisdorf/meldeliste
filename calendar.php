@@ -14,6 +14,10 @@ $bounds = calendarMonthBounds($ym);
 $events = calendarLoadEventsForUser($userId, $bounds['gridStart'], $bounds['gridEnd']);
 $byDay = calendarEventsByDay($events, $bounds['gridStart'], $bounds['gridEnd']);
 
+$calUser = new User();
+$calUser->load_by_id($userId);
+$showCalendarSubscribe = ((int)$calUser->Index > 0 && $calUser->activeLink);
+
 include 'common/header.php';
 ?>
 <script src="<?php echo assetUrl('js/melde.js'); ?>"></script>
@@ -35,7 +39,22 @@ $yearFrom = max(1970, min($calYear, (int)date('Y')) - 10);
 $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
 ?>
 <style>
-.meld-cal-nav { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 1rem 1.5rem; }
+.meld-cal-nav {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start;
+  gap: 1rem 1.5rem; position: relative;
+}
+.meld-cal-nav-actions {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  align-self: center;
+}
+@media (min-width: 901px) {
+  .meld-cal-nav-actions {
+    position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  }
+}
+.meld-cal-nav-icon {
+  margin: 0; padding: 8px 12px; line-height: 1; min-width: 2.5rem; text-align: center;
+}
 .meld-cal-spinner { display: inline-flex; flex-direction: column; align-items: center; min-width: 9rem; }
 .meld-cal-spinner select {
   text-align: center; text-align-last: center; font-weight: bold;
@@ -46,9 +65,23 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
   line-height: 1;
 }
 .meld-cal-nav-today { align-self: center; }
+#calSubscribePanel[hidden] { display: none !important; }
 </style>
 
 <div class="w3-container w3-padding-16 meld-cal-nav">
+  <div class="meld-cal-nav-actions">
+<?php if($showCalendarSubscribe) { ?>
+    <button type="button" id="calSubscribeToggle" class="w3-button w3-border meld-cal-nav-icon"
+            title="Kalender abonnieren" aria-label="Kalender abonnieren" aria-expanded="false" aria-controls="calSubscribePanel">
+      <i class="fas fa-info-circle" aria-hidden="true"></i>
+    </button>
+<?php } ?>
+    <a class="w3-button w3-border meld-cal-nav-icon"
+       href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>"
+       title="Terminkalender drucken" aria-label="Terminkalender drucken" target="_blank" rel="noopener">
+      <i class="fas fa-print" aria-hidden="true"></i>
+    </a>
+  </div>
   <div class="meld-cal-spinner" role="group" aria-label="Monat">
     <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriger Monat" aria-label="Früherer Monat"><i class="fas fa-chevron-up"></i></a>
     <select id="calMonthSelect" class="w3-select w3-border" aria-label="Monat wählen">
@@ -68,7 +101,6 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
     <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächstes Jahr" aria-label="Späteres Jahr"><i class="fas fa-chevron-down"></i></a>
   </div>
   <a class="w3-button w3-border meld-cal-nav-today" href="calendar.php" title="Aktueller Monat">Heute</a>
-  <a class="w3-button w3-border" href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>" title="Terminkalender drucken" target="_blank" rel="noopener"><i class="fas fa-print" aria-hidden="true"></i> Drucken</a>
 </div>
 <script>
 (function() {
@@ -84,20 +116,35 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
     }
     if(monthSel) monthSel.addEventListener('change', goYm);
     if(yearSel) yearSel.addEventListener('change', goYm);
+
+    var toggle = document.getElementById('calSubscribeToggle');
+    var panel = document.getElementById('calSubscribePanel');
+    if(toggle && panel) {
+        toggle.addEventListener('click', function () {
+            var open = panel.hasAttribute('hidden');
+            if(open) {
+                panel.removeAttribute('hidden');
+                toggle.setAttribute('aria-expanded', 'true');
+            } else {
+                panel.setAttribute('hidden', '');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
 })();
 </script>
 
 <?php
 include __DIR__.'/views/calendar/month.php';
 
-$calUser = new User();
-$calUser->load_by_id($userId);
-if((int)$calUser->Index > 0 && $calUser->activeLink) {
+if($showCalendarSubscribe) {
     $n = $calUser;
     $calendarSubscribeUid = 'page-cal';
-    echo '<div class="w3-container w3-padding-16" style="max-width:40rem;margin:0 auto;">';
-    include __DIR__.'/views/calendar/subscribe.php';
-    echo '</div>';
+?>
+<div id="calSubscribePanel" class="w3-container w3-padding-16" style="max-width:40rem;margin:0 auto;" hidden>
+<?php include __DIR__.'/views/calendar/subscribe.php'; ?>
+</div>
+<?php
 }
 
 include 'common/footer.php';
