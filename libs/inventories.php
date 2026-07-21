@@ -337,14 +337,16 @@ class Inventories
         $line->class=$GLOBALS['optionsDB']['HoverEffect'];
         $line->class="w3-mobile w3-border-bottom w3-border-black";
         $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
-        $loanName = $this->getActiveLoanNameShort();
+        $loanShort = (string)($this->getActiveLoanNameShort() ?? '');
+        $loanFull = (string)($this->getActiveLoanName() ?? '');
         $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-typ="'.htmlspecialchars((string)$typLabel, ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-description="'.htmlspecialchars((string)$row['Description'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-comment="'.htmlspecialchars((string)$row['Comment'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-purchasedate="'.htmlspecialchars((string)$row['PurchaseDate'], ENT_QUOTES, 'UTF-8').'"'
             .' data-sort-purchaseprize="'.htmlspecialchars((string)$row['PurchasePrize'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-loan="'.htmlspecialchars((string)$loanName, ENT_QUOTES, 'UTF-8').'"';
+            .' data-sort-loan="'.htmlspecialchars($loanFull !== '' ? $loanFull : $loanShort, ENT_QUOTES, 'UTF-8').'"'
+            .' data-search="'.htmlspecialchars(trim($loanFull.' '.$loanShort), ENT_QUOTES, 'UTF-8').'"';
         $str=$str.$line->open();
         
         $indent++;
@@ -400,7 +402,7 @@ class Inventories
         $field->indent=$indent;
         $field->class="w3-center list-secondary";
         $field->col(2,2,12);
-        $field->body=$loanName;
+        $field->body=$loanShort;
         $str=$str.$field->print();
 
         $field = new div;
