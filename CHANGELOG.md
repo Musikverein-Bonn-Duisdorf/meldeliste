@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-21-f4036 (2026-07-21)
+
+- MELD-128: Orchester-Test-User nur für Admins (Web)
+- MELD-128: Orchester-Test-User admin-geschützt
+
 ## 2026-07-21-30be4 (2026-07-21)
 
 - MELD-124: Besitzer-Wording auf Eigentümer ändern
@@ -650,7 +655,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 - adding insurance table
 - step 0.01 for instrument purchaseprize
 - fixing nav display admin page issue
-- remove config from repo
+- checkbox for insurance saving now
 
 ## 2021-11-30-73ef8 (2021-11-30)
 
@@ -716,7 +721,6 @@ Automatisch aus Git-Release-Commits erzeugt.
 - fixed issue where deleted users are shown on public entry page
 - anonymize user on delete command
 - sample config file
-- anonymous config file
 
 ## 2020-11-06-198c7 (2020-11-06)
 
