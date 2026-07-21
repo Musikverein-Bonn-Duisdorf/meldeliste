@@ -1,7 +1,62 @@
 <?php
 /**
- * Database backup / restore helpers (MELD-90).
+ * Database backup / restore helpers (MELD-90 / MELD-131).
  */
+
+/** Minimum length for HTTP remote backup token (opt-in). */
+define('BACKUP_HTTP_TOKEN_MIN_LEN', 32);
+
+/**
+ * Configured HTTP backup token, or empty if unset.
+ */
+function backupHttpTokenConfiguredValue() {
+    if(!isset($GLOBALS['backupToken'])) {
+        return '';
+    }
+    return trim((string)$GLOBALS['backupToken']);
+}
+
+/**
+ * Whether a usable HTTP backup token is configured.
+ */
+function backupHttpTokenConfigured() {
+    return strlen(backupHttpTokenConfiguredValue()) >= BACKUP_HTTP_TOKEN_MIN_LEN;
+}
+
+/**
+ * Token from query id=… or Authorization: Bearer ….
+ */
+function backupHttpExtractProvidedToken() {
+    if(isset($_GET['id']) && (string)$_GET['id'] !== '') {
+        return (string)$_GET['id'];
+    }
+    $header = '';
+    if(!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+        $header = (string)$_SERVER['HTTP_AUTHORIZATION'];
+    }
+    elseif(!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $header = (string)$_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    }
+    if(preg_match('/^Bearer\s+(\S+)/i', $header, $m)) {
+        return $m[1];
+    }
+    return '';
+}
+
+/**
+ * Validate a provided HTTP backup token (timing-safe). Never accepts $cronID.
+ */
+function backupHttpTokenValid($provided) {
+    $provided = (string)$provided;
+    if($provided === '' || !backupHttpTokenConfigured()) {
+        return false;
+    }
+    $expected = backupHttpTokenConfiguredValue();
+    if(strlen($provided) !== strlen($expected)) {
+        return false;
+    }
+    return hash_equals($expected, $provided);
+}
 
 /**
  * @return array

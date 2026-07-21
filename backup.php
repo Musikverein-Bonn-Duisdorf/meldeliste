@@ -97,8 +97,10 @@ $schema = $manifest['schemaVersion'];
   <div class="w3-card w3-padding w3-margin-bottom">
     <h3>Backup herunterladen</h3>
     <p>ZIP mit <code>manifest.json</code> (Versionsinfo) und <code>database.sql</code> (alle Tabellen mit DB-Prefix).</p>
-    <p>CLI-Backup (Cron):</p>
+    <p>CLI-Backup (Cron auf dem App-Server):</p>
     <pre class="w3-code w3-border w3-padding" style="white-space:pre-wrap;">php cron.php CRONID backup &gt; backup-$(date +%F).zip</pre>
+    <p>Remote-HTTP (nur mit eigenem <code>$backupToken</code> in <code>config.php</code>, mind. 32 Zeichen; nicht der allgemeine Cron-<code>$cronID</code>):</p>
+    <pre class="w3-code w3-border w3-padding" style="white-space:pre-wrap;">curl -fsS "https://HOST/cron.php?id=BACKUPTOKEN&amp;cmd=backup" -o backup.zip</pre>
     <p>Im Browser: Backup über die Schaltfläche unten (Benötigt Berechtigung „Konfiguration bearbeiten“).</p>
     <p><a class="w3-button w3-border <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="backup.php?download=1"><i class="fas fa-download"></i> Backup jetzt laden</a></p>
   </div>

@@ -14,26 +14,30 @@ require_once __DIR__.'/libs/sessionBootstrap.php';
 meldeConfigureSession();
 include 'common/include.php';
 
-if(!isset($_GET['id'])) {
-    die("no ID specified\n");
-}
-if($_GET['id'] != $GLOBALS['cronID']) {
-    die("ID invalid\n");
-}
 if(!isset($_GET['cmd'])) {
     die("no command specified\n");
 }
 
 $cmd = (string)$_GET['cmd'];
 
-// Binary download: CLI only (HTTP backup via backup.php)
+// Binary download: CLI uses cronID; HTTP uses dedicated $backupToken (MELD-131)
 if($cmd === 'backup') {
-    if(PHP_SAPI !== 'cli') {
-        http_response_code(403);
-        header('Content-Type: text/plain; charset=utf-8');
-        die("Backup via HTTP disabled; use backup.php or CLI: php cron.php <cronId> backup\n");
+    if(PHP_SAPI === 'cli') {
+        if(!isset($_GET['id']) || (string)$_GET['id'] !== (string)$GLOBALS['cronID']) {
+            die("ID invalid\n");
+        }
     }
-    require_once __DIR__.'/libs/backup.php';
+    else {
+        $provided = backupHttpExtractProvidedToken();
+        if(!backupHttpTokenValid($provided)) {
+            http_response_code(403);
+            header('Content-Type: text/plain; charset=utf-8');
+            if(!backupHttpTokenConfigured()) {
+                die("HTTP backup disabled: set \$backupToken in config.php (min ".BACKUP_HTTP_TOKEN_MIN_LEN." chars), or use backup.php / CLI: php cron.php <cronId> backup\n");
+            }
+            die("HTTP backup unauthorized: invalid backup token\n");
+        }
+    }
     mkAdmin();
     try {
         sendBackupDownload();
@@ -44,6 +48,13 @@ if($cmd === 'backup') {
         echo "Backup failed: ".$e->getMessage()."\n";
         exit(1);
     }
+}
+
+if(!isset($_GET['id'])) {
+    die("no ID specified\n");
+}
+if($_GET['id'] != $GLOBALS['cronID']) {
+    die("ID invalid\n");
 }
 
 if(PHP_SAPI === 'cli') {
