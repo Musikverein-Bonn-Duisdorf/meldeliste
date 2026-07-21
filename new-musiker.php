@@ -50,6 +50,9 @@ $returnTo = safeReturnUrl(
     isset($_GET['return_to']) ? $_GET['return_to'] : (isset($_POST['return_to']) ? $_POST['return_to'] : ''),
     'musiker.php'
 );
+$returnToken = !empty($_POST['return_token'])
+    ? (string)$_POST['return_token']
+    : issueReturnToken($returnTo);
 
 $fill = false;
 $n = new User;
@@ -109,6 +112,7 @@ $formAction = '';
     <input type="hidden" name="id" value="<?php echo (int)$userid; ?>">
 <?php } elseif($canEditUsers) { ?>
     <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="return_token" value="<?php echo htmlspecialchars($returnToken, ENT_QUOTES, 'UTF-8'); ?>">
 <?php } ?>
     <label>Vorname</label>
     <input class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo "value=\"".htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8')."\""; ?> <?php echo $disabled; ?>>
@@ -241,6 +245,7 @@ if($showAppLoginLink) {
     <div class="w3-container w3-mobile">
     <form action="" method="POST">
     <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="return_token" value="<?php echo htmlspecialchars($returnToken, ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
     <div class="w3-row">
     <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>

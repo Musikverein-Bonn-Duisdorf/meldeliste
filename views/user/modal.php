@@ -52,6 +52,7 @@
 <?php if($showEditButton) { ?>
 <form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
   <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
+  <input type="hidden" name="return_token" value="<?php echo htmlspecialchars(isset($returnToken) ? $returnToken : '', ENT_QUOTES, 'UTF-8'); ?>">
   <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $user->Index; ?>">bearbeiten</button>
 </form>
 <?php } ?>
