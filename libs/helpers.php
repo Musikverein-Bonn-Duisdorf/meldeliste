@@ -186,6 +186,7 @@ function getNextRegInventoryNumber($inventoryTypeId = 0) {
     return RegNumber::nextForType($inventoryTypeId);
 }
 
+/** Display name for Inventories.Owner (UI: Eigentümer). MELD-124: rename column/helper when DB is renamed. */
 function getOwner($index) {
     if($index == 0) {
         return $GLOBALS['optionsDB']['orgNameShort'];
