@@ -33,13 +33,6 @@ include 'common/header.php';
   <a class="w3-button w3-border w3-margin-left" href="calendar.php" title="Aktueller Monat">Heute</a>
 </div>
 
-<div class="w3-container w3-padding-small meld-cal-legend">
-  <span class="w3-tag w3-tiny <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnYes'], ENT_QUOTES, 'UTF-8'); ?>">Ja</span>
-  <span class="w3-tag w3-tiny <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnNo'], ENT_QUOTES, 'UTF-8'); ?>">Nein</span>
-  <span class="w3-tag w3-tiny <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnMaybe'], ENT_QUOTES, 'UTF-8'); ?>">Vielleicht</span>
-  <span class="w3-tag w3-tiny <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnEdit'], ENT_QUOTES, 'UTF-8'); ?>">Ohne Meldung</span>
-</div>
-
 <?php
 include __DIR__.'/views/calendar/month.php';
 include 'common/footer.php';
