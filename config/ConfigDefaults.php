@@ -300,6 +300,12 @@ function getConfigDefaults() {
             'Description' => 'Termine im Kalender anzeigen, die wieviele Tage alt sind',
         ),
         array(
+            'Parameter' => 'calendarFutureDays',
+            'Value' => '365',
+            'Type' => 'uint',
+            'Description' => 'Persönliches Kalenderabo (ICS): wie viele Tage in die Zukunft (MELD-127)',
+        ),
+        array(
             'Parameter' => 'alwaysMaybeNewAppmnts',
             'Value' => '',
             'Type' => 'string',

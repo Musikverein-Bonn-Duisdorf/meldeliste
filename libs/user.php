@@ -338,7 +338,13 @@ class User
         return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
     }
     public function getCalendarLink() {
-        return $GLOBALS['optionsDB']['WebSiteURL']."/calendars/MVDcal_".$this->activeLink.".ics";
+        return $GLOBALS['optionsDB']['WebSiteURL']."/ical.php?t=".$this->activeLink;
+    }
+
+    /** webcal:// variant of getCalendarLink() for calendar apps (MELD-127). */
+    public function getCalendarWebcalLink() {
+        $https = $this->getCalendarLink();
+        return (string)preg_replace('#^https?://#i', 'webcal://', $https);
     }
     protected function insert() {
         $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, "%d", "%s", "%s", %s, "%d", "%d", "%d");',
