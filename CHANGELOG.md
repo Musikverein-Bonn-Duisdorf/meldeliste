@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-ed678 (2026-07-22)
+
+- MELD-132: Backup-Größe im Log human-readable (B/KB/MB)
+- MELD-132: Log-Eintrag bei Backup-Download (Info/Fehler)
+- MELD-132: Backup-Größe im Log human-readable
+
 ## 2026-07-22-cab05 (2026-07-22)
 
 - MELD-57: Return-Token und PRG für Termine/Schichten/Mail
