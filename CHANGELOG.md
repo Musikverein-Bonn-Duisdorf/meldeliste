@@ -2,6 +2,13 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-21-85047 (2026-07-21)
+
+- MELD-99: Seriennummer, Hersteller und weitere Felder suchbar
+- MELD-99: Klarname des Leihenden in der Listensuche
+- MELD-99 MELD-122 MELD-110: Kontextsuche, Fehlerseiten, Identity-Doku
+- MELD-99 MELD-122: Kontextsuche und Fehlerseiten
+
 ## 2026-07-21-f4036 (2026-07-21)
 
 - MELD-128: Orchester-Test-User nur für Admins (Web)
