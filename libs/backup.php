@@ -256,22 +256,87 @@ function createBackupZipFile() {
 }
 
 /**
+ * How the backup was requested (for log messages).
+ *
+ * @return string cli|http|ui
+ */
+function backupDownloadVia() {
+    if(PHP_SAPI === 'cli') {
+        return 'cli';
+    }
+    $script = isset($_SERVER['SCRIPT_NAME']) ? basename((string)$_SERVER['SCRIPT_NAME']) : '';
+    if($script === 'cron.php') {
+        return 'http';
+    }
+    return 'ui';
+}
+
+/**
+ * Confirm a backup ZIP is readable and non-empty, then write an info Log entry.
+ * On failure writes an error Log entry and throws.
+ *
+ * @param array{path:string,filename:string,manifest?:array} $backup
+ * @param string|null $via Override via label (cli|http|ui); null = detect
+ * @return int Byte size of the ZIP
+ */
+function confirmAndLogBackupSuccess($backup, $via = null) {
+    $path = isset($backup['path']) ? (string)$backup['path'] : '';
+    $filename = isset($backup['filename']) ? (string)$backup['filename'] : '';
+    $viaLabel = $via !== null ? (string)$via : backupDownloadVia();
+    $size = ($path !== '' && is_file($path)) ? filesize($path) : false;
+
+    if($path === '' || $filename === '' || $size === false || $size <= 0) {
+        $detail = ($path === '' || !is_file($path)) ? 'ZIP missing' : 'ZIP empty';
+        $logentry = new Log;
+        $logentry->error('<b>Database backup failed</b>: '.$detail.' (via '.$viaLabel.')');
+        throw new RuntimeException('Backup ZIP missing or empty.');
+    }
+
+    $logentry = new Log;
+    $logentry->info('<b>Database backup</b> '.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8')
+        .' ('.$size.' bytes, via '.$viaLabel.')');
+    return (int)$size;
+}
+
+/**
+ * Log a failed backup attempt (MELD-132).
+ *
+ * @param string $message
+ * @param string|null $via
+ */
+function logBackupFailure($message, $via = null) {
+    $viaLabel = $via !== null ? (string)$via : backupDownloadVia();
+    $safe = htmlspecialchars(trim((string)$message), ENT_QUOTES, 'UTF-8');
+    if($safe === '') {
+        $safe = 'unknown error';
+    }
+    $logentry = new Log;
+    $logentry->error('<b>Database backup failed</b>: '.$safe.' (via '.$viaLabel.')');
+}
+
+/**
  * Send backup ZIP to the HTTP client and exit.
+ * Logs success (info) after confirming the ZIP, or error on failure (MELD-132).
  */
 function sendBackupDownload() {
-    $backup = createBackupZipFile();
+    try {
+        $backup = createBackupZipFile();
+    }
+    catch(Throwable $e) {
+        logBackupFailure($e->getMessage());
+        throw $e;
+    }
+
+    $size = confirmAndLogBackupSuccess($backup);
     $path = $backup['path'];
     $filename = $backup['filename'];
-    $size = filesize($path);
 
     if(function_exists('header_remove')) {
         @header_remove();
     }
     header('Content-Type: application/zip');
     header('Content-Disposition: attachment; filename="'.$filename.'"');
-    if($size !== false) {
-        header('Content-Length: '.$size);
-    }
+    header('Content-Length: '.$size);
     header('Cache-Control: no-store');
     readfile($path);
     @unlink($path);
