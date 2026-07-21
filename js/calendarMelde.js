@@ -55,3 +55,34 @@ function updateCalendarChipsForTermin(terminId, wert) {
         chip.setAttribute('data-melde-wert', (wert === null || wert === undefined || wert === '') ? '' : String(wert));
     });
 }
+
+function calendarFormatDeDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if(!m) return iso || '';
+    return m[3] + '.' + m[2] + '.' + m[1];
+}
+
+function calendarOfferNewTermin(dateIso) {
+    if(!dateIso) return;
+    var label = calendarFormatDeDate(dateIso);
+    if(!window.confirm('Neuen Termin am ' + label + ' anlegen?')) {
+        return;
+    }
+    window.location.href = 'new-termin.php?Datum=' + encodeURIComponent(dateIso);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var wrap = document.querySelector('.meld-cal-wrap');
+    if(!wrap || wrap.getAttribute('data-can-create') !== '1') return;
+    wrap.addEventListener('click', function(e) {
+        if(e.target.closest('.meld-cal-chip, .meld-cal-more, button, a, select, input')) {
+            return;
+        }
+        var cell = e.target.closest('.meld-cal-cell');
+        if(!cell || !wrap.contains(cell)) return;
+        var dateIso = cell.getAttribute('data-date');
+        if(dateIso) {
+            calendarOfferNewTermin(dateIso);
+        }
+    });
+});

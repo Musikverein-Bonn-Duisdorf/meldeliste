@@ -31,6 +31,8 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
 }
 .meld-cal-more { font-size: 0.7em; color: #555; padding: 0 2px; }
 .meld-cal-events { max-height: 6.5rem; overflow-y: auto; }
+.meld-cal-cell--create { cursor: pointer; }
+.meld-cal-cell--create:hover { filter-color: #345A95; }
 @media (max-width: 600px) {
   .meld-cal-cell { min-height: 4.2rem; padding: 2px; }
   .meld-cal-chip { font-size: 0.6em; padding: 1px 2px; }
@@ -42,12 +44,14 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
      data-color-yes="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnYes'], ENT_QUOTES, 'UTF-8'); ?>"
      data-color-no="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnNo'], ENT_QUOTES, 'UTF-8'); ?>"
      data-color-maybe="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnMaybe'], ENT_QUOTES, 'UTF-8'); ?>"
-     data-color-none="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnEdit'], ENT_QUOTES, 'UTF-8'); ?>">
+     data-color-none="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnEdit'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-can-create="<?php echo (isAdmin() && requirePermission('perm_editAppmnts')) ? '1' : '0'; ?>">
   <div class="meld-cal-grid" role="grid" aria-label="Monatskalender">
 <?php foreach($weekdays as $wd) { ?>
     <div class="meld-cal-head" role="columnheader"><?php echo htmlspecialchars($wd, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php } ?>
 <?php
+$canCreate = isAdmin() && requirePermission('perm_editAppmnts');
 while($cursor && $gridEnd && $cursor <= $gridEnd) {
     $key = $cursor->format('Y-m-d');
     $inMonth = ($key >= $monthStart && $key <= $monthEnd);
@@ -63,12 +67,19 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
     if($isToday) {
         $classes .= ' meld-cal-cell--today';
     }
+    if($canCreate) {
+        $classes .= ' meld-cal-cell--create';
+    }
     $dayEvents = isset($byDay[$key]) ? $byDay[$key] : array();
     $total = count($dayEvents);
     $shown = array_slice($dayEvents, 0, $maxChips);
     $extra = $total - count($shown);
 ?>
-    <div class="<?php echo $classes; ?>" role="gridcell" data-date="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>">
+    <div class="<?php echo $classes; ?>" role="gridcell" data-date="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"<?php
+      if($canCreate) {
+          echo ' title="Klick: neuen Termin anlegen"';
+      }
+    ?>>
       <div class="meld-cal-daynum"><?php echo (int)$cursor->format('j'); ?></div>
       <div class="meld-cal-events">
 <?php
