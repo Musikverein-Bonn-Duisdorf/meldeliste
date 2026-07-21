@@ -1187,7 +1187,7 @@ function stripMailBodyGreeting($body, $vorname) {
     return $body;
 }
 
-/** Allowed return targets for form POST redirects (MELD-15). */
+/** Allowed return targets for form POST redirects (MELD-15 / MELD-57). */
 function allowedReturnUrls() {
     return array(
         'users.php',
@@ -1198,13 +1198,17 @@ function allowedReturnUrls() {
         'register.php',
         'mein-register.php',
         'index.php',
+        'termine-archiv.php',
         'user-voice.php',
         'groups.php',
         'group-edit.php',
         'inventories.php',
         'myinventories.php',
+        'insurance.php',
         'mail.php',
         'meine-mails.php',
+        'edit-shifts.php',
+        'new-termin.php',
     );
 }
 
@@ -1222,10 +1226,14 @@ function pageToReturnUrl($page) {
         'groups' => 'groups.php',
         'inventories' => 'inventories.php',
         'myinventories' => 'myinventories.php',
+        'insurance' => 'insurance.php',
         'mail' => 'mail.php',
         'meinemails' => 'meine-mails.php',
         'home' => 'index.php',
         'me' => 'index.php',
+        'termine-archiv' => 'termine-archiv.php',
+        'shifts' => 'edit-shifts.php',
+        'newtermin' => 'new-termin.php',
     );
     $page = (string)$page;
     return isset($map[$page]) ? $map[$page] : 'index.php';
@@ -1256,6 +1264,52 @@ function safeReturnUrl($url, $default = 'index.php') {
         return $base;
     }
     return $base.'?'.$m[2];
+}
+
+/**
+ * Store a return URL in the session and return an opaque token (MELD-57).
+ * Forms POST the token instead of a raw return URL when possible.
+ */
+function issueReturnToken($url) {
+    $url = safeReturnUrl($url, 'index.php');
+    if(!isset($_SESSION['return_tokens']) || !is_array($_SESSION['return_tokens'])) {
+        $_SESSION['return_tokens'] = array();
+    }
+    if(count($_SESSION['return_tokens']) > 40) {
+        $_SESSION['return_tokens'] = array_slice($_SESSION['return_tokens'], -25, null, true);
+    }
+    $token = bin2hex(random_bytes(16));
+    $_SESSION['return_tokens'][$token] = array(
+        'url' => $url,
+        'exp' => time() + 86400,
+    );
+    return $token;
+}
+
+/**
+ * Resolve and consume a one-time return token.
+ */
+function consumeReturnToken($token, $default = 'index.php') {
+    $token = (string)$token;
+    if($token === '' || empty($_SESSION['return_tokens'][$token]) || !is_array($_SESSION['return_tokens'][$token])) {
+        return $default;
+    }
+    $entry = $_SESSION['return_tokens'][$token];
+    unset($_SESSION['return_tokens'][$token]);
+    if(empty($entry['url']) || (isset($entry['exp']) && time() > (int)$entry['exp'])) {
+        return $default;
+    }
+    return safeReturnUrl($entry['url'], $default);
+}
+
+/**
+ * Prefer return_token (session), fall back to whitelisted return_to.
+ */
+function resolvePostReturnUrl($default = 'index.php') {
+    if(!empty($_POST['return_token'])) {
+        return consumeReturnToken($_POST['return_token'], $default);
+    }
+    return safeReturnUrl(isset($_POST['return_to']) ? $_POST['return_to'] : '', $default);
 }
 
 function setFlash($type, $message) {

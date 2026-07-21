@@ -262,7 +262,7 @@ function applyUserFormPostRedirect($defaultReturnUrl, $options = array()) {
     if(!$result['handled']) {
         return false;
     }
-    $returnTo = safeReturnUrl(isset($_POST['return_to']) ? $_POST['return_to'] : '', $defaultReturnUrl);
+    $returnTo = resolvePostReturnUrl($defaultReturnUrl);
     if($result['flash']) {
         setFlash($result['flash']['type'], $result['flash']['message']);
     }
@@ -280,7 +280,7 @@ function applyNewMusikerFormPostRedirect($defaultReturnUrl) {
     if(!$result['handled']) {
         return false;
     }
-    $returnTo = safeReturnUrl(isset($_POST['return_to']) ? $_POST['return_to'] : '', $defaultReturnUrl);
+    $returnTo = resolvePostReturnUrl($defaultReturnUrl);
     if($result['flash']) {
         setFlash($result['flash']['type'], $result['flash']['message']);
     }

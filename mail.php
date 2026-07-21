@@ -24,7 +24,7 @@ MailJob::ensureSchema();
 $discordAvailable = Discord::isConfigured();
 
 $msg = '';
-$preview = false;
+$preview = isset($_GET['preview']);
 $job = null;
 $jobId = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['id']) ? (int)$_POST['id'] : 0);
 $terminParam = isset($_GET['termin']) ? (int)$_GET['termin'] : (isset($_POST['termin']) ? (int)$_POST['termin'] : 0);
@@ -119,11 +119,12 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     $job->ensureAttachmentDir();
     $job->save();
 
-    if(isset($_POST['preview']) || isset($_POST['send'])) {
-        $preview = true;
-    }
     if(isset($_POST['save'])) {
-        $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>Entwurf #'.(int)$job->Index.' gespeichert.</h3></div>';
+        setFlash('success', 'Entwurf #'.(int)$job->Index.' gespeichert.');
+        redirectAfterPost('mail.php?id='.(int)$job->Index);
+    }
+    if(isset($_POST['preview'])) {
+        redirectAfterPost('mail.php?id='.(int)$job->Index.'&preview=1');
     }
     if(isset($_POST['send'])) {
         $mail = new Usermail;
@@ -142,6 +143,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
         }
         $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Keine gültigen Emailadressen gefunden.</h3></div>';
         $job->load_by_id($job->Index);
+        $preview = true;
     }
 }
 
@@ -195,6 +197,7 @@ include_once 'common/header.php';
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
   <h2>Email versenden</h2>
 </div>
+<?php echo renderFlashHtml(); ?>
 <?php echo $msg; ?>
 
 <div class="w3-container w3-padding">

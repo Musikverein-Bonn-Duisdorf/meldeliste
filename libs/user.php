@@ -560,6 +560,7 @@ class User
             'registerLeadName' => $registerLeadName,
             'showEditButton' => ($forceEditButton || requirePermission("perm_editUsers")),
             'returnTo' => pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker'),
+            'returnToken' => issueReturnToken(pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker')),
         ));
     }
 

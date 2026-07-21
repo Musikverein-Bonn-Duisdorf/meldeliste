@@ -1,9 +1,14 @@
 <?php
+ob_start();
 require_once __DIR__.'/libs/sessionBootstrap.php';
 meldeConfigureSession();
 $_SESSION['page']='termine-archiv';
 $_SESSION['adminpage']=true;
-include "common/header.php";
+
+include_once 'common/include.php';
+mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
+requireLoggedInOrRedirect();
+
 if(isset($_POST['proxy'])) {
     $user = $_POST['proxy'];
     $proxy = new User;
@@ -13,34 +18,49 @@ else {
     $user = $_SESSION['userid'];
 }
 
+$mutated = false;
 if(isset($_POST['insert'])) {
     $n = new Termin;
     $n->fill_from_array($_POST);
     $n->save();
+    setFlash('success', 'Termin gespeichert.');
+    $mutated = true;
 }
 if(isset($_POST['delete'])) {
     $n = new Termin;
     $n->fill_from_array($_POST);
     $n->delete();
+    setFlash('success', 'Termin gelöscht.');
+    $mutated = true;
 }
 if(isset($_POST['insertAushilfe'])) {
-        $aushilfe = new Aushilfe;
-        $aushilfe->fill_from_array($_POST);
-        $aushilfe->save();
+    $aushilfe = new Aushilfe;
+    $aushilfe->fill_from_array($_POST);
+    $aushilfe->save();
+    setFlash('success', 'Aushilfe gespeichert.');
+    $mutated = true;
 }
 if(isset($_POST['deleteAushilfe'])) {
-        $aushilfe = new Aushilfe;
-        $aushilfe->load_by_id((int)$_POST['Index']);
-        if($aushilfe->Index && requirePermission('perm_editAppmnts')) {
-            $aushilfe->delete();
-        }
+    $aushilfe = new Aushilfe;
+    $aushilfe->load_by_id((int)$_POST['Index']);
+    if($aushilfe->Index && requirePermission('perm_editAppmnts')) {
+        $aushilfe->delete();
+        setFlash('success', 'Aushilfe gelöscht.');
+        $mutated = true;
+    }
 }
+if($mutated) {
+    redirectAfterPost(resolvePostReturnUrl('termine-archiv.php'));
+}
+
+include "common/header.php";
 ?>
 <script src="<?php echo assetUrl('js/getStatus.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/melde.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/meldeshift.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/changeInstrument.js'); ?>"></script>
 
+<?php echo renderFlashHtml(); ?>
 <?php
 if(isset($_POST['proxy'])) {
 ?>
