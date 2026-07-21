@@ -41,6 +41,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
+<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Details)</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
@@ -61,6 +62,7 @@ $sections[] = array(
 <p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung (auch im Termin-Archiv).</li>
+<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; die Chip-Farbe entspricht deiner Meldung (ja / nein / vielleicht / ohne).</li>
 </ul>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
