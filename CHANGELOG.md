@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-93920 (2026-07-22)
+
+- MELD-129: Inventar-Leihen korrekt im Log erfassen
+
 ## 2026-07-21-85047 (2026-07-21)
 
 - MELD-99: Seriennummer, Hersteller und weitere Felder suchbar
