@@ -9,3 +9,8 @@ RedirectMatch 403 /scripts/
 <Files "config.php">
     Require all denied
 </Files>
+
+# Branded error pages (MELD-122)
+ErrorDocument 403 /errors/403.php
+ErrorDocument 404 /errors/404.php
+ErrorDocument 500 /errors/500.php
