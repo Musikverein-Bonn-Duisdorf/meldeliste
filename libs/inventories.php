@@ -222,15 +222,22 @@ class Inventories
 
     public function delete() {
         if(!$this->Index) return false;
-        $logentry = new Log;
-        $logentry->DBdelete($this->getVars());
 
-        $sql = sprintf('DELETE FROM `%sInventoriesLoans` WHERE `Inventory` = "%d";',
+        // Log each loan before cascade-remove (MELD-129)
+        $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `Inventory` = "%d";',
         $GLOBALS['dbprefix'],
         (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
+        while($dbr && ($row = mysqli_fetch_array($dbr))) {
+            $loan = new InventoriesLoan;
+            $loan->load_by_id($row['Index']);
+            if($loan->Index) $loan->delete();
+        }
+
+        $logentry = new Log;
+        $logentry->DBdelete($this->getVars());
 
         $sql = sprintf('DELETE FROM `%sInventories` WHERE `Index` = "%d" LIMIT 1;',
         $GLOBALS['dbprefix'],

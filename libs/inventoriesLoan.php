@@ -40,39 +40,66 @@ class InventoriesLoan
         return true;
     }
 
+    /** Type label + RegNumber for log messages. */
+    private function inventoryLogLabel($inventoryId = null) {
+        $inv = new Inventories;
+        $inv->load_by_id($inventoryId !== null ? $inventoryId : $this->Inventory);
+        $typeName = $inv->getInventoryType();
+        $family = $inv->getInstrumentName();
+        if($family !== '') $typeName = $family;
+        return sprintf('(%d) <b>%s</b> %s',
+            (int)$inv->Index,
+            $typeName,
+            RegNumber::displayInventory($inv->Inventory, $inv->RegNumber)
+        );
+    }
+
     public function getChanges() {
-        $old = new Loan;
+        $old = new InventoriesLoan;
         $old->load_by_id($this->Index);
 
         $u = new User;
         $u->load_by_id($this->User);
 
-        $Inventory = new Inventories;
-        $Inventory->load_by_id($this->Inventory);
-        
-        $str = sprintf("InventoriesLoan-ID: %d, Inventory: (%d) <b>%s</b>, User: (%d) <b>%s</b>",
-        $this->Index,
-        $this->Inventory,
-        $Inventory->getInventoryType(),
-        $this->User,
-        $u->getName()
+        $str = sprintf('InventoriesLoan-ID: %d, Inventory: %s, User: (%d) <b>%s</b>',
+            (int)$this->Index,
+            $this->inventoryLogLabel(),
+            (int)$this->User,
+            $u->getName()
         );
-        if($this->StartDate != $old->StartDate) $str.=", StartDate: ".germanDate($old->StartDate,0)." &rArr; <b>".germanDate($this->StartDate,0)."</b>";
-        if($this->EndDate != $old->EndDate) $str.=", EndDate: ".germanDate($old->EndDate,0)." &rArr; <b>".germanDate($this->EndDate,0)."</b>";
+        if((int)$this->User !== (int)$old->User) {
+            $ou = new User;
+            $ou->load_by_id($old->User);
+            $str .= ', User: ('.(int)$old->User.') '.$ou->getName()
+                .' &rArr; <b>('.((int)$this->User).') '.$u->getName().'</b>';
+        }
+        if((int)$this->Inventory !== (int)$old->Inventory) {
+            $str .= ', Inventory: '.$this->inventoryLogLabel($old->Inventory)
+                .' &rArr; <b>'.$this->inventoryLogLabel().'</b>';
+        }
+        if($this->StartDate != $old->StartDate) {
+            $str .= ', StartDate: '.germanDate($old->StartDate, 0)
+                .' &rArr; <b>'.germanDate($this->StartDate, 0).'</b>';
+        }
+        if($this->EndDate != $old->EndDate) {
+            $str .= ', EndDate: '.germanDate($old->EndDate, 0)
+                .' &rArr; <b>'.germanDate($this->EndDate, 0).'</b>';
+        }
+        if($this->ContractFile != $old->ContractFile) {
+            $str .= ', ContractFile: '.$old->ContractFile
+                .' &rArr; <b>'.$this->ContractFile.'</b>';
+        }
 
         return $str;
     }
 
     public function getVars() {
-        $Inventory = new Inventories;
-        $Inventory->load_by_id($this->Inventory);
-
         $u = new User;
         $u->load_by_id($this->User);
 
         $parts = array();
         $parts[] = sprintf('InventoriesLoan-ID: %d', (int)$this->Index);
-        $parts[] = sprintf('Inventory: (%d) <b>%s</b>', (int)$this->Inventory, $Inventory->getInventoryType());
+        $parts[] = 'Inventory: '.$this->inventoryLogLabel();
         $parts[] = sprintf('User: (%d) <b>%s</b>', (int)$this->User, $u->getName());
         $start = germanDate($this->StartDate, 0);
         logAppendFilled($parts, 'StartDate', $start, (string)$start);
