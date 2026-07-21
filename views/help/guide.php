@@ -207,7 +207,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar-Typen</b> – Typen und Nummernkreise pflegen</li>
-<li>Anlegen, Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten</li>
+<li>Anlegen, Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> neue Ausleihen eintragen, offene Leihen beenden oder einzelne Historie-Einträge löschen</li>
 ' : '').'
 </ul>
 '
