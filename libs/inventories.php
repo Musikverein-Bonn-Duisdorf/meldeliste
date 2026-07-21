@@ -650,170 +650,156 @@ class Inventories
 
         }
         
+        $str .= $this->getLoansModalHtml($canEdit);
+
+        return $str;
+    }
+
+    /**
+     * Leihen-Block im Inventar-Modal: neue Leihe + Historie mit Aktionen.
+     */
+    private function getLoansModalHtml($canEdit) {
         $indent = 1;
-        $modalrow = new div;
-        $modalrow->indent=$indent;
-        $modalrow->class="w3-padding w3-margin-bottom";
-        $modalrow->class=$GLOBALS['optionsDB']['colorInputBackground'];
-        $modalrow->body="<b>Leihhistorie:</b>";
-        $str=$str.$modalrow->open();
+        $section = new div;
+        $section->indent = $indent;
+        $section->class = "w3-padding w3-margin-bottom inventory-loans";
+        $section->class = $GLOBALS['optionsDB']['colorInputBackground'];
+        $str = $section->open();
 
-        $indent = 2;
-        $modalrow2 = new div;
-        $modalrow2->indent=$indent;
-        $modalrow2->class="w3-row w3-center w3-padding w3-border-bottom";
-        $str=$str.$modalrow2->open();
-        $indent = 3;
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,4,4);
-        $content->class="w3-border-right";
-        $content->body="<b>an</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,4,4);
-        $content->class="w3-border-right";
-        $content->body="<b>von</b>";
-        $str=$str.$content->print();
-        $content = new div;
-        $content->indent=$indent;
-        $content->col(2,4,4);
-        $content->class="w3-border-right";
-        $content->body="<b>bis</b>";
-        $str=$str.$content->print();
-        $str=$str.$modalrow2->close();
+        $title = new div;
+        $title->indent = $indent + 1;
+        $title->class = "w3-padding-small";
+        $title->body = "<b>Leihen</b>";
+        $str .= $title->print();
 
-        // --> new Loan
         if($canEdit) {
-            $indent = 2;
-            $modalrow2 = new div;
-            $modalrow2->indent=$indent;
-            $modalrow2->class="w3-row w3-center w3-padding";
-            $modalrow2->tag="form";
-            $modalrow2->action="";
-            $modalrow2->method="POST";
-            $str=$str.$modalrow2->open();
-            $indent = 3;
-            $content = new div;
-            $content->indent=$indent;
-            $content->tag="input";
-            $content->name = "Inventory";
-            $content->type = "hidden";
-            $content->value = $this->Index;
-            $str=$str.$content->print();
-            $content = new div;
-            $content->indent=$indent;
-            $content->col(2,4,4);
-            $content->class="w3-border-right w3-input";
-            $content->tag="select";
-            $content->name = "User";
-            $content->body=UserOptionAll(0);
-            $str=$str.$content->print();
-            $content = new div;
-            $content->indent=$indent;
-            $content->col(2,4,4);
-            $content->class="w3-border-right w3-input";
-            $content->tag = "input";
-            $content->type = "date";
-            $content->name = "StartDate";
-            $str=$str.$content->print();
-            $content = new div;
-            $content->indent=$indent;
-            $content->col(2,4,4);
-            $content->class="w3-border-right w3-input";
-            $content->tag = "input";
-            $content->type = "date";
-            $content->name = "EndDate";
-            $str=$str.$content->print();
-            $content = new div;
-            $content->indent=$indent;
-            $content->col(2,4,4);
-            $content->class="w3-border-right w3-input";
-            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->tag = "input";
-            $content->type = "submit";
-            $content->name = "newLoan";
-            $content->value = "eintragen";
-            $str=$str.$content->print();
-            $str=$str.$modalrow2->close();
+            $str .= $this->getNewLoanFormHtml($indent + 1);
         }
-        // <-- new Loan
-            
+
         $loans = $this->getLoans();
-        for($i=0; $i<count($loans); $i++) {           
+        if(!$loans) {
+            $empty = new div;
+            $empty->indent = $indent + 1;
+            $empty->class = "w3-padding w3-text-gray";
+            $empty->body = "Noch keine Leihen.";
+            $str .= $empty->print();
+        }
+        else {
+            $listTitle = new div;
+            $listTitle->indent = $indent + 1;
+            $listTitle->class = "w3-padding-small w3-border-top";
+            $listTitle->body = "<b>Historie</b>";
+            $str .= $listTitle->print();
+
+            foreach($loans as $loanId) {
                 $L = new InventoriesLoan;
-                $L->load_by_id($loans[$i]);
-                $indent = 2;
-                $modalrow2 = new div;
-                $modalrow2->indent=$indent;
-                $modalrow2->class="w3-row w3-center w3-padding";
-                if($L->EndDate == null) {
-                    $modalrow2->class="w3-teal";
-                }
-                $str=$str.$modalrow2->open();
-                $indent = 3;
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right";
-                $content->body=$L->getName();
-                $str=$str.$content->print();
-                $content = new div;
-                $content->indent=$indent;
-                $content->col(2,4,4);
-                $content->class="w3-border-right";
-                $content->body=germanDate($L->StartDate,0);
-                $str=$str.$content->print();
-                
-                if($L->EndDate == null && $canEdit) {
-                    $form = new div;
-                    $form->indent=$indent;
-                    $form->tag="form";
-                    $form->action="";
-                    $form->method="POST";
-                    $str=$str.$form->open();
-                    
-                    $content = new div;
-                    $content->indent=$indent;
-                    $content->tag = "input";
-                    $content->type = "hidden";
-                    $content->name = "LoanIndex";
-                    $content->value = $L->Index;
-                    $str=$str.$content->print();
-                    $content = new div;
-                    $content->indent=$indent;
-                    $content->col(2,4,4);
-                    $content->class="w3-border-right w3-input";
-                    $content->tag = "input";
-                    $content->type = "date";
-                    $content->name = "EndDate";
-                    $str=$str.$content->print();
-                    $content = new div;
-                    $content->indent=$indent;
-                    $content->col(2,4,4);
-                    $content->class="w3-border-right w3-input";
-                    $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-                    $content->tag = "input";
-                    $content->type = "submit";
-                    $content->name = "endLoan";
-                    $content->value = "eintragen";
-                    $str=$str.$content->print();
-
-                    $str=$str.$form->close();
-                }
-                else {
-                    $content = new div;
-                    $content->indent=$indent;
-                    $content->col(2,4,4);
-                    $content->class="w3-border-right";
-                    $content->body=germanDate($L->EndDate,0);
-                    $str=$str.$content->print();
-                }
-                $str=$str.$modalrow2->close();
+                $L->load_by_id($loanId);
+                $str .= $this->getLoanRowHtml($indent + 1, $L, $canEdit);
             }
-        $str=$str.$modalrow->close();
+        }
 
+        $str .= $section->close();
+        return $str;
+    }
+
+    private function getNewLoanFormHtml($indent) {
+        $btn = $GLOBALS['optionsDB']['colorBtnSubmit'];
+        $form = new div;
+        $form->indent = $indent;
+        $form->tag = "form";
+        $form->action = "";
+        $form->method = "POST";
+        $form->class = "w3-padding w3-border-top";
+        $str = $form->open();
+        $str .= '<input type="hidden" name="Inventory" value="'.(int)$this->Index.'">';
+        $str .= $this->modalDetailRow($indent + 1, 'Person',
+            '<select class="w3-select w3-border w3-input" name="User">'.UserOptionAll(0).'</select>'
+        );
+        $str .= $this->modalDetailRow($indent + 1, 'Von',
+            '<input class="w3-input w3-border" type="date" name="StartDate" required>'
+        );
+        $str .= $this->modalDetailRow($indent + 1, 'Bis (optional)',
+            '<input class="w3-input w3-border" type="date" name="EndDate">'
+        );
+        $actions = new div;
+        $actions->indent = $indent + 1;
+        $actions->class = "w3-row w3-padding";
+        $str .= $actions->open();
+        $str .= '<div class="w3-col l4 m12 s12">&nbsp;</div>';
+        $str .= '<div class="w3-col l8 m12 s12">'
+            .'<button type="submit" name="newLoan" value="1" class="w3-button '.$btn.'">Leihe eintragen</button>'
+            .'</div>';
+        $str .= $actions->close();
+        $str .= $form->close();
+        return $str;
+    }
+
+    private function getLoanRowHtml($indent, InventoriesLoan $L, $canEdit) {
+        $active = ($L->EndDate === null || $L->EndDate === '');
+        $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
+        $btnDelete = $GLOBALS['optionsDB']['colorBtnDelete'];
+
+        $row = new div;
+        $row->indent = $indent;
+        $row->class = "w3-padding w3-border-top inventory-loan-row";
+        if($active) {
+            $row->class = "w3-leftbar w3-border-teal";
+        }
+        $str = $row->open();
+
+        $head = new div;
+        $head->indent = $indent + 1;
+        $head->class = "w3-row";
+        $str .= $head->open();
+
+        $info = new div;
+        $info->indent = $indent + 2;
+        $info->col(7, 12, 12);
+        $name = htmlspecialchars((string)$L->getName(), ENT_QUOTES, 'UTF-8');
+        $from = htmlspecialchars((string)germanDate($L->StartDate, 0), ENT_QUOTES, 'UTF-8');
+        $until = $active
+            ? '<span class="w3-tag w3-teal w3-round">offen</span>'
+            : htmlspecialchars((string)germanDate($L->EndDate, 0), ENT_QUOTES, 'UTF-8');
+        $info->body = '<div><b>'.$name.'</b></div>'
+            .'<div class="w3-small" style="margin-top:4px;">'.$from.' &ndash; '.$until.'</div>';
+        $str .= $info->print();
+
+        if($canEdit) {
+            $actions = new div;
+            $actions->indent = $indent + 2;
+            $actions->col(5, 12, 12);
+            $actions->class = "w3-right-align";
+            $str .= $actions->open();
+            $str .= '<form method="POST" action="" style="display:inline;" '
+                .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
+                .'<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">'
+                .'<button type="submit" name="deleteLoan" value="1" class="w3-button w3-small '.$btnDelete.'">löschen</button>'
+                .'</form>';
+            $str .= $actions->close();
+        }
+
+        $str .= $head->close();
+
+        if($active && $canEdit) {
+            $endForm = new div;
+            $endForm->indent = $indent + 1;
+            $endForm->tag = "form";
+            $endForm->method = "POST";
+            $endForm->action = "";
+            $endForm->class = "w3-row w3-padding-16";
+            $str .= $endForm->open();
+            $str .= '<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">';
+            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="w3-small"><b>Rückgabe</b></label></div>';
+            $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
+                .'<input class="w3-input w3-border" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
+                .'</div>';
+            $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
+                .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">beenden</button>'
+                .'</div>';
+            $str .= $endForm->close();
+        }
+
+        $str .= $row->close();
         return $str;
     }
 
@@ -909,8 +895,8 @@ class Inventories
  * @return bool true if a mutation was handled
  */
 function handleInventoriesMutations() {
-    $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['insert'])
-        || isset($_POST['update']) || isset($_POST['delete']);
+    $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['deleteLoan'])
+        || isset($_POST['insert']) || isset($_POST['update']) || isset($_POST['delete']);
     if(!$mutating) {
         return false;
     }
@@ -929,6 +915,14 @@ function handleInventoriesMutations() {
         $n->load_by_id($loanId);
         $n->EndDate = $_POST['EndDate'];
         $n->save();
+    }
+    if(isset($_POST['deleteLoan'])) {
+        $n = new InventoriesLoan;
+        $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
+        $n->load_by_id($loanId);
+        if($n->Index) {
+            $n->delete();
+        }
     }
     if(isset($_POST['insert'])) {
         $n = new Inventories;

@@ -810,6 +810,21 @@
   overflow-wrap: break-word;
 }
 
+.inventory-loans .inventory-loan-row {
+  margin-top: 4px;
+}
+
+.inventory-loans .inventory-loan-row form {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .inventory-loans .inventory-loan-row .w3-right-align {
+    text-align: left;
+    margin-top: 8px;
+  }
+}
+
 .orchestra-panel.w3-container {
   padding-left: 8px;
   padding-right: 8px;
