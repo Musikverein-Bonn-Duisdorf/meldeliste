@@ -45,7 +45,7 @@ if(!requirePermission("perm_showInventories") && !requirePermission("perm_showIn
   <div class="w3-col l2 m2 s2 w3-center w3-border-right list-sort" data-sort="model" data-type="string">Modell</div>
   <div class="w3-col l2 m1 s1 w3-center w3-border-right list-sort" data-sort="serial" data-type="string">Seriennummer</div>
   <div class="w3-col l1 m1 s1 w3-center w3-border-right list-sort" data-sort="zeitwert" data-type="number">Zeitwert</div>
-  <div class="w3-col l2 m1 s1 w3-center w3-border-right list-sort" data-sort="owner" data-type="string">Besitzer</div>
+  <div class="w3-col l2 m1 s1 w3-center w3-border-right list-sort" data-sort="owner" data-type="string">Eigentümer</div>
 </div>
 <div id="Liste">
 <?php

@@ -79,7 +79,7 @@ if(requirePermission("perm_showInventories")) {
       <input name="PurchasePrize" step="0.01" value="0.00" min="0" type="number" class="w3-input w3-col l4 m6 s12 <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"/>
     </div>
     <div class="w3-row w3-padding">
-      <div class="w3-col l4 m6 s12"><b>Besitzer</b></div>
+      <div class="w3-col l4 m6 s12"><b>Eigentümer</b></div>
       <select class="w3-col l4 m6 s12 w3-input <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" name="Owner">
 	<?php echo UserOptionAll(0); ?>
       </select>
