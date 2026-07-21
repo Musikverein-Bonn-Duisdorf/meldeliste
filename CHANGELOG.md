@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-53410 (2026-07-22)
+
+- MELD-130: Leihe löschen und Leihen-UI neu aufbauen
+
 ## 2026-07-22-93920 (2026-07-22)
 
 - MELD-129: Inventar-Leihen korrekt im Log erfassen
