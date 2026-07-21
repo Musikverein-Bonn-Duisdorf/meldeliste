@@ -42,10 +42,12 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
 .meld-cal-toolbar {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.65rem;
-  padding: 1rem 1.25rem 0.35rem;
-  max-width: 72rem;
-  margin: 0 auto;
+  padding: 1rem 16px 0.5rem;
+  margin: 0;
+  width: 100%;
+  max-width: none;
   box-sizing: border-box;
 }
 .meld-cal-nav {
