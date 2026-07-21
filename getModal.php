@@ -31,6 +31,22 @@ case 'termin':
     echo $t->getDetailModalHtml();
     break;
 
+case 'calendarMelde':
+    $t = new Termin;
+    $t->load_by_id($id);
+    if(!(int)$t->Index) {
+        http_response_code(404);
+        echo '<div class="w3-container w3-padding"><p>Termin nicht gefunden.</p></div>';
+        exit;
+    }
+    if(!$t->isVisibleToUser((int)$_SESSION['userid'])) {
+        http_response_code(403);
+        echo '<div class="w3-container w3-padding"><p>Keine Berechtigung.</p></div>';
+        exit;
+    }
+    echo $t->getCalendarMeldeModalHtml();
+    break;
+
 case 'terminResponse':
     // All logged-in users may view register responses (MELD-68); edit stays gated in modal HTML
     $t = new Termin;

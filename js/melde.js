@@ -30,6 +30,15 @@ function melde(user, termin, wert, Children, Guests) {
             else if(typeof invalidateTerminResponseModalCache === 'function') {
                 invalidateTerminResponseModalCache(termin);
             }
+            if(typeof refreshOpenCalendarMeldeModal === 'function') {
+                refreshOpenCalendarMeldeModal(termin);
+            }
+            else if(typeof invalidateCalendarMeldeModalCache === 'function') {
+                invalidateCalendarMeldeModalCache(termin);
+            }
+            if(typeof updateCalendarChipsForTermin === 'function') {
+                updateCalendarChipsForTermin(termin, wert);
+            }
             // Weitere Einträge desselben Termins (z. B. Zähler) nachziehen
             if(typeof scheduleRefreshMainPageTerminEntries === 'function') {
                 scheduleRefreshMainPageTerminEntries(termin);

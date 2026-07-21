@@ -40,6 +40,7 @@ if(requirePermission('perm_editConfig')) {
 <div class="w3-bar <?php echo $optionsDB['colorNav']; ?>">
   <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
   <a title="Termine" alt="Termine" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="far fa-calendar-alt"></i></a>
+  <a title="Kalender" alt="Kalender" href="calendar.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('calendar');?>"><i class="fas fa-calendar"></i></a>
   <?php
   $mailUnread = 0;
   if(isset($_SESSION['userid'])) {

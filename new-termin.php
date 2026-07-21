@@ -9,6 +9,7 @@ if(!requirePermission("perm_editAppmnts")) {
 }
 
 $fill = false;
+$prefillDatum = '';
 if(isset($_POST['id'])) {
     $n = new Termin;
     $n->load_by_id($_POST['id']);
@@ -23,6 +24,15 @@ if(isset($_POST['copy'])) {
         $fill = true;
     }
     $n->Index=NULL;
+}
+if(!$fill && isset($_GET['Datum'])) {
+    $d = trim((string)$_GET['Datum']);
+    if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
+        $parts = explode('-', $d);
+        if(checkdate((int)$parts[1], (int)$parts[2], (int)$parts[0])) {
+            $prefillDatum = $d;
+        }
+    }
 }
 $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 ?>
@@ -47,7 +57,14 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
     <div class="w3-row">
       <div class="w3-col s12 m6 l6 termin-form-field">
         <label>Datum <span class="w3-small w3-text-gray">(mehrtägig <input id="endcheck" type="checkbox" <?php if($fill && $n->EndDatum) echo "checked"; ?> onclick="endToggle();"></input>)</span></label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Datum" type="date" <?php if($fill) echo "value=\"".$n->Datum."\""; ?>>
+        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Datum" type="date"<?php
+          if($fill) {
+              echo ' value="'.htmlspecialchars((string)$n->Datum, ENT_QUOTES, 'UTF-8').'"';
+          }
+          elseif($prefillDatum !== '') {
+              echo ' value="'.htmlspecialchars($prefillDatum, ENT_QUOTES, 'UTF-8').'"';
+          }
+        ?>>
       </div>
       <div class="w3-col s12 m6 l6 termin-form-field">
         <label id="endlabel" <?php if($fill && $n->EndDatum) echo "style=\"display: block;\""; else echo "style=\"display: none;\""; ?>>Enddatum</label>
