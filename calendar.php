@@ -88,5 +88,16 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
 
 <?php
 include __DIR__.'/views/calendar/month.php';
+
+$calUser = new User();
+$calUser->load_by_id($userId);
+if((int)$calUser->Index > 0 && $calUser->activeLink) {
+    $n = $calUser;
+    $calendarSubscribeUid = 'page-cal';
+    echo '<div class="w3-container w3-padding-16" style="max-width:40rem;margin:0 auto;">';
+    include __DIR__.'/views/calendar/subscribe.php';
+    echo '</div>';
+}
+
 include 'common/footer.php';
 ?>

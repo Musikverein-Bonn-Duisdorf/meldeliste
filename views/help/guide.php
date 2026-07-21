@@ -41,7 +41,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
-<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details)</li>
+<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); unten Link zum Abonnieren in Google/Apple/Outlook</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
@@ -115,6 +115,23 @@ $sections[] = array(
 <p>Unter <b>Gruppenzugehörigkeit</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 <p>Die Android-App speichert nach dem Login ein Gerätetoken und meldet dich beim nächsten Öffnen automatisch an. Abmelden in der App widerruft dieses Token.</p>
+<p>Unter <b>Kalender abonnieren</b> findest du deinen persönlichen ICS-Link für Google, Apple oder Outlook (siehe auch <a href="#help-kalender-abo">Kalender abonnieren</a>).</p>
+'
+);
+
+$sections[] = array(
+    'id' => 'kalender-abo',
+    'title' => 'Kalender abonnieren',
+    'body' => '
+<p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b>.</p>
+<p><b>Einweg:</b> Termine und dein Melde-Status (zugesagt / vielleicht / ohne) werden in den Kalender übernommen. Zu- und Absagen änderst du weiterhin in der Meldeliste — nicht in der Kalender-App.</p>
+<p><b>Aktualisierung:</b> Wie oft der Feed neu geladen wird, steuert dein Kalender-Anbieter (oft erst nach einigen Stunden). Darauf hat die Meldeliste keinen Einfluss.</p>
+<ul>
+<li><b>Google Kalender</b> (am PC): Weitere Kalender → <b>Über URL hinzufügen</b> → HTTPS-Link einfügen.</li>
+<li><b>Apple</b> (iOS): Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → <b>Kalenderabonnement</b>; oder in der Kalender-App auf dem Mac: Ablage → Neues Kalenderabonnement.</li>
+<li><b>Outlook</b>: Kalender hinzufügen → Aus dem Internet / Abonnieren → HTTPS- oder webcal-Link.</li>
+</ul>
+<p>Abgesagte Termine (Nein) erscheinen nicht im Abo. Der Link ist persönlich — nicht weitergeben.</p>
 '
 );
 

@@ -109,7 +109,7 @@ function calendarColorClassForWert($wert) {
  * @param int $userId
  * @param string $fromDate Y-m-d
  * @param string $toDate Y-m-d
- * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string}>
+ * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string,description:string,location:string}>
  */
 function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
     $userId = (int)$userId;
@@ -172,6 +172,8 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
             'endTime' => $endTime,
             'wert' => $wert,
             'colorClass' => calendarColorClassForWert($wert),
+            'description' => (string)$t->Beschreibung,
+            'location' => method_exists($t, 'getOrt') ? (string)$t->getOrt() : '',
         );
     }
     return $out;

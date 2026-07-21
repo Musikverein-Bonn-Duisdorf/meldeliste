@@ -217,9 +217,6 @@ if($showAppLoginLink) {
     <p class="w3-small">Mit der Meldeliste-App scannen oder Link öffnen. Den Link kannst du auch manuell in der App einfügen.</p>
     <div id="app-login-qr" class="w3-margin-bottom" style="display:inline-block;" data-alink-url="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"></div>
     <div class="w3-small w3-break"><a href="<?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($appLoginUrl, ENT_QUOTES, 'UTF-8'); ?></a></div>
-<?php if($canEditUsers) { ?>
-    <div class="w3-small w3-margin-top w3-break"><a href="<?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($n->getCalendarLink(), ENT_QUOTES, 'UTF-8'); ?></a></div>
-<?php } ?>
   </div>
   <div class="w3-col s3 l4">&nbsp;</div>
 </div>
@@ -233,7 +230,26 @@ if($showAppLoginLink) {
   new QRCode(el, { text: url, width: 192, height: 192, correctLevel: QRCode.CorrectLevel.M });
 })();
 </script>
-<?php } ?>
+<?php
+    // Personal calendar subscription for self-profile (and when admin views that user)
+    $showCalendarSubscribe = $fill && (int)$n->Index > 0
+        && ($isSelfProfileEdit || (int)$n->Index === $userid || $canEditUsers)
+        && $n->activeLink;
+    if($showCalendarSubscribe) {
+?>
+<div class="w3-row">
+  <div class="w3-col s3 l4">&nbsp;</div>
+  <div class="w3-col s6 l4">
+<?php
+        $calendarSubscribeUid = 'profile-cal';
+        include __DIR__.'/views/calendar/subscribe.php';
+?>
+  </div>
+  <div class="w3-col s3 l4">&nbsp;</div>
+</div>
+<?php
+    }
+} ?>
 <?php if($fill && $canEditUsers) { ?>
     <div id="delmodal" class="w3-modal">
     <div class="w3-modal-content w3-card">
