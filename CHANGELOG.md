@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-cab05 (2026-07-22)
+
+- MELD-57: Return-Token und PRG für Termine/Schichten/Mail
+
 ## 2026-07-22-97850 (2026-07-22)
 
 - MELD-131: Remote-Backup über eigenes backupToken
