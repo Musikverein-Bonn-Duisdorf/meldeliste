@@ -42,6 +42,11 @@ else {
   <span class="profile-label">Rolle</span>
   <div class="profile-prefs profile-prefs--grid">
     <label class="profile-pref">
+      <input type="hidden" name="Active" value="0">
+      <input class="w3-check" type="checkbox" name="Active" value="1" id="pref-Active" <?php echo $checked('Active'); ?>>
+      <span>aktiv</span>
+    </label>
+    <label class="profile-pref">
       <input type="hidden" name="Mitglied" value="0">
       <input class="w3-check" type="checkbox" name="Mitglied" value="1" id="pref-Mitglied" <?php echo $checked('Mitglied'); ?>>
       <span>Mitglied</span>
@@ -108,6 +113,7 @@ if($adminUserEdit && count($mailGroups)) {
 if($adminUserEdit) {
     $previewCatalog = AudienceSpec::buildMembershipPreviewCatalog();
     $initialMitglied = $fill ? (bool)$n->Mitglied : false;
+    $initialActive = $fill ? ((int)$n->Active !== 0) : true;
     $initialInstrument = $fill ? (int)$n->Instrument : 0;
     $initialRegisterId = 0;
     $initialRegisterName = '';
@@ -117,6 +123,7 @@ if($adminUserEdit) {
     }
     $initialChips = AudienceSpec::previewDerivedMembership(array(
         'mitglied' => $initialMitglied,
+        'active' => $initialActive,
         'registerId' => $initialRegisterId,
         'registerName' => $initialRegisterName,
         'userId' => $userId,

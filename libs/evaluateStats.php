@@ -198,7 +198,7 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
         .' FROM `%sUser` `u`'
         .' LEFT JOIN `%sMeldungen` `m` ON `m`.`User` = `u`.`Index`'
         .' AND `m`.`Termin` IN (SELECT `Index` FROM `%sTermine` WHERE %s)'
-        .' WHERE `u`.`Deleted` != 1 AND `u`.`Instrument` > 0'
+        .' WHERE `u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0'
         .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`'
         .' ORDER BY `u`.`Nachname` ASC, `u`.`Vorname` ASC;',
         $prefix,
@@ -258,7 +258,7 @@ function evaluateInactiveUsers($thresholdDays) {
         .'   WHERE `m`.`User` = `u`.`Index` AND `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE()'
         .' ) AS `LastAttend`'
         .' FROM `%sUser` `u`'
-        .' WHERE `u`.`Deleted` != 1 AND `u`.`Instrument` > 0;',
+        .' WHERE `u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0;',
         $prefix,
         $prefix,
         $prefix

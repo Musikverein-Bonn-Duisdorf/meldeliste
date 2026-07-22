@@ -331,7 +331,11 @@ class AudienceSpec
             elseif($audience === 'nonmembers') {
                 $where[] = '`Mitglied` != 1';
             }
+            elseif($audience === 'musicians') {
+                $where[] = '`Active` = 1';
+            }
             if(count($registerIds) > 0) {
+                $where[] = '`Active` = 1';
                 $sql = sprintf(
                     'SELECT `Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE %s AND `Register` IN (%s);',
                     $GLOBALS['dbprefix'],
@@ -434,7 +438,7 @@ class AudienceSpec
 
         $u = new User;
         $u->load_by_id($userId);
-        if((int)$u->Index === $userId) {
+        if((int)$u->Index === $userId && (int)$u->Active !== 0) {
             $regName = html_entity_decode((string)$u->getRegisterName(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
             if($regName !== '' && strtolower(trim($regName)) !== 'keins') {
                 $items[] = array(
@@ -461,7 +465,7 @@ class AudienceSpec
      * Whether provisional user attributes match a MemberSpec (no DB user row required).
      * Mirrors resolveUserIds union semantics for groups/registers; optional users[] via userId.
      *
-     * @param array $attrs mitglied (bool), registerId (int), userId (int, optional)
+     * @param array $attrs mitglied (bool), active (bool, default true), registerId (int), userId (int, optional)
      * @param mixed $spec
      * @param array $opts includeUsers (bool, default true)
      * @return bool
@@ -469,6 +473,7 @@ class AudienceSpec
     public static function attributesMatchMemberSpec($attrs, $spec, $opts = array()) {
         $includeUsers = !array_key_exists('includeUsers', $opts) || !empty($opts['includeUsers']);
         $mitglied = !empty($attrs['mitglied']);
+        $active = !array_key_exists('active', $attrs) || !empty($attrs['active']);
         $registerId = isset($attrs['registerId']) ? (int)$attrs['registerId'] : 0;
         $userId = isset($attrs['userId']) ? (int)$attrs['userId'] : 0;
 
@@ -494,8 +499,11 @@ class AudienceSpec
 
         foreach($groups as $audience) {
             $roleOk = false;
-            if($audience === 'users' || $audience === 'musicians') {
+            if($audience === 'users') {
                 $roleOk = true;
+            }
+            elseif($audience === 'musicians') {
+                $roleOk = $active;
             }
             elseif($audience === 'members') {
                 $roleOk = $mitglied;
@@ -506,8 +514,13 @@ class AudienceSpec
             if(!$roleOk) {
                 continue;
             }
-            if(count($regs) > 0 && !in_array($registerId, $regs, true)) {
-                continue;
+            if(count($regs) > 0) {
+                if(!$active) {
+                    continue;
+                }
+                if(!in_array($registerId, $regs, true)) {
+                    continue;
+                }
             }
             return true;
         }
@@ -518,7 +531,7 @@ class AudienceSpec
      * Derived membership chips from form attributes (roles, register, rule-based mail groups).
      * Explicit users[]-only mail groups are omitted (profile checkboxes).
      *
-     * @param array $attrs mitglied (bool), registerId (int), registerName (string), userId (int)
+     * @param array $attrs mitglied (bool), active (bool), registerId (int), registerName (string), userId (int)
      * @return array<int,array{type:string,label:string}>
      */
     public static function previewDerivedMembership($attrs) {
@@ -538,7 +551,8 @@ class AudienceSpec
             }
         }
 
-        if($registerName !== '' && strtolower(trim($registerName)) !== 'keins') {
+        if($registerName !== '' && strtolower(trim($registerName)) !== 'keins'
+            && (!array_key_exists('active', $attrs) || !empty($attrs['active']))) {
             $items[] = array(
                 'type' => 'register',
                 'label' => 'Register: '.$registerName,
@@ -646,7 +660,7 @@ class AudienceSpec
             $u = new User();
             $u->load_by_id((int)$uid);
             if((int)$u->Index) {
-                $bits[] = $u->getName();
+                $bits[] = ((int)$u->Active === 0 ? 'Gast: ' : '').$u->getName();
             }
         }
         if($allowTermine) {
@@ -700,7 +714,14 @@ class AudienceSpec
             $u = new User();
             $u->load_by_id((int)$uid);
             if((int)$u->Index) {
-                $chips[] = array('type' => 'user', 'label' => $u->getName());
+                $label = $u->getName();
+                if((int)$u->Active === 0) {
+                    $label = 'Gast: '.$label;
+                    $chips[] = array('type' => 'guestMusician', 'label' => $label);
+                }
+                else {
+                    $chips[] = array('type' => 'user', 'label' => $label);
+                }
             }
         }
         if($allowTermine) {
@@ -813,7 +834,7 @@ class AudienceSpec
             $userWhere .= ' AND (u.`getMail` = 1 OR u.`notifyInbox` = 1)';
         }
         $sqlUser = sprintf(
-            'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
+            'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, u.`Active`, COALESCE(r.`Name`, "") AS `RegisterName`
              FROM `%sUser` u
              LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
              LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
@@ -829,10 +850,12 @@ class AudienceSpec
             while($u = mysqli_fetch_array($dbrUser)) {
                 $name = trim($u['Vorname'].' '.$u['Nachname']);
                 $regName = html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $isGuest = array_key_exists('Active', $u) && (int)$u['Active'] === 0;
                 $catalog['users'][] = array(
                     'id' => (int)$u['Index'],
                     'label' => $name,
                     'meta' => $regName,
+                    'guest' => $isGuest,
                 );
             }
         }

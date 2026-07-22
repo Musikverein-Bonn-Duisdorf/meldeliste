@@ -1,5 +1,5 @@
 /**
- * MELD-60/61/135: chip picker — roles + registers + users + mailGroups + termine.
+ * MELD-60/61/135/134: chip picker — roles + registers + users + mailGroups + termine + guestMusicians.
  */
 (function(global) {
   'use strict';
@@ -13,7 +13,7 @@
   var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
 
   function parseCatalog(el) {
-    if(!el) return {groups: [], registers: [], users: [], mailGroups: [], termine: []};
+    if(!el) return {groups: [], registers: [], users: [], mailGroups: [], termine: [], guestMusicians: []};
     try {
       var c = JSON.parse(el.textContent || '{}');
       return {
@@ -21,10 +21,11 @@
         registers: Array.isArray(c.registers) ? c.registers : [],
         users: Array.isArray(c.users) ? c.users : [],
         mailGroups: Array.isArray(c.mailGroups) ? c.mailGroups : [],
-        termine: Array.isArray(c.termine) ? c.termine : []
+        termine: Array.isArray(c.termine) ? c.termine : [],
+        guestMusicians: Array.isArray(c.guestMusicians) ? c.guestMusicians : []
       };
     } catch(e) {
-      return {groups: [], registers: [], users: [], mailGroups: [], termine: []};
+      return {groups: [], registers: [], users: [], mailGroups: [], termine: [], guestMusicians: []};
     }
   }
 
@@ -46,7 +47,7 @@
   }
 
   function emptySpec() {
-    return {groups: [], registers: [], users: [], mailGroups: [], termine: []};
+    return {groups: [], registers: [], users: [], mailGroups: [], termine: [], guestMusicians: []};
   }
 
   function isSpecEmpty(spec) {
@@ -55,6 +56,15 @@
       && !(spec.users && spec.users.length)
       && !(spec.mailGroups && spec.mailGroups.length)
       && !(spec.termine && spec.termine.length);
+  }
+
+  function parseGuestIds(el) {
+    if(!el) return [];
+    try {
+      return normalizeIdList(JSON.parse(el.value || '[]'));
+    } catch(e) {
+      return [];
+    }
   }
 
   function parseSpec(el, opts) {
@@ -86,7 +96,8 @@
         registers: registers,
         users: users,
         mailGroups: mailGroups,
-        termine: termine
+        termine: termine,
+        guestMusicians: []
       };
     } catch(e) {
       return fallback;
@@ -104,6 +115,7 @@
       this.inputEl = opts.inputEl;
       this.suggestEl = opts.suggestEl;
       this.hiddenEl = opts.hiddenEl;
+      this.guestHiddenEl = opts.guestHiddenEl || null;
       this.countEl = opts.countEl || null;
       this.countUrl = opts.countUrl || 'mailRecipientCount.php';
       this.countLabel = opts.countLabel || 'Empfänger';
@@ -118,6 +130,10 @@
         allowEmpty: this.allowEmpty,
         defaultGroups: this.defaultGroups
       });
+      this.spec.guestMusicians = this.guestHiddenEl
+        ? parseGuestIds(this.guestHiddenEl)
+        : [];
+      this.dedupeGuestUsers();
       if(this.inputEl) {
         this.inputEl.addEventListener('input', this.onInput.bind(this));
         this.inputEl.addEventListener('keydown', this.onKeydown.bind(this));
@@ -131,14 +147,27 @@
     },
 
     syncHidden: function() {
-      if(!this.hiddenEl) return;
-      this.hiddenEl.value = JSON.stringify({
-        groups: this.spec.groups.slice(),
-        registers: this.spec.registers.slice(),
-        users: this.spec.users.slice(),
-        mailGroups: (this.spec.mailGroups || []).slice(),
-        termine: (this.spec.termine || []).slice()
-      });
+      if(this.hiddenEl) {
+        this.hiddenEl.value = JSON.stringify({
+          groups: this.spec.groups.slice(),
+          registers: this.spec.registers.slice(),
+          users: this.spec.users.slice(),
+          mailGroups: (this.spec.mailGroups || []).slice(),
+          termine: (this.spec.termine || []).slice()
+        });
+      }
+      if(this.guestHiddenEl) {
+        this.guestHiddenEl.value = JSON.stringify((this.spec.guestMusicians || []).slice());
+      }
+    },
+
+    /** Gastmusiker-IDs nicht parallel als Person-Chip führen. */
+    dedupeGuestUsers: function() {
+      var guests = this.spec.guestMusicians || [];
+      if(!guests.length || !this.spec.users.length) return;
+      var set = {};
+      guests.forEach(function(id) { set[Number(id)] = true; });
+      this.spec.users = this.spec.users.filter(function(id) { return !set[Number(id)]; });
     },
 
     scheduleCountRefresh: function() {
@@ -246,10 +275,19 @@
       var list = this.catalog.users;
       for(var i = 0; i < list.length; i++) {
         if(Number(list[i].id) === Number(id)) {
-          return list[i].label + (list[i].meta ? ' (' + list[i].meta + ')' : '');
+          var name = list[i].label + (list[i].meta ? ' (' + list[i].meta + ')' : '');
+          return list[i].guest ? ('Gast: ' + name) : name;
         }
       }
       return 'User #' + id;
+    },
+
+    isGuestUser: function(id) {
+      var list = this.catalog.users || [];
+      for(var i = 0; i < list.length; i++) {
+        if(Number(list[i].id) === Number(id)) return !!list[i].guest;
+      }
+      return false;
     },
 
     labelForMailGroup: function(id) {
@@ -268,6 +306,16 @@
       return 'Teilnehmer: Termin #' + id;
     },
 
+    labelForGuestMusician: function(id) {
+      var list = this.catalog.guestMusicians || [];
+      for(var i = 0; i < list.length; i++) {
+        if(Number(list[i].id) === Number(id)) {
+          return list[i].label + (list[i].meta ? ' (' + list[i].meta + ')' : '');
+        }
+      }
+      return 'Gastmusiker #' + id;
+    },
+
     render: function() {
       if(!this.chipsEl) return;
       this.chipsEl.innerHTML = '';
@@ -282,7 +330,11 @@
         self.chipsEl.appendChild(self.makeChip('register', id, 'Register: ' + self.labelForRegister(id)));
       });
       this.spec.users.forEach(function(id) {
-        self.chipsEl.appendChild(self.makeChip('user', id, self.labelForUser(id)));
+        var chipType = self.isGuestUser(id) ? 'guestMusician' : 'user';
+        self.chipsEl.appendChild(self.makeChip(chipType, id, self.labelForUser(id)));
+      });
+      (this.spec.guestMusicians || []).forEach(function(id) {
+        self.chipsEl.appendChild(self.makeChip('guestMusician', id, 'Gastmusiker: ' + self.labelForGuestMusician(id)));
       });
       (this.spec.termine || []).forEach(function(id) {
         self.chipsEl.appendChild(self.makeChip('termin', id, self.labelForTermin(id)));
@@ -327,6 +379,12 @@
         id = Number(id);
         this.spec.termine = (this.spec.termine || []).filter(function(x) { return x !== id; });
       }
+      else if(type === 'guestMusician') {
+        // Unified termin UI: guests live in users[]; legacy guestMusicians[] if present.
+        id = Number(id);
+        this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
+        this.spec.guestMusicians = (this.spec.guestMusicians || []).filter(function(x) { return x !== id; });
+      }
       else {
         id = Number(id);
         this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
@@ -357,8 +415,14 @@
         if(!this.spec.termine) this.spec.termine = [];
         if(this.spec.termine.indexOf(id) === -1) this.spec.termine.push(id);
       }
+      else if(type === 'guestMusician') {
+        if(!this.spec.guestMusicians) this.spec.guestMusicians = [];
+        if(this.spec.guestMusicians.indexOf(id) === -1) this.spec.guestMusicians.push(id);
+        this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
+      }
       else if(this.spec.users.indexOf(id) === -1) {
         this.spec.users.push(id);
+        this.spec.guestMusicians = (this.spec.guestMusicians || []).filter(function(x) { return x !== id; });
       }
       this.hideSuggest();
       if(this.inputEl) this.inputEl.value = '';
@@ -401,12 +465,34 @@
 
       this.catalog.users.forEach(function(u) {
         if(self.spec.users.indexOf(Number(u.id)) !== -1) return;
-        var hay = normalize(u.label + ' ' + (u.meta || ''));
+        if((self.spec.guestMusicians || []).indexOf(Number(u.id)) !== -1) return;
+        var hay = normalize(u.label + ' ' + (u.meta || '') + (u.guest ? ' gast' : ''));
         if(q === '' || hay.indexOf(q) === -1) {
           if(q === '') return;
           return;
         }
-        items.push({type: 'user', id: u.id, label: u.label, meta: u.meta || 'Person'});
+        items.push({
+          type: 'user',
+          id: u.id,
+          label: u.guest ? ('Gast: ' + u.label) : u.label,
+          meta: u.guest ? (u.meta ? ('Gast · ' + u.meta) : 'Gast') : (u.meta || 'Person')
+        });
+      });
+
+      (this.catalog.guestMusicians || []).forEach(function(g) {
+        if((self.spec.guestMusicians || []).indexOf(Number(g.id)) !== -1) return;
+        if(self.spec.users.indexOf(Number(g.id)) !== -1) return;
+        var ghay = normalize(g.label + ' ' + (g.meta || '') + ' gastmusiker');
+        if(q === '' || ghay.indexOf(q) === -1) {
+          if(q === '') return;
+          return;
+        }
+        items.push({
+          type: 'guestMusician',
+          id: g.id,
+          label: g.label,
+          meta: g.meta ? ('Gastmusiker · ' + g.meta) : 'Gastmusiker'
+        });
       });
 
       (this.catalog.termine || []).forEach(function(t) {
@@ -512,6 +598,9 @@
       else if(e.key === 'Backspace' && this.inputEl && this.inputEl.value === '') {
         if(this.spec.termine && this.spec.termine.length) {
           this.removeChip('termin', this.spec.termine[this.spec.termine.length - 1]);
+        }
+        else if(this.spec.guestMusicians && this.spec.guestMusicians.length) {
+          this.removeChip('guestMusician', this.spec.guestMusicians[this.spec.guestMusicians.length - 1]);
         }
         else if(this.spec.users.length) {
           this.removeChip('user', this.spec.users[this.spec.users.length - 1]);

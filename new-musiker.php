@@ -107,7 +107,7 @@ $formAction = '';
 $checked = function ($field) use ($fill, $n) {
     if(!$fill) {
         return in_array($field, array(
-            'getMail', 'notifyInbox', 'notifyAppMail',
+            'Active', 'getMail', 'notifyInbox', 'notifyAppMail',
             'notifyAppTerminNew', 'notifyAppTerminChange',
         ), true) ? 'checked ' : '';
     }

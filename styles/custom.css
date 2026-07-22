@@ -861,6 +861,10 @@
   line-height: 1.2;
 }
 
+.orchestra-svg .orchestra-seat[data-user]:not([data-user="0"])[data-termin="0"] {
+  cursor: pointer;
+}
+
 .orchestra-svg--editable .orchestra-seat[data-editable="1"] {
   cursor: pointer;
 }
@@ -1107,6 +1111,11 @@
 .mail-recipient-chip--user {
   background: #f7f3e3;
   border-color: #c9b87a;
+}
+
+.mail-recipient-chip--guestMusician {
+  background: #e3f2fd;
+  border-color: #64b5f6;
 }
 
 .mail-recipient-chip--audience,
@@ -1837,6 +1846,18 @@ body.meld-cal-print {
   flex: 1 1 8rem;
   min-width: 0;
   margin-bottom: 0 !important;
+}
+
+.termin-detail-audience {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  min-width: 0;
+}
+
+.termin-detail-audience > .profile-field {
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 .termin-detail-aushilfen {

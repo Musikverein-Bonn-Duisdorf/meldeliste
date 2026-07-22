@@ -142,7 +142,7 @@ function getActiveUsers($date) {
         $dirigent = 'AND `iName` != "Dirigent"';
     }
     if($date) {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `Active` = 1 AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
@@ -152,7 +152,7 @@ function getActiveUsers($date) {
         );
     }
     else {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `Active` = 1 AND `iName` != "Admin" %s ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
@@ -1219,6 +1219,7 @@ function allowedReturnUrls() {
     return array(
         'users.php',
         'musiker.php',
+        'gastmusiker.php',
         'mitglied.php',
         'no-mitglied.php',
         'new-musiker.php',
@@ -1244,6 +1245,7 @@ function pageToReturnUrl($page) {
     $map = array(
         'users' => 'users.php',
         'musiker' => 'musiker.php',
+        'gastmusiker' => 'gastmusiker.php',
         'mitglied' => 'mitglied.php',
         'nomitglied' => 'no-mitglied.php',
         'newmusiker' => 'new-musiker.php',

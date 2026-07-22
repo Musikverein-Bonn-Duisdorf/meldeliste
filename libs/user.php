@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'Birthday' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Active' => 1, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'Birthday' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -12,6 +12,7 @@ class User
 	    case 'Passhash':
 	    case 'activeLink':
 	    case 'Mitglied':
+	    case 'Active':
 	    case 'Instrument':
 	    case 'iName':
 	    case 'Email':
@@ -47,6 +48,7 @@ class User
 	    case 'Instrument':
         case 'RefID':
 	    case 'Mitglied':
+	    case 'Active':
 	    case 'getMail':
 	    case 'notifyInbox':
 	    case 'notifyAppMail':
@@ -132,6 +134,9 @@ class User
         }
         if(boolsDiffer($this->Mitglied, $old->Mitglied)) {
             $parts[] = 'Mitglied: '.bool2string($old->Mitglied).' &rArr; <b>'.bool2string($this->Mitglied).'</b>';
+        }
+        if(boolsDiffer($this->Active, $old->Active)) {
+            $parts[] = 'Aktiv: '.bool2string($old->Active).' &rArr; <b>'.bool2string($this->Active).'</b>';
         }
         if($this->Email != $old->Email) {
             $parts[] = 'Email: '.htmlspecialchars((string)$old->Email, ENT_QUOTES, 'UTF-8')
@@ -427,7 +432,7 @@ class User
         return (string)preg_replace('#^https?://#i', 'webcal://', $https);
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `notifyInbox`, `notifyAppMail`, `notifyAppTerminNew`, `notifyAppTerminChange`, `notifyAppTerminSoon`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, "%d", "%s", "%s", %s, "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Active`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `notifyInbox`, `notifyAppMail`, `notifyAppTerminNew`, `notifyAppTerminChange`, `notifyAppTerminSoon`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, %d, "%d", "%s", "%s", %s, "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
@@ -436,6 +441,7 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
         (int)$this->Mitglied,
+        (int)$this->Active === 0 ? 0 : 1,
         (int)$this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
@@ -456,7 +462,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `notifyInbox` = "%d", `notifyAppMail` = "%d", `notifyAppTerminNew` = "%d", `notifyAppTerminChange` = "%d", `notifyAppTerminSoon` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Active` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `notifyInbox` = "%d", `notifyAppMail` = "%d", `notifyAppTerminNew` = "%d", `notifyAppTerminChange` = "%d", `notifyAppTerminSoon` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
@@ -465,6 +471,7 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
         (int)$this->Mitglied,
+        (int)$this->Active === 0 ? 0 : 1,
         (int)$this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
@@ -572,6 +579,74 @@ class User
             $this->__set($key, $val);
         }
     }
+
+    /** Gastmusiker-Defaults: keine Mail/App-Benachrichtigungen. */
+    public function applyGuestMusicianDefaults() {
+        $this->Active = 0;
+        $this->getMail = 0;
+        $this->notifyAppMail = 0;
+        $this->notifyAppTerminNew = 0;
+        $this->notifyAppTerminChange = 0;
+        $this->notifyAppTerminSoon = 0;
+    }
+
+    public function isGuestMusician() {
+        return (int)$this->Active === 0;
+    }
+
+    /**
+     * Existing non-deleted user with same Vor-/Nachname (case-insensitive), or null.
+     *
+     * @param string $vorname
+     * @param string $nachname
+     * @param int $excludeIndex
+     * @return array{Index:int,Vorname:string,Nachname:string}|null
+     */
+    public static function findExistingByName($vorname, $nachname, $excludeIndex = 0) {
+        $vorname = trim((string)$vorname);
+        $nachname = trim((string)$nachname);
+        if($vorname === '' || $nachname === '') {
+            return null;
+        }
+        $excludeIndex = (int)$excludeIndex;
+        $sql = sprintf(
+            'SELECT `Index`, `Vorname`, `Nachname` FROM `%sUser`
+             WHERE `Deleted` != 1
+               AND LOWER(TRIM(`Vorname`)) = LOWER("%s")
+               AND LOWER(TRIM(`Nachname`)) = LOWER("%s")
+               %s
+             ORDER BY `Index` ASC LIMIT 1;',
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], $vorname),
+            mysqli_real_escape_string($GLOBALS['conn'], $nachname),
+            $excludeIndex > 0 ? ('AND `Index` != '.$excludeIndex) : ''
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) {
+            return null;
+        }
+        $row = mysqli_fetch_assoc($dbr);
+        if(!is_array($row)) {
+            return null;
+        }
+        return array(
+            'Index' => (int)$row['Index'],
+            'Vorname' => (string)$row['Vorname'],
+            'Nachname' => (string)$row['Nachname'],
+        );
+    }
+
+    public function canLogin() {
+        if ((int)$this->Deleted === 1) {
+            return false;
+        }
+        if ($this->isGuestMusician() && trim((string)$this->Passhash) === '') {
+            return false;
+        }
+        return true;
+    }
+
     public function load_by_id($Index) {
         $Index = (int) $Index;
         $sql = sprintf('SELECT * FROM `%sUser` WHERE `Index` = "%d";',

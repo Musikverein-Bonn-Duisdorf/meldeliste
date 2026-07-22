@@ -114,6 +114,7 @@ if(!empty($optionsDB['urlMitgliederverwaltung'])) {
           <?php if(requirePermission("perm_showUsers")) { ?>
           <a title="Registerübersicht" alt="Registerübersicht" href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('register');?>"><i class="fas fa-list"></i> Registerübersicht</a>
           <a title="Musikerliste" alt="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('musiker');?>"><i class="fas fa-users"></i> Musikerliste</a>
+          <a title="Gastmusiker" alt="Gastmusiker" href="gastmusiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('gastmusiker');?>"><i class="fas fa-user-clock"></i> Gastmusiker</a>
           <a title="Userliste" alt="Userliste" href="users.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('users');?>"><i class="fas fa-users"></i> Userliste</a>
           <?php if($GLOBALS['optionsDB']['showMembers']) { ?>
           <a title="Mitgliederliste" alt="Mitgliederliste" href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPage('mitglied');?>"><i class="fas fa-users"></i> Mitgliederliste</a>

@@ -183,11 +183,11 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showUsers') ? '
-<li><b>Registerübersicht / Musikerliste / Userliste</b> – Personen suchen, filtern und öffnen (Register-Überschrift in Registerfarbe); Spaltenköpfe sortieren die Liste</li>
+<li><b>Registerübersicht / Musikerliste / Gastmusiker / Userliste</b> – Personen suchen, filtern und öffnen (Register-Überschrift in Registerfarbe); Spaltenköpfe sortieren die Liste. <b>Gastmusiker</b> listet alle ohne Haken <b>aktiv</b></li>
 '.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
-'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Mitglied-Status, Instrument, Gruppen-Chips und Rechte; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
+'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte; <b>Deaktivieren</b> setzt Gastmusiker; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
 '.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 '.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
 '.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>' : '').'
@@ -202,11 +202,11 @@ $sections[] = array(
     'body' => '
 <p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
 <p>Im <b>Kalender</b> kannst du auf eine freie Tagesfläche klicken: Nach Bestätigung öffnet sich das Anlege-Formular mit vorausgefülltem Datum.</p>
-<p>Nach Speichern/Löschen von Terminen, Aushilfen oder Schichten erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden.</p>
+<p>Nach Speichern/Löschen von Terminen oder Schichten erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
-<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis (Standard: <b>Alle User</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles.</p>
+<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis (Standard: <b>Alle User</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles. Personen ohne Haken <b>aktiv</b> (Gastmusiker) kannst du hier wie andere Personen auswählen – sie gehören dann zu Sichtbarkeit und Besetzung dieses Termins.</p>
 <p>Discord-Posts (bei konfiguriertem Webhook) erfolgen bei Sichtbarkeit <b>Alle User</b> automatisch, sonst nur mit der Checkbox <b>Auch auf Discord posten</b>.</p>
-<p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar). Aushilfen können am Termin ergänzt bzw. gelöscht werden, sofern freigegeben.</p>
+<p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar).</p>
 '
 );
 

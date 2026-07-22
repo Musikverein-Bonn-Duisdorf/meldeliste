@@ -2,7 +2,7 @@
 ob_start();
 require_once __DIR__.'/libs/sessionBootstrap.php';
 meldeConfigureSession();
-$_SESSION['page'] = 'musiker';
+$_SESSION['page'] = 'gastmusiker';
 $_SESSION['adminpage'] = true;
 
 include_once 'common/include.php';
@@ -10,44 +10,30 @@ mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBAL
 requireLoggedInOrRedirect();
 
 if(!requirePermission('perm_showUsers')) {
-    $logentry = new Log;
-    $logentry->error(sprintf(
-        'Zugriff auf musiker.php verweigert | User-ID: <b>%d</b>',
-        isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0
-    ));
-    denyAccess('Keine Berechtigung. Eigenes Profil bitte über „Mein Profil“ speichern.');
+    denyAccess();
 }
 
 include_once 'libs/form-response.php';
-applyUserFormPostRedirect('musiker.php', array('allowNewUser' => true));
+applyUserFormPostRedirect('gastmusiker.php', array('allowNewUser' => false));
 
 include 'common/header.php';
 
-$sql = sprintf('SELECT COUNT(`Index`) AS `Count` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` WHERE `rName` != "keins" AND `Deleted` != 1 AND `Active` = 1;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
+$sql = sprintf(
+    'SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Active` = 0 AND `Deleted` != 1;',
     $GLOBALS['dbprefix']
 );
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
 $row = mysqli_fetch_array($dbr);
-$nMusiker = $row['Count'];
+$nGuests = $row['Count'];
 ?>
 <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <h2>Liste aller Musiker (<?php echo $nMusiker; ?>)</h2>
+    <h2>Gastmusiker (<?php echo (int)$nGuests; ?>)</h2>
 </div>
 <?php echo renderFlashHtml(); ?>
 
-<?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
-<div class="w3-center orchestra-svg-wrap">
-<?php echo printOrchestra(0); ?>
-</div>
-<?php } ?>
-
 <div>
-<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Musiker suchen..." id="filterString" onkeyup="filterMusiker()">
+<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Gastmusiker suchen..." id="filterString" onkeyup="filterMusiker()">
 </div>
 <div id="listHeader" class="list-header w3-row w3-hide-small">
   <div class="w3-col l3 m6 s12 w3-container list-sort" data-sort="nachname" data-type="string">Name</div>
@@ -58,9 +44,9 @@ $nMusiker = $row['Count'];
 </div>
 <div id="Liste">
 <?php
-$chunk = listChunkUsers('musiker', 0, 50);
+$chunk = listChunkUsers('gastmusiker', 0, 50);
 echo $chunk['html'];
-echo listChunkRenderSentinel('musiker', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker');
+echo listChunkRenderSentinel('gastmusiker', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker');
 ?>
 </div>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>

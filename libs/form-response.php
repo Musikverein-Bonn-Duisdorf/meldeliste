@@ -39,6 +39,22 @@ function handleUserFormPost($options = array()) {
                 $n->fill_from_array($_POST);
                 if($id < 1) {
                     $n->Index = null;
+                    $dup = User::findExistingByName($n->Vorname, $n->Nachname);
+                    if($dup) {
+                        $result['flash'] = array(
+                            'type' => 'error',
+                            'message' => sprintf(
+                                'Es existiert bereits ein User mit dem Namen „%s %s“ (ID %d). Bitte bestehenden Eintrag öffnen oder den Namen anpassen.',
+                                $dup['Vorname'],
+                                $dup['Nachname'],
+                                $dup['Index']
+                            ),
+                        );
+                        return $result;
+                    }
+                }
+                if((int)$n->Active === 0) {
+                    $n->applyGuestMusicianDefaults();
                 }
                 if(!$n->save()) {
                     $result['flash'] = array(
@@ -51,6 +67,9 @@ function handleUserFormPost($options = array()) {
             else {
                 $n->load_by_id($_POST['Index']);
                 $n->fill_from_array($_POST);
+                if((int)$n->Active === 0) {
+                    $n->applyGuestMusicianDefaults();
+                }
                 $n->save();
             }
 
@@ -105,9 +124,9 @@ function handleUserFormPost($options = array()) {
     if(isset($_POST['deactivate'])) {
         $n = new User;
         $n->load_by_id($_POST['Index']);
-        $n->Instrument = 0;
+        $n->applyGuestMusicianDefaults();
         $n->save();
-        $result['successMessage'] = 'Deaktiviert.';
+        $result['successMessage'] = 'Als Gastmusiker deaktiviert.';
         return $result;
     }
 

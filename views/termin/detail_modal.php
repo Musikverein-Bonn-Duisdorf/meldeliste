@@ -1,7 +1,7 @@
 <?php
 /**
  * Termin detail modal (profile-shell layout).
- * Expects: $termin, $userId, $instrument, $aushilfenHtml
+ * Expects: $termin, $userId, $instrument
  */
 $t = $termin;
 $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
@@ -193,24 +193,15 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
       </div>
 <?php } ?>
 <?php if($canEdit) { ?>
-      <div class="profile-field termin-visibility">
-        <span class="profile-label">Sichtbar für</span>
-        <div class="profile-value profile-value--chips">
-<?php
-    echo AudienceSpec::renderChipsHtml($t->getVisibilitySpecArray(), array(
-        'allowMailGroups' => true,
-        'ariaLabel' => 'sichtbar für',
-    ));
-?>
+      <div class="termin-field-pair">
+        <div class="profile-field">
+          <span class="profile-label">Anmeldung offen</span>
+          <div class="profile-value"><?php echo bool2string($t->open); ?></div>
         </div>
-      </div>
-      <div class="profile-field">
-        <span class="profile-label">Anmeldung offen</span>
-        <div class="profile-value"><?php echo bool2string($t->open); ?></div>
-      </div>
-      <div class="profile-field">
-        <span class="profile-label">Neu</span>
-        <div class="profile-value"><?php echo bool2string($t->new); ?></div>
+        <div class="profile-field">
+          <span class="profile-label">Neu</span>
+          <div class="profile-value"><?php echo bool2string($t->new); ?></div>
+        </div>
       </div>
       <div class="profile-field">
         <span class="profile-label">ID</span>
@@ -219,30 +210,25 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
 <?php } ?>
     </section>
   </div>
-
-<?php if($canEdit && !$t->Shifts) { ?>
-  <div class="termin-detail-aushilfen">
-    <form class="termin-detail-aushilfe-form" method="POST" action="">
-      <h3 class="profile-col-title">Aushilfen</h3>
-      <div class="termin-field-pair">
-        <div class="profile-field">
-          <label class="profile-label" for="aushilfe-name-<?php echo (int)$t->Index; ?>">Name</label>
-          <input id="aushilfe-name-<?php echo (int)$t->Index; ?>" class="w3-input w3-border profile-control <?php echo $h($inputBg); ?>" type="text" name="Name">
-        </div>
-        <div class="profile-field">
-          <label class="profile-label" for="aushilfe-instr-<?php echo (int)$t->Index; ?>">Instrument</label>
-          <input type="hidden" name="Termin" value="<?php echo (int)$t->Index; ?>">
-          <select id="aushilfe-instr-<?php echo (int)$t->Index; ?>" class="w3-input w3-border profile-control <?php echo $h($inputBg); ?>" name="Instrument"><?php echo instrumentOption(0); ?></select>
-        </div>
+<?php if($canEdit) { ?>
+  <div class="termin-detail-audience">
+    <div class="profile-field termin-visibility">
+      <span class="profile-label">Sichtbar für</span>
+      <div class="profile-value profile-value--chips">
+<?php
+    $visForChips = $t->getVisibilitySpecArray();
+    foreach($t->getGuestMusiciansArray() as $gid) {
+        $gid = (int)$gid;
+        if($gid > 0 && !in_array($gid, $visForChips['users'], true)) {
+            $visForChips['users'][] = $gid;
+        }
+    }
+    echo AudienceSpec::renderChipsHtml($visForChips, array(
+        'allowMailGroups' => true,
+        'ariaLabel' => 'sichtbar für',
+    ));
+?>
       </div>
-      <div class="profile-field">
-        <input class="w3-btn <?php echo $h($btnSubmit); ?> w3-border w3-mobile" type="submit" name="insertAushilfe" value="eintragen">
-      </div>
-    </form>
-
-    <div class="termin-detail-aushilfe-list">
-      <h3 class="profile-col-title">Aktive Aushilfen</h3>
-<?php echo $aushilfenHtml; ?>
     </div>
   </div>
 <?php } ?>

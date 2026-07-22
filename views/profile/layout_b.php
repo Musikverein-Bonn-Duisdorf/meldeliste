@@ -26,6 +26,11 @@ $step = isset($profileStep) ? $profileStep : 'notify';
         ?>
         <div class="profile-prefs">
           <div class="profile-pref">
+            <input type="hidden" name="Active" value="0">
+            <input class="w3-check" type="checkbox" name="Active" value="1" id="pref-Active-b" <?php echo $checked('Active'); ?>>
+            <label for="pref-Active-b">aktiv</label>
+          </div>
+          <div class="profile-pref">
             <input type="hidden" name="Mitglied" value="0">
             <input class="w3-check" type="checkbox" name="Mitglied" value="1" id="pref-Mitglied-b" <?php echo $checked('Mitglied'); ?>>
             <label for="pref-Mitglied-b">Mitglied</label>
