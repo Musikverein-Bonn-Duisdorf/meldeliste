@@ -234,7 +234,7 @@
 	"notifyAppMail": {"Type": "tinyint", "Default": 1},
 	"notifyAppTerminNew": {"Type": "tinyint", "Default": 1},
 	"notifyAppTerminChange": {"Type": "tinyint", "Default": 1},
-	"notifyAppTerminSoon": {"Type": "tinyint", "Default": 1},
+	"notifyAppTerminSoon": {"Type": "tinyint", "Default": 0},
 	"Mitglied": {"Type": "tinyint", "Default": 0},
 	"Admin": {"Type": "int", "Default": 0},
 	"RegisterLead": {"Type": "int", "Default": 0},

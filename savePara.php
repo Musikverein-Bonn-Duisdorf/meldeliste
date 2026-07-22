@@ -33,13 +33,6 @@ case "change":
         if($oldScheme !== $value) {
             logConfigChange('colorSchemeActive', $oldScheme, $value);
         }
-        else {
-            $logentry = new Log;
-            $logentry->DBupdate(sprintf(
-                'Config Farbschema <b>%s</b> erneut angewendet',
-                htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8')
-            ));
-        }
         echo 'ok';
         break;
     }

@@ -84,49 +84,101 @@ class User
     }
     
     public function getChanges() {
+        $detail = $this->getChangeDetail();
+        if($detail['parts'] === array()) {
+            return $detail['header'];
+        }
+        return $detail['header'].', '.implode(', ', $detail['parts']);
+    }
+
+    /**
+     * @return array{header:string,parts:string[]}
+     */
+    public function getChangeDetail() {
         $old = new User;
         $old->load_by_id($this->Index);
 
-        $str = sprintf("User-ID: %d <b>%s %s</b>",
-        $this->Index,
-        $this->Vorname,
-        $this->Nachname
+        $header = sprintf(
+            'User-ID: %d <b>%s %s</b>',
+            (int)$this->Index,
+            htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8')
         );
+        $parts = array();
+
         if($this->Vorname != $old->Vorname) {
             $this->Vorname = trim((string)$this->Vorname);
-            $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
+            $parts[] = 'Vorname: '.htmlspecialchars((string)$old->Vorname, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8').'</b>';
         }
         if($this->Nachname != $old->Nachname) {
             $this->Nachname = trim((string)$this->Nachname);
-            $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+            $parts[] = 'Nachname: '.htmlspecialchars((string)$old->Nachname, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'</b>';
         }
-        if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
-        if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
-        if($this->Passhash != $old->Passhash) $str.=", Passhash: ".$old->Passhash." &rArr; <b>".$this->Passhash."</b>";
-        if($this->activeLink != $old->activeLink) $str.=", activeLink: ".$old->activeLink." &rArr; <b>".$this->activeLink."</b>";
-        if(boolsDiffer($this->Mitglied, $old->Mitglied)) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
-        if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
-        if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
-        if($this->Birthday != $old->Birthday) $str.=", Geburtstag: ".germanDate($old->Birthday, true)." &rArr; <b>".germanDate($this->Birthday, true)."</b>";
-        if(boolsDiffer($this->getMail, $old->getMail)) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
-        if(boolsDiffer($this->notifyInbox, $old->notifyInbox)) $str.=", notifyInbox: ".bool2string($old->notifyInbox)." &rArr; <b>".bool2string($this->notifyInbox)."</b>";
-        if(boolsDiffer($this->notifyAppMail, $old->notifyAppMail)) $str.=", notifyAppMail: ".bool2string($old->notifyAppMail)." &rArr; <b>".bool2string($this->notifyAppMail)."</b>";
-        if(boolsDiffer($this->notifyAppTerminNew, $old->notifyAppTerminNew)) $str.=", notifyAppTerminNew: ".bool2string($old->notifyAppTerminNew)." &rArr; <b>".bool2string($this->notifyAppTerminNew)."</b>";
-        if(boolsDiffer($this->notifyAppTerminChange, $old->notifyAppTerminChange)) $str.=", notifyAppTerminChange: ".bool2string($old->notifyAppTerminChange)." &rArr; <b>".bool2string($this->notifyAppTerminChange)."</b>";
-        if(boolsDiffer($this->notifyAppTerminSoon, $old->notifyAppTerminSoon)) $str.=", notifyAppTerminSoon: ".bool2string($old->notifyAppTerminSoon)." &rArr; <b>".bool2string($this->notifyAppTerminSoon)."</b>";
-        if(boolsDiffer($this->Admin, $old->Admin)) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
-        if(boolsDiffer($this->RegisterLead, $old->RegisterLead)) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
-        if($this->Instrument != $old->Instrument) {
+        if($this->RefID != $old->RefID) {
+            $parts[] = 'Mitglieds-Nr.: '.htmlspecialchars((string)$old->RefID, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->RefID, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->login != $old->login) {
+            $parts[] = 'Login: '.htmlspecialchars((string)$old->login, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->login, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->Passhash != $old->Passhash) {
+            $parts[] = 'Passhash geändert';
+        }
+        if($this->activeLink != $old->activeLink) {
+            $parts[] = 'activeLink geändert';
+        }
+        if(boolsDiffer($this->Mitglied, $old->Mitglied)) {
+            $parts[] = 'Mitglied: '.bool2string($old->Mitglied).' &rArr; <b>'.bool2string($this->Mitglied).'</b>';
+        }
+        if($this->Email != $old->Email) {
+            $parts[] = 'Email: '.htmlspecialchars((string)$old->Email, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Email, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->Email2 != $old->Email2) {
+            $parts[] = 'Email2: '.htmlspecialchars((string)$old->Email2, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Email2, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->Birthday != $old->Birthday) {
+            $parts[] = 'Geburtstag: '.germanDate($old->Birthday, true)
+                .' &rArr; <b>'.germanDate($this->Birthday, true).'</b>';
+        }
+        if(boolsDiffer($this->getMail, $old->getMail)) {
+            $parts[] = 'Benachrichtigung E-Mail: '.bool2string($old->getMail).' &rArr; <b>'.bool2string($this->getMail).'</b>';
+        }
+        if(boolsDiffer($this->notifyInbox, $old->notifyInbox)) {
+            $parts[] = 'Benachrichtigung Nachrichten: '.bool2string($old->notifyInbox).' &rArr; <b>'.bool2string($this->notifyInbox).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppMail, $old->notifyAppMail)) {
+            $parts[] = 'App: Nachrichten: '.bool2string($old->notifyAppMail).' &rArr; <b>'.bool2string($this->notifyAppMail).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppTerminNew, $old->notifyAppTerminNew)) {
+            $parts[] = 'App: neuer Termin: '.bool2string($old->notifyAppTerminNew).' &rArr; <b>'.bool2string($this->notifyAppTerminNew).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppTerminChange, $old->notifyAppTerminChange)) {
+            $parts[] = 'App: Termin geändert: '.bool2string($old->notifyAppTerminChange).' &rArr; <b>'.bool2string($this->notifyAppTerminChange).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppTerminSoon, $old->notifyAppTerminSoon)) {
+            $parts[] = 'App: Termin bald: '.bool2string($old->notifyAppTerminSoon).' &rArr; <b>'.bool2string($this->notifyAppTerminSoon).'</b>';
+        }
+        if(boolsDiffer($this->Admin, $old->Admin)) {
+            $parts[] = 'Admin: '.bool2string($old->Admin).' &rArr; <b>'.bool2string($this->Admin).'</b>';
+        }
+        if(boolsDiffer($this->RegisterLead, $old->RegisterLead)) {
+            $parts[] = 'Registerführer: '.bool2string($old->RegisterLead).' &rArr; <b>'.bool2string($this->RegisterLead).'</b>';
+        }
+        if((int)$this->Instrument !== (int)$old->Instrument) {
             $newinstr = new Instrument;
             $newinstr->load_by_id($this->Instrument);
-
             $oldinstr = new Instrument;
             $oldinstr->load_by_id($old->Instrument);
-            
-            $str.=", Instrument: ".$oldinstr->Name." &rArr; <b>".$newinstr->Name."</b>";
+            $parts[] = 'Instrument: '.htmlspecialchars((string)$oldinstr->Name, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$newinstr->Name, ENT_QUOTES, 'UTF-8').'</b>';
         }
 
-        return $str;
+        return array('header' => $header, 'parts' => $parts);
     }
     
     public function getVars() {
@@ -203,12 +255,15 @@ class User
         if($this->notifyAppMail === null) $this->notifyAppMail = 1;
         if($this->notifyAppTerminNew === null) $this->notifyAppTerminNew = 1;
         if($this->notifyAppTerminChange === null) $this->notifyAppTerminChange = 1;
-        if($this->notifyAppTerminSoon === null) $this->notifyAppTerminSoon = 1;
+        if($this->notifyAppTerminSoon === null) $this->notifyAppTerminSoon = 0;
         if($this->Instrument === null) $this->Instrument = 0;
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $logentry = new Log;
-            $logentry->DBupdate($this->getChanges());
+            $detail = $this->getChangeDetail();
+            if(count($detail['parts'])) {
+                $logentry = new Log;
+                $logentry->DBupdate($detail['header'].', '.implode(', ', $detail['parts']));
+            }
             return $this->update();
         }
         $this->Vorname = trim((string)$this->Vorname);

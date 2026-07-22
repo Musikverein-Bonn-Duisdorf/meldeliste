@@ -116,9 +116,9 @@ $sections[] = array(
 <ul>
 <li><b>E-Mail</b> – Nachrichten per E-Mail (Mailverteiler / SMTP)</li>
 <li><b>Nachrichten</b> – Eintrag unter „Meine Nachrichten“ in der Meldeliste</li>
-<li><b>App: …</b> – lokale Hinweise in der Android-App (Poll, kein Push-Dienst). Pro Ereignisart: neue Nachricht, neuer Termin, Termin geändert, Termin bald (nächste Tage)</li>
+<li><b>App: …</b> – lokale Hinweise in der Android-App (Poll, kein Push-Dienst). Pro Ereignisart: neue Nachricht, neuer Termin, Termin geändert, Termin bald (nächste Tage; standardmäßig aus)</li>
 </ul>
-<p>Unter <b>Gruppenzugehörigkeit</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit.</p>
+<p>Unter <b>Gruppen</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit. <b>Mitglied</b>-Status und benannte Gruppen ändert nur ein Admin (beim Anlegen oder Bearbeiten); im eigenen Profil sind sie nur sichtbar. <b>Automatisch</b> zeigt dem Admin live die daraus folgenden Rollen/Register/regelbasierten Gruppen. Änderungen an Benachrichtigungen und Profilfeldern werden im Anwendungsprotokoll festgehalten.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 <p>Die Android-App speichert nach dem Login ein Gerätetoken und meldet dich beim nächsten Öffnen automatisch an. Abmelden in der App widerruft dieses Token.</p>
 <p>Unter <b>Kalender abonnieren</b> findest du deinen persönlichen ICS-Link für Google, Apple oder Outlook (siehe auch <a href="#help-kalender-abo">Kalender abonnieren</a>).</p>
@@ -187,7 +187,7 @@ $sections[] = array(
 '.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
-'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – neue Person anlegen und Rechte/Instrument setzen</li>' : '').'
+'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Mitglied-Status, Instrument und Gruppen-Chips; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
 '.(requirePermission('perm_editUsers') ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 '.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
 '.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix der Rechte pro User (Autosave)</li>' : '').'
@@ -216,7 +216,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_sendEmail'),
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
-<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen.</p>
+<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
 <p>Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> (Rollen, Gruppen, Register bzw. Termin-Teilnehmer) sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '
@@ -247,7 +247,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_editConfig') ? '
-<li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …</li>
+<li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>
 <li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
 <li><b>Updater</b> – Software-Update und Datenbank-Reparatur / Schema-Stand</li>
 <li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>
