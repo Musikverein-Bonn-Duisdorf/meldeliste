@@ -237,3 +237,91 @@ function calendarFormatTimeShort($time) {
     }
     return $time;
 }
+
+/**
+ * Melde status label for print / lists (MELD-9).
+ *
+ * @param int|null $wert
+ * @return string
+ */
+function calendarMeldeLabel($wert) {
+    if($wert === null || $wert === '') {
+        return 'offen';
+    }
+    $w = (int)$wert;
+    if($w === 1) {
+        return 'zugesagt';
+    }
+    if($w === 2) {
+        return 'abgesagt';
+    }
+    if($w === 3) {
+        return 'vielleicht';
+    }
+    return 'offen';
+}
+
+/**
+ * Keep events whose date range overlaps [fromDate, toDate] (inclusive Y-m-d).
+ *
+ * @param list<array{id:int,date:string,endDate:string}> $events
+ * @param string $fromDate
+ * @param string $toDate
+ * @return list<array>
+ */
+function calendarEventsOverlappingRange(array $events, $fromDate, $toDate) {
+    $from = DateTimeImmutable::createFromFormat('Y-m-d', (string)$fromDate);
+    $to = DateTimeImmutable::createFromFormat('Y-m-d', (string)$toDate);
+    if($from === false || $to === false) {
+        return array();
+    }
+    $out = array();
+    foreach($events as $ev) {
+        $start = DateTimeImmutable::createFromFormat('Y-m-d', (string)$ev['date']);
+        if($start === false) {
+            continue;
+        }
+        $end = DateTimeImmutable::createFromFormat('Y-m-d', (string)$ev['endDate']);
+        if($end === false || $end < $start) {
+            $end = $start;
+        }
+        if($end < $from || $start > $to) {
+            continue;
+        }
+        $out[] = $ev;
+    }
+    return $out;
+}
+
+/**
+ * Human date for print table (single day or span).
+ *
+ * @param array{date:string,endDate:string} $ev
+ * @return string
+ */
+function calendarPrintDateLabel(array $ev) {
+    $date = (string)$ev['date'];
+    $endDate = trim((string)$ev['endDate']);
+    if($endDate === '' || $endDate === $date) {
+        return (string)germanDate($date, 1);
+    }
+    return (string)germanDateSpan($date, $endDate);
+}
+
+/**
+ * Time range for print table (HH:MM or HH:MM–HH:MM).
+ *
+ * @param array{startTime:string,endTime:string} $ev
+ * @return string
+ */
+function calendarPrintTimeLabel(array $ev) {
+    $start = calendarFormatTimeShort(isset($ev['startTime']) ? $ev['startTime'] : '');
+    $end = calendarFormatTimeShort(isset($ev['endTime']) ? $ev['endTime'] : '');
+    if($start === '' && $end === '') {
+        return '';
+    }
+    if($start !== '' && $end !== '') {
+        return $start.'–'.$end;
+    }
+    return $start !== '' ? $start : $end;
+}

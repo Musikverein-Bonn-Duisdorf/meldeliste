@@ -1412,6 +1412,121 @@ body.insurance-print {
   }
 }
 
+/* Calendar print table (MELD-9) */
+body.meld-cal-print {
+  margin: 0;
+  padding: 1.25rem 1.5rem 2rem;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 11pt;
+  line-height: 1.35;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+.meld-cal-print-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.meld-cal-print-btn {
+  display: inline-block;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  text-decoration: none;
+  color: #111;
+  background: #f5f5f5;
+  border: 1px solid #888;
+  border-radius: 2px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+.meld-cal-print-btn:hover {
+  background: #e8e8e8;
+}
+
+.meld-cal-print-header {
+  margin-bottom: 1.25rem;
+}
+
+.meld-cal-print-org {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.meld-cal-print-header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.meld-cal-print-meta {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.meld-cal-print-empty {
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.meld-cal-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+}
+
+.meld-cal-print-table th,
+.meld-cal-print-table td {
+  border: 1px solid #666;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.meld-cal-print-table thead th {
+  background: #efefef;
+  font-weight: 700;
+  border-bottom-width: 2px;
+}
+
+.meld-cal-print-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.meld-cal-print-time {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  body.meld-cal-print {
+    padding: 0;
+    font-size: 10pt;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .meld-cal-print-table {
+    font-size: 9pt;
+  }
+
+  .meld-cal-print-table thead {
+    display: table-header-group;
+  }
+
+  .meld-cal-print-table tr {
+    page-break-inside: avoid;
+  }
+}
+
 /* MELD-89: evaluate.php layout */
 .eval-layout {
   max-width: 100%;

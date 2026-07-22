@@ -1,5 +1,8 @@
 <?php
 
+// Appointment wall-clock times and calendar "today" are Europe/Berlin (ICS TZID).
+date_default_timezone_set('Europe/Berlin');
+
 include "common/config.php";
 if(isset($GLOBALS['conn']) && $GLOBALS['conn']) {
     mysqli_set_charset($GLOBALS['conn'], 'utf8mb4');
