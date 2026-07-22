@@ -133,11 +133,6 @@ case "tomorrow":
         echo $n->printBasicTableLine()."\n";
 	}
 	break;
-case "calendar":
-	echo "calendar...\n";
-    rebuildCalendars();
-	echo "done...\n";
-    break;
 case "processMailQueue":
 	echo "processMailQueue...\n";
 	MailJob::ensureSchema();

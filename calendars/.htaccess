@@ -1,4 +1,4 @@
-# Aggregate calendar must not be public (MELD-105)
-<Files "MVDcal_all.ics">
+# Deny leftover legacy static ICS files (MELD-105 / MELD-133)
+<FilesMatch "^MVDcal_.*\.ics$">
     Require all denied
-</Files>
+</FilesMatch>
