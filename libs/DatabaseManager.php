@@ -793,6 +793,7 @@ class DatabaseManager
                             'registers' => $spec['registers'],
                             'users' => $spec['users'],
                             'mailGroups' => $spec['mailGroups'],
+                            'termine' => isset($spec['termine']) ? $spec['termine'] : array(),
                         ));
                         $update = sprintf(
                             'UPDATE `%sMailJob` SET `RecipientSpec` = \'%s\' WHERE `Index` = %d;',

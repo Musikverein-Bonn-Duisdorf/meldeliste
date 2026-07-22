@@ -48,6 +48,7 @@ elseif($requireMail) {
 else {
     $norm = AudienceSpec::normalize($spec, array(
         'allowMailGroups' => true,
+        'allowTermine' => false,
         'defaultGroups' => null,
     ));
     $count = count(AudienceSpec::resolveUserIds($norm, false));

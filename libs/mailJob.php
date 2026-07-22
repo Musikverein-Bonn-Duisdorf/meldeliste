@@ -124,6 +124,7 @@ class MailJob
 
     /**
      * Create a new draft with fixed ID and dedicated attachment directory.
+     * Optional $termin preselects a Teilnehmer-chip (RecipientSpec), not MailJob.Termin.
      */
     public static function createDraft($createdBy = 0, $termin = 0) {
         self::ensureSchema();
@@ -132,11 +133,22 @@ class MailJob
         $job->Subject = '';
         $job->BodyText = '';
         $job->Source = 'mail';
-        $job->Termin = (int)$termin;
+        $job->Termin = 0;
         $job->Status = 'draft';
         $job->Gruss = 1;
-        $job->PostDiscord = ((int)$termin === 0 && Discord::isConfigured()) ? 1 : 0;
-        if((int)$termin === 0) {
+        $termin = (int)$termin;
+        if($termin > 0) {
+            $job->PostDiscord = 0;
+            $job->setRecipientSpecArray(array(
+                'groups' => array(),
+                'registers' => array(),
+                'users' => array(),
+                'mailGroups' => array(),
+                'termine' => array($termin),
+            ));
+        }
+        else {
+            $job->PostDiscord = Discord::isConfigured() ? 1 : 0;
             $job->setRecipientSpecArray(self::defaultRecipientSpecArray());
         }
         if(!$job->save()) {
@@ -239,6 +251,7 @@ class MailJob
     public static function parseRecipientSpec($json, $legacyRegister = 0, $legacyMemberOnly = 0) {
         return AudienceSpec::normalize($json, array(
             'allowMailGroups' => true,
+            'allowTermine' => true,
             'defaultGroups' => null,
             'legacyRegister' => $legacyRegister,
             'legacyMemberOnly' => $legacyMemberOnly,
@@ -251,6 +264,7 @@ class MailJob
     public function setRecipientSpecArray($spec) {
         $norm = AudienceSpec::normalize($spec, array(
             'allowMailGroups' => true,
+            'allowTermine' => true,
             'defaultGroups' => null,
         ));
         $payload = array(
@@ -258,6 +272,7 @@ class MailJob
             'registers' => $norm['registers'],
             'users' => $norm['users'],
             'mailGroups' => $norm['mailGroups'],
+            'termine' => $norm['termine'],
         );
         $this->RecipientSpec = json_encode($payload);
     }
@@ -268,6 +283,7 @@ class MailJob
             'registers' => array(),
             'users' => array(),
             'mailGroups' => array(),
+            'termine' => array(),
         );
     }
 

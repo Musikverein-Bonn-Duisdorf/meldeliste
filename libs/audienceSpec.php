@@ -1,13 +1,14 @@
 <?php
 /**
- * Shared audience / recipient chip specs (MELD-61).
+ * Shared audience / recipient chip specs (MELD-61 / MELD-135).
  *
  * Shape:
  * {
  *   "groups": ["musicians"|"members"|"nonmembers"|"users", ...],
  *   "registers": [id, ...],
  *   "users": [id, ...],
- *   "mailGroups": [id, ...]   // named MailGroup rows; not nested inside MemberSpec
+ *   "mailGroups": [id, ...],  // named MailGroup rows; not nested inside MemberSpec
+ *   "termine": [id, ...]      // Termin-Teilnehmer (ja+vielleicht); Mail-Verteiler only
  * }
  */
 class AudienceSpec
@@ -52,11 +53,12 @@ class AudienceSpec
             && $norm['groups'][0] === 'users'
             && empty($norm['registers'])
             && empty($norm['users'])
-            && empty($norm['mailGroups']);
+            && empty($norm['mailGroups'])
+            && empty($norm['termine']);
     }
 
     /**
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
      */
     public static function emptySpec() {
         return array(
@@ -64,13 +66,14 @@ class AudienceSpec
             'registers' => array(),
             'users' => array(),
             'mailGroups' => array(),
+            'termine' => array(),
         );
     }
 
     /**
      * Default termin visibility: chip „Alle User“.
      *
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
      */
     public static function defaultVisibilitySpec() {
         return array(
@@ -78,16 +81,76 @@ class AudienceSpec
             'registers' => array(),
             'users' => array(),
             'mailGroups' => array(),
+            'termine' => array(),
         );
     }
 
     /**
+     * Chip label for termin participants (ja + vielleicht).
+     *
+     * @param int $terminId
+     * @return string
+     */
+    public static function terminParticipantLabel($terminId) {
+        $terminId = (int)$terminId;
+        $t = new Termin();
+        $t->load_by_id($terminId);
+        if(!(int)$t->Index) {
+            return 'Teilnehmer: Termin #'.$terminId;
+        }
+        $name = trim((string)$t->Name);
+        if($name === '') {
+            $name = 'Termin #'.$terminId;
+        }
+        $date = germanDate($t->Datum, 0);
+        if($date === null || $date === '') {
+            return 'Teilnehmer: '.$name;
+        }
+        return 'Teilnehmer: '.$name.', '.$date;
+    }
+
+    /**
+     * User ids with melde ja (1) or vielleicht (3) for a termin.
+     *
+     * @param int $terminId
+     * @param bool $requireMail
+     * @return int[]
+     */
+    public static function userIdsForTerminParticipants($terminId, $requireMail = false) {
+        $terminId = (int)$terminId;
+        if($terminId <= 0) {
+            return array();
+        }
+        $where = array('u.`Deleted` != 1');
+        if($requireMail) {
+            $where[] = 'u.`getMail` = 1';
+            $where[] = '(u.`Email` != \'\' OR u.`Email2` != \'\')';
+        }
+        $sql = sprintf(
+            'SELECT u.`Index` FROM `%sMeldungen` m INNER JOIN `%sUser` u ON u.`Index` = m.`User` WHERE m.`Termin` = %d AND m.`Wert` != 2 AND %s;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $terminId,
+            implode(' AND ', $where)
+        );
+        $ids = array();
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $ids[] = (int)$row['Index'];
+            }
+        }
+        return $ids;
+    }
+
+    /**
      * @param mixed $input array or JSON string
-     * @param array $opts allowMailGroups (bool), defaultGroups (string[]|null), legacyRegister, legacyMemberOnly
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @param array $opts allowMailGroups (bool), allowTermine (bool), defaultGroups (string[]|null), legacyRegister, legacyMemberOnly
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
      */
     public static function normalize($input, $opts = array()) {
         $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowTermine = !empty($opts['allowTermine']);
         $defaultGroups = array_key_exists('defaultGroups', $opts) ? $opts['defaultGroups'] : null;
         $legacyRegister = isset($opts['legacyRegister']) ? (int)$opts['legacyRegister'] : 0;
         $legacyMemberOnly = !empty($opts['legacyMemberOnly']) ? 1 : 0;
@@ -148,6 +211,12 @@ class AudienceSpec
                     if($id > 0) $out['mailGroups'][] = $id;
                 }
             }
+            if($allowTermine && isset($decoded['termine']) && is_array($decoded['termine'])) {
+                foreach($decoded['termine'] as $id) {
+                    $id = (int)$id;
+                    if($id > 0) $out['termine'][] = $id;
+                }
+            }
         }
         elseif($decoded === null && ($legacyRegister > 0 || $legacyMemberOnly)) {
             $out['groups'] = array($legacyMemberOnly ? 'members' : 'musicians');
@@ -160,6 +229,7 @@ class AudienceSpec
         $out['registers'] = array_values(array_unique($out['registers']));
         $out['users'] = array_values(array_unique($out['users']));
         $out['mailGroups'] = array_values(array_unique($out['mailGroups']));
+        $out['termine'] = array_values(array_unique($out['termine']));
 
         if(self::isEmpty($out) && is_array($defaultGroups) && count($defaultGroups) > 0) {
             foreach($defaultGroups as $g) {
@@ -180,17 +250,22 @@ class AudienceSpec
      */
     public static function isEmpty($spec) {
         if(!is_array($spec)) return true;
-        return empty($spec['groups']) && empty($spec['registers']) && empty($spec['users']) && empty($spec['mailGroups']);
+        return empty($spec['groups']) && empty($spec['registers']) && empty($spec['users']) && empty($spec['mailGroups']) && empty($spec['termine']);
     }
 
     /**
      * Expand named mailGroups into groups/registers/users (union). Nested mailGroups ignored.
+     * Termin-IDs remain on the spec for resolveUserIds.
      *
      * @param array $spec
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
      */
     public static function expand($spec) {
-        $spec = self::normalize($spec, array('allowMailGroups' => true, 'defaultGroups' => null));
+        $spec = self::normalize($spec, array(
+            'allowMailGroups' => true,
+            'allowTermine' => true,
+            'defaultGroups' => null,
+        ));
         if(empty($spec['mailGroups'])) {
             return $spec;
         }
@@ -304,6 +379,14 @@ class AudienceSpec
             }
         }
 
+        if(!empty($flat['termine'])) {
+            foreach($flat['termine'] as $tid) {
+                foreach(self::userIdsForTerminParticipants((int)$tid, $requireMail) as $uid) {
+                    $byId[(int)$uid] = true;
+                }
+            }
+        }
+
         return array_map('intval', array_keys($byId));
     }
 
@@ -384,8 +467,10 @@ class AudienceSpec
      */
     public static function formatLabel($spec, $opts = array()) {
         $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowTermine = !empty($opts['allowTermine']);
         $norm = self::normalize($spec, array(
             'allowMailGroups' => $allowMailGroups,
+            'allowTermine' => $allowTermine,
             'defaultGroups' => null,
         ));
         if(self::isEmpty($norm)) {
@@ -419,6 +504,11 @@ class AudienceSpec
                 $bits[] = $u->getName();
             }
         }
+        if($allowTermine) {
+            foreach($norm['termine'] as $tid) {
+                $bits[] = self::terminParticipantLabel((int)$tid);
+            }
+        }
         return count($bits) ? implode(', ', $bits) : '—';
     }
 
@@ -426,13 +516,15 @@ class AudienceSpec
      * Chip items for read-only display (same types/labels as mailRecipients.js).
      *
      * @param mixed $spec
-     * @param array $opts allowMailGroups (bool)
+     * @param array $opts allowMailGroups (bool), allowTermine (bool)
      * @return array<int,array{type:string,label:string}>
      */
     public static function chipsForSpec($spec, $opts = array()) {
         $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowTermine = !empty($opts['allowTermine']);
         $norm = self::normalize($spec, array(
             'allowMailGroups' => $allowMailGroups,
+            'allowTermine' => $allowTermine,
             'defaultGroups' => null,
         ));
         $chips = array();
@@ -464,6 +556,14 @@ class AudienceSpec
             $u->load_by_id((int)$uid);
             if((int)$u->Index) {
                 $chips[] = array('type' => 'user', 'label' => $u->getName());
+            }
+        }
+        if($allowTermine) {
+            foreach($norm['termine'] as $tid) {
+                $chips[] = array(
+                    'type' => 'termin',
+                    'label' => self::terminParticipantLabel((int)$tid),
+                );
             }
         }
         return $chips;
@@ -503,13 +603,17 @@ class AudienceSpec
      */
     public static function canonicalJson($spec, $opts = array()) {
         $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowTermine = !empty($opts['allowTermine']);
         $norm = self::normalize($spec, array(
             'allowMailGroups' => $allowMailGroups,
+            'allowTermine' => $allowTermine,
             'defaultGroups' => null,
         ));
         if(!$allowMailGroups) {
-            unset($norm['mailGroups']);
             $norm['mailGroups'] = array();
+        }
+        if(!$allowTermine) {
+            $norm['termine'] = array();
         }
         if(self::isEmpty($norm)) {
             return '';
@@ -519,24 +623,27 @@ class AudienceSpec
             'registers' => $norm['registers'],
             'users' => $norm['users'],
             'mailGroups' => $norm['mailGroups'],
+            'termine' => $norm['termine'],
         ));
     }
 
     /**
      * Catalog for chip autocomplete.
      *
-     * @param array $opts forMail (bool), includeMailGroups (bool)
+     * @param array $opts forMail (bool), includeMailGroups (bool), includeTermine (bool)
      * @return array
      */
     public static function buildCatalog($opts = array()) {
         $forMail = !empty($opts['forMail']);
         $includeMailGroups = !array_key_exists('includeMailGroups', $opts) || !empty($opts['includeMailGroups']);
+        $includeTermine = !empty($opts['includeTermine']);
 
         $catalog = array(
             'groups' => array(),
             'registers' => array(),
             'users' => array(),
             'mailGroups' => array(),
+            'termine' => array(),
         );
         foreach(self::groupLabels() as $id => $label) {
             $catalog['groups'][] = array('id' => $id, 'label' => $label, 'meta' => 'Rolle');
@@ -592,6 +699,26 @@ class AudienceSpec
                     'label' => (string)$g->Name,
                     'meta' => 'Gruppe',
                 );
+            }
+        }
+
+        if($includeTermine) {
+            $today = date('Y-m-d');
+            $sqlTerm = sprintf(
+                'SELECT `Index`, `Name`, `Datum` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Name` LIMIT 200;',
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], $today)
+            );
+            $dbrTerm = mysqli_query($GLOBALS['conn'], $sqlTerm);
+            if($dbrTerm) {
+                while($row = mysqli_fetch_array($dbrTerm)) {
+                    $tid = (int)$row['Index'];
+                    $catalog['termine'][] = array(
+                        'id' => $tid,
+                        'label' => self::terminParticipantLabel($tid),
+                        'meta' => 'Termin',
+                    );
+                }
             }
         }
 

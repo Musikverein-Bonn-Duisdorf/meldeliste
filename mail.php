@@ -100,22 +100,16 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
     $rawBody = isset($_POST['Text']) ? (string)$_POST['Text'] : '';
     $job->BodyText = function_exists('sanitizeMailHtml') ? sanitizeMailHtml($rawBody) : $rawBody;
     $job->Gruss = isset($_POST['gruss']) ? (int)$_POST['gruss'] : 1;
-    $job->Termin = isset($_POST['termin']) ? (int)$_POST['termin'] : (int)$job->Termin;
-    if($job->Termin) {
-        $job->RecipientSpec = null;
-        $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
-    }
-    else {
-        $specIn = MailJob::defaultRecipientSpecArray();
-        if(isset($_POST['recipientSpec'])) {
-            $decoded = json_decode((string)$_POST['recipientSpec'], true);
-            if(is_array($decoded)) {
-                $specIn = $decoded;
-            }
+    $job->Termin = 0;
+    $specIn = MailJob::defaultRecipientSpecArray();
+    if(isset($_POST['recipientSpec'])) {
+        $decoded = json_decode((string)$_POST['recipientSpec'], true);
+        if(is_array($decoded)) {
+            $specIn = $decoded;
         }
-        $job->setRecipientSpecArray($specIn);
-        $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     }
+    $job->setRecipientSpecArray($specIn);
+    $job->PostDiscord = ($discordAvailable && isset($_POST['postDiscord'])) ? 1 : 0;
     $job->ensureAttachmentDir();
     $job->save();
 
@@ -163,19 +157,31 @@ if(isset($_GET['deleted'])) {
 }
 
 $recipientSpec = $job ? $job->getRecipientSpecArray() : MailJob::defaultRecipientSpecArray();
+// Legacy: Entwurf mit MailJob.Termin → Termin-Chip in RecipientSpec
+if($job && $job->Status === 'draft' && (int)$job->Termin > 0) {
+    $legacyTermin = (int)$job->Termin;
+    $job->Termin = 0;
+    $job->setRecipientSpecArray(array(
+        'groups' => array(),
+        'registers' => array(),
+        'users' => array(),
+        'mailGroups' => array(),
+        'termine' => array($legacyTermin),
+    ));
+    $job->save();
+    $recipientSpec = $job->getRecipientSpecArray();
+}
 // Neue / leere Entwürfe: Alle Musiker vorauswählen und im Job speichern
-// (mailGroups zählen mit — sonst würden reine Gruppen-Chips überschrieben)
+// (mailGroups/termine zählen mit — sonst würden reine Gruppen-/Termin-Chips überschrieben)
 if(
     $job
     && $job->Status === 'draft'
-    && !(int)$job->Termin
     && AudienceSpec::isEmpty($recipientSpec)
 ) {
     $recipientSpec = MailJob::defaultRecipientSpecArray();
     $job->setRecipientSpecArray($recipientSpec);
     $job->save();
 }
-$termin = $job ? (int)$job->Termin : $terminParam;
 $gruss = $job ? (int)$job->Gruss : 1;
 $betreff = $job ? (string)$job->Subject : '';
 $textRaw = $job ? (string)$job->BodyText : '';
@@ -188,7 +194,25 @@ MailGroup::ensureSchema();
 $mailRecipientCatalog = AudienceSpec::buildCatalog(array(
     'forMail' => true,
     'includeMailGroups' => true,
+    'includeTermine' => true,
 ));
+// Ensure already selected termine appear (also past events)
+if(!empty($recipientSpec['termine']) && is_array($recipientSpec['termine'])) {
+    $known = array();
+    foreach($mailRecipientCatalog['termine'] as $row) {
+        $known[(int)$row['id']] = true;
+    }
+    foreach($recipientSpec['termine'] as $tid) {
+        $tid = (int)$tid;
+        if($tid <= 0 || isset($known[$tid])) continue;
+        $mailRecipientCatalog['termine'][] = array(
+            'id' => $tid,
+            'label' => AudienceSpec::terminParticipantLabel($tid),
+            'meta' => 'Termin',
+        );
+        $known[$tid] = true;
+    }
+}
 
 $allJobs = MailJob::listJobs(null, 300);
 
@@ -360,39 +384,9 @@ foreach($allJobs as $rowJob) {
   <form name="mailform" class="w3-container w3-margin" action="mail.php?id=<?php echo (int)$job->Index; ?>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
     <label>Empfänger</label>
-    <?php
-         if($termin) {
-             $t=new Termin;
-             $t->load_by_id($termin);
-    ?>
-             <div class="w3-mobile w3-margin-bottom w3-padding">Alle Teilnehmer von <?php echo htmlspecialchars($t->Name." (".$t->getGermanDate().")", ENT_QUOTES, 'UTF-8'); ?>
-               <span id="mailRecipientCount" class="mail-recipient-count" data-termin="<?php echo (int)$termin; ?>" aria-live="polite"></span>
-             </div>
-    <input type="hidden" name="termin" value="<?php echo (int)$termin; ?>" />
-    <script>
-    (function() {
-      var el = document.getElementById('mailRecipientCount');
-      if(!el) return;
-      var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-      xhr.onreadystatechange = function() {
-        if(xhr.readyState !== 4 || xhr.status !== 200) return;
-        try {
-          var data = JSON.parse(xhr.responseText);
-          var n = data && typeof data.count === 'number' ? data.count : 0;
-          el.textContent = n === 1 ? '1 Empfänger' : (n + ' Empfänger');
-        } catch(e) {}
-      };
-      xhr.open('GET', 'mailRecipientCount.php?termin=' + encodeURIComponent(el.getAttribute('data-termin') || '0'), true);
-      xhr.send();
-    })();
-    </script>
-    <?php
-         }
-         else {
-    ?>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>">
       <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
-      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />
+      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>" placeholder="Gruppe, Rolle, Register, Termin oder Person tippen…" autocomplete="off" />
       <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
       <input type="hidden" name="recipientSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($recipientSpec), ENT_QUOTES, 'UTF-8'); ?>" />
       <p class="w3-small w3-margin-top mail-recipient-count-line">
@@ -426,8 +420,6 @@ foreach($allJobs as $rowJob) {
   window.syncDiscordDefault = function() {
     var cb = document.getElementById('postDiscord');
     if(!cb) return;
-    var isTermin = <?php echo $termin ? 'true' : 'false'; ?>;
-    if(isTermin) { cb.checked = false; return; }
     var specEl = document.getElementById('mailRecipientSpec');
     try {
       var spec = JSON.parse(specEl ? specEl.value : '{}');
@@ -435,7 +427,9 @@ foreach($allJobs as $rowJob) {
         && spec.groups.length === 1
         && spec.groups[0] === 'musicians'
         && (!spec.registers || !spec.registers.length)
-        && (!spec.users || !spec.users.length);
+        && (!spec.users || !spec.users.length)
+        && (!spec.mailGroups || !spec.mailGroups.length)
+        && (!spec.termine || !spec.termine.length);
       cb.checked = !!isDefaultAll;
     } catch(e) {
       cb.checked = false;
@@ -444,15 +438,7 @@ foreach($allJobs as $rowJob) {
   window.syncDiscordDefault();
 })();
 </script>
-<?php } ?>
-<?php if($discordAvailable && $termin) { ?>
-<script>
-window.syncDiscordDefault = function() {
-  var cb = document.getElementById('postDiscord');
-  if(cb) cb.checked = false;
-};
-</script>
-<?php } elseif(!$termin && !$discordAvailable) { ?>
+<?php if(!$discordAvailable) { ?>
 <script>
 window.syncDiscordDefault = function() {};
 </script>
@@ -694,6 +680,7 @@ function delFile(hash) {
     else {
         $verteilerHtml = AudienceSpec::renderChipsHtml($recipientSpecView, array(
             'allowMailGroups' => true,
+            'allowTermine' => true,
             'ariaLabel' => 'Verteiler',
             'emptyHtml' => '<span class="w3-text-gray">—</span>',
         ));
