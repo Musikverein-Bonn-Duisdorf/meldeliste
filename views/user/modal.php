@@ -1,7 +1,7 @@
 <?php
 /**
  * User detail modal (profile-shell layout).
- * Expects: $user, $showUserDetails, $permissionsHtml, $registerLeadName,
+ * Expects: $user, $showUserDetails, $permissions, $registerLeadName,
  *          $showEditButton, $returnTo, $returnToken
  */
 $name = trim((string)$user->Vorname.' '.(string)$user->Nachname);
@@ -93,6 +93,7 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
         <span class="profile-label">Letzter Login</span>
         <div class="profile-value"><?php echo germanDate($user->LastLogin, 1); ?></div>
       </div>
+<?php if(isAdmin()) { ?>
       <div class="profile-field">
         <span class="profile-label">Anwesenheit</span>
         <div class="profile-value"><?php echo germanDate($user->getLastVisit(), 1); ?></div>
@@ -101,6 +102,7 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
         <span class="profile-label">Meldequote</span>
         <div class="profile-value"><?php echo (float)$user->getMeldeQuote()*100; ?> %</div>
       </div>
+<?php } ?>
     </section>
 
     <section class="profile-col" aria-labelledby="user-modal-notify">
@@ -139,12 +141,35 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
           </div>
         </div>
       </div>
-<?php if($showUserDetails && $permissionsHtml !== '') { ?>
-      <div class="profile-field">
-        <span class="profile-label">Rechte</span>
-        <div class="profile-value profile-value--perms"><?php echo $permissionsHtml; ?></div>
+<?php
+if($showUserDetails && !empty($permissions)) {
+    $activePerms = array();
+    foreach(Permissions::permissionCatalog() as $item) {
+        $key = $item['key'];
+        if((int)$permissions->$key !== 1) {
+            continue;
+        }
+        $activePerms[] = $item;
+    }
+    if(count($activePerms)) {
+?>
+      <div class="profile-pref-group">
+        <h3 class="profile-col-title">Rechte</h3>
+        <div class="profile-perm-tiles" aria-label="Aktive Rechte">
+<?php
+        foreach($activePerms as $item) {
+            $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
+            echo '<span class="profile-perm-tile profile-perm-tile--'.$gid.'">'
+                .htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')
+                .'</span>';
+        }
+?>
+        </div>
       </div>
-<?php } ?>
+<?php
+    }
+}
+?>
     </section>
   </div>
 </div>

@@ -62,6 +62,11 @@ function handleUserFormPost($options = array()) {
                 MailGroup::syncUserExplicitMembership((int)$n->Index, $ids);
             }
 
+            if(isset($_POST['userPermissionsPosted']) && (int)$n->Index > 0) {
+                $sessionUserId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+                Permissions::applyPostedForUser((int)$n->Index, $_POST, $sessionUserId);
+            }
+
             if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
                 if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
                     if(!$n->passwd($_POST['pw1'])) {

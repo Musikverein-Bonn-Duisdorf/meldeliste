@@ -187,10 +187,10 @@ $sections[] = array(
 '.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
-'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Mitglied-Status, Instrument und Gruppen-Chips; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
+'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Mitglied-Status, Instrument, Gruppen-Chips und Rechte; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
 '.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 '.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
-'.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix der Rechte pro User (Autosave)</li>' : '').'
+'.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>' : '').'
 </ul>
 '
 );

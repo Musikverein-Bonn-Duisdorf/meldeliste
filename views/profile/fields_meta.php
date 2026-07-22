@@ -19,6 +19,7 @@ if(!$showMetaDetails) {
   <span class="profile-label">Letzter Login</span>
   <div class="profile-value"><?php echo germanDate($n->LastLogin, 1); ?></div>
 </div>
+<?php if(isAdmin()) { ?>
 <div class="profile-field">
   <span class="profile-label">Anwesenheit</span>
   <div class="profile-value"><?php echo germanDate($n->getLastVisit(), 1); ?></div>
@@ -27,3 +28,4 @@ if(!$showMetaDetails) {
   <span class="profile-label">Meldequote</span>
   <div class="profile-value"><?php echo (float)$n->getMeldeQuote() * 100; ?> %</div>
 </div>
+<?php } ?>
