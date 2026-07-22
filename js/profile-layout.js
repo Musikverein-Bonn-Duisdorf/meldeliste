@@ -191,6 +191,181 @@
     render();
   }
 
+  function initPermissionChips() {
+    var wrap = document.getElementById('profile-perms-wrap');
+    if (!wrap) return;
+    var chipsEl = document.getElementById('profile-perm-chips');
+    var inputEl = document.getElementById('profile-perm-input');
+    var suggestEl = document.getElementById('profile-perm-suggest');
+    var hiddensEl = document.getElementById('profile-perm-hiddens');
+    if (!chipsEl || !inputEl || !suggestEl || !hiddensEl) return;
+
+    var catalog = parseJsonAttr(wrap, 'data-perm-catalog', { permissions: [] });
+    var permissions = Array.isArray(catalog.permissions) ? catalog.permissions : [];
+    var selected = parseJsonAttr(wrap, 'data-selected-perms', []);
+    if (!Array.isArray(selected)) selected = [];
+    selected = selected.map(String).filter(function (k) { return !!k; });
+    var lockedKey = String(wrap.getAttribute('data-locked-perm') || '');
+    var activeIndex = -1;
+
+    function metaFor(key) {
+      for (var i = 0; i < permissions.length; i++) {
+        if (String(permissions[i].key) === String(key)) return permissions[i];
+      }
+      return { key: key, label: key, group: '', groupId: 'sonst' };
+    }
+
+    function sortSelected() {
+      var order = {};
+      permissions.forEach(function (p, idx) {
+        order[String(p.key)] = idx;
+      });
+      selected.sort(function (a, b) {
+        var ia = order.hasOwnProperty(a) ? order[a] : 999;
+        var ib = order.hasOwnProperty(b) ? order[b] : 999;
+        return ia - ib;
+      });
+    }
+
+    function syncHiddens() {
+      hiddensEl.innerHTML = '';
+      selected.forEach(function (key) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'userPermissions[]';
+        input.value = String(key);
+        hiddensEl.appendChild(input);
+      });
+    }
+
+    function render() {
+      if (lockedKey && selected.indexOf(lockedKey) === -1) {
+        selected.push(lockedKey);
+      }
+      sortSelected();
+      chipsEl.innerHTML = '';
+      selected.forEach(function (key) {
+        var meta = metaFor(key);
+        var gid = String(meta.groupId || 'sonst').replace(/[^a-z0-9_-]/gi, '');
+        var chip = document.createElement('span');
+        chip.className = 'profile-perm-tile profile-perm-tile--' + gid;
+        chip.setAttribute('data-key', String(key));
+        var text = document.createElement('span');
+        text.textContent = meta.label || key;
+        chip.appendChild(text);
+        if (key !== lockedKey) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'mail-recipient-chip-remove';
+          btn.setAttribute('aria-label', 'Entfernen');
+          btn.innerHTML = '&times;';
+          btn.addEventListener('click', function () {
+            selected = selected.filter(function (x) { return x !== key; });
+            render();
+          });
+          chip.appendChild(btn);
+        }
+        chipsEl.appendChild(chip);
+      });
+      syncHiddens();
+    }
+
+    function filteredSuggestions() {
+      var q = normalize(inputEl.value);
+      var items = [];
+      permissions.forEach(function (p) {
+        var key = String(p.key);
+        if (selected.indexOf(key) !== -1) return;
+        if (q === '' || normalize(p.label).indexOf(q) !== -1 || normalize(p.group).indexOf(q) !== -1) {
+          items.push(p);
+        }
+      });
+      return items;
+    }
+
+    function hideSuggest() {
+      suggestEl.hidden = true;
+      suggestEl.innerHTML = '';
+      activeIndex = -1;
+    }
+
+    function showSuggest() {
+      var items = filteredSuggestions();
+      suggestEl.innerHTML = '';
+      if (!items.length) {
+        hideSuggest();
+        return;
+      }
+      items.forEach(function (p, idx) {
+        var row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'mail-recipient-suggest-item' + (idx === activeIndex ? ' mail-recipient-suggest-item--active' : '');
+        row.setAttribute('data-index', String(idx));
+        var label = document.createElement('span');
+        label.textContent = p.label || '';
+        row.appendChild(label);
+        var meta = document.createElement('span');
+        meta.className = 'mail-recipient-suggest-meta';
+        meta.textContent = p.group || '';
+        row.appendChild(meta);
+        row.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          addPerm(String(p.key));
+        });
+        suggestEl.appendChild(row);
+      });
+      suggestEl.hidden = false;
+    }
+
+    function addPerm(key) {
+      key = String(key);
+      if (!key || selected.indexOf(key) !== -1) return;
+      selected.push(key);
+      inputEl.value = '';
+      hideSuggest();
+      render();
+      inputEl.focus();
+    }
+
+    inputEl.addEventListener('input', function () {
+      activeIndex = -1;
+      showSuggest();
+    });
+    inputEl.addEventListener('focus', showSuggest);
+    inputEl.addEventListener('blur', function () {
+      window.setTimeout(hideSuggest, 150);
+    });
+    inputEl.addEventListener('keydown', function (e) {
+      var items = filteredSuggestions();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!items.length) return;
+        activeIndex = (activeIndex + 1) % items.length;
+        showSuggest();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!items.length) return;
+        activeIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
+        showSuggest();
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && items[activeIndex]) {
+          e.preventDefault();
+          addPerm(String(items[activeIndex].key));
+        }
+      } else if (e.key === 'Backspace' && !inputEl.value && selected.length) {
+        var last = selected[selected.length - 1];
+        if (last !== lockedKey) {
+          selected.pop();
+          render();
+        }
+      } else if (e.key === 'Escape') {
+        hideSuggest();
+      }
+    });
+
+    render();
+  }
+
   function parseCatalog(wrap) {
     try {
       return JSON.parse(wrap.getAttribute('data-membership-catalog') || '{}');
@@ -297,6 +472,7 @@
   function init() {
     initQr();
     initGroupChips();
+    initPermissionChips();
     initMembershipPreview();
   }
 

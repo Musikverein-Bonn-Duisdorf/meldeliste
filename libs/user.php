@@ -637,11 +637,10 @@ class User
     
     public function getModalHtml($forceEditButton = false) {
         $showUserDetails = requirePermission("perm_showUsers");
-        $permissionsHtml = '';
+        $permissions = null;
         if($showUserDetails) {
-            $p = new Permissions;
-            $p->load_by_user($this->Index);
-            $permissionsHtml = $p->printShort();
+            $permissions = new Permissions;
+            $permissions->load_by_user($this->Index);
         }
         $registerLeadName = null;
         if($this->RegisterLead) {
@@ -652,7 +651,7 @@ class User
         return render('user/modal', array(
             'user' => $this,
             'showUserDetails' => $showUserDetails,
-            'permissionsHtml' => $permissionsHtml,
+            'permissions' => $permissions,
             'registerLeadName' => $registerLeadName,
             'showEditButton' => ($forceEditButton || requirePermission("perm_editUsers")),
             'returnTo' => pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker'),

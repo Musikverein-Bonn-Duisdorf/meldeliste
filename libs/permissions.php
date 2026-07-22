@@ -272,6 +272,74 @@ class Permissions
         );
     }
 
+    /**
+     * Logical groups: order + color id for chips (titles not shown in UI).
+     * @return array<int,array{id:string,title:string,keys:string[]}>
+     */
+    public static function permissionGroups() {
+        return array(
+            array(
+                'id' => 'nutzer',
+                'title' => 'Nutzer',
+                'keys' => array('perm_showUsers', 'perm_editUsers', 'perm_editPermissions'),
+            ),
+            array(
+                'id' => 'termine',
+                'title' => 'Termine',
+                'keys' => array(
+                    'perm_showHiddenAppmnts',
+                    'perm_editAppmnts',
+                    'perm_showResponse',
+                    'perm_editResponse',
+                ),
+            ),
+            array(
+                'id' => 'instrumente',
+                'title' => 'Instrumente',
+                'keys' => array('perm_showInstruments', 'perm_editInstruments'),
+            ),
+            array(
+                'id' => 'inventar',
+                'title' => 'Inventar',
+                'keys' => array('perm_showInventories', 'perm_editInventories'),
+            ),
+            array(
+                'id' => 'kommunikation',
+                'title' => 'Kommunikation',
+                'keys' => array('perm_sendEmail'),
+            ),
+            array(
+                'id' => 'system',
+                'title' => 'System',
+                'keys' => array('perm_showLog', 'perm_editConfig'),
+            ),
+        );
+    }
+
+    /**
+     * Flat catalog in group sort order for chip pickers / modal.
+     * @return array<int,array{key:string,label:string,group:string,groupId:string}>
+     */
+    public static function permissionCatalog() {
+        $labels = self::permissionLabels();
+        $out = array();
+        foreach(self::permissionGroups() as $group) {
+            $groupId = isset($group['id']) ? (string)$group['id'] : 'sonst';
+            $groupTitle = isset($group['title']) ? (string)$group['title'] : '';
+            $keys = isset($group['keys']) && is_array($group['keys']) ? $group['keys'] : array();
+            foreach($keys as $key) {
+                $meta = isset($labels[$key]) ? $labels[$key] : array('label' => $key);
+                $out[] = array(
+                    'key' => (string)$key,
+                    'label' => (string)$meta['label'],
+                    'group' => $groupTitle,
+                    'groupId' => $groupId,
+                );
+            }
+        }
+        return $out;
+    }
+
     public function hasAnyPermission() {
         foreach(self::permissionKeys() as $key) {
             if($this->$key) {
@@ -279,6 +347,49 @@ class Permissions
             }
         }
         return false;
+    }
+
+    /**
+     * Apply permission checkboxes from a user create/edit POST.
+     * @param array $posted typically $_POST
+     */
+    public static function applyPostedForUser($userId, array $posted, $sessionUserId = 0) {
+        $userId = (int)$userId;
+        if($userId < 1) {
+            return false;
+        }
+        $sessionUserId = (int)$sessionUserId;
+        $selected = array();
+        if(isset($posted['userPermissions']) && is_array($posted['userPermissions'])) {
+            foreach($posted['userPermissions'] as $key) {
+                $key = (string)$key;
+                if(in_array($key, self::permissionKeys(), true)) {
+                    $selected[$key] = true;
+                }
+            }
+        }
+        else {
+            foreach(self::permissionKeys() as $key) {
+                if(!empty($posted[$key])) {
+                    $selected[$key] = true;
+                }
+            }
+        }
+        $p = new Permissions;
+        $p->load_by_user($userId);
+        foreach(self::permissionKeys() as $key) {
+            $val = !empty($selected[$key]) ? 1 : 0;
+            if($sessionUserId === $userId && $key === 'perm_editPermissions' && $val === 0) {
+                $val = 1;
+            }
+            $p->$key = $val;
+        }
+        $p->save();
+        if($sessionUserId === $userId) {
+            $_SESSION['permissions'] = loadPermissions($userId);
+            $_SESSION['admin'] = isAdmin() ? 1 : 0;
+        }
+        return true;
     }
 
     public function printShort() {

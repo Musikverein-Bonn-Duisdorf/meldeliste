@@ -2002,6 +2002,87 @@ select.profile-control {
   gap: 0.4rem 0.85rem;
 }
 
+.profile-prefs--perms {
+  grid-template-columns: 1fr;
+}
+
+.profile-perm-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.profile-perm-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.3;
+  background: #eef1f4;
+  color: #222;
+}
+
+.profile-perm-tile--nutzer {
+  background: #e3f2fd;
+  border-color: #64b5f6;
+}
+
+.profile-perm-tile--termine {
+  background: #e8f5e9;
+  border-color: #66bb6a;
+}
+
+.profile-perm-tile--instrumente {
+  background: #fff3e0;
+  border-color: #ffb74d;
+}
+
+.profile-perm-tile--inventar {
+  background: #f3e5f5;
+  border-color: #ba68c8;
+}
+
+.profile-perm-tile--kommunikation {
+  background: #e0f7fa;
+  border-color: #4dd0e1;
+}
+
+.profile-perm-tile--system {
+  background: #eceff1;
+  border-color: #90a4ae;
+}
+
+.profile-perm-picker #profile-perm-chips {
+  margin-bottom: 0.25rem;
+  min-height: 1.6rem;
+}
+
+.profile-perm-group + .profile-perm-group {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.profile-perm-group-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+@media (min-width: 520px) {
+  .profile-prefs--perms {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .profile-pref {
   display: flex;
   align-items: center;
