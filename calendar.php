@@ -39,26 +39,37 @@ $yearFrom = max(1970, min($calYear, (int)date('Y')) - 10);
 $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
 ?>
 <style>
+.meld-cal-page {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 16px 1rem;
+  box-sizing: border-box;
+  width: 100%;
+}
 .meld-cal-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.65rem;
-  padding: 1rem 16px 0.5rem;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding: 0.75rem 0;
   margin: 0;
   width: 100%;
-  max-width: none;
   box-sizing: border-box;
+}
+.meld-cal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
 }
 .meld-cal-nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1rem 1.5rem;
-  padding: 0.75rem 1.25rem 1rem;
-  max-width: 72rem;
-  margin: 0 auto;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 0 0 0 auto;
+  padding: 0;
   box-sizing: border-box;
 }
 .meld-cal-nav-icon,
@@ -80,7 +91,7 @@ button.w3-button.meld-cal-nav-icon {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: 9rem;
+  min-width: 8rem;
 }
 .meld-cal-spinner select {
   text-align: center;
@@ -99,46 +110,52 @@ button.w3-button.meld-cal-nav-icon {
   line-height: 1;
 }
 .meld-cal-nav-today { align-self: center; }
+.meld-cal-page .meld-cal-wrap {
+  padding-left: 0;
+  padding-right: 0;
+}
 #calSubscribeModal .w3-modal-content {
   max-width: 36rem;
   margin: 4vh auto;
 }
 </style>
 
-<div class="meld-cal-toolbar" role="toolbar" aria-label="Kalender-Aktionen">
+<div class="meld-cal-page">
+<div class="meld-cal-toolbar" role="toolbar" aria-label="Kalender-Navigation">
+  <div class="meld-cal-actions">
 <?php if($showCalendarSubscribe) { ?>
-  <button type="button" id="calSubscribeToggle" class="w3-button w3-border meld-cal-nav-icon"
-          title="Kalender abonnieren" aria-label="Kalender abonnieren" aria-haspopup="dialog" aria-controls="calSubscribeModal">
-    <i class="fas fa-info-circle" aria-hidden="true"></i>
-  </button>
+    <button type="button" id="calSubscribeToggle" class="w3-button w3-border meld-cal-nav-icon"
+            title="Kalender abonnieren" aria-label="Kalender abonnieren" aria-haspopup="dialog" aria-controls="calSubscribeModal">
+      <i class="fas fa-info-circle" aria-hidden="true"></i>
+    </button>
 <?php } ?>
-  <a class="w3-button w3-border meld-cal-nav-icon"
-     href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>"
-     title="Terminkalender drucken" aria-label="Terminkalender drucken" target="_blank" rel="noopener">
-    <i class="fas fa-print" aria-hidden="true"></i>
-  </a>
-</div>
-
-<div class="meld-cal-nav">
-  <div class="meld-cal-spinner" role="group" aria-label="Monat">
-    <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriger Monat" aria-label="Früherer Monat"><i class="fas fa-chevron-up"></i></a>
-    <select id="calMonthSelect" class="w3-select w3-border" aria-label="Monat wählen">
+    <a class="w3-button w3-border meld-cal-nav-icon"
+       href="calendar-print.php?ym=<?php echo htmlspecialchars($bounds['ym'], ENT_QUOTES, 'UTF-8'); ?>"
+       title="Terminkalender drucken" aria-label="Terminkalender drucken" target="_blank" rel="noopener">
+      <i class="fas fa-print" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="meld-cal-nav">
+    <div class="meld-cal-spinner" role="group" aria-label="Monat">
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriger Monat" aria-label="Früherer Monat"><i class="fas fa-chevron-up"></i></a>
+      <select id="calMonthSelect" class="w3-select w3-border" aria-label="Monat wählen">
 <?php foreach($monthNames as $num => $name) { ?>
-      <option value="<?php echo (int)$num; ?>"<?php echo $num === $calMonth ? ' selected' : ''; ?>><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></option>
+        <option value="<?php echo (int)$num; ?>"<?php echo $num === $calMonth ? ' selected' : ''; ?>><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></option>
 <?php } ?>
-    </select>
-    <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächster Monat" aria-label="Späterer Monat"><i class="fas fa-chevron-down"></i></a>
-  </div>
-  <div class="meld-cal-spinner" role="group" aria-label="Jahr">
-    <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriges Jahr" aria-label="Früheres Jahr"><i class="fas fa-chevron-up"></i></a>
-    <select id="calYearSelect" class="w3-select w3-border" aria-label="Jahr wählen">
+      </select>
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächster Monat" aria-label="Späterer Monat"><i class="fas fa-chevron-down"></i></a>
+    </div>
+    <div class="meld-cal-spinner" role="group" aria-label="Jahr">
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriges Jahr" aria-label="Früheres Jahr"><i class="fas fa-chevron-up"></i></a>
+      <select id="calYearSelect" class="w3-select w3-border" aria-label="Jahr wählen">
 <?php for($y = $yearFrom; $y <= $yearTo; $y++) { ?>
-      <option value="<?php echo $y; ?>"<?php echo $y === $calYear ? ' selected' : ''; ?>><?php echo $y; ?></option>
+        <option value="<?php echo $y; ?>"<?php echo $y === $calYear ? ' selected' : ''; ?>><?php echo $y; ?></option>
 <?php } ?>
-    </select>
-    <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächstes Jahr" aria-label="Späteres Jahr"><i class="fas fa-chevron-down"></i></a>
+      </select>
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächstes Jahr" aria-label="Späteres Jahr"><i class="fas fa-chevron-down"></i></a>
+    </div>
+    <a class="w3-button w3-border meld-cal-nav-today" href="calendar.php" title="Aktueller Monat">Heute</a>
   </div>
-  <a class="w3-button w3-border meld-cal-nav-today" href="calendar.php" title="Aktueller Monat">Heute</a>
 </div>
 <script>
 (function() {
@@ -159,7 +176,9 @@ button.w3-button.meld-cal-nav-icon {
 
 <?php
 include __DIR__.'/views/calendar/month.php';
-
+?>
+</div>
+<?php
 if($showCalendarSubscribe) {
     $n = $calUser;
     $calendarSubscribeUid = 'page-cal';
