@@ -2,6 +2,27 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-f2a51 (2026-07-22)
+
+- MELD-9: Toolbar-Layout und Europe/Berlin in der App
+- MELD-9: Kalender-Aktionsbuttons linksbündig
+- MELD-9: Druck zeigt alle kommenden Termine
+- MELD-9: Kalender-Abo als Modal, Toolbar mit Abstand
+- MELD-9: Info-Toggle nach Panel binden, runde Icon-Buttons
+- MELD-9: Abo hinter Info-Knopf, Drucken nur Icon
+- MELD-9: Druckbarer Terminkalender als Tabelle
+- MELD-127: On-Demand-Kalenderabo (Konzertmeister-Stil)
+- MELD-126: Kalender-Pfeile umdrehen, schmalere Step-Buttons
+- MELD-126: Freie Kalenderfläche legt Termin mit Datum an (Admin)
+- MELD-126: Monat und Jahr einzeln wählen und inkrementieren
+- MELD-126: Wochenenden im Monatsraster leicht schattieren
+- MELD-126: Zwischen-Modal mit Meldeabfrage und Weitere Optionen
+- MELD-126: Kalender-Legende entfernen
+- MELD-126: Monats-Kalenderansicht ohne externe Abhängigkeiten
+- MELD-9: Druckbarer Terminkalender
+- MELD-127: On-Demand-Kalenderabo
+- MELD-126: Monats-Kalenderansicht
+
 ## 2026-07-22-ed678 (2026-07-22)
 
 - MELD-132: Backup-Größe im Log human-readable (B/KB/MB)
