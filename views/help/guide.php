@@ -217,7 +217,7 @@ $sections[] = array(
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
 <p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
-<p>Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> (Rollen, Gruppen, Register bzw. Termin-Teilnehmer) sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
+<p>Beim Mailversand kannst du Chips für Rollen, Gruppen, Register, Personen und <b>Teilnehmer</b> (ja/vielleicht) zukünftiger Termine wählen. Über <b>Email an Teilnehmer</b> am Termin wird der passende Teilnehmer-Chip vorausgewählt. Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '
 );

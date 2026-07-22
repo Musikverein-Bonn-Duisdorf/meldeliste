@@ -29,10 +29,6 @@ if(!$job->Index || $job->Status !== 'draft') {
     echo json_encode(array('ok' => false, 'error' => 'not_draft'));
     exit;
 }
-if((int)$job->Termin > 0) {
-    echo json_encode(array('ok' => true, 'skipped' => 'termin'));
-    exit;
-}
 
 $specRaw = isset($_POST['recipientSpec']) ? (string)$_POST['recipientSpec'] : '';
 $decoded = json_decode($specRaw, true);

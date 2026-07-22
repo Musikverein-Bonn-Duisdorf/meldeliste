@@ -1,5 +1,5 @@
 /**
- * MELD-60/61: chip picker — roles + registers + users + named mailGroups.
+ * MELD-60/61/135: chip picker — roles + registers + users + mailGroups + termine.
  */
 (function(global) {
   'use strict';
@@ -13,17 +13,18 @@
   var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
 
   function parseCatalog(el) {
-    if(!el) return {groups: [], registers: [], users: [], mailGroups: []};
+    if(!el) return {groups: [], registers: [], users: [], mailGroups: [], termine: []};
     try {
       var c = JSON.parse(el.textContent || '{}');
       return {
         groups: Array.isArray(c.groups) ? c.groups : [],
         registers: Array.isArray(c.registers) ? c.registers : [],
         users: Array.isArray(c.users) ? c.users : [],
-        mailGroups: Array.isArray(c.mailGroups) ? c.mailGroups : []
+        mailGroups: Array.isArray(c.mailGroups) ? c.mailGroups : [],
+        termine: Array.isArray(c.termine) ? c.termine : []
       };
     } catch(e) {
-      return {groups: [], registers: [], users: [], mailGroups: []};
+      return {groups: [], registers: [], users: [], mailGroups: [], termine: []};
     }
   }
 
@@ -45,7 +46,15 @@
   }
 
   function emptySpec() {
-    return {groups: [], registers: [], users: [], mailGroups: []};
+    return {groups: [], registers: [], users: [], mailGroups: [], termine: []};
+  }
+
+  function isSpecEmpty(spec) {
+    return !(spec.groups && spec.groups.length)
+      && !(spec.registers && spec.registers.length)
+      && !(spec.users && spec.users.length)
+      && !(spec.mailGroups && spec.mailGroups.length)
+      && !(spec.termine && spec.termine.length);
   }
 
   function parseSpec(el, opts) {
@@ -66,7 +75,8 @@
       var registers = normalizeIdList(s.registers);
       var users = normalizeIdList(s.users);
       var mailGroups = normalizeIdList(s.mailGroups);
-      if(!groups.length && !registers.length && !users.length && !mailGroups.length) {
+      var termine = normalizeIdList(s.termine);
+      if(!groups.length && !registers.length && !users.length && !mailGroups.length && !termine.length) {
         if(!allowEmpty && defaultGroups.length) {
           groups = normalizeGroups(defaultGroups);
         }
@@ -75,7 +85,8 @@
         groups: groups,
         registers: registers,
         users: users,
-        mailGroups: mailGroups
+        mailGroups: mailGroups,
+        termine: termine
       };
     } catch(e) {
       return fallback;
@@ -125,7 +136,8 @@
         groups: this.spec.groups.slice(),
         registers: this.spec.registers.slice(),
         users: this.spec.users.slice(),
-        mailGroups: this.spec.mailGroups.slice()
+        mailGroups: (this.spec.mailGroups || []).slice(),
+        termine: (this.spec.termine || []).slice()
       });
     },
 
@@ -193,12 +205,7 @@
             self.countEl.textContent = n === 1 ? '1 Mitglied' : (n + ' Mitglieder');
           }
           else if(label === 'sichtbar für') {
-            var emptySpec = self.allowEmpty
-              && !(self.spec.groups && self.spec.groups.length)
-              && !(self.spec.registers && self.spec.registers.length)
-              && !(self.spec.users && self.spec.users.length)
-              && !(self.spec.mailGroups && self.spec.mailGroups.length);
-            self.countEl.textContent = emptySpec
+            self.countEl.textContent = (self.allowEmpty && isSpecEmpty(self.spec))
               ? '—'
               : (n === 1 ? 'sichtbar für 1 Person' : ('sichtbar für ' + n + ' Personen'));
           }
@@ -253,6 +260,14 @@
       return 'Gruppe #' + id;
     },
 
+    labelForTermin: function(id) {
+      var list = this.catalog.termine || [];
+      for(var i = 0; i < list.length; i++) {
+        if(Number(list[i].id) === Number(id)) return list[i].label;
+      }
+      return 'Teilnehmer: Termin #' + id;
+    },
+
     render: function() {
       if(!this.chipsEl) return;
       this.chipsEl.innerHTML = '';
@@ -268,6 +283,9 @@
       });
       this.spec.users.forEach(function(id) {
         self.chipsEl.appendChild(self.makeChip('user', id, self.labelForUser(id)));
+      });
+      (this.spec.termine || []).forEach(function(id) {
+        self.chipsEl.appendChild(self.makeChip('termin', id, self.labelForTermin(id)));
       });
     },
 
@@ -305,6 +323,10 @@
         id = Number(id);
         this.spec.mailGroups = (this.spec.mailGroups || []).filter(function(x) { return x !== id; });
       }
+      else if(type === 'termin') {
+        id = Number(id);
+        this.spec.termine = (this.spec.termine || []).filter(function(x) { return x !== id; });
+      }
       else {
         id = Number(id);
         this.spec.users = this.spec.users.filter(function(x) { return x !== id; });
@@ -330,6 +352,10 @@
       else if(type === 'mailGroup') {
         if(!this.spec.mailGroups) this.spec.mailGroups = [];
         if(this.spec.mailGroups.indexOf(id) === -1) this.spec.mailGroups.push(id);
+      }
+      else if(type === 'termin') {
+        if(!this.spec.termine) this.spec.termine = [];
+        if(this.spec.termine.indexOf(id) === -1) this.spec.termine.push(id);
       }
       else if(this.spec.users.indexOf(id) === -1) {
         this.spec.users.push(id);
@@ -381,6 +407,13 @@
           return;
         }
         items.push({type: 'user', id: u.id, label: u.label, meta: u.meta || 'Person'});
+      });
+
+      (this.catalog.termine || []).forEach(function(t) {
+        if((self.spec.termine || []).indexOf(Number(t.id)) !== -1) return;
+        if(q === '' || normalize(t.label).indexOf(q) !== -1) {
+          items.push({type: 'termin', id: t.id, label: t.label, meta: t.meta || 'Termin'});
+        }
       });
 
       this.showSuggest(items.slice(0, 14));
@@ -477,7 +510,10 @@
         this.hideSuggest();
       }
       else if(e.key === 'Backspace' && this.inputEl && this.inputEl.value === '') {
-        if(this.spec.users.length) {
+        if(this.spec.termine && this.spec.termine.length) {
+          this.removeChip('termin', this.spec.termine[this.spec.termine.length - 1]);
+        }
+        else if(this.spec.users.length) {
           this.removeChip('user', this.spec.users[this.spec.users.length - 1]);
         }
         else if(this.spec.registers.length) {

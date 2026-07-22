@@ -309,7 +309,7 @@ function pollNotifyEvents($userId, $since) {
         $sql = sprintf(
             "SELECT `Index` FROM `%sTermine`
              WHERE (%s)
-             ORDER BY `Datum` ASC
+             ORDER BY `Created` DESC, `Updated` DESC, `Datum` ASC
              LIMIT 200;",
             $GLOBALS['dbprefix'],
             implode(' OR ', $sqlParts)
