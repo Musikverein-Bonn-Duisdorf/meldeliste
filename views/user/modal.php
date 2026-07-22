@@ -1,59 +1,150 @@
-<header class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span>
-  <h2><?php echo $user->Vorname." ".$user->Nachname; ?></h2>
-</header>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">userID:</div><div class="w3-col l6"><b><?php echo $user->Index; ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Instrument:</div><div class="w3-col l6"><b><?php echo $user->iName; ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($user->Mitglied); ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">E-Mail:</div><div class="w3-col l6"><b><?php echo bool2string($user->getMail); ?></b></div>
-  <div class="w3-col l6">Nachrichten:</div><div class="w3-col l6"><b><?php echo bool2string($user->notifyInbox); ?></b></div>
-</div>
-<?php if($showUserDetails) { ?>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Account erstellt:</div><div class="w3-col l6"><b><?php echo germanDate($user->Joined, 1); ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Mitglieds-Nr.:</div><div class="w3-col l6"><b><?php echo $user->RefID; ?></b></div>
-</div>
-<div class="w3-container w3-margin">
-  <div class="w3-col l6">Berechtigungen:</div>
-  <?php echo $permissionsHtml; ?>
-</div>
-<?php } ?>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $user->Email; ?>"><?php echo $user->Email; ?></a></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">zweite Emailadresse:</div><div class="w3-col l6"><b><a href="mailto:<?php echo $user->Email2; ?>"><?php echo $user->Email2; ?></a></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Loginname:</div><div class="w3-col l6"><b><?php echo $user->login; ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Letzter Login:</div><div class="w3-col l6"><b><?php echo germanDate($user->LastLogin, 1); ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Letzte Anwesenheit:</div><div class="w3-col l6"><b><?php echo germanDate($user->getLastVisit(), 1); ?></b></div>
-</div>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Meldequote:</div><div class="w3-col l6"><b><?php echo $user->getMeldeQuote()*100; ?> %</b></div>
-</div>
-<?php if($registerLeadName !== null) { ?>
-<div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">Registerführer:</div><div class="w3-col l6"><b><?php echo $registerLeadName; ?></b></div>
-</div>
-<?php } ?>
+<?php
+/**
+ * User detail modal (profile-shell layout).
+ * Expects: $user, $showUserDetails, $permissionsHtml, $registerLeadName,
+ *          $showEditButton, $returnTo, $returnToken
+ */
+$name = trim((string)$user->Vorname.' '.(string)$user->Nachname);
+$membership = AudienceSpec::membershipForUser((int)$user->Index);
+$btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
+?>
+<div class="profile-shell modal-shell user-modal">
+  <header class="profile-hero">
+    <div class="profile-hero-text">
+      <p class="profile-kicker">Nutzer</p>
+      <h2 class="profile-title"><?php echo htmlspecialchars($name !== '' ? $name : 'Profil', ENT_QUOTES, 'UTF-8'); ?></h2>
+    </div>
+    <div class="profile-hero-actions">
 <?php if($showEditButton) { ?>
-<form class="w3-center w3-bar w3-mobile" action="new-musiker.php" method="POST">
-  <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
-  <input type="hidden" name="return_token" value="<?php echo htmlspecialchars(isset($returnToken) ? $returnToken : '', ENT_QUOTES, 'UTF-8'); ?>">
-  <button class="w3-button w3-center w3-mobile w3-block <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>" type="submit" name="id" value="<?php echo $user->Index; ?>">bearbeiten</button>
-</form>
+      <form class="profile-actions-primary" action="new-musiker.php" method="POST">
+        <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="return_token" value="<?php echo htmlspecialchars(isset($returnToken) ? $returnToken : '', ENT_QUOTES, 'UTF-8'); ?>">
+        <button class="w3-btn profile-btn-primary <?php echo htmlspecialchars($btnEdit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="id" value="<?php echo (int)$user->Index; ?>">Bearbeiten</button>
+      </form>
 <?php } ?>
+      <button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button>
+    </div>
+  </header>
+
+  <div class="profile-grid profile-grid--3">
+    <section class="profile-col" aria-labelledby="user-modal-person">
+      <h3 id="user-modal-person" class="profile-col-title">Person</h3>
+      <div class="profile-field">
+        <span class="profile-label">Instrument</span>
+        <div class="profile-value"><?php echo htmlspecialchars((string)$user->iName, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">Mitglied</span>
+        <div class="profile-value"><?php echo bool2string($user->Mitglied); ?></div>
+      </div>
+<?php if($registerLeadName !== null) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Registerführer</span>
+        <div class="profile-value"><?php echo htmlspecialchars((string)$registerLeadName, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
+<?php } ?>
+<?php if(count($membership)) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Gruppen</span>
+        <div class="mail-recipient-chips" aria-label="Gruppenzugehörigkeit">
+<?php
+    foreach($membership as $chip) {
+        $type = htmlspecialchars((string)$chip['type'], ENT_QUOTES, 'UTF-8');
+        $label = htmlspecialchars((string)$chip['label'], ENT_QUOTES, 'UTF-8');
+        echo '<span class="mail-recipient-chip mail-recipient-chip--'.$type.'">'.$label.'</span>';
+    }
+?>
+        </div>
+      </div>
+<?php } ?>
+<?php if($showUserDetails) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Mitglieds-Nr.</span>
+        <div class="profile-value"><?php echo htmlspecialchars((string)$user->RefID, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">User-ID</span>
+        <div class="profile-value"><?php echo (int)$user->Index; ?></div>
+      </div>
+<?php } ?>
+    </section>
+
+    <section class="profile-col" aria-labelledby="user-modal-kontakt">
+      <h3 id="user-modal-kontakt" class="profile-col-title">Kontakt</h3>
+      <div class="profile-field">
+        <span class="profile-label">E-Mail</span>
+        <div class="profile-value"><?php if((string)$user->Email !== '') { ?><a href="mailto:<?php echo htmlspecialchars((string)$user->Email, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars((string)$user->Email, ENT_QUOTES, 'UTF-8'); ?></a><?php } else { echo '—'; } ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">E-Mail 2</span>
+        <div class="profile-value"><?php if((string)$user->Email2 !== '') { ?><a href="mailto:<?php echo htmlspecialchars((string)$user->Email2, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars((string)$user->Email2, ENT_QUOTES, 'UTF-8'); ?></a><?php } else { echo '—'; } ?></div>
+      </div>
+<?php if($showUserDetails) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Login</span>
+        <div class="profile-value"><?php echo htmlspecialchars((string)$user->login, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">Erstellt</span>
+        <div class="profile-value"><?php echo germanDate($user->Joined, 1); ?></div>
+      </div>
+<?php } ?>
+      <div class="profile-field">
+        <span class="profile-label">Letzter Login</span>
+        <div class="profile-value"><?php echo germanDate($user->LastLogin, 1); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">Anwesenheit</span>
+        <div class="profile-value"><?php echo germanDate($user->getLastVisit(), 1); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">Meldequote</span>
+        <div class="profile-value"><?php echo (float)$user->getMeldeQuote()*100; ?> %</div>
+      </div>
+    </section>
+
+    <section class="profile-col" aria-labelledby="user-modal-notify">
+      <h3 id="user-modal-notify" class="profile-col-title">Benachrichtigungen</h3>
+      <div class="profile-pref-group">
+        <h4 class="profile-subhead">Kanäle</h4>
+        <div class="profile-prefs profile-prefs--grid">
+          <div class="profile-field">
+            <span class="profile-label">E-Mail</span>
+            <div class="profile-value"><?php echo bool2string($user->getMail); ?></div>
+          </div>
+          <div class="profile-field">
+            <span class="profile-label">Nachrichten</span>
+            <div class="profile-value"><?php echo bool2string($user->notifyInbox); ?></div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-pref-group">
+        <h4 class="profile-subhead">App-Hinweise</h4>
+        <div class="profile-prefs profile-prefs--grid">
+          <div class="profile-field">
+            <span class="profile-label">Nachrichten</span>
+            <div class="profile-value"><?php echo bool2string($user->notifyAppMail); ?></div>
+          </div>
+          <div class="profile-field">
+            <span class="profile-label">Neuer Termin</span>
+            <div class="profile-value"><?php echo bool2string($user->notifyAppTerminNew); ?></div>
+          </div>
+          <div class="profile-field">
+            <span class="profile-label">Termin geändert</span>
+            <div class="profile-value"><?php echo bool2string($user->notifyAppTerminChange); ?></div>
+          </div>
+          <div class="profile-field">
+            <span class="profile-label">Termin bald</span>
+            <div class="profile-value"><?php echo bool2string($user->notifyAppTerminSoon); ?></div>
+          </div>
+        </div>
+      </div>
+<?php if($showUserDetails && $permissionsHtml !== '') { ?>
+      <div class="profile-field">
+        <span class="profile-label">Rechte</span>
+        <div class="profile-value profile-value--perms"><?php echo $permissionsHtml; ?></div>
+      </div>
+<?php } ?>
+    </section>
+  </div>
+</div>

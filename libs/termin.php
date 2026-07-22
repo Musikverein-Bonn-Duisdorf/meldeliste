@@ -1823,206 +1823,26 @@ class Termin
     }
 
     public function getDetailModalHtml() {
-        $str="";
-        $str=$str."<header class=\"w3-container ".$GLOBALS['optionsDB']['colorTitleBar']."\">\n";
-        $str=$str."<span onclick=\"closeModal()\" class=\"w3-button w3-display-topright\">&times;</span>\n";
-        $str=$str."<h2>".$this->Name."</h2>\n";
-        $str=$str."</header>\n";
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Datum:</div>\n<div class=\"w3-col l9\"><b>".$this->getGermanDate()."</b></div>\n";
-        $str=$str."</div>\n";
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Beginn:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit)."</b></div>\n";
-        $str=$str."</div>\n";
-        if($this->Ende) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">Ende:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Uhrzeit2)."</b></div>\n";
-            $str=$str."</div>\n";
-        }
-        if($this->Abfahrt && $GLOBALS['optionsDB']['showTravelTime']) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">Abfahrt:</div>\n<div class=\"w3-col l9\"><b>".sql2time($this->Abfahrt)."</b></div>\n";
-            $str=$str."</div>\n";
-        }
-        if($GLOBALS['optionsDB']['showVehicle']) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">Anfahrt mit:</div>\n<div class=\"w3-col l9\"><b>".$this->vName."</b></div>\n";
-            $str=$str."</div>\n";
-        }
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Beschreibung:</div>\n<div class=\"w3-col l9\"><b>".$this->Beschreibung."</b></div>\n";
-        $str=$str."</div>\n";
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Ort:</div>\n<div class=\"w3-col l9\"><b>".$this->Ort1."</b><br>".$this->Ort2."<br>".$this->Ort3."<br>".$this->Ort4."</div>\n";
-        $str=$str."</div>\n";
-        if($GLOBALS['googlemapsapi'] && ($this->Ort1 || $this->Ort2)) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">Karte:</div>\n<div class=\"w3-col l9\"><iframe width=\"auto\" height=\"auto\" frameborder=\"0\" style=\"border:0\" src=\"https://www.google.com/maps/embed/v1/place?key=".$GLOBALS['googlemapsapi']."&q=".$this->Ort1."+".$this->Ort2."+".$this->Ort3."+".$this->Ort4."\" allowfullscreen></iframe></div>\n";
-            $str=$str."</div>\n";
-        }
-        if($this->Capacity) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">Pl&auml;tze:</div>\n<div class=\"w3-col l9\"><b>".$this->Capacity."</b></div>\n";
-            $str=$str."</div>\n";
-        }
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Besetzung:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Auftritt)."</b></div>\n";
-        $str=$str."</div>\n";
-        $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-        $str=$str."<div class=\"w3-col l3\">Schichten zu besetzen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->Shifts)."</b></div>\n";
-        $str=$str."</div>\n";
+        $userId = (int)$this->getUser();
+        $instrument = null;
         if($this->Auftritt) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-
             $u = new User;
-            $u->load_by_id($this->getUser());
+            $u->load_by_id($userId);
             $instrument = $u->Instrument;
-
             $m = new Meldung;
-            $m->load_by_user_event($this->getUser(), $this->Index);
-            if($m->Index) {
-                if($m->Instrument) $instrument = $m->Instrument;
-            }
-
-            $str=$str."<div class=\"w3-col l3\">Instrument f&uuml;r diesen Termin:</div>\n<div class=\"w3-col l4\"><select id=\"iSelect".$this->Index."\" class=\"w3-input\" name=\"Instrument\">".instrumentOption($instrument)."</select></div>\n";
-            $str=$str."<button class=\"w3-col l1 w3-button ".$GLOBALS['optionsDB']['colorBtnEdit']."\" onclick=\"changeInstrument(".$this->getUser().", ".$this->Index.");\"><i class=\"fas fa-save\"></i></button>";
-            $str=$str."</div>\n";
-        }
-        if(requirePermission("perm_editAppmnts")) {
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">sichtbar für:</div>\n<div class=\"w3-col l9\">"
-                .AudienceSpec::renderChipsHtml($this->getVisibilitySpecArray(), array(
-                    'allowMailGroups' => true,
-                    'ariaLabel' => 'sichtbar für',
-                ))
-                ."</div>\n";
-            $str=$str."</div>\n";
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">Anmeldung offen:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->open)."</b></div>\n";
-            $str=$str."</div>\n";
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">neu:</div>\n<div class=\"w3-col l9\"><b>".bool2string($this->new)."</b></div>\n";
-            $str=$str."</div>\n";
-            $str=$str."<div class=\"w3-container w3-row w3-margin\">\n";
-            $str=$str."<div class=\"w3-col l3\">ID:</div>\n<div class=\"w3-col l9\"><b>".$this->Index."</b></div>\n";
-            $str=$str."</div>\n";
-
-            if(!$this->Shifts) {
-                $div = new div;
-                $div->tag="form";
-                $div->method="POST";
-                $div->action="";
-                $div->class="w3-container w3-row w3-margin w3-card w3-padding";
-                $str.=$div->open();
-
-                $aushilfe = new div;
-                $aushilfe->class="w3-row w3-margin-bottom";
-                $aushilfe->body="<b>Aushilfen</b>";
-                $str.=$aushilfe->print();
-
-                $row = new div;
-                $row->class="w3-row w3-margin-bottom";
-                $str.=$row->open();
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l3";
-                $aushilfe->body="&nbsp;";
-                $str.=$aushilfe->print();
-
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l2";
-                $aushilfe->body="Name:";
-                $str.=$aushilfe->print();
-
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l3 w3-input w3-border";
-                $aushilfe->class=$GLOBALS['optionsDB']['colorInputBackground'];
-                $aushilfe->type="text";
-                $aushilfe->tag="input";
-                $aushilfe->name="Name";
-                $str.=$aushilfe->print();
-                $str.=$row->close();
-
-                $str.=$row->open();
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l3";
-                $aushilfe->body="&nbsp;";
-                $str.=$aushilfe->print();
-
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l2";
-                $aushilfe->body="Instrument:";
-                $str.=$aushilfe->print();
-
-                $aushilfe = new div;
-                $aushilfe->tag="input";
-                $aushilfe->type="hidden";
-                $aushilfe->name="Termin";
-                $aushilfe->value=$this->Index;
-                $str.=$aushilfe->print();
-
-                $aushilfe = new div;
-                $aushilfe->tag="select";
-                $aushilfe->class="w3-col l3 w3-input";
-                $aushilfe->name="Instrument";
-                $aushilfe->body=instrumentOption(0);
-                $str.=$aushilfe->print();
-                $str.=$row->close();
-
-                $row = new div;
-                $row->class="w3-row";
-                $str.=$row->open();
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l5";
-                $aushilfe->body="&nbsp;";
-                $str.=$aushilfe->print();
-
-                $aushilfe = new div;
-                $aushilfe->class="w3-col l3 w3-btn w3-input";
-                $aushilfe->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-                $aushilfe->tag="input";
-                $aushilfe->type="submit";
-                $aushilfe->name="insertAushilfe";
-                $aushilfe->value="eintragen";
-                $str.=$aushilfe->print();
-                $str.=$row->close();
-
-                $str.=$div->close();
-
-                $div = new div;
-                $div->class="w3-container w3-row w3-margin w3-card w3-padding";
-                $str.=$div->open();
-
-                $aushilfe = new div;
-                $aushilfe->class="w3-row w3-margin-bottom";
-                $aushilfe->body="<b>aktive Aushilfen</b>";
-                $str.=$aushilfe->print();
-
-                $str.=$this->aktiveAushilfenTermin();
-
-                $str.=$div->close();
-            }
-
-            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"new-termin.php\" method=\"POST\">\n";
-            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"id\" value=\"".$this->Index."\">bearbeiten</button>\n";
-            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"copy\" value=\"".$this->Index."\">kopieren</button>\n";
-            $str=$str."</form>\n";
-        }
-        if(requirePermission("perm_editResponse")) {
-            $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"tracking.php\" method=\"POST\">\n";
-            $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"termin\" value=\"".$this->Index."\">Anwesenheitsliste</button>\n";
-            $str=$str."</form>\n";
-        }
-        if(requirePermission("perm_sendEmail")) {
-            $str=$str."<a class=\"w3-button w3-center w3-mobile w3-block ".$GLOBALS['optionsDB']['colorBtnEdit']."\" href=\"mail.php?new=1&termin=".$this->Index."\">Email an Teilnehmer</a>\n";
-        }
-        if(requirePermission("perm_editAppmnts")) {
-            if($this->Shifts) {
-                $str=$str."<form class=\"w3-center w3-bar w3-mobile\" action=\"edit-shifts.php\" method=\"POST\">\n";
-                $str=$str."<button class=\"w3-button w3-center w3-mobile w3-block w3-margin-top ".$GLOBALS['optionsDB']['colorBtnEdit']."\" type=\"submit\" name=\"Termin\" value=\"".$this->Index."\">Schichten bearbeiten</button>\n";
-                $str=$str."</form>\n";
+            $m->load_by_user_event($userId, $this->Index);
+            if($m->Index && $m->Instrument) {
+                $instrument = $m->Instrument;
             }
         }
-        return $str;
+        return render('termin/detail_modal', array(
+            'termin' => $this,
+            'userId' => $userId,
+            'instrument' => $instrument,
+            'aushilfenHtml' => (!$this->Shifts && requirePermission('perm_editAppmnts'))
+                ? $this->aktiveAushilfenTermin()
+                : '',
+        ));
     }
     public function getResponseString() {
         $str=$this->getMeldungenVal(1);
