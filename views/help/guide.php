@@ -49,7 +49,7 @@ $sections[] = array(
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
 <li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
 <li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
-'.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü (nur mit Admin-Zugang und entsprechenden Rechten)</li>' : '').'
+'.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü in der Reihenfolge Personen → Termine → Meldungen → Kommunikation → Inventar → Orchester → System; Einträge sind in denselben Farben wie die Rechte-Chips eingefärbt</li>' : '').'
 <li><i class="fas fa-sign-out-alt"></i> <b>Ausloggen</b> – Sitzung beenden</li>
 </ul>
 '
@@ -151,6 +151,37 @@ $sections[] = array(
 );
 
 $sections[] = array(
+    'id' => 'admin-personen',
+    'title' => 'Admin: Personen',
+    'visible' => isAdmin() && requirePermission('perm_showUsers'),
+    'body' => '
+<ul class="help-list">
+<li><b>Musikerliste / Gastmusiker / Userliste</b> – Personen suchen, filtern und öffnen; Spaltenköpfe sortieren die Liste. <b>Gastmusiker</b> listet alle ohne Haken <b>aktiv</b></li>
+'.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
+'.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
+<li><b>Registerübersicht</b> – Orchester-/Registeransicht (Überschrift in Registerfarbe); Klick auf einen Sitz öffnet das User-Modal</li>
+'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte; <b>Deaktivieren</b> setzt Gastmusiker; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
+'.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
+</ul>
+'
+);
+
+$sections[] = array(
+    'id' => 'admin-termine',
+    'title' => 'Admin: Termine',
+    'visible' => isAdmin() && requirePermission('perm_editAppmnts'),
+    'body' => '
+<p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
+<p>Im <b>Kalender</b> kannst du auf eine freie Tagesfläche klicken: Nach Bestätigung öffnet sich das Anlege-Formular mit vorausgefülltem Datum.</p>
+<p>Nach Speichern/Löschen von Terminen oder Schichten erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden.</p>
+<p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
+<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis (Standard: <b>Alle User</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles. Personen ohne Haken <b>aktiv</b> (Gastmusiker) kannst du hier wie andere Personen auswählen – sie gehören dann zu Sichtbarkeit und Besetzung dieses Termins.</p>
+<p>Discord-Posts (bei konfiguriertem Webhook) erfolgen bei Sichtbarkeit <b>Alle User</b> automatisch, sonst nur mit der Checkbox <b>Auch auf Discord posten</b>.</p>
+<p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar).</p>
+'
+);
+
+$sections[] = array(
     'id' => 'auftrag',
     'title' => 'Melden im Auftrag',
     'visible' => isAdmin() && requirePermission('perm_editResponse'),
@@ -173,40 +204,6 @@ $sections[] = array(
 <p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung).</p>
 <p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen. Die Orchesterübersicht skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
 '.(requirePermission('perm_editResponse') ? '<p>Mit Recht <b>Rückmeldungen bearbeiten</b> kannst du im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
-'
-);
-
-$sections[] = array(
-    'id' => 'admin-personen',
-    'title' => 'Admin: Personen',
-    'visible' => isAdmin() && (requirePermission('perm_showUsers') || requirePermission('perm_editPermissions') || requirePermission('perm_editInstruments')),
-    'body' => '
-<ul class="help-list">
-'.(requirePermission('perm_showUsers') ? '
-<li><b>Registerübersicht / Musikerliste / Gastmusiker / Userliste</b> – Personen suchen, filtern und öffnen (Register-Überschrift in Registerfarbe); Spaltenköpfe sortieren die Liste. <b>Gastmusiker</b> listet alle ohne Haken <b>aktiv</b></li>
-'.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
-'.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
-' : '').'
-'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte; <b>Deaktivieren</b> setzt Gastmusiker; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
-'.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
-'.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
-'.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>' : '').'
-</ul>
-'
-);
-
-$sections[] = array(
-    'id' => 'admin-termine',
-    'title' => 'Admin: Termine',
-    'visible' => isAdmin() && requirePermission('perm_editAppmnts'),
-    'body' => '
-<p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
-<p>Im <b>Kalender</b> kannst du auf eine freie Tagesfläche klicken: Nach Bestätigung öffnet sich das Anlege-Formular mit vorausgefülltem Datum.</p>
-<p>Nach Speichern/Löschen von Terminen oder Schichten erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden.</p>
-<p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
-<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis (Standard: <b>Alle User</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles. Personen ohne Haken <b>aktiv</b> (Gastmusiker) kannst du hier wie andere Personen auswählen – sie gehören dann zu Sichtbarkeit und Besetzung dieses Termins.</p>
-<p>Discord-Posts (bei konfiguriertem Webhook) erfolgen bei Sichtbarkeit <b>Alle User</b> automatisch, sonst nur mit der Checkbox <b>Auch auf Discord posten</b>.</p>
-<p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar).</p>
 '
 );
 
@@ -241,20 +238,37 @@ $sections[] = array(
 );
 
 $sections[] = array(
-    'id' => 'admin-system',
-    'title' => 'Admin: System',
-    'visible' => isAdmin() && (requirePermission('perm_editConfig') || requirePermission('perm_showLog')),
+    'id' => 'admin-orchester',
+    'title' => 'Admin: Orchester',
+    'visible' => isAdmin() && requirePermission('perm_editInstruments'),
     'body' => '
 <ul class="help-list">
+<li><b>Register</b> – Register anlegen, sortieren und einfärben (Sitzplan und Gruppenbildung)</li>
+<li><b>Instrument-Typen</b> – Instrumente den Registern zuordnen, sortieren und Spielbarkeit setzen</li>
+</ul>
+'
+);
+
+$sections[] = array(
+    'id' => 'admin-system',
+    'title' => 'Admin: System',
+    'visible' => isAdmin() && (requirePermission('perm_editConfig') || requirePermission('perm_showLog') || requirePermission('perm_editPermissions')),
+    'body' => '
+<ul class="help-list">
+'.(requirePermission('perm_editPermissions') ? '
+<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
+' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>
 <li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
-<li><b>Updater</b> – Software-Update und Datenbank-Reparatur / Schema-Stand</li>
-<li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
-<li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung)</li>
 <li><b>Statistik</b> – Auswertungen mit Abschnittsnavigation; auf breiten Bildschirmen Diagramme und Tabellen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (sortierbar)</li>
+<li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung)</li>
+' : '').'
+'.(requirePermission('perm_editConfig') ? '
+<li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>
+<li><b>Updater</b> – Software-Update und Datenbank-Prüfung/Reparatur; der Bericht listet nur Änderungen und Probleme (keine „ok“-Zeilen)</li>
 ' : '').'
 </ul>
 '

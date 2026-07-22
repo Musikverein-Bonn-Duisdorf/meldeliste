@@ -317,6 +317,22 @@ class Permissions
     }
 
     /**
+     * Color/group id for a permission key (matches profile chip CSS).
+     * @param string $key
+     * @return string
+     */
+    public static function groupIdForPermission($key) {
+        $key = (string)$key;
+        foreach(self::permissionGroups() as $group) {
+            $keys = isset($group['keys']) && is_array($group['keys']) ? $group['keys'] : array();
+            if(in_array($key, $keys, true)) {
+                return isset($group['id']) ? (string)$group['id'] : 'system';
+            }
+        }
+        return 'system';
+    }
+
+    /**
      * Flat catalog in group sort order for chip pickers / modal.
      * @return array<int,array{key:string,label:string,group:string,groupId:string}>
      */

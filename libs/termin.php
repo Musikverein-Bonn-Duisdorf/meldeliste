@@ -4,8 +4,6 @@ class Termin
     private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'GuestMusicians' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
-    /** @var int|null */
-    private $_aushilfenCount = null;
     /** @var array<int,string>|null */
     private $_freeTextByUser = null;
     public function __get($key) {
@@ -994,21 +992,6 @@ class Termin
         return $this->_meldungenCountsByWert;
     }
 
-    protected function getAushilfenCount() {
-        if(isset($this->_aushilfenCount)) {
-            return (int)$this->_aushilfenCount;
-        }
-        $sql = sprintf(
-            'SELECT COUNT(*) AS `c` FROM `%sAushilfen` WHERE `Termin` = %d;',
-            $GLOBALS['dbprefix'],
-            (int)$this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $row = $dbr ? mysqli_fetch_array($dbr) : null;
-        $this->_aushilfenCount = ($row && isset($row['c'])) ? (int)$row['c'] : 0;
-        return $this->_aushilfenCount;
-    }
     public function getMeldungRatio() {
         $Nusers = count(getActiveUsers(NULL));
         $meldungen=count($this->getMeldungen());
@@ -2158,7 +2141,7 @@ class Termin
             $shiftresponseY->class="w3-col l1 m2 s2 w3-center";
             $shiftresponseY->class=$GLOBALS['optionsDB']['colorBtnYes'];
             $shiftresponseY->body="&#10004; ";
-            $shiftresponseY->body=$s->getMeldungenVal(1)+$s->getAushilfenVal();
+            $shiftresponseY->body=$s->getMeldungenVal(1);
             $str=$str.$shiftresponseY->print();
 
             $shiftresponseN = new div;
@@ -2195,7 +2178,7 @@ class Termin
         $colorMaybe = $GLOBALS['optionsDB']['colorBtnMaybe'];
         $colorNo = $GLOBALS['optionsDB']['colorBtnNo'];
 
-        $yesNames = array_merge($s->getMeldungenUser(1), $s->getMeldungenAushilfenShift());
+        $yesNames = $s->getMeldungenUser(1);
         $maybeNames = $s->getMeldungenUser(3);
         $noNames = $s->getMeldungenUser(2);
 
@@ -2225,52 +2208,6 @@ class Termin
         return $html;
     }
 
-    public function getAushilfenRegister($filterregister) {
-        $sql = sprintf("SELECT * FROM `%sAushilfen` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Termin` = \"%d\" AND `Register` = \"%d\";",
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $GLOBALS['dbprefix'],
-                       $this->Index,
-                       $filterregister
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $aushilfen = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            $aushilfen[] = $row;
-        }
-        return $aushilfen;
-    }
-
-    /**
-     * All aushilfen for this termin with Register + instrument name (one query).
-     * @return array keyed by register id => list of rows
-     */
-    protected function getAushilfenByRegister() {
-        $sql = sprintf(
-            "SELECT a.`Index`, a.`Termin`, a.`Name`, a.`Instrument`, i.`Register`, i.`Name` AS `iName`
-             FROM `%sAushilfen` a
-             INNER JOIN `%sInstrument` i ON a.`Instrument` = i.`Index`
-             WHERE a.`Termin` = %d;",
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            (int)$this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $byReg = array();
-        if($dbr) {
-            while($row = mysqli_fetch_array($dbr)) {
-                $rid = (int)$row['Register'];
-                if(!isset($byReg[$rid])) {
-                    $byReg[$rid] = array();
-                }
-                $byReg[$rid][] = $row;
-            }
-        }
-        return $byReg;
-    }
-
     /**
      * Active member counts per register (Deleted != 1).
      * @return array<int,int>
@@ -2294,31 +2231,6 @@ class Termin
             }
         }
         return $counts;
-    }
-
-    public function getAushilfen() {
-        $sql = sprintf("SELECT * FROM `%sAushilfen` WHERE `Termin` = %d",
-                       $GLOBALS['dbprefix'],
-                       $this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $aushilfen = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            $aushilfen[] = $row['Index'];
-        }
-        return $aushilfen;
-    }
-
-    public function aktiveAushilfenTermin() {
-        $str="";
-        $aushilfen = $this->getAushilfen();
-        foreach ($aushilfen as $aushilfe) {
-            $a = new Aushilfe;
-            $a->load_by_id($aushilfe);
-            $str.=$a->TerminLine();
-        }
-        return $str;
     }
 
     /**
