@@ -160,6 +160,59 @@ class MailGroup
         return $out;
     }
 
+    /**
+     * Whether this group's MemberSpec lists the user explicitly (users[]).
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public function hasExplicitUser($userId) {
+        $userId = (int)$userId;
+        if($userId <= 0) {
+            return false;
+        }
+        return in_array($userId, array_map('intval', $this->getMemberSpecArray()['users']), true);
+    }
+
+    /**
+     * Add/remove user in each named group's explicit users[] list.
+     * Membership via roles/registers is unchanged.
+     *
+     * @param int $userId
+     * @param array $wantGroupIds MailGroup Index values that should include the user
+     */
+    public static function syncUserExplicitMembership($userId, $wantGroupIds) {
+        $userId = (int)$userId;
+        if($userId <= 0) {
+            return;
+        }
+        $want = array();
+        foreach((array)$wantGroupIds as $id) {
+            $id = (int)$id;
+            if($id > 0) {
+                $want[$id] = true;
+            }
+        }
+        foreach(self::listAll() as $g) {
+            $spec = $g->getMemberSpecArray();
+            $users = array_map('intval', $spec['users']);
+            $in = in_array($userId, $users, true);
+            $should = isset($want[(int)$g->Index]);
+            if($should && !$in) {
+                $spec['users'][] = $userId;
+                $g->setMemberSpecArray($spec);
+                $g->save();
+            }
+            elseif(!$should && $in) {
+                $spec['users'] = array_values(array_filter($users, function($u) use ($userId) {
+                    return (int)$u !== $userId;
+                }));
+                $g->setMemberSpecArray($spec);
+                $g->save();
+            }
+        }
+    }
+
     public function save() {
         if(!$this->is_valid()) return false;
         self::ensureSchema();

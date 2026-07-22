@@ -52,6 +52,9 @@ class Log
         $this->generate(4, $Message);
     }
     public function DBupdate($Message) {
+        if(!logMessageHasChanges($Message)) {
+            return;
+        }
         $this->generate(5, $Message);
     }
     public function email($Message) {

@@ -9,6 +9,10 @@ include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 requireLoggedInOrRedirect();
 
+if(empty($GLOBALS['optionsDB']['urlNotenarchiv'])) {
+    denyAccess();
+}
+
 $userId = isset($_REQUEST['user']) ? (int)$_REQUEST['user'] : 0;
 if($userId < 1) {
     $userId = (int)$_SESSION['userid'];

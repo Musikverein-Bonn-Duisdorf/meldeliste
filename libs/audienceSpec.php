@@ -294,14 +294,13 @@ class AudienceSpec
     /**
      * Base WHERE fragments for User rows.
      *
-     * @param bool $requireMail getMail + has email
+     * @param bool $requireMail getMail/notifyInbox (message recipient channels)
      * @return string[]
      */
     public static function userBaseWhere($requireMail = false) {
         $where = array('`Deleted` != 1');
         if($requireMail) {
-            $where[] = '`getMail` = 1';
-            $where[] = '(`Email` != \'\' OR `Email2` != \'\')';
+            $where[] = '(`getMail` = 1 OR `notifyInbox` = 1)';
         }
         return $where;
     }
@@ -456,6 +455,152 @@ class AudienceSpec
         }
 
         return $items;
+    }
+
+    /**
+     * Whether provisional user attributes match a MemberSpec (no DB user row required).
+     * Mirrors resolveUserIds union semantics for groups/registers; optional users[] via userId.
+     *
+     * @param array $attrs mitglied (bool), registerId (int), userId (int, optional)
+     * @param mixed $spec
+     * @param array $opts includeUsers (bool, default true)
+     * @return bool
+     */
+    public static function attributesMatchMemberSpec($attrs, $spec, $opts = array()) {
+        $includeUsers = !array_key_exists('includeUsers', $opts) || !empty($opts['includeUsers']);
+        $mitglied = !empty($attrs['mitglied']);
+        $registerId = isset($attrs['registerId']) ? (int)$attrs['registerId'] : 0;
+        $userId = isset($attrs['userId']) ? (int)$attrs['userId'] : 0;
+
+        $norm = self::normalize($spec, array(
+            'allowMailGroups' => false,
+            'defaultGroups' => null,
+        ));
+        unset($norm['mailGroups']);
+        $norm['mailGroups'] = array();
+
+        if($includeUsers && $userId > 0 && in_array($userId, array_map('intval', $norm['users']), true)) {
+            return true;
+        }
+
+        $groups = $norm['groups'];
+        $regs = array_map('intval', $norm['registers']);
+        if(!count($groups) && !count($regs)) {
+            return false;
+        }
+        if(!count($groups) && count($regs) > 0) {
+            $groups = array('musicians');
+        }
+
+        foreach($groups as $audience) {
+            $roleOk = false;
+            if($audience === 'users' || $audience === 'musicians') {
+                $roleOk = true;
+            }
+            elseif($audience === 'members') {
+                $roleOk = $mitglied;
+            }
+            elseif($audience === 'nonmembers') {
+                $roleOk = !$mitglied;
+            }
+            if(!$roleOk) {
+                continue;
+            }
+            if(count($regs) > 0 && !in_array($registerId, $regs, true)) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Derived membership chips from form attributes (roles, register, rule-based mail groups).
+     * Explicit users[]-only mail groups are omitted (profile checkboxes).
+     *
+     * @param array $attrs mitglied (bool), registerId (int), registerName (string), userId (int)
+     * @return array<int,array{type:string,label:string}>
+     */
+    public static function previewDerivedMembership($attrs) {
+        $items = array();
+        $registerName = isset($attrs['registerName'])
+            ? html_entity_decode((string)$attrs['registerName'], ENT_QUOTES | ENT_HTML5, 'UTF-8')
+            : '';
+
+        foreach(self::allowedGroupIds() as $gid) {
+            $spec = self::emptySpec();
+            $spec['groups'] = array($gid);
+            if(self::attributesMatchMemberSpec($attrs, $spec, array('includeUsers' => false))) {
+                $items[] = array(
+                    'type' => 'group',
+                    'label' => self::groupLabel($gid),
+                );
+            }
+        }
+
+        if($registerName !== '' && strtolower(trim($registerName)) !== 'keins') {
+            $items[] = array(
+                'type' => 'register',
+                'label' => 'Register: '.$registerName,
+            );
+        }
+
+        foreach(MailGroup::listAll() as $g) {
+            $member = $g->getMemberSpecArray();
+            if(self::attributesMatchMemberSpec($attrs, $member, array('includeUsers' => false))) {
+                $items[] = array(
+                    'type' => 'mailGroup',
+                    'label' => 'Gruppe: '.(string)$g->Name,
+                );
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Catalog for live profile membership preview (Instrument → Register, mail group rules).
+     *
+     * @return array
+     */
+    public static function buildMembershipPreviewCatalog() {
+        $instruments = array();
+        $sql = sprintf(
+            'SELECT i.`Index` AS `InstrumentId`, i.`Register` AS `RegisterId`,
+                    COALESCE(r.`Name`, "") AS `RegisterName`
+             FROM `%sInstrument` i
+             LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+             ORDER BY i.`Index`;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $instruments[(string)(int)$row['InstrumentId']] = array(
+                    'registerId' => (int)$row['RegisterId'],
+                    'registerName' => html_entity_decode((string)$row['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                );
+            }
+        }
+
+        $mailGroups = array();
+        foreach(MailGroup::listAll() as $g) {
+            $spec = $g->getMemberSpecArray();
+            $mailGroups[] = array(
+                'id' => (int)$g->Index,
+                'name' => (string)$g->Name,
+                'groups' => $spec['groups'],
+                'registers' => array_map('intval', $spec['registers']),
+            );
+        }
+
+        return array(
+            'groupLabels' => self::groupLabels(),
+            'groupIds' => self::allowedGroupIds(),
+            'instruments' => $instruments,
+            'mailGroups' => $mailGroups,
+        );
     }
 
     /**
@@ -665,7 +810,7 @@ class AudienceSpec
 
         $userWhere = 'u.`Deleted` != 1';
         if($forMail) {
-            $userWhere .= ' AND u.`getMail` = 1 AND (u.`Email` != "" OR u.`Email2` != "")';
+            $userWhere .= ' AND (u.`getMail` = 1 OR u.`notifyInbox` = 1)';
         }
         $sqlUser = sprintf(
             'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`

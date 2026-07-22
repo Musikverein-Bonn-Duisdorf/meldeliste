@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'Birthday' => null, 'getMail' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'Birthday' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -18,6 +18,11 @@ class User
 	    case 'Email2':
 	    case 'Birthday':
 	    case 'getMail':
+	    case 'notifyInbox':
+	    case 'notifyAppMail':
+	    case 'notifyAppTerminNew':
+	    case 'notifyAppTerminChange':
+	    case 'notifyAppTerminSoon':
 	    case 'Admin':
         case 'singleUsePW':
         case 'RegisterLead':
@@ -43,6 +48,11 @@ class User
         case 'RefID':
 	    case 'Mitglied':
 	    case 'getMail':
+	    case 'notifyInbox':
+	    case 'notifyAppMail':
+	    case 'notifyAppTerminNew':
+	    case 'notifyAppTerminChange':
+	    case 'notifyAppTerminSoon':
 	    case 'Admin':
 	    case 'singleUsePW':
 	    case 'RegisterLead':
@@ -74,44 +84,101 @@ class User
     }
     
     public function getChanges() {
+        $detail = $this->getChangeDetail();
+        if($detail['parts'] === array()) {
+            return $detail['header'];
+        }
+        return $detail['header'].', '.implode(', ', $detail['parts']);
+    }
+
+    /**
+     * @return array{header:string,parts:string[]}
+     */
+    public function getChangeDetail() {
         $old = new User;
         $old->load_by_id($this->Index);
 
-        $str = sprintf("User-ID: %d <b>%s %s</b>",
-        $this->Index,
-        $this->Vorname,
-        $this->Nachname
+        $header = sprintf(
+            'User-ID: %d <b>%s %s</b>',
+            (int)$this->Index,
+            htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8')
         );
+        $parts = array();
+
         if($this->Vorname != $old->Vorname) {
             $this->Vorname = trim((string)$this->Vorname);
-            $str.=", Vorname: ".$old->Vorname." &rArr; <b>".$this->Vorname."</b>";
+            $parts[] = 'Vorname: '.htmlspecialchars((string)$old->Vorname, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8').'</b>';
         }
         if($this->Nachname != $old->Nachname) {
             $this->Nachname = trim((string)$this->Nachname);
-            $str.=", Nachname: ".$old->Nachname." &rArr; <b>".$this->Nachname."</b>";
+            $parts[] = 'Nachname: '.htmlspecialchars((string)$old->Nachname, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'</b>';
         }
-        if($this->RefID != $old->RefID) $str.=", RefID: ".$old->RefID." &rArr; <b>".$this->RefID."</b>";
-        if($this->login != $old->login) $str.=", login: ".$old->login." &rArr; <b>".$this->login."</b>";
-        if($this->Passhash != $old->Passhash) $str.=", Passhash: ".$old->Passhash." &rArr; <b>".$this->Passhash."</b>";
-        if($this->activeLink != $old->activeLink) $str.=", activeLink: ".$old->activeLink." &rArr; <b>".$this->activeLink."</b>";
-        if(boolsDiffer($this->Mitglied, $old->Mitglied)) $str.=", Mitglied: ".bool2string($old->Mitglied)." &rArr; <b>".bool2string($this->Mitglied)."</b>";
-        if($this->Email != $old->Email) $str.=", Email: ".$old->Email." &rArr; <b>".$this->Email."</b>";
-        if($this->Email2 != $old->Email2) $str.=", Email2: ".$old->Email2." &rArr; <b>".$this->Email2."</b>";
-        if($this->Birthday != $old->Birthday) $str.=", Geburtstag: ".germanDate($old->Birthday, true)." &rArr; <b>".germanDate($this->Birthday, true)."</b>";
-        if(boolsDiffer($this->getMail, $old->getMail)) $str.=", getMail: ".bool2string($old->getMail)." &rArr; <b>".bool2string($this->getMail)."</b>";
-        if(boolsDiffer($this->Admin, $old->Admin)) $str.=", Admin: ".bool2string($old->Admin)." &rArr; <b>".bool2string($this->Admin)."</b>";
-        if(boolsDiffer($this->RegisterLead, $old->RegisterLead)) $str.=", RegisterLead: ".bool2string($old->RegisterLead)." &rArr; <b>".bool2string($this->RegisterLead)."</b>";
-        if($this->Instrument != $old->Instrument) {
+        if($this->RefID != $old->RefID) {
+            $parts[] = 'Mitglieds-Nr.: '.htmlspecialchars((string)$old->RefID, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->RefID, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->login != $old->login) {
+            $parts[] = 'Login: '.htmlspecialchars((string)$old->login, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->login, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->Passhash != $old->Passhash) {
+            $parts[] = 'Passhash geändert';
+        }
+        if($this->activeLink != $old->activeLink) {
+            $parts[] = 'activeLink geändert';
+        }
+        if(boolsDiffer($this->Mitglied, $old->Mitglied)) {
+            $parts[] = 'Mitglied: '.bool2string($old->Mitglied).' &rArr; <b>'.bool2string($this->Mitglied).'</b>';
+        }
+        if($this->Email != $old->Email) {
+            $parts[] = 'Email: '.htmlspecialchars((string)$old->Email, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Email, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->Email2 != $old->Email2) {
+            $parts[] = 'Email2: '.htmlspecialchars((string)$old->Email2, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Email2, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if($this->Birthday != $old->Birthday) {
+            $parts[] = 'Geburtstag: '.germanDate($old->Birthday, true)
+                .' &rArr; <b>'.germanDate($this->Birthday, true).'</b>';
+        }
+        if(boolsDiffer($this->getMail, $old->getMail)) {
+            $parts[] = 'Benachrichtigung E-Mail: '.bool2string($old->getMail).' &rArr; <b>'.bool2string($this->getMail).'</b>';
+        }
+        if(boolsDiffer($this->notifyInbox, $old->notifyInbox)) {
+            $parts[] = 'Benachrichtigung Nachrichten: '.bool2string($old->notifyInbox).' &rArr; <b>'.bool2string($this->notifyInbox).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppMail, $old->notifyAppMail)) {
+            $parts[] = 'App: Nachrichten: '.bool2string($old->notifyAppMail).' &rArr; <b>'.bool2string($this->notifyAppMail).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppTerminNew, $old->notifyAppTerminNew)) {
+            $parts[] = 'App: neuer Termin: '.bool2string($old->notifyAppTerminNew).' &rArr; <b>'.bool2string($this->notifyAppTerminNew).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppTerminChange, $old->notifyAppTerminChange)) {
+            $parts[] = 'App: Termin geändert: '.bool2string($old->notifyAppTerminChange).' &rArr; <b>'.bool2string($this->notifyAppTerminChange).'</b>';
+        }
+        if(boolsDiffer($this->notifyAppTerminSoon, $old->notifyAppTerminSoon)) {
+            $parts[] = 'App: Termin bald: '.bool2string($old->notifyAppTerminSoon).' &rArr; <b>'.bool2string($this->notifyAppTerminSoon).'</b>';
+        }
+        if(boolsDiffer($this->Admin, $old->Admin)) {
+            $parts[] = 'Admin: '.bool2string($old->Admin).' &rArr; <b>'.bool2string($this->Admin).'</b>';
+        }
+        if(boolsDiffer($this->RegisterLead, $old->RegisterLead)) {
+            $parts[] = 'Registerführer: '.bool2string($old->RegisterLead).' &rArr; <b>'.bool2string($this->RegisterLead).'</b>';
+        }
+        if((int)$this->Instrument !== (int)$old->Instrument) {
             $newinstr = new Instrument;
             $newinstr->load_by_id($this->Instrument);
-
             $oldinstr = new Instrument;
             $oldinstr->load_by_id($old->Instrument);
-            
-            $str.=", Instrument: ".$oldinstr->Name." &rArr; <b>".$newinstr->Name."</b>";
+            $parts[] = 'Instrument: '.htmlspecialchars((string)$oldinstr->Name, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$newinstr->Name, ENT_QUOTES, 'UTF-8').'</b>';
         }
 
-        return $str;
+        return array('header' => $header, 'parts' => $parts);
     }
     
     public function getVars() {
@@ -139,7 +206,12 @@ class User
         logAppendFilled($parts, 'Email2', $this->Email2, (string)$this->Email2);
         $bday = germanDate($this->Birthday, true);
         logAppendFilled($parts, 'Geburtstag', $bday, (string)$bday);
-        $parts[] = logPart('Mailverteiler', bool2string($this->getMail));
+        $parts[] = logPart('E-Mail', bool2string($this->getMail));
+        $parts[] = logPart('Nachrichten', bool2string($this->notifyInbox));
+        $parts[] = logPart('App: Nachrichten', bool2string($this->notifyAppMail));
+        $parts[] = logPart('App: neuer Termin', bool2string($this->notifyAppTerminNew));
+        $parts[] = logPart('App: Termin geändert', bool2string($this->notifyAppTerminChange));
+        $parts[] = logPart('App: Termin bald', bool2string($this->notifyAppTerminSoon));
         logAppendTrue($parts, 'Admin', $this->Admin);
         logAppendTrue($parts, 'RegisterLead', $this->RegisterLead);
         logAppendFilled($parts, 'LastLogin', $this->LastLogin, (string)$this->LastLogin);
@@ -179,11 +251,19 @@ class User
         if($this->RegisterLead === null) $this->RegisterLead = 0;
         if($this->Mitglied === null) $this->Mitglied = 0;
         if($this->getMail === null) $this->getMail = 0;
+        if($this->notifyInbox === null) $this->notifyInbox = 1;
+        if($this->notifyAppMail === null) $this->notifyAppMail = 1;
+        if($this->notifyAppTerminNew === null) $this->notifyAppTerminNew = 1;
+        if($this->notifyAppTerminChange === null) $this->notifyAppTerminChange = 1;
+        if($this->notifyAppTerminSoon === null) $this->notifyAppTerminSoon = 0;
         if($this->Instrument === null) $this->Instrument = 0;
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
-            $logentry = new Log;
-            $logentry->DBupdate($this->getChanges());
+            $detail = $this->getChangeDetail();
+            if(count($detail['parts'])) {
+                $logentry = new Log;
+                $logentry->DBupdate($detail['header'].', '.implode(', ', $detail['parts']));
+            }
             return $this->update();
         }
         $this->Vorname = trim((string)$this->Vorname);
@@ -347,7 +427,7 @@ class User
         return (string)preg_replace('#^https?://#i', 'webcal://', $https);
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, "%d", "%s", "%s", %s, "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `notifyInbox`, `notifyAppMail`, `notifyAppTerminNew`, `notifyAppTerminChange`, `notifyAppTerminSoon`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, "%d", "%s", "%s", %s, "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
@@ -361,6 +441,11 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
         mkNULLstr($this->Birthday),
         (int)$this->getMail,
+        (int)$this->notifyInbox,
+        (int)$this->notifyAppMail,
+        (int)$this->notifyAppTerminNew,
+        (int)$this->notifyAppTerminChange,
+        (int)$this->notifyAppTerminSoon,
         (int)$this->Admin,
         (int)$this->RegisterLead
         );
@@ -371,7 +456,7 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `notifyInbox` = "%d", `notifyAppMail` = "%d", `notifyAppTerminNew` = "%d", `notifyAppTerminChange` = "%d", `notifyAppTerminSoon` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
@@ -385,6 +470,11 @@ class User
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
         mkNULLstr($this->Birthday),
         (int)$this->getMail,
+        (int)$this->notifyInbox,
+        (int)$this->notifyAppMail,
+        (int)$this->notifyAppTerminNew,
+        (int)$this->notifyAppTerminChange,
+        (int)$this->notifyAppTerminSoon,
         (int)$this->Admin,
         (int)$this->RegisterLead,
         (int)$this->Index
@@ -463,7 +553,7 @@ class User
     }
     public function delete() {
         if(!$this->Index) return false;
-        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gelöschter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0 WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gelöschter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0, `notifyInbox` = 0, `notifyAppMail` = 0, `notifyAppTerminNew` = 0, `notifyAppTerminChange` = 0, `notifyAppTerminSoon` = 0 WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Index
         );
@@ -547,11 +637,10 @@ class User
     
     public function getModalHtml($forceEditButton = false) {
         $showUserDetails = requirePermission("perm_showUsers");
-        $permissionsHtml = '';
+        $permissions = null;
         if($showUserDetails) {
-            $p = new Permissions;
-            $p->load_by_user($this->Index);
-            $permissionsHtml = $p->printShort();
+            $permissions = new Permissions;
+            $permissions->load_by_user($this->Index);
         }
         $registerLeadName = null;
         if($this->RegisterLead) {
@@ -562,7 +651,7 @@ class User
         return render('user/modal', array(
             'user' => $this,
             'showUserDetails' => $showUserDetails,
-            'permissionsHtml' => $permissionsHtml,
+            'permissions' => $permissions,
             'registerLeadName' => $registerLeadName,
             'showEditButton' => ($forceEditButton || requirePermission("perm_editUsers")),
             'returnTo' => pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker'),

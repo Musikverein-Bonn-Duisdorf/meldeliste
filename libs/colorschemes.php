@@ -252,20 +252,27 @@ function getConfigParamRawValue($parameter) {
     return $row ? (string)$row['Value'] : null;
 }
 
-function setConfigParamRawValue($parameter, $value) {
+function setConfigParamRawValue($parameter, $value, $opts = array()) {
+    $silent = !empty($opts['silent']);
     $conn = $GLOBALS['conn'];
     $prefix = $GLOBALS['dbprefix'];
     $escapedParam = mysqli_real_escape_string($conn, $parameter);
     $escapedValue = mysqli_real_escape_string($conn, (string)$value);
 
+    $oldValue = null;
+    $type = 'string';
     $sql = sprintf(
-        'SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = "%s" LIMIT 1;',
+        'SELECT `Parameter`, `Value`, `Type` FROM `%sconfig` WHERE `Parameter` = "%s" LIMIT 1;',
         $prefix,
         $escapedParam
     );
     $dbr = mysqli_query($conn, $sql);
     $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
     if($row) {
+        $oldValue = (string)$row['Value'];
+        if(isset($row['Type']) && $row['Type'] !== '') {
+            $type = (string)$row['Type'];
+        }
         $sql = sprintf(
             'UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
             $prefix,
@@ -274,7 +281,6 @@ function setConfigParamRawValue($parameter, $value) {
         );
     }
     else {
-        $type = 'string';
         $desc = '';
         if(function_exists('getConfigDefaults')) {
             foreach(getConfigDefaults() as $item) {
@@ -296,6 +302,9 @@ function setConfigParamRawValue($parameter, $value) {
     }
     $ok = mysqli_query($conn, $sql);
     sqlerror();
+    if($ok && !$silent && $type !== 'internal') {
+        logConfigChange($parameter, $oldValue === null ? '' : $oldValue, $value, $type);
+    }
     return (bool)$ok;
 }
 
@@ -336,7 +345,8 @@ function saveColorSchemes($schemes) {
     if($json === false) {
         return false;
     }
-    return setConfigParamRawValue('colorSchemes', $json);
+    // Farbschema-JSON: Einzeländerungen loggen die betroffenen Farbparameter (savePara).
+    return setConfigParamRawValue('colorSchemes', $json, array('silent' => true));
 }
 
 function getActiveColorSchemeId() {
@@ -353,7 +363,7 @@ function applyColorScheme($schemeId) {
     if(!isset($schemes[$schemeId])) {
         return false;
     }
-    setConfigParamRawValue('colorSchemeActive', $schemeId);
+    setConfigParamRawValue('colorSchemeActive', $schemeId, array('silent' => true));
     $colors = isset($schemes[$schemeId]['colors']) && is_array($schemes[$schemeId]['colors'])
         ? $schemes[$schemeId]['colors']
         : array();
@@ -373,7 +383,7 @@ function applyColorScheme($schemeId) {
         if($value !== '' && function_exists('normalizeHexColor')) {
             $value = normalizeHexColor($value);
         }
-        setConfigParamRawValue($param, $value);
+        setConfigParamRawValue($param, $value, array('silent' => true));
     }
     return true;
 }

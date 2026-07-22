@@ -190,12 +190,18 @@ Token widerrufen (`Revoked = 1`), optional Session zerstören.
 
 **Auth:** Bearer-Token **oder** bestehende PHP-Session.
 
-**Quelle (MVP):** `MailOutbox` für den User:
+**Quellen:** abhängig von den User-Prefs unter Mein Profil:
 
-- `DeletedByUser = 0`
-- `Status IN ('pending','sending','sent')`
-- bei gesetztem `since`: `Created > since`
-- Limit sinnvoll (z. B. 50)
+| `type` | Pref | Inhalt |
+|--------|------|--------|
+| `mail` | `notifyAppMail` | `MailOutbox` (`DeletedByUser=0`, Status pending/sending/sent) |
+| `termin_new` | `notifyAppTerminNew` | sichtbarer Termin mit `Created > since` (**nur mit `since`**) |
+| `termin_change` | `notifyAppTerminChange` | sichtbarer Termin mit `Updated > Created` und `Updated > since` (**nur mit `since`**) |
+| `termin_soon` | `notifyAppTerminSoon` | sichtbarer Termin mit Datum heute … heute+3 Tage (max. 1×/Kalendertag; auch ohne `since`) |
+
+- bei gesetztem `since`: jeweils nur neuere Ereignisse
+- Gesamt-Limit sinnvoll (z. B. 50)
+- `url` ist relativ zur Web-App (Deep-Link in der Android-App)
 
 **Erfolg (200):**
 
@@ -210,6 +216,15 @@ Token widerrufen (`Revoked = 1`), optional Session zerstören.
       "created": "2026-07-19T10:00:00+02:00",
       "unread": true,
       "url": "meine-mails.php"
+    },
+    {
+      "id": "termin-new-45",
+      "type": "termin_new",
+      "title": "Neuer Termin: Probe",
+      "body": "22.07.2026",
+      "created": "2026-07-20T09:00:00+02:00",
+      "unread": true,
+      "url": "index.php"
     }
   ],
   "serverTime": "2026-07-19T11:00:00+02:00",
@@ -217,7 +232,7 @@ Token widerrufen (`Revoked = 1`), optional Session zerstören.
 }
 ```
 
-Die App speichert `serverTime` als nächsten `since`-Cursor und zeigt lokale Notifications.
+Die App speichert `serverTime` als nächsten `since`-Cursor und zeigt lokale Notifications. Tippen öffnet `url` (nicht fest `meine-mails.php`).
 
 **Fehler:** `401` `{ "error": "unauthorized" }`
 
