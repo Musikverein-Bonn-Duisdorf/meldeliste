@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-22-1aa82 (2026-07-22)
+
+- MELD-133: calendars/-Ordner entfernen
+- MELD-133: Legacy static ICS / UserCalendar entfernen
+
 ## 2026-07-22-f2a51 (2026-07-22)
 
 - MELD-9: Toolbar-Layout und Europe/Berlin in der App
