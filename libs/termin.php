@@ -220,9 +220,6 @@ class Termin
                 $this->publishToDiscord(false);
             }
         }
-	$c = new UserCalendar;
-        $c->User = 0;
-        $c->makeCalendar();
     }
 
     /**

@@ -1,3 +1,0 @@
-This folder may still contain legacy static ICS files from older builds.
-Personal calendar subscriptions use on-demand ical.php (MELD-127) — do not rely on
-rebuilding MVDcal_*.ics per user.

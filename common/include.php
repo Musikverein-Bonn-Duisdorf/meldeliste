@@ -44,7 +44,6 @@ include "libs/mailOutbox.php";
 include "libs/mailGroup.php";
 include "libs/appToken.php";
 include "libs/ics.php";
-include "libs/usercalendar.php";
 include "libs/aushilfe.php";
 include "libs/aushilfeShift.php";
 include "libs/AppmntFreeTextResponse.php";

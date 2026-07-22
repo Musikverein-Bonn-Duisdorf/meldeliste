@@ -131,7 +131,7 @@ function icalFeedMeldeLabel($wert) {
 }
 
 /**
- * Local DTSTART/DTEND as YmdThis (Europe/Berlin wall clock), matching legacy UserCalendar.
+ * Local DTSTART/DTEND as YmdThis (Europe/Berlin wall clock).
  *
  * @param array{date:string,endDate:string,startTime:string,endTime:string} $ev
  * @return array{begin:string,end:string}
