@@ -1,7 +1,0 @@
-Legacy static ICS files (MVDcal_*.ics) are no longer generated.
-
-Personal calendar subscriptions use on-demand ical.php?t={activeLink} (MELD-127).
-Single-appointment download remains download-ics.php (session).
-
-On deploy: delete any leftover calendars/MVDcal_*.ics on the server and disable
-cron jobs that called cmd=calendar / rebuildCalendars().

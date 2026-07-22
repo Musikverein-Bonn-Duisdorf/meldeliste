@@ -1,4 +1,0 @@
-# Deny leftover legacy static ICS files (MELD-105 / MELD-133)
-<FilesMatch "^MVDcal_.*\.ics$">
-    Require all denied
-</FilesMatch>
