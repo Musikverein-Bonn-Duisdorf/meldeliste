@@ -9,23 +9,19 @@ if(!requirePermission("perm_showResponse")) {
 }
 
 $chunk = listChunkTermine('past', 'response', '', 50, (int)$_SESSION['userid']);
+adminListPageBegin('Meldungen', 'Archiv: Meldungen');
+adminListSearchField('Termine suchen (Titel, Ort, Datum, Beschreibung)…', array(
+    'onkeyup' => 'filterTermine()',
+    'label' => 'Termine suchen',
+));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Rückmeldungen - Archiv</h2>
-</div>
-<div class="w3-row">
-  <div class="w3-panel w3-col l3 w3-left"></div>
-  <div class="w3-col l6 s12 m12">
-    <div class="w3-container w3-padding-16" style="clear:both;">
-      <input class="w3-input w3-border w3-padding" type="text" placeholder="Termine suchen (Titel, Ort, Datum, Beschreibung)…" id="filterString" onkeyup="filterTermine()">
-    </div>
-    <div id="Liste">
+<div id="Liste">
 <?php echo $chunk['html']; ?>
 <?php echo listChunkRenderSentinel('archiv', $chunk['nextCursor'], $chunk['hasMore'], 'filterTermine'); ?>
-    </div>
-  </div>
-  <div class="w3-col l3"></div>
 </div>
+<?php
+adminListPageEnd();
+?>
 <script src="js/filterTermine.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php

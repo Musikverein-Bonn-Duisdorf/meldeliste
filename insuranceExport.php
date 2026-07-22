@@ -7,7 +7,7 @@ include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 requireLoggedInOrRedirect();
 
-if(!requirePermission('perm_showInventories') && !requirePermission('perm_showInstruments')) {
+if(!requirePermission('perm_showInventories')) {
     denyAccess();
 }
 

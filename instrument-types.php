@@ -4,7 +4,7 @@ meldeConfigureSession();
 $_SESSION['page'] = 'instrument-types';
 $_SESSION['adminpage'] = true;
 include 'common/header.php';
-if(!requirePermission('perm_editInstruments')) {
+if(!requirePermission('perm_editRegisters')) {
     denyAccess();
 }
 
@@ -53,13 +53,13 @@ if(isset($_POST['delete'])) {
 
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Instrument-Typen</h2>
-</div>
+<?php
+adminListPageBegin('Register', 'Instrument-Typen');
+?>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
 
-<div class="w3-container w3-padding">
+<div class="admin-list-intro">
   <p>Instrument-Typen (z.B. Flöte, Trompete) gehören zu einem Register. Farbe erscheint in dieser Übersicht; Register-Farben steuern die Orchesterdarstellung.</p>
   <p><a href="register-types.php">Register verwalten</a></p>
 </div>
@@ -166,5 +166,6 @@ while($row = mysqli_fetch_array($dbr)) {
   </form>
 </div>
 <?php
+adminListPageEnd();
 include 'common/footer.php';
 ?>

@@ -15,6 +15,7 @@ foreach($permCatalog as $item) {
 }
 $permLabels = Permissions::permissionLabels();
 $sessionUserId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+$inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 
 $sql = sprintf(
     'SELECT `Index` FROM `%sUser` WHERE `Deleted` != 1 ORDER BY `Nachname`, `Vorname`;',
@@ -40,27 +41,31 @@ while($row = mysqli_fetch_array($dbr)) {
     );
 }
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Berechtigungen bearbeiten</h2>
-</div>
-<div class="w3-container w3-padding">
-  <div class="w3-row w3-margin-bottom">
-    <div class="w3-col m6 s12 w3-padding-small">
-      <input type="search" id="permFilter" class="w3-input w3-border" placeholder="Name filtern…" autocomplete="off">
+<?php
+adminListPageBegin('System', 'Berechtigungen', array(
+    'shellClass' => 'perm-page-shell',
+    'actionsHtml' => '<span id="permSaveStatus" class="profile-label perm-save-status" aria-live="polite"></span>',
+));
+?>
+    <div class="perm-toolbar">
+      <div class="profile-field perm-toolbar-search">
+        <label class="profile-label" for="permFilter">Name filtern</label>
+        <input type="search" id="permFilter" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Name tippen…" autocomplete="off">
+      </div>
+      <div class="profile-field perm-toolbar-filter">
+        <label class="profile-pref" for="permOnlyActive">
+          <input type="checkbox" id="permOnlyActive">
+          <span>nur mit mindestens einem Recht</span>
+        </label>
+      </div>
     </div>
-    <div class="w3-col m6 s12 w3-padding-small w3-padding-16">
-      <label class="w3-margin-right">
-        <input type="checkbox" id="permOnlyActive"> nur mit mindestens einem Recht
-      </label>
-      <span id="permSaveStatus" class="w3-small" aria-live="polite"></span>
-    </div>
-  </div>
-</div>
-<div class="perm-matrix-wrap w3-margin-bottom">
-  <table class="perm-matrix" id="permMatrix">
-    <thead>
-      <tr>
-        <th class="perm-user-col">Benutzer</th>
+
+    <h3 class="profile-col-title">Rechte-Matrix</h3>
+    <div class="perm-matrix-wrap">
+      <table class="perm-matrix" id="permMatrix">
+        <thead>
+          <tr>
+            <th class="perm-user-col">Benutzer</th>
 <?php foreach($permKeys as $key) {
     $meta = $permLabels[$key];
     $gid = Permissions::groupIdForPermission($key);
@@ -72,20 +77,27 @@ while($row = mysqli_fetch_array($dbr)) {
     $labelHtml = htmlspecialchars(implode("\n", $labelParts), ENT_QUOTES, 'UTF-8');
     $labelHtml = nl2br($labelHtml, false);
 ?>
-        <th class="perm-col perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?>">
-          <span class="perm-col-label"><?php echo $labelHtml; ?></span>
-        </th>
+            <th class="perm-col perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?>">
+              <span class="perm-col-label"><?php echo $labelHtml; ?></span>
+            </th>
 <?php } ?>
-      </tr>
-    </thead>
-    <tbody>
+          </tr>
+        </thead>
+        <tbody>
 <?php foreach($rows as $entry) {
     $uid = (int)$entry['user']->Index;
     $name = (string)$entry['name'];
     $nameAttr = htmlspecialchars(mb_strtolower($name, 'UTF-8'), ENT_QUOTES, 'UTF-8');
 ?>
-      <tr data-name="<?php echo $nameAttr; ?>" data-has-perms="<?php echo $entry['hasAny'] ? '1' : '0'; ?>">
-        <td class="perm-user-col"><?php echo htmlspecialchars($name); ?></td>
+          <tr data-name="<?php echo $nameAttr; ?>" data-has-perms="<?php echo $entry['hasAny'] ? '1' : '0'; ?>">
+            <td class="perm-user-col perm-user-link"
+                role="button"
+                tabindex="0"
+                title="Benutzer öffnen"
+                onclick="openModal('user', <?php echo $uid; ?>)"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('user', <?php echo $uid; ?>);}">
+              <?php echo htmlspecialchars($name); ?>
+            </td>
 <?php foreach($permKeys as $key) {
     $on = (bool)$entry['perm']->$key;
     $locked = ($uid === $sessionUserId && $key === 'perm_editPermissions');
@@ -96,20 +108,21 @@ while($row = mysqli_fetch_array($dbr)) {
         $gid = 'system';
     }
 ?>
-        <td class="perm-cell perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?> <?php echo $on ? 'perm-on' : 'perm-off'; ?>" title="<?php echo $title; ?>">
-          <input type="checkbox"
-                 class="perm-toggle"
-                 data-user="<?php echo $uid; ?>"
-                 data-perm="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"
-                 <?php echo $on ? 'checked' : ''; ?>
-                 <?php echo $locked ? 'disabled title="Eigenes Recht „Berechtigungen bearbeiten“ kann nicht entfernt werden"' : ''; ?>>
-        </td>
+            <td class="perm-cell perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?> <?php echo $on ? 'perm-on' : 'perm-off'; ?>" title="<?php echo $title; ?>">
+              <input type="checkbox"
+                     class="perm-toggle"
+                     data-user="<?php echo $uid; ?>"
+                     data-perm="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"
+                     <?php echo $on ? 'checked' : ''; ?>
+                     <?php echo $locked ? 'disabled title="Eigenes Recht „Berechtigungen bearbeiten“ kann nicht entfernt werden"' : ''; ?>>
+            </td>
 <?php } ?>
-      </tr>
+          </tr>
 <?php } ?>
-    </tbody>
-  </table>
-</div>
+        </tbody>
+      </table>
+    </div>
+<?php adminListPageEnd(); ?>
 <script>
 (function() {
   var matrix = document.getElementById('permMatrix');
@@ -121,12 +134,12 @@ while($row = mysqli_fetch_array($dbr)) {
   function setStatus(text, ok) {
     if(!statusEl) return;
     statusEl.textContent = text || '';
-    statusEl.className = 'w3-small ' + (ok === true ? 'w3-text-green' : (ok === false ? 'w3-text-red' : ''));
+    statusEl.className = 'profile-label perm-save-status' + (ok === true ? ' perm-save-ok' : (ok === false ? ' perm-save-err' : ''));
     if(statusTimer) clearTimeout(statusTimer);
     if(text) {
       statusTimer = setTimeout(function() {
         statusEl.textContent = '';
-        statusEl.className = 'w3-small';
+        statusEl.className = 'profile-label perm-save-status';
       }, 2500);
     }
   }
@@ -187,6 +200,9 @@ while($row = mysqli_fetch_array($dbr)) {
       refreshRowHasPerms(cell.parentNode);
       applyFilter();
       setStatus('Gespeichert', true);
+      if(typeof modalCache !== 'undefined') {
+        delete modalCache['user:' + cb.getAttribute('data-user')];
+      }
     };
     xhr.open('POST', 'savePermission.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');

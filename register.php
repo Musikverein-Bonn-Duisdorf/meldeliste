@@ -8,10 +8,8 @@ if(!requirePermission("perm_showUsers")) {
     denyAccess();
 }
 
+adminListPageBegin('Personen', 'Registerübersicht');
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <h2>Registerübersicht</h2>
-</div>
 
 <?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
 <div class="w3-center orchestra-svg-wrap">
@@ -30,8 +28,6 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->load_by_id($row['Index']);
     $M->memberTable();
 }
-?>
-
-<?php
+adminListPageEnd();
 include "common/footer.php";
 ?>

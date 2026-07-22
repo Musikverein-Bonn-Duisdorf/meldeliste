@@ -65,36 +65,36 @@ $catalog = AudienceSpec::buildCatalog(array(
 
 include 'common/header.php';
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
+$groupTitle = (int)$g->Index ? 'Gruppe bearbeiten' : 'Neue Gruppe';
+$backLink = '<a class="w3-button w3-border" href="groups.php">Zur Übersicht</a>';
+adminListPageBegin('Kommunikation', $groupTitle, array('actionsHtml' => $backLink));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2><?php echo (int)$g->Index ? 'Gruppe bearbeiten' : 'Neue Gruppe'; ?></h2>
-</div>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 
-<div class="w3-container w3-padding">
-  <a href="groups.php">← Zur Übersicht</a>
-</div>
-
-<form method="post" class="w3-container w3-padding">
+<form method="post" class="profile-form">
   <?php if((int)$g->Index) { ?>
   <input type="hidden" name="Index" value="<?php echo (int)$g->Index; ?>" />
   <?php } ?>
-  <label>Name</label>
-  <input class="w3-input w3-border w3-margin-bottom <?php echo $inputCls; ?>" type="text" name="Name" required
-    value="<?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?>"
-    placeholder="z.B. Egerländerbesetzung" />
+  <div class="profile-field">
+    <label class="profile-label" for="groupName">Name</label>
+    <input id="groupName" class="w3-input w3-border profile-control <?php echo $inputCls; ?>" type="text" name="Name" required
+      value="<?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="z.B. Egerländerbesetzung" />
+  </div>
 
-  <label>Mitglieder</label>
-  <p class="w3-small w3-text-gray">Rollen, Register und Personen (Union). Beispiel: Posaunen + Schlagwerk + Klarinetten + einzelne Personen.</p>
-  <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputCls; ?>">
-    <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
-    <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $inputCls; ?>" placeholder="Rolle, Register oder Person tippen…" autocomplete="off" />
-    <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
-    <input type="hidden" name="memberSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($memberSpec), ENT_QUOTES, 'UTF-8'); ?>" />
-    <p class="w3-small w3-margin-top mail-recipient-count-line">
-      <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
-    </p>
+  <div class="profile-field">
+    <label class="profile-label">Mitglieder</label>
+    <p class="w3-small w3-text-gray">Rollen, Register und Personen (Union). Beispiel: Posaunen + Schlagwerk + Klarinetten + einzelne Personen.</p>
+    <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputCls; ?>">
+      <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
+      <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $inputCls; ?>" placeholder="Rolle, Register oder Person tippen…" autocomplete="off" />
+      <div id="mailRecipientSuggest" class="mail-recipient-suggest" hidden></div>
+      <input type="hidden" name="memberSpec" id="mailRecipientSpec" value="<?php echo htmlspecialchars(json_encode($memberSpec), ENT_QUOTES, 'UTF-8'); ?>" />
+      <p class="w3-small w3-margin-top mail-recipient-count-line">
+        <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
+      </p>
+    </div>
   </div>
 
   <button class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" type="submit" name="save" value="1">Speichern</button>
@@ -121,5 +121,6 @@ $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 })();
 </script>
 <?php
+adminListPageEnd();
 include 'common/footer.php';
 ?>

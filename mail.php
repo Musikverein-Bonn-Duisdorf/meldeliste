@@ -217,22 +217,16 @@ if(!empty($recipientSpec['termine']) && is_array($recipientSpec['termine'])) {
 $allJobs = MailJob::listJobs(null, 300);
 
 include_once 'common/header.php';
+$mailActions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?new=1'.($terminParam ? '&termin='.(int)$terminParam : '').'">Neue Email</a>';
+if($job) {
+    $mailActions .= ' <a class="w3-button w3-border" href="mail.php">Zur Übersicht</a>';
+}
+adminListPageBegin('Kommunikation', 'Email versenden', array('actionsHtml' => $mailActions));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Email versenden</h2>
-</div>
 <?php echo renderFlashHtml(); ?>
 <?php echo $msg; ?>
 
-<div class="w3-container w3-padding">
-  <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail.php?new=1<?php echo $terminParam ? '&termin='.(int)$terminParam : ''; ?>">Neue Email</a>
-  <?php if($job) { ?>
-  <a class="w3-button w3-margin-left" href="mail.php">Zur Übersicht</a>
-  <?php } ?>
-</div>
-
 <?php if(!$job) { ?>
-<div class="w3-container w3-padding">
   <div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <div>Betreff</div>
@@ -317,7 +311,6 @@ foreach($allJobs as $rowJob) {
 }
 ?>
   </div>
-</div>
 <?php if(count($mailSendingIds)) { ?>
 <script>
 (function() {
@@ -777,5 +770,6 @@ else {
 <?php } ?>
 
 <?php
+adminListPageEnd();
  include "common/footer.php";
 ?>

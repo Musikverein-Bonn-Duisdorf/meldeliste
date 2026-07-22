@@ -16,16 +16,15 @@ if($leak !== false && $leak !== '') {
     $chunk['html'] = $leak.$chunk['html'];
 }
 ?>
-<div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<h2>Log</h2>
-</div>
-<div class="w3-container w3-padding-16" style="clear:both;">
-<input class="w3-input w3-border w3-padding" type="text" placeholder="Log durchsuchen..." id="filterString" onkeyup="filterLog()">
-</div>
+<?php
+adminListPageBegin('System', 'Log');
+adminListSearchField('Log durchsuchen…', array('onkeyup' => 'filterLog()', 'label' => 'Log durchsuchen'));
+?>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>
 <?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog'); ?>
 </div>
+<?php adminListPageEnd(); ?>
 <script>
 function getLogMaxIndex() {
     var parent = document.getElementById("Liste");

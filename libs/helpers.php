@@ -203,6 +203,66 @@ function adminNavPermClass($permKey) {
     return 'admin-nav-perm admin-nav-perm--'.$gid;
 }
 
+/**
+ * Open admin list page chrome (profile-shell, same style as new-musiker / permissions).
+ * @param string $kicker Section label (Personen, Inventar, …)
+ * @param string $title Page title (plain text)
+ * @param array $options actionsHtml (string), shellClass (string)
+ */
+function adminListPageBegin($kicker, $title, $options = array()) {
+    $actionsHtml = isset($options['actionsHtml']) ? (string)$options['actionsHtml'] : '';
+    $shellClass = isset($options['shellClass']) ? trim((string)$options['shellClass']) : '';
+    $shellCls = 'profile-shell admin-list-shell'.($shellClass !== '' ? ' '.$shellClass : '');
+    echo '<div class="w3-container w3-margin-bottom profile-page">'."\n";
+    echo '  <div class="'.htmlspecialchars($shellCls, ENT_QUOTES, 'UTF-8').'">'."\n";
+    echo '    <header class="profile-hero">'."\n";
+    echo '      <div class="profile-hero-text">'."\n";
+    echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
+    echo '        <h2 class="profile-title">'.htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8').'</h2>'."\n";
+    echo '      </div>'."\n";
+    if($actionsHtml !== '') {
+        echo '      <div class="profile-hero-actions">'.$actionsHtml.'</div>'."\n";
+    }
+    echo '    </header>'."\n";
+}
+
+/** Close adminListPageBegin(). */
+function adminListPageEnd() {
+    echo '  </div>'."\n";
+    echo '</div>'."\n";
+}
+
+/**
+ * Search field styled like profile controls (keeps #filterString for existing JS).
+ * @param string $placeholder
+ * @param array $options id, onkeyup, label, extraHtml
+ */
+function adminListSearchField($placeholder, $options = array()) {
+    $id = isset($options['id']) ? (string)$options['id'] : 'filterString';
+    $onkeyup = isset($options['onkeyup']) ? (string)$options['onkeyup'] : '';
+    $label = isset($options['label']) ? (string)$options['label'] : 'Suchen';
+    $extra = isset($options['extraHtml']) ? (string)$options['extraHtml'] : '';
+    $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground'])
+        ? (string)$GLOBALS['optionsDB']['colorInputBackground'] : '';
+    echo '<div class="admin-list-toolbar">'."\n";
+    echo '  <div class="profile-field admin-list-search">'."\n";
+    echo '    <label class="profile-label" for="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'">'
+        .htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</label>'."\n";
+    echo '    <input type="search" id="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'"'
+        .' class="w3-input w3-border profile-control '.htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8').'"'
+        .' placeholder="'.htmlspecialchars((string)$placeholder, ENT_QUOTES, 'UTF-8').'"'
+        .' autocomplete="off"';
+    if($onkeyup !== '') {
+        echo ' onkeyup="'.htmlspecialchars($onkeyup, ENT_QUOTES, 'UTF-8').'"';
+    }
+    echo '>'."\n";
+    echo '  </div>'."\n";
+    if($extra !== '') {
+        echo '  <div class="admin-list-toolbar-extra">'.$extra.'</div>'."\n";
+    }
+    echo '</div>'."\n";
+}
+
 function getNextRegInventoryNumber($inventoryTypeId = 0) {
     $inventoryTypeId = (int)$inventoryTypeId;
     if($inventoryTypeId < 1) {

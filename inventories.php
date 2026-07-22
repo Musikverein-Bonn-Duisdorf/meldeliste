@@ -24,14 +24,16 @@ if(requirePermission("perm_showInventories")) {
     $row = mysqli_fetch_array($dbr);
     $nInventories = $row['Count'];
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Inventarliste (<?php echo $nInventories; ?>)</h2>
-</div>
-
-<div class="w3-row">
-  <input class="w3-input w3-border w3-padding w3-col l6 m10 s10" type="text" placeholder="Nach Inventar suchen..." id="filterString" onkeyup="filterMusiker()">
-  <div onclick="document.getElementById('inputModal').style.display='block'" class="w3-col l1 m2 s2 w3-center w3-padding <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?>"><i class="fas fa-plus"></i></div>
-</div>
+<?php
+$plusBtn = requirePermission('perm_editInventories')
+    ? '<button type="button" class="w3-button w3-border '.$GLOBALS['optionsDB']['colorInputBackground'].'" onclick="document.getElementById(\'inputModal\').style.display=\'block\'" title="neues Inventar"><i class="fas fa-plus"></i></button>'
+    : '';
+adminListPageBegin('Inventar', 'Inventar ('.$nInventories.')');
+adminListSearchField('Nach Inventar suchen…', array(
+    'onkeyup' => 'filterMusiker()',
+    'extraHtml' => $plusBtn,
+));
+?>
 <div id="inputModal" class="w3-modal">
   <form class="w3-modal-content" action="" method="POST">
     <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
@@ -124,6 +126,7 @@ if(requirePermission("perm_showInventories")) {
     }
 ?>
 </div>
+<?php adminListPageEnd(); ?>
 <script src="js/filterInstruments.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/sortList.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script>bindListSort({ headerId: 'listHeader', listId: 'Liste', mode: 'client' });</script>

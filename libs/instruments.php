@@ -471,7 +471,7 @@ class Instruments
         $detailform->method="POST";
         $str=$str.$detailform->open();
 
-        $canEdit = requirePermission("perm_editInstruments");
+        $canEdit = requirePermission("perm_editInventories");
         $indent++;
 
         // Inventarnummer
@@ -656,7 +656,7 @@ class Instruments
         $str=$str.$modalrow2->close();
 
         // --> new Loan
-        if(requirePermission("perm_editInstruments")) {
+        if(requirePermission("perm_editInventories")) {
             $indent--;
             $modalrow2 = new div;
             $modalrow2->indent=$indent;
@@ -737,7 +737,7 @@ class Instruments
                 $content->body=germanDate($L->StartDate,0);
                 $str=$str.$content->print();
                 
-                if($L->EndDate == null && requirePermission("perm_editInstruments")) {
+                if($L->EndDate == null && requirePermission("perm_editInventories")) {
                     $form = new div;
                     $form->indent=$indent;
                     $form->tag="form";

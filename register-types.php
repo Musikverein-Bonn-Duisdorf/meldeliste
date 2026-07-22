@@ -4,7 +4,7 @@ meldeConfigureSession();
 $_SESSION['page'] = 'register-types';
 $_SESSION['adminpage'] = true;
 include 'common/header.php';
-if(!requirePermission('perm_editInstruments')) {
+if(!requirePermission('perm_editRegisters')) {
     denyAccess();
 }
 
@@ -55,14 +55,12 @@ if(isset($_POST['delete'])) {
 }
 
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
+adminListPageBegin('Register', 'Register');
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Register</h2>
-</div>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
 
-<div class="w3-container w3-padding">
+<div class="admin-list-intro">
   <p>Register steuern Gruppierung, Orchester-Sitzplan und Farben in der <a href="register.php">Registerübersicht</a>.</p>
   <p><a href="instrument-types.php">Instrument-Typen verwalten</a></p>
   <p class="w3-small"><b>Reihe</b> = Abstand vom Dirigenten (0 = Dirigent). <b>ArcMin/ArcMax</b> = Winkelbereich (0° links, 90° vorne, 180° rechts). Nach dem Speichern aktualisiert sich die Vorschau.</p>
@@ -172,5 +170,6 @@ while($row = mysqli_fetch_array($dbr)) {
   </form>
 </div>
 <?php
+adminListPageEnd();
 include 'common/footer.php';
 ?>

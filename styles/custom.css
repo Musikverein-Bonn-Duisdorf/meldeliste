@@ -1,36 +1,131 @@
+.admin-list-shell {
+  color: #111;
+}
+
+.admin-list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.85rem;
+}
+
+.admin-list-search {
+  flex: 1 1 16rem;
+  min-width: 12rem;
+  margin-bottom: 0;
+}
+
+.admin-list-toolbar-extra {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding-bottom: 0.15rem;
+}
+
+.admin-list-shell .list-header,
+.admin-list-shell .type-edit-header {
+  border-radius: 6px 6px 0 0;
+}
+
+.admin-list-shell .admin-list-intro {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.admin-list-shell .admin-list-intro p {
+  margin: 0 0 0.4rem;
+}
+
+.admin-list-shell .mail-list-header {
+  border-radius: 6px 6px 0 0;
+}
+
+.perm-page-shell {
+  color: #111;
+}
+
+.perm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.perm-toolbar-search {
+  flex: 1 1 16rem;
+  min-width: 12rem;
+  margin-bottom: 0;
+}
+
+.perm-toolbar-filter {
+  flex: 0 1 auto;
+  margin-bottom: 0.35rem;
+}
+
+.perm-save-status {
+  margin: 0;
+  min-height: 1.2em;
+  opacity: 0.85;
+}
+
+.perm-save-status.perm-save-ok {
+  color: #2e7d32;
+  opacity: 1;
+}
+
+.perm-save-status.perm-save-err {
+  color: #c62828;
+  opacity: 1;
+}
+
 .perm-matrix-wrap {
   overflow: auto;
+  width: 100%;
   max-width: 100%;
-  max-height: calc(100vh - 12rem);
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  min-width: 0;
+  box-sizing: border-box;
+  max-height: calc(100dvh - 16rem);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: #fff;
+  -webkit-overflow-scrolling: touch;
 }
 
 .perm-matrix {
   border-collapse: separate;
   border-spacing: 0;
-  width: max-content;
-  min-width: 100%;
-  font-size: 0.8rem;
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.95rem;
+  color: #111;
+  font-family: inherit;
 }
 
 .perm-matrix th,
 .perm-matrix td {
-  padding: 0.35rem 0.45rem;
-  border-bottom: 1px solid #ddd;
-  border-right: 1px solid #eee;
+  padding: 0.4rem 0.35rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .perm-matrix thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #eceff1;
-  color: #222;
-  font-weight: 600;
+  background: #f5f5f5;
+  color: #111;
+  font-weight: 650;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
 }
 
 .perm-matrix .perm-user-col {
@@ -38,22 +133,47 @@
   left: 0;
   z-index: 1;
   text-align: left;
-  min-width: 11rem;
+  width: 12rem;
+  min-width: 8rem;
   max-width: 16rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   background: #fff;
   box-shadow: 2px 0 4px rgba(0,0,0,0.06);
+  font-weight: 500;
+}
+
+.perm-matrix td.perm-user-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(0, 0, 0, 0.35);
+}
+
+.perm-matrix td.perm-user-link:hover,
+.perm-matrix td.perm-user-link:focus {
+  background: #e3f2fd;
+  outline: none;
 }
 
 .perm-matrix thead th.perm-user-col {
   z-index: 3;
-  background: #cfd8dc;
-  color: #222;
+  background: #eceff1;
+  color: #111;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  font-weight: 650;
 }
 
 .perm-matrix th.perm-col {
   vertical-align: bottom;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  width: auto;
 }
 
 .perm-matrix th.perm-col .perm-col-label {
@@ -61,10 +181,31 @@
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   white-space: normal;
-  line-height: 1.15;
+  line-height: 1.2;
   font-weight: 500;
   text-align: left;
-  max-height: none;
+  max-height: 9.5rem;
+  overflow: hidden;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .perm-matrix {
+    /* Narrow viewports: allow horizontal scroll instead of crushing checkboxes */
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+  }
+
+  .perm-matrix th.perm-col {
+    min-width: 2rem;
+  }
+
+  .perm-matrix .perm-user-col {
+    width: 9rem;
+    min-width: 9rem;
+  }
 }
 
 /* Group colors (same palette as Admin-Nav / Rechte-Chips) */
@@ -76,7 +217,7 @@
   background: #e8f5e9;
   box-shadow: inset 0 -3px 0 #66bb6a;
 }
-.perm-matrix thead th.perm-group--instrumente {
+.perm-matrix thead th.perm-group--register {
   background: #fff3e0;
   box-shadow: inset 0 -3px 0 #ffb74d;
 }
@@ -97,8 +238,8 @@
 .perm-matrix td.perm-group--nutzer.perm-on { background: #90caf9; }
 .perm-matrix td.perm-group--termine.perm-off { background: #f4faf5; }
 .perm-matrix td.perm-group--termine.perm-on { background: #a5d6a7; }
-.perm-matrix td.perm-group--instrumente.perm-off { background: #fffaf3; }
-.perm-matrix td.perm-group--instrumente.perm-on { background: #ffcc80; }
+.perm-matrix td.perm-group--register.perm-off { background: #fffaf3; }
+.perm-matrix td.perm-group--register.perm-on { background: #ffcc80; }
 .perm-matrix td.perm-group--inventar.perm-off { background: #faf5fc; }
 .perm-matrix td.perm-group--inventar.perm-on { background: #ce93d8; }
 .perm-matrix td.perm-group--kommunikation.perm-off { background: #f2fcfd; }
@@ -138,7 +279,7 @@
 /* Legacy grid (unused after MELD-65 matrix); keep harmless */
 .permissions {
   display: grid;
-  grid-template-columns: 2fr repeat(14, 1fr);
+  grid-template-columns: 2fr repeat(13, 1fr);
   grid-column-gap: 1px;
   grid-row-gap: 1px;
   justify-items: stretch;
@@ -212,8 +353,8 @@
   border-color: #66bb6a;
 }
 
-.admin-nav .admin-nav-perm--instrumente,
-.profile-perm-tile--instrumente {
+.admin-nav .admin-nav-perm--register,
+.profile-perm-tile--register {
   background: #fff3e0 !important;
   border-color: #ffb74d;
 }
