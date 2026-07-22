@@ -8,7 +8,11 @@ if(!requirePermission("perm_editPermissions")) {
     denyAccess();
 }
 
-$permKeys = Permissions::permissionKeys();
+$permCatalog = Permissions::permissionCatalog();
+$permKeys = array();
+foreach($permCatalog as $item) {
+    $permKeys[] = $item['key'];
+}
 $permLabels = Permissions::permissionLabels();
 $sessionUserId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
 
@@ -59,11 +63,16 @@ while($row = mysqli_fetch_array($dbr)) {
         <th class="perm-user-col">Benutzer</th>
 <?php foreach($permKeys as $key) {
     $meta = $permLabels[$key];
+    $gid = Permissions::groupIdForPermission($key);
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
+    if($gid === '') {
+        $gid = 'system';
+    }
     $labelParts = preg_split('/\s+/u', trim($meta['label']), -1, PREG_SPLIT_NO_EMPTY);
     $labelHtml = htmlspecialchars(implode("\n", $labelParts), ENT_QUOTES, 'UTF-8');
     $labelHtml = nl2br($labelHtml, false);
 ?>
-        <th class="perm-col">
+        <th class="perm-col perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?>">
           <span class="perm-col-label"><?php echo $labelHtml; ?></span>
         </th>
 <?php } ?>
@@ -81,8 +90,13 @@ while($row = mysqli_fetch_array($dbr)) {
     $on = (bool)$entry['perm']->$key;
     $locked = ($uid === $sessionUserId && $key === 'perm_editPermissions');
     $title = htmlspecialchars($permLabels[$key]['label'], ENT_QUOTES, 'UTF-8');
+    $gid = Permissions::groupIdForPermission($key);
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
+    if($gid === '') {
+        $gid = 'system';
+    }
 ?>
-        <td class="perm-cell <?php echo $on ? 'perm-on' : 'perm-off'; ?>" title="<?php echo $title; ?>">
+        <td class="perm-cell perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?> <?php echo $on ? 'perm-on' : 'perm-off'; ?>" title="<?php echo $title; ?>">
           <input type="checkbox"
                  class="perm-toggle"
                  data-user="<?php echo $uid; ?>"

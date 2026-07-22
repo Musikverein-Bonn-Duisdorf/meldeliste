@@ -91,30 +91,6 @@ class Shift
         }
         return $meldungen;
     }
-    public function getAushilfen() {
-        $sql = sprintf('SELECT * FROM `%sAushilfenShift` WHERE `Shift` = "%d";',
-        $GLOBALS['dbprefix'],
-        $this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $aushilfen = array();
-        while($row = mysqli_fetch_array($dbr)) {
-            array_push($aushilfen, $row['Index']);
-        }
-        return $aushilfen;
-    }
-    public function getAushilfenVal() {
-        $sql = sprintf(
-            'SELECT COUNT(*) AS `c` FROM `%sAushilfenShift` WHERE `Shift` = %d;',
-            $GLOBALS['dbprefix'],
-            (int)$this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        $row = $dbr ? mysqli_fetch_array($dbr) : null;
-        return ($row && isset($row['c'])) ? (int)$row['c'] : 0;
-    }
     public function getMeldungenUser($val) {
         $user = array();
         $sql = sprintf(
@@ -133,22 +109,6 @@ class Shift
         if($dbr) {
             while($row = mysqli_fetch_array($dbr)) {
                 $user[] = trim($row['Vorname'].' '.$row['Nachname']);
-            }
-        }
-        return $user;
-    }
-    public function getMeldungenAushilfenShift() {
-        $user = array();
-        $sql = sprintf(
-            'SELECT `Name` FROM `%sAushilfenShift` WHERE `Shift` = %d ORDER BY `Name`;',
-            $GLOBALS['dbprefix'],
-            (int)$this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if($dbr) {
-            while($row = mysqli_fetch_array($dbr)) {
-                $user[] = $row['Name'];
             }
         }
         return $user;

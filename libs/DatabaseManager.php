@@ -37,6 +37,37 @@ class DatabaseManager
         return $this->report;
     }
 
+    /**
+     * Statuses that matter in check/repair UI (skip noisy "ok").
+     * @param string $status
+     * @return bool
+     */
+    public static function isNotableStatus($status) {
+        return in_array((string)$status, array(
+            'created',
+            'fixed',
+            'removed',
+            'missing',
+            'mismatch',
+            'error',
+            'obsolete',
+        ), true);
+    }
+
+    /**
+     * Report without "ok" noise — changes, problems, mismatches only.
+     * @return array<int,array{level:string,target:string,status:string,message:string,detail:mixed}>
+     */
+    public function getNotableReport() {
+        $out = array();
+        foreach($this->report as $entry) {
+            if(self::isNotableStatus(isset($entry['status']) ? $entry['status'] : '')) {
+                $out[] = $entry;
+            }
+        }
+        return $out;
+    }
+
     public function hasErrors() {
         foreach($this->report as $entry) {
             if($entry['status'] === 'error' || $entry['status'] === 'missing' || $entry['status'] === 'mismatch') {
@@ -48,7 +79,7 @@ class DatabaseManager
 
     public function hasChanges() {
         foreach($this->report as $entry) {
-            if(in_array($entry['status'], array('created', 'fixed', 'missing', 'mismatch', 'removed'), true)) {
+            if(self::isNotableStatus($entry['status'])) {
                 return true;
             }
         }
@@ -924,8 +955,8 @@ class DatabaseManager
             }
         }
 
-        // Leftover tables after inventory migration (also dropped by RegNumber::migrateInstruments).
-        foreach(array('Instruments', 'Loans') as $obsoleteTable) {
+        // Leftover tables after inventory migration / MELD-134 Gastmusiker.
+        foreach(array('Instruments', 'Loans', 'Aushilfen', 'AushilfenShift') as $obsoleteTable) {
             $SQL = new SQLtable($obsoleteTable);
             if(!$SQL->exists()) {
                 continue;
@@ -1141,7 +1172,6 @@ class DatabaseManager
             'User' => array('Vorname', 'Nachname'),
             'Termine' => array('Name', 'Beschreibung', 'Ort1', 'Ort2', 'Ort3', 'Ort4', 'defaultFreeText'),
             'Schichten' => array('Name'),
-            'Aushilfen' => array('Name'),
             'vehicle' => array('Name'),
             'Register' => array('Name'),
             'Instrument' => array('Name'),
@@ -1225,9 +1255,13 @@ class DatabaseManager
     /**
      * Plain-text summary for CLI.
      */
-    public function formatReportText() {
+    public function formatReportText($notableOnly = true) {
+        $entries = $notableOnly ? $this->getNotableReport() : $this->report;
+        if(!count($entries)) {
+            return "OK\tnothing to report\n";
+        }
         $lines = array();
-        foreach($this->report as $entry) {
+        foreach($entries as $entry) {
             $line = strtoupper($entry['status'])."\t[".$entry['level']."]\t".$entry['target'];
             if($entry['message']) $line .= "\t".$entry['message'];
             if($entry['detail'] && is_string($entry['detail'])) $line .= "\t".$entry['detail'];

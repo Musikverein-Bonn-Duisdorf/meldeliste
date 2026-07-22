@@ -28,8 +28,8 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #009688;
-  color: #fff;
+  background: #eceff1;
+  color: #222;
   font-weight: 600;
 }
 
@@ -46,7 +46,8 @@
 
 .perm-matrix thead th.perm-user-col {
   z-index: 3;
-  background: #00796b;
+  background: #cfd8dc;
+  color: #222;
 }
 
 .perm-matrix th.perm-col {
@@ -66,16 +67,47 @@
   max-height: none;
 }
 
-.perm-matrix td.perm-on {
-  background: #c8e6c9;
+/* Group colors (same palette as Admin-Nav / Rechte-Chips) */
+.perm-matrix thead th.perm-group--nutzer {
+  background: #e3f2fd;
+  box-shadow: inset 0 -3px 0 #64b5f6;
+}
+.perm-matrix thead th.perm-group--termine {
+  background: #e8f5e9;
+  box-shadow: inset 0 -3px 0 #66bb6a;
+}
+.perm-matrix thead th.perm-group--instrumente {
+  background: #fff3e0;
+  box-shadow: inset 0 -3px 0 #ffb74d;
+}
+.perm-matrix thead th.perm-group--inventar {
+  background: #f3e5f5;
+  box-shadow: inset 0 -3px 0 #ba68c8;
+}
+.perm-matrix thead th.perm-group--kommunikation {
+  background: #e0f7fa;
+  box-shadow: inset 0 -3px 0 #4dd0e1;
+}
+.perm-matrix thead th.perm-group--system {
+  background: #eceff1;
+  box-shadow: inset 0 -3px 0 #90a4ae;
 }
 
-.perm-matrix td.perm-off {
-  background: #fff;
-}
+.perm-matrix td.perm-group--nutzer.perm-off { background: #f5fafd; }
+.perm-matrix td.perm-group--nutzer.perm-on { background: #90caf9; }
+.perm-matrix td.perm-group--termine.perm-off { background: #f4faf5; }
+.perm-matrix td.perm-group--termine.perm-on { background: #a5d6a7; }
+.perm-matrix td.perm-group--instrumente.perm-off { background: #fffaf3; }
+.perm-matrix td.perm-group--instrumente.perm-on { background: #ffcc80; }
+.perm-matrix td.perm-group--inventar.perm-off { background: #faf5fc; }
+.perm-matrix td.perm-group--inventar.perm-on { background: #ce93d8; }
+.perm-matrix td.perm-group--kommunikation.perm-off { background: #f2fcfd; }
+.perm-matrix td.perm-group--kommunikation.perm-on { background: #80deea; }
+.perm-matrix td.perm-group--system.perm-off { background: #f7f9fa; }
+.perm-matrix td.perm-group--system.perm-on { background: #b0bec5; }
 
 .perm-matrix tr:hover td.perm-off {
-  background: #f7f7f7;
+  filter: brightness(0.97);
 }
 
 .perm-matrix tr:hover td.perm-user-col {
@@ -156,6 +188,57 @@
   padding: 8px 16px;
   white-space: nowrap;
   background-color: transparent;
+}
+
+/* Same palette as profile permission chips */
+.admin-nav .admin-nav-perm,
+.profile-perm-tile {
+  color: #222 !important;
+}
+
+.admin-nav .admin-nav-perm {
+  border-left: 4px solid transparent;
+}
+
+.admin-nav .admin-nav-perm--nutzer,
+.profile-perm-tile--nutzer {
+  background: #e3f2fd !important;
+  border-color: #64b5f6;
+}
+
+.admin-nav .admin-nav-perm--termine,
+.profile-perm-tile--termine {
+  background: #e8f5e9 !important;
+  border-color: #66bb6a;
+}
+
+.admin-nav .admin-nav-perm--instrumente,
+.profile-perm-tile--instrumente {
+  background: #fff3e0 !important;
+  border-color: #ffb74d;
+}
+
+.admin-nav .admin-nav-perm--inventar,
+.profile-perm-tile--inventar {
+  background: #f3e5f5 !important;
+  border-color: #ba68c8;
+}
+
+.admin-nav .admin-nav-perm--kommunikation,
+.profile-perm-tile--kommunikation {
+  background: #e0f7fa !important;
+  border-color: #4dd0e1;
+}
+
+.admin-nav .admin-nav-perm--system,
+.profile-perm-tile--system {
+  background: #eceff1 !important;
+  border-color: #90a4ae;
+}
+
+.admin-nav .admin-nav-group > .w3-button.admin-nav-perm:hover,
+.admin-nav .w3-bar-item.admin-nav-perm:hover {
+  filter: brightness(0.96);
 }
 
 .admin-nav-caret {
@@ -1860,26 +1943,6 @@ body.meld-cal-print {
   margin-bottom: 0;
 }
 
-.termin-detail-aushilfen {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  display: grid;
-  gap: 1.25rem;
-}
-
-@media (min-width: 720px) {
-  .termin-detail-aushilfen {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-}
-
-.termin-detail-aushilfe-form,
-.termin-detail-aushilfe-list {
-  min-width: 0;
-}
-
 /* Profil (MELD-125): volle Breite, 3 Spalten, ohne Instruktions-Texte */
 .profile-page {
   max-width: none;
@@ -2051,36 +2114,6 @@ select.profile-control {
   line-height: 1.3;
   background: #eef1f4;
   color: #222;
-}
-
-.profile-perm-tile--nutzer {
-  background: #e3f2fd;
-  border-color: #64b5f6;
-}
-
-.profile-perm-tile--termine {
-  background: #e8f5e9;
-  border-color: #66bb6a;
-}
-
-.profile-perm-tile--instrumente {
-  background: #fff3e0;
-  border-color: #ffb74d;
-}
-
-.profile-perm-tile--inventar {
-  background: #f3e5f5;
-  border-color: #ba68c8;
-}
-
-.profile-perm-tile--kommunikation {
-  background: #e0f7fa;
-  border-color: #4dd0e1;
-}
-
-.profile-perm-tile--system {
-  background: #eceff1;
-  border-color: #90a4ae;
 }
 
 .profile-perm-picker #profile-perm-chips {

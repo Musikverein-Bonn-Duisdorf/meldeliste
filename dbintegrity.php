@@ -3,7 +3,30 @@
  * HTML report for DatabaseManager results (used by updater.php / install.php).
  */
 
-function DBRenderReport($report) {
+/**
+ * @param array $report
+ * @param bool $notableOnly skip status "ok" (default true for repair/check UI)
+ */
+function DBRenderReport($report, $notableOnly = true) {
+    if($notableOnly && is_array($report)) {
+        $filtered = array();
+        foreach($report as $entry) {
+            $status = isset($entry['status']) ? $entry['status'] : '';
+            if(class_exists('DatabaseManager') && DatabaseManager::isNotableStatus($status)) {
+                $filtered[] = $entry;
+            }
+            elseif(!class_exists('DatabaseManager') && $status !== 'ok') {
+                $filtered[] = $entry;
+            }
+        }
+        $report = $filtered;
+    }
+
+    if(!is_array($report) || !count($report)) {
+        echo "<div class=\"w3-panel w3-pale-green w3-padding\"><b>Keine Änderungen oder Probleme.</b> Schema und Daten passen zum Soll.</div>\n";
+        return;
+    }
+
     $str = '';
     $currentTable = null;
 
@@ -68,7 +91,10 @@ function DBStatusColor($status) {
         return 'w3-green';
     case 'created':
     case 'fixed':
+    case 'removed':
         return 'w3-yellow';
+    case 'obsolete':
+        return 'w3-orange';
     case 'missing':
     case 'mismatch':
     case 'error':
@@ -96,7 +122,8 @@ function DBCheckIntegrity($mode = 'repair') {
         $manager->repair();
         break;
     }
-    DBRenderReport($manager->getReport());
+    // Fresh create: show all notable actions (still skips pure "ok").
+    DBRenderReport($manager->getReport(), true);
     return $manager;
 }
 ?>

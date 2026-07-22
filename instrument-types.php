@@ -121,8 +121,8 @@ while($row = mysqli_fetch_array($dbr)) {
       <span class="type-edit-label">Nutzung</span>
       User: <?php echo (int)$usage['users']; ?>
       · Inv: <?php echo (int)$usage['inventories']; ?>
-      <?php if($usage['meldungen'] || $usage['aushilfen']) {
-          echo ' · M/A: '.((int)$usage['meldungen'] + (int)$usage['aushilfen']);
+      <?php if($usage['meldungen']) {
+          echo ' · M: '.(int)$usage['meldungen'];
       } ?>
     </div>
     <div class="type-edit-field type-edit-field--actions">

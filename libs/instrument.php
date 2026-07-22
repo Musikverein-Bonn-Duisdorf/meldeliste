@@ -114,29 +114,17 @@ class Instrument
             $meld = (int)$row['CNT'];
         }
 
-        $aus = 0;
-        $sql = sprintf(
-            'SELECT COUNT(`Index`) AS `CNT` FROM `%sAushilfen` WHERE `Instrument` = %d;',
-            $GLOBALS['dbprefix'],
-            (int)$this->Index
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        if($dbr && ($row = mysqli_fetch_array($dbr))) {
-            $aus = (int)$row['CNT'];
-        }
-
         return array(
             'users' => $users,
             'inventories' => $inv,
             'meldungen' => $meld,
-            'aushilfen' => $aus,
         );
     }
 
     public function canDelete() {
         if(!$this->Index) return false;
         $u = $this->usageCount();
-        return ($u['users'] + $u['inventories'] + $u['meldungen'] + $u['aushilfen']) === 0;
+        return ($u['users'] + $u['inventories'] + $u['meldungen']) === 0;
     }
 
     public function save() {

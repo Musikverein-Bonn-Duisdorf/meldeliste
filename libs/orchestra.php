@@ -131,7 +131,6 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
         $instrId = (int)$instr;
         $allMusikerBase[] = array(
             'userId' => $uid,
-            'aushilfe' => false,
             'short' => $short,
             'name' => $fullName,
             'Instrument' => $instr,
@@ -307,7 +306,7 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
                     }
                     $titleParts[] = $style['label'];
                     $titleText = htmlspecialchars(implode("\n", $titleParts), ENT_QUOTES, 'UTF-8');
-                    $seatEditable = $editable && !$user['aushilfe'] && (int)$user['userId'] > 0;
+                    $seatEditable = $editable && (int)$user['userId'] > 0;
                     $seatsHtml .= '<g class="orchestra-seat"'
                         .' data-wert="'.$wertAttr.'"'
                         .' data-user="'.(int)$user['userId'].'"'

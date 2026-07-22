@@ -176,6 +176,33 @@ function getAdminPage($string) {
     }
 }
 
+/**
+ * Admin-Menü-Eintrag: aktive Seite = TitleBar, sonst Berechtigungs-Farbgruppe.
+ * @param string $page
+ * @param string $permKey Permissions::* key
+ */
+function getAdminPagePerm($page, $permKey) {
+    if($page == $_SESSION['page'] && !empty($_SESSION['adminpage'])) {
+        echo $GLOBALS['optionsDB']['colorTitleBar'];
+        return;
+    }
+    echo adminNavPermClass($permKey);
+}
+
+/**
+ * CSS-Klassen für Admin-Nav anhand der Rechte-Farbgruppe (wie Profil-Chips).
+ * @param string $permKey
+ * @return string
+ */
+function adminNavPermClass($permKey) {
+    $gid = Permissions::groupIdForPermission($permKey);
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
+    if($gid === '') {
+        $gid = 'system';
+    }
+    return 'admin-nav-perm admin-nav-perm--'.$gid;
+}
+
 function getNextRegInventoryNumber($inventoryTypeId = 0) {
     $inventoryTypeId = (int)$inventoryTypeId;
     if($inventoryTypeId < 1) {
@@ -224,22 +251,6 @@ function getShort($Vorname, $Nachname) {
     $narray = explode(' ', $Nachname);
     $short2 = substr($narray[sizeof($narray) - 1], 0, 2);
     return $short1.$short2;
-}
-
-function getShortAushilfe($Name) {
-    $flags = ENT_QUOTES;
-    if(defined('ENT_HTML5')) {
-        $flags = ENT_QUOTES | ENT_HTML5;
-    }
-    $Name = html_entity_decode((string)$Name, $flags, 'UTF-8');
-    $narray = preg_split('/\s+/u', trim($Name), -1, PREG_SPLIT_NO_EMPTY);
-    if($narray && count($narray) > 1) {
-        return getShort($narray[0], $narray[count($narray) - 1]);
-    }
-    if(function_exists('mb_substr')) {
-        return mb_substr($Name, 0, 4, 'UTF-8');
-    }
-    return substr($Name, 0, 4);
 }
 
 function instrumentOption($val) {
