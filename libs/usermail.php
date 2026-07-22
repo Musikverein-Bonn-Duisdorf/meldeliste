@@ -192,6 +192,17 @@ class Usermail {
             if($uid > 0 && isset($queuedUsers[$uid])) {
                 continue;
             }
+            $wantMail = !empty($row['getMail']);
+            $wantInbox = !empty($row['notifyInbox']);
+            // Single-user system mail: always treat as mail+outbox, ignore prefs
+            if($this->User > 0) {
+                $wantMail = true;
+                $wantInbox = true;
+            }
+            if(!$wantMail && !$wantInbox) {
+                continue;
+            }
+
             $emails = array();
             if(!empty($row['Email'])) {
                 $emails[] = trim($row['Email']);
@@ -210,7 +221,7 @@ class Usermail {
                 $queuedEmails[$key] = true;
                 $fresh[] = $em;
             }
-            if(!$fresh) {
+            if($wantMail && !$fresh && !$wantInbox) {
                 continue;
             }
             if($uid > 0) {
@@ -227,11 +238,18 @@ class Usermail {
             $out = new MailOutbox;
             $out->Job = $job->Index;
             $out->User = $uid;
-            $out->ToEmail = implode(', ', $fresh);
+            $out->ToEmail = ($wantMail && $fresh) ? implode(', ', $fresh) : '';
             $out->Subject = $subjectFull;
             $out->BodyText = $bodyStored;
-            $out->Status = 'pending';
             $out->Attempts = 0;
+            // Inbox-only (or mail without usable address): deliver to Meine Nachrichten without SMTP
+            if(!$wantMail || !$fresh) {
+                $out->Status = 'sent';
+                $out->SentAt = date('Y-m-d H:i:s');
+            }
+            else {
+                $out->Status = 'pending';
+            }
             if($out->save()) {
                 $count++;
             }
@@ -247,6 +265,9 @@ class Usermail {
         // Store subject with prefix for history clarity on job
         $job->Subject = $subjectFull;
         $job->save();
+        if($count > 0) {
+            $job->refreshCounts();
+        }
 
         $logentry = new Log;
         if($count > 0) {
@@ -265,7 +286,7 @@ class Usermail {
         }
         else {
             $logentry->warning(sprintf(
-                "Warteschlange leer | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Quelle: <b>%s</b> (keine gültigen Emailadressen)",
+                "Warteschlange leer | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Quelle: <b>%s</b> (keine Empfänger für E-Mail/Nachrichten)",
                 (int)$job->Index,
                 htmlspecialchars($subjectFull),
                 htmlspecialchars($source)
@@ -274,7 +295,7 @@ class Usermail {
 
         // Success banner removed (MELD-121); overview table shows queue status.
         if(!$this->quiet && $count === 0) {
-            echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>Keine gültigen Emailadressen gefunden. Kein Versand möglich.</h3></div>";
+            echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorLogError']." w3-mobile\"><h3>Keine Empfänger für E-Mail oder Nachrichten gefunden.</h3></div>";
         }
 
         return $count;
@@ -316,6 +337,19 @@ class Usermail {
 
         $user = new User;
         $user->load_by_id($outbox->User);
+
+        $toEmail = trim((string)$outbox->ToEmail);
+        $wantSmtp = $toEmail !== '' && (!$user->Index || (int)$user->getMail === 1);
+        // Inbox-only / no SMTP: mark delivered without PHPMailer
+        if(!$wantSmtp) {
+            $outbox->Status = 'sent';
+            $outbox->SentAt = date('Y-m-d H:i:s');
+            $outbox->LastError = null;
+            $outbox->Attempts = (int)$outbox->Attempts + 1;
+            $outbox->save();
+            $job->refreshCounts();
+            return true;
+        }
 
         $mail = new PHPMailer(true);
         $mail->IsMail();
@@ -696,27 +730,26 @@ class Usermail {
     }
 
     /**
-     * Bulk/mail-job recipients: Mailverteiler + mindestens eine Adresse.
+     * Bulk/mail-job recipients: E-Mail und/oder Nachrichten-Kanal aktiv.
      * @return string SQL AND-clauses without leading AND
      */
     protected function mailRecipientBaseWhere($alias = '') {
         $p = $alias !== '' ? $alias.'.' : '';
         return array(
             $p.'`Deleted` != 1',
-            $p.'`getMail` = 1',
-            '('.$p."`Email` != '' OR ".$p."`Email2` != '')",
+            '('.$p.'`getMail` = 1 OR '.$p.'`notifyInbox` = 1)',
         );
     }
 
     /**
-     * @return array list of user rows with Index, Vorname, Nachname, Email, Email2, activeLink
+     * @return array list of user rows with Index, Vorname, Nachname, Email, Email2, activeLink, getMail, notifyInbox
      */
     protected function resolveRecipients() {
         $rows = array();
         if($this->User > 0) {
             // Einzelversand (System/Benachrichtigung): keine Verteiler-Pflicht
             $sql = sprintf(
-                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` = %d AND `Deleted` != 1;",
+                "SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink`, `getMail`, `notifyInbox` FROM `%sUser` WHERE `Index` = %d AND `Deleted` != 1;",
                 $GLOBALS['dbprefix'],
                 (int)$this->User
             );
@@ -729,12 +762,14 @@ class Usermail {
             return $rows;
         }
         if($this->termin) {
+            $base = implode(' AND ', $this->mailRecipientBaseWhere());
             $sql = sprintf(
-                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname`, `getMail`, `Deleted` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2 AND `getMail` = 1 AND `Deleted` != 1 AND (`Email` != '' OR `Email2` != '');",
+                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink`, `getMail`, `notifyInbox` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname`, `getMail`, `notifyInbox`, `Deleted` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2 AND %s;",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
-                (int)$this->termin
+                (int)$this->termin,
+                $base
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
@@ -766,7 +801,7 @@ class Usermail {
             return array();
         }
         $sql = sprintf(
-            'SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink` FROM `%sUser` WHERE `Index` IN (%s);',
+            'SELECT `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink`, `getMail`, `notifyInbox` FROM `%sUser` WHERE `Index` IN (%s);',
             $GLOBALS['dbprefix'],
             implode(',', array_map('intval', $userIds))
         );

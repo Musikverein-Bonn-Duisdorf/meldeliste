@@ -112,6 +112,12 @@ $sections[] = array(
     'body' => '
 <p>Unter <b>Mein Profil</b> pflegst du deine Kontaktdaten, E-Mail-Adressen und weitere Angaben.</p>
 <p>Halte insbesondere E-Mail und Instrument aktuell – davon hängen Benachrichtigungen und die Orchesterdarstellung ab.</p>
+<p><b>Benachrichtigungen</b> (unabhängig wählbar):</p>
+<ul>
+<li><b>E-Mail</b> – Nachrichten per E-Mail (Mailverteiler / SMTP)</li>
+<li><b>Nachrichten</b> – Eintrag unter „Meine Nachrichten“ in der Meldeliste</li>
+<li><b>App: …</b> – lokale Hinweise in der Android-App (Poll, kein Push-Dienst). Pro Ereignisart: neue Nachricht, neuer Termin, Termin geändert, Termin bald (nächste Tage)</li>
+</ul>
 <p>Unter <b>Gruppenzugehörigkeit</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 <p>Die Android-App speichert nach dem Login ein Gerätetoken und meldet dich beim nächsten Öffnen automatisch an. Abmelden in der App widerruft dieses Token.</p>

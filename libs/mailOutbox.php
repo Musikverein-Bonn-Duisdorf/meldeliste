@@ -53,7 +53,7 @@ class MailOutbox
     public function is_valid() {
         if(!$this->Job) return false;
         if(!$this->User) return false;
-        if($this->ToEmail === null || $this->ToEmail === '') return false;
+        // ToEmail may be empty for inbox-only (Nachrichten ohne SMTP)
         if($this->Subject === null || $this->Subject === '') return false;
         return true;
     }

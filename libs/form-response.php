@@ -215,6 +215,11 @@ function handleSelfProfilePost($userid) {
         $n->Email = isset($_POST['Email']) ? $_POST['Email'] : $n->Email;
         $n->Email2 = isset($_POST['Email2']) ? $_POST['Email2'] : $n->Email2;
         $n->getMail = isset($_POST['getMail']) ? (int)$_POST['getMail'] : 0;
+        $n->notifyInbox = isset($_POST['notifyInbox']) ? (int)$_POST['notifyInbox'] : 0;
+        $n->notifyAppMail = isset($_POST['notifyAppMail']) ? (int)$_POST['notifyAppMail'] : 0;
+        $n->notifyAppTerminNew = isset($_POST['notifyAppTerminNew']) ? (int)$_POST['notifyAppTerminNew'] : 0;
+        $n->notifyAppTerminChange = isset($_POST['notifyAppTerminChange']) ? (int)$_POST['notifyAppTerminChange'] : 0;
+        $n->notifyAppTerminSoon = isset($_POST['notifyAppTerminSoon']) ? (int)$_POST['notifyAppTerminSoon'] : 0;
         if(!$n->save()) {
             $result['flash'] = array('type' => 'error', 'message' => 'Profil konnte nicht gespeichert werden.');
             return $result;

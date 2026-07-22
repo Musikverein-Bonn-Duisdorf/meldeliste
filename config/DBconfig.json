@@ -204,7 +204,9 @@
 	"new": {"Type": "int", "Default": 1},
 	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
-	"PostDiscord": {"Type": "tinyint", "Default": 0}
+	"PostDiscord": {"Type": "tinyint", "Default": 0},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
+	"Updated": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
     },
     "UserVoice": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
@@ -228,6 +230,11 @@
 	"activeLink": {"Type": "text", "Collation": "utf8mb4_unicode_ci", "Null": "YES"},
 	"Instrument": {"Type": "int"},
 	"getMail": {"Type": "tinyint", "Default": 1},
+	"notifyInbox": {"Type": "tinyint", "Default": 1},
+	"notifyAppMail": {"Type": "tinyint", "Default": 1},
+	"notifyAppTerminNew": {"Type": "tinyint", "Default": 1},
+	"notifyAppTerminChange": {"Type": "tinyint", "Default": 1},
+	"notifyAppTerminSoon": {"Type": "tinyint", "Default": 1},
 	"Mitglied": {"Type": "tinyint", "Default": 0},
 	"Admin": {"Type": "int", "Default": 0},
 	"RegisterLead": {"Type": "int", "Default": 0},

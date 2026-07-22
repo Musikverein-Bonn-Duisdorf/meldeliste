@@ -219,14 +219,13 @@ class AudienceSpec
     /**
      * Base WHERE fragments for User rows.
      *
-     * @param bool $requireMail getMail + has email
+     * @param bool $requireMail getMail/notifyInbox (message recipient channels)
      * @return string[]
      */
     public static function userBaseWhere($requireMail = false) {
         $where = array('`Deleted` != 1');
         if($requireMail) {
-            $where[] = '`getMail` = 1';
-            $where[] = '(`Email` != \'\' OR `Email2` != \'\')';
+            $where[] = '(`getMail` = 1 OR `notifyInbox` = 1)';
         }
         return $where;
     }
@@ -558,7 +557,7 @@ class AudienceSpec
 
         $userWhere = 'u.`Deleted` != 1';
         if($forMail) {
-            $userWhere .= ' AND u.`getMail` = 1 AND (u.`Email` != "" OR u.`Email2` != "")';
+            $userWhere .= ' AND (u.`getMail` = 1 OR u.`notifyInbox` = 1)';
         }
         $sqlUser = sprintf(
             'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`

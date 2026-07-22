@@ -12,7 +12,8 @@
   <div class="w3-col l6">Vereinsmitglied:</div><div class="w3-col l6"><b><?php echo bool2string($user->Mitglied); ?></b></div>
 </div>
 <div class="w3-container w3-row w3-margin">
-  <div class="w3-col l6">erhält Emails:</div><div class="w3-col l6"><b><?php echo bool2string($user->getMail); ?></b></div>
+  <div class="w3-col l6">E-Mail:</div><div class="w3-col l6"><b><?php echo bool2string($user->getMail); ?></b></div>
+  <div class="w3-col l6">Nachrichten:</div><div class="w3-col l6"><b><?php echo bool2string($user->notifyInbox); ?></b></div>
 </div>
 <?php if($showUserDetails) { ?>
 <div class="w3-container w3-row w3-margin">
