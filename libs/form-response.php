@@ -54,6 +54,14 @@ function handleUserFormPost($options = array()) {
                 $n->save();
             }
 
+            if(isset($_POST['userMailGroupsPosted']) && (int)$n->Index > 0) {
+                $ids = isset($_POST['userMailGroups']) ? $_POST['userMailGroups'] : array();
+                if(!is_array($ids)) {
+                    $ids = array();
+                }
+                MailGroup::syncUserExplicitMembership((int)$n->Index, $ids);
+            }
+
             if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
                 if($_POST['pw1'] == $_POST['pw2'] && $_POST['pw1'] != '') {
                     if(!$n->passwd($_POST['pw1'])) {
@@ -212,17 +220,22 @@ function handleSelfProfilePost($userid) {
             return $result;
         }
 
+        // Eigenes Profil: nur Kontakt + Benachrichtigungen.
+        // Mitglied, RegisterLead, Gruppen, Name, Instrument: nur Admin-Nutzerbearbeitung.
         $n->Email = isset($_POST['Email']) ? $_POST['Email'] : $n->Email;
         $n->Email2 = isset($_POST['Email2']) ? $_POST['Email2'] : $n->Email2;
         $n->getMail = isset($_POST['getMail']) ? (int)$_POST['getMail'] : 0;
+        $n->notifyInbox = isset($_POST['notifyInbox']) ? (int)$_POST['notifyInbox'] : 0;
+        $n->notifyAppMail = isset($_POST['notifyAppMail']) ? (int)$_POST['notifyAppMail'] : 0;
+        $n->notifyAppTerminNew = isset($_POST['notifyAppTerminNew']) ? (int)$_POST['notifyAppTerminNew'] : 0;
+        $n->notifyAppTerminChange = isset($_POST['notifyAppTerminChange']) ? (int)$_POST['notifyAppTerminChange'] : 0;
+        $n->notifyAppTerminSoon = isset($_POST['notifyAppTerminSoon']) ? (int)$_POST['notifyAppTerminSoon'] : 0;
         if(!$n->save()) {
             $result['flash'] = array('type' => 'error', 'message' => 'Profil konnte nicht gespeichert werden.');
             return $result;
         }
 
         $result['successMessage'] = 'Profil gespeichert.';
-        $logentry = new Log;
-        $logentry->info(sprintf('Eigenes Profil gespeichert | User-ID: <b>%d</b>', $selfId));
 
         if(isset($_POST['pw1']) && isset($_POST['pw2'])) {
             $pw1 = (string)$_POST['pw1'];
@@ -289,8 +302,12 @@ function applyNewMusikerFormPostRedirect($defaultReturnUrl) {
     }
     $userId = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
     $stayOnEdit = isset($_POST['passwd']) || isset($_POST['newmail']) || isset($_POST['deactivate']);
+    $layout = '';
+    if(isset($_POST['profile_layout']) && in_array($_POST['profile_layout'], array('a', 'b', 'c'), true)) {
+        $layout = '&layout='.rawurlencode($_POST['profile_layout']);
+    }
     if($stayOnEdit && $userId > 0) {
-        redirectAfterPost('new-musiker.php?id='.$userId.'&return_to='.rawurlencode($returnTo));
+        redirectAfterPost('new-musiker.php?id='.$userId.'&return_to='.rawurlencode($returnTo).$layout);
     }
     redirectAfterPost($returnTo);
 }

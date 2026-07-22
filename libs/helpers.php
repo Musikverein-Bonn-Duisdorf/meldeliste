@@ -686,6 +686,34 @@ function logAppendTrue(array &$parts, $label, $value) {
 }
 
 /**
+ * True when a DB-UPDATE log message describes at least one field change.
+ * Header-only messages (ID + name) must not create log noise.
+ */
+function logMessageHasChanges($message) {
+    $message = (string)$message;
+    if($message === '') {
+        return false;
+    }
+    if(strpos($message, '&rArr;') !== false) {
+        return true;
+    }
+    // Meldung::getChanges uses "(vorher:…)" for status without &rArr;
+    if(strpos($message, '(vorher:') !== false) {
+        return true;
+    }
+    if(preg_match('/\b(?:Passhash|activeLink)\s+geändert\b/u', $message)) {
+        return true;
+    }
+    if(strpos($message, 'zurückgesetzt') !== false) {
+        return true;
+    }
+    if(strpos($message, 'umbenannt:') !== false) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * Format a config value for log display (HTML-escaped).
  */
 function formatConfigLogValue($value, $type = '') {
@@ -705,10 +733,22 @@ function logConfigChange($parameter, $oldValue, $newValue, $type = '') {
     if((string)$oldValue === (string)$newValue) {
         return;
     }
+    $label = (string)$parameter;
+    if($type === '' && function_exists('getConfigDefaults')) {
+        foreach(getConfigDefaults() as $item) {
+            if($item['Parameter'] === $parameter) {
+                $type = isset($item['Type']) ? (string)$item['Type'] : '';
+                if(!empty($item['Description'])) {
+                    $label = $parameter.' ('.$item['Description'].')';
+                }
+                break;
+            }
+        }
+    }
     $logentry = new Log;
     $logentry->DBupdate(sprintf(
         'Config <b>%s</b>: %s &rArr; <b>%s</b>',
-        htmlspecialchars((string)$parameter, ENT_QUOTES, 'UTF-8'),
+        htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
         formatConfigLogValue($oldValue, $type),
         formatConfigLogValue($newValue, $type)
     ));

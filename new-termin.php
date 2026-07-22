@@ -10,6 +10,7 @@ if(!requirePermission("perm_editAppmnts")) {
 
 $fill = false;
 $prefillDatum = '';
+$n = null;
 if(isset($_POST['id'])) {
     $n = new Termin;
     $n->load_by_id($_POST['id']);
@@ -35,29 +36,71 @@ if(!$fill && isset($_GET['Datum'])) {
     }
 }
 $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
+$btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
+$btnDelete = $GLOBALS['optionsDB']['colorBtnDelete'];
+
+$isCopy = isset($_POST['copy']);
+if($fill && $n && (int)$n->Index > 0) {
+    $terminKicker = 'Termin bearbeiten';
+    $terminTitle = trim((string)$n->Name) !== '' ? (string)$n->Name : 'Termin';
+}
+elseif($fill && $isCopy) {
+    $terminKicker = 'Termin kopieren';
+    $terminTitle = trim((string)$n->Name) !== '' ? (string)$n->Name : 'Kopie';
+}
+else {
+    $terminKicker = 'Neuer Termin';
+    $terminTitle = 'Neuer Termin';
+}
+
+$visSpec = ($fill && $n) ? $n->getVisibilitySpecArray() : AudienceSpec::defaultVisibilitySpec();
 ?>
-<div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <h2>neuen Termin erstellen</h2>
-</div>
+<div class="w3-container w3-margin-bottom termin-page">
+<div class="profile-shell termin-shell">
+<form class="profile-form" action="index.php" method="POST">
 
-<div class="w3-container termin-form">
-<form class="termin-form-card w3-border w3-padding <?php echo $inputBg; ?>" action="index.php" method="POST">
+  <header class="profile-hero">
+    <div class="profile-hero-text">
+      <p class="profile-kicker"><?php echo htmlspecialchars($terminKicker, ENT_QUOTES, 'UTF-8'); ?></p>
+      <h2 class="profile-title"><?php echo htmlspecialchars($terminTitle, ENT_QUOTES, 'UTF-8'); ?></h2>
+    </div>
+    <div class="profile-hero-actions">
+      <div class="profile-actions">
+        <div class="profile-actions-primary">
+          <input class="w3-btn profile-btn-primary <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="insert" value="Speichern">
+        </div>
+<?php if($fill && $n && (int)$n->Index > 0) { ?>
+        <details class="profile-actions-more">
+          <summary>Weitere Aktionen</summary>
+          <div class="profile-actions-secondary">
+            <button type="button" class="w3-btn <?php echo htmlspecialchars($btnDelete, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">Löschen</button>
+          </div>
+        </details>
+        <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
+        <input type="hidden" name="new" value="<?php echo htmlspecialchars((string)$n->new, ENT_QUOTES, 'UTF-8'); ?>">
+<?php } ?>
+      </div>
+    </div>
+  </header>
 
-  <div class="termin-form-columns">
-  <section class="termin-form-section">
-    <h3 class="termin-form-heading">Was</h3>
-    <label>Veranstaltung</label>
-    <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Name" type="text" placeholder="Name" <?php if($fill) echo "value=\"".$n->Name."\""; ?>>
-    <label>Beschreibung</label>
-    <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Beschreibung" type="text" placeholder="Beschreibung" <?php if($fill) echo "value=\"".$n->Beschreibung."\""; ?>>
-  </section>
+  <div class="termin-grid">
+    <section class="profile-col" aria-labelledby="termin-col-was">
+      <h3 id="termin-col-was" class="profile-col-title">Was</h3>
+      <div class="profile-field">
+        <label class="profile-label" for="termin-name">Veranstaltung</label>
+        <input id="termin-name" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Name" type="text" placeholder="Name" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Name, ENT_QUOTES, 'UTF-8').'"'; ?>>
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="termin-beschreibung">Beschreibung</label>
+        <input id="termin-beschreibung" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Beschreibung" type="text" placeholder="Beschreibung" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Beschreibung, ENT_QUOTES, 'UTF-8').'"'; ?>>
+      </div>
+    </section>
 
-  <section class="termin-form-section">
-    <h3 class="termin-form-heading">Wann</h3>
-    <div class="w3-row">
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Datum <span class="w3-small w3-text-gray">(mehrtägig <input id="endcheck" type="checkbox" <?php if($fill && $n->EndDatum) echo "checked"; ?> onclick="endToggle();"></input>)</span></label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Datum" type="date"<?php
+    <section class="profile-col" aria-labelledby="termin-col-wann">
+      <h3 id="termin-col-wann" class="profile-col-title">Wann</h3>
+      <div class="profile-field">
+        <label class="profile-label" for="termin-datum">Datum</label>
+        <input id="termin-datum" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Datum" type="date"<?php
           if($fill) {
               echo ' value="'.htmlspecialchars((string)$n->Datum, ENT_QUOTES, 'UTF-8').'"';
           }
@@ -66,27 +109,32 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
           }
         ?>>
       </div>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label id="endlabel" <?php if($fill && $n->EndDatum) echo "style=\"display: block;\""; else echo "style=\"display: none;\""; ?>>Enddatum</label>
-        <input id="endinput" class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="EndDatum" type="date" <?php if($fill) echo "value=\"".$n->EndDatum."\""; ?> <?php if($fill && $n->EndDatum) echo "style=\"display: block;\""; else echo "style=\"display: none;\""; ?>>
+      <div class="profile-field">
+        <label class="profile-pref" for="endcheck">
+          <input id="endcheck" type="checkbox" class="w3-check" <?php if($fill && $n->EndDatum) echo 'checked'; ?> onclick="endToggle();">
+          <span>Mehrtägig</span>
+        </label>
       </div>
-    </div>
-    <div class="w3-row">
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Beginn (optional) <b class="termin-form-clear" onclick="clearInput('Uhrzeit')">&#10006;</b></label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Uhrzeit" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit."\""; ?>>
+      <div class="profile-field" id="endfield" <?php if(!($fill && $n->EndDatum)) echo 'hidden'; ?>>
+        <label class="profile-label" id="endlabel" for="endinput">Enddatum</label>
+        <input id="endinput" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="EndDatum" type="date" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->EndDatum, ENT_QUOTES, 'UTF-8').'"'; ?>>
       </div>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Ende (optional) <b class="termin-form-clear" onclick="clearInput('Uhrzeit2')">&#10006;</b></label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Uhrzeit2" type="time" <?php if($fill) echo "value=\"".$n->Uhrzeit2."\""; ?>>
+      <div class="termin-field-pair">
+        <div class="profile-field">
+          <label class="profile-label" for="termin-uhrzeit">Beginn <b class="termin-form-clear" onclick="clearInput('Uhrzeit')" title="leeren">&#10006;</b></label>
+          <input id="termin-uhrzeit" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uhrzeit" type="time" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Uhrzeit, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
+        <div class="profile-field">
+          <label class="profile-label" for="termin-uhrzeit2">Ende <b class="termin-form-clear" onclick="clearInput('Uhrzeit2')" title="leeren">&#10006;</b></label>
+          <input id="termin-uhrzeit2" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uhrzeit2" type="time" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Uhrzeit2, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
       </div>
-    </div>
 <?php if($GLOBALS['optionsDB']['showVehicle'] || $GLOBALS['optionsDB']['showTravelTime']) { ?>
-    <div class="w3-row">
+      <div class="termin-field-pair">
 <?php if($GLOBALS['optionsDB']['showVehicle']) { ?>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Fahrzeug</label>
-        <select class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Vehicle">
+        <div class="profile-field">
+          <label class="profile-label" for="termin-vehicle">Fahrzeug</label>
+          <select id="termin-vehicle" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Vehicle">
 <?php
   if($fill) {
     VehicleOption($n->Vehicle);
@@ -94,120 +142,128 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
     VehicleOption(0);
   }
 ?>
-        </select>
-      </div>
+          </select>
+        </div>
 <?php } ?>
 <?php if($GLOBALS['optionsDB']['showTravelTime']) { ?>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Abfahrt</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Abfahrt" type="time" <?php if($fill) echo "value=\"".$n->Abfahrt."\""; ?>>
+        <div class="profile-field">
+          <label class="profile-label" for="termin-abfahrt">Abfahrt</label>
+          <input id="termin-abfahrt" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Abfahrt" type="time" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Abfahrt, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
+<?php } ?>
       </div>
 <?php } ?>
-    </div>
-<?php } ?>
-  </section>
+    </section>
 
-  <section class="termin-form-section">
-    <h3 class="termin-form-heading">Wo</h3>
-    <div class="w3-row">
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Veranstaltungsort (z.B. Rochuskirche)</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Ort1" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort1."\""; ?>>
+    <section class="profile-col" aria-labelledby="termin-col-wo">
+      <h3 id="termin-col-wo" class="profile-col-title">Wo</h3>
+      <div class="profile-field">
+        <label class="profile-label" for="termin-ort1">Ort</label>
+        <input id="termin-ort1" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Ort1" type="text" placeholder="Ort" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Ort1, ENT_QUOTES, 'UTF-8').'"'; ?>>
       </div>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Straße, Hausnummer</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Ort2" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort2."\""; ?>>
+      <div class="profile-field">
+        <label class="profile-label" for="termin-ort2">Straße</label>
+        <input id="termin-ort2" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Ort2" type="text" placeholder="Straße" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Ort2, ENT_QUOTES, 'UTF-8').'"'; ?>>
       </div>
-    </div>
-    <div class="w3-row">
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Stadtteil</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Ort3" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort3."\""; ?>>
+      <div class="termin-field-pair">
+        <div class="profile-field">
+          <label class="profile-label" for="termin-ort3">Stadtteil</label>
+          <input id="termin-ort3" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Ort3" type="text" placeholder="Stadtteil" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Ort3, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
+        <div class="profile-field">
+          <label class="profile-label" for="termin-ort4">Stadt</label>
+          <input id="termin-ort4" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Ort4" type="text" placeholder="Stadt" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Ort4, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
       </div>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Stadt</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Ort4" type="text" placeholder="Ort" <?php if($fill) echo "value=\"".$n->Ort4."\""; ?>>
-      </div>
-    </div>
-  </section>
-
-  <section class="termin-form-section">
-    <h3 class="termin-form-heading">Optionen</h3>
-    <div class="w3-row">
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Kapazit&auml;t</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="Capacity" type="number" min="0" step="1" <?php if($fill) echo "value=\"".$n->Capacity."\""; ?>>
-      </div>
-      <div class="w3-col s12 m6 l6 termin-form-field">
-        <label>Freitext-Rückmeldung (optional)</label>
-        <input class="w3-input w3-border <?php echo $inputBg; ?> w3-margin-bottom w3-mobile" name="defaultFreeText" type="text" <?php if($fill) echo "value=\"".$n->defaultFreeText."\""; ?>>
-      </div>
-    </div>
-    <div class="w3-row termin-form-checks">
-      <div class="w3-col s12 termin-form-check">
-        <input type="hidden" name="Auftritt" value="0">
-        <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo "checked"; ?>>
-        <label>Besetzung</label>
-        <span class="w3-small w3-text-gray termin-form-hint"> — Registeraufschlüsselung und Orchesterdarstellung</span>
-      </div>
-      <div class="w3-col s12 m4 l4 termin-form-check">
-        <input type="hidden" name="Shifts" value="0">
-        <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo "checked"; ?>>
-        <label>Schichtdienst</label>
-      </div>
-      <div class="w3-col s12 m4 l4 termin-form-check">
-        <input type="hidden" name="open" value="0">
-        <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo "checked"; ?>>
-        <label>Anmeldung offen</label>
-      </div>
-    </div>
-    <div class="w3-margin-top">
-      <label>sichtbar für</label>
-      <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputBg; ?>">
-        <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
-        <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo $inputBg; ?>" placeholder="Gruppe, Rolle, Register oder Person tippen…" autocomplete="off" />
-        <div id="terminVisibilitySuggest" class="mail-recipient-suggest" hidden></div>
 <?php
-  $visSpec = $fill ? $n->getVisibilitySpecArray() : AudienceSpec::defaultVisibilitySpec();
+if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n->Ort1 || $n->Ort2)) {
+    $mapsQuery = rawurlencode(trim(implode(' ', array_filter(array(
+        (string)$n->Ort1,
+        (string)$n->Ort2,
+        (string)$n->Ort3,
+        (string)$n->Ort4,
+    )))));
 ?>
-        <input type="hidden" name="visibilitySpec" id="terminVisibilitySpec" value="<?php
-          echo htmlspecialchars(json_encode($visSpec), ENT_QUOTES, 'UTF-8');
-        ?>" />
-        <p class="w3-small w3-margin-top mail-recipient-count-line">
-          <span id="terminVisibilityCount" class="mail-recipient-count" aria-live="polite">…</span>
-        </p>
+      <div class="profile-field termin-edit-map">
+        <span class="profile-label">Karte</span>
+        <div class="profile-value profile-value--map">
+          <iframe title="Karte" width="100%" height="180" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?key=<?php echo htmlspecialchars((string)$GLOBALS['googlemapsapi'], ENT_QUOTES, 'UTF-8'); ?>&amp;q=<?php echo htmlspecialchars($mapsQuery, ENT_QUOTES, 'UTF-8'); ?>" allowfullscreen></iframe>
+        </div>
       </div>
+<?php } ?>
+    </section>
+
+    <section class="profile-col" aria-labelledby="termin-col-optionen">
+      <h3 id="termin-col-optionen" class="profile-col-title">Optionen</h3>
+      <div class="termin-field-pair">
+        <div class="profile-field">
+          <label class="profile-label" for="termin-capacity">Kapazität</label>
+          <input id="termin-capacity" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Capacity" type="number" min="0" step="1" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Capacity, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
+        <div class="profile-field">
+          <label class="profile-label" for="termin-freetext">Freitext</label>
+          <input id="termin-freetext" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="defaultFreeText" type="text" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->defaultFreeText, ENT_QUOTES, 'UTF-8').'"'; ?>>
+        </div>
+      </div>
+      <div class="profile-prefs profile-prefs--grid termin-opts">
+        <label class="profile-pref">
+          <input type="hidden" name="Auftritt" value="0">
+          <input class="w3-check" type="checkbox" name="Auftritt" value="1" <?php if($fill && (bool)$n->Auftritt) echo 'checked'; ?>>
+          <span>Besetzung</span>
+        </label>
+        <label class="profile-pref">
+          <input type="hidden" name="Shifts" value="0">
+          <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo 'checked'; ?>>
+          <span>Schichtdienst</span>
+        </label>
+        <label class="profile-pref">
+          <input type="hidden" name="open" value="0">
+          <input class="w3-check" type="checkbox" name="open" value="1" <?php if($fill && (bool)$n->open) echo 'checked'; ?>>
+          <span>Anmeldung offen</span>
+        </label>
 <?php if(Discord::isConfigured()) {
     $postDiscordChecked = $fill
       ? ((int)$n->PostDiscord > 0 || AudienceSpec::isAlleUserSpec($visSpec))
       : true;
 ?>
-      <div class="w3-margin-top termin-form-check">
-        <input type="hidden" name="PostDiscord" value="0">
-        <input class="w3-check" type="checkbox" name="PostDiscord" id="terminPostDiscord" value="1" <?php if($postDiscordChecked) echo "checked"; ?>>
-        <label for="terminPostDiscord">Auch auf Discord posten</label>
+        <label class="profile-pref">
+          <input type="hidden" name="PostDiscord" value="0">
+          <input class="w3-check" type="checkbox" name="PostDiscord" id="terminPostDiscord" value="1" <?php if($postDiscordChecked) echo 'checked'; ?>>
+          <span>Discord</span>
+        </label>
+<?php } ?>
+      </div>
+      <div class="profile-field termin-visibility">
+        <span class="profile-label">Sichtbar für</span>
+        <div class="termin-visibility-box w3-padding w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>">
+          <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
+          <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Gruppe, Rolle, Register…" autocomplete="off">
+          <div id="terminVisibilitySuggest" class="mail-recipient-suggest" hidden></div>
+          <input type="hidden" name="visibilitySpec" id="terminVisibilitySpec" value="<?php
+            echo htmlspecialchars(json_encode($visSpec), ENT_QUOTES, 'UTF-8');
+          ?>">
+          <p class="w3-small w3-margin-top mail-recipient-count-line">
+            <span id="terminVisibilityCount" class="mail-recipient-count" aria-live="polite">…</span>
+          </p>
+        </div>
+      </div>
+<?php if($fill && $n && (int)$n->Index > 0) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Neu</span>
+        <div class="profile-value"><?php echo bool2string($n->new); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">Termin-ID</span>
+        <div class="profile-value"><?php echo (int)$n->Index; ?></div>
       </div>
 <?php } ?>
-    </div>
-  </section>
-  </div>
-
-  <div class="termin-form-actions w3-row">
-    <div class="w3-col s12 <?php echo $fill ? 'm6 l6' : 'm12 l12'; ?> termin-form-action">
-      <input class="w3-btn w3-block <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border" type="submit" name="insert" value="speichern">
-    </div>
-<?php if($fill) { ?>
-    <div class="w3-col s12 m6 l6 termin-form-action">
-      <button type="button" class="w3-btn w3-block <?php echo $GLOBALS['optionsDB']['colorBtnDelete']; ?> w3-border" onclick="document.getElementById('delmodal').style.display='block'">l&ouml;schen</button>
-    </div>
-    <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
-    <input type="hidden" name="new" <?php if($fill) echo "value=\"".$n->new."\""; ?>>
-<?php } ?>
+    </section>
   </div>
 </form>
 </div>
+</div>
 
-<?php if($fill) { ?>
+<?php if($fill && $n && (int)$n->Index > 0) { ?>
 <div id="delmodal" class="w3-modal">
   <div class="w3-modal-content w3-card">
     <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
@@ -215,19 +271,19 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
       class="w3-button w3-display-topright">&times;</span>
       <h2>L&ouml;schen best&auml;tigen</h2>
     </header>
-    <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo $n->Name." (".germanDate($n->Datum,1); ?>)</b> l&ouml;schen wollen?</div>
+    <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo htmlspecialchars($n->Name.' ('.germanDate($n->Datum,1).')', ENT_QUOTES, 'UTF-8'); ?></b> l&ouml;schen wollen?</div>
     <div class="w3-container w3-mobile">
       <form action="index.php" method="POST">
-        <input type="hidden" name="Index" <?php if($fill) echo "value=\"".$n->Index."\""; ?>>
+        <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
         <div class="w3-row">
           <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-          <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
+          <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
           <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
         </div>
       </form>
       <div class="w3-row">
         <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-        <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='none'">nein</button>
+        <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='none'">nein</button>
         <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
       </div>
     </div>
@@ -237,12 +293,11 @@ $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 
 <script type="text/javascript">
 function endToggle() {
-  if(document.getElementById("endcheck").checked) {
-    document.getElementById("endlabel").style.display="block";
-    document.getElementById("endinput").style.display="block";
-  } else {
-    document.getElementById("endlabel").style.display="none";
-    document.getElementById("endinput").style.display="none";
+  var on = document.getElementById('endcheck').checked;
+  var field = document.getElementById('endfield');
+  if(field) {
+    if(on) field.removeAttribute('hidden');
+    else field.setAttribute('hidden', '');
   }
 }
 function clearInput(name) {

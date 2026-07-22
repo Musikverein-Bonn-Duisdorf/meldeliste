@@ -285,35 +285,6 @@ class Inventories
         return $row['Typ'];
     }
 
-    /** Label + value row for detail modal. */
-    private function modalDetailRow($indent, $label, $valueHtml) {
-        $row = new div;
-        $row->indent = $indent;
-        $row->class = "w3-row w3-padding";
-        $str = $row->open();
-
-        $lab = new div;
-        $lab->indent = $indent + 1;
-        $lab->col(4, 12, 12);
-        $lab->body = "<b>".htmlspecialchars($label, ENT_QUOTES, 'UTF-8').":</b>";
-        $str .= $lab->print();
-
-        $val = new div;
-        $val->indent = $indent + 1;
-        $val->col(8, 12, 12);
-        $str .= $val->open();
-        $str .= $valueHtml;
-        $str .= $val->close();
-
-        $str .= $row->close();
-        return $str;
-    }
-
-    private function modalDisplayText($text) {
-        $text = trim(html_entity_decode(strip_tags((string)$text)));
-        if($text === '') return '<span class="w3-text-gray">—</span>';
-        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-    }
 
     public function printTableLine($editable = true) {
         $sql = sprintf(
@@ -461,198 +432,14 @@ class Inventories
         sqlerror();
         $row = $dbr ? mysqli_fetch_array($dbr) : null;
         if(!is_array($row)) {
-            return '<header class="w3-container '.$GLOBALS['optionsDB']['colorTitleBar'].'"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Inventar</h2></header><div class="w3-container w3-padding"><p>Datensatz konnte nicht geladen werden.</p></div>';
+            return '<div class="profile-shell modal-shell"><header class="profile-hero"><div class="profile-hero-text"><h2 class="profile-title">Inventar</h2></div><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Datensatz konnte nicht geladen werden.</p></div>';
         }
 
-        $str = "";
-
-        // Start above 0: extracted from nested modal wrappers; loan loop still decrements
-        $indent = 2;
-        $header = new div;
-        $header->indent=$indent;
-        $header->class="w3-container";
-        $header->class=$GLOBALS['optionsDB']['colorTitleBar'];
-        $header->tag="header";
-        $str=$str.$header->open();
-        $indent++;
-        $span = new div;
-        $span->indent=$indent;
-        $span->tag="span";
-        $span->onclick="closeModal()";
-        $span->class="w3-button w3-display-topright";
-        $span->body="&times;";
-        $str=$str.$span->print();
-        
-        $content = new div;
-        $content->indent=$indent;
-        $headerTitle = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
-        $content->body="<h2>".htmlspecialchars((string)$headerTitle, ENT_QUOTES, 'UTF-8')."</h2>";
-        $str=$str.$content->print();
-        $str=$str.$header->close();
-
-        $indent--;
-        $detailform = new div;
-        $detailform->indent = $indent;
-        if($canEdit) {
-            $detailform->tag="form";
-            $detailform->action="";
-            $detailform->method="POST";
-        }
-        $str=$str.$detailform->open();
-        $indent++;
-
-        $str .= $this->modalDetailRow($indent, 'Inventarnummer', $canEdit
-            ? '<input class="w3-input w3-border" type="number" name="RegNumber" value="'.htmlspecialchars((string)$this->RegNumber, ENT_QUOTES, 'UTF-8').'">'
-              .'<div class="w3-small w3-text-gray" style="margin-top:4px;">'.htmlspecialchars(RegNumber::displayInventory($this->Inventory, $this->RegNumber), ENT_QUOTES, 'UTF-8').'</div>'
-            : htmlspecialchars(RegNumber::displayInventory($this->Inventory, $this->RegNumber), ENT_QUOTES, 'UTF-8')
-        );
-        if($canEdit) {
-            $str .= '<input type="hidden" name="InventoriesIndex" value="'.(int)$this->Index.'">';
-        }
-
-        $isInstr = $this->isInstrType();
-        if($isInstr || (int)$this->Instrument > 0) {
-            $str .= $this->modalDetailRow($indent, 'Instrument', $canEdit
-                ? '<select class="w3-select w3-border w3-input" name="Instrument">'.instrumentOptionAll((int)$this->Instrument).'</select>'
-                : $this->modalDisplayText($this->getInstrumentName())
-            );
-        }
-
-        $str .= $this->modalDetailRow($indent, 'Beschreibung', $canEdit
-            ? '<input class="w3-input w3-border" type="text" name="Description" value="'.htmlspecialchars((string)$this->Description, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText($this->Description)
-        );
-
-        $str .= $this->modalDetailRow($indent, 'Hersteller', $canEdit
-            ? '<input class="w3-input w3-border" type="text" name="Vendor" value="'.htmlspecialchars((string)$this->Vendor, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText($this->Vendor)
-        );
-
-        $str .= $this->modalDetailRow($indent, 'Modell', $canEdit
-            ? '<input class="w3-input w3-border" type="text" name="Model" value="'.htmlspecialchars((string)$this->Model, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText($this->Model)
-        );
-
-        $str .= $this->modalDetailRow($indent, 'Seriennummer', $canEdit
-            ? '<input class="w3-input w3-border" type="text" name="SerialNr" value="'.htmlspecialchars((string)$this->SerialNr, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText($this->SerialNr)
-        );
-
-        $str .= $this->modalDetailRow($indent, 'Kaufdatum', $canEdit
-            ? '<input class="w3-input w3-border" type="date" name="PurchaseDate" value="'.htmlspecialchars((string)$this->PurchaseDate, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText(germanDate($this->PurchaseDate, 0))
-        );
-
-        $str .= $this->modalDetailRow($indent, 'Kaufpreis', $canEdit
-            ? '<input class="w3-input w3-border" type="number" step="0.01" name="PurchasePrize" value="'.htmlspecialchars((string)$this->PurchasePrize, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText(mkPrize($this->PurchasePrize))
-        );
-
-        $str .= $this->modalDetailRow($indent, 'Eigentümer', $canEdit
-            ? '<select class="w3-select w3-border w3-input" name="Owner">'.UserOptionAll((int)$this->Owner).'</select>'
-            : $this->modalDisplayText(getOwner((int)$this->Owner))
-        );
-
-        if($canEdit) {
-            $insured = !empty($row['Insurance']) || !empty($this->Insurance);
-            $insHtml = '<input type="hidden" name="Insurance" value="0">'
-                .'<input class="w3-check" type="checkbox" name="Insurance" value="1"'.($insured ? ' checked' : '').'>';
-        }
-        else {
-            $insHtml = $this->modalDisplayText(bool2string(!empty($row['Insurance']) || !empty($this->Insurance)));
-        }
-        $str .= $this->modalDetailRow($indent, 'Versichert', $insHtml);
-
-        $str .= $this->modalDetailRow($indent, 'Kommentar', $canEdit
-            ? '<input class="w3-input w3-border" type="text" name="Comment" value="'.htmlspecialchars((string)$this->Comment, ENT_QUOTES, 'UTF-8').'">'
-            : $this->modalDisplayText($this->Comment)
-        );
-
-        if($canEdit) {
-            $indent--;
-            $modalrow = new div;
-            $modalrow->indent=$indent;
-            $modalrow->class="w3-row w3-padding";
-            $str=$str.$modalrow->open();
-            $indent++;
-            $content = new div;
-            $content->indent=$indent;
-            $content->tag="button";
-            $content->type="submit";
-            $content->name="update";
-            $content->value="update";
-            $content->class="w3-button";
-            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->col(2,6,6);
-            $content->body="speichern";
-            $str=$str.$content->print();        
-            $str=$str.$modalrow->close();
-        }
-
-        $str=$str.$detailform->close();
-        $indent--;
-
-        if($canEdit) {
-            $indent--;
-            $modalrow = new div;
-            $modalrow->indent=$indent;
-            $modalrow->class="w3-row w3-padding";
-            $str=$str.$modalrow->open();
-            $indent++;
-            $content = new div;
-            $content->indent=$indent;
-            $content->tag="button";
-            $content->class="w3-button";
-            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->onclick="document.getElementById('del".$this->Index."').style.display='block'";
-            $content->col(2,6,6);
-            $content->body="l&ouml;schen";
-            $str=$str.$content->print();        
-            $str=$str.$modalrow->close();
-
-            $indent--;
-            $modalrow = new div;
-            $modalrow->indent=$indent;
-            $modalrow->class="w3-row w3-padding";
-            $modalrow->class=$GLOBALS['optionsDB']['colorWarning'];
-            $modalrow->style="display: none;";
-            $modalrow->id="del".$this->Index;
-            $modalrow->tag="form";
-            $modalrow->action="";
-            $modalrow->method="POST";
-            $str=$str.$modalrow->open();
-            $indent++;
-            $content = new div;
-            $content->indent=$indent;
-            $content->class="w3-padding";
-            $content->col(4,6,12);
-            $content->body="Diesen Eintrag wirklich l&ouml;schen?";
-            $str=$str.$content->print();        
-            $content = new div;
-            $content->indent=$indent;
-            $content->tag="button";
-            $content->class="w3-button";
-            $content->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $content->type="submit";
-            $content->name="delete";
-            $content->value="delete";
-            $content->col(2,6,12);
-            $content->body="Ja";
-            $str=$str.$content->print();        
-            $hidden = new div;
-            $hidden->indent=$indent;
-            $hidden->tag="input";
-            $hidden->type="hidden";
-            $hidden->name="InventoriesIndex";
-            $hidden->value=$this->Index;
-            $str=$str.$hidden->print();
-            $str=$str.$modalrow->close();
-
-        }
-        
-        $str .= $this->getLoansModalHtml($canEdit);
-
-        return $str;
+        $inv = $this;
+        $loansHtml = $this->getLoansModalHtml($canEdit);
+        ob_start();
+        require __DIR__.'/../views/inventar/modal.php';
+        return ob_get_clean();
     }
 
     /**
@@ -662,14 +449,14 @@ class Inventories
         $indent = 1;
         $section = new div;
         $section->indent = $indent;
-        $section->class = "w3-padding w3-margin-bottom inventory-loans";
-        $section->class = $GLOBALS['optionsDB']['colorInputBackground'];
+        $section->class = "inventory-loans profile-col";
         $str = $section->open();
 
         $title = new div;
         $title->indent = $indent + 1;
-        $title->class = "w3-padding-small";
-        $title->body = "<b>Leihen</b>";
+        $title->tag = "h3";
+        $title->class = "profile-col-title";
+        $title->body = "Leihen";
         $str .= $title->print();
 
         if($canEdit) {
@@ -680,15 +467,15 @@ class Inventories
         if(!$loans) {
             $empty = new div;
             $empty->indent = $indent + 1;
-            $empty->class = "w3-padding w3-text-gray";
+            $empty->class = "profile-value";
             $empty->body = "Noch keine Leihen.";
             $str .= $empty->print();
         }
         else {
             $listTitle = new div;
             $listTitle->indent = $indent + 1;
-            $listTitle->class = "w3-padding-small w3-border-top";
-            $listTitle->body = "<b>Historie</b>";
+            $listTitle->class = "profile-label";
+            $listTitle->body = "Historie";
             $str .= $listTitle->print();
 
             foreach($loans as $loanId) {
@@ -704,32 +491,22 @@ class Inventories
 
     private function getNewLoanFormHtml($indent) {
         $btn = $GLOBALS['optionsDB']['colorBtnSubmit'];
+        $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         $form = new div;
         $form->indent = $indent;
         $form->tag = "form";
         $form->action = "";
         $form->method = "POST";
-        $form->class = "w3-padding w3-border-top";
+        $form->class = "inventar-loan-new";
         $str = $form->open();
         $str .= '<input type="hidden" name="Inventory" value="'.(int)$this->Index.'">';
-        $str .= $this->modalDetailRow($indent + 1, 'Person',
-            '<select class="w3-select w3-border w3-input" name="User">'.UserOptionAll(0).'</select>'
-        );
-        $str .= $this->modalDetailRow($indent + 1, 'Von',
-            '<input class="w3-input w3-border" type="date" name="StartDate" required>'
-        );
-        $str .= $this->modalDetailRow($indent + 1, 'Bis (optional)',
-            '<input class="w3-input w3-border" type="date" name="EndDate">'
-        );
-        $actions = new div;
-        $actions->indent = $indent + 1;
-        $actions->class = "w3-row w3-padding";
-        $str .= $actions->open();
-        $str .= '<div class="w3-col l4 m12 s12">&nbsp;</div>';
-        $str .= '<div class="w3-col l8 m12 s12">'
-            .'<button type="submit" name="newLoan" value="1" class="w3-button '.$btn.'">Leihe eintragen</button>'
-            .'</div>';
-        $str .= $actions->close();
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-user">Person</label>'
+            .'<select id="loan-user" class="w3-select w3-border w3-input profile-control '.$inputBg.'" name="User">'.UserOptionAll(0).'</select></div>';
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-start">Von</label>'
+            .'<input id="loan-start" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="StartDate" required></div>';
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-end">Bis</label>'
+            .'<input id="loan-end" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="EndDate"></div>';
+        $str .= '<div class="profile-field"><button type="submit" name="newLoan" value="1" class="w3-btn profile-btn-primary '.$btn.' w3-border w3-mobile">Leihe eintragen</button></div>';
         $str .= $form->close();
         return $str;
     }
@@ -773,7 +550,7 @@ class Inventories
             $str .= '<form method="POST" action="" style="display:inline;" '
                 .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
                 .'<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">'
-                .'<button type="submit" name="deleteLoan" value="1" class="w3-button w3-small '.$btnDelete.'">löschen</button>'
+                .'<button type="submit" name="deleteLoan" value="1" class="w3-button w3-small '.$btnDelete.'">Löschen</button>'
                 .'</form>';
             $str .= $actions->close();
         }
@@ -789,12 +566,12 @@ class Inventories
             $endForm->class = "w3-row w3-padding-16";
             $str .= $endForm->open();
             $str .= '<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">';
-            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="w3-small"><b>Rückgabe</b></label></div>';
+            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-end-'.(int)$L->Index.'">Rückgabe</label></div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
-                .'<input class="w3-input w3-border" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
+                .'<input id="loan-end-'.(int)$L->Index.'" class="w3-input w3-border profile-control" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
                 .'</div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
-                .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">beenden</button>'
+                .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">Beenden</button>'
                 .'</div>';
             $str .= $endForm->close();
         }

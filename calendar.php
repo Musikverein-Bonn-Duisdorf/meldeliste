@@ -125,7 +125,7 @@ button.w3-button.meld-cal-nav-icon {
   <div class="meld-cal-actions">
 <?php if($showCalendarSubscribe) { ?>
     <button type="button" id="calSubscribeToggle" class="w3-button w3-border meld-cal-nav-icon"
-            title="Kalender abonnieren" aria-label="Kalender abonnieren" aria-haspopup="dialog" aria-controls="calSubscribeModal">
+            title="Persönlichen Kalender abonnieren" aria-label="Persönlichen Kalender abonnieren" aria-haspopup="dialog" aria-controls="calSubscribeModal">
       <i class="fas fa-info-circle" aria-hidden="true"></i>
     </button>
 <?php } ?>
@@ -189,7 +189,7 @@ if($showCalendarSubscribe) {
   <div class="w3-modal-content w3-card">
     <header class="w3-container <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorTitleBar'], ENT_QUOTES, 'UTF-8'); ?>">
       <button type="button" class="w3-button w3-display-topright" id="calSubscribeClose" aria-label="Schließen">&times;</button>
-      <h2 id="calSubscribeModalTitle"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Kalender abonnieren</h2>
+      <h2 id="calSubscribeModalTitle"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Persönlichen Kalender abonnieren</h2>
     </header>
     <div class="w3-container w3-padding">
 <?php include __DIR__.'/views/calendar/subscribe.php'; ?>

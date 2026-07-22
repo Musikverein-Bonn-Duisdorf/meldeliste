@@ -1,6 +1,6 @@
 /**
  * Calendar melde modal helpers (MELD-126).
- * Refresh intermediate modal + chip colors after melde().
+ * Close intermediate modal + update chip colors after melde().
  */
 function invalidateCalendarMeldeModalCache(terminId) {
     if(typeof modalCache === 'undefined') return;
@@ -13,13 +13,11 @@ function invalidateCalendarMeldeModalCache(terminId) {
 }
 
 function refreshOpenCalendarMeldeModal(terminId) {
-    var host = document.getElementById('ajaxModalHost');
-    if(!host || host.style.display === 'none') return;
     var root = document.querySelector('.calendar-melde-modal[data-termin-id="' + terminId + '"]');
     if(!root) return;
     invalidateCalendarMeldeModalCache(terminId);
-    if(typeof openModal === 'function') {
-        openModal('calendarMelde', terminId);
+    if(typeof closeModal === 'function') {
+        closeModal();
     }
 }
 
