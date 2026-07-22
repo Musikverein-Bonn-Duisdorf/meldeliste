@@ -39,7 +39,7 @@ else {
 }
 ?>
 </select>
-<?php if($fill && (int)$n->Index > 0) { ?>
+<?php if($fill && (int)$n->Index > 0 && !empty($GLOBALS['optionsDB']['urlNotenarchiv'])) { ?>
 <p class="w3-small"><a href="user-voice.php?user=<?php echo (int)$n->Index; ?>">Stimme / Fallbacks (Notenarchiv)</a></p>
 <?php } ?>
 <?php

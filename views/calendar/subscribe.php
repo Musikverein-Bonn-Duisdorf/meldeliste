@@ -25,7 +25,7 @@ $quiet = !empty($calendarSubscribeQuiet) || $inModal;
 if(!$inModal) {
 ?>
 <div class="w3-panel w3-border w3-padding w3-margin-top <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorInputBackground'], ENT_QUOTES, 'UTF-8'); ?>">
-  <h3><i class="fas fa-calendar-plus" aria-hidden="true"></i> Kalender abonnieren</h3>
+  <h3><i class="fas fa-calendar-plus" aria-hidden="true"></i> Persönlichen Kalender abonnieren</h3>
 <?php } ?>
 <?php if(!$quiet) { ?>
   <p class="w3-small">

@@ -175,6 +175,22 @@ $visSpec = ($fill && $n) ? $n->getVisibilitySpecArray() : AudienceSpec::defaultV
           <input id="termin-ort4" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Ort4" type="text" placeholder="Stadt" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Ort4, ENT_QUOTES, 'UTF-8').'"'; ?>>
         </div>
       </div>
+<?php
+if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n->Ort1 || $n->Ort2)) {
+    $mapsQuery = rawurlencode(trim(implode(' ', array_filter(array(
+        (string)$n->Ort1,
+        (string)$n->Ort2,
+        (string)$n->Ort3,
+        (string)$n->Ort4,
+    )))));
+?>
+      <div class="profile-field termin-edit-map">
+        <span class="profile-label">Karte</span>
+        <div class="profile-value profile-value--map">
+          <iframe title="Karte" width="100%" height="180" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?key=<?php echo htmlspecialchars((string)$GLOBALS['googlemapsapi'], ENT_QUOTES, 'UTF-8'); ?>&amp;q=<?php echo htmlspecialchars($mapsQuery, ENT_QUOTES, 'UTF-8'); ?>" allowfullscreen></iframe>
+        </div>
+      </div>
+<?php } ?>
     </section>
 
     <section class="profile-col" aria-labelledby="termin-col-optionen">
@@ -231,6 +247,16 @@ $visSpec = ($fill && $n) ? $n->getVisibilitySpecArray() : AudienceSpec::defaultV
           </p>
         </div>
       </div>
+<?php if($fill && $n && (int)$n->Index > 0) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Neu</span>
+        <div class="profile-value"><?php echo bool2string($n->new); ?></div>
+      </div>
+      <div class="profile-field">
+        <span class="profile-label">Termin-ID</span>
+        <div class="profile-value"><?php echo (int)$n->Index; ?></div>
+      </div>
+<?php } ?>
     </section>
   </div>
 </form>

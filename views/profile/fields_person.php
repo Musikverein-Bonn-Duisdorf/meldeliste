@@ -56,8 +56,14 @@ else {
   </div>
 </div>
 <?php } ?>
-<?php if($fill && (int)$n->Index > 0 && $adminUserEdit) { ?>
+<?php if($fill && (int)$n->Index > 0 && $adminUserEdit && !empty($GLOBALS['optionsDB']['urlNotenarchiv'])) { ?>
 <p class="profile-inline-link"><a href="user-voice.php?user=<?php echo (int)$n->Index; ?>">Stimme / Fallbacks</a></p>
+<?php } ?>
+<?php if($fill && (int)$n->Index > 0) { ?>
+<div class="profile-field">
+  <span class="profile-label">User-ID</span>
+  <div class="profile-value"><?php echo (int)$n->Index; ?></div>
+</div>
 <?php } ?>
 <?php
 $mailGroups = MailGroup::listAll();

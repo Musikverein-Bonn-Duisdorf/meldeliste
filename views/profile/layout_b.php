@@ -79,7 +79,7 @@ $canEditUsers = $canEditUsersSaved;
 <?php } ?>
 <?php if($showCalendarSubscribe) { ?>
     <div class="profile-b-block">
-      <h4><i class="fas fa-calendar-plus" aria-hidden="true"></i> Kalender abonnieren</h4>
+      <h4><i class="fas fa-calendar-plus" aria-hidden="true"></i> Persönlichen Kalender abonnieren</h4>
 <?php
         $calendarSubscribeUid = 'profile-cal-b';
         $calendarSubscribeInModal = true;

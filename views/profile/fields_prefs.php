@@ -50,3 +50,18 @@ $idSuffix = isset($idSuffix) ? (string)$idSuffix : '';
   </div>
 </div>
 <p class="profile-help-link"><a href="help.php#help-profil">Hilfe zu Benachrichtigungen</a></p>
+<?php
+if($fill && (int)$n->Index > 0 && !empty($adminUserEdit)) {
+    $p = new Permissions;
+    $p->load_by_user((int)$n->Index);
+    $permissionsHtml = $p->printShort();
+    if($permissionsHtml !== '') {
+?>
+<div class="profile-field">
+  <span class="profile-label">Rechte</span>
+  <div class="profile-value profile-value--perms"><?php echo $permissionsHtml; ?></div>
+</div>
+<?php
+    }
+}
+?>

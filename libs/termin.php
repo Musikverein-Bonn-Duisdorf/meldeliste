@@ -1776,50 +1776,27 @@ class Termin
      * Ja/Nein/Vielleicht like the list; „Weitere Optionen“ opens the detail modal.
      */
     public function getCalendarMeldeModalHtml() {
-        $user = (int)$this->getUser();
-        $name = htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8');
-        $timeInfo = htmlspecialchars($this->makeTimeInfo(), ENT_QUOTES, 'UTF-8');
-        $ort = htmlspecialchars((string)$this->Ort1, ENT_QUOTES, 'UTF-8');
-
-        $str = '<div class="calendar-melde-modal" data-termin-id="'.(int)$this->Index.'">';
-        $str .= '<header class="w3-container '.$GLOBALS['optionsDB']['colorTitleBar'].'">';
-        $str .= '<span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span>';
-        $str .= '<h2>'.$name.'</h2>';
-        $str .= '</header>';
-        $str .= '<div class="w3-container w3-padding">';
-        $str .= '<p class="w3-margin-bottom"><b>'.$timeInfo.'</b>';
-        if($ort !== '') {
-            $str .= '<br>'.$ort;
-        }
-        $str .= '</p>';
-
-        if($this->Shifts) {
-            $str .= '<p class="w3-padding w3-border">Dieser Termin hat Schichten. Bitte unter <b>Weitere Optionen</b> melden.</p>';
-        }
-        else {
-            $str .= '<p class="w3-margin-bottom">Deine Rückmeldung:</p>';
-            $str .= '<div class="w3-row w3-margin-bottom" id="calendarMeldeBtns'.(int)$this->Index.'">';
+        $buttonsHtml = null;
+        $capacityFull = false;
+        if(!$this->Shifts) {
             if($this->Capacity) {
                 if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || requirePermission('perm_editResponse')) {
-                    $str .= $this->makeButtons(2, 0, $this->Wert);
+                    $buttonsHtml = $this->makeButtons(2, 0, $this->Wert);
                 }
                 else {
-                    $str .= '<div class="w3-padding">Alle Plätze belegt</div>';
+                    $capacityFull = true;
                 }
             }
             else {
-                $str .= $this->makeButtons(3, 0, $this->Wert);
+                $buttonsHtml = $this->makeButtons(3, 0, $this->Wert);
             }
-            $str .= '</div>';
         }
-
-        $str .= '<div class="w3-margin-top w3-margin-bottom">';
-        $str .= '<button type="button" class="w3-button w3-border '.$GLOBALS['optionsDB']['colorBtnEdit'].'" '
-            .'onclick="openModal(\'termin\', '.(int)$this->Index.')">'
-            .'<i class="fas fa-info-circle"></i> Weitere Optionen</button>';
-        $str .= '</div>';
-        $str .= '</div></div>';
-        return $str;
+        return render('termin/calendar_melde_modal', array(
+            'termin' => $this,
+            'timeInfo' => $this->makeTimeInfo(),
+            'buttonsHtml' => $buttonsHtml,
+            'capacityFull' => $capacityFull,
+        ));
     }
 
     public function getDetailModalHtml() {
@@ -1977,111 +1954,38 @@ class Termin
     }
 
     public function getShiftResponseModalHtml($s) {
-        $str="";
-        $indent=0;
+        $colorYes = $GLOBALS['optionsDB']['colorBtnYes'];
+        $colorMaybe = $GLOBALS['optionsDB']['colorBtnMaybe'];
+        $colorNo = $GLOBALS['optionsDB']['colorBtnNo'];
 
-        $modalheader = new div;
-        $modalheader->tag="header";
-        $modalheader->class="w3-container";
-        $modalheader->class=$GLOBALS['optionsDB']['colorTitleBar'];
-        $modalheader->indent=$indent;
-        $str=$str.$modalheader->open();
+        $yesNames = array_merge($s->getMeldungenUser(1), $s->getMeldungenAushilfenShift());
+        $maybeNames = $s->getMeldungenUser(3);
+        $noNames = $s->getMeldungenUser(2);
 
-        $modalclose = new div;
-        $modalclose->tag="span";
-        $modalclose->class="w3-button w3-display-topright";
-        $modalclose->onclick="closeModal()";
-        $modalclose->body="&times;";
-        $indent++;
-        $modalclose->indent=$indent;
-        $str=$str.$modalclose->print();
+        return render('termin/shift_response_modal', array(
+            'terminName' => (string)$this->Name,
+            'shiftName' => (string)$s->Name,
+            'shiftTime' => (string)$s->getTime(),
+            'yesHtml' => $this->renderShiftResponseNames($yesNames, $colorYes),
+            'maybeHtml' => $this->renderShiftResponseNames($maybeNames, $colorMaybe),
+            'noHtml' => $this->renderShiftResponseNames($noNames, $colorNo),
+        ));
+    }
 
-        $modaltitle = new div;
-        $modaltitle->tag="h2";
-        $modaltitle->body=$this->Name." - ".$s->Name." ".$s->getTime();
-        $modaltitle->indent=$indent;
-        $str=$str.$modaltitle->print();
-
-        $str=$str.$modalheader->close();
-        $indent--;
-
-        $modalbody = new div;
-        $modalbody->indent = $indent;
-        $modalbody->class="w3-container";
-        $str=$str.$modalbody->open();
-        $indent++;
-
-        $modalY = new div;
-        $modalY->indent=$indent;
-        $modalY->class="w3-row w3-margin-top";
-        $modalY->bold();
-        $modalY->body="Zusagen";
-        $str=$str.$modalY->open();
-        $indent++;
-
-        $u = $s->getMeldungenUser(1);
-        for($j=0; $j<count($u); $j++) {
-            $udiv = new div;
-            $udiv->indent=$indent;
-            $udiv->class="w3-row";
-            $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
-            $udiv->body=$u[$j];
-            $str=$str.$udiv->print();
+    /**
+     * @param array<int, string> $names
+     */
+    private function renderShiftResponseNames(array $names, $colorClass) {
+        if(!count($names)) {
+            return '<div class="profile-value">—</div>';
         }
-        $u = $s->getMeldungenAushilfenShift();
-        for($j=0; $j<count($u); $j++) {
-            $udiv = new div;
-            $udiv->indent=$indent;
-            $udiv->class="w3-row";
-            $udiv->class=$GLOBALS['optionsDB']['colorBtnYes'];
-            $udiv->body=$u[$j];
-            $str=$str.$udiv->print();
+        $html = '';
+        foreach($names as $name) {
+            $html .= '<div class="shift-response-name '.$colorClass.'">'
+                .htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8')
+                .'</div>';
         }
-        $str=$str.$modalY->close();
-        $indent--;
-
-        $modalM = new div;
-        $modalM->indent=$indent;
-        $modalM->class="w3-row w3-margin-top";
-        $modalM->bold();
-        $modalM->body="unsicher";
-        $str=$str.$modalM->open();
-        $indent++;
-
-        $u = $s->getMeldungenUser(3);
-        for($j=0; $j<count($u); $j++) {
-            $udiv = new div;
-            $udiv->indent=$indent;
-            $udiv->class="w3-row";
-            $udiv->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
-            $udiv->body=$u[$j];
-            $str=$str.$udiv->print();
-        }
-        $str=$str.$modalM->close();
-        $indent--;
-
-        $modalN = new div;
-        $modalN->indent=$indent;
-        $modalN->class="w3-row w3-margin-top";
-        $modalN->bold();
-        $modalN->body="Absagen";
-        $str=$str.$modalN->open();
-        $indent++;
-
-        $u = $s->getMeldungenUser(2);
-        for($j=0; $j<count($u); $j++) {
-            $udiv = new div;
-            $udiv->indent=$indent;
-            $udiv->class="w3-row";
-            $udiv->class=$GLOBALS['optionsDB']['colorBtnNo'];
-            $udiv->body=$u[$j];
-            $str=$str.$udiv->print();
-        }
-        $str=$str.$modalN->close();
-        $indent--;
-
-        $str=$str.$modalbody->close();
-        return $str;
+        return $html;
     }
 
     public function getAushilfenRegister($filterregister) {

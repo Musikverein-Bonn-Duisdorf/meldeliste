@@ -77,7 +77,7 @@ $mailHintLabel = count($mailHint) ? implode(' · ', $mailHint) : 'keine Kanäle'
   <div class="profile-sheet-backdrop" data-profile-sheet-close></div>
   <div class="profile-sheet-panel w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" role="dialog" aria-modal="true" aria-labelledby="profile-sheet-cal-title">
     <header class="profile-sheet-head">
-      <h3 id="profile-sheet-cal-title"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Kalender abonnieren</h3>
+      <h3 id="profile-sheet-cal-title"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Persönlichen Kalender abonnieren</h3>
       <button type="button" class="w3-button" data-profile-sheet-close aria-label="Schließen">&times;</button>
     </header>
     <div class="profile-sheet-body">

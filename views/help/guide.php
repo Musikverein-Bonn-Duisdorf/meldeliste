@@ -121,13 +121,13 @@ $sections[] = array(
 <p>Unter <b>Gruppen</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit. <b>Mitglied</b>-Status und benannte Gruppen ändert nur ein Admin (beim Anlegen oder Bearbeiten); im eigenen Profil sind sie nur sichtbar. <b>Automatisch</b> zeigt dem Admin live die daraus folgenden Rollen/Register/regelbasierten Gruppen. Änderungen an Benachrichtigungen und Profilfeldern werden im Anwendungsprotokoll festgehalten.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 <p>Die Android-App speichert nach dem Login ein Gerätetoken und meldet dich beim nächsten Öffnen automatisch an. Abmelden in der App widerruft dieses Token.</p>
-<p>Unter <b>Kalender abonnieren</b> findest du deinen persönlichen ICS-Link für Google, Apple oder Outlook (siehe auch <a href="#help-kalender-abo">Kalender abonnieren</a>).</p>
+<p>Unter <b>Persönlichen Kalender abonnieren</b> findest du deinen persönlichen ICS-Link für Google, Apple oder Outlook (siehe auch <a href="#help-kalender-abo">Persönlichen Kalender abonnieren</a>).</p>
 '
 );
 
 $sections[] = array(
     'id' => 'kalender-abo',
-    'title' => 'Kalender abonnieren',
+    'title' => 'Persönlichen Kalender abonnieren',
     'body' => '
 <p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b> im Info-Dialog (runde Buttons über der Monatsauswahl).</p>
 <p><b>Einweg:</b> Termine und dein Melde-Status (zugesagt / vielleicht / ohne) werden in den Kalender übernommen. Zu- und Absagen änderst du weiterhin in der Meldeliste — nicht in der Kalender-App.</p>
@@ -188,7 +188,7 @@ $sections[] = array(
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 ' : '').'
 '.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Mitglied-Status, Instrument und Gruppen-Chips; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
-'.(requirePermission('perm_editUsers') ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
+'.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 '.(requirePermission('perm_editInstruments') ? '<li><b>Instrument-Typen / Register</b> – Typen und Register anlegen, sortieren und einfärben</li>' : '').'
 '.(requirePermission('perm_editPermissions') ? '<li><b>Berechtigungen</b> – Matrix der Rechte pro User (Autosave)</li>' : '').'
 </ul>
