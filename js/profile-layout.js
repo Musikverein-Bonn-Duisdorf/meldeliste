@@ -374,10 +374,11 @@
     }
   }
 
-  function roleMatches(audience, mitglied) {
-    if (audience === 'users' || audience === 'musicians') return true;
-    if (audience === 'members') return !!mitglied;
-    if (audience === 'nonmembers') return !mitglied;
+  function roleMatches(audience, attrs) {
+    if (audience === 'users') return true;
+    if (audience === 'musicians') return !!attrs.active;
+    if (audience === 'members') return !!attrs.mitglied;
+    if (audience === 'nonmembers') return !attrs.mitglied;
     return false;
   }
 
@@ -388,8 +389,11 @@
     if (!groups.length && registers.length) groups = ['musicians'];
     var i;
     for (i = 0; i < groups.length; i++) {
-      if (!roleMatches(groups[i], attrs.mitglied)) continue;
-      if (registers.length && registers.indexOf(attrs.registerId) === -1) continue;
+      if (!roleMatches(groups[i], attrs)) continue;
+      if (registers.length) {
+        if (!attrs.active) continue;
+        if (registers.indexOf(attrs.registerId) === -1) continue;
+      }
       return true;
     }
     return false;
@@ -407,7 +411,7 @@
       }
     }
     var regName = (attrs.registerName || '').trim();
-    if (regName && regName.toLowerCase() !== 'keins') {
+    if (attrs.active && regName && regName.toLowerCase() !== 'keins') {
       chips.push({ type: 'register', label: 'Register: ' + regName });
     }
     var mailGroups = catalog.mailGroups || [];
@@ -422,11 +426,17 @@
 
   function readAttrs(form, catalog) {
     var instrumentEl = form.querySelector('#profile-instrument') || form.querySelector('[name="Instrument"]');
-    var mitgliedEl = form.querySelector('#pref-Mitglied') || form.querySelector('[name="Mitglied"][type="checkbox"]');
+    var mitgliedEl = form.querySelector('#pref-Mitglied')
+      || form.querySelector('#pref-Mitglied-b')
+      || form.querySelector('[name="Mitglied"][type="checkbox"]');
+    var activeEl = form.querySelector('#pref-Active')
+      || form.querySelector('#pref-Active-b')
+      || form.querySelector('[name="Active"][type="checkbox"]');
     var instrumentId = instrumentEl ? Number(instrumentEl.value || 0) : 0;
     var info = (catalog.instruments && catalog.instruments[String(instrumentId)]) || null;
     return {
       mitglied: !!(mitgliedEl && mitgliedEl.checked),
+      active: !activeEl || !!activeEl.checked,
       registerId: info ? Number(info.registerId || 0) : 0,
       registerName: info ? String(info.registerName || '') : ''
     };
@@ -463,9 +473,15 @@
     }
 
     var instrumentEl = form.querySelector('#profile-instrument') || form.querySelector('[name="Instrument"]');
-    var mitgliedEl = form.querySelector('#pref-Mitglied') || form.querySelector('[name="Mitglied"][type="checkbox"]');
+    var mitgliedEl = form.querySelector('#pref-Mitglied')
+      || form.querySelector('#pref-Mitglied-b')
+      || form.querySelector('[name="Mitglied"][type="checkbox"]');
+    var activeEl = form.querySelector('#pref-Active')
+      || form.querySelector('#pref-Active-b')
+      || form.querySelector('[name="Active"][type="checkbox"]');
     if (instrumentEl) instrumentEl.addEventListener('change', refresh);
     if (mitgliedEl) mitgliedEl.addEventListener('change', refresh);
+    if (activeEl) activeEl.addEventListener('change', refresh);
     refresh();
   }
 

@@ -23,7 +23,9 @@ if(!$row) {
     apiJsonExit(array('error' => 'invalid_alink'), 401);
 }
 
-establishSessionFromUserRow($row, 'AppLink');
+if(!establishSessionFromUserRow($row, 'AppLink')) {
+    apiJsonExit(array('error' => 'invalid_alink'), 401);
+}
 $token = createAppToken((int)$row['Index'], $device);
 if(!$token) {
     apiJsonExit(array('error' => 'token_create_failed'), 500);

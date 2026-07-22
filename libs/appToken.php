@@ -12,6 +12,17 @@ function hashAppToken($rawToken) {
  * Establish the same PHP session keys as password / link login.
  */
 function establishSessionFromUserRow($row, $via = 'Password') {
+    if((int)$row['Deleted'] === 1) {
+        $logentry = new Log;
+        $logentry->error("Login via ".$via." verweigert: gelöschter Benutzer.");
+        return false;
+    }
+    $active = array_key_exists('Active', $row) ? (int)$row['Active'] : 1;
+    if($active === 0 && trim((string)$row['Passhash']) === '') {
+        $logentry = new Log;
+        $logentry->error("Login via ".$via." verweigert: Gastmusiker ohne Passwort.");
+        return false;
+    }
     $_SESSION['userid'] = (int)$row['Index'];
     $_SESSION['Vorname'] = $row['Vorname'];
     $_SESSION['Nachname'] = $row['Nachname'];

@@ -35,7 +35,9 @@ if($hash === '' || !password_verify($password, $hash)) {
     apiJsonExit(array('error' => 'invalid_credentials'), 401);
 }
 
-establishSessionFromUserRow($row, 'AppPassword');
+if(!establishSessionFromUserRow($row, 'AppPassword')) {
+    apiJsonExit(array('error' => 'invalid_credentials'), 401);
+}
 $token = createAppToken((int)$row['Index'], $device);
 if(!$token) {
     apiJsonExit(array('error' => 'token_create_failed'), 500);

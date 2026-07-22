@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'GuestMusicians' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
     /** @var int|null */
@@ -34,6 +34,7 @@ class Termin
 	    case 'new':
         case 'defaultFreeText':
         case 'VisibilitySpec':
+        case 'GuestMusicians':
         case 'PostDiscord':
         case 'Created':
         case 'Updated':
@@ -61,6 +62,7 @@ class Termin
 	    case 'Abfahrt':
         case 'defaultFreeText':
         case 'VisibilitySpec':
+        case 'GuestMusicians':
         case 'Created':
         case 'Updated':
             $this->_data[$key] = trim((string)$val);
@@ -117,6 +119,13 @@ class Termin
         if($oldVis !== $newVis) {
             $str.=", sichtbar für: ".htmlspecialchars($old->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')
                 ." &rArr; <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
+        }
+        $oldGuests = $old->getGuestMusiciansArray();
+        $newGuests = $this->getGuestMusiciansArray();
+        sort($oldGuests);
+        sort($newGuests);
+        if($oldGuests !== $newGuests) {
+            $str.=", Gastmusiker: ".count($oldGuests)." &rArr; <b>".count($newGuests)."</b>";
         }
         if(boolsDiffer($this->PostDiscord, $old->PostDiscord)) {
             $str.=", Discord: ".bool2string($old->PostDiscord)." &rArr; <b>".bool2string($this->PostDiscord)."</b>";
@@ -289,7 +298,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `GuestMusicians`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, %s, "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -309,6 +318,7 @@ class Termin
                        $this->open,
                        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
                        $this->sqlVisibilitySpec(),
+                       $this->sqlGuestMusicians(),
                        (int)$this->PostDiscord
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -453,7 +463,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `PostDiscord` = "%d", `Updated` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `GuestMusicians` = %s, `PostDiscord` = "%d", `Updated` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -474,6 +484,7 @@ class Termin
         $this->new,
                        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
                        $this->sqlVisibilitySpec(),
+                       $this->sqlGuestMusicians(),
                        (int)$this->PostDiscord,
         $this->Index
         );
@@ -523,21 +534,87 @@ class Termin
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-            if($key === 'VisibilitySpec' || $key === 'visibilitySpec') {
+            if($key === 'VisibilitySpec' || $key === 'visibilitySpec'
+                || $key === 'GuestMusicians' || $key === 'guestMusicians') {
                 continue;
             }
             if(array_key_exists($key, $this->_data)) {
                 $this->_data[$key] = $val;
             }
         }
-        if(isset($row['VisibilitySpec']) || isset($row['visibilitySpec'])) {
+        $hadVisibility = isset($row['VisibilitySpec']) || isset($row['visibilitySpec']);
+        $hadGuests = isset($row['GuestMusicians']) || isset($row['guestMusicians']);
+        if($hadVisibility) {
             $raw = isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : $row['visibilitySpec'];
             if(is_array($raw)) {
-                $this->setVisibilitySpecArray($raw);
+                $this->setVisibilitySpecArray($raw, false);
             }
             elseif(is_string($raw) || $raw === null) {
-                $this->setVisibilitySpecArray($raw);
+                $this->setVisibilitySpecArray($raw, false);
             }
+        }
+        if($hadGuests) {
+            $raw = isset($row['GuestMusicians']) ? $row['GuestMusicians'] : $row['guestMusicians'];
+            $this->setGuestMusiciansArray($raw);
+        }
+        if($hadVisibility || $hadGuests) {
+            $this->mergeGuestMusiciansIntoVisibilityUsers();
+            $this->syncGuestMusiciansFromVisibility();
+        }
+    }
+
+    /**
+     * GuestMusicians aus VisibilitySpec.users ableiten (Active = 0).
+     */
+    public function syncGuestMusiciansFromVisibility() {
+        $vis = $this->getVisibilitySpecArray();
+        $userIds = array();
+        foreach($vis['users'] as $uid) {
+            $uid = (int)$uid;
+            if($uid > 0) {
+                $userIds[$uid] = $uid;
+            }
+        }
+        if(!count($userIds)) {
+            $this->setGuestMusiciansArray(array());
+            return;
+        }
+        $sql = sprintf(
+            'SELECT `Index` FROM `%sUser` WHERE `Index` IN (%s) AND `Deleted` != 1 AND `Active` = 0;',
+            $GLOBALS['dbprefix'],
+            implode(',', array_map('intval', $userIds))
+        );
+        $ids = array();
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $ids[] = (int)$row['Index'];
+            }
+        }
+        $this->setGuestMusiciansArray($ids);
+    }
+
+    /**
+     * Sicherstellen, dass gespeicherte GuestMusicians auch als Visibility-Personen-Chips sichtbar sind.
+     */
+    public function mergeGuestMusiciansIntoVisibilityUsers() {
+        $guestIds = $this->getGuestMusiciansArray();
+        if(!count($guestIds)) {
+            return;
+        }
+        $vis = $this->getVisibilitySpecArray();
+        $have = array_fill_keys($vis['users'], true);
+        $changed = false;
+        foreach($guestIds as $gid) {
+            $gid = (int)$gid;
+            if($gid > 0 && empty($have[$gid])) {
+                $vis['users'][] = $gid;
+                $have[$gid] = true;
+                $changed = true;
+            }
+        }
+        if($changed) {
+            $this->setVisibilitySpecArray($vis, false);
         }
     }
 
@@ -552,15 +629,19 @@ class Termin
     }
 
     /**
-     * @param array $spec
+     * @param mixed $spec
+     * @param bool $syncGuests GuestMusicians aus Personen-Chips ableiten
      */
-    public function setVisibilitySpecArray($spec) {
+    public function setVisibilitySpecArray($spec, $syncGuests = true) {
         $norm = AudienceSpec::normalize($spec, array(
             'allowMailGroups' => true,
             'defaultGroups' => null,
         ));
         if(AudienceSpec::isEmpty($norm)) {
             $this->VisibilitySpec = null;
+            if($syncGuests) {
+                $this->setGuestMusiciansArray(array());
+            }
             return;
         }
         $this->VisibilitySpec = json_encode(array(
@@ -569,6 +650,9 @@ class Termin
             'users' => $norm['users'],
             'mailGroups' => $norm['mailGroups'],
         ));
+        if($syncGuests) {
+            $this->syncGuestMusiciansFromVisibility();
+        }
     }
 
     protected function sqlVisibilitySpec() {
@@ -586,6 +670,165 @@ class Termin
             'users' => $norm['users'],
             'mailGroups' => $norm['mailGroups'],
         ))).'"';
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getGuestMusiciansArray() {
+        $raw = $this->GuestMusicians;
+        if(is_array($raw)) {
+            $decoded = $raw;
+        }
+        else {
+            $decoded = json_decode(trim((string)$raw), true);
+        }
+        $ids = array();
+        if(is_array($decoded)) {
+            foreach($decoded as $id) {
+                $id = (int)$id;
+                if($id > 0) {
+                    $ids[$id] = $id;
+                }
+            }
+        }
+        return array_values($ids);
+    }
+
+    /**
+     * @param mixed $input JSON string, array of ids, or null
+     */
+    public function setGuestMusiciansArray($input) {
+        $ids = array();
+        if(is_array($input)) {
+            foreach($input as $id) {
+                $id = (int)$id;
+                if($id > 0) {
+                    $ids[$id] = $id;
+                }
+            }
+        }
+        else {
+            $raw = trim((string)$input);
+            if($raw !== '') {
+                $decoded = json_decode($raw, true);
+                if(is_array($decoded)) {
+                    foreach($decoded as $id) {
+                        $id = (int)$id;
+                        if($id > 0) {
+                            $ids[$id] = $id;
+                        }
+                    }
+                }
+            }
+        }
+        $list = array_values($ids);
+        $this->GuestMusicians = count($list) ? json_encode($list) : null;
+    }
+
+    protected function sqlGuestMusicians() {
+        $ids = $this->getGuestMusiciansArray();
+        if(!count($ids)) {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode($ids)).'"';
+    }
+
+    /**
+     * Catalog of guests (Active=0) for chip UI.
+     * @return array{users:array<int,array{id:int,label:string,meta:string}>}
+     */
+    public static function buildGuestMusicianCatalog() {
+        $catalog = array('users' => array());
+        $sql = sprintf(
+            'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
+             FROM `%sUser` u
+             LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
+             LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+             WHERE u.`Deleted` != 1 AND u.`Active` = 0
+             ORDER BY u.`Nachname`, u.`Vorname`;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbr) {
+            while($u = mysqli_fetch_array($dbr)) {
+                $catalog['users'][] = array(
+                    'id' => (int)$u['Index'],
+                    'label' => trim($u['Vorname'].' '.$u['Nachname']),
+                    'meta' => html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                );
+            }
+        }
+        return $catalog;
+    }
+
+    /**
+     * Resolved guest musician rows for this termin (chip display).
+     * @return array<int,array{id:int,label:string,meta:string}>
+     */
+    public function getGuestMusicianEntries() {
+        $ids = $this->getGuestMusiciansArray();
+        if(!count($ids)) {
+            return array();
+        }
+        $sql = sprintf(
+            'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
+             FROM `%sUser` u
+             LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
+             LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+             WHERE u.`Index` IN (%s)
+             ORDER BY u.`Nachname`, u.`Vorname`;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            implode(',', array_map('intval', $ids))
+        );
+        $byId = array();
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if($dbr) {
+            while($u = mysqli_fetch_array($dbr)) {
+                $byId[(int)$u['Index']] = array(
+                    'id' => (int)$u['Index'],
+                    'label' => trim($u['Vorname'].' '.$u['Nachname']),
+                    'meta' => html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                );
+            }
+        }
+        $out = array();
+        foreach($ids as $id) {
+            if(isset($byId[$id])) {
+                $out[] = $byId[$id];
+            }
+            else {
+                $out[] = array('id' => $id, 'label' => 'User #'.$id, 'meta' => '');
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Read-only chips for GuestMusicians (same visual language as visibility chips).
+     * @return string
+     */
+    public function renderGuestMusiciansChipsHtml() {
+        $entries = $this->getGuestMusicianEntries();
+        if(!count($entries)) {
+            return '<span class="w3-text-grey">—</span>';
+        }
+        $html = '<div class="mail-recipient-chips" role="list" aria-label="Gastmusiker">';
+        foreach($entries as $e) {
+            $label = 'Gastmusiker: '.$e['label'];
+            if($e['meta'] !== '') {
+                $label .= ' ('.$e['meta'].')';
+            }
+            $html .= '<span class="mail-recipient-chip mail-recipient-chip--guestMusician" role="listitem">'
+                .htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+                .'</span>';
+        }
+        $html .= '</div>';
+        return $html;
     }
 
     /**
@@ -725,9 +968,6 @@ class Termin
         $val = (int)$val;
         $counts = $this->getMeldungenCountsByWert();
         $r = isset($counts[$val]) ? (int)$counts[$val] : 0;
-        if($val === 1) {
-            $r += $this->getAushilfenCount();
-        }
         return $r;
     }
 
@@ -1816,9 +2056,6 @@ class Termin
             'termin' => $this,
             'userId' => $userId,
             'instrument' => $instrument,
-            'aushilfenHtml' => (!$this->Shifts && requirePermission('perm_editAppmnts'))
-                ? $this->aktiveAushilfenTermin()
-                : '',
         ));
     }
     public function getResponseString() {
@@ -2043,7 +2280,7 @@ class Termin
             'SELECT i.`Register` AS `Register`, COUNT(*) AS `c`
              FROM `%sUser` u
              INNER JOIN `%sInstrument` i ON u.`Instrument` = i.`Index`
-             WHERE u.`Deleted` != 1
+             WHERE u.`Deleted` != 1 AND u.`Active` = 1
              GROUP BY i.`Register`;',
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix']
@@ -2190,7 +2427,6 @@ ORDER BY `Nachname`, `Vorname`;",
                 $dbr = mysqli_query($GLOBALS['conn'], $sql);
                 sqlerror();
                 $memberCounts = $this->getRegisterMemberCounts();
-                $aushilfenByReg = $this->getAushilfenByRegister();
                 $sja=0;
                 $sall=0;
                 $snReg=0;
@@ -2239,10 +2475,6 @@ ORDER BY `Nachname`, `Vorname`;",
                         }
                     }
 
-                    $aushilfen = isset($aushilfenByReg[$regId]) ? $aushilfenByReg[$regId] : array();
-                    $nAus = count($aushilfen);
-                    $ja += $nAus;
-                    $sja += $nAus;
                     $all = $ja+$nein+$vielleicht;
                     $sall=$sall+$all;
                     $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\">".$row['Name']."</div>\n<div class=\"w3-col l2 m2 s2\">".$all." / ".sprintf("%02d", $nReg)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div>\n</div>\n";
@@ -2299,8 +2531,6 @@ ORDER BY `Nachname`, `Vorname`;",
                     break;
                 }
             }
-            $ja += $this->getAushilfenCount();
-
             if($bus && $GLOBALS['optionsDB']['showChildOption']) {
                 $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
             }
@@ -2435,7 +2665,6 @@ ORDER BY `Nachname`, `Vorname`;",
                     $registerIds[] = $row['Index'];
                 }
             }
-            $aushilfenByReg = $this->getAushilfenByRegister();
             foreach($registerIds as $registerId) {
                 $registerId = (int)$registerId;
                 foreach($aMeldungen as $row2) {
@@ -2455,12 +2684,6 @@ ORDER BY `Nachname`, `Vorname`;",
                     default:
                         break;
                     }
-                }
-                $aushilfen = isset($aushilfenByReg[$registerId]) ? $aushilfenByReg[$registerId] : array();
-                foreach($aushilfen as $aushilfe) {
-                    $aName = isset($aushilfe['Name']) ? $aushilfe['Name'] : '';
-                    $iName = isset($aushilfe['iName']) ? $aushilfe['iName'] : '';
-                    $whoYes[] = $this->makeResponseEntry(1, $aName, $iName, 0, 0, 0, false);
                 }
             }
         }
@@ -2487,18 +2710,6 @@ ORDER BY `Nachname`, `Vorname`;",
                     break;
                 default:
                     break;
-                }
-            }
-            $sql = sprintf(
-                "SELECT a.`Name` FROM `%sAushilfen` a WHERE a.`Termin` = %d ORDER BY a.`Name`;",
-                $GLOBALS['dbprefix'],
-                (int)$this->Index
-            );
-            $dbrA = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            if($dbrA) {
-                while($row = mysqli_fetch_array($dbrA)) {
-                    $whoYes[] = $this->makeResponseEntry(1, $row['Name'], '', 0, 0, 0, false);
                 }
             }
         }

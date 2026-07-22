@@ -33,22 +33,6 @@ if(isset($_POST['delete'])) {
     setFlash('success', 'Termin gelöscht.');
     $mutated = true;
 }
-if(isset($_POST['insertAushilfe'])) {
-    $aushilfe = new Aushilfe;
-    $aushilfe->fill_from_array($_POST);
-    $aushilfe->save();
-    setFlash('success', 'Aushilfe gespeichert.');
-    $mutated = true;
-}
-if(isset($_POST['deleteAushilfe'])) {
-    $aushilfe = new Aushilfe;
-    $aushilfe->load_by_id((int)$_POST['Index']);
-    if($aushilfe->Index && requirePermission('perm_editAppmnts')) {
-        $aushilfe->delete();
-        setFlash('success', 'Aushilfe gelöscht.');
-        $mutated = true;
-    }
-}
 if($mutated) {
     redirectAfterPost(resolvePostReturnUrl('termine-archiv.php'));
 }

@@ -624,10 +624,18 @@ document.addEventListener('click', function(ev) {
         return;
     }
 
-    // Klick/Tipp: Meldung wechseln (wenn erlaubt)
+    // Klick/Tipp: Meldung wechseln (Termin) bzw. User-Modal (Registeransicht)
     if(seat.getAttribute('data-editable') === '1') {
         ev.preventDefault();
         cycleOrchestraSeat(seat);
+        return;
+    }
+    var userId = parseInt(seat.getAttribute('data-user'), 10) || 0;
+    var terminId = parseInt(seat.getAttribute('data-termin'), 10) || 0;
+    if(userId > 0 && terminId === 0 && typeof openModal === 'function') {
+        ev.preventDefault();
+        closeOrchestraSeatSheet();
+        openModal('user', userId);
     }
 });
 

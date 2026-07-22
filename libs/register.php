@@ -80,7 +80,7 @@ class Register
             .htmlspecialchars(html_entity_decode((string)$this->Name, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES, 'UTF-8')
             .' ('.$this->members().')</h3></div>';
         $sql = sprintf(
-            'SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Deleted` != 1 AND `Register` = "%d" ORDER BY `Nachname`, `Vorname`;',
+            'SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Deleted` != 1 AND `Active` = 1 AND `Register` = "%d" ORDER BY `Nachname`, `Vorname`;',
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
@@ -105,7 +105,7 @@ class Register
 
     public function getMembers() {
         $sql = sprintf(
-            'SELECT `Index`, `Deleted` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Deleted` != 1 AND `Register` = "%d";',
+            'SELECT `Index`, `Deleted` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` WHERE `Deleted` != 1 AND `Active` = 1 AND `Register` = "%d";',
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],

@@ -54,6 +54,15 @@ else {
 }
 
 $visSpec = ($fill && $n) ? $n->getVisibilitySpecArray() : AudienceSpec::defaultVisibilitySpec();
+if($fill && $n) {
+    // Gastmusiker (Active=0) erscheinen als normale Personen-Chips in derselben Maske.
+    foreach($n->getGuestMusiciansArray() as $gid) {
+        $gid = (int)$gid;
+        if($gid > 0 && !in_array($gid, $visSpec['users'], true)) {
+            $visSpec['users'][] = $gid;
+        }
+    }
+}
 ?>
 <div class="w3-container w3-margin-bottom termin-page">
 <div class="profile-shell termin-shell">
@@ -237,7 +246,7 @@ if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n
         <span class="profile-label">Sichtbar für</span>
         <div class="termin-visibility-box w3-padding w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>">
           <div id="terminVisibilityChips" class="mail-recipient-chips" aria-live="polite"></div>
-          <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Gruppe, Rolle, Register…" autocomplete="off">
+          <input type="text" id="terminVisibilityInput" class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Gruppe, Rolle, Register, Person…" autocomplete="off">
           <div id="terminVisibilitySuggest" class="mail-recipient-suggest" hidden></div>
           <input type="hidden" name="visibilitySpec" id="terminVisibilitySpec" value="<?php
             echo htmlspecialchars(json_encode($visSpec), ENT_QUOTES, 'UTF-8');

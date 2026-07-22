@@ -84,6 +84,15 @@ case 'mitglied':
     $result = listChunkUsers('mitglied', $cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
     break;
 
+case 'gastmusiker':
+    if(!requirePermission('perm_showUsers')) {
+        http_response_code(403);
+        header('X-Has-More: 0');
+        exit;
+    }
+    $result = listChunkUsers('gastmusiker', $cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
+    break;
+
 default:
     http_response_code(400);
     header('X-Has-More: 0');

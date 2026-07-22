@@ -34,6 +34,15 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
         <div class="profile-value"><?php echo htmlspecialchars((string)$user->iName, ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
       <div class="profile-field">
+        <span class="profile-label">aktiv</span>
+        <div class="profile-value"><?php
+          echo bool2string($user->Active);
+          if((int)$user->Active === 0) {
+              echo ' <span class="w3-text-grey">(Gastmusiker)</span>';
+          }
+        ?></div>
+      </div>
+      <div class="profile-field">
         <span class="profile-label">Mitglied</span>
         <div class="profile-value"><?php echo bool2string($user->Mitglied); ?></div>
       </div>

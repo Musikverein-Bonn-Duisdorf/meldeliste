@@ -2,14 +2,14 @@
 /**
  * Load shared orchestra datasets once (for full + activeOnly render).
  * @param int $tid
- * @return array{meldungen:array,aushilfen:array,users:array,instruments:array}
+ * @return array{meldungen:array,users:array,instruments:array,guestIds:int[]}
  */
 function loadOrchestraData($tid) {
     $tid = (int)$tid;
     $aMeldungen = array();
-    $aAushilfen = array();
     $aUser = array();
     $aInstrument = array();
+    $guestIds = array();
     if($tid) {
         $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `uInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = %d ORDER BY `Instrument`, `Nachname`, `Vorname`;",
                        $GLOBALS['dbprefix'],
@@ -23,20 +23,17 @@ function loadOrchestraData($tid) {
                 $aMeldungen[] = $row;
             }
         }
-
-        $sql = sprintf("SELECT * FROM `%sAushilfen` WHERE `Termin` = %d;",
-        $GLOBALS['dbprefix'],
-        $tid
-        );
-        $dbAushilfe = mysqli_query($GLOBALS['conn'], $sql);
-        if($dbAushilfe) {
-            while($row = mysqli_fetch_array($dbAushilfe)) {
-                $aAushilfen[] = $row;
-            }
-        }
+        $termin = new Termin;
+        $termin->load_by_id($tid);
+        $guestIds = $termin->getGuestMusiciansArray();
     }
-    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;",
-                   $GLOBALS['dbprefix']
+    $guestSql = '';
+    if(count($guestIds)) {
+        $guestSql = ' OR `Index` IN ('.implode(',', array_map('intval', $guestIds)).')';
+    }
+    $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND (`Active` = 1%s) ORDER BY `Nachname`, `Vorname`;",
+                   $GLOBALS['dbprefix'],
+                   $guestSql
     );
     $dbUser = mysqli_query($GLOBALS['conn'], $sql);
     if($dbUser) {
@@ -55,9 +52,9 @@ function loadOrchestraData($tid) {
     }
     return array(
         'meldungen' => $aMeldungen,
-        'aushilfen' => $aAushilfen,
         'users' => $aUser,
         'instruments' => $aInstrument,
+        'guestIds' => $guestIds,
     );
 }
 
@@ -99,7 +96,6 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
         $data = loadOrchestraData($tid);
     }
     $aMeldungen = isset($data['meldungen']) ? $data['meldungen'] : array();
-    $aAushilfen = isset($data['aushilfen']) ? $data['aushilfen'] : array();
     $aUser = isset($data['users']) ? $data['users'] : array();
     $aInstrument = isset($data['instruments']) ? $data['instruments'] : array();
 
@@ -145,24 +141,6 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
             'Children' => $children,
             'Guests' => $guests,
         );
-    }
-    if($tid) {
-        foreach($aAushilfen as $user) {
-            $short = getShortAushilfe($user['Name']);
-            $instrId = (int)$user['Instrument'];
-            $allMusikerBase[] = array(
-                'userId' => 0,
-                'aushilfe' => true,
-                'short' => $short,
-                'name' => (string)$user['Name'],
-                'Instrument' => $user['Instrument'],
-                'instrumentName' => isset($instrumentNameById[$instrId]) ? $instrumentNameById[$instrId] : '',
-                'homeInstrument' => $user['Instrument'],
-                'Wert' => 1,
-                'Children' => 0,
-                'Guests' => 0,
-            );
-        }
     }
 
     $sql = sprintf('SELECT * FROM `%sRegister` ORDER BY `Row`;',
@@ -359,9 +337,14 @@ function printOrchestra($tid, $scale = 1, $activeOnly = false, $data = null) {
                     $titleText = htmlspecialchars(implode("\n", $titleParts), ENT_QUOTES, 'UTF-8');
                     $fillColor = isset($register['Color']) ? (string)$register['Color'] : '#cccccc';
                     $textFill = hexContrastText($fillColor);
+                    $staticUserId = (int)$user['userId'];
                     $seatsHtml .= '<g class="orchestra-seat"'
+                        .' data-user="'.$staticUserId.'"'
+                        .' data-termin="0"'
                         .' data-name="'.htmlspecialchars((string)$user['name'], ENT_QUOTES, 'UTF-8').'"'
+                        .' data-editable="0"'
                         .($instrLabel !== '' ? ' data-instrument="'.htmlspecialchars($instrLabel, ENT_QUOTES, 'UTF-8').'"' : '')
+                        .($staticUserId > 0 ? ' style="cursor:pointer"' : '')
                         .'>'."\n";
                     $seatsHtml .= '<title>'.$titleText."</title>\n";
                     $seatsHtml .= '<circle cx="'.$x.'" cy="'.$y.'" r="'.$seatR.'" stroke="black" stroke-width="2" fill="'.$fillColor."\" />\n";
