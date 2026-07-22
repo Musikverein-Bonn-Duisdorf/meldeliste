@@ -6,7 +6,7 @@
 if(!isset($adminUserEdit)) {
     $adminUserEdit = !empty($canEditUsers) && isset($edit) && (int)$edit === 3;
 }
-if(empty($adminUserEdit)) {
+if(empty($adminUserEdit) || !requirePermission('perm_editPermissions')) {
     return;
 }
 if(!isset($inputBg)) {

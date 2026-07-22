@@ -49,7 +49,7 @@ $sections[] = array(
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
 <li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
 <li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
-'.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü in der Reihenfolge Personen → Termine → Meldungen → Kommunikation → Inventar → Orchester → System; Einträge sind in denselben Farben wie die Rechte-Chips eingefärbt</li>' : '').'
+'.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü in der Reihenfolge Personen → Termine → Meldungen → Kommunikation → Inventar → Register → System; Einträge sind in denselben Farben wie die Rechte-Chips eingefärbt</li>' : '').'
 <li><i class="fas fa-sign-out-alt"></i> <b>Ausloggen</b> – Sitzung beenden</li>
 </ul>
 '
@@ -226,7 +226,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Bestände anzeigen, Details und Ausleihen; Spaltenköpfe sortieren die Liste</li>
+<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); Spaltenköpfe sortieren die Liste</li>
 <li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal; Spalten sortierbar; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
@@ -238,13 +238,14 @@ $sections[] = array(
 );
 
 $sections[] = array(
-    'id' => 'admin-orchester',
-    'title' => 'Admin: Orchester',
-    'visible' => isAdmin() && requirePermission('perm_editInstruments'),
+    'id' => 'admin-register',
+    'title' => 'Admin: Register',
+    'visible' => isAdmin() && requirePermission('perm_editRegisters'),
     'body' => '
 <ul class="help-list">
 <li><b>Register</b> – Register anlegen, sortieren und einfärben (Sitzplan und Gruppenbildung)</li>
 <li><b>Instrument-Typen</b> – Instrumente den Registern zuordnen, sortieren und Spielbarkeit setzen</li>
+<li>Beide Seiten brauchen das Recht <b>Register bearbeiten</b></li>
 </ul>
 '
 );
@@ -256,7 +257,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_editPermissions') ? '
-<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
+<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Klick auf den Namen öffnet das User-Modal; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>

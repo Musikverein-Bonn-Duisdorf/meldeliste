@@ -27,14 +27,9 @@ sqlerror();
 $row = mysqli_fetch_array($dbr);
 $nGuests = $row['Count'];
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <h2>Gastmusiker (<?php echo (int)$nGuests; ?>)</h2>
-</div>
 <?php echo renderFlashHtml(); ?>
-
-<div>
-<input class="w3-input w3-border w3-padding" type="text" placeholder="Nach Gastmusiker suchen..." id="filterString" onkeyup="filterMusiker()">
-</div>
+<?php adminListPageBegin('Personen', 'Gastmusiker ('.(int)$nGuests.')'); ?>
+<?php adminListSearchField('Nach Gastmusiker suchen…', array('onkeyup' => 'filterMusiker()')); ?>
 <div id="listHeader" class="list-header w3-row w3-hide-small">
   <div class="w3-col l3 m6 s12 w3-container list-sort" data-sort="nachname" data-type="string">Name</div>
   <div class="w3-col l2 m6 s12 w3-container list-sort" data-sort="instrument" data-type="string">Instrument</div>
@@ -49,6 +44,7 @@ echo $chunk['html'];
 echo listChunkRenderSentinel('gastmusiker', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker');
 ?>
 </div>
+<?php adminListPageEnd(); ?>
 <script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/sortList.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>

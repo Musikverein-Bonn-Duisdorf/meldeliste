@@ -9,8 +9,7 @@ class Permissions
         'perm_editUsers' => null,
         'perm_editAppmnts' => null,
         'perm_showLog' => null,
-        'perm_showInstruments' => null,
-        'perm_editInstruments' => null,
+        'perm_editRegisters' => null,
         'perm_showInventories' => null,
         'perm_editInventories' => null,
         'perm_sendEmail' => null,
@@ -51,8 +50,7 @@ class Permissions
         if($this->perm_editUsers != $old->perm_editUsers) $str.=", perm_editUsers: ".$old->perm_editUsers." &rArr; <b>".$this->perm_editUsers."</b>";
         if($this->perm_editAppmnts != $old->perm_editAppmnts) $str.=", perm_editAppmnts: ".$old->perm_editAppmnts." &rArr; <b>".$this->perm_editAppmnts."</b>";
         if($this->perm_showLog != $old->perm_showLog) $str.=", perm_showLog: ".$old->perm_showLog." &rArr; <b>".$this->perm_showLog."</b>";
-        if($this->perm_showInstruments != $old->perm_showInstruments) $str.=", perm_showInstruments: ".$old->perm_showInstruments." &rArr; <b>".$this->perm_showInstruments."</b>";
-        if($this->perm_editInstruments != $old->perm_editInstruments) $str.=", perm_editInstruments: ".$old->perm_editInstruments." &rArr; <b>".$this->perm_editInstruments."</b>";
+        if($this->perm_editRegisters != $old->perm_editRegisters) $str.=", perm_editRegisters: ".$old->perm_editRegisters." &rArr; <b>".$this->perm_editRegisters."</b>";
         if($this->perm_showInventories != $old->perm_showInventories) $str.=", perm_showInventories: ".$old->perm_showInventories." &rArr; <b>".$this->perm_showInventories."</b>";
         if($this->perm_editInventories != $old->perm_editInventories) $str.=", perm_editInventories: ".$old->perm_editInventories." &rArr; <b>".$this->perm_editInventories."</b>";
         if($this->perm_sendEmail != $old->perm_sendEmail) $str.=", perm_sendEmail: ".$old->perm_sendEmail." &rArr; <b>".$this->perm_sendEmail."</b>";
@@ -101,7 +99,7 @@ class Permissions
     }
     
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_showInstruments`, `perm_editInstruments`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_editRegisters`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -109,8 +107,7 @@ class Permissions
                        $this->perm_editUsers,
                        $this->perm_editAppmnts,
                        $this->perm_showLog,
-                       $this->perm_showInstruments,
-                       $this->perm_editInstruments,
+                       $this->perm_editRegisters,
                        $this->perm_showInventories,
                        $this->perm_editInventories,
                        $this->perm_sendEmail,
@@ -127,7 +124,7 @@ class Permissions
     }
     
     protected function update() {
-        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_showInstruments` = "%d", `perm_editInstruments` = "%d", `perm_showInventories` = "%d", `perm_editInventories` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_editRegisters` = "%d", `perm_showInventories` = "%d", `perm_editInventories` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d" WHERE `Index` = "%d";',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -135,8 +132,7 @@ class Permissions
                        $this->perm_editUsers,
                        $this->perm_editAppmnts,
                        $this->perm_showLog,
-                       $this->perm_showInstruments,
-                       $this->perm_editInstruments,
+                       $this->perm_editRegisters,
                        $this->perm_showInventories,
                        $this->perm_editInventories,
                        $this->perm_sendEmail,
@@ -210,8 +206,7 @@ class Permissions
         if($this->perm_editUsers) return true;
         if($this->perm_editAppmnts) return true;
         if($this->perm_showLog) return true;
-        if($this->perm_showInstruments) return true;
-        if($this->perm_editInstruments) return true;
+        if($this->perm_editRegisters) return true;
         if($this->perm_showInventories) return true;
         if($this->perm_editInventories) return true;
         if($this->perm_sendEmail) return true;
@@ -238,8 +233,7 @@ class Permissions
             'perm_editUsers',
             'perm_editAppmnts',
             'perm_showLog',
-            'perm_showInstruments',
-            'perm_editInstruments',
+            'perm_editRegisters',
             'perm_showInventories',
             'perm_editInventories',
             'perm_sendEmail',
@@ -260,8 +254,7 @@ class Permissions
             'perm_editUsers' => array('short' => 'User+', 'label' => 'Benutzer bearbeiten'),
             'perm_editAppmnts' => array('short' => 'Termine', 'label' => 'Termine bearbeiten'),
             'perm_showLog' => array('short' => 'Log', 'label' => 'Log anzeigen'),
-            'perm_showInstruments' => array('short' => 'Instr.', 'label' => 'Instrumente anzeigen'),
-            'perm_editInstruments' => array('short' => 'Instr.+', 'label' => 'Instrumente bearbeiten'),
+            'perm_editRegisters' => array('short' => 'Register+', 'label' => 'Register bearbeiten'),
             'perm_showInventories' => array('short' => 'Inventar', 'label' => 'Inventar anzeigen'),
             'perm_editInventories' => array('short' => 'Inventar+', 'label' => 'Inventar bearbeiten'),
             'perm_sendEmail' => array('short' => 'Mail', 'label' => 'E-Mails senden'),
@@ -294,9 +287,9 @@ class Permissions
                 ),
             ),
             array(
-                'id' => 'instrumente',
-                'title' => 'Instrumente',
-                'keys' => array('perm_showInstruments', 'perm_editInstruments'),
+                'id' => 'register',
+                'title' => 'Register',
+                'keys' => array('perm_editRegisters'),
             ),
             array(
                 'id' => 'inventar',
@@ -367,11 +360,15 @@ class Permissions
 
     /**
      * Apply permission checkboxes from a user create/edit POST.
+     * Requires session `perm_editPermissions`.
      * @param array $posted typically $_POST
      */
     public static function applyPostedForUser($userId, array $posted, $sessionUserId = 0) {
         $userId = (int)$userId;
         if($userId < 1) {
+            return false;
+        }
+        if(!requirePermission('perm_editPermissions')) {
             return false;
         }
         $sessionUserId = (int)$sessionUserId;

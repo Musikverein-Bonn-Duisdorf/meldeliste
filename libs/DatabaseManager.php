@@ -193,7 +193,7 @@ class DatabaseManager
         }
 
         $insert = sprintf(
-            'INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_showInstruments`, `perm_editInstruments`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES (%d, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);',
+            'INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_editRegisters`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES (%d, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);',
             $GLOBALS['dbprefix'],
             $userId
         );
@@ -259,14 +259,116 @@ class DatabaseManager
 
     public function check() {
         $this->report = array();
+        $this->migratePermissionsRegisterColumns(false);
         $this->processSchema(false, false);
         $this->pruneObsoleteSchema(false);
         $this->checkConfigDefaults(false);
         return $this->report;
     }
 
+    /**
+     * MELD-136: rename perm_editInstruments → perm_editRegisters;
+     * fold perm_showInstruments into perm_showInventories (column dropped by prune).
+     *
+     * @param bool $apply when false (check), only report needed renames/merges
+     */
+    private function migratePermissionsRegisterColumns($apply = true) {
+        $table = new SQLtable('Permissions');
+        if(!$table->exists()) {
+            return;
+        }
+
+        $hasOldEdit = $table->columnExists('perm_editInstruments');
+        $hasNewEdit = $table->columnExists('perm_editRegisters');
+        if($hasOldEdit && !$hasNewEdit) {
+            if(!$apply) {
+                $this->addReport(
+                    'column',
+                    'Permissions.perm_editRegisters',
+                    'missing',
+                    'Spalte fehlt (Rename von perm_editInstruments nötig)'
+                );
+            }
+            else {
+                $sql = sprintf(
+                    'ALTER TABLE `%sPermissions` CHANGE COLUMN `perm_editInstruments` `perm_editRegisters` int NOT NULL DEFAULT 0;',
+                    $GLOBALS['dbprefix']
+                );
+                $ok = mysqli_query($GLOBALS['conn'], $sql);
+                if($ok) {
+                    $this->addReport(
+                        'column',
+                        'Permissions.perm_editRegisters',
+                        'fixed',
+                        'Spalte von perm_editInstruments umbenannt'
+                    );
+                }
+                else {
+                    $this->addReport(
+                        'column',
+                        'Permissions.perm_editRegisters',
+                        'error',
+                        'Rename perm_editInstruments fehlgeschlagen',
+                        mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                    );
+                }
+            }
+        }
+        elseif($hasOldEdit && $hasNewEdit && $apply) {
+            $sql = sprintf(
+                'UPDATE `%sPermissions` SET `perm_editRegisters` = 1 WHERE `perm_editInstruments` = 1 AND (`perm_editRegisters` IS NULL OR `perm_editRegisters` = 0);',
+                $GLOBALS['dbprefix']
+            );
+            mysqli_query($GLOBALS['conn'], $sql);
+            $this->addReport(
+                'column',
+                'Permissions.perm_editInstruments',
+                'obsolete',
+                'Werte nach perm_editRegisters übernommen (Drop via prune)'
+            );
+        }
+
+        if(!$table->columnExists('perm_showInstruments')) {
+            return;
+        }
+        if(!$apply) {
+            $this->addReport(
+                'column',
+                'Permissions.perm_showInstruments',
+                'obsolete',
+                'Werte sollten nach perm_showInventories übernommen werden'
+            );
+            return;
+        }
+        if($table->columnExists('perm_showInventories')) {
+            $sql = sprintf(
+                'UPDATE `%sPermissions` SET `perm_showInventories` = 1 WHERE `perm_showInstruments` = 1;',
+                $GLOBALS['dbprefix']
+            );
+            $ok = mysqli_query($GLOBALS['conn'], $sql);
+            if($ok) {
+                $this->addReport(
+                    'data',
+                    'Permissions.perm_showInstruments',
+                    'fixed',
+                    'Werte nach perm_showInventories übernommen'
+                );
+            }
+            else {
+                $this->addReport(
+                    'data',
+                    'Permissions.perm_showInstruments',
+                    'error',
+                    'Merge nach perm_showInventories fehlgeschlagen',
+                    mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                );
+            }
+        }
+    }
+
     public function create() {
         $this->report = array();
+        $this->migratePermissionsRegisterColumns();
         $this->processSchema(true, false);
         $this->migrateAudienceLegacyColumns();
         $this->pruneObsoleteSchema(true);
@@ -285,6 +387,7 @@ class DatabaseManager
 
     public function repair() {
         $this->report = array();
+        $this->migratePermissionsRegisterColumns();
         $this->processSchema(true, true);
         $this->migrateAudienceLegacyColumns();
         $this->pruneObsoleteSchema(true);

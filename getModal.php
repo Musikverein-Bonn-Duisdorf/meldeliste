@@ -83,7 +83,9 @@ case 'shiftResponse':
     break;
 
 case 'user':
-    if(!requirePermission('perm_showUsers') && (int)$_SESSION['userid'] !== $id) {
+    if(!requirePermission('perm_showUsers')
+        && !requirePermission('perm_editPermissions')
+        && (int)$_SESSION['userid'] !== $id) {
         http_response_code(403);
         echo '<div class="w3-container w3-padding"><p>Keine Berechtigung.</p></div>';
         exit;

@@ -25,20 +25,17 @@ if(isset($_POST['delete']) && isset($_POST['Index'])) {
 }
 
 $groups = MailGroup::listAll();
+$actions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="group-edit.php">Neue Gruppe</a>'
+    .' <a class="w3-button w3-border" href="mail.php">Email versenden</a>';
+adminListPageBegin('Kommunikation', 'Gruppen', array('actionsHtml' => $actions));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Gruppen</h2>
-</div>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 
-<div class="w3-container w3-padding">
+<div class="admin-list-intro">
   <p>Benannte Gruppen mit Rollen, Registern und Personen – nutzbar beim Mailversand und bei der Termin-Sichtbarkeit.</p>
-  <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="group-edit.php">Neue Gruppe</a>
-  <a class="w3-button w3-margin-left" href="mail.php">Email versenden</a>
 </div>
 
-<div class="w3-container w3-padding">
   <div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <div>Name</div>
@@ -67,7 +64,7 @@ foreach($groups as $g) {
     </div>
 <?php } ?>
   </div>
-</div>
 <?php
+adminListPageEnd();
 include 'common/footer.php';
 ?>
