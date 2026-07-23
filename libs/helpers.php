@@ -302,6 +302,21 @@ function adminHeroClass($options = array()) {
  * @param string $title Page title (plain text)
  * @param array $options actionsHtml (string), shellClass (string), permKey (string), groupId (string)
  */
+/**
+ * Queue modal HTML to render outside .app-main (MELD-147).
+ * Footer echoes $GLOBALS['mlDeferredPageModals'] after .app-shell closes.
+ */
+function deferPageModalHtml($html) {
+    $html = (string)$html;
+    if($html === '') {
+        return;
+    }
+    if(!isset($GLOBALS['mlDeferredPageModals'])) {
+        $GLOBALS['mlDeferredPageModals'] = '';
+    }
+    $GLOBALS['mlDeferredPageModals'] .= $html;
+}
+
 function adminListPageBegin($kicker, $title, $options = array()) {
     $actionsHtml = isset($options['actionsHtml']) ? (string)$options['actionsHtml'] : '';
     $shellClass = isset($options['shellClass']) ? trim((string)$options['shellClass']) : '';

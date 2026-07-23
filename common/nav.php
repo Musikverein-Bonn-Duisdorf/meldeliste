@@ -281,6 +281,9 @@ if(!empty($optionsDB['showMessageOfTheDay'])) {
     <i class="fas fa-exclamation-triangle"></i>
   </div>
 </div>
+<?php
+    ob_start();
+?>
 <div id="MessageOfTheDay" class="w3-modal">
   <div class="w3-modal-content">
     <div class="w3-container">
@@ -291,11 +294,13 @@ if(!empty($optionsDB['showMessageOfTheDay'])) {
   </div>
 </div>
 <?php
+    if(!isset($_SESSION['MessageOfTheDay'])) {
+        $_SESSION['MessageOfTheDay'] = true;
+?>
+<script>document.getElementById('MessageOfTheDay').style.display='block';</script>
+<?php
+    }
+    deferPageModalHtml(ob_get_clean());
 }
 ?>
 <script src="<?php echo assetUrl('js/app-nav.js'); ?>"></script>
-<?php if(!empty($optionsDB['showMessageOfTheDay']) && !isset($_SESSION['MessageOfTheDay'])) {
-    $_SESSION['MessageOfTheDay'] = true;
-?>
-<script>document.getElementById('MessageOfTheDay').style.display='block';</script>
-<?php } ?>

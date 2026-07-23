@@ -474,13 +474,8 @@ function ensureOrchestraSeatSheet() {
         +   '<button type="button" class="w3-btn w3-border w3-border-black w3-center orchestra-seat-sheet-btn" data-wert="3" title="unsicher"><b>?</b></button>'
         + '</div>';
 
-    var host = document.getElementById('ajaxModalHost');
-    if(host) {
-        host.appendChild(sheet);
-    }
-    else {
-        document.body.appendChild(sheet);
-    }
+    // Always on body: ajaxModalHost is position:fixed + overflow and would clip/trap the sheet.
+    document.body.appendChild(sheet);
 
     function onClose(ev) {
         ev.preventDefault();
@@ -726,3 +721,26 @@ document.addEventListener('contextmenu', function(ev) {
         ev.preventDefault();
     }
 });
+
+/**
+ * MELD-147: .app-main is a stacking/overflow context (z-index:1).
+ * Page-local .w3-modal nodes must sit outside it (with ajaxModalHost) or they collide with chrome.
+ */
+function liftPageModalsOutOfAppMain() {
+    var main = document.querySelector('.app-main');
+    if(!main) return;
+    var modals = main.querySelectorAll('.w3-modal');
+    if(!modals.length) return;
+    var anchor = document.getElementById('ajaxModalHost');
+    var parent = (anchor && anchor.parentNode) ? anchor.parentNode : document.body;
+    for(var i = 0; i < modals.length; i++) {
+        if(anchor) {
+            parent.insertBefore(modals[i], anchor);
+        }
+        else {
+            parent.appendChild(modals[i]);
+        }
+    }
+}
+
+liftPageModalsOutOfAppMain();
