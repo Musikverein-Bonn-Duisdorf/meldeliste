@@ -129,7 +129,7 @@ def notes_from_paths(newer: str, older: str | None) -> list[str]:
 def collect_notes(newer: str, older: str | None) -> list[str]:
     rng = f"{older}..{newer}" if older else newer
     try:
-        # Not first-parent: releases often FF from_dev, so ticket notes live on into_dev merges.
+        # Not first-parent: releases often FF from dev, so ticket notes live on merges into dev.
         out = run(["git", "log", "--pretty=format:%s%n%b%n==END==", rng])
     except subprocess.CalledProcessError:
         return []
