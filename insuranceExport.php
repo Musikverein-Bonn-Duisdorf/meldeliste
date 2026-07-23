@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/libs/sessionBootstrap.php';
 meldeConfigureSession();
-$_SESSION['page'] = 'insurance';
+$_SESSION['page'] = 'inventories';
 $_SESSION['adminpage'] = true;
 include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
@@ -90,7 +90,7 @@ header('Content-Type: text/html; charset=utf-8');
 </head>
 <body class="insurance-print">
   <div class="insurance-print-toolbar no-print">
-    <a class="insurance-print-btn" href="insurance.php">Zur&uuml;ck zur Liste</a>
+    <a class="insurance-print-btn" href="inventories.php?versichert=1">Zur&uuml;ck zur Liste</a>
     <button type="button" class="insurance-print-btn" onclick="window.print()">Drucken / als PDF speichern</button>
   </div>
 

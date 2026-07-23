@@ -228,6 +228,12 @@ function getConfigDefaults() {
             'Description' => 'Man kann sich auch von bereits geschlossenen Anmeldungen abmelden.',
         ),
         array(
+            'Parameter' => 'meldeRowResponseOpacity',
+            'Value' => '0.55',
+            'Type' => 'string',
+            'Description' => 'Opazit&auml;t der Meldezeilen-Hintergrundfarbe bei vorhandener Meldung (0–1; 1 = volle Farbe)',
+        ),
+        array(
             'Parameter' => 'showOrchestraView',
             'Value' => '1',
             'Type' => 'bool',

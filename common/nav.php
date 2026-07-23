@@ -92,7 +92,7 @@ if(requirePermission('perm_editConfig')) {
       <i class="fas fa-shirt" aria-hidden="true"></i><span class="nav-label">Mein Inventar</span>
     </a>
 <?php } ?>
-    <form class="app-nav-form" action="new-musiker.php" method="POST">
+    <form class="app-nav-form app-nav-item--secondary" action="new-musiker.php" method="POST">
       <button class="app-nav-item <?php getPage('me', 'nutzer'); ?>" type="submit" title="Mein Profil">
         <i class="fas fa-user" aria-hidden="true"></i>
         <span class="nav-label"><span class="nav-label-long">Mein Profil</span><span class="nav-label-short">Profil</span></span>
@@ -134,6 +134,14 @@ if(requirePermission('perm_editConfig')) {
           <i class="fas fa-shirt" aria-hidden="true"></i><span class="nav-label">Mein Inventar</span>
         </a>
 <?php } ?>
+        <form class="app-nav-form app-nav-more-only-mobile" action="new-musiker.php" method="POST">
+          <button class="app-nav-item <?php getPage('me', 'nutzer'); ?>" type="submit" title="Mein Profil">
+            <i class="fas fa-user" aria-hidden="true"></i>
+            <span class="nav-label"><span class="nav-label-long">Mein Profil</span><span class="nav-label-short">Profil</span></span>
+          </button>
+          <input type="hidden" name="id" value="<?php echo (int)$_SESSION['userid']; ?>">
+          <input type="hidden" name="mode" value="useredit">
+        </form>
         <a class="app-nav-item app-nav-more-only-mobile <?php getPage('media', 'system'); ?>" href="media.php" title="Medien">
           <i class="fas fa-photo-film" aria-hidden="true"></i><span class="nav-label">Medien</span>
         </a>
@@ -210,9 +218,9 @@ if(requirePermission('perm_editConfig')) {
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
 <?php if(requirePermission('perm_showInventories')) { ?>
                 <a title="Inventar" href="inventories.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('inventories', 'perm_showInventories'); ?>"><i class="fas fa-shirt"></i> Inventar</a>
-                <a title="Versicherung" href="insurance.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('insurance', 'perm_showInventories'); ?>"><i class="fas fa-file-invoice-dollar"></i> Versicherung</a>
 <?php } ?>
 <?php if(requirePermission('perm_editInventories')) { ?>
+                <a title="Inventar anlegen" href="new-inventory.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newinventory', 'perm_editInventories'); ?>"><i class="fas fa-plus-circle"></i> Inventar anlegen</a>
                 <a title="Inventar-Typen" href="inventory-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('inventory-types', 'perm_editInventories'); ?>"><i class="fas fa-tags"></i> Inventar-Typen</a>
 <?php } ?>
               </div>

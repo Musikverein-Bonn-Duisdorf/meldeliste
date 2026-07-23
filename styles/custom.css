@@ -429,9 +429,15 @@ a.app-titlebar-logo {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  /* Shared modal edge gap (z-index puts modals above titlebar/nav) */
+  :root {
+    --app-nav-bottom-h: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    --app-modal-edge-gap: 0.5rem;
+  }
+
   .app-nav-primary {
-    /* 5 Kern-Buttons: gleiche Zellenbreite wie „Mehr“ (1) */
-    flex: 5 1 0;
+    /* 4 Kern-Buttons: Termine, Kalender, Nachrichten, Mein Register (+ Mehr separat) */
+    flex: 4 1 0;
     flex-direction: row;
     align-items: stretch;
     min-width: 0;
@@ -447,6 +453,17 @@ a.app-titlebar-logo {
 
   .app-nav-item--secondary {
     display: none !important;
+  }
+
+  .app-nav-more-body > .app-nav-form.app-nav-more-only-mobile {
+    display: block;
+    flex: none;
+    width: 100%;
+    height: auto;
+  }
+
+  .app-nav-more-body > .app-nav-form.app-nav-more-only-mobile > .app-nav-item {
+    width: 100%;
   }
 
   .app-nav-more-wrap {
@@ -622,6 +639,7 @@ a.app-titlebar-logo {
 
   .profile-shell .profile-hero.admin-list-hero,
   .w3-container.admin-list-hero {
+    --admin-hero-accent-w: 3px;
     margin-bottom: 0.5rem;
     padding: 0.65rem 1rem;
   }
@@ -647,12 +665,16 @@ a.app-titlebar-logo {
    Descendant (not only >) so Form-Seiten mit .profile-form > header auch treffen. */
 .profile-shell .profile-hero.admin-list-hero,
 .w3-container.admin-list-hero {
+  --admin-hero-accent-w: clamp(3px, 0.85vw, 6px);
   margin: 0 -1.25rem 0.5rem;
   padding: 0.65rem 1.25rem;
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
-  border-left: 6px solid transparent;
+  border-left-width: var(--admin-hero-accent-w);
+  border-left-style: solid;
+  border-left-color: var(--page-title-accent, transparent);
   color: #222;
+  box-sizing: border-box;
 }
 
 /* Admin-Listen-Karten ohne seitliches app-main-Padding: Hero ohne Negativ-Margin */
@@ -2065,6 +2087,11 @@ a.app-titlebar-logo {
   border-color: #64b5f6;
 }
 
+.mail-recipient-chip--insured {
+  background: #e8eef6;
+  border-color: #7f9dc1;
+}
+
 .mail-recipient-chip--audience,
 .mail-recipient-chip--group {
   background: #345a95;
@@ -2760,7 +2787,26 @@ body.meld-cal-print {
 }
 
 .calendar-melde-buttons {
-  margin-top: 0.5rem;
+  margin-top: 0;
+}
+
+.calendar-melde-modal .melde-btns--modal {
+  flex: 1 1 auto;
+  max-width: none;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.calendar-melde-modal .melde-btns--modal .melde-btn {
+  min-height: 2.75rem;
+  font-size: 1.15rem;
+  padding: 0.45rem 0.55rem !important;
+}
+
+@media (max-width: 600px) {
+  .calendar-melde-modal .melde-btns--modal .melde-btn {
+    min-height: 3rem;
+  }
 }
 
 .modal-shell {
@@ -2770,19 +2816,260 @@ body.meld-cal-print {
 
 .modal-shell .profile-hero {
   padding-right: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+}
+
+.modal-shell .profile-hero-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.modal-shell .profile-hero-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem 0.55rem;
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.modal-shell .profile-hero-actions .profile-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.modal-shell .profile-actions-primary {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.modal-shell .profile-actions-primary form {
+  margin: 0;
+}
+
+.modal-shell .profile-btn-primary {
+  min-width: 0;
+}
+
+.modal-shell .profile-actions-primary .w3-btn,
+.modal-shell .profile-actions-primary .w3-button,
+.modal-shell .profile-actions-primary a.w3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.modal-shell .profile-actions-more {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.modal-shell .profile-actions-more > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 0.25rem;
+  background: #f7f7f7;
+  color: #222;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.25;
+  opacity: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+}
+
+.modal-shell .profile-actions-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.modal-shell .profile-actions-more > summary::after {
+  content: "▾";
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.modal-shell .profile-actions-more[open] > summary {
+  background: #eee;
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.modal-shell .profile-actions-secondary {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 11.5rem;
+  max-width: min(18rem, 80vw);
+  margin: 0;
+  padding: 0.4rem;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 0.35rem;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+}
+
+.modal-shell .profile-actions-secondary form {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.modal-shell .profile-actions-secondary .w3-btn,
+.modal-shell .profile-actions-secondary .w3-button,
+.modal-shell .profile-actions-secondary a.w3-btn {
+  display: block;
+  width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  text-align: left;
+  white-space: normal;
 }
 
 .modal-close {
   position: static;
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   line-height: 1;
-  padding: 0.15rem 0.55rem;
+  padding: 0.35rem 0.55rem;
   margin: 0;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.25rem;
   background: #f5f5f5;
   color: #111;
   cursor: pointer;
   flex-shrink: 0;
+  align-self: center;
+}
+
+/* Modal hero actions: stack on narrow screens */
+@media (max-width: 600px) {
+  .modal-shell .profile-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 0.5rem;
+    row-gap: 0.65rem;
+    flex-wrap: unset;
+  }
+
+  .modal-shell .profile-hero-text {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .modal-shell .profile-hero-actions {
+    display: contents;
+  }
+
+  .modal-shell .profile-hero-actions > .modal-close {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+  }
+
+  .modal-shell .profile-hero-actions > .profile-actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin: 0;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .modal-shell .profile-actions-primary,
+  .modal-shell .profile-actions-more {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    position: static;
+  }
+
+  .modal-shell .profile-actions-primary .w3-btn,
+  .modal-shell .profile-actions-primary .w3-button,
+  .modal-shell .profile-actions-primary a.w3-btn {
+    display: block;
+    width: 100% !important;
+    font-size: clamp(0.85rem, 2.6vw, 1rem);
+    padding: 0.55rem 0.7rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .modal-shell .profile-actions-more > summary {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    text-align: center;
+    font-size: clamp(0.85rem, 2.6vw, 0.95rem);
+    white-space: normal;
+  }
+
+  .modal-shell .profile-actions-more > summary::after {
+    content: none;
+  }
+
+  .modal-shell .profile-actions-secondary {
+    position: static;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .modal-shell .profile-actions-secondary .w3-btn,
+  .modal-shell .profile-actions-secondary .w3-button,
+  .modal-shell .profile-actions-secondary a.w3-btn {
+    text-align: center;
+    font-size: clamp(0.85rem, 2.6vw, 1rem);
+    padding: 0.55rem 0.7rem;
+  }
+
+  .modal-shell .profile-title {
+    font-size: clamp(1.2rem, 5vw, 1.65rem);
+  }
 }
 
 #ajaxModalContent:has(.modal-shell) {
@@ -2794,6 +3081,41 @@ body.meld-cal-print {
   max-height: none;
   background: #fff;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* Above titlebar (1100) and bottom nav (1000); below orchestra seat sheet (10020) */
+.w3-modal {
+  z-index: 2000;
+}
+
+/* Keep modal content in the safe viewport (notches + breathing room) */
+@media (max-width: 600px) {
+  .w3-modal {
+    padding-top: max(var(--app-modal-edge-gap, 0.5rem), env(safe-area-inset-top, 0px));
+    padding-bottom: max(var(--app-modal-edge-gap, 0.5rem), env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+
+  .w3-modal-content {
+    max-height: calc(
+      100vh
+      - max(var(--app-modal-edge-gap, 0.5rem), env(safe-area-inset-top, 0px))
+      - max(var(--app-modal-edge-gap, 0.5rem), env(safe-area-inset-bottom, 0px))
+    );
+    max-height: calc(
+      100dvh
+      - max(var(--app-modal-edge-gap, 0.5rem), env(safe-area-inset-top, 0px))
+      - max(var(--app-modal-edge-gap, 0.5rem), env(safe-area-inset-bottom, 0px))
+    );
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  #ajaxModalContent .modal-shell {
+    margin: 0.35rem 0.5rem;
+  }
 }
 
 .termin-detail-instrument {
@@ -3156,6 +3478,30 @@ select.profile-control {
 .melde-row {
   overflow: hidden;
   cursor: pointer;
+  position: relative;
+}
+
+/* Soften response tint (config: meldeRowResponseOpacity) without fading buttons/text */
+.melde-row.melde-row--responded {
+  background-color: transparent !important;
+  color: var(--melde-response-fg, inherit) !important;
+  isolation: isolate;
+}
+
+.melde-row.melde-row--responded::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-color: var(--melde-response-bg, transparent);
+  opacity: var(--melde-response-opacity, 1);
+}
+
+.melde-row.melde-row--responded > * {
+  position: relative;
+  z-index: 1;
 }
 
 .melde-row:focus-visible {
@@ -3431,3 +3777,266 @@ select.profile-control {
     min-height: 2.85rem;
   }
 }
+
+/* MELD-145: Inventar-Listen (Mein Inventar + Admin) — Layout analog Meldezeilen */
+.inv-list-empty {
+  margin: 1rem 0;
+  opacity: 0.85;
+}
+
+.inv-sort-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  padding: 0.4rem 0 0.7rem;
+  margin: 0 0 0.35rem;
+  background: transparent;
+  color: inherit;
+  font-weight: 400;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Escape teal table-header chrome that targets #listHeader */
+#listHeader.inv-sort-bar,
+.admin-list-body > #listHeader.inv-sort-bar,
+.admin-list-shell > #listHeader.inv-sort-bar {
+  position: sticky;
+  top: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 400;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  margin: 0 0 0.35rem;
+  padding: 0.4rem 0 0.7rem;
+}
+
+.inv-sort-bar-filters,
+.inv-sort-bar-sorts {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 0.1rem;
+}
+
+.inv-sort-bar-filters {
+  flex: 0 0 auto;
+}
+
+.inv-sort-bar-sorts {
+  flex: 1 1 auto;
+}
+
+.inv-sort-chip {
+  appearance: none;
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: inherit;
+  padding: 0.28rem 0.65rem;
+  font: inherit;
+  font-size: clamp(0.72rem, 0.65rem + 0.35vw, 0.85rem);
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.inv-sort-chip:hover {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+#listHeader.inv-sort-bar .list-sort,
+.inv-sort-bar .list-sort {
+  color: inherit;
+}
+
+#listHeader.inv-sort-bar .list-sort:hover,
+.inv-sort-bar .list-sort:hover {
+  background: #fff;
+  text-decoration: none;
+}
+
+.inv-filter-chip.is-active {
+  background: var(--page-title-accent, #345A95);
+  border-color: transparent;
+  color: #fff;
+}
+
+.inv-filter-chip.is-active:hover {
+  background: var(--page-title-accent, #345A95);
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.inv-row.list-filtered-out {
+  display: none !important;
+}
+
+.inv-row {
+  --inv-id-col-w: 9.75rem;
+  --inv-rail-w: 0.35rem;
+  --inv-rail-color: var(--page-title-accent, #345A95);
+  --inv-row-pad-y: 0.85rem;
+  --inv-rail-inset: 0.4rem;
+  display: grid;
+  grid-template-columns: var(--inv-id-col-w) var(--inv-rail-w) minmax(0, 1fr);
+  column-gap: 0.85rem;
+  align-items: start;
+  box-sizing: border-box;
+  padding: var(--inv-row-pad-y) 1rem;
+  margin: 0 0 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.35rem;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.inv-row:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.45);
+  outline-offset: 2px;
+}
+
+.inv-row--insured {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.inv-id {
+  width: var(--inv-id-col-w);
+  max-width: var(--inv-id-col-w);
+  min-width: 0;
+  box-sizing: border-box;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.inv-reg {
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.inv-typ {
+  font-size: 0.88rem;
+  line-height: 1.25;
+  opacity: 0.9;
+  word-break: break-word;
+}
+
+.inv-id .mail-recipient-chip {
+  margin-top: 0.05rem;
+}
+
+.inv-rail {
+  width: var(--inv-rail-w);
+  align-self: stretch;
+  margin-top: calc(-1 * var(--inv-row-pad-y) + var(--inv-rail-inset));
+  margin-bottom: calc(-1 * var(--inv-row-pad-y) + var(--inv-rail-inset));
+  min-height: calc(100% + 2 * var(--inv-row-pad-y) - 2 * var(--inv-rail-inset));
+  background: var(--inv-rail-color);
+  border-radius: 2px;
+}
+
+.inv-main {
+  min-width: 0;
+  align-self: center;
+}
+
+.inv-product {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.inv-desc {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.inv-desc--secondary {
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 400;
+  opacity: 0.92;
+}
+
+.inv-desc--empty {
+  font-weight: 400;
+  opacity: 0.45;
+}
+
+.inv-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.inv-meta-item {
+  min-width: 0;
+  word-break: break-word;
+}
+
+.inv-meta-k {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-right: 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .inv-sort-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    padding: 0.25rem 0 0.55rem;
+  }
+
+  .inv-sort-bar-filters,
+  .inv-sort-bar-sorts {
+    width: 100%;
+  }
+
+  .inv-sort-chip {
+    padding: 0.32rem 0.6rem;
+  }
+
+  .inv-row {
+    --inv-id-col-w: 7.5rem;
+    --inv-row-pad-y: 0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .inv-meta-admin {
+    display: none;
+  }
+}
+

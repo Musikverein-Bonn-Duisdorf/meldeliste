@@ -8,7 +8,6 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
 $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
 $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
 $canEdit = requirePermission('perm_editAppmnts');
-$canResponse = requirePermission('perm_editResponse');
 $canMail = requirePermission('perm_sendEmail');
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -49,11 +48,6 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
             <form action="new-termin.php" method="POST">
               <button class="w3-btn <?php echo $h($btnEdit); ?> w3-border w3-mobile" type="submit" name="copy" value="<?php echo (int)$t->Index; ?>">Kopieren</button>
             </form>
-<?php if($canResponse) { ?>
-            <form action="tracking.php" method="POST">
-              <button class="w3-btn <?php echo $h($btnEdit); ?> w3-border w3-mobile" type="submit" name="termin" value="<?php echo (int)$t->Index; ?>">Anwesenheitsliste</button>
-            </form>
-<?php } ?>
 <?php if($canMail) { ?>
             <a class="w3-btn <?php echo $h($btnEdit); ?> w3-border w3-mobile" href="mail.php?new=1&amp;termin=<?php echo (int)$t->Index; ?>">Email an Teilnehmer</a>
 <?php } ?>
@@ -65,25 +59,11 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
           </div>
         </details>
       </div>
-<?php } elseif($canResponse || $canMail) { ?>
+<?php } elseif($canMail) { ?>
       <div class="profile-actions">
         <div class="profile-actions-primary">
-<?php if($canResponse) { ?>
-          <form action="tracking.php" method="POST">
-            <button class="w3-btn profile-btn-primary <?php echo $h($btnEdit); ?> w3-border w3-mobile" type="submit" name="termin" value="<?php echo (int)$t->Index; ?>">Anwesenheitsliste</button>
-          </form>
-<?php } elseif($canMail) { ?>
           <a class="w3-btn profile-btn-primary <?php echo $h($btnEdit); ?> w3-border w3-mobile" href="mail.php?new=1&amp;termin=<?php echo (int)$t->Index; ?>">Email an Teilnehmer</a>
-<?php } ?>
         </div>
-<?php if($canResponse && $canMail) { ?>
-        <details class="profile-actions-more">
-          <summary>Weitere Aktionen</summary>
-          <div class="profile-actions-secondary">
-            <a class="w3-btn <?php echo $h($btnEdit); ?> w3-border w3-mobile" href="mail.php?new=1&amp;termin=<?php echo (int)$t->Index; ?>">Email an Teilnehmer</a>
-          </div>
-        </details>
-<?php } ?>
       </div>
 <?php } ?>
       <button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button>
