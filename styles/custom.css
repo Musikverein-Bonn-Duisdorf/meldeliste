@@ -4309,3 +4309,143 @@ select.profile-control {
   }
 }
 
+/* MELD-148: admin log rows (inventar list layout) */
+.log-row {
+  --log-id-col-w: 11rem;
+  --log-rail-w: 0.25rem;
+  --log-rail-color: var(--page-title-accent, #345A95);
+  --log-row-pad-y: 0.3rem;
+  --log-rail-inset: 0.2rem;
+  display: grid;
+  grid-template-columns: var(--log-id-col-w) var(--log-rail-w) minmax(0, 1fr);
+  column-gap: 0.55rem;
+  align-items: start;
+  box-sizing: border-box;
+  padding: var(--log-row-pad-y) 0.65rem;
+  margin: 0 0 0.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background: transparent;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.log-row.list-filtered-out {
+  display: none !important;
+}
+
+.log-id {
+  width: var(--log-id-col-w);
+  max-width: var(--log-id-col-w);
+  min-width: 0;
+  box-sizing: border-box;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.log-time {
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.log-rail {
+  width: var(--log-rail-w);
+  align-self: stretch;
+  margin-top: calc(-1 * var(--log-row-pad-y) + var(--log-rail-inset));
+  margin-bottom: calc(-1 * var(--log-row-pad-y) + var(--log-rail-inset));
+  min-height: calc(100% + 2 * var(--log-row-pad-y) - 2 * var(--log-rail-inset));
+  background: var(--log-rail-color);
+  border-radius: 2px;
+}
+
+.log-main {
+  min-width: 0;
+  align-self: start;
+}
+
+.log-user {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 0.05rem;
+  line-height: 1.2;
+}
+
+.log-message {
+  font-size: 0.95rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.log-type-chip,
+.log-melde-chip {
+  display: inline-block;
+  padding: 0.08rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  vertical-align: middle;
+  border-radius: 0.2rem;
+  color: #fff;
+}
+
+.log-type-chip--fatal {
+  background: #7f1d1d;
+}
+
+.log-type-chip--error {
+  background: #f44336;
+}
+
+.log-type-chip--warning {
+  background: #f59e0b;
+  color: #1a1a1a;
+}
+
+.log-type-chip--db-delete {
+  background: #b91c1c;
+}
+
+.log-type-chip--db-insert {
+  background: #16a34a;
+}
+
+.log-type-chip--db-update {
+  background: #2563eb;
+}
+
+.log-type-chip--email {
+  background: #7c3aed;
+}
+
+.log-type-chip--info {
+  background: #0284c7;
+}
+
+.log-type-chip--default {
+  background: #6b7280;
+}
+
+.log-message .log-melde-chip {
+  font-style: normal;
+}
+
+@media (max-width: 600px) {
+  .log-row {
+    --log-id-col-w: 8.5rem;
+    --log-row-pad-y: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    column-gap: 0.4rem;
+  }
+}
+

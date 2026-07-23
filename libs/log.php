@@ -174,55 +174,65 @@ class Log
         $User->load_by_id($this->User);
         switch($this->Type) {
         case 7:
-            $color = $GLOBALS['optionsDB']['colorLogInfo'];
             $type  = "INFO";
+            $chipMod = 'info';
             break;
         case 6:
-            $color = $GLOBALS['optionsDB']['colorLogEmail'];
             $type  = "EMAIL";
+            $chipMod = 'email';
             break;
         case 5:
-            $color = $GLOBALS['optionsDB']['colorLogDBUpdate'];
             $type  = "DB UPDATE";
+            $chipMod = 'db-update';
             break;
         case 4:
-            $color = $GLOBALS['optionsDB']['colorLogDBInsert'];
             $type  = "DB INSERT";
+            $chipMod = 'db-insert';
             break;
         case 3:
-            $color = $GLOBALS['optionsDB']['colorLogDBDelete'];
             $type  = "DB DELETE";
+            $chipMod = 'db-delete';
             break;
         case 2:
-            $color = $GLOBALS['optionsDB']['colorLogWarning'];
             $type  = "WARNING";
+            $chipMod = 'warning';
             break;
         case 1:
-            $color = $GLOBALS['optionsDB']['colorLogError'];
             $type  = "ERROR";
+            $chipMod = 'error';
             break;
         case 0:
-            $color = $GLOBALS['optionsDB']['colorLogFatal'];
             $type  = "FATAL";
+            $chipMod = 'fatal';
             break;
         default:
-            $color = $GLOBALS['optionsDB']['colorLogDefault'];
             $type  = "";
+            $chipMod = 'default';
             break;
         }
-	echo "<div id=\"".$this->Index."\" class=\"w3-row ".$color." ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding w3-mobile w3-border-bottom w3-border-black\">\n";
-	echo "  <div class=\"w3-col l1 w3-container\">".$this->Timestamp."</div>\n";
-	echo "  <div class=\"w3-col l1 w3-container\"><b>".$type."</b></div>\n";
-    echo "  <div class=\"w3-col l1 w3-container\">";
-    if($User->Index) {
-        echo $User->getName();
-    }
-    else {
-        echo "<b>SYSTEM</b>";
-    }
-    echo "</div>\n";
-	echo "  <div class=\"w3-col l9 w3-container\"><i>".$this->Message."</i></div>\n";
-	echo "</div>\n";
+        $hover = isset($GLOBALS['optionsDB']['HoverEffect']) ? $GLOBALS['optionsDB']['HoverEffect'] : '';
+        $userLabel = $User->Index ? $User->getName() : 'SYSTEM';
+        $classes = trim('log-row list-row '.$hover);
+        $tsRaw = (string)$this->Timestamp;
+        $tsView = (string)germanDate($tsRaw, false);
+        if(strlen($tsRaw) >= 16) {
+            $tsView .= ' '.sql2timeRaw(substr($tsRaw, 11, 8));
+        }
+
+        echo '<div id="'.(int)$this->Index.'" class="'.htmlspecialchars($classes, ENT_QUOTES, 'UTF-8').'">';
+        echo '<div class="log-id">';
+        echo '<div class="log-time">'.htmlspecialchars($tsView, ENT_QUOTES, 'UTF-8').'</div>';
+        if($type !== '') {
+            echo '<span class="w3-tag log-type-chip log-type-chip--'.htmlspecialchars($chipMod, ENT_QUOTES, 'UTF-8').'">'
+                .htmlspecialchars($type, ENT_QUOTES, 'UTF-8').'</span>';
+        }
+        echo '</div>';
+        echo '<div class="log-rail" aria-hidden="true"></div>';
+        echo '<div class="log-main">';
+        echo '<div class="log-user">'.htmlspecialchars($userLabel, ENT_QUOTES, 'UTF-8').'</div>';
+        echo '<div class="log-message">'.$this->Message.'</div>';
+        echo '</div>';
+        echo '</div>';
     }
 };
 ?>

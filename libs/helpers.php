@@ -979,27 +979,20 @@ function meldeWert($val) {
 }
 
 function meldeSymbol($val) {
-    $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
-    $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
-
-    $div = new div;
-    $div->class="w3-button w3-border w3-border-black w3-center";
-    switch($val) {
-	case 1:
-        $div->class=$colors[0];
-        $div->body=$symbols[0];
-        break;
-	case 2:
-        $div->class=$colors[1];
-        $div->body=$symbols[1];
-        break;
-	case 3:
-        $div->class=$colors[2];
-        $div->body=$symbols[2];
-        break;
-	default:
-        break;
+    $label = meldeWert($val);
+    if($label === null || $label === '') {
+        return '';
     }
+    $colors = array(
+        1 => isset($GLOBALS['optionsDB']['colorBtnYes']) ? $GLOBALS['optionsDB']['colorBtnYes'] : 'w3-green',
+        2 => isset($GLOBALS['optionsDB']['colorBtnNo']) ? $GLOBALS['optionsDB']['colorBtnNo'] : 'w3-red',
+        3 => isset($GLOBALS['optionsDB']['colorBtnMaybe']) ? $GLOBALS['optionsDB']['colorBtnMaybe'] : 'w3-orange',
+    );
+    $color = isset($colors[(int)$val]) ? $colors[(int)$val] : '';
+    $div = new div;
+    $div->tag = 'span';
+    $div->class = 'w3-tag log-melde-chip '.$color;
+    $div->body = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
     return $div->print();
 }
 
