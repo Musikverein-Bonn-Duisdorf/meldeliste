@@ -1692,17 +1692,6 @@ class Termin
         $str=$str.$admStatusDiv->print();
         return $str;
     }
-    protected function hasMeldeResponseTint() {
-        if($this->globalShiftColor()) {
-            return true;
-        }
-        if(!$this->Shifts) {
-            $w = (int)$this->Wert;
-            return ($w === 1 || $w === 2 || $w === 3);
-        }
-        return false;
-    }
-
     /**
      * Resolve hex for a config color CSS class (cfg-hex-… or legacy w3-*).
      * @param string $colorClass
@@ -1737,6 +1726,26 @@ class Termin
         return max(0.0, min(1.0, $opacity));
     }
 
+    /**
+     * Soft response tint via CSS vars (meldeRowResponseOpacity), or empty if full opacity / unknown color.
+     * @return array{0:string,1:string} [extraClass, styleAttrIncludingLeadingSpace]
+     */
+    protected function meldeSoftTintAttrs($colorClass) {
+        $opacity = $this->meldeRowResponseOpacity();
+        if($opacity >= 0.999) {
+            return array('', '');
+        }
+        $hex = $this->resolveMeldeColorHex($colorClass);
+        if($hex === '') {
+            return array('', '');
+        }
+        $fg = hexContrastTextOnFill($hex, $opacity);
+        $style = ' style="--melde-response-opacity:'.$opacity
+            .';--melde-response-bg:'.$hex
+            .';--melde-response-fg:'.$fg.'"';
+        return array('melde-row--responded', $style);
+    }
+
     public function getLineColor($val) {
         $c="";
         switch($val) {
@@ -1759,11 +1768,9 @@ class Termin
             return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
         };
 
+        $isShifts = (bool)$this->Shifts;
         $classes = array('melde-row', 'w3-card-4', 'w3-margin');
         $mainColor = $this->mainColor();
-        if($mainColor) {
-            $classes[] = $mainColor;
-        }
         $mainHover = $this->mainHover();
         if($mainHover) {
             $classes[] = $mainHover;
@@ -1772,18 +1779,29 @@ class Termin
             $classes[] = $GLOBALS['optionsDB']['styleAppmntUnpublished'];
         }
 
+        /*
+         * Soft tint must REPLACE the solid color class: cfg-hex-* uses
+         * background !important and would sit under the 0.55 overlay (= wrong opacity).
+         * Schichten: tint only header + shift lines, never the whole card.
+         */
         $styleAttr = '';
-        if($this->hasMeldeResponseTint()) {
-            $opacity = $this->meldeRowResponseOpacity();
-            if($opacity < 0.999) {
-                $hex = $this->resolveMeldeColorHex($mainColor);
-                if($hex !== '') {
-                    $classes[] = 'melde-row--responded';
-                    $fg = hexContrastTextOnFill($hex, $opacity);
-                    $styleAttr = ' style="--melde-response-opacity:'.$opacity
-                        .';--melde-response-bg:'.$hex
-                        .';--melde-response-fg:'.$fg.'"';
-                }
+        $mainSoftClass = '';
+        $mainSoftStyle = '';
+        if(!$isShifts) {
+            list($tintClass, $tintStyle) = $this->meldeSoftTintAttrs($mainColor);
+            if($tintClass !== '') {
+                $classes[] = $tintClass;
+                $styleAttr = $tintStyle;
+            }
+            elseif($mainColor) {
+                $classes[] = $mainColor;
+            }
+        }
+        else {
+            list($mainSoftClass, $mainSoftStyle) = $this->meldeSoftTintAttrs($mainColor);
+            if($mainSoftClass === '' && $mainColor) {
+                $mainSoftClass = $mainColor;
+                $mainSoftStyle = '';
             }
         }
 
@@ -1792,13 +1810,12 @@ class Termin
         if($lineHover) {
             $rowClasses[] = $lineHover;
         }
-        $shiftColor = $this->globalShiftColor();
-        if($shiftColor) {
-            $rowClasses[] = $shiftColor;
+        if($isShifts && $mainSoftClass !== '') {
+            $rowClasses[] = $mainSoftClass;
         }
 
         $str = '<div id="entry'.$tid.'_user'.$user.'" class="'.implode(' ', $classes).'"'.$styleAttr.' data-termin-id="'.$tid.'" '.$this->getSearchDataAttr().'>';
-        $str .= '<div class="'.implode(' ', $rowClasses).'">';
+        $str .= '<div class="'.implode(' ', $rowClasses).'"'.$mainSoftStyle.'>';
         $str .= '<div class="melde-date-col">'.$this->makeListDateInfo().'</div>';
         $str .= '<div class="melde-date-rail" aria-hidden="true"></div>';
 
@@ -1880,11 +1897,19 @@ class Termin
 
                 $shiftClasses = array('melde-shift');
                 $shiftClasses[] = $GLOBALS['optionsDB']['HoverEffect'];
+                $shiftStyleAttr = '';
                 $lc = $this->getLineColor($m->Wert);
                 if($lc) {
-                    $shiftClasses[] = $lc;
+                    list($tintClass, $tintStyle) = $this->meldeSoftTintAttrs($lc);
+                    if($tintClass !== '') {
+                        $shiftClasses[] = $tintClass;
+                        $shiftStyleAttr = $tintStyle;
+                    }
+                    else {
+                        $shiftClasses[] = $lc;
+                    }
                 }
-                $str .= '<div class="'.implode(' ', array_filter($shiftClasses)).'" data-melde-stop>';
+                $str .= '<div class="'.implode(' ', array_filter($shiftClasses)).'"'.$shiftStyleAttr.' data-melde-stop>';
                 $str .= '<div class="melde-shift-info">';
                 $str .= '<div class="melde-shift-name">'.$h($s->Name).'</div>';
                 if($s->Start != $s->End) {

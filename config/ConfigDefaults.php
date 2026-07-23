@@ -231,7 +231,7 @@ function getConfigDefaults() {
             'Parameter' => 'meldeRowResponseOpacity',
             'Value' => '0.55',
             'Type' => 'string',
-            'Description' => 'Opazit&auml;t der Meldezeilen-Hintergrundfarbe bei vorhandener Meldung (0–1; 1 = volle Farbe)',
+            'Description' => 'Opazit&auml;t der Meldezeilen-Hintergrundfarbe (0–1; auch ohne Meldung; 1 = volle Farbe)',
         ),
         array(
             'Parameter' => 'showOrchestraView',

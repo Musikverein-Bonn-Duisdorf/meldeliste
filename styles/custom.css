@@ -3093,20 +3093,80 @@ body.meld-cal-print {
   z-index: 2000;
 }
 
-/* MELD-147: Kalender-Abo-Modal (rendered outside .app-main via footer) */
-#calSubscribeModal .w3-modal-content {
-  max-width: 36rem;
+/* Page-local profile-shell modals (outside .app-main): same chrome as #ajaxModalContent */
+#calSubscribeModal .w3-modal-content,
+#delmodal .w3-modal-content {
+  background: transparent;
+  box-shadow: none;
+  width: auto !important;
+  max-width: min(36rem, calc(100vw - 1.5rem));
   margin: 4vh auto;
 }
 
-#calSubscribeModal .calendar-subscribe-modal {
-  margin: 0.75rem;
+#delmodal .w3-modal-content {
+  max-width: min(32rem, calc(100vw - 1.5rem));
+  margin: 8vh auto;
 }
 
-/* Confirm-delete modals (Termin etc.) */
-#delmodal .w3-modal-content {
-  max-width: 32rem;
-  margin: 8vh auto;
+#calSubscribeModal .calendar-subscribe-modal,
+#delmodal .confirm-delete-modal {
+  margin: 0.75rem;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+.calendar-subscribe-block .profile-field {
+  margin-bottom: 0.85rem;
+}
+
+.calendar-subscribe-url {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.calendar-subscribe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0.25rem;
+}
+
+.calendar-subscribe-actions .profile-actions-primary {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: min(100%, 11rem);
+  margin: 0;
+}
+
+.calendar-subscribe-actions .profile-actions-primary .w3-btn,
+.calendar-subscribe-actions > .w3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 2.6rem;
+  margin: 0 !important;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.calendar-subscribe-actions > .w3-btn {
+  flex: 1 1 auto;
+  min-width: min(100%, 11rem);
+}
+
+.calendar-subscribe-block .profile-inline-link {
+  margin-top: 0.65rem;
+  margin-bottom: 0;
 }
 
 .confirm-delete-modal .profile-actions--confirm {
@@ -3119,6 +3179,19 @@ body.meld-cal-print {
 
 .confirm-delete-modal .profile-actions--confirm .profile-actions-primary {
   margin: 0;
+}
+
+@media (max-width: 600px) {
+  #calSubscribeModal .calendar-subscribe-modal,
+  #delmodal .confirm-delete-modal {
+    margin: 0.35rem 0.5rem;
+  }
+
+  .calendar-subscribe-actions .profile-actions-primary,
+  .calendar-subscribe-actions > .w3-btn {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
 /* Keep modal content in the safe viewport (notches + breathing room) */
@@ -3514,14 +3587,21 @@ select.profile-control {
   position: relative;
 }
 
-/* Soften response tint (config: meldeRowResponseOpacity) without fading buttons/text */
-.melde-row.melde-row--responded {
+/* Soften tint (config: meldeRowResponseOpacity) without fading buttons/text.
+   Beat cfg-hex-* background !important — solid color class must not be combined. */
+.melde-row.melde-row--responded,
+.melde-row-main.melde-row--responded,
+.melde-shift.melde-row--responded {
+  background: transparent !important;
   background-color: transparent !important;
   color: var(--melde-response-fg, inherit) !important;
   isolation: isolate;
+  position: relative;
 }
 
-.melde-row.melde-row--responded::before {
+.melde-row.melde-row--responded::before,
+.melde-row-main.melde-row--responded::before,
+.melde-shift.melde-row--responded::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -3532,7 +3612,9 @@ select.profile-control {
   opacity: var(--melde-response-opacity, 1);
 }
 
-.melde-row.melde-row--responded > * {
+.melde-row.melde-row--responded > *,
+.melde-row-main.melde-row--responded > *,
+.melde-shift.melde-row--responded > * {
   position: relative;
   z-index: 1;
 }
@@ -3776,6 +3858,8 @@ select.profile-control {
   padding: 0.65rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.65);
   cursor: default;
+  position: relative;
+  overflow: hidden;
 }
 
 .melde-shift-info {
