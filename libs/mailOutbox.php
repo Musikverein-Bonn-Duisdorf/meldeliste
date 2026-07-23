@@ -180,7 +180,7 @@ class MailOutbox
         $sql = sprintf(
             'SELECT COUNT(*) AS `cnt` FROM `%sMailOutbox`
              WHERE `User` = %d AND `DeletedByUser` = 0
-               AND `Status` IN ("pending", "sending", "sent")
+               AND `Status` IN ("pending", "sending", "sent", "failed")
                AND `ReadAt` IS NULL;',
             $GLOBALS['dbprefix'],
             $userId

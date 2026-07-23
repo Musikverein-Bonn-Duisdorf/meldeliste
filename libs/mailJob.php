@@ -622,11 +622,14 @@ class MailJob
         elseif($this->Failed > 0 && $this->Sent === 0) {
             $this->Status = 'failed';
         }
+        elseif($this->Failed > 0 && $this->Sent > 0) {
+            $this->Status = 'partial';
+        }
         else {
             $this->Status = 'done';
         }
         $this->update();
-        if($this->Status === 'done' || $this->Status === 'failed') {
+        if($this->Status === 'done' || $this->Status === 'failed' || $this->Status === 'partial') {
             $this->cleanupAttachments();
         }
     }
@@ -738,6 +741,8 @@ class MailJob
             return 'abgebrochen';
         case 'done':
             return 'Versendet';
+        case 'partial':
+            return 'Teilweise fehlgeschlagen';
         case 'failed':
             return 'Fehler';
         default:
@@ -756,11 +761,30 @@ class MailJob
             return self::tagClass('colorBtnNo', 'w3-grey');
         case 'done':
             return self::tagClass('colorLogEmail', 'w3-green');
+        case 'partial':
+            return self::tagClass('colorWarning', 'w3-amber');
         case 'failed':
             return self::tagClass('colorLogError', 'w3-red');
         default:
             return 'w3-light-grey';
         }
+    }
+
+    /**
+     * Display string for Sent/Total and failed SMTP deliveries.
+     * @param int|null $sent
+     * @param int|null $total
+     * @param int|null $failed
+     */
+    public static function formatCounts($sent, $total, $failed = 0) {
+        $sent = (int)$sent;
+        $total = (int)$total;
+        $failed = (int)$failed;
+        $counts = $sent.'/'.$total;
+        if($failed > 0) {
+            $counts .= ' ('.$failed.' Fehler)';
+        }
+        return $counts;
     }
 
     /**
@@ -804,10 +828,7 @@ class MailJob
             }
         }
         $sending = $open > 0;
-        $counts = $sent.'/'.$total;
-        if($failed > 0) {
-            $counts .= ' ('.$failed.' Fehler)';
-        }
+        $counts = self::formatCounts($sent, $total, $failed);
         if($sending) {
             $label = 'wird versendet…';
             $cls = self::tagClass('colorWarning', 'w3-amber');
@@ -824,8 +845,8 @@ class MailJob
                 $cls = self::tagClass('colorLogError', 'w3-red');
             }
             elseif($total > 0 && $failed > 0 && $sent > 0) {
-                $label = 'Versendet';
-                $cls = self::tagClass('colorLogEmail', 'w3-green');
+                $label = 'Teilweise fehlgeschlagen';
+                $cls = self::tagClass('colorWarning', 'w3-amber');
             }
         }
         return array(

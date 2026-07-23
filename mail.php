@@ -266,10 +266,7 @@ foreach($allJobs as $rowJob) {
     $statusCls = $rowJob->statusClass();
     $counts = '';
     if($rowJob->Status !== 'draft') {
-        $counts = (int)$rowJob->Sent.'/'.(int)$rowJob->Total;
-        if((int)$rowJob->Failed > 0) {
-            $counts .= ' ('.(int)$rowJob->Failed.' Fehler)';
-        }
+        $counts = MailJob::formatCounts($rowJob->Sent, $rowJob->Total, $rowJob->Failed);
     }
     else {
         $counts = '—';
@@ -634,7 +631,7 @@ function delFile(hash) {
       · <span id="mail-detail-status" class="w3-tag <?php echo $job->statusClass(); ?>"><?php echo htmlspecialchars($job->statusLabel(), ENT_QUOTES, 'UTF-8'); ?></span>
       · <?php echo $createdView; ?>
       · von <?php echo $byName; ?>
-      · Empfänger <span id="mail-detail-counts"><?php echo (int)$job->Sent; ?>/<?php echo (int)$job->Total; ?><?php if((int)$job->Failed > 0) echo ' ('.(int)$job->Failed.' Fehler)'; ?></span>
+      · Empfänger <span id="mail-detail-counts"><?php echo htmlspecialchars(MailJob::formatCounts($job->Sent, $job->Total, $job->Failed), ENT_QUOTES, 'UTF-8'); ?></span>
     </p>
     <h3 class="w3-margin-top"><?php echo $viewSubject !== '' ? $viewSubject : '<em>(ohne Betreff)</em>'; ?></h3>
     <div class="w3-padding-16 w3-border-top mail-body-content"><?php echo $viewBody !== '' ? $viewBody : '<em>(kein Text)</em>'; ?></div>

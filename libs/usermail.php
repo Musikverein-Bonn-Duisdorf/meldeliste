@@ -351,11 +351,54 @@ class Usermail {
             return true;
         }
 
+        $cfg = (isset($GLOBALS['mailconfig']) && is_array($GLOBALS['mailconfig']))
+            ? $GLOBALS['mailconfig']
+            : array();
+        $smtpHost = isset($cfg['server']) ? trim((string)$cfg['server']) : '';
+        $smtpFrom = isset($cfg['from']) ? trim((string)$cfg['from']) : '';
+        $smtpFromName = isset($cfg['fromName']) ? (string)$cfg['fromName'] : '';
+        if($smtpHost === '' || $smtpFrom === '') {
+            $outbox->Status = 'failed';
+            $outbox->LastError = 'SMTP nicht konfiguriert (mailconfig server/from)';
+            $outbox->Attempts = (int)$outbox->Attempts + 1;
+            $outbox->LockedAt = null;
+            $outbox->save();
+            $logentry = new Log;
+            $logentry->error(sprintf(
+                'Email-Versand fehlgeschlagen | Outbox-ID: <b>%d</b>, Email-ID: <b>%d</b>, User-ID: <b>%d</b> — SMTP nicht konfiguriert',
+                (int)$outbox->Index,
+                (int)$job->Index,
+                (int)$outbox->User
+            ));
+            $job->refreshCounts();
+            return false;
+        }
+
         $mail = new PHPMailer(true);
-        $mail->IsMail();
+        $mail->isSMTP();
+        $mail->Host = $smtpHost;
+        $mail->Port = isset($cfg['port']) ? (int)$cfg['port'] : 587;
+        $secure = isset($cfg['secure']) ? strtolower(trim((string)$cfg['secure'])) : '';
+        if($secure === '' || $secure === 'none' || $secure === 'false' || $secure === '0') {
+            $mail->SMTPSecure = false;
+            $mail->SMTPAutoTLS = false;
+        }
+        else {
+            $mail->SMTPSecure = $secure;
+        }
+        $smtpUser = isset($cfg['user']) ? (string)$cfg['user'] : '';
+        $smtpPass = isset($cfg['password']) ? (string)$cfg['password'] : '';
+        if($smtpUser !== '') {
+            $mail->SMTPAuth = true;
+            $mail->Username = $smtpUser;
+            $mail->Password = $smtpPass;
+        }
+        else {
+            $mail->SMTPAuth = false;
+        }
         $mail->CharSet = 'UTF-8';
         $mail->SMTPDebug = false;
-        $mail->setFrom($GLOBALS['mailconfig']['from'], $GLOBALS['mailconfig']['fromName']);
+        $mail->setFrom($smtpFrom, $smtpFromName);
         $mail->IsHTML(true);
         $mail->Subject = $outbox->Subject;
 
