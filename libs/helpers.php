@@ -278,7 +278,7 @@ function adminListSectionGroupId($kicker) {
         'Neuer Termin' => 'termine',
         'Termin bearbeiten' => 'termine',
         'Termin kopieren' => 'termine',
-        'Schichten bearbeiten' => 'termine',
+        'Schichten & Aufgaben bearbeiten' => 'termine',
         'Neuer Nutzer' => 'nutzer',
         'Nutzer bearbeiten' => 'nutzer',
         'Mein Profil' => 'nutzer',

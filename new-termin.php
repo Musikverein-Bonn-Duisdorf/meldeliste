@@ -223,7 +223,7 @@ if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n
         <label class="profile-pref">
           <input type="hidden" name="Shifts" value="0">
           <input class="w3-check" type="checkbox" name="Shifts" value="1" <?php if($fill && (bool)$n->Shifts) echo 'checked'; ?>>
-          <span>Schichtdienst</span>
+          <span>Schichten &amp; Aufgaben</span>
         </label>
         <label class="profile-pref">
           <input type="hidden" name="open" value="0">

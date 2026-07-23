@@ -25,7 +25,7 @@ class Shift
             break;
 	    case 'Start':
 	    case 'End':
-            $this->_data[$key] = trim($val);
+            $this->_data[$key] = self::normalizedTime($val);
             break;
 	    case 'Name':
             $this->_data[$key] = trim((string)$val);
@@ -34,33 +34,59 @@ class Shift
             break;
         }	
     }
-    public function getChanges() {
+    /**
+     * Real field diffs vs DB row (empty = nothing changed).
+     * @return string[]
+     */
+    protected function collectChanges() {
         $old = new Shift;
         $old->load_by_id($this->Index);
+        $parts = array();
+        if((int)$this->Termin !== (int)$old->Termin) {
+            $parts[] = 'Termin: '.$old->Termin.' &rArr; <b>'.$this->Termin.'</b>';
+        }
+        if((string)$this->Name !== (string)$old->Name) {
+            $parts[] = 'Name: '.htmlspecialchars((string)$old->Name, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        $oldStart = self::normalizedTime($old->Start);
+        $newStart = self::normalizedTime($this->Start);
+        if($oldStart !== $newStart) {
+            $parts[] = 'Start: '.self::formatTimeLog($oldStart).' &rArr; <b>'.self::formatTimeLog($newStart).'</b>';
+        }
+        $oldEnd = self::normalizedTime($old->End);
+        $newEnd = self::normalizedTime($this->End);
+        if($oldEnd !== $newEnd) {
+            $parts[] = 'Ende: '.self::formatTimeLog($oldEnd).' &rArr; <b>'.self::formatTimeLog($newEnd).'</b>';
+        }
+        if((int)$this->Bedarf !== (int)$old->Bedarf) {
+            $parts[] = 'Bedarf: '.(int)$old->Bedarf.' &rArr; <b>'.(int)$this->Bedarf.'</b>';
+        }
+        return $parts;
+    }
 
-        $str = sprintf('Schicht: %d, Termin: <b>%d</b>, Name: <b>%s</b>',
-            (int)$this->Index,
-            (int)$this->Termin,
-            (string)$this->Name
-        );
-        if($this->Termin != $old->Termin) $str .= ', Termin: '.$old->Termin.' &rArr; <b>'.$this->Termin.'</b>';
-        if($this->Name != $old->Name) $str .= ', Name: '.$old->Name.' &rArr; <b>'.$this->Name.'</b>';
-        if($this->Start != $old->Start) $str .= ', Start: '.$old->Start.' &rArr; <b>'.$this->Start.'</b>';
-        if($this->End != $old->End) $str .= ', Ende: '.$old->End.' &rArr; <b>'.$this->End.'</b>';
-        if($this->Bedarf != $old->Bedarf) $str .= ', Bedarf: '.$old->Bedarf.' &rArr; <b>'.$this->Bedarf.'</b>';
-        return $str;
+    public function hasChanges() {
+        return count($this->collectChanges()) > 0;
+    }
+
+    public function getChanges() {
+        $parts = $this->collectChanges();
+        if(count($parts) < 1) {
+            return '';
+        }
+        return sprintf('Schicht/Aufgabe: %d, ', (int)$this->Index).implode(', ', $parts);
     }
 
     public function getVars() {
         $parts = array();
-        $parts[] = sprintf('Schicht: %d', (int)$this->Index);
+        $parts[] = sprintf('Schicht/Aufgabe: %d', (int)$this->Index);
         $parts[] = logPart('Termin', (string)(int)$this->Termin);
         logAppendFilled($parts, 'Name', $this->Name, (string)$this->Name);
-        if(logValueFilled($this->Start) && $this->Start !== '00:00:00') {
-            $parts[] = logPart('Start', (string)$this->Start);
+        if(self::normalizedTime($this->Start) !== null) {
+            $parts[] = logPart('Start', self::formatTimeLog($this->Start));
         }
-        if(logValueFilled($this->End) && $this->End !== '00:00:00') {
-            $parts[] = logPart('Ende', (string)$this->End);
+        if(self::normalizedTime($this->End) !== null) {
+            $parts[] = logPart('Ende', self::formatTimeLog($this->End));
         }
         if((int)$this->Bedarf > 0) {
             $parts[] = logPart('Bedarf', (string)(int)$this->Bedarf);
@@ -69,14 +95,62 @@ class Shift
     }
 
     public function getTime() {
-        if($this->Start == "00:00:00" && $this->End == "00:00:00") return "&nbsp;";
-        if($this->End) {
-            $str=sql2timeRaw($this->Start)." - ".sql2timeRaw($this->End);
+        $start = self::normalizedTime($this->Start);
+        $end = self::normalizedTime($this->End);
+        if($start === null && $end === null) {
+            return '';
         }
-        else {
-            $str="ab ".sql2timeRaw($this->Start);
+        if($start !== null && $end !== null) {
+            return sql2timeRaw($start).' - '.sql2timeRaw($end);
         }
-        return $str;
+        if($start !== null) {
+            return 'ab '.sql2timeRaw($start);
+        }
+        return 'bis '.sql2timeRaw($end);
+    }
+
+    /**
+     * Empty / midnight sentinel → null; otherwise canonical HH:MM:SS.
+     * HTML time inputs often send HH:MM — treat equal to HH:MM:00.
+     */
+    public static function normalizedTime($val) {
+        if($val === null) {
+            return null;
+        }
+        $val = trim((string)$val);
+        if($val === '') {
+            return null;
+        }
+        if(!preg_match('/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/', $val, $m)) {
+            return null;
+        }
+        $h = (int)$m[1];
+        $i = (int)$m[2];
+        $s = isset($m[3]) ? (int)$m[3] : 0;
+        if($h === 0 && $i === 0 && $s === 0) {
+            return null;
+        }
+        if($h > 23 || $i > 59 || $s > 59) {
+            return null;
+        }
+        return sprintf('%02d:%02d:%02d', $h, $i, $s);
+    }
+
+    /** Log/display form HH:MM (or „—“ if empty). */
+    public static function formatTimeLog($val) {
+        $t = self::normalizedTime($val);
+        if($t === null) {
+            return '—';
+        }
+        return substr($t, 0, 5);
+    }
+
+    protected function sqlTimeOrNull($val) {
+        $t = self::normalizedTime($val);
+        if($t === null) {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], $t).'"';
     }
     public function getMeldungen() {
         $sql = sprintf('SELECT * FROM `%sSchichtmeldung` WHERE `Shift` = "%d";',
@@ -134,15 +208,18 @@ class Shift
     public function save() {
         if(!$this->is_valid()) return false;
         if($this->Index > 0) {
+            $changes = $this->getChanges();
+            if($changes === '') {
+                return true;
+            }
             $logentry = new Log;
-            $logentry->DBupdate($this->getChanges());
-            $this->update();
+            $logentry->DBupdate($changes);
+            return $this->update();
         }
-        else {
-            $this->insert();
-            $logentry = new Log;
-            $logentry->DBinsert($this->getVars());
-        }
+        $this->insert();
+        $logentry = new Log;
+        $logentry->DBinsert($this->getVars());
+        return (int)$this->Index > 0;
     }
     public function is_valid() {
         if(!$this->Name) return false;
@@ -150,12 +227,12 @@ class Shift
         return true;
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sSchichten` (`Termin`, `Name`, `Start`, `End`, `Bedarf`) VALUES ("%d", "%s", "%s", "%s", "%d");',
+        $sql = sprintf('INSERT INTO `%sSchichten` (`Termin`, `Name`, `Start`, `End`, `Bedarf`) VALUES ("%d", "%s", %s, %s, "%d");',
         $GLOBALS['dbprefix'],
         $this->Termin,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
-        $this->Start,
-        $this->End,
+        $this->sqlTimeOrNull($this->Start),
+        $this->sqlTimeOrNull($this->End),
         $this->Bedarf
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -165,12 +242,12 @@ class Shift
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sSchichten` SET `Termin` = "%d", `Name` = "%s", `Start` = "%s", `End` = "%s", `Bedarf` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sSchichten` SET `Termin` = "%d", `Name` = "%s", `Start` = %s, `End` = %s, `Bedarf` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         $this->Termin,
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
-        $this->Start,
-        $this->End,
+        $this->sqlTimeOrNull($this->Start),
+        $this->sqlTimeOrNull($this->End),
         $this->Bedarf,
         $this->Index
         );
@@ -209,7 +286,11 @@ class Shift
     }
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            if($key === 'Start' || $key === 'End') {
+                $this->$key = $val;
+                continue;
+            }
+            $this->_data[$key] = $val;
         }
     }
     public function load_by_id($Index) {

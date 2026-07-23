@@ -215,8 +215,11 @@ class Log
         $classes = trim('log-row list-row '.$hover);
         $tsRaw = (string)$this->Timestamp;
         $tsView = (string)germanDate($tsRaw, false);
-        if(strlen($tsRaw) >= 16) {
-            $tsView .= ' '.sql2timeRaw(substr($tsRaw, 11, 8));
+        if(strlen($tsRaw) >= 19) {
+            $tsView .= ' '.substr($tsRaw, 11, 8);
+        }
+        elseif(strlen($tsRaw) >= 16) {
+            $tsView .= ' '.substr($tsRaw, 11, 5);
         }
 
         echo '<div id="'.(int)$this->Index.'" class="'.htmlspecialchars($classes, ENT_QUOTES, 'UTF-8').'">';

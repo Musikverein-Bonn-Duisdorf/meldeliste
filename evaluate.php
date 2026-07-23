@@ -61,7 +61,7 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
   <div class="eval-charts">
     <section class="eval-panel" id="eval-attendance">
       <h3>Teilnahme über Zeit</h3>
-      <p class="w3-text-gray">Veröffentlichte Termine ohne Schichten<?php echo $besetzungOnly ? ' (nur Besetzung)' : ''; ?> der letzten <?php echo (int)$days; ?> Tage.</p>
+      <p class="w3-text-gray">Veröffentlichte Termine ohne Schichten &amp; Aufgaben<?php echo $besetzungOnly ? ' (nur Besetzung)' : ''; ?> der letzten <?php echo (int)$days; ?> Tage.</p>
       <div class="eval-chart-wrap">
         <canvas id="chartAttendance" aria-label="Teilnahme-Diagramm"></canvas>
       </div>

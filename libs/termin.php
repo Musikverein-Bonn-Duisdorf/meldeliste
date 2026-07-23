@@ -106,7 +106,7 @@ class Termin
         }
         if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
         if(boolsDiffer($this->Auftritt, $old->Auftritt)) $str.=", Besetzung: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
-        if(boolsDiffer($this->Shifts, $old->Shifts)) $str.=", Schichten: ".bool2string($old->Shifts)." &rArr; <b>".bool2string($this->Shifts)."</b>";
+        if(boolsDiffer($this->Shifts, $old->Shifts)) $str.=", Schichten &amp; Aufgaben: ".bool2string($old->Shifts)." &rArr; <b>".bool2string($this->Shifts)."</b>";
         if($this->Ort1 != $old->Ort1) $str.=", Ort1: ".$old->Ort1." &rArr; <b>".$this->Ort1."</b>";
         if($this->Ort2 != $old->Ort2) $str.=", Ort2: ".$old->Ort2." &rArr; <b>".$this->Ort2."</b>";
         if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
@@ -194,7 +194,7 @@ class Termin
             $parts[] = sprintf("Beschreibung: <b>%s</b>", $this->Beschreibung);
         }
         if($this->Shifts) {
-            $parts[] = "Schichten: <b>".bool2string($this->Shifts)."</b>";
+            $parts[] = "Schichten &amp; Aufgaben: <b>".bool2string($this->Shifts)."</b>";
         }
         $parts[] = "sichtbar für: <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
         if((int)$this->PostDiscord) {
@@ -1024,274 +1024,154 @@ class Termin
 
         return $str;
     }
-    public function shiftEditLine($shift) {
-        $indent=1;
-        $str="";
-        $s= new Shift;
-        $s->load_by_id($shift);
-        $shiftmain = new div;
-        $shiftmain->tag = "form";
-        $shiftmain->action="edit-shifts.php";
-        $shiftmain->method="POST";
-        $shiftmain->indent=$indent;
-        $shiftmain->class="w3-border-top w3-border-white w3-padding w3-row";
-        $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
-        $shiftmain->class=$GLOBALS['optionsDB']['colorInputBackground'];
-        $str=$str.$shiftmain->open();
-        $indent++;
-
-        $shiftNameStr = new div;
-        $shiftNameStr->indent=$indent;
-        $shiftNameStr->col(1, 6, 6);
-        $shiftNameStr->class="w3-padding";
-        $shiftNameStr->body="Bezeichnung:";
-        $str=$str.$shiftNameStr->print();
-
-        $shiftName = new div;
-        $shiftName->indent=$indent;
-        $shiftName->col(2, 0, 0);
-        $shiftName->tag="input";
-        $shiftName->type="text";
-        $shiftName->placeholder="Bezeichnung";
-        $shiftName->name="Name";
-        $shiftName->class="w3-input w3-border";
-        $shiftName->value=$s->Name;
-        $str=$str.$shiftName->print();
-
-        $shiftTimeStartStr = new div;
-        $shiftTimeStartStr->indent=$indent;
-        $shiftTimeStartStr->col(1, 6, 6);
-        $shiftTimeStartStr->class="w3-padding";
-        $shiftTimeStartStr->body="Beginn:";
-        $str=$str.$shiftTimeStartStr->print();
-
-        $shiftTimeStart = new div;
-        $shiftTimeStart->tag="input";
-        $shiftTimeStart->type="time";
-        $shiftTimeStart->name="Start";
-        $shiftTimeStart->indent=$indent;
-        $shiftTimeStart->class="w3-input w3-border";
-        $shiftTimeStart->col(1, 0, 0);
-        $shiftTimeStart->value=$s->Start;
-        $str=$str.$shiftTimeStart->print();
-
-        $shiftTimeEndStr = new div;
-        $shiftTimeEndStr->indent=$indent;
-        $shiftTimeEndStr->col(1, 6, 6);
-        $shiftTimeEndStr->class="w3-padding";
-        $shiftTimeEndStr->body="Ende (optional):";
-        $str=$str.$shiftTimeEndStr->print();
-
-        $shiftTimeEnd = new div;
-        $shiftTimeEnd->tag="input";
-        $shiftTimeEnd->type="time";
-        $shiftTimeEnd->name="End";
-        $shiftTimeEnd->indent=$indent;
-        $shiftTimeEnd->class="w3-input w3-border";
-        $shiftTimeEnd->col(1, 0, 0);
-        $shiftTimeEnd->value=$s->End;
-        $str=$str.$shiftTimeEnd->print();
-
-        $shiftBedarfStr = new div;
-        $shiftBedarfStr->indent=$indent;
-        $shiftBedarfStr->col(1, 6, 6);
-        $shiftBedarfStr->class="w3-padding";
-        $shiftBedarfStr->body="Bedarf:";
-        $str=$str.$shiftBedarfStr->print();
-
-        $shiftBedarf = new div;
-        $shiftBedarf->tag="input";
-        $shiftBedarf->type="number";
-        $shiftBedarf->name="Bedarf";
-        $shiftBedarf->min="0";
-        $shiftBedarf->indent=$indent;
-        $shiftBedarf->class="w3-input w3-border";
-        $shiftBedarf->col(1, 0, 0);
-        $shiftBedarf->value=$s->Bedarf;
-        $str=$str.$shiftBedarf->print();
-
-        $hidden = new div;
-        $hidden->indent=$indent;
-        $hidden->tag = "input";
-        $hidden->type = "hidden";
-        $hidden->name="Termin";
-        $hidden->value=$this->Index;
-
-        $str=$str.$hidden->print();
-
-        $btncntr = new div;
-        $btncntr->indent=$indent;
-        $btncntr->class="w3-row w3-mobile w3-container";
-        $btncntr->col(2, 12, 12);
-        $str=$str.$btncntr->open();
-        $indent++;
-        
-        $btnDiv = new div;
-        $btnDiv->indent=$indent;
-        $btnDiv->tag="button";
-        $btnDiv->type="submit";
-        $btnDiv->name="save";
-        $btnDiv->body="<i class=\"fas fa-save\"></i>";
-        $btnDiv->value=$s->Index;
-        $btnDiv->class="w3-button w3-center w3-border w3-border-black";
-        $btnDiv->class=$GLOBALS['optionsDB']['colorBtnEdit'];
-        $btnDiv->col(5, 5, 5);
-        $str=$str.$btnDiv->print();
-        $btnSpacer = new div;
-        $btnSpacer->indent=$indent;
-        $btnSpacer->col(1,1,1);
-        $str=$str.$btnSpacer->print();
-        
-        if($s->Index) {
-            $btnDiv = new div;
-            $btnDiv->indent=$indent;
-            $btnDiv->onclick="document.getElementById('delmodal".$s->Index."').style.display='block'";
-            $btnDiv->body="<i class=\"fas fa-trash-alt\"></i>";
-            $btnDiv->class="w3-button w3-center w3-border w3-border-black w3-hover";
-            $btnDiv->class=$GLOBALS['optionsDB']['colorBtnEdit'];
-            $btnDiv->col(5, 5, 5);
-            $str=$str.$btnDiv->print();
+    /**
+     * One editable table row for a shift (or empty new row).
+     * @param int|string $shiftId existing Index, or 0 / "new_N" for a new row key
+     */
+    public function shiftEditRowHtml($shiftId, $inputBg = '') {
+        $s = new Shift;
+        $id = 0;
+        $key = 'new_0';
+        if(is_string($shiftId) && $shiftId !== '') {
+            $key = $shiftId;
+            if(strpos($shiftId, 'new_') !== 0 && ctype_digit($shiftId)) {
+                $s->load_by_id((int)$shiftId);
+                $id = (int)$s->Index;
+                $key = (string)$id;
+            }
         }
-        $str=$str.$btncntr->close();
-        $indent--;
-
-        $str=$str.$shiftmain->close();
-        $indent--;
-        
-        if($s->Index) {
-            $divModal = new div;
-            $divModal->id="delmodal".$s->Index;
-            $divModal->class="w3-modal";
-            $divModal->indent=$indent;
-            $str=$str.$divModal->open();
-            $indent++;
-        
-            $divCard = new div;
-            $divCard->indent=$indent;
-            $divCard->class="w3-modal-content w3-card";
-            $str=$str.$divCard->open();
-            $indent++;
-        
-            $divHeader = new div;
-            $divHeader->indent=$indent;
-            $divHeader->tag="header";
-            $divHeader->class="w3-container w3-row";
-            $divHeader->class=$GLOBALS['optionsDB']['colorTitleBar'];
-            $str=$str.$divHeader->open();
-            $indent++;
-        
-            $divSpan = new div;
-            $divSpan->indent=$indent;
-            $divSpan->onclick="document.getElementById('delmodal".$s->Index."').style.display='none'";
-            $divSpan->class="w3-button w3-display-topright";
-            $str=$str.$divSpan->print();
-
-            $divH = new div;
-            $divH->indent=$indent;
-            $divH->tag="h2";
-            $divH->body="L&ouml;schen best&auml;tigen";
-            $str=$str.$divH->print();
-            
-            $str=$str.$divHeader->close();
-            $indent--;
-        
-            $divBody = new div;
-            $divBody->indent=$indent;
-            $divBody->class="w3-container w3-row w3-center w3-padding w3-margin w3-card";
-            $divBody->class=$GLOBALS['optionsDB']['colorWarning'];
-            $divBody->body="Sind Sie sicher, dass sie <b>".$s->Name." ".$s->getTime()."</b> l&ouml;schen wollen?<br />Alle Meldungen zu dieser Schicht werden ebenfalls gel&ouml;scht.";
-            $str=$str.$divBody->print();
-
-            $divForm1 = new div;
-            $divForm1->indent=$indent;
-            $divForm1->class="w3-container w3-mobile";
-            $str=$str.$divForm1->open();
-            $indent++;
-        
-            $divForm = new div;
-            $divForm->tag="form";
-            $divForm->indent=$indent;
-            $divForm->action="edit-shifts.php";
-            $divForm->method="POST";
-            $str=$str.$divForm->open();
-            $indent++;
-            
-            $divHiddenIndex = new div;
-            $divHiddenIndex->indent=$indent;
-            $divHiddenIndex->tag="input";
-            $divHiddenIndex->type="hidden";
-            $divHiddenIndex->name="Termin";
-            $divHiddenIndex->value=$this->Index;
-            $str=$str.$divHiddenIndex->print();
-
-            $divRow = new div;
-            $divRow->indent=$indent;
-            $divRow->class="w3-row";
-            $str=$str.$divRow->open();
-            $indent++;
-            
-            $divSpacer = new div;
-            $divSpacer->indent=$indent;
-            $divSpacer->class="w3-center";
-            $divSpacer->col(4, 4, 2);
-            $str=$str.$divSpacer->print();
-
-            $divBtnYes = new div;
-            $divBtnYes->indent=$indent;
-            $divBtnYes->tag="button";
-            $divBtnYes->type="submit";
-            $divBtnYes->name="delete";
-            $divBtnYes->value=$s->Index;
-            $divBtnYes->class="w3-btn w3-center w3-border w3-margin-bottom w3-mobile";
-            $divBtnYes->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $divBtnYes->body="ja";
-            $divBtnYes->col(4, 4, 8);
-            $str=$str.$divBtnYes->print();
-            
-            $str=$str.$divSpacer->print();
-            
-            $str=$str.$divRow->close();
-            $indent--;
-            
-            $str=$str.$divForm->close();
-            $indent--;
-            
-            $str=$str.$divRow->open();
-            $indent++;
-            $str=$str.$divSpacer->print();
-            
-            $divBtnNo = new div;
-            $divBtnNo->indent=$indent;
-            $divBtnNo->tag="button";
-            $divBtnNo->onclick="document.getElementById('delmodal".$s->Index."').style.display='none'";
-            $divBtnNo->class="w3-btn w3-center w3-border w3-margin-bottom w3-mobile";
-            $divBtnNo->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $divBtnNo->body="nein";
-            $divBtnNo->col(4, 4, 8);
-            $str=$str.$divBtnNo->print();
-            
-            $str=$str.$divSpacer->print();
-            $str=$str.$divRow->close();
-            $indent--;
-            
-            $str=$str.$divForm1->close();
-            $indent--;
-            $str=$str.$divCard->close();
-            $indent--;
-            $str=$str.$divModal->close();
-            $indent--;
+        elseif((int)$shiftId > 0) {
+            $s->load_by_id((int)$shiftId);
+            $id = (int)$s->Index;
+            $key = (string)$id;
         }
-        
+        $h = function ($x) {
+            return htmlspecialchars((string)$x, ENT_QUOTES, 'UTF-8');
+        };
+        if($inputBg === '') {
+            $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground']) ? (string)$GLOBALS['optionsDB']['colorInputBackground'] : '';
+        }
+        $btnDelete = isset($GLOBALS['optionsDB']['colorBtnDelete']) ? (string)$GLOBALS['optionsDB']['colorBtnDelete'] : 'w3-red';
+
+        $startVal = Shift::normalizedTime($s->Start);
+        $endVal = Shift::normalizedTime($s->End);
+        $nameVal = ($s->Name !== null && $s->Name !== '') ? $h($s->Name) : '';
+        $startAttr = $startVal !== null ? ' value="'.$h(substr($startVal, 0, 5)).'"' : '';
+        $endAttr = $endVal !== null ? ' value="'.$h(substr($endVal, 0, 5)).'"' : '';
+        $prefix = 'shifts['.$h($key).']';
+        $isNew = ($id < 1);
+
+        $str = '<tr class="shift-edit-row'.($isNew ? ' shift-edit-row--new' : '').'" data-shift-key="'.$h($key).'">';
+        $str .= '<td data-label="Bezeichnung">';
+        $str .= '<input id="shift-name-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Name]" type="text" placeholder="Bezeichnung"'.($nameVal !== '' ? ' value="'.$nameVal.'"' : '').'>';
+        $str .= '</td>';
+        $str .= '<td data-label="Beginn">';
+        $str .= '<div class="shift-edit-time-wrap">';
+        $str .= '<input id="shift-start-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Start]" type="time"'.$startAttr.'>';
+        $str .= '<button type="button" class="termin-form-clear shift-edit-clear" title="Beginn leeren" aria-label="Beginn leeren">&#10006;</button>';
+        $str .= '</div>';
+        $str .= '</td>';
+        $str .= '<td data-label="Ende">';
+        $str .= '<div class="shift-edit-time-wrap">';
+        $str .= '<input id="shift-end-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[End]" type="time"'.$endAttr.'>';
+        $str .= '<button type="button" class="termin-form-clear shift-edit-clear" title="Ende leeren" aria-label="Ende leeren">&#10006;</button>';
+        $str .= '</div>';
+        $str .= '</td>';
+        $str .= '<td data-label="Bedarf">';
+        $str .= '<input id="shift-bedarf-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Bedarf]" type="number" min="0" value="'.$h((string)(int)$s->Bedarf).'">';
+        $str .= '</td>';
+        $str .= '<td data-label="Aktion" class="shift-edit-row-actions">';
+        if($isNew) {
+            $str .= '<button type="button" class="w3-btn w3-border '.$h($btnDelete).' shift-edit-remove-row">Entfernen</button>';
+        }
+        else {
+            $str .= '<button type="button" class="w3-btn w3-border '.$h($btnDelete).'" onclick="document.getElementById(\'delmodal'.$id.'\').style.display=\'block\'">Löschen</button>';
+        }
+        $str .= '</td>';
+        $str .= '</tr>';
         return $str;
     }
+
+    /**
+     * Delete-confirmation modal for one shift (outside the main edit form).
+     */
+    public function shiftDeleteModalHtml($shiftId) {
+        $s = new Shift;
+        $s->load_by_id((int)$shiftId);
+        $id = (int)$s->Index;
+        if($id < 1) {
+            return '';
+        }
+        $h = function ($x) {
+            return htmlspecialchars((string)$x, ENT_QUOTES, 'UTF-8');
+        };
+        $btnSubmit = isset($GLOBALS['optionsDB']['colorBtnSubmit']) ? (string)$GLOBALS['optionsDB']['colorBtnSubmit'] : 'w3-purple';
+        $titleBar = isset($GLOBALS['optionsDB']['colorTitleBar']) ? (string)$GLOBALS['optionsDB']['colorTitleBar'] : '';
+        $warning = isset($GLOBALS['optionsDB']['colorWarning']) ? (string)$GLOBALS['optionsDB']['colorWarning'] : '';
+        $timeLabel = $s->getTime();
+        $confirmName = $h($s->Name).($timeLabel !== '' ? ' '.$h($timeLabel) : '');
+
+        $str = '<div id="delmodal'.$id.'" class="w3-modal">';
+        $str .= '<div class="w3-modal-content w3-card">';
+        $str .= '<header class="w3-container '.$h($titleBar).'">';
+        $str .= '<button type="button" class="w3-button w3-display-topright" onclick="document.getElementById(\'delmodal'.$id.'\').style.display=\'none\'" aria-label="Schließen">&times;</button>';
+        $str .= '<h2>Löschen bestätigen</h2>';
+        $str .= '</header>';
+        $str .= '<div class="w3-container w3-padding '.$h($warning).'">';
+        $str .= '<p>Sind Sie sicher, dass Sie <b>'.$confirmName.'</b> löschen wollen?<br>Alle Meldungen zu dieser Schicht/Aufgabe werden ebenfalls gelöscht.</p>';
+        $str .= '</div>';
+        $str .= '<div class="shift-edit-actions w3-padding w3-margin-bottom">';
+        $str .= '<form action="edit-shifts.php" method="POST">';
+        $str .= '<input type="hidden" name="Termin" value="'.(int)$this->Index.'">';
+        $str .= '<button type="submit" class="w3-btn w3-border '.$h($btnSubmit).'" name="delete" value="'.$id.'">Ja, löschen</button>';
+        $str .= '</form>';
+        $str .= '<button type="button" class="w3-btn w3-border '.$h($btnSubmit).'" onclick="document.getElementById(\'delmodal'.$id.'\').style.display=\'none\'">Abbrechen</button>';
+        $str .= '</div>';
+        $str .= '</div>';
+        $str .= '</div>';
+        return $str;
+    }
+
+    /**
+     * Shared table editor for all shifts of this termin (+ one empty row + add/remove).
+     */
     public function printShiftEdit() {
-        $str='';
-        $indent = 1;
-        foreach($this->getShifts() as &$shift) {
-            $str=$str.$this->ShiftEditLine($shift);
+        $h = function ($x) {
+            return htmlspecialchars((string)$x, ENT_QUOTES, 'UTF-8');
+        };
+        $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground']) ? (string)$GLOBALS['optionsDB']['colorInputBackground'] : '';
+        $btnEdit = isset($GLOBALS['optionsDB']['colorBtnEdit']) ? (string)$GLOBALS['optionsDB']['colorBtnEdit'] : 'w3-teal';
+        $btnSubmit = isset($GLOBALS['optionsDB']['colorBtnSubmit']) ? (string)$GLOBALS['optionsDB']['colorBtnSubmit'] : 'w3-purple';
+        $shiftIds = $this->getShifts();
+
+        $str = '<form class="shift-edit-form" action="edit-shifts.php" method="POST" data-shift-new-counter="1">';
+        $str .= '<input type="hidden" name="Termin" value="'.(int)$this->Index.'">';
+        $str .= '<div class="shift-edit-table-wrap">';
+        $str .= '<table class="shift-edit-table">';
+        $str .= '<thead><tr>';
+        $str .= '<th scope="col">Bezeichnung</th>';
+        $str .= '<th scope="col">Beginn</th>';
+        $str .= '<th scope="col">Ende</th>';
+        $str .= '<th scope="col">Bedarf</th>';
+        $str .= '<th scope="col">Aktion</th>';
+        $str .= '</tr></thead><tbody>';
+        foreach($shiftIds as $shiftId) {
+            $str .= $this->shiftEditRowHtml((int)$shiftId, $inputBg);
+        }
+        $str .= $this->shiftEditRowHtml('new_0', $inputBg);
+        $str .= '</tbody></table></div>';
+        $str .= '<div class="shift-edit-actions shift-edit-form-actions">';
+        $str .= '<button type="button" class="w3-btn w3-border '.$h($btnSubmit).'" id="shift-edit-add-row">Zeile hinzufügen</button>';
+        $str .= '<button type="submit" class="w3-btn w3-border '.$h($btnEdit).'" name="save_all" value="1">Alle speichern</button>';
+        $str .= '</div>';
+        $str .= '</form>';
+        $str .= '<template id="shift-edit-row-template">'.$this->shiftEditRowHtml('__KEY__', $inputBg).'</template>';
+        foreach($shiftIds as $shiftId) {
+            $str .= $this->shiftDeleteModalHtml((int)$shiftId);
         }
         return $str;
     }
+
     public function printMailResponse() {
         $wertval = array('Zusagen', 'Absagen', 'unsicher');
         $colorval = array($GLOBALS['optionsDB']['colorAppmntYes'], $GLOBALS['optionsDB']['colorAppmntNo'], $GLOBALS['optionsDB']['colorAppmntMaybe']);
@@ -1912,7 +1792,7 @@ class Termin
                 $str .= '<div class="'.implode(' ', array_filter($shiftClasses)).'"'.$shiftStyleAttr.' data-melde-stop>';
                 $str .= '<div class="melde-shift-info">';
                 $str .= '<div class="melde-shift-name">'.$h($s->Name).'</div>';
-                if($s->Start != $s->End) {
+                if($s->getTime() !== '') {
                     $str .= '<div class="melde-shift-time">'.$h($s->getTime()).'</div>';
                 }
                 $str .= '</div>';
@@ -2066,7 +1946,7 @@ class Termin
             $empty = new div;
             $empty->indent=$indent;
             $empty->class="w3-padding w3-text-gray";
-            $empty->body="Noch keine Schichten angelegt.";
+            $empty->body="Noch keine Schichten &amp; Aufgaben angelegt.";
             $str=$str.$empty->print();
         }
         for($i=0; $i<count($shifts); $i++) {

@@ -48,7 +48,7 @@ $hasShifts = (bool)$t->Shifts;
     <section class="profile-col" aria-labelledby="cal-melde-response">
       <h3 id="cal-melde-response" class="profile-col-title">Rückmeldung</h3>
 <?php if($hasShifts) { ?>
-      <p class="profile-value">Schichten — bitte unter Weitere Optionen melden.</p>
+      <p class="profile-value">Schichten &amp; Aufgaben — bitte unter Weitere Optionen melden.</p>
 <?php } elseif($capacityFull) { ?>
       <p class="profile-value">Alle Plätze belegt.</p>
 <?php } elseif($buttonsHtml !== null && $buttonsHtml !== '') { ?>
