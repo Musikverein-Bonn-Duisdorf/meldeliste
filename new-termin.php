@@ -289,22 +289,19 @@ if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n
           <button type="button" class="modal-close w3-button" id="delmodalClose" aria-label="Schließen">&times;</button>
         </div>
       </header>
-      <div class="termin-grid">
-        <section class="profile-col" aria-labelledby="delmodal-body">
-          <h3 id="delmodal-body" class="profile-col-title">Bestätigung</h3>
-          <p class="profile-value">
-            Soll <b><?php echo $delName; ?></b> wirklich gelöscht werden?
-          </p>
-          <div class="profile-actions profile-actions--confirm">
-            <div class="profile-actions-primary">
-              <form action="index.php" method="POST">
-                <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
-                <button class="w3-btn profile-btn-primary <?php echo htmlspecialchars($btnDelete, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="delete" value="delete">Löschen</button>
-              </form>
-            </div>
-            <button type="button" class="w3-btn w3-border w3-mobile" id="delmodalCancel">Abbrechen</button>
+      <div class="confirm-delete-body">
+        <p class="profile-value">
+          Soll <b><?php echo $delName; ?></b> wirklich gelöscht werden?
+        </p>
+        <div class="profile-actions profile-actions--confirm">
+          <div class="profile-actions-primary">
+            <form action="index.php" method="POST">
+              <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
+              <button class="w3-btn profile-btn-primary <?php echo htmlspecialchars($btnDelete, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="delete" value="delete">Löschen</button>
+            </form>
           </div>
-        </section>
+          <button type="button" class="w3-btn w3-border w3-mobile" id="delmodalCancel">Abbrechen</button>
+        </div>
       </div>
     </div>
   </div>

@@ -212,6 +212,27 @@ function getAdminPagePerm($page, $permKey) {
 }
 
 /**
+ * Desktop sidebar: keep the admin accordion section open when one of its pages is active.
+ * @param string|string[] $pages $_SESSION['page'] values belonging to this group
+ * @return string CSS classes (leading space) or ''
+ */
+function adminNavGroupActiveClass($pages) {
+    if(empty($_SESSION['adminpage'])) {
+        return '';
+    }
+    $current = isset($_SESSION['page']) ? (string)$_SESSION['page'] : '';
+    if($current === '') {
+        return '';
+    }
+    foreach((array)$pages as $p) {
+        if((string)$p === $current) {
+            return ' admin-nav-open admin-nav-current-group';
+        }
+    }
+    return '';
+}
+
+/**
  * CSS-Klassen für Nav anhand der Rechte-Farbgruppe (wie Admin-Nav / Chips).
  * @param string $groupId nutzer|termine|register|inventar|kommunikation|system
  * @return string

@@ -192,11 +192,9 @@ if($showCalendarSubscribe) {
           <button type="button" class="modal-close w3-button" id="calSubscribeClose" aria-label="Schließen">&times;</button>
         </div>
       </header>
-      <div class="termin-grid">
-        <section class="profile-col" aria-labelledby="cal-subscribe-links">
-          <h3 id="cal-subscribe-links" class="profile-col-title">Abo-Link</h3>
+      <div class="calendar-subscribe-body">
+        <h3 class="profile-col-title">Abo-Link</h3>
 <?php include __DIR__.'/views/calendar/subscribe.php'; ?>
-        </section>
       </div>
     </div>
   </div>
