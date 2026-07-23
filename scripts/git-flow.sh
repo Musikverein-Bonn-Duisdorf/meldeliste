@@ -2,7 +2,7 @@
 # Meldeliste: pull / push / PR / merge helpers.
 #
 # Branch names live ONLY here. Agents must call this script instead of typing
-# "origin" + branch as one token (e.g. never "origin_dev" / "--base_dev").
+# Never glue remote and branch into one token (use origin/dev, not a glued name).
 #
 # Usage:
 #   ./scripts/git-flow.sh sync-dev

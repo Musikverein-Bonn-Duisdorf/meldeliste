@@ -1,0 +1,44 @@
+---
+description: Ticket-Workflow mit Jira/GitHub-PR, Freigabe für dev und master
+alwaysApply: true
+---
+
+# Ticket-Workflow: Jira ↔ GitHub, Freigabe, PR, `dev`/`master`
+
+Project **MELD** on Jira (`musikverein-bonn-duisdorf.atlassian.net`) is linked to GitHub via **GitHub for Jira** (Development panel). Branches, commits, and PRs appear there automatically when the issue key is in the name/title/message — no manual remote link needed.
+
+Git-Branches heißen **`dev`** und **`master`**. Pull/Push/PR/Merge immer über **`./scripts/git-flow.sh`** — siehe Regel `git-branch-shell-commands`.
+
+## Naming (required for Jira Development panel)
+
+- **Branch:** `MELD-<n>-Kurzbeschreibung` (ASCII, hyphens; e.g. `MELD-64-Orchester`)
+- **Commits:** start with `MELD-<n>: …`
+- **PR title:** start with `MELD-<n>: …` (same style as commits)
+- **PR body:** Summary + Test plan; mention the Jira key/URL once
+
+Do **not** rely on Smart Commits (`#done` etc.) to close tickets — Freigabe and **Fertig** stay manual (see below).
+
+## Steps
+
+1. **Implement locally** on a feature branch created from **`origin/dev`** (never from `master`; they may diverge). Workflow: `git fetch origin` then `git checkout -b MELD-n-Kurzbeschreibung origin/dev`. Commit locally when appropriate. Set Jira to **In Arbeit** when starting.
+2. **Stop and wait** for local test. Do **not** push to `origin` yet unless the user explicitly asks.
+3. After local OK, wait for **Freigabe für den Branch `dev`** („nach `dev`“, „in `dev` mergen“). Then:
+   - `./scripts/git-flow.sh pr-dev --title "MELD-n: …" --body "…"` (push + PR into branch `dev`)
+   - Optionally comment on the Jira issue with the PR URL (panel usually picks it up anyway).
+   - **Babysit the PR autonomously** until merge-ready, then `./scripts/git-flow.sh merge-pr` — no second ask once Freigabe für `dev` was given.
+   - **Immediately after the merge into `dev`:** set Jira to **Review**. The ticket stays in Review while branch `dev` is tested.
+4. After testing on `dev` is OK, wait for **Freigabe für den Branch `master`** („nach `master`“, „releasen“). Then `./scripts/git-flow.sh release-master` (merge `dev`→`master`, `makeVersion`, push, sync release files back to `dev`).
+5. **Delete the feature branch on GitHub** once it is in `master`. Never delete `master` or `dev`.
+6. Set Jira to **Fertig** only after the master release (or when the user says done without release). Add a short release comment (version/`makeVersion` id) as usual. Do **not** leave the ticket in **In Arbeit** once it is on `dev` — that is **Review**.
+7. **User-facing features:** update `views/help/guide.php` in the same ticket when workflows/nav/rights change.
+
+## PRs eigenständig abarbeiten
+
+When a PR exists (opened by us or pointed out):
+
+- Fix CI, review/Bugbot comments, and conflicts **without waiting to be asked** each time.
+- Push scoped fixes with `./scripts/git-flow.sh push`; loop until merge-ready.
+- Act only on valid findings; if unsure, ask briefly.
+- Do **not** merge to `dev`/`master` without Freigabe (except step 3: Freigabe für `dev` covers merging that PR into `dev`).
+
+Do **not** assume Freigabe from plan approval or „implement the plan“. Local test, branch `dev`, and `master` each need an explicit go-ahead.

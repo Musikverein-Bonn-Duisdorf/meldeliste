@@ -1,0 +1,40 @@
+---
+description: Git-Befehle für Branches dev und master nur über scripts/git-flow.sh
+alwaysApply: true
+---
+
+# Git-Branches: Shell-Befehle nur über git-flow.sh
+
+Die Branches heißen **`dev`** und **`master`**.
+
+## Verbotene Shell-Formen (brechen zuverlässig)
+
+Nie Remote-Name und Branch zu einem Token verkleben und nie Flags ohne Leerzeichen an den Branchnamen hängen.
+
+Richtig:
+
+- `origin/dev`
+- `git fetch origin dev`
+- `gh pr create --base="dev"`
+
+## Stattdessen: Script
+
+Alle Pull/Push/PR/Merge-Schritte mit:
+
+```bash
+./scripts/git-flow.sh sync-dev
+./scripts/git-flow.sh push
+./scripts/git-flow.sh pr-dev --title "MELD-n: …" --body "## Summary\n…"
+./scripts/git-flow.sh merge-pr
+./scripts/git-flow.sh release-master
+```
+
+Branchnamen stehen **nur im Script**. Wenn du doch `git`/`gh` direkt brauchst: Variable nutzen:
+
+```bash
+B=dev
+git fetch origin "$B"
+gh pr create --base="$B" …
+```
+
+Niemals `origin` und Branchname ohne Slash bzw. ohne Leerzeichen hintereinander schreiben.

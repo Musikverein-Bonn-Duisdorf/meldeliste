@@ -1,0 +1,19 @@
+---
+description: Keine Rückfragen bei klaren Git-Aufträgen; Rechte direkt anfordern
+alwaysApply: true
+---
+
+# Git: nicht nachfragen
+
+Wenn der User Git-Aktionen bereits verlangt hat (z. B. committen, pushen, PR erstellen, mergen, Freigabe für dev/master), **nicht** erneut im Chat fragen („Darf ich…?“, „Soll ich pushen?“). Sofort ausführen.
+
+## Shell-Rechte
+
+- Benötigte `required_permissions` (`git_write`, `full_network`, `all`) **direkt** mitschicken — keine Extra-Bestätigung im Dialogtext erbitten.
+- Read-only (`git status`, `git log`, `git diff`, `git show`) ohne erhöhte Rechte, wenn der Sandbox das erlaubt.
+- Für Schreiben/Commit: `git_write`. Für Push/`gh`: zusätzlich Netzwerk (`full_network` oder `all`).
+- Nicht zwischen `git_write` und `all` hin- und herwechseln, wenn `git_write` (+ Netzwerk) reicht — sonst neue Permission-Karten.
+
+## Unverändert
+
+Weiterhin **nicht** committen/pushen/mergen ohne expliziten Auftrag bzw. ohne Freigabe laut Ticket-Workflow. Nur die doppelte Rückfrage entfällt.
