@@ -56,8 +56,8 @@ $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 <?php
 adminListPageBegin('Register', 'Instrument-Typen');
 ?>
-<?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg); ?></div><?php } ?>
-<?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
+<?php if($msg) { echo renderFlashHtml(array('type' => 'success', 'message' => $msg)); } ?>
+<?php if($err) { echo renderFlashHtml(array('type' => 'error', 'message' => $err)); } ?>
 
 <div class="admin-list-intro">
   <p><a href="register-types.php">Register verwalten</a></p>

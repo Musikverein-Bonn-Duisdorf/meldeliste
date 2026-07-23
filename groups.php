@@ -29,8 +29,8 @@ $actions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" hre
     .' <a class="w3-button w3-border" href="mail.php">Email versenden</a>';
 adminListPageBegin('Kommunikation', 'Gruppen', array('actionsHtml' => $actions));
 ?>
-<?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
-<?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
+<?php if($msg) { echo renderFlashHtml(array('type' => 'success', 'message' => $msg)); } ?>
+<?php if($err) { echo renderFlashHtml(array('type' => 'error', 'message' => $err)); } ?>
 
   <div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">

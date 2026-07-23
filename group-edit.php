@@ -84,8 +84,8 @@ $groupTitle = (int)$g->Index ? 'Gruppe bearbeiten' : 'Neue Gruppe';
 $backLink = '<a class="w3-button w3-border" href="groups.php">Zur Übersicht</a>';
 adminListPageBegin('Kommunikation', $groupTitle, array('actionsHtml' => $backLink));
 ?>
-<?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
-<?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
+<?php if($msg) { echo renderFlashHtml(array('type' => 'success', 'message' => $msg)); } ?>
+<?php if($err) { echo renderFlashHtml(array('type' => 'error', 'message' => $err)); } ?>
 
 <form method="post" class="profile-form">
   <?php if((int)$g->Index) { ?>

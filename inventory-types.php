@@ -61,8 +61,8 @@ if(isset($_POST['delete'])) {
 <?php
 adminListPageBegin('Inventar', 'Inventar-Typen');
 ?>
-<?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg); ?></div><?php } ?>
-<?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
+<?php if($msg) { echo renderFlashHtml(array('type' => 'success', 'message' => $msg)); } ?>
+<?php if($err) { echo renderFlashHtml(array('type' => 'error', 'message' => $err)); } ?>
 
 <div class="w3-row w3-padding w3-teal type-edit-header">
   <div class="w3-col l2 m2 s3"><b>Prefix</b></div>

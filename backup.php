@@ -77,8 +77,8 @@ $schema = $manifest['schemaVersion'];
 adminListPageBegin('System', 'Backup & Restore', array('permKey' => 'perm_editConfig'));
 ?>
 <?php if($flash) {
-    $panel = ($flash['type'] === 'ok') ? $GLOBALS['optionsDB']['colorSuccess'] : $GLOBALS['optionsDB']['colorLogError'];
-    echo '<div class="w3-panel '.$panel.'"><p>'.htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8').'</p></div>';
+    $toastType = ($flash['type'] === 'ok') ? 'success' : 'error';
+    echo renderFlashHtml(array('type' => $toastType, 'message' => $flash['message']));
 } ?>
 
   <div class="w3-card w3-padding w3-margin-bottom">
