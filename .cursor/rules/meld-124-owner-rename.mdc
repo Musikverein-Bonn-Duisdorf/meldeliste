@@ -1,0 +1,14 @@
+---
+description: MELD-124 follow-up — Inventories.Owner DB rename to Eigentümer
+alwaysApply: true
+---
+
+# MELD-124: Owner → Eigentümer (DB noch offen)
+
+UI-Labels sind bereits „Eigentümer“. Die **Datenbankspalte** `Inventories.Owner` (und PHP: Property/`$_POST`/`getOwner`) heißt weiter `Owner`.
+
+Bei der nächsten bewussten Schema-/Spalten-Umbenennung mitziehen:
+
+- Spalte `Owner` → `Eigentuemer` (ASCII in DB, analog zu anderen technischen Namen)
+- `config/DBconfig.json`, Schema-Migration, alle SQL/PHP-Referenzen, Form-Feld `name`, Helper `getOwner`
+- Ticket-Bezug: MELD-124 (UI erledigt; Spalten-Rename separat)

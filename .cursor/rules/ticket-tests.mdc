@@ -1,0 +1,34 @@
+---
+description: Bei Ticket-Arbeit und Releases passende PHPUnit-Tests in meldeliste-tests schreiben
+alwaysApply: true
+---
+
+# Tests bei Ticket-Arbeit
+
+Bei jedem Feature-/Bug-Ticket **sinnvolle Regressionstests** mitliefern — nicht erst auf Nachfrage.
+
+## Wo
+
+- Tests liegen im Sibling-Repo **`meldeliste-tests`** (`../meldeliste-tests`), nicht im App-Repo.
+- Ausführen: `cd ../meldeliste-tests && composer test` (Pre-Push-Hook der App ruft das bereits auf).
+- Basis: `MeldelisteTestCase` (Schema, Session, Hilfsfixture). Muster: `ReturnUrlTest`, `InventoryLoanTest`, `AppTokenTest`.
+
+## Was testen
+
+- Domain-Logik / Helpers / Auth / Logging / Schema-relevante Verhalten — **ja**.
+- Reine Docs, CSS/Layout, triviale Label-Änderungen — nur wenn leicht regressierbar (z. B. Log-Wording „Eigentümer“).
+- JS-UI: PHPUnit nur für serverseitig erzeugte Attribute/HTML; reines JS separat oder manuell.
+
+## Wann
+
+1. **Während** der Ticket-Implementierung (gleicher Arbeitszyklus, nicht „später“).
+2. Vor Freigabe für `dev`: neue/angepasste Tests grün.
+3. Bei „Ticket abschließen“ / Nachziehen: fehlende Tests für gerade gelieferte Funktionalität nachziehen.
+
+## Stil
+
+- `final class … extends MeldelisteTestCase`
+- Eindeutige Marker (`PHPUnit-` + random) in Namen
+- Echte Test-DB, keine Mocks (außer I/O-Grenzen wie Mail)
+- `assertSame` / `assertStringContainsString`; bei HTML nur relevante Substrings
+- Neue App-Libs ggf. in `tests/bootstrap.php` nachziehen

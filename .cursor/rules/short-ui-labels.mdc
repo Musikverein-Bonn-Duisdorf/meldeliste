@@ -1,0 +1,25 @@
+---
+description: Kurze UI-Labels; keine Instruktions-/Beschreibungstexte auf Seiten
+alwaysApply: true
+---
+
+# Kurze UI-Labels
+
+- Formular-, Nav- und Checkbox-Labels kurz und funktional halten (meist 1–3 Wörter).
+- Keine länglichen Erklärungstexte neben Feldern oder Checkboxen.
+- Details, Beispiele und „wann greift das?“ gehören in `views/help/guide.php` (Anker-Link vom Formular ist ok).
+- `title`/Tooltips nur für Icons oder Aktionen ohne sichtbares Label — nicht als Ersatz für Hilfe-Absätze.
+
+# Keine UI-Instruktionen / Beschreibungstexte
+
+- Keine Sätze wie „Änderungen mit Speichern übernehmen“, „Hier kannst du …“, „Bitte zuerst …“, „Tipp:“, „Hier findest du …“ in Formularen, Titelleisten, Listenköpfen oder neben Buttons.
+- Die Oberfläche soll selbsterklärend durch Labels und Anordnung sein — nicht durch Anleitungsprosa.
+- Erklärungen nur in der Hilfe; optional ein kurzer Anker-Link (z. B. „Hilfe: Benachrichtigungen“), kein Fließtext.
+- Ausnahme: technisch notwendige Inhalte in einem bewusst geöffneten Hilfsdialog (z. B. Kalender-Abo-URLs), weiterhin ohne Belehrungston.
+
+# Suchfelder
+
+- Listen-Suche über `adminListSearchField()` — **kein sichtbares Label** („Suchen“, „Termine suchen“, …).
+- Nur Placeholder (+ `aria-label`, defaults auf den Placeholder).
+- Keine doppelten Hinweise über der Suche; der Seiten-Hero reicht als Kontext.
+- Gleiches Muster für andere Suchfelder (z. B. Rechte-Matrix): Placeholder statt `profile-label`.
