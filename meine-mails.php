@@ -43,7 +43,7 @@ $sqlList = sprintf(
     'SELECT o.*, j.`CreatedBy` AS `SenderId`
      FROM `%sMailOutbox` o
      LEFT JOIN `%sMailJob` j ON j.`Index` = o.`Job`
-     WHERE o.`User` = %d AND o.`DeletedByUser` = 0 AND o.`Status` IN ("pending", "sending", "sent")
+     WHERE o.`User` = %d AND o.`DeletedByUser` = 0 AND o.`Status` IN ("pending", "sending", "sent", "failed")
      ORDER BY o.`Created` DESC, o.`Index` DESC
      LIMIT 200;',
     $GLOBALS['dbprefix'],
@@ -86,7 +86,11 @@ adminListPageBegin('Kommunikation', 'Meine Nachrichten');
 <div class="w3-container">
   <div class="w3-card w3-padding">
     <h3 class="w3-margin-top"><?php echo $subj !== '' ? $subj : '<em>(ohne Betreff)</em>'; ?></h3>
-    <p class="w3-small"><?php echo $when; ?> · von <?php echo $sender; ?></p>
+    <p class="w3-small"><?php echo $when; ?> · von <?php echo $sender; ?>
+<?php if((string)$viewMail->Status === 'failed') { ?>
+      · <span class="w3-tag <?php echo isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red'; ?>">E-Mail fehlgeschlagen</span>
+<?php } ?>
+    </p>
     <div class="w3-padding-16 mail-body-content"><?php echo $body; ?></div>
     <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="meine-mails.php">Zur Übersicht</a>
@@ -122,13 +126,16 @@ else {
         $neu = $unread
             ? '<span class="w3-tag '.$GLOBALS['optionsDB']['colorLogEmail'].'">neu</span>'
             : '';
+        $mailFail = (isset($row['Status']) && $row['Status'] === 'failed')
+            ? ' <span class="w3-tag '.(isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red').'">E-Mail fehlgeschlagen</span>'
+            : '';
         if($unread) {
             $subject = '<strong>'.$subject.'</strong>';
         }
         echo '<div class="mail-list-item'.$rowCls.'">';
         echo '<div class="mail-list-primary"><a href="meine-mails.php?id='.$id.'">'.$subject.'</a></div>';
         echo '<div class="mail-list-meta">'.$when.' · '.$sender.'</div>';
-        echo '<div class="mail-list-status">'.$neu.'</div>';
+        echo '<div class="mail-list-status">'.$neu.$mailFail.'</div>';
         echo '<div class="mail-list-actions">';
         echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="meine-mails.php?id='.$id.'">Anzeigen</a>';
         echo '<form method="post" action="meine-mails.php" onsubmit="return confirm(\'Nachricht ausblenden?\');">';
