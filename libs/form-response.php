@@ -133,7 +133,27 @@ function handleUserFormPost($options = array()) {
     if(isset($_POST['delete'])) {
         $n = new User;
         $n->load_by_id($_POST['Index']);
-        $n->delete();
+        if(!(int)$n->Index) {
+            $result['flash'] = array(
+                'type' => 'error',
+                'message' => 'Benutzer nicht gefunden.',
+            );
+            return $result;
+        }
+        if($n->hasInventories()) {
+            $result['flash'] = array(
+                'type' => 'error',
+                'message' => $n->getDeleteInventoryBlockMessage(),
+            );
+            return $result;
+        }
+        if(!$n->delete()) {
+            $result['flash'] = array(
+                'type' => 'error',
+                'message' => 'Löschen fehlgeschlagen.',
+            );
+            return $result;
+        }
         $result['successMessage'] = 'Gelöscht.';
         return $result;
     }
