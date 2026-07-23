@@ -4112,7 +4112,7 @@ select.profile-control {
   max-width: var(--inv-id-col-w);
   min-width: 0;
   box-sizing: border-box;
-  align-self: center;
+  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -4150,7 +4150,7 @@ select.profile-control {
 
 .inv-main {
   min-width: 0;
-  align-self: center;
+  align-self: start;
 }
 
 .inv-product {
