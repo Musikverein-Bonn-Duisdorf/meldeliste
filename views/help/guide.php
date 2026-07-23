@@ -69,7 +69,7 @@ $sections[] = array(
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
 <p><b>Tipp:</b> Auch „vielleicht“ oder „nein“ sind wertvoll – offene Einträge erschweren die Planung.</p>
 <p>Bei Terminen mit <b>Besetzung</b> kannst du im Termin-Detail ggf. das <b>Instrument für diesen Termin</b> anpassen (z.&nbsp;B. Dirigat übernehmen). Speichern mit dem Speicher-Button neben der Auswahl.</p>
-<p>Über das Info-Symbol <i class="fa fa-info-circle"></i> öffnest du die Termin-Details (Ort, Uhrzeit, Orchesterübersicht, …).</p>
+<p>Ein Klick auf Titel, Beschreibung oder Ort öffnet die Termin-Details (Uhrzeit, Orchesterübersicht, …).</p>
 <p>Über <i class="fa fa-calendar-plus"></i> kannst du einen Termin als ICS-Datei in deinen Kalender (Google, Outlook, …) importieren.</p>
 '
 );

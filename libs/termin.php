@@ -373,6 +373,7 @@ class Termin
             (string)$this->Beschreibung,
             (string)$this->getOrt(),
             (string)$this->getGermanDate(),
+            (string)germanWeekdayShort($this->Datum),
             (string)$this->Datum,
             (string)$this->EndDatum,
             (string)$this->Uhrzeit,
@@ -1445,10 +1446,61 @@ class Termin
         }
         return $str;
     }
+
+    /**
+     * Compact date block for Hauptseite melde rows (MELD-141):
+     * two-letter weekday in a box, numeric date left-aligned — no relative countdown.
+     */
+    protected function makeListDateInfo() {
+        $dow = germanWeekdayShort($this->Datum);
+        if($this->EndDatum) {
+            $dateText = germanDateCompact($this->Datum).' – '.germanDateCompact($this->EndDatum);
+        }
+        else {
+            $dateText = germanDateCompact($this->Datum);
+        }
+
+        $timeBits = array();
+        if($this->Uhrzeit) {
+            $t = sql2timeRaw($this->Uhrzeit);
+            if($this->Uhrzeit2) {
+                $t .= ' – '.sql2timeRaw($this->Uhrzeit2);
+            }
+            $timeBits[] = $t;
+        }
+        $travel = '';
+        if(($GLOBALS['optionsDB']['showTravelTime'] || $GLOBALS['optionsDB']['showVehicle'])
+            && ($this->Abfahrt || $this->vName)) {
+            $parts = array();
+            if($this->Abfahrt && $GLOBALS['optionsDB']['showTravelTime']) {
+                $parts[] = sql2timeRaw($this->Abfahrt);
+            }
+            if($GLOBALS['optionsDB']['showVehicle'] && $this->vName) {
+                $parts[] = $this->vName;
+            }
+            if($parts) {
+                $travel = '('.implode(' ', $parts).')';
+            }
+        }
+        if($travel !== '') {
+            $timeBits[] = $travel;
+        }
+
+        $title = htmlspecialchars($this->getGermanDate(), ENT_QUOTES, 'UTF-8');
+        $str = '<div class="melde-date" title="'.$title.'">';
+        $str .= '<span class="melde-weekday">'.htmlspecialchars($dow, ENT_QUOTES, 'UTF-8').'</span>';
+        $str .= '<span class="melde-date-details">';
+        $str .= '<span class="melde-date-day">'.htmlspecialchars($dateText, ENT_QUOTES, 'UTF-8').'</span>';
+        if($timeBits) {
+            $str .= '<span class="melde-date-time">'.htmlspecialchars(implode(' ', $timeBits), ENT_QUOTES, 'UTF-8').'</span>';
+        }
+        $str .= '</span></div>';
+        return $str;
+    }
     protected function makeButtons($N, $indent, $val) {
         return $this->makeButtonsUser($N, $indent, $val, $this->getUser());
     }
-    protected function makeButtonsUser($N, $indent, $val, $user) {
+    protected function makeButtonsUser($N, $indent, $val, $user, $listStyle = false) {
         $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
         $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
         
@@ -1456,26 +1508,36 @@ class Termin
         for($i=1; $i<=$N; $i++) {
             $btn = new div;
             $btn->indent = $indent;
-            $btn->class="w3-col s3 m3 l3";
-            $btn->class="w3-margin-left";
+            if(!$listStyle) {
+                $btn->class="w3-col s3 m3 l3";
+                $btn->class="w3-margin-left";
+            }
             if($this->open == false && requirePermission("perm_editResponse") == false) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
-                        $str=$str.$btn->print();
+                        if(!$listStyle) {
+                            $str=$str.$btn->print();
+                        }
                         continue;
                     }
                 }
                 else {
-                    $str=$str.$btn->print();
+                    if(!$listStyle) {
+                        $str=$str.$btn->print();
+                    }
                     continue;
                 }
             }
             $btn->tag="button";
+            if($listStyle) {
+                $btn->class="melde-btn";
+            }
             $btn->class="w3-btn";
             $btn->class="w3-border";
             $btn->class="w3-border-black";
             /* $btn->class="w3-margin-top"; */
             $btn->class="w3-center";
+            $btn->type="button";
             $btn->body=$symbols[$i-1];
 
             if($val && $val != $i) {
@@ -1538,7 +1600,7 @@ class Termin
         }
         return $str;
     }
-    protected function makeShiftButtonsUser($N, $indent, $shift, $val, $user) {
+    protected function makeShiftButtonsUser($N, $indent, $shift, $val, $user, $listStyle = false) {
         $symbols = array("&#10004;", "&#10008;", "<b>?</b>");
         $colors = array($GLOBALS['optionsDB']['colorBtnYes'], $GLOBALS['optionsDB']['colorBtnNo'], $GLOBALS['optionsDB']['colorBtnMaybe']);
         
@@ -1547,26 +1609,36 @@ class Termin
             $btn = new div;
             $btn->indent = $indent;
 
-            $btn->class="w3-col s3 m3 l3";
-            $btn->class="w3-margin-left";
+            if(!$listStyle) {
+                $btn->class="w3-col s3 m3 l3";
+                $btn->class="w3-margin-left";
+            }
             if(!$this->open && !requirePermission("perm_editResponse")) {
                 if($GLOBALS['optionsDB']['AppmntAlwaysDecline']) {
                     if($i != 2) {
-                        $str=$str.$btn->print();
+                        if(!$listStyle) {
+                            $str=$str.$btn->print();
+                        }
                         continue;
                     }
                 }
                 else {
-                    $str=$str.$btn->print();
+                    if(!$listStyle) {
+                        $str=$str.$btn->print();
+                    }
                     continue;
                 }
             }
             $btn->tag="button";
+            if($listStyle) {
+                $btn->class="melde-btn";
+            }
             $btn->class="w3-btn";
             $btn->class="w3-border";
             $btn->class="w3-border-black";
             /* $btn->class="w3-margin-top"; */
             $btn->class="w3-center";
+            $btn->type="button";
             $btn->body=$symbols[$i-1];
 
             if($val && $val != $i) {
@@ -1681,317 +1753,168 @@ class Termin
         return $c;
     }
     public function printBasicTableLine() {
-        $user=$this->getUser();
-        $str="";
-        $indent=0;
-        
-        $main = new div;
-        $main->indent = $indent;
-        $main->id="entry".$this->Index."_user".$user;
-        $main->class="w3-card-4 w3-margin";
-        $main->class=$this->mainColor();
-        $main->class=$this->mainHover();
-        if($this->shouldStyleAsUnpublished($user)) $main->class=$GLOBALS['optionsDB']['styleAppmntUnpublished'];
-        $main->extraAttrs = $this->getSearchDataAttr();
-        $str=$str.$main->open();
+        $user = $this->getUser();
+        $tid = (int)$this->Index;
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
 
-        $indent++;
-        $mainline = new div;
-        $mainline->indent = $indent;
-        $mainline->class="w3-row w3-padding";
-        $mainline->class=$this->lineHover();
-        $mainline->class=$this->globalShiftColor();
-        $str=$str.$mainline->open();
-
-        $indent++;
-        $nameDiv = new div;
-        $nameDiv->indent = $indent;
-        //$nameDiv->onclick="document.getElementById('id".$this->Index."').style.display='block'";
-        $nameDiv->col(3, 0, 0);
-        $nameDiv->bold();
-        if($GLOBALS['optionsDB']['showAddToCalendarButton']) {
-            $nameDiv->body="<form id=\"icalform".$this->Index."\" method=\"post\" action=\"download-ics.php\"><i onclick=\"openModal('termin', ".$this->Index.")\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;<input type=\"hidden\" name=\"appID\" value=\"".$this->Index."\"></input><i onclick=\"document.getElementById('icalform".$this->Index."').submit();\" style=\"font-size: 30px;\" class=\"fa fa-calendar-plus\"></i>&nbsp;&nbsp;".$this->Name."</form>";
+        $classes = array('melde-row', 'w3-card-4', 'w3-margin');
+        $mainColor = $this->mainColor();
+        if($mainColor) {
+            $classes[] = $mainColor;
         }
-        else {
-            $nameDiv->body="<i onclick=\"openModal('termin', ".$this->Index.")\" style=\"font-size: 30px;\" class=\"fa fa-info-circle\"></i>&nbsp;&nbsp;".$this->Name;
+        $mainHover = $this->mainHover();
+        if($mainHover) {
+            $classes[] = $mainHover;
         }
-        $str=$str.$nameDiv->print();
-
-        $startDiv = new div;
-        $startDiv->indent=$indent;
-        $startDiv->col(3, 0, 0);
-        $startDiv->body=$this->makeTimeInfo();
-        $str=$str.$startDiv->print();
-
-        $ortDiv = new div;
-        $ortDiv->indent=$indent;
-        $ortDiv->class="w3-margin-bottom";
-        $ortDiv->col(3, 0, 0);
-        $ortDiv->body=$this->Ort1;
-        $str=$str.$ortDiv->print();
-
-        $btnDiv = new Div;
-        $btnDiv->indent = $indent;
-        $btnDiv->col(2, 0, 0);
-        $btnDiv->class="w3-row w3-mobile";
-        if($this->Shifts) {
-            $str=$str.$btnDiv->print();
+        if($this->shouldStyleAsUnpublished($user)) {
+            $classes[] = $GLOBALS['optionsDB']['styleAppmntUnpublished'];
         }
-        else {
-            $str=$str.$btnDiv->open();
-            $indent++;
+
+        $rowClasses = array('melde-row-main');
+        $lineHover = $this->lineHover();
+        if($lineHover) {
+            $rowClasses[] = $lineHover;
+        }
+        $shiftColor = $this->globalShiftColor();
+        if($shiftColor) {
+            $rowClasses[] = $shiftColor;
+        }
+
+        $str = '<div id="entry'.$tid.'_user'.$user.'" class="'.implode(' ', $classes).'" data-termin-id="'.$tid.'" '.$this->getSearchDataAttr().'>';
+        $str .= '<div class="'.implode(' ', $rowClasses).'">';
+        $str .= '<div class="melde-date-col">'.$this->makeListDateInfo().'</div>';
+        $str .= '<div class="melde-date-rail" aria-hidden="true"></div>';
+
+        $name = $this->Name !== null && $this->Name !== '' ? $this->Name : 'Termin';
+        $str .= '<div class="melde-main">';
+        $str .= '<div class="melde-title">'.$h($name).'</div>';
+        $desc = trim((string)$this->Beschreibung);
+        if($desc !== '') {
+            $str .= '<div class="melde-desc">'.$h($desc).'</div>';
+        }
+        $ort = trim((string)$this->getOrt());
+        if($ort !== '') {
+            $str .= '<div class="melde-ort">'.$h($ort).'</div>';
+        }
+        $str .= '</div>';
+
+        $str .= '<div class="melde-actions" data-melde-stop>';
+        if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+            $str .= '<form id="icalform'.$tid.'" method="post" action="download-ics.php" class="melde-ical">';
+            $str .= '<input type="hidden" name="appID" value="'.$tid.'">';
+            $str .= '<button type="submit" class="melde-ical-btn" title="In Kalender" aria-label="In Kalender eintragen">'
+                .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></button>';
+            $str .= '</form>';
+        }
+
+        if(!$this->Shifts) {
+            $str .= '<div class="melde-btns">';
             if($this->Capacity) {
-                if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || requirePermission("perm_editResponse")) {
-                    $str=$str.$this->makeButtons(2, $indent, $this->Wert);
+                if($this->Capacity > $this->getMeldungenVal(1) || $this->Wert == 1 || requirePermission('perm_editResponse')) {
+                    $str .= $this->makeButtonsUser(2, 0, $this->Wert, $user, true);
                 }
                 else {
-                    $closed = new div;
-            $closed->class="w3-col s9 m9 l9";
-            $closed->class="w3-margin-left w3-center w3-padding";
-            $closed->body="Alle Pl&auml;tze belegt";
-            $str=$str.$closed->print();
+                    $str .= '<span class="melde-full">Alle Plätze belegt</span>';
                 }
             }
             else {
-                $str=$str.$this->makeButtons(3, $indent, $this->Wert);
+                $str .= $this->makeButtonsUser(3, 0, $this->Wert, $user, true);
             }
-            $indent--;
-            $str=$str.$btnDiv->close();
+            $str .= '</div>';
         }
-        $str=$str.$this->statusMailBtn($indent);
+        $str .= $this->makeListMetaHtml($user);
+        $str .= '</div>'; // melde-actions
+        $str .= '</div>'; // melde-row-main
 
         if($this->defaultFreeText) {
-            $ftRow = new div;
-            $ftRow->indent=$indent;
-            $ftRow->class="w3-row";
-            $str=$str.$ftRow->open();
-            
-            $freeTextLabel = new div;
-            $freeTextLabel->indent=$indent;
-            $freeTextLabel->class="w3-margin-bottom w3-margin-top w3-mobile";
-            $freeTextLabel->col(2, 6, 6);
-            $freeTextLabel->bold();
-            $freeTextLabel->body="Zusatzangabe";
-            $str=$str.$freeTextLabel->print();
-
-            $FreeTextInDiv = new div;
-            $FreeTextInDiv->indent=$indent;
-            $FreeTextInDiv->col(7, 6, 6);
-            $FreeTextInDiv->class="w3-input w3-border w3-mobile w3-margin-bottom w3-margin-top";
-            $FreeTextInDiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
-            $FreeTextInDiv->type="text";
-            $FreeTextInDiv->tag="input";
-
             $ft = new AppmntFreeTextResponse;
             $ft->load_by_user_event($user, $this->Index);
-            if($ft->Text) {
-                $FreeTextInDiv->value=$ft->Text;
-            }
-            $FreeTextInDiv->id="FreeText".$this->Index;
-            $FreeTextInDiv->name="AppmntFreeTextResponse";
-            $FreeTextInDiv->placeholder=$this->defaultFreeText;
-            $FreeTextInDiv->emptyBody=true;
-            $str=$str.$FreeTextInDiv->print();
-            
-            $FreeTextSaveBtn = new div;
-            $FreeTextSaveBtn->indent=$indent;
-            $FreeTextSaveBtn->tag="button";
-            $FreeTextSaveBtn->class="w3-btn w3-row w3-border w3-border-black w3-margin-top";
-            $FreeTextSaveBtn->col(2, 12, 12);
-            $FreeTextSaveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $FreeTextSaveBtn->name="saveFreeText";
-            $FreeTextSaveBtn->onclick="meldeFT(".$user.", ".$this->Index.")";
-            $FreeTextSaveBtn->bold();
-            $FreeTextSaveBtn->body="speichern";
-            $str=$str.$FreeTextSaveBtn->print();
-            $str=$str.$ftRow->close();
+            $ftVal = $ft->Text ? $h($ft->Text) : '';
+            $ph = $h($this->defaultFreeText);
+            $str .= '<div class="melde-extra melde-freetext" data-melde-stop>';
+            $str .= '<label class="melde-extra-label" for="FreeText'.$tid.'">Zusatzangabe</label>';
+            $str .= '<input type="text" id="FreeText'.$tid.'" name="AppmntFreeTextResponse" class="w3-input w3-border melde-freetext-input '.$GLOBALS['optionsDB']['colorInputBackground'].'" placeholder="'.$ph.'" value="'.$ftVal.'">';
+            $str .= '<button type="button" class="w3-btn w3-border w3-border-black '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" onclick="meldeFT('.$user.', '.$tid.')"><b>speichern</b></button>';
+            $str .= '</div>';
         }
 
-        $str=$str.$mainline->close();
-        $indent--;
-        $indent--;
-        
-        if(($GLOBALS['optionsDB']['showGuestOption'] || $GLOBALS['optionsDB']['showChildOption']) && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == "Bus") {
-            $guestChildLine = new div;
-            $guestChildLine->indent = $indent;
-            $guestChildLine->class="w3-row w3-padding";
-            $str=$str.$guestChildLine->open();
-            $indent++;
-
+        if(($GLOBALS['optionsDB']['showGuestOption'] || $GLOBALS['optionsDB']['showChildOption'])
+            && ($this->Wert == 1 || $this->Wert == 3) && $this->vName == 'Bus') {
+            $str .= '<div class="melde-extra melde-guests" data-melde-stop>';
             if($GLOBALS['optionsDB']['showChildOption']) {
-                $emptyDiv = new div;
-                $emptyDiv->indent=$indent;
-                $emptyDiv->col(9, 0, 0);
-                $emptyDiv->class="w3-container";
-                $str=$str.$emptyDiv->print();
-
-                $childDiv = new div;
-                $childDiv->indent=$indent;
-                $childDiv->col(1, 6, 6);
-                $childDiv->class="w3-row w3-margin-top w3-container";
-                $childDiv->body="Kinder";
-                $str=$str.$childDiv->print();
-
-                $childInDiv = new div;
-                $childInDiv->indent=$indent;
-                $childInDiv->col(1, 6, 6);
-                $childInDiv->class="w3-row w3-margin-top w3-container";
-                $childInDiv->type="number";
-                $childInDiv->tag="input";
-                $childInDiv->style="width: 5em";
-                $childInDiv->min=0;
-                $childInDiv->defaultt=0;
-                $childInDiv->value=$this->Children;
-                $childInDiv->id="Children".$this->Index;
-                $childInDiv->name="Children";
-                $childInDiv->emptyBody=true;
-                $str=$str.$childInDiv->print();
-
-                $childSpacerDiv = new div;
-                $childSpacerDiv->indent=$indent;
-                $childSpacerDiv->col(1, 6, 6);
-                $childSpacerDiv->class="w3-hide-small w3-hide-medium";
-                $str=$str.$childSpacerDiv->print();
+                $str .= '<label class="melde-extra-label" for="Children'.$tid.'">Kinder</label>';
+                $str .= '<input type="number" min="0" id="Children'.$tid.'" name="Children" class="melde-num" value="'.(int)$this->Children.'">';
             }
             if($GLOBALS['optionsDB']['showGuestOption']) {
-                $emptyDiv = new div;
-                $emptyDiv->indent=$indent;
-                $emptyDiv->col(9, 0, 0);
-                $emptyDiv->class="w3-container";
-                $str=$str.$emptyDiv->print();
-
-                $guestDiv = new div;
-                $guestDiv->indent=$indent;
-                $guestDiv->col(1, 6, 6);
-                $guestDiv->class="w3-row w3-margin-top w3-container";
-                $guestDiv->body="G&auml;ste";
-                $str=$str.$guestDiv->print();
-
-                $guestInDiv = new div;
-                $guestInDiv->indent=$indent;
-                $guestInDiv->col(1, 6, 6);
-                $guestInDiv->class="w3-row w3-margin-top w3-container";
-                $guestInDiv->type="number";
-                $guestInDiv->tag="input";
-                $guestInDiv->style="width: 5em";
-                $guestInDiv->min=0;
-                $guestInDiv->default=0;
-                $guestInDiv->value=$this->Guests;
-                $guestInDiv->id="Guests".$this->Index;
-                $guestInDiv->name="Guests";
-                $guestInDiv->emptyBody=true;
-                $str=$str.$guestInDiv->print();
-
-                $guestSpacerDiv = new div;
-                $guestSpacerDiv->indent=$indent;
-                $guestSpacerDiv->col(1, 6, 6);
-                $guestSpacerDiv->class="w3-hide-small w3-hide-medium";
-                $str=$str.$guestSpacerDiv->print();
+                $str .= '<label class="melde-extra-label" for="Guests'.$tid.'">Gäste</label>';
+                $str .= '<input type="number" min="0" id="Guests'.$tid.'" name="Guests" class="melde-num" value="'.(int)$this->Guests.'">';
             }
-            $emptyDiv = new div;
-            $emptyDiv->indent=$indent;
-            $emptyDiv->col(9, 0, 0);
-            $emptyDiv->class="w3-hide-small w3-hide-medium";
-            $str=$str.$emptyDiv->print();
-            
-            $saveBtn = new div;
-            $saveBtn->indent=$indent;
-            $saveBtn->tag="button";
-            $saveBtn->class="w3-btn w3-row w3-border w3-border-black w3-margin-top";
-            $saveBtn->col(2, 12, 12);
-            $saveBtn->class=$GLOBALS['optionsDB']['colorBtnSubmit'];
-            $saveBtn->name="meldungGC";
-            $saveBtn->onclick="melde(".$user.", ".$this->Index.", ".$this->Wert.", -1, -1)";
-            $saveBtn->bold();
-            $saveBtn->body="speichern";
-            $str=$str.$saveBtn->print();
-
-            $SpacerDiv = new div;
-            $SpacerDiv->indent=$indent;
-            $SpacerDiv->col(1, 6, 6);
-            $SpacerDiv->class="w3-hide-small, w3-hide-medium";
-            $str=$str.$SpacerDiv->print();
-
-            $str=$str.$guestChildLine->close();
-            $indent--;
+            $str .= '<button type="button" class="w3-btn w3-border w3-border-black '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" onclick="melde('.$user.', '.$tid.', '.(int)$this->Wert.', -1, -1)"><b>speichern</b></button>';
+            $str .= '</div>';
         }
+
         if($this->Shifts) {
             $shifts = $this->getShifts();
-            for($i=0; $i<count($shifts); $i++) {
+            for($i = 0; $i < count($shifts); $i++) {
                 $s = new Shift;
                 $s->load_by_id($shifts[$i]);
                 $m = new Shiftmeldung;
                 $m->load_by_user_event($user, $s->Index);
-                
-                $shiftmain = new div;
-                $shiftmain->indent=$indent;
-                $shiftmain->class="w3-border-top w3-border-white w3-padding w3-row";
-                $shiftmain->class=$GLOBALS['optionsDB']['HoverEffect'];
-                $shiftmain->class=$this->getLineColor($m->Wert);
-                $str=$str.$shiftmain->open();
-                $indent++;
 
-                $shiftSpacer = new div;
-                $shiftSpacer->indent=$indent;
-                $shiftSpacer->class="w3-hide-small w3-hide-medium";
-                $shiftSpacer->col(3, 0, 0);
-                $str=$str.$shiftSpacer->print();
-
-                $shiftName = new div;
-                $shiftName->indent=$indent;
-                $shiftName->col(3, 0, 0);
-                $shiftName->bold();
-                $shiftName->body=$s->Name;
-                $str=$str.$shiftName->print();
-
-                $shiftTime = new div;
-                $shiftTime->indent=$indent;
-                $shiftTime->class="w3-margin-bottom";
-                $shiftTime->col(3, 0, 0);
-                if($s->Start != $s->End) {
-                    $shiftTime->body=$s->getTime();
+                $shiftClasses = array('melde-shift');
+                $shiftClasses[] = $GLOBALS['optionsDB']['HoverEffect'];
+                $lc = $this->getLineColor($m->Wert);
+                if($lc) {
+                    $shiftClasses[] = $lc;
                 }
-                $str=$str.$shiftTime->print();
-                
-                $btnDiv = new div;
-                $btnDiv->indent=$indent;
-                $btnDiv->col(2, 0, 0);
-                $str=$str.$btnDiv->open();
-                $indent++;
+                $str .= '<div class="'.implode(' ', array_filter($shiftClasses)).'" data-melde-stop>';
+                $str .= '<div class="melde-shift-info">';
+                $str .= '<div class="melde-shift-name">'.$h($s->Name).'</div>';
+                if($s->Start != $s->End) {
+                    $str .= '<div class="melde-shift-time">'.$h($s->getTime()).'</div>';
+                }
+                $str .= '</div>';
+                $str .= '<div class="melde-actions">';
+                $str .= '<div class="melde-btns">';
                 if($s->Bedarf) {
-                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || requirePermission("perm_editResponse")) {
-                        $str=$str.$this->makeShiftButtonsUser(2, $indent, $s->Index, $m->Wert, $user);
+                    if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || requirePermission('perm_editResponse')) {
+                        $str .= $this->makeShiftButtonsUser(2, 0, $s->Index, $m->Wert, $user, true);
                     }
                     else {
-                        $closed = new div;
-                        $closed->class="w3-col s9 m9 l9";
-                        $closed->class="w3-margin-left w3-center w3-padding";
-                        $closed->body="Alle Pl&auml;tze belegt";
-                        $str=$str.$closed->print();
+                        $str .= '<span class="melde-full">Alle Plätze belegt</span>';
                     }
                 }
                 else {
-                    $str=$str.$this->makeShiftButtonsUser(3, $indent, $s->Index, $m->Wert, $user);
+                    $str .= $this->makeShiftButtonsUser(3, 0, $s->Index, $m->Wert, $user, true);
                 }
-                /* $str=$str.$this->makeShiftButtons(3, $indent, $s->Index, $m->Wert); */
-                $str=$str.$btnDiv->close();
-                $indent--;
-                
-                $valdiv = new div;
-                $valdiv->indent=$indent;
-                $valdiv->class="w3-center w3-padding";
-                $valdiv->col(1, 0, 0);
+                $str .= '</div>';
                 if($s->Bedarf) {
-                    $valdiv->body="<i class=\"fas fa-user-friends\"></i>&nbsp;&nbsp;".$s->getResponseString();
+                    $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
                 }
-                $str=$str.$valdiv->print();
-
-                $str=$str.$shiftmain->close();
-                $indent--;
+                $str .= '</div>';
+                $str .= '</div>';
             }
         }
-        $str=$str.$main->close();
+
+        $str .= '</div>';
         return $str;
+    }
+
+    /**
+     * Status-Mail button or capacity count for list rows (MELD-141).
+     */
+    protected function makeListMetaHtml($user) {
+        if(requirePermission('perm_sendEmail') && !empty($GLOBALS['optionsDB']['statusPerMail'])) {
+            return '<button type="button" class="melde-meta-btn w3-btn w3-border w3-border-black '.$GLOBALS['optionsDB']['colorBtnSubmit'].'"'
+                .' onclick="getStatus('.(int)$user.', '.(int)$this->Index.')">Status per Mail</button>';
+        }
+        if($this->Capacity) {
+            return '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '
+                .htmlspecialchars($this->getResponseString(), ENT_QUOTES, 'UTF-8').'</div>';
+        }
+        return '';
     }
 
     /**
