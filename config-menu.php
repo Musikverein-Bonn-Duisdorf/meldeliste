@@ -147,10 +147,8 @@ function resetColorScheme() {
 	xmlhttp.send(body);
 }
 </script>
-<div class="w3-container <?php echo htmlspecialchars(adminHeroClass(array('kicker' => 'globale Einstellungen', 'permKey' => 'perm_editConfig', 'withProfileHero' => false)), ENT_QUOTES, 'UTF-8'); ?>">
-    <h2>globale Einstellungen</h2>
-</div>
-<div class="w3-container w3-card w3-margin w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
+<?php adminListPageBegin('System', 'globale Einstellungen', array('permKey' => 'perm_editConfig')); ?>
+<div class="w3-container w3-card w3-margin-bottom w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
 </div>
@@ -282,7 +280,7 @@ while($row = mysqli_fetch_array($dbr)) {
 ?>
 <button class="w3-btn w3-padding <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin w3-mobile" type="submit" name="save" value="speichern" >speichern</button>
     </form>
-      
 <?php
+adminListPageEnd();
 include "common/footer.php";
 ?>
