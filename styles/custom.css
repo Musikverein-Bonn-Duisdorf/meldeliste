@@ -2,26 +2,58 @@
   color: #111;
 }
 
-/* Colored title bar like older admin pages (colorTitleBar on .profile-hero) */
-.admin-list-shell > .profile-hero {
+/* Hero tinted by Admin-Rechte group (same palette as Nav / Chips / Matrix) */
+.admin-list-shell > .profile-hero.admin-list-hero {
   margin: -1px -1px 1.15rem;
   padding: 0.65rem 1rem;
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
+  border-left: 6px solid transparent;
+  color: #222;
 }
 
-.admin-list-shell > .profile-hero .profile-kicker {
-  opacity: 0.85;
+.admin-list-shell > .profile-hero.admin-list-hero .profile-kicker {
+  opacity: 0.8;
   color: inherit;
 }
 
-.admin-list-shell > .profile-hero .profile-title {
+.admin-list-shell > .profile-hero.admin-list-hero .profile-title {
   color: inherit;
   font-weight: 700;
 }
 
-.admin-list-shell > .profile-hero .profile-hero-actions .w3-button {
+.admin-list-shell > .profile-hero.admin-list-hero .profile-hero-actions .w3-button {
   color: inherit;
+}
+
+.admin-list-shell > .profile-hero.admin-list-hero--nutzer {
+  background: #90caf9;
+  border-left-color: #42a5f5;
+}
+
+.admin-list-shell > .profile-hero.admin-list-hero--termine {
+  background: #a5d6a7;
+  border-left-color: #66bb6a;
+}
+
+.admin-list-shell > .profile-hero.admin-list-hero--register {
+  background: #ffcc80;
+  border-left-color: #ffa726;
+}
+
+.admin-list-shell > .profile-hero.admin-list-hero--inventar {
+  background: #ce93d8;
+  border-left-color: #ab47bc;
+}
+
+.admin-list-shell > .profile-hero.admin-list-hero--kommunikation {
+  background: #80deea;
+  border-left-color: #26c6da;
+}
+
+.admin-list-shell > .profile-hero.admin-list-hero--system {
+  background: #b0bec5;
+  border-left-color: #78909c;
 }
 
 .admin-list-toolbar {
