@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-3b1dd (2026-07-23)
+
+- MELD-144: Email-Listen durchsuchbar und nachladbar
+- MELD-144: Emails durchsuchen
+
 ## 2026-07-23-7a911 (2026-07-23)
 
 - MELD-140: Schichtzeilen am Termin-Strich ausrichten
