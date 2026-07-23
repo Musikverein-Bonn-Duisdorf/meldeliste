@@ -78,7 +78,7 @@ $sections[] = array(
     'id' => 'mein-register',
     'title' => 'Mein Register',
     'body' => '
-<p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben:</p>
+<p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben. Die Übersicht nutzt dieselbe Zeilenoptik wie die Startseite (Datum, Titel, Status-Chips); Tippen/Klick öffnet die Namensliste im Detail – Personenzeilen in Registerfarbe, gruppiert nach Zusage / Unsicher / Absage.</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung.</li>
 </ul>
@@ -202,8 +202,8 @@ $sections[] = array(
     'title' => 'Admin: Meldungen',
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
-<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung).</p>
-<p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen. Die Orchesterübersicht skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
+<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung).</p>
+<p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert, Personenzeilen in Registerfarbe. Die Orchesterübersicht skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
 '.(requirePermission('perm_editResponse') ? '<p>Mit Recht <b>Rückmeldungen bearbeiten</b> kannst du im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
 '
 );

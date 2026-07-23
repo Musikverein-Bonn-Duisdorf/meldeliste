@@ -1901,121 +1901,106 @@ class Termin
         if($this->Shifts) return $this->printShiftResponseLine();
         return $this->getResponseLine(0);
     }
+    /**
+     * Status chips for response overview cards (MELD-149).
+     */
+    protected function renderResponseStatusChips($ja, $nein, $vielleicht, $allLabel = '') {
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $html = '<div class="melde-response-chips">';
+        if($allLabel !== '') {
+            $html .= '<span class="melde-response-chip melde-response-chip--sum" title="Gemeldet / Register">'
+                .'<i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($allLabel).'</span>';
+        }
+        $html .= '<span class="melde-response-chip '.$GLOBALS['optionsDB']['colorBtnYes'].'" title="Zusagen">'
+            .'&#10004; '.(int)$ja.'</span>';
+        $html .= '<span class="melde-response-chip '.$GLOBALS['optionsDB']['colorBtnNo'].'" title="Absagen">'
+            .'&#10008; '.(int)$nein.'</span>';
+        $html .= '<span class="melde-response-chip '.$GLOBALS['optionsDB']['colorBtnMaybe'].'" title="Unsicher">'
+            .'? '.(int)$vielleicht.'</span>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Melde-row shell for Meldungen / Mein Register / Archiv (MELD-149).
+     * @param string $onclick JS for card click (empty = no row click)
+     * @param string $actionsHtml right-side chips / meta
+     * @param string $bodyHtml optional content below the main row
+     */
+    protected function renderMeldeResponseCard($filterregister, $onclick, $actionsHtml, $bodyHtml = '') {
+        $tid = (int)$this->Index;
+        $filterregister = (int)$filterregister;
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $name = $this->Name !== null && $this->Name !== '' ? (string)$this->Name : 'Termin';
+        $classes = array('melde-row', 'melde-response-row', 'w3-card-4');
+        $bg = isset($GLOBALS['optionsDB']['colorInputBackground'])
+            ? (string)$GLOBALS['optionsDB']['colorInputBackground'] : '';
+        if($bg !== '') {
+            $classes[] = $bg;
+        }
+        $attrs = ' id="responseLine'.$tid.'" data-termin="'.$tid.'" data-register="'.$filterregister.'"'
+            .' class="'.implode(' ', $classes).'" '.$this->getSearchDataAttr();
+        if($onclick !== '') {
+            $attrs .= ' onclick="'.$onclick.'" role="button" tabindex="0"'
+                .' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();'.$onclick.';}"';
+        }
+        $html = '<div'.$attrs.'>';
+        $html .= '<div class="melde-row-main">';
+        $html .= '<div class="melde-date-col">'.$this->makeListDateInfo().'</div>';
+        $html .= '<div class="melde-date-rail" aria-hidden="true"></div>';
+        $html .= '<div class="melde-main">';
+        $html .= '<div class="melde-title">'.$h($name).'</div>';
+        $ort = trim((string)$this->getOrt());
+        if($ort !== '') {
+            $html .= '<div class="melde-ort">'.$h($ort).'</div>';
+        }
+        $html .= '</div>';
+        $html .= '<div class="melde-actions">'.$actionsHtml.'</div>';
+        $html .= '</div>'; // melde-row-main
+        if($bodyHtml !== '') {
+            $html .= $bodyHtml;
+        }
+        $html .= '</div>';
+        return $html;
+    }
+
     public function printShiftResponseLine() {
-        $str="";
-        $indent=1;
-
-        $containerdiv = new div;
-        $containerdiv->indent=$indent;
-        $containerdiv->id="responseLine".$this->Index;
-        $containerdiv->class="w3-margin-top w3-border w3-border-black w3-card";
-        $containerdiv->class=$GLOBALS['optionsDB']['colorInputBackground'];
-        $containerdiv->extraAttrs = $this->getSearchDataAttr();
-        $str=$str.$containerdiv->open();
-        $indent++;
-        
-        $maindiv = new div;
-        $maindiv->indent=$indent;
-        $maindiv->class="w3-container w3-center";
-        $str=$str.$maindiv->open();
-        $indent++;
-        
-        $mainheader = new div;
-        $mainheader->tag="h3";
-        $mainheader->class="w3-left";
-        $mainheader->body=$this->Name;
-        $mainheader->indent=$indent;
-        $str=$str.$mainheader->print();
-
-        $mainheader = new div;
-        $mainheader->tag="p";
-        $mainheader->class="w3-right";
-        $mainheader->body=$this->getGermanDate();
-        $mainheader->indent=$indent;
-        $str=$str.$mainheader->print();
-
-        $str=$str.$maindiv->close();
-        $indent--;
-
-        $content = new div;
-        $content->indent=$indent;
-        $content->class="w3-container w3-margin-bottom";
-        $str=$str.$content->open();
-        $indent++;
-        
         $shifts = $this->getShifts();
+        $body = '<div class="melde-response-body">';
         if(count($shifts) === 0) {
-            $empty = new div;
-            $empty->indent=$indent;
-            $empty->class="w3-padding w3-text-gray";
-            $empty->body="Noch keine Schichten &amp; Aufgaben angelegt.";
-            $str=$str.$empty->print();
+            $body .= '<div class="melde-response-empty">Noch keine Schichten &amp; Aufgaben angelegt.</div>';
         }
-        for($i=0; $i<count($shifts); $i++) {
-            $s = new Shift;
-            $s->load_by_id($shifts[$i]);
-            $shift = new div;
-            $shift->indent=$indent;
-            $shift->onclick="openModal('shiftResponse', ".$s->Index.")";
-            $shift->class="w3-row w3-border-bottom w3-border-black";
-            $str=$str.$shift->open();
-            $indent++;
-            
-            $shiftname = new div;
-            $shiftname->indent=$indent;
-            $shiftname->class="w3-col l4 m2 s2";
-            $shiftname->body=$s->Name;
-            $shiftname->bold();
-            $str=$str.$shiftname->print();
-
-            $shifttime = new div;
-            $shifttime->indent=$indent;
-            $shifttime->class="w3-col l4 m2 s2";
-            $shifttime->body=$s->getTime();
-            $str=$str.$shifttime->print();
-
-            $shiftbedarf = new div;
-            $shiftbedarf->indent=$indent;
-            $shiftbedarf->class="w3-col l1 m2 s2 w3-center";
-            $shiftbedarf->body="<i class=\"fas fa-user-friends\"></i> ";
-            $shiftbedarf->body=$s->Bedarf;
-            $str=$str.$shiftbedarf->print();
-
-            $shiftresponseY = new div;
-            $shiftresponseY->indent=$indent;
-            $shiftresponseY->class="w3-col l1 m2 s2 w3-center";
-            $shiftresponseY->class=$GLOBALS['optionsDB']['colorBtnYes'];
-            $shiftresponseY->body="&#10004; ";
-            $shiftresponseY->body=$s->getMeldungenVal(1);
-            $str=$str.$shiftresponseY->print();
-
-            $shiftresponseN = new div;
-            $shiftresponseN->indent=$indent;
-            $shiftresponseN->class="w3-col l1 m2 s2 w3-center";
-            $shiftresponseN->class=$GLOBALS['optionsDB']['colorBtnNo'];
-            $shiftresponseN->body="&#10008; ";
-            $shiftresponseN->body=$s->getMeldungenVal(2);
-            $str=$str.$shiftresponseN->print();
-
-            $shiftresponseM = new div;
-            $shiftresponseM->indent=$indent;
-            $shiftresponseM->class="w3-col l1 m2 s2 w3-center";
-            $shiftresponseM->class=$GLOBALS['optionsDB']['colorBtnMaybe'];
-            $shiftresponseM->body="? ";
-            $shiftresponseM->body=$s->getMeldungenVal(3);
-            $str=$str.$shiftresponseM->print();
-
-            $str=$str.$shift->close();
-            $indent--;
-
+        else {
+            foreach($shifts as $shiftId) {
+                $s = new Shift;
+                $s->load_by_id($shiftId);
+                $ja = (int)$s->getMeldungenVal(1);
+                $nein = (int)$s->getMeldungenVal(2);
+                $vielleicht = (int)$s->getMeldungenVal(3);
+                $bedarf = (int)$s->Bedarf;
+                $allLabel = $bedarf > 0 ? ($ja.' / '.$bedarf) : '';
+                $time = (string)$s->getTime();
+                $body .= '<div class="melde-shift melde-response-shift" role="button" tabindex="0"'
+                    .' onclick="event.stopPropagation();openModal(\'shiftResponse\', '.(int)$s->Index.')"'
+                    .' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();openModal(\'shiftResponse\', '.(int)$s->Index.');}">';
+                $body .= '<div class="melde-shift-info">';
+                $body .= '<div class="melde-shift-name">'.htmlspecialchars((string)$s->Name, ENT_QUOTES, 'UTF-8').'</div>';
+                if($time !== '') {
+                    $body .= '<div class="melde-shift-time">'.htmlspecialchars($time, ENT_QUOTES, 'UTF-8').'</div>';
+                }
+                $body .= '</div>';
+                $body .= '<div class="melde-actions">';
+                $body .= $this->renderResponseStatusChips($ja, $nein, $vielleicht, $allLabel);
+                $body .= '</div>';
+                $body .= '</div>';
+            }
         }
-                
-        $str=$str.$content->close();
-        $indent--;
-        $str=$str.$containerdiv->close();
-        $indent--;
-
-        return $str;
+        $body .= '</div>';
+        return $this->renderMeldeResponseCard(0, '', '', $body);
     }
 
     public function getShiftResponseModalHtml($s) {
@@ -2034,6 +2019,9 @@ class Termin
             'yesHtml' => $this->renderShiftResponseNames($yesNames, $colorYes),
             'maybeHtml' => $this->renderShiftResponseNames($maybeNames, $colorMaybe),
             'noHtml' => $this->renderShiftResponseNames($noNames, $colorNo),
+            'countYes' => count($yesNames),
+            'countMaybe' => count($maybeNames),
+            'countNo' => count($noNames),
         ));
     }
 
@@ -2042,13 +2030,20 @@ class Termin
      */
     private function renderShiftResponseNames(array $names, $colorClass) {
         if(!count($names)) {
-            return '<div class="profile-value">—</div>';
+            return '';
         }
         $html = '';
         foreach($names as $name) {
-            $html .= '<div class="shift-response-name '.$colorClass.'">'
-                .htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8')
-                .'</div>';
+            $html .= render('termin/response_line', array(
+                'entry' => array(
+                    'colorClass' => $colorClass,
+                    'name' => (string)$name,
+                    'instrument' => '',
+                    'children' => null,
+                    'guests' => null,
+                    'freeText' => null,
+                ),
+            ));
         }
         return $html;
     }
@@ -2083,18 +2078,18 @@ class Termin
      * @return array
      */
     protected function fetchResponseMeldungenRows() {
-        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
+        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName`, `rColor` FROM `%sMeldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung`, `Color` AS `rColor` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
 WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` = '0')
 
 UNION
 
-(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName` FROM `%sMeldungen`
+(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName`, `rColor` FROM `%sMeldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung`, `Color` AS `rColor` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
 WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` != '0')
 
 ORDER BY `Nachname`, `Vorname`;",
@@ -2132,182 +2127,192 @@ ORDER BY `Nachname`, `Vorname`;",
 
     public function getResponseLine($filterregister) {
         $filterregister = (int)$filterregister;
+        $bus = ($this->vName == 'Bus');
+        $modalOpen = "openModal('terminResponse', ".$this->Index.($filterregister ? ', '.$filterregister : '').')';
 
-        if($this->vName == "Bus") {
-            $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
-            $bus=true;
+        if($this->Auftritt && $filterregister) {
+            $lists = $this->buildResponseLists($filterregister);
+            $ja = count($lists['whoYes']);
+            $nein = count($lists['whoNo']);
+            $vielleicht = count($lists['whoMaybe']);
+            $actions = $this->renderResponseStatusChips($ja, $nein, $vielleicht);
+            return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions);
         }
-        else {
-            $cols = 2;
-            $bus=false;
-        }
-        if($this->defaultFreeText && isAdmin()) $cols++;
-        switch($cols) {
-        case 3:
-            $colsize = array(4,3,5);
-            break;
-        case 4:
-            $colsize = array(4,4,2,2);
-            break;
-        case 5:
-            $colsize = array(3,3,2,2,2);
-            break;
-        case 2:
-        default:
-            $colsize = array(6,6);
-            break;
-        }
-
-        $modalOpen = "openModal('terminResponse', ".$this->Index.($filterregister ? ", ".$filterregister : "").")";
-        $str = "<div id=\"responseLine".$this->Index."\" data-termin=\"".$this->Index."\" data-register=\"".$filterregister."\" ".$this->getSearchDataAttr()." class=\"w3-card w3-border w3-margin-top w3-border-black ".$GLOBALS['optionsDB']['colorInputBackground']."\"><div onclick=\"".$modalOpen."\" class=\"w3-container w3-center\"><h3 class=\"w3-left\">".$this->Name."</h3><p class=\"w3-right\">".$this->getGermanDate()."</p></div>\n";
-        $str=$str."<div onclick=\"".$modalOpen."\" class=\"w3-container w3-margin-bottom\">\n";
 
         if($this->Auftritt) {
-            if($filterregister) {
-                $lists = $this->buildResponseLists($filterregister);
-                $str=$str.$this->renderResponseEntries($lists['whoYes'], $lists['colsize'])
-                    .$this->renderResponseEntries($lists['whoNo'], $lists['colsize'])
-                    .$this->renderResponseEntries($lists['whoMaybe'], $lists['colsize']);
+            $aMeldungen = $this->fetchResponseMeldungenRows();
+            if($GLOBALS['optionsDB']['showConductor']) {
+                $sql = sprintf(
+                    "SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                    $GLOBALS['dbprefix']
+                );
             }
             else {
-                $aMeldungen = $this->fetchResponseMeldungenRows();
-                if($GLOBALS['optionsDB']['showConductor']) {
-                    $sql = sprintf("SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                $sql = sprintf(
+                    "SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
                     $GLOBALS['dbprefix']
-                    );
-                }
-                else {
-                    $sql = sprintf("SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
-                    $GLOBALS['dbprefix']
-                    );
-                }
-                $dbr = mysqli_query($GLOBALS['conn'], $sql);
-                sqlerror();
-                $memberCounts = $this->getRegisterMemberCounts();
-                $sja=0;
-                $sall=0;
-                $snReg=0;
-                $snein=0;
-                $svielleicht=0;
-                $childrenYes=0;
-                $guestsYes=0;
-                $childrenMaybe=0;
-                $guestsMaybe=0;
-                while($row = mysqli_fetch_array($dbr)) {
-                    $regId = (int)$row['Index'];
-                    $nReg = isset($memberCounts[$regId]) ? (int)$memberCounts[$regId] : 0;
-                    $snReg+=$nReg;
-                    $ja=0;
-                    $nein=0;
-                    $vielleicht=0;
-                    foreach($aMeldungen as $row2) {
-                        if((int)$row2['rIndex'] != $regId) continue;
-                        switch($row2['Wert']) {
-                        case 1:
-                            $ja++;
-                            $sja++;
-                            if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                                $childrenYes+=$row2['Children'];
-                            }
-                            if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                                $guestsYes+=$row2['Guests'];
-                            }
-                            break;
-                        case 2:
-                            $nein++;
-                            $snein++;
-                            break;
-                        case 3:
-                            $vielleicht++;
-                            $svielleicht++;
-                            if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                                $childrenMaybe+=$row2['Children'];
-                            }
-                            if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                                $guestsMaybe+=$row2['Guests'];
-                            }
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-
-                    $all = $ja+$nein+$vielleicht;
-                    $sall=$sall+$all;
-                    $str=$str."<div class=\"w3-row w3-border-bottom w3-border-black\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\">".$row['Name']."</div>\n<div class=\"w3-col l2 m2 s2\">".$all." / ".sprintf("%02d", $nReg)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10004; ".$ja."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center w3-opacity-min\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center w3-opacity-min\">? ".$vielleicht."</div>\n</div>\n";
-                }
-                if($bus && $GLOBALS['optionsDB']['showChildOption']) {
-                    $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
-                }
-                if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
-                    $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; 0</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div>\n</div>\n";
-                }
-                $str=$str."<div class=\"w3-row\"><div class=\"".$GLOBALS['optionsDB']['HoverEffect']." w3-col l7 m4 s4\"><b>Summe</b></div>\n<div class=\"w3-col l2 m2 s2\"><b>".$sall;
-                if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
-                    $str=$str."+".($childrenYes+$childrenMaybe+$guestsYes+$guestsMaybe);
-                }
-                $str=$str." / ".sprintf("%02d", $snReg)."</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($sja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$snein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($svielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
+                );
             }
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+            $memberCounts = $this->getRegisterMemberCounts();
+            $sja = 0;
+            $sall = 0;
+            $snReg = 0;
+            $snein = 0;
+            $svielleicht = 0;
+            $childrenYes = 0;
+            $guestsYes = 0;
+            $childrenMaybe = 0;
+            $guestsMaybe = 0;
+            $regRows = '';
+            while($row = mysqli_fetch_array($dbr)) {
+                $regId = (int)$row['Index'];
+                $nReg = isset($memberCounts[$regId]) ? (int)$memberCounts[$regId] : 0;
+                $snReg += $nReg;
+                $ja = 0;
+                $nein = 0;
+                $vielleicht = 0;
+                foreach($aMeldungen as $row2) {
+                    if((int)$row2['rIndex'] != $regId) continue;
+                    switch($row2['Wert']) {
+                    case 1:
+                        $ja++;
+                        $sja++;
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $childrenYes += (int)$row2['Children'];
+                        }
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $guestsYes += (int)$row2['Guests'];
+                        }
+                        break;
+                    case 2:
+                        $nein++;
+                        $snein++;
+                        break;
+                    case 3:
+                        $vielleicht++;
+                        $svielleicht++;
+                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                            $childrenMaybe += (int)$row2['Children'];
+                        }
+                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                            $guestsMaybe += (int)$row2['Guests'];
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                $all = $ja + $nein + $vielleicht;
+                $sall += $all;
+                $regRows .= '<div class="melde-response-reg">';
+                $regRows .= '<div class="melde-response-reg-name">'.htmlspecialchars((string)$row['Name'], ENT_QUOTES, 'UTF-8').'</div>';
+                $regRows .= $this->renderResponseStatusChips(
+                    $ja,
+                    $nein,
+                    $vielleicht,
+                    $all.' / '.sprintf('%02d', $nReg)
+                );
+                $regRows .= '</div>';
+            }
+            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
+                $regRows .= '<div class="melde-response-reg melde-response-reg--meta">';
+                $regRows .= '<div class="melde-response-reg-name">Kinder</div>';
+                $regRows .= $this->renderResponseStatusChips($childrenYes, 0, $childrenMaybe);
+                $regRows .= '</div>';
+            }
+            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
+                $regRows .= '<div class="melde-response-reg melde-response-reg--meta">';
+                $regRows .= '<div class="melde-response-reg-name">Gäste</div>';
+                $regRows .= $this->renderResponseStatusChips($guestsYes, 0, $guestsMaybe);
+                $regRows .= '</div>';
+            }
+            $sumYes = $sja + $childrenYes + $guestsYes;
+            $sumMaybe = $svielleicht + $childrenMaybe + $guestsMaybe;
+            $sumAll = (string)$sall;
+            if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
+                $sumAll .= '+'.($childrenYes + $childrenMaybe + $guestsYes + $guestsMaybe);
+            }
+            $sumAll .= ' / '.sprintf('%02d', $snReg);
+            $actions = $this->renderResponseStatusChips($sumYes, $snein, $sumMaybe, $sumAll);
+            $body = '<div class="melde-response-body">'.$regRows.'</div>';
+            return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions, $body);
         }
-        else { // $this->Auftritt
-            $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
+
+        // Non-Auftritt: aggregate only
+        $sql = sprintf(
+            "SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
             $this->Index
-            );
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            $ja=0;
-            $nein=0;
-            $vielleicht=0;
-            $childrenYes=0;
-            $guestsYes=0;
-            $childrenMaybe=0;
-            $guestsMaybe=0;
-            while($row = mysqli_fetch_array($dbr)) {
-                switch($row['Wert']) {
-                case 1:
-                    $ja++;
-                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                        $childrenYes+=$row['Children'];
-                    }
-                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                        $guestsYes+=$row['Guests'];
-                    }
-                    break;
-                case 2:
-                    $nein++;
-                    break;
-                case 3:
-                    $vielleicht++;
-                    $childrenMaybe+=$row['Children'];
-                    $guestsMaybe+=$row['Guests'];
-                    break;
-                default:
-                    break;
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $ja = 0;
+        $nein = 0;
+        $vielleicht = 0;
+        $childrenYes = 0;
+        $guestsYes = 0;
+        $childrenMaybe = 0;
+        $guestsMaybe = 0;
+        while($row = mysqli_fetch_array($dbr)) {
+            switch($row['Wert']) {
+            case 1:
+                $ja++;
+                if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                    $childrenYes += (int)$row['Children'];
                 }
+                if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                    $guestsYes += (int)$row['Guests'];
+                }
+                break;
+            case 2:
+                $nein++;
+                break;
+            case 3:
+                $vielleicht++;
+                $childrenMaybe += (int)$row['Children'];
+                $guestsMaybe += (int)$row['Guests'];
+                break;
+            default:
+                break;
             }
-            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">Kinder</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$childrenYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$childrenMaybe."</div>\n</div>\n";
-            }
-            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
-                $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\">G&auml;ste</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".$guestsYes."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".$guestsMaybe."</div>\n</div>\n";
-            }
-            $str=$str."<div class=\"w3-row\"><div class=\"w3-col l9 m6 s6\"><b>Summe</b></div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnYes']." w3-col l1 m2 s2 w3-center\">&#10004; ".($ja+$childrenYes+$guestsYes)."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnNo']." w3-col l1 m2 s2 w3-center\">&#10008; ".$nein."</div>\n<div class=\"".$GLOBALS['optionsDB']['colorBtnMaybe']." w3-col l1 m2 s2 w3-center\">? ".($vielleicht+$childrenMaybe+$guestsMaybe)."</div>\n</div>\n";
         }
-        $str=$str."</div></div>\n";
-        return $str;
+        $metaRows = '';
+        if($bus && $GLOBALS['optionsDB']['showChildOption']) {
+            $metaRows .= '<div class="melde-response-reg melde-response-reg--meta">';
+            $metaRows .= '<div class="melde-response-reg-name">Kinder</div>';
+            $metaRows .= $this->renderResponseStatusChips($childrenYes, $nein, $childrenMaybe);
+            $metaRows .= '</div>';
+        }
+        if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
+            $metaRows .= '<div class="melde-response-reg melde-response-reg--meta">';
+            $metaRows .= '<div class="melde-response-reg-name">Gäste</div>';
+            $metaRows .= $this->renderResponseStatusChips($guestsYes, $nein, $guestsMaybe);
+            $metaRows .= '</div>';
+        }
+        $actions = $this->renderResponseStatusChips(
+            $ja + $childrenYes + $guestsYes,
+            $nein,
+            $vielleicht + $childrenMaybe + $guestsMaybe
+        );
+        $body = $metaRows !== '' ? '<div class="melde-response-body">'.$metaRows.'</div>' : '';
+        return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions, $body);
     }
 
-    private function makeResponseEntry($wert, $name, $instrument, $children, $guests, $userId, $bus) {
-        $colors = array(
+    private function makeResponseEntry($wert, $name, $instrument, $children, $guests, $userId, $bus, $registerColor = '') {
+        $statusColors = array(
             1 => $GLOBALS['optionsDB']['colorBtnYes'],
             2 => $GLOBALS['optionsDB']['colorBtnNo'],
             3 => $GLOBALS['optionsDB']['colorBtnMaybe'],
         );
+        $regHex = function_exists('normalizeHexColor') ? normalizeHexColor($registerColor) : '';
         $entry = array(
-            'colorClass' => isset($colors[$wert]) ? $colors[$wert] : '',
+            'colorClass' => '',
+            'statusClass' => isset($statusColors[$wert]) ? $statusColors[$wert] : '',
+            'registerColor' => $regHex,
             'name' => $name,
             'instrument' => $instrument,
             'children' => null,
@@ -2356,12 +2361,11 @@ ORDER BY `Nachname`, `Vorname`;",
         return $this->_freeTextByUser;
     }
 
-    private function renderResponseEntries($entries, $colsize) {
+    private function renderResponseEntries($entries, $colsize = null) {
         $html = '';
         foreach($entries as $entry) {
             $html .= render('termin/response_line', array(
                 'entry' => $entry,
-                'colsize' => $colsize,
             ));
         }
         return $html;
@@ -2428,15 +2432,16 @@ ORDER BY `Nachname`, `Vorname`;",
                     if((int)$row2['rIndex'] != $registerId) continue;
                     $name = $row2['Vorname']." ".$row2['Nachname'];
                     $instrument = $row2['iName'];
+                    $regColor = isset($row2['rColor']) ? $row2['rColor'] : '';
                     switch($row2['Wert']) {
                     case 1:
-                        $whoYes[] = $this->makeResponseEntry(1, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus);
+                        $whoYes[] = $this->makeResponseEntry(1, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor);
                         break;
                     case 2:
-                        $whoNo[] = $this->makeResponseEntry(2, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus);
+                        $whoNo[] = $this->makeResponseEntry(2, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor);
                         break;
                     case 3:
-                        $whoMaybe[] = $this->makeResponseEntry(3, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus);
+                        $whoMaybe[] = $this->makeResponseEntry(3, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor);
                         break;
                     default:
                         break;
@@ -2482,7 +2487,6 @@ ORDER BY `Nachname`, `Vorname`;",
 
     public function getResponseModalHtml($filterregister = 0) {
         $lists = $this->buildResponseLists($filterregister);
-        $colsize = $lists['colsize'];
         $bus = $lists['bus'];
 
         $orchestraFull = '';
@@ -2514,12 +2518,14 @@ ORDER BY `Nachname`, `Vorname`;",
             'showOrchestra' => $showOrchestra,
             'orchestraFull' => $orchestraFull,
             'orchestraActive' => $orchestraActive,
-            'colsize' => $colsize,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
-            'whoYesHtml' => $this->renderResponseEntries($lists['whoYes'], $colsize),
-            'whoMaybeHtml' => $this->renderResponseEntries($lists['whoMaybe'], $colsize),
-            'whoNoHtml' => $this->renderResponseEntries($lists['whoNo'], $colsize),
+            'whoYesHtml' => $this->renderResponseEntries($lists['whoYes']),
+            'whoMaybeHtml' => $this->renderResponseEntries($lists['whoMaybe']),
+            'whoNoHtml' => $this->renderResponseEntries($lists['whoNo']),
+            'countYes' => count($lists['whoYes']),
+            'countMaybe' => count($lists['whoMaybe']),
+            'countNo' => count($lists['whoNo']),
         ));
     }
 

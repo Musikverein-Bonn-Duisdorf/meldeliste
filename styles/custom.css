@@ -373,9 +373,14 @@ a.app-titlebar-logo {
 }
 
 .admin-list-body #Liste > [id^="responseLine"],
+.admin-list-body #Liste > .melde-response-row,
 .admin-list-body #Liste > .w3-card {
   margin-top: 0.65rem !important;
   margin-bottom: 0 !important;
+}
+
+.admin-list-body #Liste > .melde-response-row:first-child {
+  margin-top: 0 !important;
 }
 
 /* Seiten ohne Body (Hilfe, …): Chrome padded, Hero negativ zurück auf Kanten */
@@ -2064,9 +2069,21 @@ a.app-titlebar-logo {
 }
 
 /* Orchestra: full vs packed active seating toggle */
+.orchestra-panel {
+  margin: 1rem 1.25rem 0;
+}
+
 .orchestra-panel-header {
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
   align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.orchestra-panel-title {
+  font-size: 1rem;
 }
 
 .orchestra-panel-toggle {
@@ -3189,6 +3206,137 @@ body.meld-cal-print {
   word-break: break-word;
 }
 
+/* MELD-149: response modal person lists */
+.modal-shell .profile-subtitle {
+  margin: 0.25rem 0 0;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.melde-response-modal-lists {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.melde-response-section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.melde-response-section-hint {
+  margin: -0.15rem 0 0.5rem;
+  font-size: 0.82rem;
+  opacity: 0.8;
+}
+
+.melde-response-list {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .melde-response-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem 0.65rem;
+  }
+}
+
+@media (min-width: 1000px) {
+  .melde-response-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.melde-response-person {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.3rem;
+}
+
+.melde-response-person--register {
+  background-color: var(--melde-person-reg, transparent);
+  color: var(--melde-person-fg, inherit);
+}
+
+@supports (background: color-mix(in srgb, red 50%, white)) {
+  .melde-response-person--register {
+    background-color: color-mix(in srgb, var(--melde-person-reg) 42%, white);
+    color: #111;
+  }
+}
+
+.melde-response-person--register .melde-response-person-extra {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.melde-response-person-main {
+  min-width: 0;
+}
+
+.melde-response-person-name {
+  font-weight: 700;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.melde-response-person-instrument {
+  margin-top: 0.1rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.melde-response-person-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+
+.melde-response-person-extra {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.2rem;
+  background: rgba(255, 255, 255, 0.45);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  max-width: 14rem;
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  .melde-response-modal-lists {
+    padding: 0.85rem 0.85rem 1rem;
+  }
+
+  .melde-response-person {
+    grid-template-columns: 1fr;
+  }
+
+  .melde-response-person-extras {
+    justify-content: flex-start;
+  }
+
+  .orchestra-panel {
+    margin-left: 0.85rem;
+    margin-right: 0.85rem;
+  }
+
+  .orchestra-panel-toggle {
+    text-align: left;
+  }
+}
+
 .calendar-melde-buttons {
   margin-top: 0;
 }
@@ -4027,7 +4175,7 @@ select.profile-control {
 .melde-row {
   --melde-date-col-w: 9.5rem;
   --melde-date-rail-w: 0.35rem;
-  --melde-date-rail-color: #fff;
+  --melde-date-rail-color: var(--page-title-accent, #345A95);
   --melde-col-gap: 0.85rem;
   --melde-pad-x: 1rem;
   --melde-shift-indent: calc(
@@ -4080,8 +4228,10 @@ select.profile-control {
   outline-offset: 2px;
 }
 
-/* Schicht-Termine: eine durchgehende vertikale Linie Header → Schichten */
-.melde-row:has(> .melde-shift) {
+/* Durchgehende vertikale Linie: Header → Schichten / Register-Body (MELD-149) */
+.melde-row:has(> .melde-shift),
+.melde-row:has(> .melde-response-body),
+.melde-response-row {
   --melde-date-rail-inset: 0.4rem;
   --melde-rail-left: calc(
     var(--melde-pad-x)
@@ -4090,12 +4240,14 @@ select.profile-control {
   );
 }
 
-.melde-row:has(> .melde-shift)::after {
+.melde-row:has(> .melde-shift)::after,
+.melde-row:has(> .melde-response-body)::after,
+.melde-response-row::after {
   content: "";
   position: absolute;
   left: var(--melde-rail-left);
   top: var(--melde-date-rail-inset);
-  bottom: 0;
+  bottom: var(--melde-date-rail-inset);
   width: var(--melde-date-rail-w);
   background: var(--melde-date-rail-color);
   border-radius: 2px;
@@ -4103,7 +4255,9 @@ select.profile-control {
   pointer-events: none;
 }
 
-.melde-row:has(> .melde-shift) > .melde-row-main > .melde-date-rail {
+.melde-row:has(> .melde-shift) > .melde-row-main > .melde-date-rail,
+.melde-row:has(> .melde-response-body) > .melde-row-main > .melde-date-rail,
+.melde-response-row > .melde-row-main > .melde-date-rail {
   visibility: hidden;
 }
 
@@ -4367,6 +4521,120 @@ select.profile-control {
   opacity: 0.9;
 }
 
+/* MELD-149: Meldungen / Mein Register overview cards */
+.melde-response-row .melde-actions {
+  align-items: flex-start;
+}
+
+.melde-response-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.melde-response-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.melde-response-chip--sum {
+  background: rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+}
+
+.melde-response-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 var(--melde-pad-x, 1rem) 0.75rem;
+  /*
+   * Rechts vom Strich wie die Titelspalte:
+   * date-col + gap + rail + gap  (+ pad-x kommt über padding-left)
+   */
+  margin-left: calc(
+    var(--melde-date-col-w, 9.5rem)
+    + var(--melde-date-rail-w, 0.35rem)
+    + (2 * var(--melde-col-gap, 0.85rem))
+  );
+}
+
+/* Schichten stecken im Body — kein zweites Melde-Shift-Indent / kein zweiter Strich */
+.melde-response-body > .melde-shift,
+.melde-response-body > .melde-response-shift {
+  margin-left: 0;
+  border-left: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.melde-response-empty {
+  padding: 0.35rem 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.melde-response-reg {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 0.75rem;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.melde-response-reg:last-child {
+  border-bottom: 0;
+}
+
+.melde-response-reg-name {
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.melde-response-reg--meta .melde-response-reg-name {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.melde-response-shift {
+  cursor: pointer;
+}
+
+.melde-response-shift:hover .melde-shift-name {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  /* Body bleibt rechts vom Strich (nicht margin-left: 0) */
+  .melde-response-row .melde-actions {
+    grid-column: 1 / -1;
+  }
+
+  .melde-response-chips {
+    justify-content: flex-start;
+  }
+
+  .melde-response-reg {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .melde-response-reg .melde-response-chips {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 600px) {
   .melde-row {
     --melde-pad-x: 0.75rem;
@@ -4380,12 +4648,56 @@ select.profile-control {
     max-width: none;
   }
 
+  /* Startseite-Schichten: Kurz-Strich im Header reicht auf Mobile */
   .melde-row:has(> .melde-shift)::after {
     display: none;
   }
 
   .melde-row:has(> .melde-shift) > .melde-row-main > .melde-date-rail {
     visibility: visible;
+  }
+
+  /*
+   * Meldungen/Mein Register (Mobile):
+   * Keine leere Datums-Gutter neben Schichten/Registern —
+   * Strich als linker Kartenrand (volle Höhe), Header: Datum | Titel.
+   */
+  .melde-response-row {
+    --melde-date-col-w: max-content;
+    border-left: var(--melde-date-rail-w) solid var(--melde-date-rail-color);
+    border-radius: 0 0.35rem 0.35rem 0;
+  }
+
+  .melde-response-row::after,
+  .melde-row.melde-response-row:has(> .melde-response-body)::after {
+    display: none !important;
+  }
+
+  .melde-response-row > .melde-row-main > .melde-date-rail {
+    display: none;
+  }
+
+  .melde-response-row .melde-date-col {
+    width: auto;
+    max-width: none;
+  }
+
+  .melde-response-row .melde-row-main {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.65rem;
+  }
+
+  .melde-response-body {
+    margin-left: 0;
+    padding-top: 0.15rem;
+  }
+
+  /* Response-Schichten: volle Breite unter dem Header */
+  .melde-response-body > .melde-shift,
+  .melde-response-body > .melde-response-shift {
+    margin-left: 0;
+    border-left: none;
+    padding: 0.55rem 0;
   }
 
   .melde-row-main {
