@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-f1fec (2026-07-23)
+
+- MELD-148: kompakte Log-Zeilen im Inventar-Layout mit Typ-Chips
+- MELD-148: Log Stil
+
 ## 2026-07-23-52bf1 (2026-07-23)
 
 - MELD-151: SMTP-Versand und Fehlerzählung im Mail-Menü
