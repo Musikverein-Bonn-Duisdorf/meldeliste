@@ -52,8 +52,7 @@ adminListPageBegin('System', 'Berechtigungen', array(
 ?>
     <div class="perm-toolbar">
       <div class="profile-field perm-toolbar-search">
-        <label class="profile-label" for="permFilter">Name filtern</label>
-        <input type="search" id="permFilter" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Name tippen…" autocomplete="off">
+        <input type="search" id="permFilter" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Name tippen…" aria-label="Name tippen…" autocomplete="off">
       </div>
       <div class="profile-field perm-toolbar-filter">
         <label class="profile-pref" for="permOnlyActive">
@@ -62,8 +61,8 @@ adminListPageBegin('System', 'Berechtigungen', array(
         </label>
       </div>
     </div>
+<?php adminListChromeClose(); ?>
 
-    <h3 class="profile-col-title">Rechte-Matrix</h3>
     <div class="perm-matrix-wrap">
       <table class="perm-matrix" id="permMatrix">
         <thead>

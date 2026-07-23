@@ -17,9 +17,10 @@ elseif(!$fill) {
 else {
     $profileKicker = 'Nutzer bearbeiten';
 }
-$profileHeroClass = !empty($_SESSION['adminpage'])
-    ? adminHeroClass(array('kicker' => $profileKicker, 'permKey' => 'perm_editUsers'))
-    : 'profile-hero';
+$profileHeroClass = adminHeroClass(array(
+    'kicker' => $profileKicker,
+    'permKey' => 'perm_editUsers',
+));
 ?>
 <div class="profile-shell profile-layout-a">
   <form class="profile-form" action="<?php echo htmlspecialchars($formAction, ENT_QUOTES, 'UTF-8'); ?>" method="POST">

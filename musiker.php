@@ -37,14 +37,12 @@ $nMusiker = $row['Count'];
 ?>
 <?php echo renderFlashHtml(); ?>
 <?php adminListPageBegin('Personen', 'Musiker ('.$nMusiker.')'); ?>
-
+<?php adminListSearchField('Nach Musiker suchen…', array('onkeyup' => 'filterMusiker()')); ?>
 <?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
 <div class="w3-center orchestra-svg-wrap">
 <?php echo printOrchestra(0); ?>
 </div>
 <?php } ?>
-
-<?php adminListSearchField('Nach Musiker suchen…', array('onkeyup' => 'filterMusiker()')); ?>
 <div id="listHeader" class="list-header w3-row w3-hide-small">
   <div class="w3-col l3 m6 s12 w3-container list-sort" data-sort="nachname" data-type="string">Name</div>
   <div class="w3-col l2 m6 s12 w3-container list-sort" data-sort="instrument" data-type="string">Instrument</div>

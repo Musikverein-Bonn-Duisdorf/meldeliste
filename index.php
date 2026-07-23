@@ -47,29 +47,22 @@ include "common/header.php";
 
 <?php echo renderFlashHtml(); ?>
 <?php
-if(isset($_POST['proxy'])) {
-?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorLogWarning']; ?>">
-    <h2>Bevorstehende Termine <?php echo $proxy->getName();?></h2>
-</div>
-<?php
-} else {
-?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <h2>Bevorstehende Termine</h2>
-</div>
-<?php
+$homeTitle = 'Bevorstehende Termine';
+if(isset($_POST['proxy']) && isset($proxy) && $proxy) {
+    $homeTitle .= ' '.$proxy->getName();
 }
+adminListPageBegin('Termine', $homeTitle);
+adminListSearchField('Termine suchen (Titel, Ort, Datum, Beschreibung)…', array(
+    'onkeyup' => 'filterTermine()',
+));
 $chunkUser = isset($user) ? (int)$user : (int)$_SESSION['userid'];
 $chunk = listChunkTermine('future', 'basic', '', 50, $chunkUser);
 ?>
-<div class="w3-container w3-padding-16" style="clear:both;">
-<input class="w3-input w3-border w3-padding" type="text" placeholder="Termine suchen (Titel, Ort, Datum, Beschreibung)…" id="filterString" onkeyup="filterTermine()">
-</div>
 <div id="Liste">
 <?php echo $chunk['html']; ?>
 <?php echo listChunkRenderSentinel('termine', $chunk['nextCursor'], $chunk['hasMore'], 'filterTermine', ' data-extra="user='.$chunkUser.'"'); ?>
 </div>
+<?php adminListPageEnd(); ?>
 <script src="<?php echo assetUrl('js/filterTermine.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/infiniteScroll.js'); ?>"></script>
 <?php

@@ -2,16 +2,679 @@
   color: #111;
 }
 
+/* —— App navigation (MELD-139): sidebar ≥601px, bottom bar ≤600px —— */
+html {
+  height: 100%;
+}
+
+body.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+}
+
+.app-titlebar {
+  position: relative;
+  z-index: 1100;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.5rem 4.5rem 0.5rem 1rem;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* w3-container-Clearfix darf hier kein Flex-Item erzeugen */
+.app-titlebar::before,
+.app-titlebar::after {
+  content: none;
+  display: none;
+}
+
+.app-titlebar-name {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 1.75rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.app-titlebar-logo {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  transform: translateY(-50%);
+  height: 2.75rem;
+  width: auto;
+  max-height: 2.75rem;
+  max-width: 3.5rem;
+  display: block;
+  object-fit: contain;
+}
+
+a.app-titlebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-titlebar-logo img {
+  height: 2.75rem;
+  width: auto;
+  max-height: 2.75rem;
+  max-width: 3.5rem;
+  display: block;
+  object-fit: contain;
+}
+
+.app-titlebar-user {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .app-titlebar {
+    padding-right: 3.75rem;
+  }
+
+  .app-titlebar-name {
+    font-size: 1.4rem;
+  }
+
+  .app-titlebar-logo,
+  .app-titlebar-logo img {
+    height: 2.25rem;
+    max-height: 2.25rem;
+    max-width: 2.75rem;
+  }
+}
+
+.app-banner {
+  flex-shrink: 0;
+}
+
+.app-shell {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1000;
+  overflow-x: visible;
+  overflow-y: auto;
+}
+
+.app-nav-primary,
+.app-nav-more-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-nav-form {
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+.app-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+  position: relative;
+}
+
+.app-nav-item:hover {
+  filter: brightness(0.95);
+}
+
+.app-nav-item .nav-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-nav-item .nav-label-short {
+  display: none;
+}
+
+.app-nav-item--badge {
+  padding-right: 1.75rem;
+}
+
+.app-nav-badge {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  padding: 1px 5px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.app-nav-more-wrap {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.app-nav-more-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.9rem;
+  font-weight: 700;
+}
+
+.app-nav-more-close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.app-nav-admin-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.9rem;
+  font-weight: 700;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+  margin: 0.65rem 0.75rem 0.75rem;
+  padding: 0 1.25rem 1.25rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --app-page-head-h: 0px;
+  --app-page-toolbar-h: 0px;
+}
+
+.app-main:has(.profile-hero) {
+  --app-page-head-h: 4.75rem;
+}
+
+.app-main:has(.admin-list-toolbar),
+.app-main:has(.perm-toolbar) {
+  --app-page-toolbar-h: 2.35rem;
+}
+
+/* Flash / MOTD oben etwas Abstand (kein padding-top auf der Karte) */
+.app-main > .w3-panel:first-child,
+.app-main > .w3-container.w3-card:first-of-type {
+  margin-top: 1rem;
+}
+
+/* Admin/Profil-Seiten: keine zweite Karte im gleichen Rahmen */
+.app-main > .profile-page,
+.app-main > .termin-page {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: none;
+}
+
+.app-main > .profile-page > .profile-shell,
+.app-main > .termin-page > .profile-shell,
+.app-main > .w3-container > .profile-shell,
+.app-main > .profile-shell {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Admin-Listen: Hero bündig am Kartenrand (wie Hilfe), Inhalt eingerückt */
+.app-main:has(.admin-list-shell) {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0.75rem;
+}
+
+.admin-list-shell > .app-page-chrome > .admin-list-toolbar,
+.admin-list-shell > .app-page-chrome > .perm-toolbar {
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
+}
+
+/* Seiten ohne Body (Hilfe, …): Chrome padded, Hero negativ zurück auf Kanten */
+.admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome > .profile-hero.admin-list-hero {
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+}
+
+/* Listen mit Chrome+Body: Titel(+Suche) fest, nur .admin-list-body scrollt */
+.app-main:has(.admin-list-body) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-main:has(.admin-list-body) > .w3-panel,
+.app-main:has(.admin-list-body) > .w3-container.w3-card,
+.app-main:has(.admin-list-body) > .app-banner {
+  flex-shrink: 0;
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
+}
+
+.app-main:has(.admin-list-body) > .profile-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-list-shell:has(.admin-list-body) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  --app-chrome-fade-h: 0.75rem;
+}
+
+.admin-list-shell > .app-page-chrome {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 6;
+  padding-bottom: 0;
+}
+
+/* Inhalt scrollt unter die Suche und fadet aus (schmale Zone) */
+.admin-list-shell > .app-page-chrome::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: var(--app-chrome-fade-h);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #fff 0%,
+    rgba(255, 255, 255, 0.65) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.admin-list-shell > .admin-list-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  /* ungescrollt: Inhalt erst unter / am Ende der Fade-Zone */
+  padding-top: var(--app-chrome-fade-h);
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Seiten ohne Body-Wrapper (Hilfe, Formulare): Hero sticky im app-main-Scroll */
+.app-main .profile-shell:not(.admin-list-shell) > .profile-hero,
+.app-main .profile-form > .profile-hero,
+.app-main .admin-list-shell:not(:has(.admin-list-body)) .profile-hero {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.app-main .profile-shell > .profile-hero:not(.admin-list-hero),
+.app-main .profile-form > .profile-hero:not(.admin-list-hero) {
+  background: #fff;
+}
+
+@media (min-width: 601px) {
+  .app-nav {
+    width: 13.5rem;
+    align-self: stretch;
+    overflow-x: visible;
+    overflow-y: auto;
+  }
+
+  .app-nav-more-toggle,
+  .app-nav-more-backdrop,
+  .app-nav-more-head,
+  .app-nav-more-only-mobile {
+    display: none !important;
+  }
+
+  .app-nav-more-panel {
+    display: block;
+    position: static;
+    box-shadow: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    overflow: visible;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .app-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    min-height: 3.75rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .app-nav-primary {
+    /* 5 Kern-Buttons: gleiche Zellenbreite wie „Mehr“ (1) */
+    flex: 5 1 0;
+    flex-direction: row;
+    align-items: stretch;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .app-nav-form {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .app-nav-item--secondary {
+    display: none !important;
+  }
+
+  .app-nav-more-wrap {
+    margin-top: 0;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .app-nav-primary > .app-nav-item,
+  .app-nav-form > .app-nav-item,
+  .app-nav-more-wrap > .app-nav-more-toggle {
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    padding: 0.45rem 0.2rem;
+    margin: 0;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 3.75rem;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .app-nav-item > i,
+  .app-nav-more-toggle > i {
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+
+  /* Bottom-Bar: nur Icons, Labels im Mehr-Sheet */
+  .app-nav-primary > .app-nav-item .nav-label,
+  .app-nav-form > .app-nav-item .nav-label,
+  .app-nav-more-toggle .nav-label {
+    display: none;
+  }
+
+  .app-nav-item--badge {
+    padding-right: 0.2rem;
+  }
+
+  .app-nav-badge {
+    top: 0.2rem;
+    right: 0.15rem;
+    font-size: 0.65rem;
+  }
+
+  .app-nav-more-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 45;
+  }
+
+  .app-nav-more-panel {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: min(75vh, 32rem);
+    overflow: auto;
+    z-index: 50;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0));
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+
+  .app-nav-more-panel.is-open {
+    display: block;
+  }
+
+  .app-nav-more-head {
+    font-size: 1.05rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .app-nav-more-body .app-nav-item {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+    min-width: 0;
+    min-height: 3rem;
+    height: auto;
+    font-size: 1.05rem;
+    font-weight: 600;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .app-nav-more-body .app-nav-item > i {
+    font-size: 1.25rem;
+    width: 1.5rem;
+    text-align: center;
+  }
+
+  .app-nav-more-body .app-nav-item .nav-label {
+    display: inline;
+    flex: 1;
+    font-size: 1.05rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .app-nav-more-body .app-nav-item .nav-label-long {
+    display: inline;
+  }
+
+  .app-nav-more-body .app-nav-item .nav-label-short {
+    display: none;
+  }
+
+  .app-main {
+    margin: 0.5rem 0.5rem calc(4.5rem + env(safe-area-inset-bottom, 0));
+    padding: 0 1rem 1rem;
+  }
+
+  .app-main:has(.admin-list-shell) {
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0.75rem;
+  }
+
+  .admin-list-shell > .app-page-chrome > .admin-list-toolbar,
+  .admin-list-shell > .app-page-chrome > .perm-toolbar {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .admin-list-shell > .admin-list-body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome > .profile-hero.admin-list-hero {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+
+  .app-main:has(.admin-list-body) > .w3-panel,
+  .app-main:has(.admin-list-body) > .w3-container.w3-card,
+  .app-main:has(.admin-list-body) > .app-banner {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .app-main:has(.profile-hero) {
+    --app-page-head-h: 5.25rem;
+  }
+
+  .app-main:has(.admin-list-toolbar),
+  .app-main:has(.perm-toolbar) {
+    --app-page-toolbar-h: 2.45rem;
+  }
+
+  .profile-shell .profile-hero.admin-list-hero,
+  .w3-container.admin-list-hero {
+    margin-bottom: 0.5rem;
+    padding: 0.65rem 1rem;
+  }
+
+  .app-main:has(.admin-list-shell) .admin-list-shell .profile-hero.admin-list-hero {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .app-main:has(.admin-list-shell) .admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome > .profile-hero.admin-list-hero {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+
+  body.app-nav-more-open {
+    overflow: hidden;
+  }
+}
+
+/* —— end app navigation —— */
+
 /* Hero tinted by Admin-Rechte group (same palette as Nav / Chips / Matrix).
    Descendant (not only >) so Form-Seiten mit .profile-form > header auch treffen. */
 .profile-shell .profile-hero.admin-list-hero,
 .w3-container.admin-list-hero {
-  margin: -1px -1px 1.15rem;
-  padding: 0.65rem 1rem;
+  margin: 0 -1.25rem 0.5rem;
+  padding: 0.65rem 1.25rem;
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
   border-left: 6px solid transparent;
   color: #222;
+}
+
+/* Admin-Listen-Karten ohne seitliches app-main-Padding: Hero ohne Negativ-Margin */
+.app-main:has(.admin-list-shell) .admin-list-shell .profile-hero.admin-list-hero {
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* Hilfe & Co.: Chrome hat seitliches Padding → Hero wieder auf Kartenkante */
+.app-main:has(.admin-list-shell) .admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome > .profile-hero.admin-list-hero {
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+}
+
+.app-main > div.profile-page:first-of-type > .profile-shell > .profile-hero.admin-list-hero:first-child,
+.app-main > div.profile-page:first-of-type > .profile-shell > .app-page-chrome > .profile-hero.admin-list-hero:first-child,
+.app-main > div.termin-page:first-of-type > .profile-shell > .profile-hero.admin-list-hero:first-child,
+.app-main > div.termin-page:first-of-type > .profile-shell > .app-page-chrome > .profile-hero.admin-list-hero:first-child,
+.app-main .profile-form > .profile-hero.admin-list-hero:first-child,
+.app-main > div.w3-container.admin-list-hero:first-of-type {
+  border-radius: 10px 10px 0 0;
 }
 
 .profile-shell .profile-hero.admin-list-hero .profile-kicker {
@@ -22,6 +685,7 @@
 .profile-shell .profile-hero.admin-list-hero .profile-title {
   color: inherit;
   font-weight: 700;
+  font-size: clamp(1.65rem, 2.8vw, 2.05rem);
 }
 
 .profile-shell .profile-hero.admin-list-hero .profile-hero-actions .w3-button,
@@ -29,54 +693,32 @@
   color: inherit;
 }
 
-.profile-shell .profile-hero.admin-list-hero--nutzer,
-.w3-container.admin-list-hero--nutzer {
-  background: #90caf9;
-  border-left-color: #42a5f5;
-}
+/* Gruppenfarben (Nav/Hero/Matrix): siehe renderPermissionGroupColorCss() */
 
-.profile-shell .profile-hero.admin-list-hero--termine,
-.w3-container.admin-list-hero--termine {
-  background: #a5d6a7;
-  border-left-color: #66bb6a;
-}
-
-.profile-shell .profile-hero.admin-list-hero--register,
-.w3-container.admin-list-hero--register {
-  background: #ffcc80;
-  border-left-color: #ffa726;
-}
-
-.profile-shell .profile-hero.admin-list-hero--inventar,
-.w3-container.admin-list-hero--inventar {
-  background: #ce93d8;
-  border-left-color: #ab47bc;
-}
-
-.profile-shell .profile-hero.admin-list-hero--kommunikation,
-.w3-container.admin-list-hero--kommunikation {
-  background: #80deea;
-  border-left-color: #26c6da;
-}
-
-.profile-shell .profile-hero.admin-list-hero--system,
-.w3-container.admin-list-hero--system {
-  background: #b0bec5;
-  border-left-color: #78909c;
-}
-
-.admin-list-toolbar {
+.admin-list-toolbar,
+.perm-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  align-items: flex-end;
-  margin-bottom: 0.85rem;
+  gap: 0.35rem 0.75rem;
+  align-items: stretch;
+  margin: 0;
+  padding: 0.15rem 0 0;
+  background: #fff;
 }
 
-.admin-list-search {
+.admin-list-search,
+.perm-toolbar-search,
+.admin-list-toolbar .profile-field,
+.perm-toolbar .profile-field {
   flex: 1 1 16rem;
   min-width: 12rem;
-  margin-bottom: 0;
+  margin: 0 !important;
+  padding: 0;
+}
+
+.admin-list-toolbar .profile-control,
+.perm-toolbar .profile-control {
+  margin: 0 !important;
 }
 
 .admin-list-toolbar-extra {
@@ -85,7 +727,43 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-  padding-bottom: 0.15rem;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-list-shell > #Liste,
+.admin-list-shell > .list-header,
+.admin-list-shell > #listHeader,
+.profile-shell > #Liste,
+.profile-shell > .list-header,
+.profile-shell > #listHeader {
+  margin-top: 0;
+}
+
+/* Abstand Suche → Liste: weicher Fade unter .app-page-chrome */
+.admin-list-body > #Liste > :first-child,
+.admin-list-shell > #Liste > :first-child {
+  margin-top: 0 !important;
+}
+
+.admin-list-body > .list-header,
+.admin-list-body > #listHeader,
+.admin-list-shell > .list-header,
+.admin-list-shell > #listHeader {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.admin-list-body > .list-header + #Liste > :first-child,
+.admin-list-body > #listHeader + #Liste > :first-child,
+.admin-list-shell > .list-header + #Liste > :first-child,
+.admin-list-shell > #listHeader + #Liste > :first-child {
+  margin-top: 0 !important;
+}
+
+.perm-toolbar-filter {
+  flex: 0 1 auto;
+  margin: 0 !important;
 }
 
 .admin-list-shell .list-header,
@@ -138,25 +816,6 @@
   color: #111;
 }
 
-.perm-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.perm-toolbar-search {
-  flex: 1 1 16rem;
-  min-width: 12rem;
-  margin-bottom: 0;
-}
-
-.perm-toolbar-filter {
-  flex: 0 1 auto;
-  margin-bottom: 0.35rem;
-}
-
 .perm-save-status {
   margin: 0;
   min-height: 1.2em;
@@ -179,11 +838,16 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  max-height: calc(100dvh - 16rem);
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   background: #fff;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Ohne Body-Scroll (Fallback): begrenzte Höhe */
+.admin-list-shell:not(:has(.admin-list-body)) > .perm-matrix-wrap,
+.profile-shell:not(.admin-list-shell) > .perm-matrix-wrap {
+  max-height: calc(100dvh - 16rem);
 }
 
 .perm-matrix {
@@ -207,7 +871,7 @@
   overflow: hidden;
 }
 
-.perm-matrix thead th {
+.perm-matrix-wrap .perm-matrix thead th {
   position: sticky;
   top: 0;
   z-index: 2;
@@ -298,44 +962,7 @@
   }
 }
 
-/* Group colors (same palette as Admin-Nav / Rechte-Chips) */
-.perm-matrix thead th.perm-group--nutzer {
-  background: #e3f2fd;
-  box-shadow: inset 0 -3px 0 #64b5f6;
-}
-.perm-matrix thead th.perm-group--termine {
-  background: #e8f5e9;
-  box-shadow: inset 0 -3px 0 #66bb6a;
-}
-.perm-matrix thead th.perm-group--register {
-  background: #fff3e0;
-  box-shadow: inset 0 -3px 0 #ffb74d;
-}
-.perm-matrix thead th.perm-group--inventar {
-  background: #f3e5f5;
-  box-shadow: inset 0 -3px 0 #ba68c8;
-}
-.perm-matrix thead th.perm-group--kommunikation {
-  background: #e0f7fa;
-  box-shadow: inset 0 -3px 0 #4dd0e1;
-}
-.perm-matrix thead th.perm-group--system {
-  background: #eceff1;
-  box-shadow: inset 0 -3px 0 #90a4ae;
-}
-
-.perm-matrix td.perm-group--nutzer.perm-off { background: #f5fafd; }
-.perm-matrix td.perm-group--nutzer.perm-on { background: #90caf9; }
-.perm-matrix td.perm-group--termine.perm-off { background: #f4faf5; }
-.perm-matrix td.perm-group--termine.perm-on { background: #a5d6a7; }
-.perm-matrix td.perm-group--register.perm-off { background: #fffaf3; }
-.perm-matrix td.perm-group--register.perm-on { background: #ffcc80; }
-.perm-matrix td.perm-group--inventar.perm-off { background: #faf5fc; }
-.perm-matrix td.perm-group--inventar.perm-on { background: #ce93d8; }
-.perm-matrix td.perm-group--kommunikation.perm-off { background: #f2fcfd; }
-.perm-matrix td.perm-group--kommunikation.perm-on { background: #80deea; }
-.perm-matrix td.perm-group--system.perm-off { background: #f7f9fa; }
-.perm-matrix td.perm-group--system.perm-on { background: #b0bec5; }
+/* Group colors: renderPermissionGroupColorCss() */
 
 .perm-matrix td.perm-inherited {
   outline: 2px dashed rgba(0, 0, 0, 0.35);
@@ -386,20 +1013,64 @@
   align-items: stretch;
 }
 
-/* Admin nested dropdowns (MELD-58) */
+/* Admin nested dropdowns (MELD-58 / MELD-139 sidebar) */
+.admin-nav {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
 .admin-nav > .w3-dropdown-content {
   min-width: 0;
   width: max-content;
   max-width: min(90vw, 16rem);
-  z-index: 10;
+  z-index: 1100;
 }
 
-/* w3.css opens ALL nested .w3-dropdown-content on parent hover — reset that */
-.admin-nav:hover .w3-dropdown-content {
-  display: none;
+/* w3.css opens ALL nested .w3-dropdown-content on ancestor hover — reset that.
+   Desktop (MELD-139): Akkordeon nach unten in der Sidebar, nicht als Flyout über dem Content. */
+@media (min-width: 601px) {
+  .admin-nav:hover .admin-nav-group > .w3-dropdown-content,
+  .admin-nav .admin-nav-group:hover > .w3-dropdown-content {
+    display: none;
+  }
+
+  .admin-nav .admin-nav-group > .w3-dropdown-content {
+    position: static !important;
+    left: auto;
+    top: auto;
+    display: none !important;
+    width: 100%;
+    max-width: none;
+    min-width: 0 !important;
+    z-index: auto;
+    box-shadow: none;
+  }
+
+  .admin-nav .admin-nav-group.admin-nav-open > .w3-dropdown-content {
+    display: block !important;
+  }
+
+  .admin-nav-group.admin-nav-open > .w3-button .admin-nav-caret {
+    transform: rotate(90deg);
+  }
+
+  .admin-nav-group > .w3-button {
+    font-weight: 600;
+    cursor: pointer;
+    white-space: normal;
+  }
+
+  .admin-nav-group > .w3-dropdown-content .w3-bar-item {
+    white-space: normal;
+    padding-left: 1.25rem;
+  }
 }
-.admin-nav:hover > .w3-dropdown-content {
-  display: block;
+
+@media (max-width: 600px) {
+  .admin-nav:hover .admin-nav-group > .w3-dropdown-content {
+    display: none;
+  }
 }
 
 /*
@@ -431,55 +1102,29 @@
   background-color: transparent;
 }
 
-/* Same palette as profile permission chips */
-.admin-nav .admin-nav-perm,
+/* Gruppenfarben Nav/Chips: renderPermissionGroupColorCss() */
+.app-nav .admin-nav-perm,
 .profile-perm-tile {
   color: #222 !important;
 }
 
-.admin-nav .admin-nav-perm {
+.app-nav .admin-nav-perm {
   border-left: 4px solid transparent;
 }
 
-.admin-nav .admin-nav-perm--nutzer,
-.profile-perm-tile--nutzer {
-  background: #e3f2fd !important;
-  border-color: #64b5f6;
-}
-
-.admin-nav .admin-nav-perm--termine,
-.profile-perm-tile--termine {
-  background: #e8f5e9 !important;
-  border-color: #66bb6a;
-}
-
-.admin-nav .admin-nav-perm--register,
-.profile-perm-tile--register {
-  background: #fff3e0 !important;
-  border-color: #ffb74d;
-}
-
-.admin-nav .admin-nav-perm--inventar,
-.profile-perm-tile--inventar {
-  background: #f3e5f5 !important;
-  border-color: #ba68c8;
-}
-
-.admin-nav .admin-nav-perm--kommunikation,
-.profile-perm-tile--kommunikation {
-  background: #e0f7fa !important;
-  border-color: #4dd0e1;
-}
-
-.admin-nav .admin-nav-perm--system,
-.profile-perm-tile--system {
-  background: #eceff1 !important;
-  border-color: #90a4ae;
-}
-
-.admin-nav .admin-nav-group > .w3-button.admin-nav-perm:hover,
-.admin-nav .w3-bar-item.admin-nav-perm:hover {
+.app-nav .admin-nav-group > .w3-button.admin-nav-perm:hover,
+.app-nav .w3-bar-item.admin-nav-perm:hover,
+.app-nav .app-nav-item.admin-nav-perm:hover {
   filter: brightness(0.96);
+}
+
+@media (max-width: 600px) {
+  .app-nav > .app-nav-primary > .app-nav-item.admin-nav-perm,
+  .app-nav > .app-nav-primary > .app-nav-form > .app-nav-item.admin-nav-perm,
+  .app-nav > .app-nav-more-wrap > .app-nav-more-toggle.admin-nav-perm {
+    border-left: 0;
+    border-top: 3px solid transparent;
+  }
 }
 
 .admin-nav-caret {
@@ -490,20 +1135,15 @@
 
 .admin-nav-group > .w3-dropdown-content {
   position: absolute !important;
-  /* slight overlap so the pointer can reach the flyout without leaving :hover */
   left: calc(100% - 2px);
   top: 0;
-  /* override .w3-bar-block … min-width:100% */
   min-width: 0 !important;
   width: max-content;
   max-width: min(90vw, 16rem);
-  z-index: 12;
+  z-index: 1100;
   margin: 0;
   padding: 0;
-}
-
-.admin-nav-group:hover > .w3-dropdown-content {
-  display: block;
+  display: none;
 }
 
 .admin-nav-group > .w3-dropdown-content .w3-bar-item {
@@ -511,28 +1151,13 @@
 }
 
 @media (max-width: 600px) {
-  /* Top-level admin panel: full width when hamburger opens admin-nav */
-  .admin-nav.w3-show > .w3-dropdown-content,
-  .admin-nav.w3-show:hover > .w3-dropdown-content {
-    display: block;
-    position: static !important;
-    width: 100%;
-    max-width: none;
-    min-width: 100% !important;
-    box-shadow: none;
-  }
-
-  .admin-nav > .w3-dropdown-content,
-  .admin-nav .admin-nav-group > .w3-dropdown-content {
-    width: 100%;
-    max-width: none;
-    min-width: 100% !important;
-  }
-
-  /* Subgroups collapsed by default (accordion) */
+  /* Admin accordion inside Mehr-Sheet */
   .admin-nav .admin-nav-group > .w3-dropdown-content {
     position: static !important;
     display: none !important;
+    width: 100%;
+    max-width: none;
+    min-width: 100% !important;
     box-shadow: none;
   }
 
@@ -541,7 +1166,6 @@
     display: block !important;
   }
 
-  /* No hover-open on touch devices */
   .admin-nav:hover .admin-nav-group > .w3-dropdown-content {
     display: none !important;
   }
@@ -565,11 +1189,6 @@
   .admin-nav-group > .w3-dropdown-content .w3-bar-item {
     white-space: normal;
     padding-left: 1.5em;
-  }
-
-  /* Wrench stays hidden; groups are the mobile entry */
-  .admin-nav > .w3-button.w3-hide-small {
-    display: none !important;
   }
 }
 
@@ -1821,7 +2440,7 @@ body.meld-cal-print {
   flex-wrap: wrap;
   gap: 0.5rem;
   position: sticky;
-  top: 0;
+  top: calc(var(--app-page-head-h, 0px) + var(--app-page-toolbar-h, 0px));
   z-index: 5;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -1889,11 +2508,25 @@ body.meld-cal-print {
 }
 
 /* Sortierbare Listenköpfe (MELD-96): Format + sticky beim Scrollen
-   z-index unter Nav/Admin-Dropdowns (admin-nav: 10/12), damit Menüs nicht verdeckt werden */
+   z-index unter Nav/Admin-Dropdowns (app-nav: 1000), damit Menüs nicht verdeckt werden */
+/* Listenköpfe: im Body-Scroll unter festem Chrome bei top:0 kleben */
+.admin-list-body > #listHeader,
+.admin-list-body > .list-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.admin-list-shell > #listHeader,
+.admin-list-shell > .list-header {
+  position: static;
+  top: auto;
+}
+
 #listHeader,
 .list-header {
   position: sticky;
-  top: 0;
+  top: calc(var(--app-page-head-h, 0px) + var(--app-page-toolbar-h, 0px));
   z-index: 2;
   margin: 0;
   background: #009688;
@@ -2217,6 +2850,13 @@ body.meld-cal-print {
   margin-bottom: 1.15rem;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.profile-hero-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
 }
 
 .profile-kicker {
@@ -2225,13 +2865,15 @@ body.meld-cal-print {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.65;
+  text-align: left;
 }
 
 .profile-title {
   margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.7rem);
-  font-weight: 650;
+  font-size: clamp(1.65rem, 2.8vw, 2.05rem);
+  font-weight: 700;
   line-height: 1.2;
+  text-align: left;
 }
 
 .profile-hero-actions {

@@ -27,11 +27,8 @@ include 'common/header.php';
 <script src="<?php echo assetUrl('js/changeInstrument.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/calendarMelde.js'); ?>"></script>
 
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Kalender</h2>
-</div>
-
 <?php
+adminListPageBegin('Termine', 'Kalender');
 $calYear = (int)$bounds['year'];
 $calMonth = (int)$bounds['month'];
 $monthNames = calendarMonthNames();
@@ -178,6 +175,7 @@ button.w3-button.meld-cal-nav-icon {
 include __DIR__.'/views/calendar/month.php';
 ?>
 </div>
+<?php adminListPageEnd(); ?>
 <?php
 if($showCalendarSubscribe) {
     $n = $calUser;

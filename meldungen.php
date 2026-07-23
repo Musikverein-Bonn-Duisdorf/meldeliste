@@ -12,7 +12,6 @@ $chunk = listChunkTermine('future', 'response', '', 50, (int)$_SESSION['userid']
 adminListPageBegin('Meldungen', 'Rückmeldungen');
 adminListSearchField('Termine suchen (Titel, Ort, Datum, Beschreibung)…', array(
     'onkeyup' => 'filterTermine()',
-    'label' => 'Termine suchen',
 ));
 ?>
 <div id="Liste">

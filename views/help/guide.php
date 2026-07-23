@@ -30,7 +30,7 @@ $sections[] = array(
     'title' => 'Einführung',
     'body' => '
 <p>Die Meldeliste ist die zentrale Plattform für Termine, Rückmeldungen und (je nach Rechten) Verwaltung im Verein.</p>
-<p>Oben in der Navigation erreichst du die Bereiche, die für dich freigeschaltet sind. Diese Hilfe zeigt nur Abschnitte, die zu deinen aktuellen Rechten passen.</p>
+<p>Über die Navigation erreichst du die Bereiche, die für dich freigeschaltet sind: auf breiten Bildschirmen links mit Text, auf dem Smartphone unten als Leiste (weitere Einträge und Admin unter <b>Mehr</b>). Diese Hilfe zeigt nur Abschnitte, die zu deinen aktuellen Rechten passen.</p>
 <p>Bitte melde dich möglichst vollständig zu Terminen an (ja / nein / vielleicht) – das erleichtert die Planung enorm.</p>
 '
 );
@@ -39,6 +39,7 @@ $sections[] = array(
     'id' => 'navigation',
     'title' => 'Navigation',
     'body' => '
+<p>Auf dem Desktop steht die Navigation links (Icons mit Beschriftung). Auf dem Smartphone unten; unter <b>Mehr</b> findest du weitere Einträge, Admin und Ausloggen.</p>
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
 <li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
@@ -49,7 +50,7 @@ $sections[] = array(
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
 <li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
 <li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
-'.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü in der Reihenfolge Personen → Termine → Meldungen → Kommunikation → Inventar → Register → System; Einträge sind in denselben Farben wie die Rechte-Chips eingefärbt</li>' : '').'
+'.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü in der Reihenfolge Personen → Termine → Meldungen → Kommunikation → Inventar → Register → System; Einträge sind in denselben Farben wie die Rechte-Chips eingefärbt (Desktop links unten, mobil unter Mehr)</li>' : '').'
 <li><i class="fas fa-sign-out-alt"></i> <b>Ausloggen</b> – Sitzung beenden</li>
 </ul>
 '

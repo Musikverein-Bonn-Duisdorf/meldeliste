@@ -1,3 +1,5 @@
+</div><!-- .app-main -->
+</div><!-- .app-shell -->
 <div id="ajaxModalHost" class="w3-modal" onclick="if(event.target===this)closeModal();">
   <div id="ajaxModalContent" class="w3-modal-content"></div>
 </div>

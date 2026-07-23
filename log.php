@@ -18,7 +18,7 @@ if($leak !== false && $leak !== '') {
 ?>
 <?php
 adminListPageBegin('System', 'Log');
-adminListSearchField('Log durchsuchen…', array('onkeyup' => 'filterLog()', 'label' => 'Log durchsuchen'));
+adminListSearchField('Log durchsuchen…', array('onkeyup' => 'filterLog()'));
 ?>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>

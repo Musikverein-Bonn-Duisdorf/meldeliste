@@ -63,10 +63,8 @@ foreach($voices as $uv) {
 }
 
 include 'common/header.php';
+adminListPageBegin('Stimme', 'Stimme / Fallbacks — '.$target->Vorname.' '.$target->Nachname);
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Stimme / Fallbacks — <?php echo htmlspecialchars($target->Vorname.' '.$target->Nachname, ENT_QUOTES, 'UTF-8'); ?></h2>
-</div>
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4"></div>
 <div class="w3-card <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile w3-center w3-border w3-padding w3-col s6 l4">
 <?php echo renderFlashHtml(); ?>
@@ -119,4 +117,7 @@ function addFallbackRow() {
   container.appendChild(clone);
 }
 </script>
-<?php include 'common/footer.php'; ?>
+<?php
+adminListPageEnd();
+include 'common/footer.php';
+?>

@@ -51,13 +51,8 @@ foreach($mediaLinks as $link) {
         $visibleLinks[] = $link;
     }
 }
+adminListPageBegin('Medien', 'Medien');
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<h2>Medien</h2>
-</div>
-<div class="w3-container">
-<h3>Hier findest du Konzertaufnahmen, Fotos und weitere Medien für den internen Gebrauch</h3>
-</div>
 <?php if($visibleLinks) { ?>
   <div class="w3-container w3-row-padding">
 <?php foreach($visibleLinks as $link) { ?>
@@ -72,5 +67,6 @@ foreach($mediaLinks as $link) {
 </div>
 <?php } ?>
 <?php
+adminListPageEnd();
 include "common/footer.php";
 ?>

@@ -12,16 +12,11 @@ if(isset($_POST['proxy'])) {
 else {
     $user = $_SESSION['userid'];
 }
+adminListPageBegin('Register', 'Mein Register');
+adminListSearchField('Termine suchen (Titel, Ort, Datum, Beschreibung)…', array(
+    'onkeyup' => 'filterTermine()',
+));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<h2>Mein Register</h2>
-</div>
-      <div class="w3-row">
-               <div class="w3-panel w3-col l3 w3-left"></div>
-                        <div class="w3-col l6 s12 m12">
-<div class="w3-container w3-padding-16" style="clear:both;">
-<input class="w3-input w3-border w3-padding" type="text" placeholder="Termine suchen (Titel, Ort, Datum, Beschreibung)…" id="filterString" onkeyup="filterTermine()">
-</div>
 <div id="Liste">
 <?php
 $now = date("Y-m-d");
@@ -41,9 +36,7 @@ while($row = mysqli_fetch_array($dbr)) {
 }
 ?>
 </div>
-</div>
-<div class="w3-col l3"></div>
-</div>
+<?php adminListPageEnd(); ?>
 <script src="js/filterTermine.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php
 include "common/footer.php";

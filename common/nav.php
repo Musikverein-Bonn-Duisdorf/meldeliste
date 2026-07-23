@@ -1,21 +1,49 @@
-<div class="w3-container <?php echo $optionsDB['colorTitle']; ?>">
-  <h1 class="w3-hide-small" style="width: calc(100vw - 150px);"><?php echo $optionsDB['WebSiteName']; ?></h1>
-  <h1 class="w3-hide-large w3-hide-medium" style="width: calc(100vw - 150px);"><?php echo $optionsDB['WebSiteNameShort']; ?></h1>
+<?php
+$mailUnread = 0;
+if(isset($_SESSION['userid'])) {
+    $mailUnread = MailOutbox::countUnreadForUser((int)$_SESSION['userid']);
+}
+$mailUnreadLabel = $mailUnread > 99 ? '99+' : (string)$mailUnread;
+$navUser = new User;
+$navUser->load_by_id($_SESSION['userid']);
+$navHasInventories = $navUser->hasInventories();
+$ssoArchiv = !empty($optionsDB['urlNotenarchiv'])
+    ? 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlNotenarchiv']))
+    : '';
+$ssoMit = !empty($optionsDB['urlMitgliederverwaltung'])
+    ? 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlMitgliederverwaltung']))
+    : '';
+$isAdminNav = isAdmin();
+if($isAdminNav) {
+    $showPersonen = requirePermission('perm_showUsers');
+    $showTermine = requirePermission('perm_editAppmnts');
+    $showMeldungen = requirePermission('perm_showResponse');
+    $showKommunikation = requirePermission('perm_sendEmail');
+    $showInventar = requirePermission('perm_showInventories') || requirePermission('perm_editInventories');
+    $showRegister = requirePermission('perm_editRegisters');
+    $showSystem = requirePermission('perm_editConfig') || requirePermission('perm_showLog') || requirePermission('perm_editPermissions');
+}
+$navColor = htmlspecialchars((string)$optionsDB['colorNav'], ENT_QUOTES, 'UTF-8');
+$navAdminColor = htmlspecialchars((string)$optionsDB['colorNavAdmin'], ENT_QUOTES, 'UTF-8');
+?>
+<div class="app-titlebar <?php echo htmlspecialchars((string)$optionsDB['colorTitle'], ENT_QUOTES, 'UTF-8'); ?>">
+  <h1 class="app-titlebar-name w3-hide-small"><?php echo htmlspecialchars((string)$optionsDB['WebSiteName'], ENT_QUOTES, 'UTF-8'); ?></h1>
+  <h1 class="app-titlebar-name w3-hide-large w3-hide-medium"><?php echo htmlspecialchars((string)$optionsDB['WebSiteNameShort'], ENT_QUOTES, 'UTF-8'); ?></h1>
   <?php if(!empty($optionsDB['MasterPage'])) { ?>
-  <a href="<?php echo htmlspecialchars($optionsDB['MasterPage'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" title="Vereinshomepage" style="position: absolute; top: 10px; right: 10px;">
-    <img src="imgs/Logo.png" alt="Vereinshomepage" style="max-height:100px; max-width:100px; display:block;">
+  <a class="app-titlebar-logo" href="<?php echo htmlspecialchars($optionsDB['MasterPage'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" title="Vereinshomepage">
+    <img src="imgs/Logo.png" alt="Vereinshomepage">
   </a>
   <?php } else { ?>
-  <img src="imgs/Logo.png" alt="" style="max-height:100px; max-width:100px; position: absolute; top: 10px; right: 10px;">
+  <img class="app-titlebar-logo" src="imgs/Logo.png" alt="">
   <?php } ?>
-  <p><?php
-      echo $_SESSION['username'];
-      if(isAdmin()) echo " (Admin)";
-      ?></p>
+  <p class="app-titlebar-user"><?php
+      echo htmlspecialchars((string)$_SESSION['username'], ENT_QUOTES, 'UTF-8');
+      if(isAdmin()) echo ' (Admin)';
+  ?></p>
 </div>
-<?php if(getBranchName() != "master" || !empty($optionsDB['showBranchBannerAlways'])) { ?>
-<div class="w3-yellow w3-padding"><i class="fas fa-code-branch"></i>
-<?php echo "branch: <b>".htmlspecialchars(getBranchName(), ENT_QUOTES, 'UTF-8')."</b>"; ?>
+<?php if(getBranchName() != 'master' || !empty($optionsDB['showBranchBannerAlways'])) { ?>
+<div class="w3-yellow w3-padding app-banner"><i class="fas fa-code-branch"></i>
+<?php echo 'branch: <b>'.htmlspecialchars(getBranchName(), ENT_QUOTES, 'UTF-8').'</b>'; ?>
 </div>
 <?php } ?>
 <?php
@@ -25,7 +53,7 @@ if(requirePermission('perm_editConfig')) {
         if($schemaMgr->isSchemaOutdated()) {
             $inst = (int)$schemaMgr->getInstalledSchemaVersion();
             $exp = (int)$schemaMgr->getExpectedSchemaVersion();
-            echo '<div class="w3-orange w3-padding"><i class="fas fa-database"></i> '
+            echo '<div class="w3-orange w3-padding app-banner"><i class="fas fa-database"></i> '
                 .'Neue Datenbank-Version verfügbar (installiert: <b>'.$inst.'</b>, Soll: <b>'.$exp.'</b>). '
                 .'Bitte im <a href="updater.php"><b>Updater</b></a> „Datenbank reparieren“ ausführen '
                 .'oder „Update durchführen“ (aktualisiert die DB bei Bedarf mit).'
@@ -37,172 +65,203 @@ if(requirePermission('perm_editConfig')) {
     }
 }
 ?>
-<div class="w3-bar <?php echo $optionsDB['colorNav']; ?>">
-  <button onclick="showAll()" class="w3-bar-item w3-button w3-mobile w3-hide-large w3-hide-medium material-icons">menu</button>
-  <a title="Termine" alt="Termine" href="<?php echo $GLOBALS['optionsDB']['WebSiteURL']; ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('home');?>"><i class="far fa-calendar-alt"></i></a>
-  <a title="Kalender" alt="Kalender" href="calendar.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('calendar');?>"><i class="fas fa-calendar"></i></a>
-  <?php
-  $mailUnread = 0;
-  if(isset($_SESSION['userid'])) {
-      $mailUnread = MailOutbox::countUnreadForUser((int)$_SESSION['userid']);
-  }
-  $mailUnreadLabel = $mailUnread > 99 ? '99+' : (string)$mailUnread;
-  ?>
-  <a title="Meine Nachrichten<?php echo $mailUnread > 0 ? ' ('.$mailUnreadLabel.' neu)' : ''; ?>" alt="Meine Nachrichten" href="meine-mails.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinemails');?>" style="position:relative;">
-    <i class="fas fa-envelope"></i><?php
-    if($mailUnread > 0) {
-        echo '<span class="w3-badge w3-tiny '.$GLOBALS['optionsDB']['colorLogEmail'].'" style="position:absolute;top:0;right:0;padding:1px 5px;font-size:10px;line-height:1.2;">'
-            .htmlspecialchars($mailUnreadLabel, ENT_QUOTES, 'UTF-8')
-            .'</span>';
-    }
-    ?></a>
-  <a title="Mein Register" alt="Mein Register" href="mein-register.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('meinregister');?>"><i class="fas fa-users"></i></a>
-<?php
-$u = new User;
-$u->load_by_id($_SESSION['userid']);
-if($u->hasInventories()) { ?>
-    <a title="Inventar" alt="Mein Inventar" href="myinventories.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('myinventories');?>"><i class="fas fa-shirt"></i></a>
+<div class="app-shell">
+<nav class="app-nav <?php echo $navColor; ?>" aria-label="Hauptnavigation">
+  <div class="app-nav-primary">
+    <a class="app-nav-item <?php getPage('home', 'termine'); ?>" href="<?php echo htmlspecialchars((string)$GLOBALS['optionsDB']['WebSiteURL'], ENT_QUOTES, 'UTF-8'); ?>" title="Termine">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i><span class="nav-label">Termine</span>
+    </a>
+    <a class="app-nav-item <?php getPage('calendar', 'termine'); ?>" href="calendar.php" title="Kalender">
+      <i class="fas fa-calendar" aria-hidden="true"></i><span class="nav-label">Kalender</span>
+    </a>
+    <a class="app-nav-item app-nav-item--badge <?php getPage('meinemails', 'kommunikation'); ?>" href="meine-mails.php" title="Meine Nachrichten<?php echo $mailUnread > 0 ? ' ('.$mailUnreadLabel.' neu)' : ''; ?>">
+      <i class="fas fa-envelope" aria-hidden="true"></i><span class="nav-label">Nachrichten</span><?php
+      if($mailUnread > 0) {
+          echo '<span class="app-nav-badge w3-badge w3-tiny '.$GLOBALS['optionsDB']['colorLogEmail'].'">'
+              .htmlspecialchars($mailUnreadLabel, ENT_QUOTES, 'UTF-8')
+              .'</span>';
+      }
+      ?>
+    </a>
+    <a class="app-nav-item <?php getPage('meinregister', 'register'); ?>" href="mein-register.php" title="Mein Register">
+      <i class="fas fa-users" aria-hidden="true"></i>
+      <span class="nav-label"><span class="nav-label-long">Mein Register</span><span class="nav-label-short">Register</span></span>
+    </a>
+<?php if($navHasInventories) { ?>
+    <a class="app-nav-item app-nav-item--secondary <?php getPage('myinventories', 'inventar'); ?>" href="myinventories.php" title="Mein Inventar">
+      <i class="fas fa-shirt" aria-hidden="true"></i><span class="nav-label">Mein Inventar</span>
+    </a>
 <?php } ?>
-  <form action="new-musiker.php" method="POST">
-    <button title="Mein Profil" alt="Mein Profil" type="submit" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('me');?>">
-      <i class="fas fa-user"></i>
+    <form class="app-nav-form" action="new-musiker.php" method="POST">
+      <button class="app-nav-item <?php getPage('me', 'nutzer'); ?>" type="submit" title="Mein Profil">
+        <i class="fas fa-user" aria-hidden="true"></i>
+        <span class="nav-label"><span class="nav-label-long">Mein Profil</span><span class="nav-label-short">Profil</span></span>
+      </button>
+      <input type="hidden" name="id" value="<?php echo (int)$_SESSION['userid']; ?>">
+      <input type="hidden" name="mode" value="useredit">
+    </form>
+    <a class="app-nav-item app-nav-item--secondary <?php getPage('media', 'system'); ?>" href="media.php" title="Medien">
+      <i class="fas fa-photo-film" aria-hidden="true"></i><span class="nav-label">Medien</span>
+    </a>
+<?php if($ssoArchiv !== '') { ?>
+    <a class="app-nav-item app-nav-item--secondary <?php echo htmlspecialchars(navGroupClass('system'), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($ssoArchiv, ENT_QUOTES, 'UTF-8'); ?>" title="Notenarchiv">
+      <i class="fas fa-book" aria-hidden="true"></i><span class="nav-label">Notenarchiv</span>
+    </a>
+<?php } ?>
+<?php if($ssoMit !== '') { ?>
+    <a class="app-nav-item app-nav-item--secondary <?php echo htmlspecialchars(navGroupClass('nutzer'), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($ssoMit, ENT_QUOTES, 'UTF-8'); ?>" title="Mitgliederverwaltung">
+      <i class="fas fa-id-card" aria-hidden="true"></i><span class="nav-label">Mitgliederverw.</span>
+    </a>
+<?php } ?>
+    <a class="app-nav-item app-nav-item--secondary <?php getPage('help', 'system'); ?>" href="help.php" title="Hilfe">
+      <i class="fas fa-circle-question" aria-hidden="true"></i><span class="nav-label">Hilfe</span>
+    </a>
+  </div>
+
+  <div class="app-nav-more-wrap">
+    <button type="button" class="app-nav-item app-nav-more-toggle <?php echo htmlspecialchars(navGroupClass('system'), ENT_QUOTES, 'UTF-8'); ?>" id="appNavMoreToggle" aria-expanded="false" aria-controls="appNavMorePanel" title="Mehr">
+      <i class="fas fa-ellipsis-h" aria-hidden="true"></i><span class="nav-label">Mehr</span>
     </button>
-    <input type="hidden" name="id" value="<?php echo $_SESSION['userid']; ?>" />
-    <input type="hidden" name="mode" value="useredit" />
-  </form>
-  <a title="Medien" alt="Medien" href="media.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-photo-film"></i></a>
-<?php
-if(!empty($optionsDB['urlNotenarchiv'])) {
-    $ssoArchiv = 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlNotenarchiv']));
-?>
-  <a title="Notenarchiv" href="<?php echo htmlspecialchars($ssoArchiv, ENT_QUOTES, 'UTF-8'); ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-book"></i></a>
-<?php }
-if(!empty($optionsDB['urlMitgliederverwaltung'])) {
-    $ssoMit = 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlMitgliederverwaltung']));
-?>
-  <a title="Mitgliederverwaltung" href="<?php echo htmlspecialchars($ssoMit, ENT_QUOTES, 'UTF-8'); ?>" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php echo $optionsDB['colorNav']; ?>"><i class="fas fa-id-card"></i></a>
+    <div class="app-nav-more-backdrop" id="appNavMoreBackdrop" hidden></div>
+    <div class="app-nav-more-panel <?php echo $navColor; ?>" id="appNavMorePanel" role="dialog" aria-label="Weitere Navigation">
+      <div class="app-nav-more-head">
+        <span>Mehr</span>
+        <button type="button" class="app-nav-more-close" id="appNavMoreClose" aria-label="Schließen">&times;</button>
+      </div>
+      <div class="app-nav-more-body">
+<?php if($navHasInventories) { ?>
+        <a class="app-nav-item app-nav-more-only-mobile <?php getPage('myinventories', 'inventar'); ?>" href="myinventories.php" title="Mein Inventar">
+          <i class="fas fa-shirt" aria-hidden="true"></i><span class="nav-label">Mein Inventar</span>
+        </a>
 <?php } ?>
-  <a title="Hilfe" alt="Hilfe" href="help.php" class="stdhide w3-hide-small w3-bar-item w3-button w3-mobile <?php getPage('help');?>"><i class="fas fa-circle-question"></i></a>
-  <?php if(isAdmin()) {
-    $showPersonen = requirePermission("perm_showUsers");
-    $showTermine = requirePermission("perm_editAppmnts");
-    $showMeldungen = requirePermission("perm_showResponse");
-    $showKommunikation = requirePermission("perm_sendEmail");
-    $showInventar = requirePermission("perm_showInventories") || requirePermission("perm_editInventories");
-    $showRegister = requirePermission("perm_editRegisters");
-    $showSystem = requirePermission("perm_editConfig") || requirePermission("perm_showLog") || requirePermission("perm_editPermissions");
-  ?>
-  <div class="stdhide w3-hide-small w3-dropdown-hover w3-mobile admin-nav">
-    <button title="Admin" alt="Admin" class="w3-button w3-mobile w3-hide-small <?php getAdminPage($_SESSION['page']); ?>"><i class="fas fa-wrench"></i></button>
-    <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-      <?php if($showPersonen) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showUsers'); ?>">Personen <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <a title="Musikerliste" alt="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('musiker', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Musikerliste</a>
-          <a title="Gastmusiker" alt="Gastmusiker" href="gastmusiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('gastmusiker', 'perm_showUsers'); ?>"><i class="fas fa-user-clock"></i> Gastmusiker</a>
-          <a title="Userliste" alt="Userliste" href="users.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('users', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Userliste</a>
-          <?php if($GLOBALS['optionsDB']['showMembers']) { ?>
-          <a title="Mitgliederliste" alt="Mitgliederliste" href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('mitglied', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Mitgliederliste</a>
-          <?php } ?>
-          <?php if($GLOBALS['optionsDB']['showNonMembers']) { ?>
-          <a title="Nicht-Mitgliederliste" alt="Nicht-Mitgliederliste" href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('nomitglied', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Nicht-Mitgliederliste</a>
-          <?php } ?>
-          <a title="Registerübersicht" alt="Registerübersicht" href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('register', 'perm_showUsers'); ?>"><i class="fas fa-list"></i> Registerübersicht</a>
-          <?php if(requirePermission("perm_editUsers")) { ?>
-          <a title="neuen Musiker anlegen" alt="neuen Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newmusiker', 'perm_editUsers'); ?>"><i class="fas fa-plus-circle"></i> Musiker anlegen</a>
-          <?php } ?>
+        <a class="app-nav-item app-nav-more-only-mobile <?php getPage('media', 'system'); ?>" href="media.php" title="Medien">
+          <i class="fas fa-photo-film" aria-hidden="true"></i><span class="nav-label">Medien</span>
+        </a>
+<?php if($ssoArchiv !== '') { ?>
+        <a class="app-nav-item app-nav-more-only-mobile <?php echo htmlspecialchars(navGroupClass('system'), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($ssoArchiv, ENT_QUOTES, 'UTF-8'); ?>" title="Notenarchiv">
+          <i class="fas fa-book" aria-hidden="true"></i><span class="nav-label">Notenarchiv</span>
+        </a>
+<?php } ?>
+<?php if($ssoMit !== '') { ?>
+        <a class="app-nav-item app-nav-more-only-mobile <?php echo htmlspecialchars(navGroupClass('nutzer'), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($ssoMit, ENT_QUOTES, 'UTF-8'); ?>" title="Mitgliederverwaltung">
+          <i class="fas fa-id-card" aria-hidden="true"></i><span class="nav-label">Mitgliederverw.</span>
+        </a>
+<?php } ?>
+        <a class="app-nav-item app-nav-more-only-mobile <?php getPage('help', 'system'); ?>" href="help.php" title="Hilfe">
+          <i class="fas fa-circle-question" aria-hidden="true"></i><span class="nav-label">Hilfe</span>
+        </a>
+<?php if($isAdminNav) { ?>
+        <div class="admin-nav app-nav-admin">
+          <div class="app-nav-admin-title"><i class="fas fa-wrench" aria-hidden="true"></i><span class="nav-label">Admin</span></div>
+          <div class="w3-bar-block <?php echo $navAdminColor; ?>">
+<?php if($showPersonen) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showUsers'); ?>">Personen <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+                <a title="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('musiker', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Musikerliste</a>
+                <a title="Gastmusiker" href="gastmusiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('gastmusiker', 'perm_showUsers'); ?>"><i class="fas fa-user-clock"></i> Gastmusiker</a>
+                <a title="Userliste" href="users.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('users', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Userliste</a>
+<?php if(!empty($GLOBALS['optionsDB']['showMembers'])) { ?>
+                <a title="Mitgliederliste" href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('mitglied', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Mitgliederliste</a>
+<?php } ?>
+<?php if(!empty($GLOBALS['optionsDB']['showNonMembers'])) { ?>
+                <a title="Nicht-Mitgliederliste" href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('nomitglied', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Nicht-Mitgliederliste</a>
+<?php } ?>
+                <a title="Registerübersicht" href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('register', 'perm_showUsers'); ?>"><i class="fas fa-list"></i> Registerübersicht</a>
+<?php if(requirePermission('perm_editUsers')) { ?>
+                <a title="Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newmusiker', 'perm_editUsers'); ?>"><i class="fas fa-plus-circle"></i> Musiker anlegen</a>
+<?php } ?>
+              </div>
+            </div>
+<?php } ?>
+<?php if($showTermine) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editAppmnts'); ?>">Termine <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+                <a title="Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newtermin', 'perm_editAppmnts'); ?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
+                <a title="Archiv: Termine" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('termine-archiv', 'perm_editAppmnts'); ?>"><i class="fas fa-history"></i> Archiv: Termine</a>
+              </div>
+            </div>
+<?php } ?>
+<?php if($showMeldungen) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showResponse'); ?>">Meldungen <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+                <a title="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('meldungen', 'perm_showResponse'); ?>"><i class="fas fa-comment-dots"></i> Meldungen</a>
+                <a title="Archiv: Meldungen" href="archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('archiv', 'perm_showResponse'); ?>"><i class="fas fa-history"></i> Archiv: Meldungen</a>
+<?php if(requirePermission('perm_editResponse')) { ?>
+                <a title="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('public-entry', 'perm_editResponse'); ?>"><i class="fas fa-comments"></i> im Auftrag melden</a>
+<?php } ?>
+              </div>
+            </div>
+<?php } ?>
+<?php if($showKommunikation) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_sendEmail'); ?>">Kommunikation <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+                <a title="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('mail', 'perm_sendEmail'); ?>"><i class="fas fa-envelope-open-text"></i> Email versenden</a>
+                <a title="Gruppen" href="groups.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('groups', 'perm_sendEmail'); ?>"><i class="fas fa-users"></i> Gruppen</a>
+              </div>
+            </div>
+<?php } ?>
+<?php if($showInventar) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showInventories'); ?>">Inventar <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+<?php if(requirePermission('perm_showInventories')) { ?>
+                <a title="Inventar" href="inventories.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('inventories', 'perm_showInventories'); ?>"><i class="fas fa-shirt"></i> Inventar</a>
+                <a title="Versicherung" href="insurance.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('insurance', 'perm_showInventories'); ?>"><i class="fas fa-file-invoice-dollar"></i> Versicherung</a>
+<?php } ?>
+<?php if(requirePermission('perm_editInventories')) { ?>
+                <a title="Inventar-Typen" href="inventory-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('inventory-types', 'perm_editInventories'); ?>"><i class="fas fa-tags"></i> Inventar-Typen</a>
+<?php } ?>
+              </div>
+            </div>
+<?php } ?>
+<?php if($showRegister) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editRegisters'); ?>">Register <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+                <a title="Register" href="register-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('register-types', 'perm_editRegisters'); ?>"><i class="fas fa-layer-group"></i> Register</a>
+                <a title="Instrument-Typen" href="instrument-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('instrument-types', 'perm_editRegisters'); ?>"><i class="fas fa-guitar"></i> Instrument-Typen</a>
+              </div>
+            </div>
+<?php } ?>
+<?php if($showSystem) { ?>
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+              <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editConfig'); ?>">System <i class="fas fa-caret-right admin-nav-caret"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
+<?php if(requirePermission('perm_editPermissions')) { ?>
+                <a title="Berechtigungen" href="permissions.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('permissions', 'perm_editPermissions'); ?>"><i class="fas fa-lock"></i> Berechtigungen</a>
+<?php } ?>
+<?php if(requirePermission('perm_editConfig')) { ?>
+                <a title="Konfiguration" href="config-menu.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('config', 'perm_editConfig'); ?>"><i class="fas fa-cogs"></i> Konfiguration</a>
+<?php } ?>
+<?php if(requirePermission('perm_showLog')) { ?>
+                <a title="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('evaluate', 'perm_showLog'); ?>"><i class="fas fa-chart-pie"></i> Statistik</a>
+                <a title="Log" href="log.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('log', 'perm_showLog'); ?>"><i class="fas fa-poll"></i> Log</a>
+<?php } ?>
+<?php if(requirePermission('perm_editConfig')) { ?>
+                <a title="Backup" href="backup.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('backup', 'perm_editConfig'); ?>"><i class="fas fa-database"></i> Backup</a>
+                <a title="Updater" href="updater.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('updater', 'perm_editConfig'); ?>"><i class="fas fa-code-branch"></i> Updater</a>
+<?php } ?>
+              </div>
+            </div>
+<?php } ?>
+          </div>
         </div>
+<?php } ?>
+        <a class="app-nav-item <?php echo htmlspecialchars(navGroupClass('system'), ENT_QUOTES, 'UTF-8'); ?>" href="logout.php" title="Ausloggen">
+          <i class="fas fa-sign-out-alt" aria-hidden="true"></i><span class="nav-label">Ausloggen</span>
+        </a>
       </div>
-      <?php } ?>
-
-      <?php if($showTermine) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editAppmnts'); ?>">Termine <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <a title="neuen Termin erstellen" alt="neuen Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newtermin', 'perm_editAppmnts'); ?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
-          <a title="Termine - Archiv" alt="termine archiv" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('termine-archiv', 'perm_editAppmnts'); ?>"><i class="fas fa-history"></i> Archiv: Termine</a>
-        </div>
-      </div>
-      <?php } ?>
-
-      <?php if($showMeldungen) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showResponse'); ?>">Meldungen <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <a title="Meldungen" alt="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('meldungen', 'perm_showResponse'); ?>"><i class="fas fa-comment-dots"></i> Meldungen</a>
-          <a title="Meldungen - Archiv" alt="archiv" href="archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('archiv', 'perm_showResponse'); ?>"><i class="fas fa-history"></i> Archiv: Meldungen</a>
-          <?php if(requirePermission("perm_editResponse")) { ?>
-          <a title="im Auftrag melden" alt="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('public-entry', 'perm_editResponse'); ?>"><i class="fas fa-comments"></i> im Auftrag melden</a>
-          <?php } ?>
-        </div>
-      </div>
-      <?php } ?>
-
-      <?php if($showKommunikation) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_sendEmail'); ?>">Kommunikation <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <a title="Email versenden" alt="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('mail', 'perm_sendEmail'); ?>"><i class="fas fa-envelope-open-text"></i> Email versenden</a>
-          <a title="Gruppen" alt="Gruppen" href="groups.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('groups', 'perm_sendEmail'); ?>"><i class="fas fa-users"></i> Gruppen</a>
-        </div>
-      </div>
-      <?php } ?>
-
-      <?php if($showInventar) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showInventories'); ?>">Inventar <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <?php if(requirePermission("perm_showInventories")) { ?>
-          <a title="Inventar" alt="Inventar" href="inventories.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('inventories', 'perm_showInventories'); ?>"><i class="fas fa-shirt"></i> Inventar</a>
-          <a title="Versicherung" alt="Versicherung" href="insurance.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('insurance', 'perm_showInventories'); ?>"><i class="fas fa-file-invoice-dollar"></i> Versicherung</a>
-          <?php } ?>
-          <?php if(requirePermission("perm_editInventories")) { ?>
-          <a title="Inventar-Typen" alt="Inventar-Typen" href="inventory-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('inventory-types', 'perm_editInventories'); ?>"><i class="fas fa-tags"></i> Inventar-Typen</a>
-          <?php } ?>
-        </div>
-      </div>
-      <?php } ?>
-
-      <?php if($showRegister) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editRegisters'); ?>">Register <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <a title="Register" alt="Register" href="register-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('register-types', 'perm_editRegisters'); ?>"><i class="fas fa-layer-group"></i> Register</a>
-          <a title="Instrument-Typen" alt="Instrument-Typen" href="instrument-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('instrument-types', 'perm_editRegisters'); ?>"><i class="fas fa-guitar"></i> Instrument-Typen</a>
-        </div>
-      </div>
-      <?php } ?>
-
-      <?php if($showSystem) { ?>
-      <div class="w3-dropdown-hover w3-mobile admin-nav-group">
-        <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editConfig'); ?>">System <i class="fas fa-caret-right admin-nav-caret"></i></button>
-        <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $optionsDB['colorNavAdmin']; ?> w3-mobile">
-          <?php if(requirePermission("perm_editPermissions")) { ?>
-          <a title="Berechtigungen" alt="Berechtigungen" href="permissions.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('permissions', 'perm_editPermissions'); ?>"><i class="fas fa-lock"></i> Berechtigungen</a>
-          <?php } ?>
-          <?php if(requirePermission("perm_editConfig")) { ?>
-          <a title="Konfiguration" alt="Konfiguration" href="config-menu.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('config', 'perm_editConfig'); ?>"><i class="fas fa-cogs"></i> Konfiguration</a>
-          <?php } ?>
-          <?php if(requirePermission("perm_showLog")) { ?>
-          <a title="Statistik" alt="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('evaluate', 'perm_showLog'); ?>"><i class="fas fa-chart-pie"></i> Statistik</a>
-          <a title="Logfile anschauen" alt="Logfile anschauen" href="log.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('log', 'perm_showLog'); ?>"><i class="fas fa-poll"></i> Log</a>
-          <?php } ?>
-          <?php if(requirePermission("perm_editConfig")) { ?>
-          <a title="Backup" alt="Backup" href="backup.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('backup', 'perm_editConfig'); ?>"><i class="fas fa-database"></i> Backup</a>
-          <a title="Updater" alt="Updater" href="updater.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('updater', 'perm_editConfig'); ?>"><i class="fas fa-code-branch"></i> Updater</a>
-          <?php } ?>
-        </div>
-      </div>
-      <?php } ?>
     </div>
   </div>
-  <?php } ?>
-  <a title="Ausloggen" alt="Ausloggen" href="logout.php" class="stdhide w3-hide-small w3-bar-item w3-button <?php echo $optionsDB['colorNav']; ?> w3-mobile"><i class="fas fa-sign-out-alt"></i></a>
-</div>
+</nav>
+<div class="app-main">
 <?php
- if($optionsDB['showMessageOfTheDay']) {
- ?>
+if(!empty($optionsDB['showMessageOfTheDay'])) {
+?>
 <div class="w3-container w3-card w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
@@ -210,7 +269,6 @@ if(!empty($optionsDB['urlMitgliederverwaltung'])) {
   <div class="w3-col l6 m6 s8 w3-center">
     <?php echo $optionsDB['MessageOfTheDayShort']; ?>
   </div>
-
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
   </div>
@@ -225,53 +283,11 @@ if(!empty($optionsDB['urlMitgliederverwaltung'])) {
   </div>
 </div>
 <?php
- }
- ?>
-<script type="text/javascript">
-  function resetAdminNavGroups() {
-    var groups = document.querySelectorAll('.admin-nav-group.admin-nav-open');
-    for(var i = 0; i < groups.length; i++) {
-      groups[i].classList.remove('admin-nav-open');
-    }
-  }
-
-  function showAll() {
-    var x = document.getElementsByClassName('stdhide');
-    var closing = false;
-    for(var i = 0; i < x.length; i++) {
-      if(x[i].className.indexOf("w3-show") == -1) {
-        x[i].className = x[i].className.replace("w3-hide-small", "w3-show");
-      }
-      else {
-        x[i].className = x[i].className.replace("w3-show", "w3-hide-small");
-        closing = true;
-      }
-    }
-    if(closing) {
-      resetAdminNavGroups();
-    }
-  }
-
-  document.addEventListener('click', function(ev) {
-    if(window.matchMedia && !window.matchMedia('(max-width: 600px)').matches) {
-      return;
-    }
-    var btn = ev.target.closest ? ev.target.closest('.admin-nav-group > .w3-button') : null;
-    if(!btn) return;
-    var group = btn.parentNode;
-    if(!group || !group.classList || !group.classList.contains('admin-nav-group')) return;
-    ev.preventDefault();
-    ev.stopPropagation();
-    var open = group.classList.contains('admin-nav-open');
-    resetAdminNavGroups();
-    if(!open) {
-      group.classList.add('admin-nav-open');
-    }
-  });
-
-  <?php if(!isset($_SESSION['MessageOfTheDay'])){
-    $_SESSION['MessageOfTheDay']=true;
-  ?>
-  document.getElementById('MessageOfTheDay').style.display='block';
-  <?php } ?>
-</script>
+}
+?>
+<script src="<?php echo assetUrl('js/app-nav.js'); ?>"></script>
+<?php if(!empty($optionsDB['showMessageOfTheDay']) && !isset($_SESSION['MessageOfTheDay'])) {
+    $_SESSION['MessageOfTheDay'] = true;
+?>
+<script>document.getElementById('MessageOfTheDay').style.display='block';</script>
+<?php } ?>

@@ -190,17 +190,26 @@ function getAdminPagePerm($page, $permKey) {
 }
 
 /**
+ * CSS-Klassen für Nav anhand der Rechte-Farbgruppe (wie Admin-Nav / Chips).
+ * @param string $groupId nutzer|termine|register|inventar|kommunikation|system
+ * @return string
+ */
+function navGroupClass($groupId) {
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$groupId);
+    if($gid === '') {
+        $gid = 'system';
+    }
+    return 'admin-nav-perm admin-nav-perm--'.$gid;
+}
+
+/**
  * CSS-Klassen für Admin-Nav anhand der Rechte-Farbgruppe (wie Profil-Chips).
  * @param string $permKey
  * @return string
  */
 function adminNavPermClass($permKey) {
     $gid = Permissions::groupIdForPermission($permKey);
-    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
-    if($gid === '') {
-        $gid = 'system';
-    }
-    return 'admin-nav-perm admin-nav-perm--'.$gid;
+    return navGroupClass($gid);
 }
 
 /**
@@ -217,6 +226,11 @@ function adminListSectionGroupId($kicker) {
         'Inventar' => 'inventar',
         'Register' => 'register',
         'System' => 'system',
+        // Nutzer-Seiten (gleicher Hero wie Admin-Listen)
+        'Hilfe' => 'system',
+        'Medien' => 'system',
+        'Anwesenheit' => 'termine',
+        'Stimme' => 'nutzer',
         // Admin-Formulare (nicht Listen)
         'Neuer Termin' => 'termine',
         'Termin bearbeiten' => 'termine',
@@ -278,8 +292,9 @@ function adminListPageBegin($kicker, $title, $options = array()) {
         $heroOpts['permKey'] = $options['permKey'];
     }
     $heroCls = adminHeroClass($heroOpts);
-    echo '<div class="w3-container w3-margin-bottom profile-page">'."\n";
+    echo '<div class="profile-page">'."\n";
     echo '  <div class="'.htmlspecialchars($shellCls, ENT_QUOTES, 'UTF-8').'">'."\n";
+    echo '    <div class="app-page-chrome">'."\n";
     echo '    <header class="'.htmlspecialchars($heroCls, ENT_QUOTES, 'UTF-8').'">'."\n";
     echo '      <div class="profile-hero-text">'."\n";
     echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
@@ -289,43 +304,69 @@ function adminListPageBegin($kicker, $title, $options = array()) {
         echo '      <div class="profile-hero-actions">'.$actionsHtml.'</div>'."\n";
     }
     echo '    </header>'."\n";
+    $GLOBALS['mlAdminListChrome'] = 'open';
+}
+
+/**
+ * Close open app-page-chrome and open scrollable body (after search or before other content).
+ */
+function adminListChromeClose() {
+    if(!empty($GLOBALS['mlAdminListChrome']) && $GLOBALS['mlAdminListChrome'] === 'open') {
+        echo '    </div><!-- .app-page-chrome -->'."\n";
+        echo '    <div class="admin-list-body">'."\n";
+        $GLOBALS['mlAdminListChrome'] = 'closed';
+        $GLOBALS['mlAdminListBody'] = 'open';
+        return;
+    }
 }
 
 /** Close adminListPageBegin(). */
 function adminListPageEnd() {
+    if(!empty($GLOBALS['mlAdminListChrome']) && $GLOBALS['mlAdminListChrome'] === 'open') {
+        /* Kein Search/ChromeClose: Inhalt liegt im Chrome — nur Chrome schließen */
+        echo '    </div><!-- .app-page-chrome -->'."\n";
+        $GLOBALS['mlAdminListChrome'] = 'closed';
+    }
+    elseif(!empty($GLOBALS['mlAdminListBody']) && $GLOBALS['mlAdminListBody'] === 'open') {
+        echo '    </div><!-- .admin-list-body -->'."\n";
+        $GLOBALS['mlAdminListBody'] = 'closed';
+    }
     echo '  </div>'."\n";
     echo '</div>'."\n";
 }
 
 /**
  * Search field styled like profile controls (keeps #filterString for existing JS).
+ * Kein sichtbares Label — nur Placeholder (+ aria-label). Siehe .cursor/rules/short-ui-labels.mdc
  * @param string $placeholder
- * @param array $options id, onkeyup, label, extraHtml
+ * @param array $options id, onkeyup, extraHtml (label wird ignoriert / nur für aria)
  */
 function adminListSearchField($placeholder, $options = array()) {
     $id = isset($options['id']) ? (string)$options['id'] : 'filterString';
     $onkeyup = isset($options['onkeyup']) ? (string)$options['onkeyup'] : '';
-    $label = isset($options['label']) ? (string)$options['label'] : 'Suchen';
     $extra = isset($options['extraHtml']) ? (string)$options['extraHtml'] : '';
     $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground'])
         ? (string)$GLOBALS['optionsDB']['colorInputBackground'] : '';
-    echo '<div class="admin-list-toolbar">'."\n";
-    echo '  <div class="profile-field admin-list-search">'."\n";
-    echo '    <label class="profile-label" for="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'">'
-        .htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</label>'."\n";
-    echo '    <input type="search" id="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'"'
+    $aria = isset($options['ariaLabel']) && (string)$options['ariaLabel'] !== ''
+        ? (string)$options['ariaLabel']
+        : (string)$placeholder;
+    echo '    <div class="admin-list-toolbar">'."\n";
+    echo '      <div class="profile-field admin-list-search">'."\n";
+    echo '        <input type="search" id="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'"'
         .' class="w3-input w3-border profile-control '.htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8').'"'
         .' placeholder="'.htmlspecialchars((string)$placeholder, ENT_QUOTES, 'UTF-8').'"'
+        .' aria-label="'.htmlspecialchars($aria, ENT_QUOTES, 'UTF-8').'"'
         .' autocomplete="off"';
     if($onkeyup !== '') {
         echo ' onkeyup="'.htmlspecialchars($onkeyup, ENT_QUOTES, 'UTF-8').'"';
     }
     echo '>'."\n";
-    echo '  </div>'."\n";
+    echo '      </div>'."\n";
     if($extra !== '') {
-        echo '  <div class="admin-list-toolbar-extra">'.$extra.'</div>'."\n";
+        echo '      <div class="admin-list-toolbar-extra">'.$extra.'</div>'."\n";
     }
-    echo '</div>'."\n";
+    echo '    </div>'."\n";
+    adminListChromeClose();
 }
 
 function getNextRegInventoryNumber($inventoryTypeId = 0) {
@@ -349,13 +390,16 @@ function getOwner($index) {
     return $user->getName();
 }
 
-function getPage($string) {
+function getPage($string, $groupId = '') {
     if($string == $_SESSION['page']) {
         echo $GLOBALS['optionsDB']['colorTitleBar'];
+        return;
     }
-    else {
-        echo $GLOBALS['optionsDB']['colorNav'];
+    if($groupId !== '') {
+        echo navGroupClass($groupId);
+        return;
     }
+    echo $GLOBALS['optionsDB']['colorNav'];
 }
 
 function getShort($Vorname, $Nachname) {
@@ -459,6 +503,123 @@ function normalizeHexColor($value) {
         return '#'.$value[1].$value[1].$value[2].$value[2].$value[3].$value[3];
     }
     return $value;
+}
+
+/**
+ * Mix two hex colors. $t=0 → $hexA, $t=1 → $hexB.
+ * @param string $hexA
+ * @param string $hexB
+ * @param float $t
+ * @return string
+ */
+function hexMix($hexA, $hexB, $t) {
+    $hexA = normalizeHexColor($hexA);
+    $hexB = normalizeHexColor($hexB);
+    if($hexA === '') return $hexB !== '' ? $hexB : '#808080';
+    if($hexB === '') return $hexA;
+    $t = max(0.0, min(1.0, (float)$t));
+    $ar = hexdec(substr($hexA, 1, 2));
+    $ag = hexdec(substr($hexA, 3, 2));
+    $ab = hexdec(substr($hexA, 5, 2));
+    $br = hexdec(substr($hexB, 1, 2));
+    $bg = hexdec(substr($hexB, 3, 2));
+    $bb = hexdec(substr($hexB, 5, 2));
+    $r = (int)round($ar + ($br - $ar) * $t);
+    $g = (int)round($ag + ($bg - $ag) * $t);
+    $b = (int)round($ab + ($bb - $ab) * $t);
+    return sprintf('#%02X%02X%02X', $r, $g, $b);
+}
+
+/**
+ * Soft / accent / strong / softOff from a group accent color.
+ * @param string $accentHex
+ * @return array{accent:string,soft:string,strong:string,softOff:string,fg:string}
+ */
+function permissionGroupTonePalette($accentHex) {
+    $accent = normalizeHexColor($accentHex);
+    if($accent === '') {
+        $accent = '#78909C';
+    }
+    return array(
+        'accent' => $accent,
+        'soft' => hexMix($accent, '#FFFFFF', 0.82),
+        'strong' => hexMix($accent, '#FFFFFF', 0.38),
+        'softOff' => hexMix($accent, '#FFFFFF', 0.92),
+        'fg' => '#222222',
+    );
+}
+
+/**
+ * Palette for all permission groups (id → tones).
+ * @return array<string,array{accent:string,soft:string,strong:string,softOff:string,fg:string}>
+ */
+function permissionGroupPalettes() {
+    static $cache = null;
+    if($cache !== null) {
+        return $cache;
+    }
+    $cache = array();
+    if(!class_exists('Permissions')) {
+        return $cache;
+    }
+    foreach(Permissions::permissionGroups() as $group) {
+        $id = isset($group['id']) ? preg_replace('/[^a-z0-9_-]/i', '', (string)$group['id']) : '';
+        if($id === '') {
+            continue;
+        }
+        $accent = isset($group['color']) ? (string)$group['color'] : Permissions::groupColor($id);
+        $cache[$id] = permissionGroupTonePalette($accent);
+    }
+    return $cache;
+}
+
+/**
+ * CSS for Nav / Chips / Heroes / Rechte-Matrix from permission group colors.
+ * @param bool $wrapStyleTag
+ * @return string
+ */
+function renderPermissionGroupColorCss($wrapStyleTag = true) {
+    $palettes = permissionGroupPalettes();
+    if(!$palettes) {
+        return '';
+    }
+    $css = '';
+    foreach($palettes as $id => $tone) {
+        $soft = $tone['soft'];
+        $accent = $tone['accent'];
+        $strong = $tone['strong'];
+        $softOff = $tone['softOff'];
+        $fg = $tone['fg'];
+
+        $css .= '.app-nav .admin-nav-perm--'.$id
+            .',.profile-perm-tile--'.$id
+            .'{background:'.$soft.' !important;border-color:'.$accent.';color:'.$fg.' !important;}';
+
+        $css .= '.profile-shell .profile-hero.admin-list-hero--'.$id
+            .',.w3-container.admin-list-hero--'.$id
+            .'{background:'.$strong.';border-left-color:'.$accent.';}';
+
+        $css .= '.perm-matrix thead th.perm-group--'.$id
+            .'{background:'.$soft.';box-shadow:inset 0 -3px 0 '.$accent.';}';
+
+        $css .= '.perm-matrix td.perm-group--'.$id.'.perm-off{background:'.$softOff.';}';
+        $css .= '.perm-matrix td.perm-group--'.$id.'.perm-on{background:'.$strong.';}';
+    }
+
+    $css .= '@media (max-width:600px){';
+    foreach($palettes as $id => $tone) {
+        $accent = $tone['accent'];
+        $css .= '.app-nav>.app-nav-primary>.app-nav-item.admin-nav-perm--'.$id
+            .',.app-nav>.app-nav-primary>.app-nav-form>.app-nav-item.admin-nav-perm--'.$id
+            .',.app-nav>.app-nav-more-wrap>.app-nav-more-toggle.admin-nav-perm--'.$id
+            .'{border-top-color:'.$accent.';}';
+    }
+    $css .= '}';
+
+    if($css === '') {
+        return '';
+    }
+    return $wrapStyleTag ? '<style type="text/css" id="perm-group-colors">'.$css.'</style>' : $css;
 }
 
 function hexContrastText($hex) {

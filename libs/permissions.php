@@ -305,19 +305,22 @@ class Permissions
     }
 
     /**
-     * Logical groups: order + color id for chips (titles not shown in UI).
-     * @return array<int,array{id:string,title:string,keys:string[]}>
+     * Logical groups: order + color id for chips/nav/heroes.
+     * `color` = Akzentfarbe; Soft/Strong werden daraus abgeleitet (kein Hardcode in CSS).
+     * @return array<int,array{id:string,title:string,color:string,keys:string[]}>
      */
     public static function permissionGroups() {
         return array(
             array(
                 'id' => 'nutzer',
                 'title' => 'Nutzer',
+                'color' => '#42A5F5',
                 'keys' => array('perm_showUsers', 'perm_editUsers', 'perm_editPermissions'),
             ),
             array(
                 'id' => 'termine',
                 'title' => 'Termine',
+                'color' => '#66BB6A',
                 'keys' => array(
                     'perm_showHiddenAppmnts',
                     'perm_editAppmnts',
@@ -328,24 +331,43 @@ class Permissions
             array(
                 'id' => 'register',
                 'title' => 'Register',
+                'color' => '#FFA726',
                 'keys' => array('perm_editRegisters'),
             ),
             array(
                 'id' => 'inventar',
                 'title' => 'Inventar',
+                'color' => '#AB47BC',
                 'keys' => array('perm_showInventories', 'perm_editInventories'),
             ),
             array(
                 'id' => 'kommunikation',
                 'title' => 'Kommunikation',
+                'color' => '#26C6DA',
                 'keys' => array('perm_sendEmail'),
             ),
             array(
                 'id' => 'system',
                 'title' => 'System',
+                'color' => '#78909C',
                 'keys' => array('perm_showLog', 'perm_editConfig'),
             ),
         );
+    }
+
+    /**
+     * Accent hex for a group id (from permissionGroups).
+     * @param string $groupId
+     * @return string
+     */
+    public static function groupColor($groupId) {
+        $groupId = (string)$groupId;
+        foreach(self::permissionGroups() as $group) {
+            if(isset($group['id']) && (string)$group['id'] === $groupId) {
+                return isset($group['color']) ? (string)$group['color'] : '#78909C';
+            }
+        }
+        return '#78909C';
     }
 
     /**
