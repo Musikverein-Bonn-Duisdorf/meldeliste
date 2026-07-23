@@ -24,9 +24,10 @@ case "save":
     }
     $m->save();
 
+    $uid = (int)meldeRequest('user');
     $t = new Termin;
     $t->load_by_id(meldeRequest('termin'));
-    echo $t->printBasicTableLine();
+    echo $t->printBasicTableLine($uid);
     break;
 case "reload":
     if(!loggedIn()) {
@@ -54,7 +55,7 @@ case "reload":
         http_response_code(404);
         die('not found');
     }
-    echo $t->printBasicTableLine();
+    echo $t->printBasicTableLine($targetUser);
     break;
 case "responseLine":
     if(!loggedIn()) {
@@ -114,9 +115,10 @@ case "freetext":
     $m->Text = meldeRequest('freeText');
     $m->save();
 
+    $uid = (int)meldeRequest('user');
     $t = new Termin;
     $t->load_by_id(meldeRequest('termin'));
-    echo $t->printBasicTableLine();
+    echo $t->printBasicTableLine($uid);
     break;
 default:
     http_response_code(400);

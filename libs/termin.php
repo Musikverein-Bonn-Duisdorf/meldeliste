@@ -6,6 +6,8 @@ class Termin
     private $_meldungenCountsByWert = null;
     /** @var array<int,string>|null */
     private $_freeTextByUser = null;
+    /** @var int|null Override for getUser() when rendering proxy/AJAX rows (MELD-153) */
+    private $_renderUserOverride = null;
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -419,11 +421,18 @@ class Termin
         }
     }
     protected function getUser() {
+        if($this->_renderUserOverride !== null && (int)$this->_renderUserOverride > 0) {
+            return (int)$this->_renderUserOverride;
+        }
         if(isset($_POST['proxy'])) {
             return $_POST['proxy'];
         }
         if(isset($_GET['user'])) {
             return $_GET['user'];
+        }
+        // AJAX melde/meldeshift speichern die Zielperson als POST user (MELD-153)
+        if(isset($_POST['user']) && (int)$_POST['user'] > 0) {
+            return (int)$_POST['user'];
         }
         if(isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) {
             return (int)$_SESSION['proxy'];
@@ -432,6 +441,37 @@ class Termin
             return $_SESSION['userid'];
         }
         return 0;
+    }
+
+    /** Force list/modal rendering for a specific user (im Auftrag / AJAX). */
+    public function setRenderUser($userId) {
+        $userId = (int)$userId;
+        $this->_renderUserOverride = $userId > 0 ? $userId : null;
+    }
+
+    /**
+     * Load Wert/Children/Guests for $userId onto this Termin (MELD-153).
+     */
+    public function loadMeldungStateForUser($userId) {
+        $userId = (int)$userId;
+        $this->Wert = null;
+        $this->Children = null;
+        $this->Guests = null;
+        if($userId < 1 || !(int)$this->Index) {
+            return;
+        }
+        $sql = sprintf(
+            'SELECT `Wert`, `Children`, `Guests` FROM `%sMeldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index,
+            $userId
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if(is_array($row)) {
+            $this->fill_from_array($row);
+        }
     }
     public function getShiftsStatus() {
         $user=$this->getUser();
@@ -917,19 +957,9 @@ class Termin
         if(is_array($row)) {
             $this->fill_from_array($row);
         }
-        $user=$this->getUser();
+        $user = (int)$this->getUser();
         if($user > 0) {
-            $sql = sprintf('SELECT `Wert`, `Children`, `Guests` FROM `%sMeldungen` WHERE `Termin` = "%d" AND `User` = "%d";',
-            $GLOBALS['dbprefix'],
-            $Index,
-            $user
-            );
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            $row = mysqli_fetch_array($dbr);
-            if(is_array($row)) {
-                $this->fill_from_array($row);
-            }
+            $this->loadMeldungStateForUser($user);
         }
     }
     public function setOld() {
@@ -1641,7 +1671,11 @@ class Termin
         }
         return $c;
     }
-    public function printBasicTableLine() {
+    public function printBasicTableLine($userId = null) {
+        if($userId !== null && (int)$userId > 0) {
+            $this->setRenderUser((int)$userId);
+            $this->loadMeldungStateForUser((int)$userId);
+        }
         $user = $this->getUser();
         $tid = (int)$this->Index;
         $h = function ($s) {

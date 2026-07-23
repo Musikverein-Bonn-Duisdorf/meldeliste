@@ -21,9 +21,10 @@ case "save":
     }
     $m->Wert = meldeRequest('wert');
     $m->save();
+    $uid = (int)meldeRequest('user');
     $t = new Termin;
     $t->load_by_id(meldeRequest('termin'));
-    echo $t->printBasicTableLine();
+    echo $t->printBasicTableLine($uid);
     break;
 default:
     http_response_code(400);
