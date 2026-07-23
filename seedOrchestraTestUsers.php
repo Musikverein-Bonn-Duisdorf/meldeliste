@@ -113,6 +113,9 @@ function seedOrchestraTestUsersDelete() {
         );
     }
     $n = mysqli_affected_rows($GLOBALS['conn']);
+    if(class_exists('User')) {
+        User::deleteFutureMeldungenForDeletedUsers();
+    }
     return array(
         'summary' => 'Soft-gelöscht: '.$n.' Test-User',
         'lines' => array('Soft-gelöscht: '.$n.' Test-User'),

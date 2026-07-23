@@ -558,11 +558,105 @@ class User
         }
         return $r;
     }
+    /**
+     * Remove responses for termine on/after today (MELD-152). Past meldungen stay.
+     *
+     * @param int $userId
+     * @return array{meldungen:int,schichtmeldungen:int}
+     */
+    public static function deleteFutureMeldungenForUser($userId) {
+        $userId = (int)$userId;
+        $out = array('meldungen' => 0, 'schichtmeldungen' => 0);
+        if($userId <= 0 || !isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return $out;
+        }
+        $p = $GLOBALS['dbprefix'];
+        $sql = sprintf(
+            'DELETE `m` FROM `%sMeldungen` `m`
+             INNER JOIN `%sTermine` `t` ON `t`.`Index` = `m`.`Termin`
+             WHERE `m`.`User` = %d AND `t`.`Datum` >= CURDATE();',
+            $p,
+            $p,
+            $userId
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            $out['meldungen'] = (int)mysqli_affected_rows($GLOBALS['conn']);
+        }
+        $sql = sprintf(
+            'DELETE `sm` FROM `%sSchichtmeldung` `sm`
+             INNER JOIN `%sSchichten` `s` ON `s`.`Index` = `sm`.`Shift`
+             INNER JOIN `%sTermine` `t` ON `t`.`Index` = `s`.`Termin`
+             WHERE `sm`.`User` = %d AND `t`.`Datum` >= CURDATE();',
+            $p,
+            $p,
+            $p,
+            $userId
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            $out['schichtmeldungen'] = (int)mysqli_affected_rows($GLOBALS['conn']);
+        }
+        return $out;
+    }
+
+    /**
+     * Idempotent cleanup: future responses of already soft-deleted users (MELD-152).
+     *
+     * @return array{meldungen:int,schichtmeldungen:int}
+     */
+    public static function deleteFutureMeldungenForDeletedUsers() {
+        $out = array('meldungen' => 0, 'schichtmeldungen' => 0);
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return $out;
+        }
+        $p = $GLOBALS['dbprefix'];
+        $sql = sprintf(
+            'DELETE `m` FROM `%sMeldungen` `m`
+             INNER JOIN `%sTermine` `t` ON `t`.`Index` = `m`.`Termin`
+             INNER JOIN `%sUser` `u` ON `u`.`Index` = `m`.`User`
+             WHERE `u`.`Deleted` = 1 AND `t`.`Datum` >= CURDATE();',
+            $p,
+            $p,
+            $p
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            $out['meldungen'] = (int)mysqli_affected_rows($GLOBALS['conn']);
+        }
+        $sql = sprintf(
+            'DELETE `sm` FROM `%sSchichtmeldung` `sm`
+             INNER JOIN `%sSchichten` `s` ON `s`.`Index` = `sm`.`Shift`
+             INNER JOIN `%sTermine` `t` ON `t`.`Index` = `s`.`Termin`
+             INNER JOIN `%sUser` `u` ON `u`.`Index` = `sm`.`User`
+             WHERE `u`.`Deleted` = 1 AND `t`.`Datum` >= CURDATE();',
+            $p,
+            $p,
+            $p,
+            $p
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if($dbr) {
+            $out['schichtmeldungen'] = (int)mysqli_affected_rows($GLOBALS['conn']);
+        }
+        return $out;
+    }
+
     public function delete() {
         if(!$this->Index) return false;
+        // Inventar zuerst prüfen – sonst keine Soft-Delete und keine Melde-Bereinigung
+        if($this->hasInventories()) {
+            return false;
+        }
+        $userId = (int)$this->Index;
+        self::deleteFutureMeldungenForUser($userId);
         $sql = sprintf('UPDATE `%sUser` SET `Deleted` = 1, `DeletedOn` = CURRENT_TIMESTAMP, `Vorname` = "gelöschter", `Nachname` = "Benutzer", `Email` = "", `Email2` = "", `login` = "", `Passhash` = "", `getMail` = 0, `notifyInbox` = 0, `notifyAppMail` = 0, `notifyAppTerminNew` = 0, `notifyAppTerminChange` = 0, `notifyAppTerminSoon` = 0 WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
-        $this->Index
+        $userId
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -726,6 +820,109 @@ class User
     /** Eigentum oder aktive Ausleihe (geliehenes Vereinsinventar zählt). */
     public function hasInventories() {
         return count($this->getInventoriesLoans()) > 0 || count($this->getInventories()) > 0;
+    }
+
+    /**
+     * Short label for delete/inventory warnings (nr + type/vendor/model).
+     */
+    private static function inventoryWarningLabel($inventoryId) {
+        $inv = new Inventories;
+        $inv->load_by_id((int)$inventoryId);
+        if(!(int)$inv->Index) {
+            return 'Inventar #'.(int)$inventoryId;
+        }
+        $sql = sprintf(
+            'SELECT `Typ` FROM `%sInventory` WHERE `Index` = %d;',
+            $GLOBALS['dbprefix'],
+            (int)$inv->Inventory
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        $typeName = ($row && isset($row['Typ'])) ? (string)$row['Typ'] : '';
+        $family = method_exists($inv, 'getInstrumentName') ? trim((string)$inv->getInstrumentName()) : '';
+        if($family !== '') {
+            $typeName = $family;
+        }
+        $parts = array_filter(array(
+            RegNumber::displayInventory($inv->Inventory, $inv->RegNumber),
+            $typeName,
+            trim((string)$inv->Vendor),
+            trim((string)$inv->Model),
+        ), function ($p) {
+            return $p !== '';
+        });
+        return implode(' · ', $parts);
+    }
+
+    /**
+     * HTML warning for user delete modal when Eigentum or active loans exist (MELD-152).
+     */
+    public function getDeleteInventoryWarningHtml() {
+        $ownedIds = $this->getInventories();
+        $loanIds = $this->getInventoriesLoans();
+        if(!count($ownedIds) && !count($loanIds)) {
+            return '';
+        }
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $html = '<div class="confirm-delete-inventory-warn '.$h($GLOBALS['optionsDB']['colorBtnNo']).'">';
+        $html .= '<p><b>Achtung Inventar</b></p>';
+        if(count($ownedIds)) {
+            $labels = array();
+            foreach($ownedIds as $id) {
+                $labels[] = self::inventoryWarningLabel($id);
+            }
+            $n = count($ownedIds);
+            $html .= '<p>Diese Person ist Eigentümer von <b>'.$n.'</b> Inventarstück'
+                .($n === 1 ? '' : 'en').':</p><ul>';
+            foreach($labels as $label) {
+                $html .= '<li>'.$h($label).'</li>';
+            }
+            $html .= '</ul>';
+        }
+        if(count($loanIds)) {
+            $labels = array();
+            foreach($loanIds as $loanId) {
+                $loan = new InventoriesLoan;
+                $loan->load_by_id((int)$loanId);
+                $labels[] = self::inventoryWarningLabel($loan->Inventory);
+            }
+            $n = count($loanIds);
+            $html .= '<p>Diese Person hat <b>'.$n.'</b> aktive Ausleihe'
+                .($n === 1 ? '' : 'n').':</p><ul>';
+            foreach($labels as $label) {
+                $html .= '<li>'.$h($label).'</li>';
+            }
+            $html .= '</ul>';
+        }
+        $html .= '<p>Löschen ist erst möglich, wenn Eigentum umgetragen und aktive Ausleihen beendet sind.</p>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Plain-text reason when soft-delete is blocked by inventory (MELD-152).
+     */
+    public function getDeleteInventoryBlockMessage() {
+        $owned = count($this->getInventories());
+        $loans = count($this->getInventoriesLoans());
+        if($owned < 1 && $loans < 1) {
+            return '';
+        }
+        $parts = array('Löschen nicht möglich:');
+        if($owned > 0) {
+            $parts[] = $owned === 1
+                ? '1 Inventarstück als Eigentum'
+                : $owned.' Inventarstücke als Eigentum';
+        }
+        if($loans > 0) {
+            $parts[] = $loans === 1
+                ? '1 aktive Ausleihe'
+                : $loans.' aktive Ausleihen';
+        }
+        return implode(' ', $parts).'. Bitte zuerst Eigentum/Ausleihen klären.';
     }
     
     public function getModalHtml($forceEditButton = false) {

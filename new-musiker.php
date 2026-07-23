@@ -158,35 +158,64 @@ if(!empty($_GET['return_to'])) {
 </div>
 <script src="js/qrcode.min.js"></script>
 <script src="js/profile-layout.js"></script>
-<?php if($fill && $canEditUsers) { ?>
-    <div id="delmodal" class="w3-modal">
-    <div class="w3-modal-content w3-card">
-    <header class="w3-container w3-row <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <span onclick="document.getElementById('delmodal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
-    <h2>L&ouml;schen best&auml;tigen</h2>
-    </header>
-    <div class="w3-container w3-row w3-center w3-padding w3-margin w3-card <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Sind Sie sicher, dass sie <b><?php echo htmlspecialchars($n->Vorname." ".$n->Nachname); ?></b> l&ouml;schen wollen?</div>
-    <div class="w3-container w3-mobile">
-    <form action="" method="POST">
-    <input type="hidden" name="profile_layout" value="a">
-    <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="return_token" value="<?php echo htmlspecialchars($returnToken, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
-    <div class="w3-row">
-    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-    <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" type="submit" name="delete" value="delete">ja</button>
-    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-    </div>
-    </form>
-    <div class="w3-row">
-    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-    <button class="w3-btn w3-col l4 m4 s8 w3-center <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin-bottom w3-mobile" onclick="document.getElementById('delmodal').style.display='none'">nein</button>
-    <div class="w3-col l4 m4 s2 w3-center">&nbsp;</div>
-    </div>
-    </div>
-    </div>
-    </div>
+<?php if($fill && $canEditUsers) {
+    $delName = htmlspecialchars(trim($n->Vorname.' '.$n->Nachname), ENT_QUOTES, 'UTF-8');
+    $inventoryBlocksDelete = $n->hasInventories();
+    ob_start();
+?>
+<div id="delmodal" class="w3-modal" role="dialog" aria-modal="true" aria-labelledby="delmodalTitle" style="display:none;"
+     onclick="if(event.target===this){ this.style.display='none'; }">
+  <div class="w3-modal-content">
+    <div class="profile-shell modal-shell confirm-delete-modal">
+      <header class="profile-hero">
+        <div class="profile-hero-text">
+          <p class="profile-kicker">Musiker</p>
+          <h2 class="profile-title" id="delmodalTitle">Löschen bestätigen</h2>
+        </div>
+        <div class="profile-hero-actions">
+          <button type="button" class="modal-close w3-button" id="delmodalClose" aria-label="Schließen">&times;</button>
+        </div>
+      </header>
+      <div class="confirm-delete-body">
+        <p class="profile-value">
+          Soll <b><?php echo $delName; ?></b> wirklich gelöscht werden?
+        </p>
+        <?php echo $n->getDeleteInventoryWarningHtml(); ?>
+        <div class="profile-actions profile-actions--confirm">
+<?php if(!$inventoryBlocksDelete) { ?>
+          <div class="profile-actions-primary">
+            <form action="" method="POST">
+              <input type="hidden" name="profile_layout" value="a">
+              <input type="hidden" name="return_to" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
+              <input type="hidden" name="return_token" value="<?php echo htmlspecialchars($returnToken, ENT_QUOTES, 'UTF-8'); ?>">
+              <input type="hidden" name="Index" value="<?php echo (int)$n->Index; ?>">
+              <button class="w3-btn profile-btn-primary <?php echo htmlspecialchars($btnDelete, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="delete" value="delete">Löschen</button>
+            </form>
+          </div>
 <?php } ?>
+          <button type="button" class="w3-btn w3-border w3-mobile" id="delmodalCancel"><?php echo $inventoryBlocksDelete ? 'Schließen' : 'Abbrechen'; ?></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  var modal = document.getElementById('delmodal');
+  if(!modal) return;
+  function closeDel() { modal.style.display = 'none'; }
+  var closeBtn = document.getElementById('delmodalClose');
+  var cancelBtn = document.getElementById('delmodalCancel');
+  if(closeBtn) closeBtn.addEventListener('click', closeDel);
+  if(cancelBtn) cancelBtn.addEventListener('click', closeDel);
+  document.addEventListener('keydown', function(e) {
+    if(e.key === 'Escape' && modal.style.display === 'block') closeDel();
+  });
+})();
+</script>
+<?php
+    deferPageModalHtml(ob_get_clean());
+} ?>
 <?php
 include 'common/footer.php';
 ?>

@@ -3676,6 +3676,26 @@ body.meld-cal-print {
   box-sizing: border-box;
 }
 
+.confirm-delete-inventory-warn {
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.35rem;
+  text-align: left;
+}
+
+.confirm-delete-inventory-warn p {
+  margin: 0 0 0.45rem;
+}
+
+.confirm-delete-inventory-warn ul {
+  margin: 0 0 0.55rem;
+  padding-left: 1.2rem;
+}
+
+.confirm-delete-inventory-warn li {
+  margin: 0.15rem 0;
+}
+
 .calendar-subscribe-block {
   width: 100%;
   max-width: 100%;

@@ -422,6 +422,7 @@ class DatabaseManager
         $this->ensureMailTableUtf8mb4();
         $this->ensureAllTablesUtf8mb4();
         $this->migrateHtmlEntitiesInTextFields();
+        $this->migrateDeletedUserFutureMeldungen();
         $this->finalizeSchemaVersion();
         return $this->report;
     }
@@ -443,6 +444,7 @@ class DatabaseManager
         $this->ensureMailTableUtf8mb4();
         $this->ensureAllTablesUtf8mb4();
         $this->migrateHtmlEntitiesInTextFields();
+        $this->migrateDeletedUserFutureMeldungen();
         $this->finalizeSchemaVersion();
         return $this->report;
     }
@@ -1335,6 +1337,40 @@ class DatabaseManager
                     mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
                 );
             }
+        }
+    }
+
+    /**
+     * Drop future meldungen/schichtmeldungen for soft-deleted users (MELD-152). Idempotent.
+     */
+    private function migrateDeletedUserFutureMeldungen() {
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        if(!class_exists('User')) {
+            return;
+        }
+        $counts = User::deleteFutureMeldungenForDeletedUsers();
+        $total = (int)$counts['meldungen'] + (int)$counts['schichtmeldungen'];
+        if($total > 0) {
+            $this->addReport(
+                'data',
+                'Meldungen.deletedUsersFuture',
+                'fixed',
+                sprintf(
+                    'Zukünftige Meldungen gelöschter Nutzer entfernt (%d Termin, %d Schicht)',
+                    (int)$counts['meldungen'],
+                    (int)$counts['schichtmeldungen']
+                )
+            );
+        }
+        else {
+            $this->addReport(
+                'data',
+                'Meldungen.deletedUsersFuture',
+                'ok',
+                'Keine zukünftigen Meldungen gelöschter Nutzer'
+            );
         }
     }
 
