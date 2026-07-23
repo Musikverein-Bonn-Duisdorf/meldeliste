@@ -23,7 +23,6 @@ MailJob::ensureSchema();
 
 $discordAvailable = Discord::isConfigured();
 
-$msg = '';
 $preview = isset($_GET['preview']);
 $job = null;
 $jobId = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['id']) ? (int)$_POST['id'] : 0);
@@ -36,7 +35,7 @@ if(isset($_GET['new'])) {
         header('Location: mail.php?id='.(int)$created->Index);
         exit;
     }
-    $msg = '<div class="w3-container w3-red"><h3>Entwurf konnte nicht angelegt werden.</h3></div>';
+    setFlash('error', 'Entwurf konnte nicht angelegt werden.');
 }
 
 // Bestehende Email als Entwurf kopieren
@@ -50,7 +49,7 @@ if(isset($_GET['copy'])) {
             exit;
         }
     }
-    $msg = '<div class="w3-container w3-red"><h3>Kopieren als Entwurf fehlgeschlagen.</h3></div>';
+    setFlash('error', 'Kopieren als Entwurf fehlgeschlagen.');
 }
 
 // Entwurf laden
@@ -59,7 +58,7 @@ if($jobId > 0) {
     $job->load_by_id($jobId);
     if(!$job->Index) {
         $job = null;
-        $msg = '<div class="w3-container w3-red"><h3>Email-ID '.$jobId.' nicht gefunden.</h3></div>';
+        setFlash('error', 'Email-ID '.$jobId.' nicht gefunden.');
     }
 }
 
@@ -76,10 +75,11 @@ if(isset($_POST['cancel_job'])) {
     $cancelJob = new MailJob;
     $cancelJob->load_by_id($cancelId);
     if($cancelJob->Index && $cancelJob->cancel()) {
-        header('Location: mail.php?cancelled='.$cancelId);
+        setFlash('success', 'Versand von Email-ID '.$cancelId.' abgebrochen.');
+        header('Location: mail.php');
         exit;
     }
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Abbruch nicht möglich.</h3></div>';
+    setFlash('error', 'Abbruch nicht möglich.');
 }
 
 // Löschen (Entwurf oder noch an niemanden versendet)
@@ -88,10 +88,11 @@ if(isset($_POST['delete_job'])) {
     $delJob = new MailJob;
     $delJob->load_by_id($delId);
     if($delJob->Index && $delJob->deleteCompletely()) {
-        header('Location: mail.php?deleted='.$delId);
+        setFlash('success', 'Email-ID '.$delId.' gelöscht.');
+        header('Location: mail.php');
         exit;
     }
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Löschen nicht möglich (bereits an Empfänger versendet).</h3></div>';
+    setFlash('error', 'Löschen nicht möglich (bereits an Empfänger versendet).');
 }
 
 // Speichern / Vorschau / Senden
@@ -135,7 +136,7 @@ if($job && $job->Status === 'draft' && (isset($_POST['save']) || isset($_POST['p
             Usermail::finishResponseThenProcessQueue();
             exit;
         }
-        $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogError'].'"><h3>Keine gültigen Emailadressen gefunden.</h3></div>';
+        setFlash('error', 'Keine gültigen Emailadressen gefunden.');
         $job->load_by_id($job->Index);
         $preview = true;
     }
@@ -146,13 +147,14 @@ if(isset($_GET['queued'])) {
     $job = null;
 }
 if(isset($_GET['cancelled'])) {
+    // Legacy redirect param (newer flow uses setFlash before redirect).
     $cid = (int)$_GET['cancelled'];
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorWarning'].'"><h3>Versand von Email-ID '.$cid.' abgebrochen.</h3></div>';
+    setFlash('success', 'Versand von Email-ID '.$cid.' abgebrochen.');
     $job = null;
 }
 if(isset($_GET['deleted'])) {
     $did = (int)$_GET['deleted'];
-    $msg = '<div class="w3-container '.$GLOBALS['optionsDB']['colorLogEmail'].'"><h3>Email-ID '.$did.' gelöscht.</h3></div>';
+    setFlash('success', 'Email-ID '.$did.' gelöscht.');
     $job = null;
 }
 
@@ -224,7 +226,6 @@ if($job) {
 adminListPageBegin('Kommunikation', 'Email versenden', array('actionsHtml' => $mailActions));
 ?>
 <?php echo renderFlashHtml(); ?>
-<?php echo $msg; ?>
 
 <?php if(!$job) { ?>
   <div class="mail-list">

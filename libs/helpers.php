@@ -1768,10 +1768,25 @@ function renderFlashHtml($flash = null) {
     if(!$flash || $flash['message'] === '') {
         return '';
     }
-    $class = ($flash['type'] === 'error') ? 'w3-red' : 'w3-green';
-    return '<div class="w3-panel '.$class.' w3-padding"><b>'
+    $isError = ($flash['type'] === 'error');
+    $mod = $isError ? 'app-toast--error' : 'app-toast--success';
+    $role = $isError ? 'alert' : 'status';
+    $attrs = $isError ? '' : ' data-autodismiss="3500"';
+    $close = $isError
+        ? '<button type="button" class="app-toast-close" aria-label="Hinweis schließen">&times;</button>'
+        : '';
+    $html = '<div class="app-toast '.$mod.'" role="'.$role.'"'.$attrs.'>'
+        .'<div class="app-toast-body">'
         .htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8')
-        .'</b></div>';
+        .'</div>'
+        .$close
+        .'</div>';
+    /* Outside .app-main so fixed toasts are not clipped by overflow/stacking. */
+    if(!isset($GLOBALS['mlDeferredToasts'])) {
+        $GLOBALS['mlDeferredToasts'] = '';
+    }
+    $GLOBALS['mlDeferredToasts'] .= $html;
+    return '';
 }
 
 function redirectAfterPost($url) {
