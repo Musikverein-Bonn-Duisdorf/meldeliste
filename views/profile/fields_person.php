@@ -71,12 +71,12 @@ else {
 </div>
 <?php } ?>
 <?php
-$mailGroups = MailGroup::listAll();
+$namedGroups = Group::listAll();
 $userId = ($fill && (int)$n->Index > 0) ? (int)$n->Index : 0;
-if($adminUserEdit && count($mailGroups)) {
+if($adminUserEdit && count($namedGroups)) {
     $selectedGroupIds = array();
     $groupCatalog = array();
-    foreach($mailGroups as $g) {
+    foreach($namedGroups as $g) {
         $gid = (int)$g->Index;
         $groupCatalog[] = array(
             'id' => $gid,
@@ -87,7 +87,7 @@ if($adminUserEdit && count($mailGroups)) {
         }
     }
     $groupCatalogJson = json_encode(
-        array('mailGroups' => $groupCatalog),
+        array('namedGroups' => $groupCatalog),
         JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
     );
     $selectedJson = json_encode(
@@ -99,7 +99,7 @@ if($adminUserEdit && count($mailGroups)) {
      data-group-catalog="<?php echo htmlspecialchars((string)$groupCatalogJson, ENT_QUOTES, 'UTF-8'); ?>"
      data-selected-groups="<?php echo htmlspecialchars((string)$selectedJson, ENT_QUOTES, 'UTF-8'); ?>">
   <span class="profile-label">Gruppen</span>
-  <input type="hidden" name="userMailGroupsPosted" value="1">
+  <input type="hidden" name="userNamedGroupsPosted" value="1">
   <div class="profile-group-picker w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>">
     <div id="profile-group-chips" class="mail-recipient-chips" aria-live="polite"></div>
     <input type="text" id="profile-group-input" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Gruppe tippen…" autocomplete="off">

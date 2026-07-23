@@ -71,7 +71,7 @@
 	"Type": {"Type": "int"},
 	"Message": {"Type": "text", "Collation": "utf8mb4_unicode_ci"}
     },
-    "MailGroup": {
+    "Group": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"MemberSpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},

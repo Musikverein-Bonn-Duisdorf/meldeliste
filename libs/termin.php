@@ -112,8 +112,8 @@ class Termin
         if($this->Ort3 != $old->Ort3) $str.=", Ort3: ".$old->Ort3." &rArr; <b>".$this->Ort3."</b>";
         if($this->Ort4 != $old->Ort4) $str.=", Ort4: ".$old->Ort4." &rArr; <b>".$this->Ort4."</b>";
         if($this->Beschreibung != $old->Beschreibung) $str.=", Beschreibung: ".$old->Beschreibung." &rArr; <b>".$this->Beschreibung."</b>";
-        $oldVis = AudienceSpec::canonicalJson($old->VisibilitySpec, array('allowMailGroups' => true));
-        $newVis = AudienceSpec::canonicalJson($this->VisibilitySpec, array('allowMailGroups' => true));
+        $oldVis = AudienceSpec::canonicalJson($old->VisibilitySpec, array('allowNamedGroups' => true));
+        $newVis = AudienceSpec::canonicalJson($this->VisibilitySpec, array('allowNamedGroups' => true));
         if($oldVis !== $newVis) {
             $str.=", sichtbar für: ".htmlspecialchars($old->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')
                 ." &rArr; <b>".htmlspecialchars($this->getVisibilityLabel(), ENT_QUOTES, 'UTF-8')."</b>";
@@ -617,11 +617,11 @@ class Termin
     }
 
     /**
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[]}
      */
     public function getVisibilitySpecArray() {
         return AudienceSpec::normalize($this->VisibilitySpec, array(
-            'allowMailGroups' => true,
+            'allowNamedGroups' => true,
             'defaultGroups' => null,
         ));
     }
@@ -632,7 +632,7 @@ class Termin
      */
     public function setVisibilitySpecArray($spec, $syncGuests = true) {
         $norm = AudienceSpec::normalize($spec, array(
-            'allowMailGroups' => true,
+            'allowNamedGroups' => true,
             'defaultGroups' => null,
         ));
         if(AudienceSpec::isEmpty($norm)) {
@@ -646,7 +646,7 @@ class Termin
             'groups' => $norm['groups'],
             'registers' => $norm['registers'],
             'users' => $norm['users'],
-            'mailGroups' => $norm['mailGroups'],
+            'namedGroups' => $norm['namedGroups'],
         ));
         if($syncGuests) {
             $this->syncGuestMusiciansFromVisibility();
@@ -658,7 +658,7 @@ class Termin
         if($raw === null || $raw === '') {
             return 'NULL';
         }
-        $norm = AudienceSpec::normalize($raw, array('allowMailGroups' => true, 'defaultGroups' => null));
+        $norm = AudienceSpec::normalize($raw, array('allowNamedGroups' => true, 'defaultGroups' => null));
         if(AudienceSpec::isEmpty($norm)) {
             return 'NULL';
         }
@@ -666,7 +666,7 @@ class Termin
             'groups' => $norm['groups'],
             'registers' => $norm['registers'],
             'users' => $norm['users'],
-            'mailGroups' => $norm['mailGroups'],
+            'namedGroups' => $norm['namedGroups'],
         ))).'"';
     }
 
@@ -834,7 +834,7 @@ class Termin
      * @return string
      */
     public function getVisibilityLabel() {
-        return AudienceSpec::formatLabel($this->getVisibilitySpecArray(), array('allowMailGroups' => true));
+        return AudienceSpec::formatLabel($this->getVisibilitySpecArray(), array('allowNamedGroups' => true));
     }
 
     /**

@@ -224,7 +224,7 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
         }
     }
     echo AudienceSpec::renderChipsHtml($visForChips, array(
-        'allowMailGroups' => true,
+        'allowNamedGroups' => true,
         'ariaLabel' => 'sichtbar für',
     ));
 ?>

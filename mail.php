@@ -165,14 +165,14 @@ if($job && $job->Status === 'draft' && (int)$job->Termin > 0) {
         'groups' => array(),
         'registers' => array(),
         'users' => array(),
-        'mailGroups' => array(),
+        'namedGroups' => array(),
         'termine' => array($legacyTermin),
     ));
     $job->save();
     $recipientSpec = $job->getRecipientSpecArray();
 }
 // Neue / leere Entwürfe: Alle Musiker vorauswählen und im Job speichern
-// (mailGroups/termine zählen mit — sonst würden reine Gruppen-/Termin-Chips überschrieben)
+// (namedGroups/termine zählen mit — sonst würden reine Gruppen-/Termin-Chips überschrieben)
 if(
     $job
     && $job->Status === 'draft'
@@ -190,10 +190,10 @@ $anrede = 'Hallo {VORNAME},';
 $postDiscord = ($discordAvailable && $job) ? ((int)$job->PostDiscord === 1) : false;
 
 // Catalog for chip autocomplete
-MailGroup::ensureSchema();
+Group::ensureSchema();
 $mailRecipientCatalog = AudienceSpec::buildCatalog(array(
     'forMail' => true,
-    'includeMailGroups' => true,
+    'includeNamedGroups' => true,
     'includeTermine' => true,
 ));
 // Ensure already selected termine appear (also past events)
@@ -421,7 +421,7 @@ foreach($allJobs as $rowJob) {
         && spec.groups[0] === 'musicians'
         && (!spec.registers || !spec.registers.length)
         && (!spec.users || !spec.users.length)
-        && (!spec.mailGroups || !spec.mailGroups.length)
+        && (!spec.namedGroups || !spec.namedGroups.length)
         && (!spec.termine || !spec.termine.length);
       cb.checked = !!isDefaultAll;
     } catch(e) {
@@ -672,7 +672,7 @@ function delFile(hash) {
     }
     else {
         $verteilerHtml = AudienceSpec::renderChipsHtml($recipientSpecView, array(
-            'allowMailGroups' => true,
+            'allowNamedGroups' => true,
             'allowTermine' => true,
             'ariaLabel' => 'Verteiler',
             'emptyHtml' => '<span class="w3-text-gray">—</span>',

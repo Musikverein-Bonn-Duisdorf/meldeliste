@@ -219,7 +219,7 @@ class Permissions
     }
 
     /**
-     * Personal Permissions row OR-merged with MailGroup PermissionSpec for members.
+     * Personal Permissions row OR-merged with Group PermissionSpec for members.
      * @param int $userId
      * @return Permissions
      */
@@ -230,7 +230,7 @@ class Permissions
         }
         $p = new Permissions();
         $p->load_by_user($userId);
-        foreach(MailGroup::permissionsGrantedToUser($userId) as $key) {
+        foreach(Group::permissionsGrantedToUser($userId) as $key) {
             if(in_array($key, self::permissionKeys(), true)) {
                 $p->$key = 1;
             }

@@ -806,7 +806,7 @@ class DatabaseManager
                         $id = (int)$row['Index'];
                         $rawVis = isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : null;
                         $spec = AudienceSpec::normalize($rawVis, array(
-                            'allowMailGroups' => true,
+                            'allowNamedGroups' => true,
                             'defaultGroups' => null,
                         ));
                         $isEmpty = AudienceSpec::isEmpty($spec);
@@ -909,14 +909,14 @@ class DatabaseManager
                         $spec = AudienceSpec::normalize(
                             isset($row['RecipientSpec']) ? $row['RecipientSpec'] : null,
                             array(
-                                'allowMailGroups' => true,
+                                'allowNamedGroups' => true,
                                 'defaultGroups' => null,
                                 'legacyRegister' => $legacyRegister,
                                 'legacyMemberOnly' => $legacyMemberOnly,
                             )
                         );
                         $raw = isset($row['RecipientSpec']) ? trim((string)$row['RecipientSpec']) : '';
-                        if($raw !== '' && !AudienceSpec::isEmpty(AudienceSpec::normalize($raw, array('allowMailGroups' => true, 'defaultGroups' => null)))) {
+                        if($raw !== '' && !AudienceSpec::isEmpty(AudienceSpec::normalize($raw, array('allowNamedGroups' => true, 'defaultGroups' => null)))) {
                             continue;
                         }
                         if(AudienceSpec::isEmpty($spec) && $legacyRegister <= 0 && !$legacyMemberOnly) {
@@ -926,7 +926,7 @@ class DatabaseManager
                             'groups' => $spec['groups'],
                             'registers' => $spec['registers'],
                             'users' => $spec['users'],
-                            'mailGroups' => $spec['mailGroups'],
+                            'namedGroups' => $spec['namedGroups'],
                             'termine' => isset($spec['termine']) ? $spec['termine'] : array(),
                         ));
                         $update = sprintf(

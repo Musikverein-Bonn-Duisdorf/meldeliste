@@ -273,7 +273,7 @@ class Usermail {
         if($count > 0) {
             $specLabel = AudienceSpec::formatLabel(
                 $job->getRecipientSpecArray(),
-                array('allowMailGroups' => true, 'allowTermine' => true)
+                array('allowNamedGroups' => true, 'allowTermine' => true)
             );
             $logentry->email(sprintf(
                 "In Warteschlange gestellt | Email-ID: <b>%d</b>, Betreff: <b>%s</b>, Empfänger: <b>%d</b>, Quelle: <b>%s</b>, Auswahl: <b>%s</b>",
@@ -785,7 +785,7 @@ class Usermail {
 
         $spec = is_array($this->recipientSpec)
             ? AudienceSpec::normalize($this->recipientSpec, array(
-                'allowMailGroups' => true,
+                'allowNamedGroups' => true,
                 'allowTermine' => true,
                 'defaultGroups' => array('musicians'),
                 'legacyRegister' => (int)$this->register,

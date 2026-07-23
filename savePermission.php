@@ -61,7 +61,7 @@ if($sessionUserId === $userId) {
     $_SESSION['admin'] = isAdmin() ? 1 : 0;
 }
 
-$inherited = MailGroup::inheritedPermissionSources($userId);
+$inherited = Group::inheritedPermissionSources($userId);
 $inheritedGroups = isset($inherited[$perm]) ? $inherited[$perm] : array();
 
 permJsonOut(array(

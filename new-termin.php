@@ -317,10 +317,10 @@ function clearInput(name) {
 }
 </script>
 <?php
-MailGroup::ensureSchema();
+Group::ensureSchema();
 $terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
     'forMail' => false,
-    'includeMailGroups' => true,
+    'includeNamedGroups' => true,
 ));
 ?>
 <script type="application/json" id="terminVisibilityCatalog"><?php echo json_encode($terminVisibilityCatalog, JSON_UNESCAPED_UNICODE); ?></script>
@@ -350,7 +350,7 @@ $terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
       && spec.groups[0] === 'users'
       && (!spec.registers || !spec.registers.length)
       && (!spec.users || !spec.users.length)
-      && (!spec.mailGroups || !spec.mailGroups.length);
+      && (!spec.namedGroups || !spec.namedGroups.length);
   }
   function syncTerminDiscordDefault() {
     try {

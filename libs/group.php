@@ -1,10 +1,10 @@
 <?php
 /**
- * Named audience groups for mail and termin visibility (MELD-61).
- * MemberSpec uses AudienceSpec shape without nested mailGroups.
- * PermissionSpec (MELD-137): JSON array of permission keys granted to members.
+ * Named audience groups for mail, termin visibility, and permission inheritance (MELD-61 / MELD-137).
+ * MemberSpec uses AudienceSpec shape without nested namedGroups.
+ * PermissionSpec: JSON array of permission keys granted to members.
  */
-class MailGroup
+class Group
 {
     private $_data = array(
         'Index' => null,
@@ -56,24 +56,38 @@ class MailGroup
     public static function ensureSchema() {
         static $done = false;
         if($done) return true;
-        $table = new SQLtable('MailGroup');
+        self::migrateLegacyTableName();
+        $table = new SQLtable('Group');
         if(!$table->exists()
             || !$table->columnExists('MemberSpec')
             || !$table->columnExists('PermissionSpec')) {
             $manager = new DatabaseManager();
             $manager->create();
             $manager->repair();
+            self::migrateLegacyTableName();
         }
         $done = true;
-        return (new SQLtable('MailGroup'))->exists();
+        return (new SQLtable('Group'))->exists();
+    }
+
+    /** Rename legacy MailGroup table to Group when present. */
+    private static function migrateLegacyTableName() {
+        $prefix = isset($GLOBALS['dbprefix']) ? (string)$GLOBALS['dbprefix'] : '';
+        $old = new SQLtable('MailGroup');
+        $new = new SQLtable('Group');
+        if($old->exists() && !$new->exists()) {
+            $sql = sprintf('RENAME TABLE `%sMailGroup` TO `%sGroup`;', $prefix, $prefix);
+            mysqli_query($GLOBALS['conn'], $sql);
+            sqlerror();
+        }
     }
 
     /**
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[]}
      */
     public function getMemberSpecArray() {
         return AudienceSpec::normalize($this->MemberSpec, array(
-            'allowMailGroups' => false,
+            'allowNamedGroups' => false,
             'defaultGroups' => null,
         ));
     }
@@ -83,10 +97,10 @@ class MailGroup
      */
     public function setMemberSpecArray($spec) {
         $norm = AudienceSpec::normalize($spec, array(
-            'allowMailGroups' => false,
+            'allowNamedGroups' => false,
             'defaultGroups' => null,
         ));
-        unset($norm['mailGroups']);
+        unset($norm['namedGroups']);
         $payload = array(
             'groups' => $norm['groups'],
             'registers' => $norm['registers'],
@@ -194,7 +208,7 @@ class MailGroup
     }
 
     public function getMemberLabel() {
-        return AudienceSpec::formatLabel($this->getMemberSpecArray(), array('allowMailGroups' => false));
+        return AudienceSpec::formatLabel($this->getMemberSpecArray(), array('allowNamedGroups' => false));
     }
 
     public function getVars() {
@@ -210,15 +224,15 @@ class MailGroup
     }
 
     public function getChanges() {
-        $old = new MailGroup();
+        $old = new Group();
         $old->load_by_id((int)$this->Index);
         $str = sprintf('Gruppen-ID: %d, <b>%s</b>', (int)$this->Index, htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8'));
         if((string)$this->Name !== (string)$old->Name) {
             $str .= ', Name: '.htmlspecialchars((string)$old->Name, ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8').'</b>';
         }
-        $oldJson = AudienceSpec::canonicalJson($old->MemberSpec, array('allowMailGroups' => false));
-        $newJson = AudienceSpec::canonicalJson($this->MemberSpec, array('allowMailGroups' => false));
+        $oldJson = AudienceSpec::canonicalJson($old->MemberSpec, array('allowNamedGroups' => false));
+        $newJson = AudienceSpec::canonicalJson($this->MemberSpec, array('allowNamedGroups' => false));
         if($oldJson !== $newJson) {
             $str .= ', Mitglieder: '.htmlspecialchars($old->getMemberLabel(), ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars($this->getMemberLabel(), ENT_QUOTES, 'UTF-8').'</b>';
@@ -236,7 +250,7 @@ class MailGroup
         self::ensureSchema();
         $Index = (int)$Index;
         $sql = sprintf(
-            'SELECT * FROM `%sMailGroup` WHERE `Index` = %d;',
+            'SELECT * FROM `%sGroup` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             $Index
         );
@@ -249,20 +263,20 @@ class MailGroup
     }
 
     /**
-     * @return MailGroup[]
+     * @return Group[]
      */
     public static function listAll() {
         self::ensureSchema();
         $out = array();
         $sql = sprintf(
-            'SELECT * FROM `%sMailGroup` ORDER BY `Name`, `Index`;',
+            'SELECT * FROM `%sGroup` ORDER BY `Name`, `Index`;',
             $GLOBALS['dbprefix']
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return $out;
         while($row = mysqli_fetch_array($dbr)) {
-            $g = new MailGroup();
+            $g = new Group();
             $g->fill_from_array($row);
             $out[] = $g;
         }
@@ -288,7 +302,7 @@ class MailGroup
      * Membership via roles/registers is unchanged.
      *
      * @param int $userId
-     * @param array $wantGroupIds MailGroup Index values that should include the user
+     * @param array $wantGroupIds Group Index values that should include the user
      */
     public static function syncUserExplicitMembership($userId, $wantGroupIds) {
         $userId = (int)$userId;
@@ -351,7 +365,7 @@ class MailGroup
             $createdBy = (int)$_SESSION['userid'];
         }
         $sql = sprintf(
-            'INSERT INTO `%sMailGroup` (`Name`, `MemberSpec`, `PermissionSpec`, `CreatedBy`) VALUES ("%s", %s, %s, %d);',
+            'INSERT INTO `%sGroup` (`Name`, `MemberSpec`, `PermissionSpec`, `CreatedBy`) VALUES ("%s", %s, %s, %d);',
             $GLOBALS['dbprefix'],
             mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
             $this->sqlMemberSpec(),
@@ -367,7 +381,7 @@ class MailGroup
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailGroup` SET `Name` = "%s", `MemberSpec` = %s, `PermissionSpec` = %s WHERE `Index` = %d;',
+            'UPDATE `%sGroup` SET `Name` = "%s", `MemberSpec` = %s, `PermissionSpec` = %s WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
             $this->sqlMemberSpec(),
@@ -400,7 +414,7 @@ class MailGroup
         self::ensureSchema();
         $vars = $this->getVars();
         $sql = sprintf(
-            'DELETE FROM `%sMailGroup` WHERE `Index` = %d;',
+            'DELETE FROM `%sGroup` WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             (int)$this->Index
         );

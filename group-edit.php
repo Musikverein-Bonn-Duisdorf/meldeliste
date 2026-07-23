@@ -19,11 +19,11 @@ if(!requirePermission('perm_sendEmail')) {
     denyAccess();
 }
 
-MailGroup::ensureSchema();
+Group::ensureSchema();
 
 $msg = '';
 $err = '';
-$g = new MailGroup();
+$g = new Group();
 $editId = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['Index']) ? (int)$_POST['Index'] : 0);
 if($editId > 0) {
     $g->load_by_id($editId);
@@ -67,7 +67,7 @@ $groupPerms = $g->Index ? $g->getPermissionSpecArray() : array();
 $groupPermFlip = array_flip($groupPerms);
 $catalog = AudienceSpec::buildCatalog(array(
     'forMail' => false,
-    'includeMailGroups' => false,
+    'includeNamedGroups' => false,
 ));
 
 include 'common/header.php';

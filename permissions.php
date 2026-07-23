@@ -33,7 +33,7 @@ while($row = mysqli_fetch_array($dbr)) {
     }
     $perm = new Permissions;
     $perm->load_by_user($user->Index);
-    $inherited = MailGroup::inheritedPermissionSources((int)$user->Index);
+    $inherited = Group::inheritedPermissionSources((int)$user->Index);
     $hasAny = $perm->hasAnyPermission() || count($inherited) > 0;
     $rows[] = array(
         'user' => $user,

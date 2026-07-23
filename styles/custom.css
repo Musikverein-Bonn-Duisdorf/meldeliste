@@ -1332,7 +1332,7 @@
   border-color: #7f9dc1;
 }
 
-.mail-recipient-chip--mailGroup {
+.mail-recipient-chip--namedGroup, .mail-recipient-chip--mailGroup {
   background: #e8f5e9;
   border-color: #66bb6a;
 }

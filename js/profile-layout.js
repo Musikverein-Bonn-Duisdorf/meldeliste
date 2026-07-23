@@ -43,8 +43,8 @@
     var hiddensEl = document.getElementById('profile-group-hiddens');
     if (!chipsEl || !inputEl || !suggestEl || !hiddensEl) return;
 
-    var catalog = parseJsonAttr(wrap, 'data-group-catalog', { mailGroups: [] });
-    var mailGroups = Array.isArray(catalog.mailGroups) ? catalog.mailGroups : [];
+    var catalog = parseJsonAttr(wrap, 'data-group-catalog', { namedGroups: [] });
+    var namedGroups = Array.isArray(catalog.namedGroups) ? catalog.namedGroups : [];
     var selected = parseJsonAttr(wrap, 'data-selected-groups', []);
     if (!Array.isArray(selected)) selected = [];
     selected = selected.map(Number).filter(function (id) { return id > 0; });
@@ -52,8 +52,8 @@
     var readonly = !!inputEl.disabled;
 
     function labelFor(id) {
-      for (var i = 0; i < mailGroups.length; i++) {
-        if (Number(mailGroups[i].id) === Number(id)) return mailGroups[i].label || ('#' + id);
+      for (var i = 0; i < namedGroups.length; i++) {
+        if (Number(namedGroups[i].id) === Number(id)) return namedGroups[i].label || ('#' + id);
       }
       return 'Gruppe #' + id;
     }
@@ -63,7 +63,7 @@
       selected.forEach(function (id) {
         var input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'userMailGroups[]';
+        input.name = 'userNamedGroups[]';
         input.value = String(id);
         hiddensEl.appendChild(input);
       });
@@ -73,7 +73,7 @@
       chipsEl.innerHTML = '';
       selected.forEach(function (id) {
         var chip = document.createElement('span');
-        chip.className = 'mail-recipient-chip mail-recipient-chip--mailGroup';
+        chip.className = 'mail-recipient-chip mail-recipient-chip--namedGroup';
         chip.setAttribute('data-id', String(id));
         var text = document.createElement('span');
         text.textContent = labelFor(id);
@@ -98,7 +98,7 @@
     function filteredSuggestions() {
       var q = normalize(inputEl.value);
       var items = [];
-      mailGroups.forEach(function (g) {
+      namedGroups.forEach(function (g) {
         var id = Number(g.id);
         if (selected.indexOf(id) !== -1) return;
         if (q === '' || normalize(g.label).indexOf(q) !== -1) {
@@ -414,11 +414,11 @@
     if (attrs.active && regName && regName.toLowerCase() !== 'keins') {
       chips.push({ type: 'register', label: 'Register: ' + regName });
     }
-    var mailGroups = catalog.mailGroups || [];
-    for (i = 0; i < mailGroups.length; i++) {
-      var g = mailGroups[i];
+    var namedGroups = catalog.namedGroups || [];
+    for (i = 0; i < namedGroups.length; i++) {
+      var g = namedGroups[i];
       if (attrsMatchSpec(attrs, g.groups || [], g.registers || [])) {
-        chips.push({ type: 'mailGroup', label: 'Gruppe: ' + (g.name || '') });
+        chips.push({ type: 'namedGroup', label: 'Gruppe: ' + (g.name || '') });
       }
     }
     return chips;

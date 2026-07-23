@@ -8,13 +8,13 @@ if(!requirePermission('perm_sendEmail')) {
     denyAccess();
 }
 
-MailGroup::ensureSchema();
+Group::ensureSchema();
 
 $msg = '';
 $err = '';
 
 if(isset($_POST['delete']) && isset($_POST['Index'])) {
-    $g = new MailGroup();
+    $g = new Group();
     $g->load_by_id((int)$_POST['Index']);
     if((int)$g->Index && $g->delete()) {
         $msg = 'Gruppe gelöscht.';
@@ -24,7 +24,7 @@ if(isset($_POST['delete']) && isset($_POST['Index'])) {
     }
 }
 
-$groups = MailGroup::listAll();
+$groups = Group::listAll();
 $actions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="group-edit.php">Neue Gruppe</a>'
     .' <a class="w3-button w3-border" href="mail.php">Email versenden</a>';
 adminListPageBegin('Kommunikation', 'Gruppen', array('actionsHtml' => $actions));
