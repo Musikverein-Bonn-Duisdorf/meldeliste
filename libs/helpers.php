@@ -204,18 +204,83 @@ function adminNavPermClass($permKey) {
 }
 
 /**
+ * Map Admin-Listen-Kicker (Personen, Inventar, …) auf Rechte-Farbgruppe.
+ * @param string $kicker
+ * @return string nutzer|termine|register|inventar|kommunikation|system
+ */
+function adminListSectionGroupId($kicker) {
+    $map = array(
+        'Personen' => 'nutzer',
+        'Termine' => 'termine',
+        'Meldungen' => 'termine',
+        'Kommunikation' => 'kommunikation',
+        'Inventar' => 'inventar',
+        'Register' => 'register',
+        'System' => 'system',
+        // Admin-Formulare (nicht Listen)
+        'Neuer Termin' => 'termine',
+        'Termin bearbeiten' => 'termine',
+        'Termin kopieren' => 'termine',
+        'Schichten bearbeiten' => 'termine',
+        'Neuer Nutzer' => 'nutzer',
+        'Nutzer bearbeiten' => 'nutzer',
+        'Mein Profil' => 'nutzer',
+        'globale Einstellungen' => 'system',
+        'Datenauswertung' => 'system',
+    );
+    $k = trim((string)$kicker);
+    return isset($map[$k]) ? $map[$k] : 'system';
+}
+
+/**
+ * CSS classes for Admin-Hero (Rechte-Farben wie Nav/Chips).
+ * @param array $options kicker|groupId|permKey, withProfileHero (bool, default true)
+ * @return string
+ */
+function adminHeroClass($options = array()) {
+    if(isset($options['groupId']) && (string)$options['groupId'] !== '') {
+        $gid = (string)$options['groupId'];
+    }
+    elseif(isset($options['permKey']) && (string)$options['permKey'] !== '') {
+        $gid = Permissions::groupIdForPermission((string)$options['permKey']);
+    }
+    elseif(isset($options['kicker'])) {
+        $gid = adminListSectionGroupId((string)$options['kicker']);
+    }
+    else {
+        $gid = 'system';
+    }
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
+    if($gid === '') {
+        $gid = 'system';
+    }
+    $withProfile = !array_key_exists('withProfileHero', $options) || !empty($options['withProfileHero']);
+    $base = $withProfile ? 'profile-hero admin-list-hero' : 'admin-list-hero';
+    return $base.' admin-list-hero--'.$gid;
+}
+
+/**
  * Open admin list page chrome (profile-shell, same style as new-musiker / permissions).
+ * Hero color follows the Admin-Rechte group (same palette as Nav/Chips).
  * @param string $kicker Section label (Personen, Inventar, …)
  * @param string $title Page title (plain text)
- * @param array $options actionsHtml (string), shellClass (string)
+ * @param array $options actionsHtml (string), shellClass (string), permKey (string), groupId (string)
  */
 function adminListPageBegin($kicker, $title, $options = array()) {
     $actionsHtml = isset($options['actionsHtml']) ? (string)$options['actionsHtml'] : '';
     $shellClass = isset($options['shellClass']) ? trim((string)$options['shellClass']) : '';
     $shellCls = 'profile-shell admin-list-shell'.($shellClass !== '' ? ' '.$shellClass : '');
+    $heroOpts = array('kicker' => $kicker);
+    if(isset($options['groupId'])) {
+        $heroOpts['groupId'] = $options['groupId'];
+    }
+    if(isset($options['permKey'])) {
+        $heroOpts['permKey'] = $options['permKey'];
+    }
+    $heroCls = adminHeroClass($heroOpts);
     echo '<div class="w3-container w3-margin-bottom profile-page">'."\n";
     echo '  <div class="'.htmlspecialchars($shellCls, ENT_QUOTES, 'UTF-8').'">'."\n";
-    echo '    <header class="profile-hero">'."\n";
+    echo '    <header class="'.htmlspecialchars($heroCls, ENT_QUOTES, 'UTF-8').'">'."\n";
     echo '      <div class="profile-hero-text">'."\n";
     echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
     echo '        <h2 class="profile-title">'.htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8').'</h2>'."\n";

@@ -68,7 +68,7 @@ if($fill && $n) {
 <div class="profile-shell termin-shell">
 <form class="profile-form" action="index.php" method="POST">
 
-  <header class="profile-hero">
+  <header class="<?php echo htmlspecialchars(adminHeroClass(array('kicker' => $terminKicker, 'permKey' => 'perm_editAppmnts')), ENT_QUOTES, 'UTF-8'); ?>">
     <div class="profile-hero-text">
       <p class="profile-kicker"><?php echo htmlspecialchars($terminKicker, ENT_QUOTES, 'UTF-8'); ?></p>
       <h2 class="profile-title"><?php echo htmlspecialchars($terminTitle, ENT_QUOTES, 'UTF-8'); ?></h2>

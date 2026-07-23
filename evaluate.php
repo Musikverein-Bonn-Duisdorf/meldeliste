@@ -33,14 +33,11 @@ $payload = array(
     'logLabels' => array('FATAL', 'ERROR', 'WARNING', 'DBDELETE', 'DBINSERT', 'DBUPDATE', 'EMAIL', 'INFO'),
 );
 
-$titleBar = $GLOBALS['optionsDB']['colorTitleBar'];
+$tableHeadClass = adminHeroClass(array('kicker' => 'Datenauswertung', 'permKey' => 'perm_showLog', 'withProfileHero' => false));
 $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
+adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog'));
 ?>
-<div id="header" class="w3-container <?php echo $titleBar; ?>">
-  <h2>Datenauswertung</h2>
-</div>
-
-<div class="w3-container w3-margin-top w3-margin-bottom">
+<div class="w3-container w3-margin-bottom">
   <form method="get" action="evaluate.php" class="eval-filter" id="eval-filter">
     <label for="eval-days"><b>Zeitraum</b></label>
     <input id="eval-days" name="days" type="number" min="1" max="3650" step="1" value="<?php echo (int)$days; ?>" class="w3-input w3-border" required>
@@ -85,12 +82,12 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
         <table id="evalRanking" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
           <thead>
             <tr>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="name" data-type="string">Name</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="yes" data-type="number">Ja</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="no" data-type="number">Nein</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="maybe" data-type="number">Vielleicht</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="termine" data-type="number">Termine</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="quote" data-type="number">Quote</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="name" data-type="string">Name</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="yes" data-type="number">Ja</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="no" data-type="number">Nein</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="maybe" data-type="number">Vielleicht</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="termine" data-type="number">Termine</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="quote" data-type="number">Quote</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -104,10 +101,10 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
         <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
           <thead>
             <tr>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="name" data-type="string">Name</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="lastLogin" data-type="string">Letzter Login</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="lastAttend" data-type="string">Letzte Teilnahme</th>
-              <th class="eval-sort <?php echo $titleBar; ?>" data-sort="quote" data-type="number">Meldequote</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="name" data-type="string">Name</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="lastLogin" data-type="string">Letzter Login</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="lastAttend" data-type="string">Letzte Teilnahme</th>
+              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="quote" data-type="number">Meldequote</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -120,7 +117,7 @@ $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
 <script type="application/json" id="evaluate-data"><?php echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS); ?></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script src="<?php echo $evaluateJs; ?>"></script>
-
 <?php
+adminListPageEnd();
 include "common/footer.php";
 ?>

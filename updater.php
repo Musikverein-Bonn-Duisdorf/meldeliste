@@ -129,11 +129,9 @@ $schemaInfo = sprintf(
 );
 
 include 'common/header.php';
+adminListPageBegin('System', 'Updater', array('permKey' => 'perm_editConfig'));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Updater</h2>
-</div>
-<div class="w3-container w3-card w3-margin w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
+<div class="w3-container w3-card w3-margin-bottom w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
   </div>
@@ -158,22 +156,22 @@ include 'common/header.php';
       „Update durchführen“ zieht die Änderungen und repariert die Datenbank bei veraltetem Schema automatisch.
       Datenbank prüfen/reparieren kann unabhängig davon ausgeführt werden.</p>
   </div>
-  <div class="w3-padding">
-    <form action="updater.php" method="post" style="display:inline;">
+  <div class="w3-padding updater-actions">
+    <form action="updater.php" method="post">
       <input type="hidden" name="git_action" value="check">
-      <button class="w3-button w3-blue" type="submit">Auf Updates prüfen</button>
+      <button class="w3-button w3-border w3-blue w3-mobile" type="submit">Auf Updates prüfen</button>
     </form>
-    <form action="updater.php" method="post" style="display:inline;">
+    <form action="updater.php" method="post">
       <input type="hidden" name="git_action" value="update">
-      <button class="w3-button w3-green" type="submit">Update durchführen</button>
+      <button class="w3-button w3-border w3-green w3-mobile" type="submit">Update durchführen</button>
     </form>
-    <form action="updater.php" method="post" style="display:inline;">
+    <form action="updater.php" method="post">
       <input type="hidden" name="db_action" value="check">
-      <button class="w3-button w3-blue" type="submit">Datenbank prüfen</button>
+      <button class="w3-button w3-border w3-blue w3-mobile" type="submit">Datenbank prüfen</button>
     </form>
-    <form action="updater.php" method="post" style="display:inline;">
+    <form action="updater.php" method="post">
       <input type="hidden" name="db_action" value="repair">
-      <button class="w3-button w3-orange" type="submit">Datenbank reparieren</button>
+      <button class="w3-button w3-border w3-orange w3-mobile" type="submit">Datenbank reparieren</button>
     </form>
   </div>
 
@@ -266,5 +264,6 @@ include 'common/header.php';
 </div>
 
 <?php
+adminListPageEnd();
 include 'common/footer.php';
 ?>

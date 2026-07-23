@@ -60,19 +60,20 @@ if(!$n->Index) {
 }
 
 include "common/header.php";
+$shiftSub = htmlspecialchars($n->Name.' ('.germanDate($n->Datum, 1).')', ENT_QUOTES, 'UTF-8');
+adminListPageBegin('Termine', 'Schichten bearbeiten', array('permKey' => 'perm_editAppmnts'));
 ?>
-<div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-    <h2>Schichten bearbeiten</h2>
-<p><?php echo $n->Name." (".germanDate($n->Datum, 1).")"; ?></p>
+<div class="admin-list-intro">
+  <p><?php echo $shiftSub; ?></p>
 </div>
 <?php echo renderFlashHtml(); ?>
 
 <?php echo $n->printShiftEdit(); ?>
-<div class="w3-container w3-margin-bottom w3-margin-top <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-<p>neue Schicht anlegen</p>
+<div class="admin-list-intro w3-margin-top">
+  <p>neue Schicht anlegen</p>
 </div>
 <?php echo $n->shiftEditLine(0); ?>
-
 <?php
+adminListPageEnd();
 include "common/footer.php";
 ?>
