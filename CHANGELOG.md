@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-84775 (2026-07-23)
+
+- MELD-149: Meldungen-Übersicht und Modal in melde-row-Optik
+
 ## 2026-07-23-3b1dd (2026-07-23)
 
 - MELD-144: Email-Listen durchsuchbar und nachladbar
