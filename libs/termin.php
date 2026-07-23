@@ -1662,7 +1662,8 @@ class Termin
         /*
          * Soft tint must REPLACE the solid color class: cfg-hex-* uses
          * background !important and would sit under the 0.55 overlay (= wrong opacity).
-         * Schichten: tint only header + shift lines, never the whole card.
+         * Schichten: tint on the whole card so the date gutter matches the header
+         * (shift lines keep their own response colors on the right).
          */
         $styleAttr = '';
         $mainSoftClass = '';
@@ -1683,6 +1684,10 @@ class Termin
                 $mainSoftClass = $mainColor;
                 $mainSoftStyle = '';
             }
+            if($mainSoftClass !== '') {
+                $classes[] = $mainSoftClass;
+                $styleAttr = $mainSoftStyle;
+            }
         }
 
         $rowClasses = array('melde-row-main');
@@ -1690,12 +1695,9 @@ class Termin
         if($lineHover) {
             $rowClasses[] = $lineHover;
         }
-        if($isShifts && $mainSoftClass !== '') {
-            $rowClasses[] = $mainSoftClass;
-        }
 
         $str = '<div id="entry'.$tid.'_user'.$user.'" class="'.implode(' ', $classes).'"'.$styleAttr.' data-termin-id="'.$tid.'" '.$this->getSearchDataAttr().'>';
-        $str .= '<div class="'.implode(' ', $rowClasses).'"'.$mainSoftStyle.'>';
+        $str .= '<div class="'.implode(' ', $rowClasses).'">';
         $str .= '<div class="melde-date-col">'.$this->makeListDateInfo().'</div>';
         $str .= '<div class="melde-date-rail" aria-hidden="true"></div>';
 
