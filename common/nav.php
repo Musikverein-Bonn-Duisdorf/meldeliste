@@ -163,7 +163,7 @@ if(requirePermission('perm_editConfig')) {
           <div class="app-nav-admin-title"><i class="fas fa-wrench" aria-hidden="true"></i><span class="nav-label">Admin</span></div>
           <div class="w3-bar-block <?php echo $navAdminColor; ?>">
 <?php if($showPersonen) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('musiker', 'gastmusiker', 'users', 'mitglied', 'nomitglied', 'register', 'newmusiker')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showUsers'); ?>">Personen <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('musiker', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Musikerliste</a>
@@ -183,7 +183,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showTermine) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'shifts')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editAppmnts'); ?>">Termine <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newtermin', 'perm_editAppmnts'); ?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
@@ -192,7 +192,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showMeldungen) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('meldungen', 'archiv', 'public-entry')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showResponse'); ?>">Meldungen <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('meldungen', 'perm_showResponse'); ?>"><i class="fas fa-comment-dots"></i> Meldungen</a>
@@ -204,7 +204,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showKommunikation) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('mail', 'groups')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_sendEmail'); ?>">Kommunikation <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Email versenden" href="mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('mail', 'perm_sendEmail'); ?>"><i class="fas fa-envelope-open-text"></i> Email versenden</a>
@@ -213,7 +213,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showInventar) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('inventories', 'newinventory', 'inventory-types')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showInventories'); ?>">Inventar <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
 <?php if(requirePermission('perm_showInventories')) { ?>
@@ -227,7 +227,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showRegister) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('register-types', 'instrument-types')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editRegisters'); ?>">Register <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Register" href="register-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('register-types', 'perm_editRegisters'); ?>"><i class="fas fa-layer-group"></i> Register</a>
@@ -236,7 +236,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showSystem) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('permissions', 'config', 'evaluate', 'log', 'backup', 'updater')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editConfig'); ?>">System <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
 <?php if(requirePermission('perm_editPermissions')) { ?>
