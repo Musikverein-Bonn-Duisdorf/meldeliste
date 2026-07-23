@@ -32,7 +32,7 @@ include_once 'libs/form-response.php';
 $profileLayout = 'a';
 $layoutQuery = '';
 
-if(isset($_POST['insert']) && ($isSelfProfileEdit || !$canEditUsers)) {
+if(isset($_POST['insert']) && $isSelfProfileEdit && !$canEditUsers) {
     $profileResult = handleSelfProfilePost($userid);
     if($profileResult['flash']) {
         setFlash($profileResult['flash']['type'], $profileResult['flash']['message']);
@@ -43,8 +43,26 @@ if(isset($_POST['insert']) && ($isSelfProfileEdit || !$canEditUsers)) {
     redirectAfterPost('new-musiker.php?id='.$userid.'&mode=useredit'.$layoutQuery);
 }
 
-if($canEditUsers && isUserFormPost() && !$isSelfProfileEdit) {
-    applyNewMusikerFormPostRedirect('musiker.php');
+if($canEditUsers && isUserFormPost()) {
+    if($isSelfProfileEdit) {
+        $result = handleUserFormPost(array('allowNewUser' => true));
+        if($result['handled']) {
+            if($result['flash']) {
+                setFlash($result['flash']['type'], $result['flash']['message']);
+            }
+            elseif($result['successMessage']) {
+                setFlash('success', $result['successMessage']);
+            }
+            $selfUrl = 'new-musiker.php?id='.$userid.'&mode=useredit'.$layoutQuery;
+            if(isset($_POST['delete'])) {
+                redirectAfterPost('musiker.php');
+            }
+            redirectAfterPost($selfUrl);
+        }
+    }
+    else {
+        applyNewMusikerFormPostRedirect('musiker.php');
+    }
 }
 
 include 'common/header.php';
@@ -99,9 +117,9 @@ if($edit == 2 && $fill && (int)$n->Index !== $userid) {
     die('<div class="w3-panel w3-red w3-padding"><b>Kein Zugriff auf dieses Profil.</b></div>');
 }
 
-$disabled = ($edit != 3) ? 'disabled' : '';
-/** Admin legt an / bearbeitet fremdes (oder eigenes) Nutzerprofil — nicht „Mein Profil“. */
-$adminUserEdit = $canEditUsers && (int)$edit === 3;
+$disabled = ($edit == 3 || ($edit == 2 && $canEditUsers)) ? '' : 'disabled';
+/** Volle Nutzerbearbeitung: Admin-Form oder eigenes Profil mit perm_editUsers. */
+$adminUserEdit = $canEditUsers && ($edit === 3 || $edit === 2);
 $showAdminFlags = $adminUserEdit;
 $formAction = '';
 $checked = function ($field) use ($fill, $n) {

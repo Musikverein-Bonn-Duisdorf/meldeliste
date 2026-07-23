@@ -2,7 +2,8 @@
 /**
  * Actions: Speichern prominent, Admin-Aktionen sekundär.
  */
-$hasSecondary = ($fill && $edit != 2) || ($fill && $canEditUsers);
+$fullUserEdit = ($edit != 2) || !empty($canEditUsers);
+$hasSecondary = $fill && $fullUserEdit;
 ?>
 <div class="profile-actions">
   <div class="profile-actions-primary">
@@ -12,7 +13,7 @@ $hasSecondary = ($fill && $edit != 2) || ($fill && $canEditUsers);
   <details class="profile-actions-more">
     <summary>Weitere Aktionen</summary>
     <div class="profile-actions-secondary">
-<?php if($fill && $edit != 2) { ?>
+<?php if($fill && $fullUserEdit) { ?>
       <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="passwd" value="Zufallspasswort">
       <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="newmail" value="Email mit Link">
       <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="deactivate" value="Deaktivieren">

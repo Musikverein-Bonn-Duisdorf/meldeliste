@@ -244,8 +244,8 @@ function handleSelfProfilePost($userid) {
             return $result;
         }
 
-        // Eigenes Profil: nur Kontakt + Benachrichtigungen.
-        // Mitglied, RegisterLead, Gruppen, Name, Instrument: nur Admin-Nutzerbearbeitung.
+        // Eigenes Profil ohne User-Bearbeiten-Recht: nur Kontakt + Benachrichtigungen.
+        // Mit perm_editUsers läuft Speichern über handleUserFormPost (volle Bearbeitung).
         $n->Email = isset($_POST['Email']) ? $_POST['Email'] : $n->Email;
         $n->Email2 = isset($_POST['Email2']) ? $_POST['Email2'] : $n->Email2;
         $n->getMail = isset($_POST['getMail']) ? (int)$_POST['getMail'] : 0;

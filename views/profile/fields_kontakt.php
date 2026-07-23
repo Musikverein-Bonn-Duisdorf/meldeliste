@@ -12,7 +12,7 @@
   <label class="profile-label" for="profile-email2">E-Mail 2</label>
   <input id="profile-email2" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Email2" type="email" placeholder="optional" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Email2, ENT_QUOTES, 'UTF-8').'"'; ?>>
 </div>
-<?php if($edit != 2) { ?>
+<?php if($edit != 2 || !empty($adminUserEdit)) { ?>
 <div class="profile-field">
   <label class="profile-label" for="profile-login">Login</label>
   <input id="profile-login" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="login" type="text" placeholder="optional" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
@@ -23,7 +23,7 @@
   <div class="profile-value"><?php echo htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8') !== '' ? htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8') : '—'; ?></div>
 </div>
 <?php } ?>
-<?php if($fill && ($n->login || $edit == 3)) { ?>
+<?php if($fill && ($n->login || $edit == 3 || !empty($adminUserEdit))) { ?>
 <div class="profile-field">
   <label class="profile-label" for="profile-pw1">Neues Passwort</label>
   <input id="profile-pw1" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="pw1" type="password" placeholder="*****" autocomplete="new-password">
