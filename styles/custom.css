@@ -3955,6 +3955,16 @@ select.profile-control {
 
 /* MELD-141: Hauptseite melde rows — date badge + content + scalable buttons */
 .melde-row {
+  --melde-date-col-w: 9.5rem;
+  --melde-date-rail-w: 0.35rem;
+  --melde-date-rail-color: #fff;
+  --melde-col-gap: 0.85rem;
+  --melde-pad-x: 1rem;
+  --melde-shift-indent: calc(
+    var(--melde-pad-x)
+    + var(--melde-date-col-w)
+    + var(--melde-col-gap)
+  );
   overflow: hidden;
   cursor: pointer;
   position: relative;
@@ -4000,18 +4010,46 @@ select.profile-control {
   outline-offset: 2px;
 }
 
+/* Schicht-Termine: eine durchgehende vertikale Linie Header → Schichten */
+.melde-row:has(> .melde-shift) {
+  --melde-date-rail-inset: 0.4rem;
+  --melde-rail-left: calc(
+    var(--melde-pad-x)
+    + var(--melde-date-col-w)
+    + var(--melde-col-gap)
+  );
+}
+
+.melde-row:has(> .melde-shift)::after {
+  content: "";
+  position: absolute;
+  left: var(--melde-rail-left);
+  top: var(--melde-date-rail-inset);
+  bottom: 0;
+  width: var(--melde-date-rail-w);
+  background: var(--melde-date-rail-color);
+  border-radius: 2px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.melde-row:has(> .melde-shift) > .melde-row-main > .melde-date-rail {
+  visibility: hidden;
+}
+
+.melde-row:has(> .melde-shift) > .melde-shift {
+  border-left-color: transparent;
+}
+
 .melde-row-main {
-  --melde-date-col-w: 9.5rem;
-  --melde-date-rail-w: 0.35rem;
-  --melde-date-rail-color: #fff;
   --melde-row-pad-y: 0.85rem;
   --melde-date-rail-inset: 0.4rem;
   display: grid;
   grid-template-columns: var(--melde-date-col-w) var(--melde-date-rail-w) minmax(0, 1fr) auto;
-  column-gap: 0.85rem;
+  column-gap: var(--melde-col-gap);
   row-gap: 0.65rem;
   align-items: start;
-  padding: var(--melde-row-pad-y) 1rem;
+  padding: var(--melde-row-pad-y) var(--melde-pad-x);
 }
 
 .melde-date-col {
@@ -4231,11 +4269,17 @@ select.profile-control {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55rem 1rem;
-  padding: 0.65rem 1rem;
+  margin-left: var(--melde-shift-indent);
+  padding: 0.65rem var(--melde-pad-x) 0.65rem var(--melde-col-gap);
   border-top: 1px solid rgba(255, 255, 255, 0.65);
+  border-left: var(--melde-date-rail-w) solid var(--melde-date-rail-color, #fff);
+  border-radius: 0;
   cursor: default;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+  /* Eigenfläche rechts vom Strich (nicht nur Einrückung im Vollbreiten-Streifen) */
+  background-color: rgba(255, 255, 255, 0.35);
 }
 
 .melde-shift-info {
@@ -4254,10 +4298,35 @@ select.profile-control {
 }
 
 @media (max-width: 600px) {
+  .melde-row {
+    --melde-pad-x: 0.75rem;
+    --melde-date-col-w: max-content;
+    --melde-col-gap: 0.5rem;
+    --melde-shift-indent: 0;
+  }
+
+  .melde-date-col {
+    width: auto;
+    max-width: none;
+  }
+
+  .melde-row:has(> .melde-shift)::after {
+    display: none;
+  }
+
+  .melde-row:has(> .melde-shift) > .melde-row-main > .melde-date-rail {
+    visibility: visible;
+  }
+
   .melde-row-main {
     --melde-row-pad-y: 0.75rem;
     grid-template-columns: var(--melde-date-col-w) var(--melde-date-rail-w) minmax(0, 1fr);
-    padding: var(--melde-row-pad-y) 0.75rem;
+  }
+
+  .melde-shift {
+    margin-left: 0;
+    border-left: 0;
+    padding: 0.65rem var(--melde-pad-x);
   }
 
   .melde-actions {
