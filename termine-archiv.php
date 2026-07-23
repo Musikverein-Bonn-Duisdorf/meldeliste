@@ -53,7 +53,6 @@ adminListPageBegin('Termine', $title);
 $chunk = listChunkTermine('past', 'basic', '', 50, isset($user) ? (int)$user : (int)$_SESSION['userid']);
 adminListSearchField('Termine suchen (Titel, Ort, Datum, Beschreibung)…', array(
     'onkeyup' => 'filterTermine()',
-    'label' => 'Termine suchen',
 ));
 ?>
 <div id="Liste">

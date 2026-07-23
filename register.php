@@ -9,6 +9,7 @@ if(!requirePermission("perm_showUsers")) {
 }
 
 adminListPageBegin('Personen', 'Registerübersicht');
+adminListSearchField('Nach Musiker suchen…', array('onkeyup' => 'filterMusiker()'));
 ?>
 
 <?php if($GLOBALS['optionsDB']['showOrchestraView']) { ?>
@@ -17,6 +18,7 @@ adminListPageBegin('Personen', 'Registerübersicht');
 </div>
 <?php } ?>
 
+<div id="Liste">
 <?php
     $sql = sprintf('SELECT `Index` FROM `%sRegister` WHERE `Name` != "keins" ORDER BY `Sortierung`;',
         $GLOBALS['dbprefix']
@@ -28,6 +30,12 @@ while($row = mysqli_fetch_array($dbr)) {
     $M->load_by_id($row['Index']);
     $M->memberTable();
 }
+?>
+</div>
+<?php
 adminListPageEnd();
+?>
+<script src="js/filterMusiker.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<?php
 include "common/footer.php";
 ?>

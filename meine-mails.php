@@ -73,11 +73,8 @@ $resolveSender = function($senderId) use (&$userNameCache) {
     }
     return $userNameCache[$senderId];
 };
+adminListPageBegin('Kommunikation', 'Meine Nachrichten');
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Meine Nachrichten</h2>
-</div>
-
 <?php if($viewMail) {
     $subj = htmlspecialchars((string)$viewMail->Subject, ENT_QUOTES, 'UTF-8');
     $body = formatMailBodyForDisplay((string)$viewMail->BodyText);
@@ -147,5 +144,6 @@ else {
   </div>
 </div>
 <?php
+adminListPageEnd();
 include "common/footer.php";
 ?>

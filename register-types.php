@@ -56,6 +56,7 @@ if(isset($_POST['delete'])) {
 
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
 adminListPageBegin('Register', 'Register');
+adminListChromeClose();
 ?>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>

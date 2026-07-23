@@ -26,6 +26,7 @@
       <link rel="stylesheet" href="<?php echo $cssUrl('styles/fontawesome-free-6.4.2-web/css/solid.css'); ?>">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <?php echo renderConfigColorCss(); ?>
+      <?php echo renderPermissionGroupColorCss(); ?>
       <link rel="icon" href="<?php echo $GLOBALS['optionsDB']['favicon']; ?>" type="image/x-icon">
       <!-- successfully included php libraries -->
       <?php
@@ -56,7 +57,7 @@
       ?>
       <title><?php echo $optionsDB['WebSiteName']; ?></title>
   </head>
-  <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?>">
+  <body class="<?php echo $GLOBALS['optionsDB']['colorBackground']; ?> app-layout">
 <?php
 include "common/nav.php";
 $GLOBALS['mlHeaderRendered'] = true;
