@@ -214,17 +214,23 @@ class Log
         $userLabel = $User->Index ? $User->getName() : 'SYSTEM';
         $classes = trim('log-row list-row '.$hover);
         $tsRaw = (string)$this->Timestamp;
-        $tsView = (string)germanDate($tsRaw, false);
+        $datePart = (string)germanDate($tsRaw, false);
+        $timePart = '';
         if(strlen($tsRaw) >= 19) {
-            $tsView .= ' '.substr($tsRaw, 11, 8);
+            $timePart = substr($tsRaw, 11, 8);
         }
         elseif(strlen($tsRaw) >= 16) {
-            $tsView .= ' '.substr($tsRaw, 11, 5);
+            $timePart = substr($tsRaw, 11, 5);
         }
 
         echo '<div id="'.(int)$this->Index.'" class="'.htmlspecialchars($classes, ENT_QUOTES, 'UTF-8').'">';
         echo '<div class="log-id">';
-        echo '<div class="log-time">'.htmlspecialchars($tsView, ENT_QUOTES, 'UTF-8').'</div>';
+        echo '<div class="log-time">';
+        echo '<span class="log-date">'.htmlspecialchars($datePart, ENT_QUOTES, 'UTF-8').'</span>';
+        if($timePart !== '') {
+            echo '<span class="log-clock">'.htmlspecialchars($timePart, ENT_QUOTES, 'UTF-8').'</span>';
+        }
+        echo '</div>';
         if($type !== '') {
             echo '<span class="w3-tag log-type-chip log-type-chip--'.htmlspecialchars($chipMod, ENT_QUOTES, 'UTF-8').'">'
                 .htmlspecialchars($type, ENT_QUOTES, 'UTF-8').'</span>';
