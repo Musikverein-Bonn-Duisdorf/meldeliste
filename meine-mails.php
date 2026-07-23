@@ -39,40 +39,19 @@ if($viewId > 0) {
 
 include_once "common/header.php";
 
-$sqlList = sprintf(
-    'SELECT o.*, j.`CreatedBy` AS `SenderId`
-     FROM `%sMailOutbox` o
-     LEFT JOIN `%sMailJob` j ON j.`Index` = o.`Job`
-     WHERE o.`User` = %d AND o.`DeletedByUser` = 0 AND o.`Status` IN ("pending", "sending", "sent", "failed")
-     ORDER BY o.`Created` DESC, o.`Index` DESC
-     LIMIT 200;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $userId
-);
-$dbr = mysqli_query($GLOBALS['conn'], $sqlList);
-sqlerror();
-
 $userNameCache = array();
 $formatMailDate = function($raw) {
-    $raw = (string)$raw;
-    if($raw === '') return '';
-    $out = (string)germanDate($raw, true);
-    if(strlen($raw) >= 16) {
-        $out .= ' '.sql2timeRaw(substr($raw, 11, 8));
-    }
-    return $out;
+    return mailListFormatDate($raw);
 };
 $resolveSender = function($senderId) use (&$userNameCache) {
-    $senderId = (int)$senderId;
-    if($senderId <= 0) return 'System';
-    if(!isset($userNameCache[$senderId])) {
-        $u = new User;
-        $u->load_by_id($senderId);
-        $userNameCache[$senderId] = $u->Index ? $u->getName() : ('User '.$senderId);
-    }
-    return $userNameCache[$senderId];
+    return mailListResolveUserName($senderId, $userNameCache);
 };
+
+$mailListChunk = null;
+if(!$viewMail) {
+    $mailListChunk = listChunkUserMails($userId, '', 50);
+}
+
 adminListPageBegin('Kommunikation', 'Meine Nachrichten');
 ?>
 <?php if($viewMail) {
@@ -101,53 +80,29 @@ adminListPageBegin('Kommunikation', 'Meine Nachrichten');
     </div>
   </div>
 </div>
-<?php } ?>
-
-<div class="mail-list">
+<?php } else {
+    adminListSearchField('Nachrichten suchen (Betreff, Absender)…', array('onkeyup' => 'filterMail()'));
+?>
+<div class="mail-list" id="Liste">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <div>Betreff</div>
       <div></div>
       <div>Aktion</div>
     </div>
 <?php
-if(!$dbr || mysqli_num_rows($dbr) === 0) {
-    echo '<div class="mail-list-item"><div class="mail-list-primary">Keine Nachrichten vorhanden.</div></div>';
+if($mailListChunk['html'] === '') {
+    echo '<div class="mail-list-item mail-list-empty"><div class="mail-list-primary">Keine Nachrichten vorhanden.</div></div>';
 }
 else {
-    while($row = mysqli_fetch_assoc($dbr)) {
-        $id = (int)$row['Index'];
-        $unread = empty($row['ReadAt']);
-        $when = htmlspecialchars($formatMailDate($row['Created']), ENT_QUOTES, 'UTF-8');
-        $sender = htmlspecialchars($resolveSender(isset($row['SenderId']) ? $row['SenderId'] : 0), ENT_QUOTES, 'UTF-8');
-        $subject = $row['Subject'] !== '' && $row['Subject'] !== null
-            ? htmlspecialchars((string)$row['Subject'], ENT_QUOTES, 'UTF-8')
-            : '<em>(ohne Betreff)</em>';
-        $rowCls = $unread ? ' mail-unread' : '';
-        $neu = $unread
-            ? '<span class="w3-tag '.$GLOBALS['optionsDB']['colorLogEmail'].'">neu</span>'
-            : '';
-        $mailFail = (isset($row['Status']) && $row['Status'] === 'failed')
-            ? ' <span class="w3-tag '.(isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red').'">E-Mail fehlgeschlagen</span>'
-            : '';
-        if($unread) {
-            $subject = '<strong>'.$subject.'</strong>';
-        }
-        echo '<div class="mail-list-item'.$rowCls.'">';
-        echo '<div class="mail-list-primary"><a href="meine-mails.php?id='.$id.'">'.$subject.'</a></div>';
-        echo '<div class="mail-list-meta">'.$when.' · '.$sender.'</div>';
-        echo '<div class="mail-list-status">'.$neu.$mailFail.'</div>';
-        echo '<div class="mail-list-actions">';
-        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="meine-mails.php?id='.$id.'">Anzeigen</a>';
-        echo '<form method="post" action="meine-mails.php" onsubmit="return confirm(\'Nachricht ausblenden?\');">';
-        echo '<input type="hidden" name="id" value="'.$id.'" />';
-        echo '<button type="submit" name="delete" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Ausblenden</button>';
-        echo '</form>';
-        echo '</div>';
-        echo '</div>';
-    }
+    echo $mailListChunk['html'];
 }
+echo listChunkRenderSentinel('meineMails', $mailListChunk['nextCursor'], $mailListChunk['hasMore'], 'filterMail');
 ?>
 </div>
+<script src="js/listRowSearch.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/filterMail.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<?php } ?>
 <?php
 adminListPageEnd();
 include "common/footer.php";

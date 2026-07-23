@@ -396,6 +396,237 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     );
 }
 
+/**
+ * Compact Created/list timestamps for mail list meta (short weekday + date).
+ */
+function mailListFormatDate($raw) {
+    $raw = (string)$raw;
+    if($raw === '') return '';
+    $out = (string)germanDates($raw, true, true);
+    if(strlen($raw) >= 16) {
+        $out .= ' '.sql2timeRaw(substr($raw, 11, 8));
+    }
+    return $out;
+}
+
+/**
+ * Resolve user display name with a shared cache map.
+ */
+function mailListResolveUserName($userId, &$userNameCache) {
+    $userId = (int)$userId;
+    if($userId <= 0) return 'System';
+    if(!isset($userNameCache[$userId])) {
+        $u = new User;
+        $u->load_by_id($userId);
+        $userNameCache[$userId] = $u->Index ? $u->getName() : ('User '.$userId);
+    }
+    return $userNameCache[$userId];
+}
+
+/**
+ * One row for Meine Nachrichten overview.
+ * @param array $row MailOutbox fields + optional SenderId
+ */
+function mailOutboxRenderListItemHtml(array $row, &$userNameCache = null) {
+    if(!is_array($userNameCache)) {
+        $userNameCache = array();
+    }
+    $id = (int)$row['Index'];
+    $unread = empty($row['ReadAt']);
+    $when = htmlspecialchars(mailListFormatDate(isset($row['Created']) ? $row['Created'] : ''), ENT_QUOTES, 'UTF-8');
+    $senderName = mailListResolveUserName(isset($row['SenderId']) ? $row['SenderId'] : 0, $userNameCache);
+    $sender = htmlspecialchars($senderName, ENT_QUOTES, 'UTF-8');
+    $subject = (isset($row['Subject']) && $row['Subject'] !== '' && $row['Subject'] !== null)
+        ? htmlspecialchars((string)$row['Subject'], ENT_QUOTES, 'UTF-8')
+        : '<em>(ohne Betreff)</em>';
+    $rowCls = $unread ? ' mail-unread' : '';
+    $neu = $unread
+        ? '<span class="w3-tag '.$GLOBALS['optionsDB']['colorLogEmail'].'">neu</span>'
+        : '';
+    $mailFail = (isset($row['Status']) && $row['Status'] === 'failed')
+        ? ' <span class="w3-tag '.(isset($GLOBALS['optionsDB']['colorLogError']) ? $GLOBALS['optionsDB']['colorLogError'] : 'w3-red').'">E-Mail fehlgeschlagen</span>'
+        : '';
+    if($unread) {
+        $subject = '<strong>'.$subject.'</strong>';
+    }
+    $searchBits = array(
+        isset($row['Subject']) ? (string)$row['Subject'] : '',
+        $senderName,
+        isset($row['Created']) ? (string)$row['Created'] : '',
+        $unread ? 'neu' : '',
+        (isset($row['Status']) && $row['Status'] === 'failed') ? 'fehlgeschlagen' : '',
+    );
+    $html = '<div class="mail-list-item'.$rowCls.'" data-search="'.htmlspecialchars(implode(' ', $searchBits), ENT_QUOTES, 'UTF-8').'">';
+    $html .= '<div class="mail-list-primary"><a href="meine-mails.php?id='.$id.'">'.$subject.'</a></div>';
+    $html .= '<div class="mail-list-meta">'.$when.' · '.$sender.'</div>';
+    $html .= '<div class="mail-list-status">'.$neu.$mailFail.'</div>';
+    $html .= '<div class="mail-list-actions">';
+    $html .= '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="meine-mails.php?id='.$id.'">Anzeigen</a>';
+    $html .= '<form method="post" action="meine-mails.php" onsubmit="return confirm(\'Nachricht ausblenden?\');">';
+    $html .= '<input type="hidden" name="id" value="'.$id.'" />';
+    $html .= '<button type="submit" name="delete" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Ausblenden</button>';
+    $html .= '</form>';
+    $html .= '</div>';
+    $html .= '</div>';
+    return $html;
+}
+
+/**
+ * Admin mail job list chunks (ORDER BY queue/created DESC, Index DESC).
+ * Cursor: "timestamp|id" of last emitted row, or empty for start.
+ * @return array{html:string,nextCursor:string,hasMore:bool,sendingIds:int[]}
+ */
+function listChunkMailJobs($cursor, $limit) {
+    $limit = listChunkLimit($limit);
+    MailJob::ensureSchema();
+    $prefix = $GLOBALS['dbprefix'];
+    $cursorTs = '';
+    $cursorId = 0;
+    if($cursor !== '' && strpos($cursor, '|') !== false) {
+        $parts = explode('|', $cursor, 2);
+        $cursorTs = $parts[0];
+        $cursorId = (int)$parts[1];
+    }
+    $sortExpr = sprintf(
+        'COALESCE((SELECT MIN(o2.`Created`) FROM `%sMailOutbox` o2 WHERE o2.`Job` = j.`Index`), j.`Created`)',
+        $prefix
+    );
+    $queueCreated = sprintf(
+        '(SELECT MIN(o.`Created`) FROM `%sMailOutbox` o WHERE o.`Job` = j.`Index`) AS `QueueCreated`',
+        $prefix
+    );
+    if($cursorTs !== '') {
+        $esc = mysqli_real_escape_string($GLOBALS['conn'], $cursorTs);
+        $sql = sprintf(
+            'SELECT j.*, %s FROM `%sMailJob` j
+             WHERE (%s < "%s") OR (%s = "%s" AND j.`Index` < %d)
+             ORDER BY %s DESC, j.`Index` DESC LIMIT %d;',
+            $queueCreated,
+            $prefix,
+            $sortExpr,
+            $esc,
+            $sortExpr,
+            $esc,
+            $cursorId,
+            $sortExpr,
+            $limit + 1
+        );
+    }
+    else {
+        $sql = sprintf(
+            'SELECT j.*, %s FROM `%sMailJob` j ORDER BY %s DESC, j.`Index` DESC LIMIT %d;',
+            $queueCreated,
+            $prefix,
+            $sortExpr,
+            $limit + 1
+        );
+    }
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $jobs = array();
+    if($dbr) {
+        while($row = mysqli_fetch_array($dbr)) {
+            $j = new MailJob;
+            $j->fill_from_array($row);
+            $jobs[] = $j;
+        }
+    }
+    $hasMore = count($jobs) > $limit;
+    if($hasMore) {
+        $jobs = array_slice($jobs, 0, $limit);
+    }
+    $html = '';
+    $userNameCache = array();
+    $sendingIds = array();
+    $nextCursor = $cursor;
+    foreach($jobs as $job) {
+        $html .= $job->renderAdminListItemHtml($userNameCache, $sendingIds);
+        $nextCursor = $job->listTimestamp().'|'.(int)$job->Index;
+    }
+    return array(
+        'html' => $html,
+        'nextCursor' => (string)$nextCursor,
+        'hasMore' => $hasMore,
+        'sendingIds' => $sendingIds,
+    );
+}
+
+/**
+ * User inbox (Meine Nachrichten) chunks.
+ * Cursor: "created|id" of last emitted row, or empty for start.
+ */
+function listChunkUserMails($userId, $cursor, $limit) {
+    $limit = listChunkLimit($limit);
+    $userId = (int)$userId;
+    MailJob::ensureSchema();
+    $prefix = $GLOBALS['dbprefix'];
+    $cursorTs = '';
+    $cursorId = 0;
+    if($cursor !== '' && strpos($cursor, '|') !== false) {
+        $parts = explode('|', $cursor, 2);
+        $cursorTs = $parts[0];
+        $cursorId = (int)$parts[1];
+    }
+    $baseWhere = sprintf(
+        'o.`User` = %d AND o.`DeletedByUser` = 0 AND o.`Status` IN ("pending", "sending", "sent", "failed")',
+        $userId
+    );
+    if($cursorTs !== '') {
+        $esc = mysqli_real_escape_string($GLOBALS['conn'], $cursorTs);
+        $sql = sprintf(
+            'SELECT o.*, j.`CreatedBy` AS `SenderId`
+             FROM `%sMailOutbox` o
+             LEFT JOIN `%sMailJob` j ON j.`Index` = o.`Job`
+             WHERE %s AND ((o.`Created` < "%s") OR (o.`Created` = "%s" AND o.`Index` < %d))
+             ORDER BY o.`Created` DESC, o.`Index` DESC LIMIT %d;',
+            $prefix,
+            $prefix,
+            $baseWhere,
+            $esc,
+            $esc,
+            $cursorId,
+            $limit + 1
+        );
+    }
+    else {
+        $sql = sprintf(
+            'SELECT o.*, j.`CreatedBy` AS `SenderId`
+             FROM `%sMailOutbox` o
+             LEFT JOIN `%sMailJob` j ON j.`Index` = o.`Job`
+             WHERE %s
+             ORDER BY o.`Created` DESC, o.`Index` DESC LIMIT %d;',
+            $prefix,
+            $prefix,
+            $baseWhere,
+            $limit + 1
+        );
+    }
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $rows = array();
+    if($dbr) {
+        while($row = mysqli_fetch_assoc($dbr)) {
+            $rows[] = $row;
+        }
+    }
+    $hasMore = count($rows) > $limit;
+    if($hasMore) {
+        $rows = array_slice($rows, 0, $limit);
+    }
+    $html = '';
+    $userNameCache = array();
+    $nextCursor = $cursor;
+    foreach($rows as $row) {
+        $html .= mailOutboxRenderListItemHtml($row, $userNameCache);
+        $nextCursor = (string)$row['Created'].'|'.(int)$row['Index'];
+    }
+    return array(
+        'html' => $html,
+        'nextCursor' => (string)$nextCursor,
+        'hasMore' => $hasMore,
+    );
+}
+
 function listChunkRenderSentinelAttrs($type, $cursor, $hasMore, $filterFn = '') {
     $attrs = ' id="listSentinel" data-list-type="'.htmlspecialchars($type, ENT_QUOTES, 'UTF-8').'"'
         .' data-cursor="'.htmlspecialchars((string)$cursor, ENT_QUOTES, 'UTF-8').'"'

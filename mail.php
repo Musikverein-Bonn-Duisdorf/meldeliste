@@ -216,7 +216,10 @@ if(!empty($recipientSpec['termine']) && is_array($recipientSpec['termine'])) {
     }
 }
 
-$allJobs = MailJob::listJobs(null, 300);
+$mailListChunk = null;
+if(!$job) {
+    $mailListChunk = listChunkMailJobs('', 50);
+}
 
 include_once 'common/header.php';
 $mailActions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?new=1'.($terminParam ? '&termin='.(int)$terminParam : '').'">Neue Email</a>';
@@ -227,93 +230,36 @@ adminListPageBegin('Kommunikation', 'Email versenden', array('actionsHtml' => $m
 ?>
 <?php echo renderFlashHtml(); ?>
 
-<?php if(!$job) { ?>
-  <div class="mail-list">
+<?php if(!$job) {
+    adminListSearchField('Emails suchen (Betreff, Absender, Status, ID)…', array('onkeyup' => 'filterMail()'));
+?>
+  <div class="mail-list" id="Liste">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <div>Betreff</div>
       <div>Status</div>
       <div>Aktion</div>
     </div>
 <?php
-if(!count($allJobs)) {
-    echo '<div class="mail-list-item"><div class="mail-list-primary">Noch keine Emails vorhanden.</div></div>';
+if($mailListChunk['html'] === '') {
+    echo '<div class="mail-list-item mail-list-empty"><div class="mail-list-primary">Noch keine Emails vorhanden.</div></div>';
 }
-$userNameCache = array();
-$mailSendingIds = array();
-foreach($allJobs as $rowJob) {
-    $id = (int)$rowJob->Index;
-    $subject = $rowJob->Subject !== '' && $rowJob->Subject !== null
-        ? htmlspecialchars((string)$rowJob->Subject, ENT_QUOTES, 'UTF-8')
-        : '<em>(ohne Betreff)</em>';
-    $createdRaw = (string)$rowJob->listTimestamp();
-    $created = htmlspecialchars((string)germanDate($createdRaw, true), ENT_QUOTES, 'UTF-8');
-    if(strlen($createdRaw) >= 16) {
-        $created .= ' '.htmlspecialchars(sql2timeRaw(substr($createdRaw, 11, 8)), ENT_QUOTES, 'UTF-8');
-    }
-    $byId = (int)$rowJob->CreatedBy;
-    if($byId > 0) {
-        if(!isset($userNameCache[$byId])) {
-            $u = new User;
-            $u->load_by_id($byId);
-            $userNameCache[$byId] = $u->Index ? $u->getName() : ('User '.$byId);
-        }
-        $byName = htmlspecialchars($userNameCache[$byId], ENT_QUOTES, 'UTF-8');
-    }
-    else {
-        $byName = 'System';
-    }
-    $status = htmlspecialchars($rowJob->statusLabel(), ENT_QUOTES, 'UTF-8');
-    $statusCls = $rowJob->statusClass();
-    $counts = '';
-    if($rowJob->Status !== 'draft') {
-        $counts = MailJob::formatCounts($rowJob->Sent, $rowJob->Total, $rowJob->Failed);
-    }
-    else {
-        $counts = '—';
-    }
-    $isSending = in_array((string)$rowJob->Status, array('queued', 'processing'), true);
-    if($isSending) {
-        $mailSendingIds[] = $id;
-    }
-    echo '<div class="mail-list-item" data-mail-id="'.$id.'"'.($isSending ? ' data-mail-sending="1"' : '').'>';
-    echo '<div class="mail-list-primary"><a href="mail.php?id='.$id.'">'.$subject.'</a></div>';
-    echo '<div class="mail-list-meta">#'.$id.' · '.$created.' · '.$byName.'</div>';
-    echo '<div class="mail-list-status"><span class="w3-tag mail-status-tag '.$statusCls.'">'.$status.'</span>';
-    echo ' <span class="mail-counts-cell">'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</span></div>';
-    echo '<div class="mail-list-actions mail-actions-cell">';
-    if($rowJob->Status === 'draft') {
-        echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a>';
-    }
-    if($rowJob->canCancel()) {
-        echo '<span class="mail-cancel-wrap">';
-        echo '<form method="post" action="mail.php" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
-        echo '<input type="hidden" name="id" value="'.$id.'" />';
-        echo '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
-        echo '</form>';
-        echo '</span>';
-    }
-    if($rowJob->canDelete()) {
-        $delConfirm = $rowJob->Status === 'draft'
-            ? 'Entwurf #'.$id.' wirklich löschen?'
-            : 'Email-ID '.$id.' wirklich löschen? (noch an niemanden per PHPMailer versendet)';
-        echo '<span class="mail-delete-wrap">';
-        echo '<form method="post" action="mail.php" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
-        echo '<input type="hidden" name="id" value="'.$id.'" />';
-        echo '<button type="submit" name="delete_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Löschen</button>';
-        echo '</form>';
-        echo '</span>';
-    }
-    echo '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?copy='.$id.'">Als Entwurf kopieren</a>';
-    echo '</div>';
-    echo '</div>';
+else {
+    echo $mailListChunk['html'];
 }
+echo listChunkRenderSentinel('mailJobs', $mailListChunk['nextCursor'], $mailListChunk['hasMore'], 'filterMail');
 ?>
   </div>
-<?php if(count($mailSendingIds)) { ?>
 <script>
 (function() {
-  var pollIds = <?php echo json_encode(array_values($mailSendingIds)); ?>;
-  if(!pollIds.length) return;
+  function collectPollIds() {
+    var rows = document.querySelectorAll('.mail-list-item[data-mail-sending="1"]');
+    var ids = [];
+    for(var i = 0; i < rows.length; i++) {
+      var id = parseInt(rows[i].getAttribute('data-mail-id'), 10);
+      if(id > 0) ids.push(id);
+    }
+    return ids;
+  }
 
   function applyJob(job) {
     var row = document.querySelector('.mail-list-item[data-mail-id="' + job.id + '"]');
@@ -340,11 +286,11 @@ foreach($allJobs as $rowJob) {
     }
     else {
       row.removeAttribute('data-mail-sending');
-      pollIds = pollIds.filter(function(id) { return id !== job.id; });
     }
   }
 
   function poll() {
+    var pollIds = collectPollIds();
     if(!pollIds.length) return;
     var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     xhr.onreadystatechange = function() {
@@ -364,7 +310,9 @@ foreach($allJobs as $rowJob) {
   poll();
 })();
 </script>
-<?php } ?>
+<script src="js/listRowSearch.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/filterMail.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <?php } ?>
 
 <?php if($job && $job->Status === 'draft') { ?>

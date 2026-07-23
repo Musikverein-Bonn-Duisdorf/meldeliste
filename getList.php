@@ -93,6 +93,19 @@ case 'gastmusiker':
     $result = listChunkUsers('gastmusiker', $cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
     break;
 
+case 'mailJobs':
+    if(!requirePermission('perm_sendEmail')) {
+        http_response_code(403);
+        header('X-Has-More: 0');
+        exit;
+    }
+    $result = listChunkMailJobs($cursor, $limit);
+    break;
+
+case 'meineMails':
+    $result = listChunkUserMails((int)$_SESSION['userid'], $cursor, $limit);
+    break;
+
 default:
     http_response_code(400);
     header('X-Has-More: 0');

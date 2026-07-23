@@ -92,7 +92,7 @@ $sections[] = array(
     'title' => 'Meine Nachrichten',
     'body' => '
 <p>Über das Brief-Symbol öffnest du deinen Posteingang in der Meldeliste. Dort erscheinen Nachrichten, die über die App an dich verschickt wurden.</p>
-<p>Ungelesene Nachrichten werden in der Navigation als Badge angezeigt. Öffne eine Nachricht, um sie zu lesen; der Status aktualisiert sich entsprechend.</p>
+<p>Ungelesene Nachrichten werden in der Navigation als Badge angezeigt. Öffne eine Nachricht, um sie zu lesen; der Status aktualisiert sich entsprechend. Lange Listen werden beim Scrollen nachgeladen; die Suchleiste filtert die bereits geladenen Einträge nach Betreff oder Absender.</p>
 '
 );
 
@@ -215,7 +215,7 @@ $sections[] = array(
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
 <p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an. <b>Mitglieder</b> sind die Union aus Rollen, Registern und einzelnen Personen (z.&nbsp;B. Posaunen + Schlagwerk + Klarinetten + einzelne Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Unter <b>Vererbte Rechte</b> kannst du einer Gruppe Rechte setzen (z.&nbsp;B. „Versteckte Termine“ für den Vorstand) – alle Mitglieder erhalten diese zusätzlich zu ihren persönlichen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
-<p>Beim Mailversand kannst du Chips für Rollen, Gruppen, Register, Personen und <b>Teilnehmer</b> (ja/vielleicht) zukünftiger Termine wählen. Über <b>Email an Teilnehmer</b> am Termin wird der passende Teilnehmer-Chip vorausgewählt. Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht (<b>Versendet</b> nur bei erfolgreichem SMTP; Fehler und teilweise fehlgeschlagene Jobs werden dort mitgezählt). Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b> (auch wenn der E-Mail-Versand fehlgeschlagen ist, sofern die Inbox aktiv war).</p>
+<p>Beim Mailversand kannst du Chips für Rollen, Gruppen, Register, Personen und <b>Teilnehmer</b> (ja/vielleicht) zukünftiger Termine wählen. Über <b>Email an Teilnehmer</b> am Termin wird der passende Teilnehmer-Chip vorausgewählt. Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht (<b>Versendet</b> nur bei erfolgreichem SMTP; Fehler und teilweise fehlgeschlagene Jobs werden dort mitgezählt). Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b> (auch wenn der E-Mail-Versand fehlgeschlagen ist, sofern die Inbox aktiv war). Die Übersicht lädt lange Listen beim Scrollen nach; die Suchleiste filtert nach Betreff, Absender, Status oder ID.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '
 );
