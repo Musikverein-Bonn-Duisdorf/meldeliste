@@ -54,16 +54,22 @@ $p = new Permissions;
 $p->load_by_user($userId);
 $p->$perm = $value;
 $p->save();
+Permissions::clearEffectiveCache($userId);
 
 if($sessionUserId === $userId) {
     $_SESSION['permissions'] = loadPermissions($userId);
     $_SESSION['admin'] = isAdmin() ? 1 : 0;
 }
 
+$inherited = MailGroup::inheritedPermissionSources($userId);
+$inheritedGroups = isset($inherited[$perm]) ? $inherited[$perm] : array();
+
 permJsonOut(array(
     'ok' => true,
     'user' => $userId,
     'perm' => $perm,
     'value' => $value,
+    'inherited' => count($inheritedGroups) > 0,
+    'inheritedGroups' => $inheritedGroups,
 ));
 ?>

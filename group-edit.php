@@ -38,6 +38,11 @@ if(isset($_POST['save'])) {
         $decoded = AudienceSpec::emptySpec();
     }
     $g->setMemberSpecArray($decoded);
+    $permPosted = array();
+    if(isset($_POST['groupPermissions']) && is_array($_POST['groupPermissions'])) {
+        $permPosted = $_POST['groupPermissions'];
+    }
+    $g->setPermissionSpecArray($permPosted);
     if(!(int)$g->Index) {
         $g->CreatedBy = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
     }
@@ -58,6 +63,8 @@ if(isset($_GET['saved'])) {
 }
 
 $memberSpec = $g->Index ? $g->getMemberSpecArray() : AudienceSpec::emptySpec();
+$groupPerms = $g->Index ? $g->getPermissionSpecArray() : array();
+$groupPermFlip = array_flip($groupPerms);
 $catalog = AudienceSpec::buildCatalog(array(
     'forMail' => false,
     'includeMailGroups' => false,
@@ -94,6 +101,29 @@ adminListPageBegin('Kommunikation', $groupTitle, array('actionsHtml' => $backLin
       <p class="w3-small w3-margin-top mail-recipient-count-line">
         <span id="mailRecipientCount" class="mail-recipient-count" aria-live="polite">…</span>
       </p>
+    </div>
+  </div>
+
+  <div class="profile-field">
+    <label class="profile-label">Vererbte Rechte</label>
+    <p class="w3-small w3-text-gray">Mitglieder dieser Gruppe erhalten die gesetzten Rechte zusätzlich zu ihren persönlichen Rechten.</p>
+    <div class="profile-perm-tiles w3-padding w3-border <?php echo htmlspecialchars($inputCls, ENT_QUOTES, 'UTF-8'); ?>">
+<?php foreach(Permissions::permissionCatalog() as $item) {
+    $key = $item['key'];
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
+    if($gid === '') {
+        $gid = 'system';
+    }
+    $checked = isset($groupPermFlip[$key]);
+    $id = 'groupPerm_'.$key;
+?>
+      <label class="profile-pref perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?>" for="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="checkbox" id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>"
+          name="groupPermissions[]" value="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"
+          <?php echo $checked ? 'checked' : ''; ?>>
+        <span><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+      </label>
+<?php } ?>
     </div>
   </div>
 

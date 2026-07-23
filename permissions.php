@@ -33,11 +33,14 @@ while($row = mysqli_fetch_array($dbr)) {
     }
     $perm = new Permissions;
     $perm->load_by_user($user->Index);
+    $inherited = MailGroup::inheritedPermissionSources((int)$user->Index);
+    $hasAny = $perm->hasAnyPermission() || count($inherited) > 0;
     $rows[] = array(
         'user' => $user,
         'perm' => $perm,
+        'inherited' => $inherited,
         'name' => $user->getName(),
-        'hasAny' => $perm->hasAnyPermission(),
+        'hasAny' => $hasAny,
     );
 }
 ?>
@@ -59,6 +62,7 @@ adminListPageBegin('System', 'Berechtigungen', array(
         </label>
       </div>
     </div>
+    <p class="admin-list-intro w3-small">Persönliche Rechte sind editierbar. Haken mit gestricheltem Rahmen kommen nur über eine Gruppe und lassen sich hier nicht entfernen.</p>
 
     <h3 class="profile-col-title">Rechte-Matrix</h3>
     <div class="perm-matrix-wrap">
@@ -99,22 +103,38 @@ adminListPageBegin('System', 'Berechtigungen', array(
               <?php echo htmlspecialchars($name); ?>
             </td>
 <?php foreach($permKeys as $key) {
-    $on = (bool)$entry['perm']->$key;
+    $personalOn = (bool)$entry['perm']->$key;
+    $groupNames = isset($entry['inherited'][$key]) ? $entry['inherited'][$key] : array();
+    $inheritedOnly = !$personalOn && count($groupNames) > 0;
+    $on = $personalOn || count($groupNames) > 0;
     $locked = ($uid === $sessionUserId && $key === 'perm_editPermissions');
-    $title = htmlspecialchars($permLabels[$key]['label'], ENT_QUOTES, 'UTF-8');
+    $title = $permLabels[$key]['label'];
+    if(count($groupNames)) {
+        $title .= ' — Gruppe: '.implode(', ', $groupNames);
+    }
+    $title = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
     $gid = Permissions::groupIdForPermission($key);
     $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
     if($gid === '') {
         $gid = 'system';
     }
+    $cellExtra = $inheritedOnly ? ' perm-inherited' : '';
+    $disabled = $locked || $inheritedOnly;
+    $disabledTitle = '';
+    if($locked) {
+        $disabledTitle = ' title="Eigenes Recht „Berechtigungen bearbeiten“ kann nicht entfernt werden"';
+    }
+    elseif($inheritedOnly) {
+        $disabledTitle = ' title="'.htmlspecialchars('Nur über Gruppe: '.implode(', ', $groupNames), ENT_QUOTES, 'UTF-8').'"';
+    }
 ?>
-            <td class="perm-cell perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?> <?php echo $on ? 'perm-on' : 'perm-off'; ?>" title="<?php echo $title; ?>">
+            <td class="perm-cell perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?> <?php echo $on ? 'perm-on' : 'perm-off'; ?><?php echo $cellExtra; ?>" title="<?php echo $title; ?>">
               <input type="checkbox"
                      class="perm-toggle"
                      data-user="<?php echo $uid; ?>"
                      data-perm="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"
                      <?php echo $on ? 'checked' : ''; ?>
-                     <?php echo $locked ? 'disabled title="Eigenes Recht „Berechtigungen bearbeiten“ kann nicht entfernt werden"' : ''; ?>>
+                     <?php echo $disabled ? 'disabled'.$disabledTitle : ''; ?>>
             </td>
 <?php } ?>
           </tr>
@@ -167,6 +187,27 @@ adminListPageBegin('System', 'Berechtigungen', array(
     row.setAttribute('data-has-perms', any ? '1' : '0');
   }
 
+  function applyInheritedState(cb, cell, data) {
+    var inherited = data && data.inherited;
+    var groups = (data && data.inheritedGroups) ? data.inheritedGroups : [];
+    if(inherited && !cb.checked) {
+      cb.checked = true;
+      cb.disabled = true;
+      cell.classList.add('perm-inherited');
+      cell.classList.add('perm-on');
+      cell.classList.remove('perm-off');
+      var tip = groups.length ? ('Nur über Gruppe: ' + groups.join(', ')) : 'Nur über Gruppe';
+      cb.setAttribute('title', tip);
+      cell.setAttribute('title', tip);
+    } else if(!inherited) {
+      cell.classList.remove('perm-inherited');
+      if(!(cb.disabled && cb.getAttribute('data-perm') === 'perm_editPermissions')) {
+        cb.disabled = false;
+        cb.removeAttribute('title');
+      }
+    }
+  }
+
   function saveToggle(cb) {
     var cell = cb.parentNode;
     var previous = !cb.checked;
@@ -180,8 +221,9 @@ adminListPageBegin('System', 'Berechtigungen', array(
       cell.classList.remove('perm-saving');
       var ok = false;
       var err = 'Speichern fehlgeschlagen';
+      var data = null;
       try {
-        var data = JSON.parse(xhr.responseText || '{}');
+        data = JSON.parse(xhr.responseText || '{}');
         ok = xhr.status >= 200 && xhr.status < 300 && data && data.ok;
         if(data && data.error === 'cannot_remove_own_edit') {
           err = 'Eigenes Recht „Berechtigungen bearbeiten“ kann nicht entfernt werden';
@@ -197,6 +239,7 @@ adminListPageBegin('System', 'Berechtigungen', array(
       }
       cell.classList.toggle('perm-on', cb.checked);
       cell.classList.toggle('perm-off', !cb.checked);
+      applyInheritedState(cb, cell, data);
       refreshRowHasPerms(cell.parentNode);
       applyFilter();
       setStatus('Gespeichert', true);

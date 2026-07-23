@@ -247,6 +247,16 @@
 .perm-matrix td.perm-group--system.perm-off { background: #f7f9fa; }
 .perm-matrix td.perm-group--system.perm-on { background: #b0bec5; }
 
+.perm-matrix td.perm-inherited {
+  outline: 2px dashed rgba(0, 0, 0, 0.35);
+  outline-offset: -3px;
+}
+
+.perm-matrix td.perm-inherited input.perm-toggle {
+  opacity: 0.85;
+  cursor: help;
+}
+
 .perm-matrix tr:hover td.perm-off {
   filter: brightness(0.97);
 }

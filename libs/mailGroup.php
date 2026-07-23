@@ -2,6 +2,7 @@
 /**
  * Named audience groups for mail and termin visibility (MELD-61).
  * MemberSpec uses AudienceSpec shape without nested mailGroups.
+ * PermissionSpec (MELD-137): JSON array of permission keys granted to members.
  */
 class MailGroup
 {
@@ -9,6 +10,7 @@ class MailGroup
         'Index' => null,
         'Name' => null,
         'MemberSpec' => null,
+        'PermissionSpec' => null,
         'CreatedBy' => 0,
         'Created' => null,
     );
@@ -30,6 +32,7 @@ class MailGroup
             $this->_data[$key] = trim((string)$val);
             break;
         case 'MemberSpec':
+        case 'PermissionSpec':
         case 'Created':
             $this->_data[$key] = $val === null ? null : trim((string)$val);
             break;
@@ -54,7 +57,9 @@ class MailGroup
         static $done = false;
         if($done) return true;
         $table = new SQLtable('MailGroup');
-        if(!$table->exists() || !$table->columnExists('MemberSpec')) {
+        if(!$table->exists()
+            || !$table->columnExists('MemberSpec')
+            || !$table->columnExists('PermissionSpec')) {
             $manager = new DatabaseManager();
             $manager->create();
             $manager->repair();
@@ -90,6 +95,100 @@ class MailGroup
         $this->MemberSpec = json_encode($payload);
     }
 
+    /**
+     * Known permission keys granted by this group (unknown keys dropped).
+     * @return string[]
+     */
+    public function getPermissionSpecArray() {
+        return self::normalizePermissionSpec($this->PermissionSpec);
+    }
+
+    /**
+     * @param array|string|null $spec
+     */
+    public function setPermissionSpecArray($spec) {
+        $keys = self::normalizePermissionSpec($spec);
+        $this->PermissionSpec = count($keys) ? json_encode(array_values($keys)) : null;
+    }
+
+    /**
+     * @param array|string|null $raw
+     * @return string[]
+     */
+    public static function normalizePermissionSpec($raw) {
+        if(is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : array();
+        }
+        if(!is_array($raw)) {
+            return array();
+        }
+        $allowed = array_flip(Permissions::permissionKeys());
+        $out = array();
+        foreach($raw as $key) {
+            if(is_string($key) && isset($allowed[$key])) {
+                $out[$key] = true;
+            }
+        }
+        return array_keys($out);
+    }
+
+    /**
+     * Short labels for granted permissions (empty string if none).
+     */
+    public function getPermissionLabel() {
+        $keys = $this->getPermissionSpecArray();
+        if(!count($keys)) {
+            return '';
+        }
+        $labels = Permissions::permissionLabels();
+        $parts = array();
+        foreach($keys as $key) {
+            $parts[] = isset($labels[$key]['short']) ? $labels[$key]['short'] : $key;
+        }
+        return implode(', ', $parts);
+    }
+
+    /**
+     * Permission keys granted to a user via group membership (union).
+     * @return string[]
+     */
+    public static function permissionsGrantedToUser($userId) {
+        $sources = self::inheritedPermissionSources($userId);
+        return array_keys($sources);
+    }
+
+    /**
+     * Map permission key => group names that grant it (membership via MemberSpec).
+     * @return array<string,string[]>
+     */
+    public static function inheritedPermissionSources($userId) {
+        $userId = (int)$userId;
+        $out = array();
+        if($userId < 1) {
+            return $out;
+        }
+        self::ensureSchema();
+        foreach(self::listAll() as $g) {
+            $granted = $g->getPermissionSpecArray();
+            if(!count($granted)) {
+                continue;
+            }
+            $memberIds = AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false);
+            if(!in_array($userId, array_map('intval', $memberIds), true)) {
+                continue;
+            }
+            $name = (string)$g->Name;
+            foreach($granted as $key) {
+                if(!isset($out[$key])) {
+                    $out[$key] = array();
+                }
+                $out[$key][] = $name;
+            }
+        }
+        return $out;
+    }
+
     public function memberCount($requireMail = false) {
         return count(AudienceSpec::resolveUserIds($this->getMemberSpecArray(), $requireMail));
     }
@@ -103,6 +202,10 @@ class MailGroup
         $parts[] = sprintf('Gruppen-ID: <b>%d</b>', (int)$this->Index);
         $parts[] = logPart('Name', htmlspecialchars((string)$this->Name, ENT_QUOTES, 'UTF-8'));
         $parts[] = logPart('Mitglieder', htmlspecialchars($this->getMemberLabel(), ENT_QUOTES, 'UTF-8'));
+        $permLabel = $this->getPermissionLabel();
+        if($permLabel !== '') {
+            $parts[] = logPart('Rechte', htmlspecialchars($permLabel, ENT_QUOTES, 'UTF-8'));
+        }
         return implode(', ', $parts);
     }
 
@@ -119,6 +222,12 @@ class MailGroup
         if($oldJson !== $newJson) {
             $str .= ', Mitglieder: '.htmlspecialchars($old->getMemberLabel(), ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars($this->getMemberLabel(), ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        $oldPerm = $old->getPermissionSpecArray();
+        $newPerm = $this->getPermissionSpecArray();
+        if($oldPerm !== $newPerm) {
+            $str .= ', Rechte: '.htmlspecialchars($old->getPermissionLabel() !== '' ? $old->getPermissionLabel() : '—', ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars($this->getPermissionLabel() !== '' ? $this->getPermissionLabel() : '—', ENT_QUOTES, 'UTF-8').'</b>';
         }
         return $str;
     }
@@ -211,6 +320,7 @@ class MailGroup
                 $g->save();
             }
         }
+        Permissions::clearEffectiveCache($userId);
     }
 
     public function save() {
@@ -219,13 +329,16 @@ class MailGroup
         if((int)$this->Index > 0) {
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
-            return $this->update();
+            $ok = $this->update();
+            Permissions::clearEffectiveCache();
+            return $ok;
         }
         if(!$this->insert()) {
             return false;
         }
         $logentry = new Log;
         $logentry->DBinsert($this->getVars());
+        Permissions::clearEffectiveCache();
         return true;
     }
 
@@ -238,10 +351,11 @@ class MailGroup
             $createdBy = (int)$_SESSION['userid'];
         }
         $sql = sprintf(
-            'INSERT INTO `%sMailGroup` (`Name`, `MemberSpec`, `CreatedBy`) VALUES ("%s", %s, %d);',
+            'INSERT INTO `%sMailGroup` (`Name`, `MemberSpec`, `PermissionSpec`, `CreatedBy`) VALUES ("%s", %s, %s, %d);',
             $GLOBALS['dbprefix'],
             mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
             $this->sqlMemberSpec(),
+            $this->sqlPermissionSpec(),
             $createdBy
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -253,10 +367,11 @@ class MailGroup
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sMailGroup` SET `Name` = "%s", `MemberSpec` = %s WHERE `Index` = %d;',
+            'UPDATE `%sMailGroup` SET `Name` = "%s", `MemberSpec` = %s, `PermissionSpec` = %s WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
             $this->sqlMemberSpec(),
+            $this->sqlPermissionSpec(),
             (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -270,6 +385,14 @@ class MailGroup
             return 'NULL';
         }
         return '"'.mysqli_real_escape_string($GLOBALS['conn'], (string)$raw).'"';
+    }
+
+    protected function sqlPermissionSpec() {
+        $keys = $this->getPermissionSpecArray();
+        if(!count($keys)) {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode(array_values($keys))).'"';
     }
 
     public function delete() {
@@ -287,6 +410,7 @@ class MailGroup
         $logentry = new Log;
         $logentry->DBdelete($vars);
         $this->_data['Index'] = null;
+        Permissions::clearEffectiveCache();
         return true;
     }
 }

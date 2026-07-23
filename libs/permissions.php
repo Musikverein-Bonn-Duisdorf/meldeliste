@@ -91,6 +91,9 @@ class Permissions
             $logentry = new Log;
             $logentry->DBinsert($this->getVars());
         }
+        if((int)$this->User > 0) {
+            self::clearEffectiveCache((int)$this->User);
+        }
     }
     
     public function is_valid() {
@@ -198,6 +201,42 @@ class Permissions
             $this->User = $Index;
             $this->save();
         }
+    }
+
+    /** @var array<int,Permissions> */
+    private static $effectiveCache = array();
+
+    /**
+     * Drop request-level effective-permission cache (after personal or group changes).
+     * @param int|null $userId null = clear all
+     */
+    public static function clearEffectiveCache($userId = null) {
+        if($userId === null) {
+            self::$effectiveCache = array();
+            return;
+        }
+        unset(self::$effectiveCache[(int)$userId]);
+    }
+
+    /**
+     * Personal Permissions row OR-merged with MailGroup PermissionSpec for members.
+     * @param int $userId
+     * @return Permissions
+     */
+    public static function loadEffectiveByUser($userId) {
+        $userId = (int)$userId;
+        if(isset(self::$effectiveCache[$userId])) {
+            return self::$effectiveCache[$userId];
+        }
+        $p = new Permissions();
+        $p->load_by_user($userId);
+        foreach(MailGroup::permissionsGrantedToUser($userId) as $key) {
+            if(in_array($key, self::permissionKeys(), true)) {
+                $p->$key = 1;
+            }
+        }
+        self::$effectiveCache[$userId] = $p;
+        return $p;
     }
 
     public function getAdmin() {
@@ -398,6 +437,7 @@ class Permissions
             $p->$key = $val;
         }
         $p->save();
+        self::clearEffectiveCache($userId);
         if($sessionUserId === $userId) {
             $_SESSION['permissions'] = loadPermissions($userId);
             $_SESSION['admin'] = isAdmin() ? 1 : 0;

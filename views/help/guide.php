@@ -213,7 +213,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_sendEmail'),
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
-<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
+<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Zusätzlich kannst du einer Gruppe <b>Rechte vererben</b> (z.&nbsp;B. „Versteckte Termine“ für den Vorstand) – alle Mitglieder erhalten diese Rechte zusätzlich zu ihren persönlichen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
 <p>Beim Mailversand kannst du Chips für Rollen, Gruppen, Register, Personen und <b>Teilnehmer</b> (ja/vielleicht) zukünftiger Termine wählen. Über <b>Email an Teilnehmer</b> am Termin wird der passende Teilnehmer-Chip vorausgewählt. Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '
@@ -257,7 +257,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_editPermissions') ? '
-<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Klick auf den Namen öffnet das User-Modal; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
+<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Klick auf den Namen öffnet das User-Modal; Rechte aus Gruppen erscheinen als nicht editierbare Haken; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>

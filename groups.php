@@ -33,7 +33,7 @@ adminListPageBegin('Kommunikation', 'Gruppen', array('actionsHtml' => $actions))
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 
 <div class="admin-list-intro">
-  <p>Benannte Gruppen mit Rollen, Registern und Personen – nutzbar beim Mailversand und bei der Termin-Sichtbarkeit.</p>
+  <p>Benannte Gruppen mit Rollen, Registern und Personen – nutzbar beim Mailversand und bei der Termin-Sichtbarkeit. Gruppen können zusätzlich Rechte an ihre Mitglieder vererben.</p>
 </div>
 
   <div class="mail-list">
@@ -50,9 +50,15 @@ foreach($groups as $g) {
     $id = (int)$g->Index;
     $count = (int)$g->memberCount(false);
     $countMail = (int)$g->memberCount(true);
+    $permLabel = $g->getPermissionLabel();
 ?>
     <div class="mail-list-item">
-      <div class="mail-list-primary"><?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="mail-list-primary">
+        <?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?>
+<?php if($permLabel !== '') { ?>
+        <div class="w3-small w3-text-gray">Rechte: <?php echo htmlspecialchars($permLabel, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php } ?>
+      </div>
       <div class="mail-list-status"><?php echo $count; ?> <span class="w3-small w3-text-gray">(<?php echo $countMail; ?> mit Mail)</span></div>
       <div class="mail-list-actions">
         <a class="w3-button w3-small w3-blue" href="group-edit.php?id=<?php echo $id; ?>">Bearbeiten</a>

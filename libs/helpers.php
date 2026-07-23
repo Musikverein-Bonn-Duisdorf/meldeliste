@@ -569,9 +569,7 @@ function loadconfig() {
 }
 
 function loadPermissions($user) {
-    $p = new Permissions;
-    $p->load_by_user($user);
-    return $p;
+    return Permissions::loadEffectiveByUser($user);
 }
 
 /**
@@ -851,9 +849,11 @@ function RegisterOption($val) {
 }
 
 function requirePermission($perm) {
-    $P = new Permissions;
-    $P->load_by_user($_SESSION['userid']);
-    return $P->getPermission($perm);
+    $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    if($uid < 1) {
+        return false;
+    }
+    return Permissions::loadEffectiveByUser($uid)->getPermission($perm);
 }
 
 /**
@@ -886,9 +886,11 @@ function denyAccess($message = 'Keine Berechtigung für diesen Bereich.') {
 }
 
 function isAdmin() {
-    $P = new Permissions;
-    $P->load_by_user($_SESSION['userid']);
-    return $P->getAdmin();
+    $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    if($uid < 1) {
+        return false;
+    }
+    return (bool)Permissions::loadEffectiveByUser($uid)->getAdmin();
 }
 
 function sql2time($time) {
