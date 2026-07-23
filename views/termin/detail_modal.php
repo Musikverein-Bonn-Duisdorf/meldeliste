@@ -53,7 +53,7 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
 <?php } ?>
 <?php if($t->Shifts) { ?>
             <form action="edit-shifts.php" method="POST">
-              <button class="w3-btn <?php echo $h($btnEdit); ?> w3-border w3-mobile" type="submit" name="Termin" value="<?php echo (int)$t->Index; ?>">Schichten bearbeiten</button>
+              <button class="w3-btn <?php echo $h($btnEdit); ?> w3-border w3-mobile" type="submit" name="Termin" value="<?php echo (int)$t->Index; ?>">Schichten &amp; Aufgaben bearbeiten</button>
             </form>
 <?php } ?>
           </div>
@@ -160,7 +160,7 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
         <div class="profile-value"><?php echo bool2string($t->Auftritt); ?></div>
       </div>
       <div class="profile-field">
-        <span class="profile-label">Schichtdienst</span>
+        <span class="profile-label">Schichten &amp; Aufgaben</span>
         <div class="profile-value"><?php echo bool2string($t->Shifts); ?></div>
       </div>
 <?php if($t->Auftritt) { ?>

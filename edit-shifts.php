@@ -20,7 +20,7 @@ elseif(isset($_POST['Termin'])) {
     $terminId = (int)$_POST['Termin'];
 }
 
-if(isset($_POST['save']) || isset($_POST['delete'])) {
+if(isset($_POST['save_all']) || isset($_POST['delete'])) {
     if($terminId < 1) {
         setFlash('error', 'Kein Termin angegeben.');
         redirectAfterPost('index.php');
@@ -31,18 +31,83 @@ if(isset($_POST['save']) || isset($_POST['delete'])) {
         setFlash('error', 'Termin nicht gefunden.');
         redirectAfterPost('index.php');
     }
-    if(isset($_POST['save'])) {
-        $s = new Shift;
-        $s->load_by_id($_POST['save']);
-        $s->fill_from_array($_POST);
-        $s->save();
-        setFlash('success', 'Schicht gespeichert.');
+    if(isset($_POST['save_all'])) {
+        $rows = (isset($_POST['shifts']) && is_array($_POST['shifts'])) ? $_POST['shifts'] : array();
+        $saved = 0;
+        $created = 0;
+        $errors = 0;
+        foreach($rows as $key => $row) {
+            if(!is_array($row)) {
+                continue;
+            }
+            $name = isset($row['Name']) ? trim((string)$row['Name']) : '';
+            $isNew = ($key === 'new' || strpos((string)$key, 'new_') === 0);
+            if($isNew) {
+                if($name === '') {
+                    continue;
+                }
+                $s = new Shift;
+                $s->Termin = $terminId;
+                $s->Name = $name;
+                $s->Start = isset($row['Start']) ? $row['Start'] : '';
+                $s->End = isset($row['End']) ? $row['End'] : '';
+                $s->Bedarf = isset($row['Bedarf']) ? $row['Bedarf'] : 0;
+                if($s->save() === false || (int)$s->Index < 1) {
+                    $errors++;
+                    continue;
+                }
+                $created++;
+                continue;
+            }
+            $id = (int)$key;
+            if($id < 1) {
+                continue;
+            }
+            if($name === '') {
+                $errors++;
+                continue;
+            }
+            $s = new Shift;
+            $s->load_by_id($id);
+            if(!(int)$s->Index || (int)$s->Termin !== $terminId) {
+                $errors++;
+                continue;
+            }
+            $s->Name = $name;
+            $s->Start = isset($row['Start']) ? $row['Start'] : '';
+            $s->End = isset($row['End']) ? $row['End'] : '';
+            $s->Bedarf = isset($row['Bedarf']) ? $row['Bedarf'] : 0;
+            $s->Termin = $terminId;
+            if(!$s->hasChanges()) {
+                continue;
+            }
+            if($s->save() === false) {
+                $errors++;
+                continue;
+            }
+            $saved++;
+        }
+        if($errors > 0 && ($saved + $created) === 0) {
+            setFlash('error', 'Schichten & Aufgaben konnten nicht gespeichert werden.');
+        }
+        elseif($errors > 0) {
+            setFlash('success', 'Schichten & Aufgaben teilweise gespeichert ('.$saved.' geändert, '.$created.' neu, '.$errors.' Fehler).');
+        }
+        else {
+            setFlash('success', 'Schichten & Aufgaben gespeichert'
+                .(($saved + $created) > 0 ? ' ('.$saved.' geändert, '.$created.' neu).' : '.'));
+        }
     }
     if(isset($_POST['delete'])) {
         $s = new Shift;
         $s->load_by_id($_POST['delete']);
-        $s->delete();
-        setFlash('success', 'Schicht gelöscht.');
+        if((int)$s->Index > 0 && (int)$s->Termin === $terminId) {
+            $s->delete();
+            setFlash('success', 'Schicht/Aufgabe gelöscht.');
+        }
+        else {
+            setFlash('error', 'Schicht/Aufgabe nicht gefunden.');
+        }
     }
     redirectAfterPost('edit-shifts.php?Termin='.$terminId);
 }
@@ -55,24 +120,23 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $terminId > 0) {
 $n = new Termin;
 $n->load_by_id($terminId);
 if(!$n->Index) {
-    setFlash('error', 'Kein Termin zum Bearbeiten der Schichten.');
+    setFlash('error', 'Kein Termin zum Bearbeiten der Schichten & Aufgaben.');
     redirectAfterPost('index.php');
 }
 
 include "common/header.php";
 $shiftSub = htmlspecialchars($n->Name.' ('.germanDate($n->Datum, 1).')', ENT_QUOTES, 'UTF-8');
-adminListPageBegin('Termine', 'Schichten bearbeiten', array('permKey' => 'perm_editAppmnts'));
+adminListPageBegin('Termine', 'Schichten & Aufgaben bearbeiten', array('permKey' => 'perm_editAppmnts'));
 ?>
 <div class="admin-list-intro">
-  <p><?php echo $shiftSub; ?></p>
+  <p class="profile-value"><?php echo $shiftSub; ?></p>
 </div>
 <?php echo renderFlashHtml(); ?>
 
+<section class="shift-edit-list" aria-label="Schichten und Aufgaben">
 <?php echo $n->printShiftEdit(); ?>
-<div class="admin-list-intro w3-margin-top">
-  <p>neue Schicht anlegen</p>
-</div>
-<?php echo $n->shiftEditLine(0); ?>
+</section>
+<script src="<?php echo assetUrl('js/shiftEdit.js'); ?>"></script>
 <?php
 adminListPageEnd();
 include "common/footer.php";

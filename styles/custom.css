@@ -447,6 +447,7 @@ a.app-titlebar-logo {
 
 .admin-list-shell > .admin-list-body {
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   /* ungescrollt: Inhalt erst unter / am Ende der Fade-Zone */
   padding-top: var(--app-chrome-fade-h);
@@ -475,7 +476,7 @@ a.app-titlebar-logo {
 
 @media (min-width: 601px) {
   .app-nav {
-    width: 13.5rem;
+    width: 15rem;
     align-self: stretch;
     overflow-x: visible;
     overflow-y: auto;
@@ -1167,7 +1168,7 @@ a.app-titlebar-logo {
   .admin-nav-group > .w3-button {
     font-weight: 600;
     cursor: pointer;
-    white-space: normal;
+    white-space: nowrap;
   }
 
   .admin-nav-group > .w3-dropdown-content .w3-bar-item {
@@ -1204,6 +1205,10 @@ a.app-titlebar-logo {
 }
 
 .admin-nav-group > .w3-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
   width: 100%;
   text-align: left;
   padding: 8px 16px;
@@ -1237,9 +1242,10 @@ a.app-titlebar-logo {
 }
 
 .admin-nav-caret {
-  float: right;
-  margin-left: 0.75em;
-  margin-top: 0.2em;
+  float: none;
+  flex: 0 0 auto;
+  margin: 0;
+  line-height: 1;
 }
 
 .admin-nav-group > .w3-dropdown-content {
@@ -1281,7 +1287,7 @@ a.app-titlebar-logo {
 
   .admin-nav-caret {
     display: inline-block;
-    float: right;
+    float: none;
   }
 
   .admin-nav-group.admin-nav-open > .w3-button .admin-nav-caret {
@@ -1291,7 +1297,7 @@ a.app-titlebar-logo {
   .admin-nav-group > .w3-button {
     font-weight: bold;
     pointer-events: auto;
-    white-space: normal;
+    white-space: nowrap;
     cursor: pointer;
   }
 
@@ -1749,6 +1755,241 @@ a.app-titlebar-logo {
 @media (max-width: 719px) {
   .termin-field-pair {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Schichten & Aufgaben bearbeiten (edit-shifts) */
+.shift-edit-list,
+.shift-edit-form {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.shift-edit-list {
+  margin: 0 0 1.25rem;
+}
+
+.shift-edit-form {
+  margin: 0;
+}
+
+.shift-edit-table-wrap {
+  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0 0 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.35rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shift-edit-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.shift-edit-table th,
+.shift-edit-table td {
+  padding: 0.45rem 0.55rem;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  text-align: left;
+  overflow: hidden;
+}
+
+.shift-edit-table thead th {
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.shift-edit-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.shift-edit-table th:nth-child(1),
+.shift-edit-table td:nth-child(1) {
+  width: 34%;
+}
+
+.shift-edit-table th:nth-child(2),
+.shift-edit-table td:nth-child(2),
+.shift-edit-table th:nth-child(3),
+.shift-edit-table td:nth-child(3) {
+  width: 15%;
+}
+
+.shift-edit-table th:nth-child(4),
+.shift-edit-table td:nth-child(4) {
+  width: 10%;
+}
+
+.shift-edit-table th:nth-child(5),
+.shift-edit-table td:nth-child(5) {
+  width: 16%;
+}
+
+.shift-edit-table .profile-control,
+.shift-edit-table input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.shift-edit-time-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.shift-edit-time-wrap .profile-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shift-edit-clear {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  padding: 0.1rem 0.25rem;
+  line-height: 1;
+}
+
+.shift-edit-row-actions {
+  white-space: normal;
+}
+
+.shift-edit-row-actions .w3-btn {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+}
+
+.shift-edit-new-hint {
+  font-size: 0.78rem;
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.shift-edit-row--new td {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.shift-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.shift-edit-actions .w3-btn {
+  margin: 0;
+}
+
+.shift-edit-form-actions {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 900px) {
+  .shift-edit-table-wrap {
+    overflow: visible;
+  }
+
+  .shift-edit-table,
+  .shift-edit-table thead,
+  .shift-edit-table tbody {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .shift-edit-table thead {
+    display: none;
+  }
+
+  .shift-edit-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem 0.65rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 0.65rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .shift-edit-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .shift-edit-table th,
+  .shift-edit-table td,
+  .shift-edit-table th:nth-child(1),
+  .shift-edit-table td:nth-child(1),
+  .shift-edit-table th:nth-child(2),
+  .shift-edit-table td:nth-child(2),
+  .shift-edit-table th:nth-child(3),
+  .shift-edit-table td:nth-child(3),
+  .shift-edit-table th:nth-child(4),
+  .shift-edit-table td:nth-child(4),
+  .shift-edit-table th:nth-child(5),
+  .shift-edit-table td:nth-child(5) {
+    display: block;
+    width: auto;
+    max-width: none;
+    overflow: visible;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .shift-edit-table td:nth-child(1),
+  .shift-edit-table td:nth-child(4),
+  .shift-edit-table td:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  .shift-edit-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 0.2rem;
+  }
+
+  .shift-edit-table .profile-control,
+  .shift-edit-table input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .shift-edit-time-wrap {
+    width: 100%;
+  }
+
+  .shift-edit-row-actions .w3-btn {
+    width: 100%;
   }
 }
 

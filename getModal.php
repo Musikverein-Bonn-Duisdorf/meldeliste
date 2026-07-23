@@ -69,7 +69,7 @@ case 'shiftResponse':
     $s->load_by_id($id);
     if(!(int)$s->Index) {
         http_response_code(404);
-        echo '<div class="w3-container w3-padding"><p>Schicht nicht gefunden.</p></div>';
+        echo '<div class="w3-container w3-padding"><p>Schicht/Aufgabe nicht gefunden.</p></div>';
         exit;
     }
     $t = new Termin;

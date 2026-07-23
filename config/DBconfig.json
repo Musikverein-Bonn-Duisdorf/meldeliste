@@ -152,7 +152,7 @@
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Termin": {"Type": "int"},
 	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
-	"Start": {"Type": "time"},
+	"Start": {"Type": "time", "Null": "YES"},
 	"End": {"Type": "time", "Null": "YES"},
 	"Bedarf": {"Type": "int"}
     },

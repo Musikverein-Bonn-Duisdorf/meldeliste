@@ -11,7 +11,7 @@ $subtitle = trim($shiftName.($shiftTime !== '' ? ' · '.$shiftTime : ''));
 <div class="profile-shell modal-shell shift-response-modal">
   <header class="profile-hero">
     <div class="profile-hero-text">
-      <p class="profile-kicker">Schicht</p>
+      <p class="profile-kicker">Schicht/Aufgabe</p>
       <h2 class="profile-title"><?php echo $h($terminName !== '' ? $terminName : 'Termin'); ?></h2>
 <?php if($subtitle !== '') { ?>
       <p class="profile-value" style="font-weight:400;margin:0.25rem 0 0;"><?php echo $h($subtitle); ?></p>
