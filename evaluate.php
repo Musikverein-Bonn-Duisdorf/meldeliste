@@ -33,10 +33,10 @@ $payload = array(
     'logLabels' => array('FATAL', 'ERROR', 'WARNING', 'DBDELETE', 'DBINSERT', 'DBUPDATE', 'EMAIL', 'INFO'),
 );
 
-$titleBar = $GLOBALS['optionsDB']['colorTitleBar'];
+$titleBar = adminHeroClass(array('kicker' => 'Datenauswertung', 'permKey' => 'perm_showLog', 'withProfileHero' => false));
 $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
 ?>
-<div id="header" class="w3-container <?php echo $titleBar; ?>">
+<div id="header" class="w3-container <?php echo htmlspecialchars($titleBar, ENT_QUOTES, 'UTF-8'); ?>">
   <h2>Datenauswertung</h2>
 </div>
 

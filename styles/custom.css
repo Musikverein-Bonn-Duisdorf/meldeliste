@@ -3,7 +3,8 @@
 }
 
 /* Hero tinted by Admin-Rechte group (same palette as Nav / Chips / Matrix) */
-.admin-list-shell > .profile-hero.admin-list-hero {
+.profile-shell > .profile-hero.admin-list-hero,
+.w3-container.admin-list-hero {
   margin: -1px -1px 1.15rem;
   padding: 0.65rem 1rem;
   border-bottom: 0;
@@ -12,46 +13,53 @@
   color: #222;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero .profile-kicker {
+.profile-shell > .profile-hero.admin-list-hero .profile-kicker {
   opacity: 0.8;
   color: inherit;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero .profile-title {
+.profile-shell > .profile-hero.admin-list-hero .profile-title {
   color: inherit;
   font-weight: 700;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero .profile-hero-actions .w3-button {
+.profile-shell > .profile-hero.admin-list-hero .profile-hero-actions .w3-button,
+.profile-shell > .profile-hero.admin-list-hero .profile-hero-actions .w3-btn {
   color: inherit;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero--nutzer {
+.profile-shell > .profile-hero.admin-list-hero--nutzer,
+.w3-container.admin-list-hero--nutzer {
   background: #90caf9;
   border-left-color: #42a5f5;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero--termine {
+.profile-shell > .profile-hero.admin-list-hero--termine,
+.w3-container.admin-list-hero--termine {
   background: #a5d6a7;
   border-left-color: #66bb6a;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero--register {
+.profile-shell > .profile-hero.admin-list-hero--register,
+.w3-container.admin-list-hero--register {
   background: #ffcc80;
   border-left-color: #ffa726;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero--inventar {
+.profile-shell > .profile-hero.admin-list-hero--inventar,
+.w3-container.admin-list-hero--inventar {
   background: #ce93d8;
   border-left-color: #ab47bc;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero--kommunikation {
+.profile-shell > .profile-hero.admin-list-hero--kommunikation,
+.w3-container.admin-list-hero--kommunikation {
   background: #80deea;
   border-left-color: #26c6da;
 }
 
-.admin-list-shell > .profile-hero.admin-list-hero--system {
+.profile-shell > .profile-hero.admin-list-hero--system,
+.w3-container.admin-list-hero--system {
   background: #b0bec5;
   border-left-color: #78909c;
 }

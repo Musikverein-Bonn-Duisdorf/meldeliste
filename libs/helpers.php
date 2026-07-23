@@ -217,9 +217,46 @@ function adminListSectionGroupId($kicker) {
         'Inventar' => 'inventar',
         'Register' => 'register',
         'System' => 'system',
+        // Admin-Formulare (nicht Listen)
+        'Neuer Termin' => 'termine',
+        'Termin bearbeiten' => 'termine',
+        'Termin kopieren' => 'termine',
+        'Schichten bearbeiten' => 'termine',
+        'Neuer Nutzer' => 'nutzer',
+        'Nutzer bearbeiten' => 'nutzer',
+        'Mein Profil' => 'nutzer',
+        'globale Einstellungen' => 'system',
+        'Datenauswertung' => 'system',
     );
     $k = trim((string)$kicker);
     return isset($map[$k]) ? $map[$k] : 'system';
+}
+
+/**
+ * CSS classes for Admin-Hero (Rechte-Farben wie Nav/Chips).
+ * @param array $options kicker|groupId|permKey, withProfileHero (bool, default true)
+ * @return string
+ */
+function adminHeroClass($options = array()) {
+    if(isset($options['groupId']) && (string)$options['groupId'] !== '') {
+        $gid = (string)$options['groupId'];
+    }
+    elseif(isset($options['permKey']) && (string)$options['permKey'] !== '') {
+        $gid = Permissions::groupIdForPermission((string)$options['permKey']);
+    }
+    elseif(isset($options['kicker'])) {
+        $gid = adminListSectionGroupId((string)$options['kicker']);
+    }
+    else {
+        $gid = 'system';
+    }
+    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
+    if($gid === '') {
+        $gid = 'system';
+    }
+    $withProfile = !array_key_exists('withProfileHero', $options) || !empty($options['withProfileHero']);
+    $base = $withProfile ? 'profile-hero admin-list-hero' : 'admin-list-hero';
+    return $base.' admin-list-hero--'.$gid;
 }
 
 /**
@@ -233,20 +270,14 @@ function adminListPageBegin($kicker, $title, $options = array()) {
     $actionsHtml = isset($options['actionsHtml']) ? (string)$options['actionsHtml'] : '';
     $shellClass = isset($options['shellClass']) ? trim((string)$options['shellClass']) : '';
     $shellCls = 'profile-shell admin-list-shell'.($shellClass !== '' ? ' '.$shellClass : '');
-    if(isset($options['groupId']) && (string)$options['groupId'] !== '') {
-        $gid = (string)$options['groupId'];
+    $heroOpts = array('kicker' => $kicker);
+    if(isset($options['groupId'])) {
+        $heroOpts['groupId'] = $options['groupId'];
     }
-    elseif(isset($options['permKey']) && (string)$options['permKey'] !== '') {
-        $gid = Permissions::groupIdForPermission((string)$options['permKey']);
+    if(isset($options['permKey'])) {
+        $heroOpts['permKey'] = $options['permKey'];
     }
-    else {
-        $gid = adminListSectionGroupId($kicker);
-    }
-    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$gid);
-    if($gid === '') {
-        $gid = 'system';
-    }
-    $heroCls = 'profile-hero admin-list-hero admin-list-hero--'.$gid;
+    $heroCls = adminHeroClass($heroOpts);
     echo '<div class="w3-container w3-margin-bottom profile-page">'."\n";
     echo '  <div class="'.htmlspecialchars($shellCls, ENT_QUOTES, 'UTF-8').'">'."\n";
     echo '    <header class="'.htmlspecialchars($heroCls, ENT_QUOTES, 'UTF-8').'">'."\n";

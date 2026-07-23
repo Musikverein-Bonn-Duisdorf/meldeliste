@@ -60,15 +60,16 @@ if(!$n->Index) {
 }
 
 include "common/header.php";
+$shiftHero = adminHeroClass(array('kicker' => 'Schichten bearbeiten', 'permKey' => 'perm_editAppmnts', 'withProfileHero' => false));
 ?>
-<div class="w3-container w3-margin-bottom <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+<div class="w3-container w3-margin-bottom <?php echo htmlspecialchars($shiftHero, ENT_QUOTES, 'UTF-8'); ?>">
     <h2>Schichten bearbeiten</h2>
 <p><?php echo $n->Name." (".germanDate($n->Datum, 1).")"; ?></p>
 </div>
 <?php echo renderFlashHtml(); ?>
 
 <?php echo $n->printShiftEdit(); ?>
-<div class="w3-container w3-margin-bottom w3-margin-top <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
+<div class="w3-container w3-margin-bottom w3-margin-top <?php echo htmlspecialchars($shiftHero, ENT_QUOTES, 'UTF-8'); ?>">
 <p>neue Schicht anlegen</p>
 </div>
 <?php echo $n->shiftEditLine(0); ?>
