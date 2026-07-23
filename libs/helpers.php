@@ -617,9 +617,12 @@ function renderPermissionGroupColorCss($wrapStyleTag = true) {
             .',.profile-perm-tile--'.$id
             .'{background:'.$soft.' !important;border-color:'.$accent.';color:'.$fg.' !important;}';
 
+        $css .= '.admin-list-shell:has(.admin-list-hero--'.$id.')'
+            .'{--page-title-accent:'.$accent.';}';
+
         $css .= '.profile-shell .profile-hero.admin-list-hero--'.$id
             .',.w3-container.admin-list-hero--'.$id
-            .'{background:'.$strong.';border-left-color:'.$accent.';}';
+            .'{background:'.$strong.';border-left-color:'.$accent.';--page-title-accent:'.$accent.';}';
 
         $css .= '.perm-matrix thead th.perm-group--'.$id
             .'{background:'.$soft.';box-shadow:inset 0 -3px 0 '.$accent.';}';
@@ -1561,6 +1564,7 @@ function allowedReturnUrls() {
         'inventories.php',
         'myinventories.php',
         'insurance.php',
+        'new-inventory.php',
         'mail.php',
         'meine-mails.php',
         'edit-shifts.php',
@@ -1583,7 +1587,8 @@ function pageToReturnUrl($page) {
         'groups' => 'groups.php',
         'inventories' => 'inventories.php',
         'myinventories' => 'myinventories.php',
-        'insurance' => 'insurance.php',
+        'insurance' => 'inventories.php',
+        'newinventory' => 'new-inventory.php',
         'mail' => 'mail.php',
         'meinemails' => 'meine-mails.php',
         'home' => 'index.php',

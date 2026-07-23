@@ -15,25 +15,11 @@ if(handleInventoriesMutations()) {
 
 include "common/header.php";
 adminListPageBegin('Inventar', 'Mein Inventar');
-?>
-<div class="w3-row w3-padding w3-border-bottom w3-border-black w3-hide-small w3-hide-medium">
-  <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Inventarnummer</b></div>
-  <div class="w3-col l2 m2 s2 w3-center w3-border-right"><b>Typ</b></div>
-<?php if(requirePermission("perm_showInventories")) { ?>
-  <div class="w3-col l2 m4 s4 w3-center w3-border-right"><b>Beschreibung</b></div>
-  <div class="w3-col l2 m4 s4 w3-center w3-border-right"><b>Kommentar</b></div>    
-  <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Kaufdatum</b></div>
-  <div class="w3-col l1 m1 s1 w3-center w3-border-right"><b>Kaufpreis</b></div>
-<?php } else { ?>
-  <div class="w3-col l4 m4 s4 w3-center w3-border-right"><b>Beschreibung</b></div>    
-  <div class="w3-col l2 m4 s4 w3-center w3-border-right"><b>Kommentar</b></div>    
-<?php } ?>
-  <div class="w3-col l3 m2 s2 w3-center w3-border-right"><b>ausgeliehen an</b></div>
-</div>
-<?php
+
 $u = new User;
 $u->load_by_id($_SESSION['userid']);
 $shown = array();
+$html = '';
 
 $owned = $u->getInventories();
 for($i=0; $i < count($owned); $i++) {
@@ -42,7 +28,7 @@ for($i=0; $i < count($owned); $i++) {
     $shown[$id] = true;
     $inventory = new Inventories;
     $inventory->load_by_id($id);
-    echo $inventory->printTableLine(false);
+    $html .= $inventory->printTableLine(false);
 }
 
 $loans = $u->getInventoriesLoans();
@@ -54,9 +40,20 @@ for($i=0; $i < count($loans); $i++) {
     $shown[$id] = true;
     $inventory = new Inventories;
     $inventory->load_by_id($id);
-    echo $inventory->printTableLine(false);
+    $html .= $inventory->printTableLine(false);
 }
-
+?>
+<div class="inv-list" id="Liste">
+<?php
+if($html === '') {
+    echo '<p class="inv-list-empty">Kein Inventar zugeordnet oder ausgeliehen.</p>';
+}
+else {
+    echo $html;
+}
+?>
+</div>
+<?php
 adminListPageEnd();
 include "common/footer.php";
 ?>

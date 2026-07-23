@@ -301,117 +301,130 @@ class Inventories
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         $row = mysqli_fetch_array($dbr);
-
-        $str="";
-
-        $indent=0;
-        $line = new div;
-        $line->indent=$indent;
-        $line->class="w3-row list-row w3-padding";
-        $line->onclick="openModal('inventar', ".$this->Index.")";
-        if(!empty($this->Insurance)) {
-            $line->class=$GLOBALS['optionsDB']['colorUserMember'];
+        if(!is_array($row)) {
+            return '';
         }
-        $line->class=$GLOBALS['optionsDB']['HoverEffect'];
-        $line->class="w3-mobile w3-border-bottom w3-border-black";
+
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+
+        $showAdminCols = requirePermission('perm_showInventories');
+        $insured = !empty($row['Insurance']) || !empty($this->Insurance);
         $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
         $loanShort = (string)($this->getActiveLoanNameShort() ?? '');
         $loanFull = (string)($this->getActiveLoanName() ?? '');
-        $ownerName = getOwner((int)$row['Owner']);
+        $loanDate = (string)($this->getActiveLoanDate() ?? '');
+        $ownerName = trim((string)getOwner((int)$row['Owner']));
         $regDisplay = RegNumber::displayInventory($row['Inventory'], $row['RegNumber']);
+        $desc = trim((string)$row['Description']);
+        $comment = trim((string)$row['Comment']);
+        $vendor = trim((string)$row['Vendor']);
+        $model = trim((string)$row['Model']);
+        $purchaseDate = trim((string)germanDate($row['PurchaseDate'], 0));
+        $purchasePrize = mkPrize($row['PurchasePrize']);
+
         $searchParts = array(
             $regDisplay,
             (string)(int)$row['RegNumber'],
             $typLabel,
-            (string)$row['Description'],
-            (string)$row['Comment'],
-            (string)$row['Vendor'],
-            (string)$row['Model'],
+            $desc,
+            $comment,
+            $vendor,
+            $model,
             (string)$row['SerialNr'],
             (string)$row['PurchaseDate'],
             (string)$row['PurchasePrize'],
             $ownerName,
             $loanFull,
             $loanShort,
+            $insured ? 'versichert' : '',
         );
-        $line->extraAttrs = 'data-sort-regnumber="'.htmlspecialchars((string)(int)$row['RegNumber'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-typ="'.htmlspecialchars((string)$typLabel, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-description="'.htmlspecialchars((string)$row['Description'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-comment="'.htmlspecialchars((string)$row['Comment'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-vendor="'.htmlspecialchars((string)$row['Vendor'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-model="'.htmlspecialchars((string)$row['Model'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-serial="'.htmlspecialchars((string)$row['SerialNr'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-owner="'.htmlspecialchars((string)$ownerName, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-purchasedate="'.htmlspecialchars((string)$row['PurchaseDate'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-purchaseprize="'.htmlspecialchars((string)$row['PurchasePrize'], ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-loan="'.htmlspecialchars($loanFull !== '' ? $loanFull : $loanShort, ENT_QUOTES, 'UTF-8').'"'
-            .' data-search="'.htmlspecialchars(trim(implode(' ', $searchParts)), ENT_QUOTES, 'UTF-8').'"';
-        $str=$str.$line->open();
-        
-        $indent++;
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-primary";
-        $field->col(1,2,12);
-        $field->body='<b>'.RegNumber::displayInventory($row['Inventory'], $row['RegNumber']).'</b>';
-        $str=$str.$field->print();
 
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-secondary";
-        $field->col(2,2,12);
-        $field->body=$typLabel;
-        $str=$str.$field->print();
-
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-secondary";
-        if(requirePermission("perm_showInventories")) {
-            $field->col(2,4,12);
+        $classes = array('inv-row', 'list-row');
+        if($insured) {
+            $classes[] = 'inv-row--insured';
         }
-        else {
-            $field->col(4,4,12);
+        $hover = $GLOBALS['optionsDB']['HoverEffect'];
+        if($hover) {
+            $classes[] = $hover;
         }
-        $field->body=$row['Description'];
-        $str=$str.$field->print();
 
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-secondary";
-        $field->col(2,2,12);
-        $field->body=$row['Comment'];
-        $str=$str.$field->print();
+        $attrs = 'data-insured="'.($insured ? '1' : '0').'"'
+            .' data-sort-regnumber="'.$h((string)(int)$row['RegNumber']).'"'
+            .' data-sort-typ="'.$h($typLabel).'"'
+            .' data-sort-description="'.$h($desc).'"'
+            .' data-sort-comment="'.$h($comment).'"'
+            .' data-sort-vendor="'.$h($vendor).'"'
+            .' data-sort-model="'.$h($model).'"'
+            .' data-sort-serial="'.$h($row['SerialNr']).'"'
+            .' data-sort-owner="'.$h($ownerName).'"'
+            .' data-sort-purchasedate="'.$h($row['PurchaseDate']).'"'
+            .' data-sort-purchaseprize="'.$h($row['PurchasePrize']).'"'
+            .' data-sort-loan="'.$h($loanFull !== '' ? $loanFull : $loanShort).'"'
+            .' data-search="'.$h(trim(implode(' ', $searchParts))).'"'
+            .' onclick="openModal(\'inventar\', '.(int)$this->Index.')"'
+            .' role="button" tabindex="0"'
+            .' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openModal(\'inventar\', '.(int)$this->Index.');}"';
 
-        if(requirePermission("perm_showInventories")) {
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
-        $field->col(1,4,12);
-        $field->body=germanDate($row['PurchaseDate'], 0);
-        $str=$str.$field->print();
-
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
-        $field->col(1,4,12);
-        $field->body=mkPrize($row['PurchasePrize']);
-        $str=$str.$field->print();
+        $str = '<div class="'.$h(implode(' ', $classes)).'" '.$attrs.'>';
+        $str .= '<div class="inv-id">';
+        $str .= '<div class="inv-reg">'.$h($regDisplay).'</div>';
+        $str .= '<div class="inv-typ">'.$h($typLabel).'</div>';
+        if($insured) {
+            $str .= '<span class="mail-recipient-chip mail-recipient-chip--insured">versichert</span>';
         }
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center list-secondary";
-        $field->col(2,2,12);
-        $field->body=$loanShort;
-        $str=$str.$field->print();
+        $str .= '</div>';
+        $str .= '<div class="inv-rail" aria-hidden="true"></div>';
 
-        $field = new div;
-        $field->indent=$indent;
-        $field->class="w3-center w3-border-right list-meta w3-hide-medium";
-        $field->col(1,2,12);
-        $field->body=$this->getActiveLoanDate();
-        $str=$str.$field->print();
+        $str .= '<div class="inv-main">';
+        $productBits = array();
+        if($vendor !== '') {
+            $productBits[] = $h($vendor);
+        }
+        if($model !== '') {
+            $productBits[] = $h($model);
+        }
+        if($productBits) {
+            $str .= '<div class="inv-product">'.implode(' · ', $productBits).'</div>';
+        }
+        if($desc !== '') {
+            $str .= '<div class="inv-desc'.($productBits ? ' inv-desc--secondary' : '').'">'.$h($desc).'</div>';
+        }
+        $meta = array();
+        if($ownerName !== '') {
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Eigentümer</span> '.$h($ownerName).'</span>';
+        }
+        if($comment !== '') {
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Kommentar</span> '.$h($comment).'</span>';
+        }
+        if($loanShort !== '' || $loanDate !== '') {
+            $loanBits = array();
+            if($loanShort !== '') {
+                $loanBits[] = $h($loanShort);
+            }
+            if($loanDate !== '') {
+                $loanBits[] = $h($loanDate);
+            }
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.implode(' · ', $loanBits).'</span>';
+        }
+        if($showAdminCols) {
+            if($purchaseDate !== '') {
+                $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufdatum</span> '.$h($purchaseDate).'</span>';
+            }
+            if($purchasePrize) {
+                $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufpreis</span> '.$purchasePrize.'</span>';
+            }
+        }
+        if($meta) {
+            $str .= '<div class="inv-meta-line">'.implode('', $meta).'</div>';
+        }
+        elseif(!$productBits && $desc === '') {
+            $str .= '<div class="inv-desc inv-desc--empty">–</div>';
+        }
+        $str .= '</div>';
 
-        $str=$str.$line->close();
+        $str .= '</div>';
         return $str;
     }
 

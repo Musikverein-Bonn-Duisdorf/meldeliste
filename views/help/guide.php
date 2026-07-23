@@ -39,14 +39,14 @@ $sections[] = array(
     'id' => 'navigation',
     'title' => 'Navigation',
     'body' => '
-<p>Auf dem Desktop steht die Navigation links (Icons mit Beschriftung). Auf dem Smartphone unten; unter <b>Mehr</b> findest du weitere Einträge, Admin und Ausloggen.</p>
+<p>Auf dem Desktop steht die Navigation links (Icons mit Beschriftung). Auf dem Smartphone unten; unter <b>Mehr</b> findest du weitere Einträge (u.&nbsp;a. Mein Profil), Admin und Ausloggen.</p>
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
 <li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
-<li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers</li>
+<li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers (auf dem Smartphone dauerhaft in der unteren Leiste)</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
-<li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen</li>
+<li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen (Desktop in der Seitenleiste, Smartphone unter <b>Mehr</b>)</li>
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
 <li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
 <li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
@@ -102,7 +102,7 @@ if($helpUser->hasInventories()) {
         'title' => 'Mein Inventar',
         'body' => '
 <p>Wenn dir Inventar gehört oder an dich ausgeliehen ist, erscheint <b>Mein Inventar</b> in der Navigation.</p>
-<p>Dort siehst du deine Stücke (Instrumente, Kleidung, …) und kannst Details im Modal öffnen. Bearbeiten ist nur möglich, wenn du die entsprechenden Rechte hast bzw. für dein eigenes Inventar freigegeben bist.</p>
+<p>Dort siehst du deine Stücke (Instrumente, Kleidung, …) als Liste bzw. auf dem Handy als Karten – mit Nr., Typ, Hersteller und Modell; eine Beschreibung erscheint nur, wenn sie hinterlegt ist. Ein Tippen/Klick öffnet die Details im Modal. Bearbeiten ist nur möglich, wenn du die entsprechenden Rechte hast bzw. für dein eigenes Inventar freigegeben bist.</p>
 '
     );
 }
@@ -227,12 +227,12 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); Spaltenköpfe sortieren die Liste</li>
-<li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal; Spalten sortierbar; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
+<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); Sortier-Chips und Suche filtern die Liste; Chip <b>Versichert</b> zeigt nur versicherte Stücke; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
+<li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>
 <li><b>Inventar-Typen</b> – Prefix bestimmt den Nummernkreis (z.&nbsp;B. <code>MARSCH-001</code>, <code>INSTR-42</code>); die Beschriftung erscheint in Listen und Formularen</li>
-<li>Anlegen, Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> neue Ausleihen eintragen, offene Leihen beenden oder einzelne Historie-Einträge löschen</li>
+<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> neue Ausleihen eintragen, offene Leihen beenden oder einzelne Historie-Einträge löschen</li>
 ' : '').'
 </ul>
 '
