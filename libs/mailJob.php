@@ -143,7 +143,7 @@ class MailJob
                 'groups' => array(),
                 'registers' => array(),
                 'users' => array(),
-                'mailGroups' => array(),
+                'namedGroups' => array(),
                 'termine' => array($termin),
             ));
         }
@@ -246,11 +246,11 @@ class MailJob
      * @param string|null $json
      * @param int $legacyRegister
      * @param int $legacyMemberOnly
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[]}
      */
     public static function parseRecipientSpec($json, $legacyRegister = 0, $legacyMemberOnly = 0) {
         return AudienceSpec::normalize($json, array(
-            'allowMailGroups' => true,
+            'allowNamedGroups' => true,
             'allowTermine' => true,
             'defaultGroups' => null,
             'legacyRegister' => $legacyRegister,
@@ -263,7 +263,7 @@ class MailJob
      */
     public function setRecipientSpecArray($spec) {
         $norm = AudienceSpec::normalize($spec, array(
-            'allowMailGroups' => true,
+            'allowNamedGroups' => true,
             'allowTermine' => true,
             'defaultGroups' => null,
         ));
@@ -271,7 +271,7 @@ class MailJob
             'groups' => $norm['groups'],
             'registers' => $norm['registers'],
             'users' => $norm['users'],
-            'mailGroups' => $norm['mailGroups'],
+            'namedGroups' => $norm['namedGroups'],
             'termine' => $norm['termine'],
         );
         $this->RecipientSpec = json_encode($payload);
@@ -282,7 +282,7 @@ class MailJob
             'groups' => array('musicians'),
             'registers' => array(),
             'users' => array(),
-            'mailGroups' => array(),
+            'namedGroups' => array(),
             'termine' => array(),
         );
     }

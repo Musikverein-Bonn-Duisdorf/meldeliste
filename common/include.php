@@ -41,7 +41,7 @@ include "libs/usermail.php";
 include "libs/audienceSpec.php";
 include "libs/mailJob.php";
 include "libs/mailOutbox.php";
-include "libs/mailGroup.php";
+include "libs/group.php";
 include "libs/appToken.php";
 include "libs/ics.php";
 include "libs/AppmntFreeTextResponse.php";

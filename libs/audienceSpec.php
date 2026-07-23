@@ -7,12 +7,43 @@
  *   "groups": ["musicians"|"members"|"nonmembers"|"users", ...],
  *   "registers": [id, ...],
  *   "users": [id, ...],
- *   "mailGroups": [id, ...],  // named MailGroup rows; not nested inside MemberSpec
+ *   "namedGroups": [id, ...],  // named Group rows; not nested inside MemberSpec
+ *   "mailGroups": [id, ...],   // legacy alias for namedGroups (still read)
  *   "termine": [id, ...]      // Termin-Teilnehmer (ja+vielleicht); Mail-Verteiler only
  * }
  */
 class AudienceSpec
 {
+
+    /**
+     * Whether named Group chips are allowed (opts: allowNamedGroups; legacy allowMailGroups).
+     * @param array $opts
+     * @return bool
+     */
+    public static function allowNamedGroupsOpt($opts) {
+        if(array_key_exists('allowNamedGroups', $opts)) {
+            return !empty($opts['allowNamedGroups']);
+        }
+        if(array_key_exists('allowMailGroups', $opts)) {
+            return !empty($opts['allowMailGroups']);
+        }
+        return true;
+    }
+
+    /**
+     * Whether named groups are included in catalogs (opts: includeNamedGroups; legacy includeMailGroups).
+     * @param array $opts
+     * @return bool
+     */
+    public static function includeNamedGroupsOpt($opts) {
+        if(array_key_exists('includeNamedGroups', $opts)) {
+            return !empty($opts['includeNamedGroups']);
+        }
+        if(array_key_exists('includeMailGroups', $opts)) {
+            return !empty($opts['includeMailGroups']);
+        }
+        return true;
+    }
     public static function allowedGroupIds() {
         return array('musicians', 'members', 'nonmembers', 'users');
     }
@@ -48,24 +79,24 @@ class AudienceSpec
      * @return bool
      */
     public static function isAlleUserSpec($spec) {
-        $norm = self::normalize($spec, array('allowMailGroups' => true, 'defaultGroups' => null));
+        $norm = self::normalize($spec, array('allowNamedGroups' => true, 'defaultGroups' => null));
         return count($norm['groups']) === 1
             && $norm['groups'][0] === 'users'
             && empty($norm['registers'])
             && empty($norm['users'])
-            && empty($norm['mailGroups'])
+            && empty($norm['namedGroups'])
             && empty($norm['termine']);
     }
 
     /**
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[],termine:int[]}
      */
     public static function emptySpec() {
         return array(
             'groups' => array(),
             'registers' => array(),
             'users' => array(),
-            'mailGroups' => array(),
+            'namedGroups' => array(),
             'termine' => array(),
         );
     }
@@ -73,14 +104,14 @@ class AudienceSpec
     /**
      * Default termin visibility: chip „Alle User“.
      *
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[],termine:int[]}
      */
     public static function defaultVisibilitySpec() {
         return array(
             'groups' => array('users'),
             'registers' => array(),
             'users' => array(),
-            'mailGroups' => array(),
+            'namedGroups' => array(),
             'termine' => array(),
         );
     }
@@ -145,11 +176,11 @@ class AudienceSpec
 
     /**
      * @param mixed $input array or JSON string
-     * @param array $opts allowMailGroups (bool), allowTermine (bool), defaultGroups (string[]|null), legacyRegister, legacyMemberOnly
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
+     * @param array $opts allowNamedGroups (bool; legacy allowMailGroups), allowTermine (bool), defaultGroups (string[]|null), legacyRegister, legacyMemberOnly
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[],termine:int[]}
      */
     public static function normalize($input, $opts = array()) {
-        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowNamedGroups = self::allowNamedGroupsOpt($opts);
         $allowTermine = !empty($opts['allowTermine']);
         $defaultGroups = array_key_exists('defaultGroups', $opts) ? $opts['defaultGroups'] : null;
         $legacyRegister = isset($opts['legacyRegister']) ? (int)$opts['legacyRegister'] : 0;
@@ -205,10 +236,17 @@ class AudienceSpec
                     if($id > 0) $out['users'][] = $id;
                 }
             }
-            if($allowMailGroups && isset($decoded['mailGroups']) && is_array($decoded['mailGroups'])) {
-                foreach($decoded['mailGroups'] as $id) {
-                    $id = (int)$id;
-                    if($id > 0) $out['mailGroups'][] = $id;
+            if($allowNamedGroups) {
+                foreach(array('namedGroups', 'mailGroups') as $ngKey) {
+                    if(!isset($decoded[$ngKey]) || !is_array($decoded[$ngKey])) {
+                        continue;
+                    }
+                    foreach($decoded[$ngKey] as $id) {
+                        $id = (int)$id;
+                        if($id > 0) {
+                            $out['namedGroups'][] = $id;
+                        }
+                    }
                 }
             }
             if($allowTermine && isset($decoded['termine']) && is_array($decoded['termine'])) {
@@ -228,7 +266,7 @@ class AudienceSpec
         $out['groups'] = array_values(array_unique($out['groups']));
         $out['registers'] = array_values(array_unique($out['registers']));
         $out['users'] = array_values(array_unique($out['users']));
-        $out['mailGroups'] = array_values(array_unique($out['mailGroups']));
+        $out['namedGroups'] = array_values(array_unique($out['namedGroups']));
         $out['termine'] = array_values(array_unique($out['termine']));
 
         if(self::isEmpty($out) && is_array($defaultGroups) && count($defaultGroups) > 0) {
@@ -250,27 +288,27 @@ class AudienceSpec
      */
     public static function isEmpty($spec) {
         if(!is_array($spec)) return true;
-        return empty($spec['groups']) && empty($spec['registers']) && empty($spec['users']) && empty($spec['mailGroups']) && empty($spec['termine']);
+        return empty($spec['groups']) && empty($spec['registers']) && empty($spec['users']) && empty($spec['namedGroups']) && empty($spec['termine']);
     }
 
     /**
-     * Expand named mailGroups into groups/registers/users (union). Nested mailGroups ignored.
+     * Expand namedGroups into groups/registers/users (union). Nested namedGroups ignored.
      * Termin-IDs remain on the spec for resolveUserIds.
      *
      * @param array $spec
-     * @return array{groups:string[],registers:int[],users:int[],mailGroups:int[],termine:int[]}
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[],termine:int[]}
      */
     public static function expand($spec) {
         $spec = self::normalize($spec, array(
-            'allowMailGroups' => true,
+            'allowNamedGroups' => true,
             'allowTermine' => true,
             'defaultGroups' => null,
         ));
-        if(empty($spec['mailGroups'])) {
+        if(empty($spec['namedGroups'])) {
             return $spec;
         }
-        foreach($spec['mailGroups'] as $gid) {
-            $g = new MailGroup();
+        foreach($spec['namedGroups'] as $gid) {
+            $g = new Group();
             $g->load_by_id((int)$gid);
             if(!(int)$g->Index) continue;
             $member = $g->getMemberSpecArray();
@@ -284,7 +322,7 @@ class AudienceSpec
                 $spec['users'][] = (int)$uid;
             }
         }
-        $spec['mailGroups'] = array();
+        $spec['namedGroups'] = array();
         $spec['groups'] = array_values(array_unique($spec['groups']));
         $spec['registers'] = array_values(array_unique($spec['registers']));
         $spec['users'] = array_values(array_unique($spec['users']));
@@ -403,7 +441,7 @@ class AudienceSpec
     public static function userMatches($userId, $spec) {
         $userId = (int)$userId;
         if($userId <= 0) return false;
-        $norm = self::normalize($spec, array('allowMailGroups' => true, 'defaultGroups' => null));
+        $norm = self::normalize($spec, array('allowNamedGroups' => true, 'defaultGroups' => null));
         if(self::isEmpty($norm)) {
             return true;
         }
@@ -448,11 +486,11 @@ class AudienceSpec
             }
         }
 
-        foreach(MailGroup::listAll() as $g) {
+        foreach(Group::listAll() as $g) {
             $memberIds = self::resolveUserIds($g->getMemberSpecArray(), false);
             if(in_array($userId, $memberIds, true)) {
                 $items[] = array(
-                    'type' => 'mailGroup',
+                    'type' => 'namedGroup',
                     'label' => 'Gruppe: '.(string)$g->Name,
                 );
             }
@@ -478,11 +516,11 @@ class AudienceSpec
         $userId = isset($attrs['userId']) ? (int)$attrs['userId'] : 0;
 
         $norm = self::normalize($spec, array(
-            'allowMailGroups' => false,
+            'allowNamedGroups' => false,
             'defaultGroups' => null,
         ));
-        unset($norm['mailGroups']);
-        $norm['mailGroups'] = array();
+        unset($norm['namedGroups']);
+        $norm['namedGroups'] = array();
 
         if($includeUsers && $userId > 0 && in_array($userId, array_map('intval', $norm['users']), true)) {
             return true;
@@ -559,11 +597,11 @@ class AudienceSpec
             );
         }
 
-        foreach(MailGroup::listAll() as $g) {
+        foreach(Group::listAll() as $g) {
             $member = $g->getMemberSpecArray();
             if(self::attributesMatchMemberSpec($attrs, $member, array('includeUsers' => false))) {
                 $items[] = array(
-                    'type' => 'mailGroup',
+                    'type' => 'namedGroup',
                     'label' => 'Gruppe: '.(string)$g->Name,
                 );
             }
@@ -598,10 +636,10 @@ class AudienceSpec
             }
         }
 
-        $mailGroups = array();
-        foreach(MailGroup::listAll() as $g) {
+        $namedGroups = array();
+        foreach(Group::listAll() as $g) {
             $spec = $g->getMemberSpecArray();
-            $mailGroups[] = array(
+            $namedGroups[] = array(
                 'id' => (int)$g->Index,
                 'name' => (string)$g->Name,
                 'groups' => $spec['groups'],
@@ -613,7 +651,7 @@ class AudienceSpec
             'groupLabels' => self::groupLabels(),
             'groupIds' => self::allowedGroupIds(),
             'instruments' => $instruments,
-            'mailGroups' => $mailGroups,
+            'namedGroups' => $namedGroups,
         );
     }
 
@@ -621,14 +659,14 @@ class AudienceSpec
      * Human-readable audience for logs/UI (roles, registers, users, named groups).
      *
      * @param mixed $spec
-     * @param array $opts allowMailGroups (bool)
+     * @param array $opts allowNamedGroups (bool; legacy allowMailGroups)
      * @return string
      */
     public static function formatLabel($spec, $opts = array()) {
-        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowNamedGroups = self::allowNamedGroupsOpt($opts);
         $allowTermine = !empty($opts['allowTermine']);
         $norm = self::normalize($spec, array(
-            'allowMailGroups' => $allowMailGroups,
+            'allowNamedGroups' => $allowNamedGroups,
             'allowTermine' => $allowTermine,
             'defaultGroups' => null,
         ));
@@ -636,9 +674,9 @@ class AudienceSpec
             return '—';
         }
         $bits = array();
-        if($allowMailGroups) {
-            foreach($norm['mailGroups'] as $gid) {
-                $g = new MailGroup();
+        if($allowNamedGroups) {
+            foreach($norm['namedGroups'] as $gid) {
+                $g = new Group();
                 $g->load_by_id((int)$gid);
                 if((int)$g->Index) {
                     $bits[] = 'Gruppe: '.(string)$g->Name;
@@ -675,24 +713,24 @@ class AudienceSpec
      * Chip items for read-only display (same types/labels as mailRecipients.js).
      *
      * @param mixed $spec
-     * @param array $opts allowMailGroups (bool), allowTermine (bool)
+     * @param array $opts allowNamedGroups (bool; legacy allowMailGroups), allowTermine (bool)
      * @return array<int,array{type:string,label:string}>
      */
     public static function chipsForSpec($spec, $opts = array()) {
-        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowNamedGroups = self::allowNamedGroupsOpt($opts);
         $allowTermine = !empty($opts['allowTermine']);
         $norm = self::normalize($spec, array(
-            'allowMailGroups' => $allowMailGroups,
+            'allowNamedGroups' => $allowNamedGroups,
             'allowTermine' => $allowTermine,
             'defaultGroups' => null,
         ));
         $chips = array();
-        if($allowMailGroups) {
-            foreach($norm['mailGroups'] as $gid) {
-                $g = new MailGroup();
+        if($allowNamedGroups) {
+            foreach($norm['namedGroups'] as $gid) {
+                $g = new Group();
                 $g->load_by_id((int)$gid);
                 if((int)$g->Index) {
-                    $chips[] = array('type' => 'mailGroup', 'label' => 'Gruppe: '.(string)$g->Name);
+                    $chips[] = array('type' => 'namedGroup', 'label' => 'Gruppe: '.(string)$g->Name);
                 }
             }
         }
@@ -739,7 +777,7 @@ class AudienceSpec
      * Read-only chip HTML (no remove buttons).
      *
      * @param mixed $spec
-     * @param array $opts allowMailGroups, ariaLabel, emptyHtml
+     * @param array $opts allowNamedGroups (legacy allowMailGroups), ariaLabel, emptyHtml
      * @return string
      */
     public static function renderChipsHtml($spec, $opts = array()) {
@@ -764,19 +802,19 @@ class AudienceSpec
      * Canonical JSON for equality checks in change logs.
      *
      * @param mixed $spec
-     * @param array $opts allowMailGroups (bool)
+     * @param array $opts allowNamedGroups (bool; legacy allowMailGroups)
      * @return string
      */
     public static function canonicalJson($spec, $opts = array()) {
-        $allowMailGroups = !array_key_exists('allowMailGroups', $opts) || !empty($opts['allowMailGroups']);
+        $allowNamedGroups = self::allowNamedGroupsOpt($opts);
         $allowTermine = !empty($opts['allowTermine']);
         $norm = self::normalize($spec, array(
-            'allowMailGroups' => $allowMailGroups,
+            'allowNamedGroups' => $allowNamedGroups,
             'allowTermine' => $allowTermine,
             'defaultGroups' => null,
         ));
-        if(!$allowMailGroups) {
-            $norm['mailGroups'] = array();
+        if(!$allowNamedGroups) {
+            $norm['namedGroups'] = array();
         }
         if(!$allowTermine) {
             $norm['termine'] = array();
@@ -788,7 +826,7 @@ class AudienceSpec
             'groups' => $norm['groups'],
             'registers' => $norm['registers'],
             'users' => $norm['users'],
-            'mailGroups' => $norm['mailGroups'],
+            'namedGroups' => $norm['namedGroups'],
             'termine' => $norm['termine'],
         ));
     }
@@ -796,19 +834,19 @@ class AudienceSpec
     /**
      * Catalog for chip autocomplete.
      *
-     * @param array $opts forMail (bool), includeMailGroups (bool), includeTermine (bool)
+     * @param array $opts forMail (bool), includeNamedGroups (bool; legacy includeMailGroups), includeTermine (bool)
      * @return array
      */
     public static function buildCatalog($opts = array()) {
         $forMail = !empty($opts['forMail']);
-        $includeMailGroups = !array_key_exists('includeMailGroups', $opts) || !empty($opts['includeMailGroups']);
+        $includeNamedGroups = self::includeNamedGroupsOpt($opts);
         $includeTermine = !empty($opts['includeTermine']);
 
         $catalog = array(
             'groups' => array(),
             'registers' => array(),
             'users' => array(),
-            'mailGroups' => array(),
+            'namedGroups' => array(),
             'termine' => array(),
         );
         foreach(self::groupLabels() as $id => $label) {
@@ -860,9 +898,9 @@ class AudienceSpec
             }
         }
 
-        if($includeMailGroups) {
-            foreach(MailGroup::listAll() as $g) {
-                $catalog['mailGroups'][] = array(
+        if($includeNamedGroups) {
+            foreach(Group::listAll() as $g) {
+                $catalog['namedGroups'][] = array(
                     'id' => (int)$g->Index,
                     'label' => (string)$g->Name,
                     'meta' => 'Gruppe',

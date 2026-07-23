@@ -14,8 +14,10 @@ if(!isset($inputBg)) {
 }
 $catalog = Permissions::permissionCatalog();
 $permObj = new Permissions;
+$inherited = array();
 if(!empty($fill) && isset($n) && (int)$n->Index > 0) {
     $permObj->load_by_user((int)$n->Index);
+    $inherited = Group::inheritedPermissionSources((int)$n->Index);
 }
 $sessionUserId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
 $targetUserId = (!empty($fill) && isset($n)) ? (int)$n->Index : 0;
@@ -29,18 +31,16 @@ foreach($catalog as $item) {
     }
 }
 
-$catalogJson = json_encode(
-    array('permissions' => $catalog),
-    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
-);
-$selectedJson = json_encode(
-    array_values($selected),
-    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
-);
+$jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE;
+$catalogJson = json_encode(array('permissions' => $catalog), $jsonFlags);
+$selectedJson = json_encode(array_values($selected), $jsonFlags);
+$inheritedJson = json_encode($inherited ? $inherited : new stdClass(), $jsonFlags);
 ?>
 <div class="profile-pref-group" id="profile-perms-wrap"
      data-perm-catalog="<?php echo htmlspecialchars((string)$catalogJson, ENT_QUOTES, 'UTF-8'); ?>"
      data-selected-perms="<?php echo htmlspecialchars((string)$selectedJson, ENT_QUOTES, 'UTF-8'); ?>"
+     data-inherited-perms="<?php echo htmlspecialchars((string)$inheritedJson, ENT_QUOTES, 'UTF-8'); ?>"
+     data-perm-input-name="userPermissions[]"
      data-locked-perm="<?php echo $lockEditPerms ? 'perm_editPermissions' : ''; ?>">
   <h3 class="profile-col-title">Rechte</h3>
   <input type="hidden" name="userPermissionsPosted" value="1">

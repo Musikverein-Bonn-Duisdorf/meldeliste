@@ -43,8 +43,8 @@
     var hiddensEl = document.getElementById('profile-group-hiddens');
     if (!chipsEl || !inputEl || !suggestEl || !hiddensEl) return;
 
-    var catalog = parseJsonAttr(wrap, 'data-group-catalog', { mailGroups: [] });
-    var mailGroups = Array.isArray(catalog.mailGroups) ? catalog.mailGroups : [];
+    var catalog = parseJsonAttr(wrap, 'data-group-catalog', { namedGroups: [] });
+    var namedGroups = Array.isArray(catalog.namedGroups) ? catalog.namedGroups : [];
     var selected = parseJsonAttr(wrap, 'data-selected-groups', []);
     if (!Array.isArray(selected)) selected = [];
     selected = selected.map(Number).filter(function (id) { return id > 0; });
@@ -52,8 +52,8 @@
     var readonly = !!inputEl.disabled;
 
     function labelFor(id) {
-      for (var i = 0; i < mailGroups.length; i++) {
-        if (Number(mailGroups[i].id) === Number(id)) return mailGroups[i].label || ('#' + id);
+      for (var i = 0; i < namedGroups.length; i++) {
+        if (Number(namedGroups[i].id) === Number(id)) return namedGroups[i].label || ('#' + id);
       }
       return 'Gruppe #' + id;
     }
@@ -63,7 +63,7 @@
       selected.forEach(function (id) {
         var input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'userMailGroups[]';
+        input.name = 'userNamedGroups[]';
         input.value = String(id);
         hiddensEl.appendChild(input);
       });
@@ -73,7 +73,7 @@
       chipsEl.innerHTML = '';
       selected.forEach(function (id) {
         var chip = document.createElement('span');
-        chip.className = 'mail-recipient-chip mail-recipient-chip--mailGroup';
+        chip.className = 'mail-recipient-chip mail-recipient-chip--namedGroup';
         chip.setAttribute('data-id', String(id));
         var text = document.createElement('span');
         text.textContent = labelFor(id);
@@ -98,7 +98,7 @@
     function filteredSuggestions() {
       var q = normalize(inputEl.value);
       var items = [];
-      mailGroups.forEach(function (g) {
+      namedGroups.forEach(function (g) {
         var id = Number(g.id);
         if (selected.indexOf(id) !== -1) return;
         if (q === '' || normalize(g.label).indexOf(q) !== -1) {
@@ -205,7 +205,20 @@
     var selected = parseJsonAttr(wrap, 'data-selected-perms', []);
     if (!Array.isArray(selected)) selected = [];
     selected = selected.map(String).filter(function (k) { return !!k; });
+    var inheritedRaw = parseJsonAttr(wrap, 'data-inherited-perms', {});
+    var inherited = {};
+    if (inheritedRaw && typeof inheritedRaw === 'object' && !Array.isArray(inheritedRaw)) {
+      Object.keys(inheritedRaw).forEach(function (k) {
+        var groups = inheritedRaw[k];
+        if (!Array.isArray(groups) || !groups.length) return;
+        inherited[String(k)] = groups.map(String);
+      });
+    }
     var lockedKey = String(wrap.getAttribute('data-locked-perm') || '');
+    var inputName = String(wrap.getAttribute('data-perm-input-name') || 'userPermissions[]');
+    if(inputName.indexOf('[]') === -1) {
+      inputName = inputName + '[]';
+    }
     var activeIndex = -1;
 
     function metaFor(key) {
@@ -215,16 +228,36 @@
       return { key: key, label: key, group: '', groupId: 'sonst' };
     }
 
-    function sortSelected() {
+    function groupNamesFor(key) {
+      return inherited[String(key)] || [];
+    }
+
+    function isInheritedOnly(key) {
+      return selected.indexOf(String(key)) === -1 && groupNamesFor(key).length > 0;
+    }
+
+    function sortKeys(keys) {
       var order = {};
       permissions.forEach(function (p, idx) {
         order[String(p.key)] = idx;
       });
-      selected.sort(function (a, b) {
+      keys.sort(function (a, b) {
         var ia = order.hasOwnProperty(a) ? order[a] : 999;
         var ib = order.hasOwnProperty(b) ? order[b] : 999;
         return ia - ib;
       });
+      return keys;
+    }
+
+    function displayKeys() {
+      var keys = selected.slice();
+      Object.keys(inherited).forEach(function (k) {
+        if (keys.indexOf(k) === -1) keys.push(k);
+      });
+      if (lockedKey && keys.indexOf(lockedKey) === -1) {
+        keys.push(lockedKey);
+      }
+      return sortKeys(keys);
     }
 
     function syncHiddens() {
@@ -232,7 +265,7 @@
       selected.forEach(function (key) {
         var input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'userPermissions[]';
+        input.name = inputName;
         input.value = String(key);
         hiddensEl.appendChild(input);
       });
@@ -242,18 +275,28 @@
       if (lockedKey && selected.indexOf(lockedKey) === -1) {
         selected.push(lockedKey);
       }
-      sortSelected();
+      selected = sortKeys(selected.slice());
       chipsEl.innerHTML = '';
-      selected.forEach(function (key) {
+      displayKeys().forEach(function (key) {
         var meta = metaFor(key);
         var gid = String(meta.groupId || 'sonst').replace(/[^a-z0-9_-]/gi, '');
+        var groups = groupNamesFor(key);
+        var inheritedOnly = isInheritedOnly(key);
         var chip = document.createElement('span');
         chip.className = 'profile-perm-tile profile-perm-tile--' + gid;
+        if (inheritedOnly) {
+          chip.className += ' profile-perm-tile--inherited';
+        }
         chip.setAttribute('data-key', String(key));
+        if (groups.length) {
+          chip.title = (inheritedOnly ? 'Nur über Gruppe: ' : 'Auch Gruppe: ') + groups.join(', ');
+        } else if (key === lockedKey) {
+          chip.title = 'Eigenes Recht „Berechtigungen bearbeiten“ kann nicht entfernt werden';
+        }
         var text = document.createElement('span');
         text.textContent = meta.label || key;
         chip.appendChild(text);
-        if (key !== lockedKey) {
+        if (key !== lockedKey && !inheritedOnly) {
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'mail-recipient-chip-remove';
@@ -276,6 +319,7 @@
       permissions.forEach(function (p) {
         var key = String(p.key);
         if (selected.indexOf(key) !== -1) return;
+        if (groupNamesFor(key).length) return;
         if (q === '' || normalize(p.label).indexOf(q) !== -1 || normalize(p.group).indexOf(q) !== -1) {
           items.push(p);
         }
@@ -355,7 +399,7 @@
       } else if (e.key === 'Backspace' && !inputEl.value && selected.length) {
         var last = selected[selected.length - 1];
         if (last !== lockedKey) {
-          selected.pop();
+          selected = selected.slice(0, -1);
           render();
         }
       } else if (e.key === 'Escape') {
@@ -414,11 +458,11 @@
     if (attrs.active && regName && regName.toLowerCase() !== 'keins') {
       chips.push({ type: 'register', label: 'Register: ' + regName });
     }
-    var mailGroups = catalog.mailGroups || [];
-    for (i = 0; i < mailGroups.length; i++) {
-      var g = mailGroups[i];
+    var namedGroups = catalog.namedGroups || [];
+    for (i = 0; i < namedGroups.length; i++) {
+      var g = namedGroups[i];
       if (attrsMatchSpec(attrs, g.groups || [], g.registers || [])) {
-        chips.push({ type: 'mailGroup', label: 'Gruppe: ' + (g.name || '') });
+        chips.push({ type: 'namedGroup', label: 'Gruppe: ' + (g.name || '') });
       }
     }
     return chips;

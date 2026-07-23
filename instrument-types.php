@@ -60,7 +60,6 @@ adminListPageBegin('Register', 'Instrument-Typen');
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
 
 <div class="admin-list-intro">
-  <p>Instrument-Typen (z.B. Flöte, Trompete) gehören zu einem Register. Farbe erscheint in dieser Übersicht; Register-Farben steuern die Orchesterdarstellung.</p>
   <p><a href="register-types.php">Register verwalten</a></p>
 </div>
 

@@ -47,7 +47,7 @@ elseif($requireMail) {
 }
 else {
     $norm = AudienceSpec::normalize($spec, array(
-        'allowMailGroups' => true,
+        'allowNamedGroups' => true,
         'allowTermine' => false,
         'defaultGroups' => null,
     ));

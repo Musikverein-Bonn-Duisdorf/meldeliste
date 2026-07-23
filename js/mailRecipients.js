@@ -1,5 +1,5 @@
 /**
- * MELD-60/61/135/134: chip picker — roles + registers + users + mailGroups + termine + guestMusicians.
+ * MELD-60/61/135/134: chip picker — roles + registers + users + namedGroups + termine + guestMusicians.
  */
 (function(global) {
   'use strict';
@@ -13,19 +13,19 @@
   var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
 
   function parseCatalog(el) {
-    if(!el) return {groups: [], registers: [], users: [], mailGroups: [], termine: [], guestMusicians: []};
+    if(!el) return {groups: [], registers: [], users: [], namedGroups: [], termine: [], guestMusicians: []};
     try {
       var c = JSON.parse(el.textContent || '{}');
       return {
         groups: Array.isArray(c.groups) ? c.groups : [],
         registers: Array.isArray(c.registers) ? c.registers : [],
         users: Array.isArray(c.users) ? c.users : [],
-        mailGroups: Array.isArray(c.mailGroups) ? c.mailGroups : [],
+        namedGroups: Array.isArray(c.namedGroups) ? c.namedGroups : [],
         termine: Array.isArray(c.termine) ? c.termine : [],
         guestMusicians: Array.isArray(c.guestMusicians) ? c.guestMusicians : []
       };
     } catch(e) {
-      return {groups: [], registers: [], users: [], mailGroups: [], termine: [], guestMusicians: []};
+      return {groups: [], registers: [], users: [], namedGroups: [], termine: [], guestMusicians: []};
     }
   }
 
@@ -47,14 +47,14 @@
   }
 
   function emptySpec() {
-    return {groups: [], registers: [], users: [], mailGroups: [], termine: [], guestMusicians: []};
+    return {groups: [], registers: [], users: [], namedGroups: [], termine: [], guestMusicians: []};
   }
 
   function isSpecEmpty(spec) {
     return !(spec.groups && spec.groups.length)
       && !(spec.registers && spec.registers.length)
       && !(spec.users && spec.users.length)
-      && !(spec.mailGroups && spec.mailGroups.length)
+      && !(spec.namedGroups && spec.namedGroups.length)
       && !(spec.termine && spec.termine.length);
   }
 
@@ -84,9 +84,9 @@
       }
       var registers = normalizeIdList(s.registers);
       var users = normalizeIdList(s.users);
-      var mailGroups = normalizeIdList(s.mailGroups);
+      var namedGroups = normalizeIdList(s.namedGroups);
       var termine = normalizeIdList(s.termine);
-      if(!groups.length && !registers.length && !users.length && !mailGroups.length && !termine.length) {
+      if(!groups.length && !registers.length && !users.length && !namedGroups.length && !termine.length) {
         if(!allowEmpty && defaultGroups.length) {
           groups = normalizeGroups(defaultGroups);
         }
@@ -95,7 +95,7 @@
         groups: groups,
         registers: registers,
         users: users,
-        mailGroups: mailGroups,
+        namedGroups: namedGroups,
         termine: termine,
         guestMusicians: []
       };
@@ -152,7 +152,7 @@
           groups: this.spec.groups.slice(),
           registers: this.spec.registers.slice(),
           users: this.spec.users.slice(),
-          mailGroups: (this.spec.mailGroups || []).slice(),
+          namedGroups: (this.spec.namedGroups || []).slice(),
           termine: (this.spec.termine || []).slice()
         });
       }
@@ -290,8 +290,8 @@
       return false;
     },
 
-    labelForMailGroup: function(id) {
-      var list = this.catalog.mailGroups || [];
+    labelForNamedGroup: function(id) {
+      var list = this.catalog.namedGroups || [];
       for(var i = 0; i < list.length; i++) {
         if(Number(list[i].id) === Number(id)) return list[i].label;
       }
@@ -320,8 +320,8 @@
       if(!this.chipsEl) return;
       this.chipsEl.innerHTML = '';
       var self = this;
-      (this.spec.mailGroups || []).forEach(function(id) {
-        self.chipsEl.appendChild(self.makeChip('mailGroup', id, 'Gruppe: ' + self.labelForMailGroup(id)));
+      (this.spec.namedGroups || []).forEach(function(id) {
+        self.chipsEl.appendChild(self.makeChip('namedGroup', id, 'Gruppe: ' + self.labelForNamedGroup(id)));
       });
       this.spec.groups.forEach(function(id) {
         self.chipsEl.appendChild(self.makeChip('group', id, self.labelForGroup(id)));
@@ -371,9 +371,9 @@
         id = Number(id);
         this.spec.registers = this.spec.registers.filter(function(x) { return x !== id; });
       }
-      else if(type === 'mailGroup') {
+      else if(type === 'namedGroup') {
         id = Number(id);
-        this.spec.mailGroups = (this.spec.mailGroups || []).filter(function(x) { return x !== id; });
+        this.spec.namedGroups = (this.spec.namedGroups || []).filter(function(x) { return x !== id; });
       }
       else if(type === 'termin') {
         id = Number(id);
@@ -407,9 +407,9 @@
       if(type === 'register') {
         if(this.spec.registers.indexOf(id) === -1) this.spec.registers.push(id);
       }
-      else if(type === 'mailGroup') {
-        if(!this.spec.mailGroups) this.spec.mailGroups = [];
-        if(this.spec.mailGroups.indexOf(id) === -1) this.spec.mailGroups.push(id);
+      else if(type === 'namedGroup') {
+        if(!this.spec.namedGroups) this.spec.namedGroups = [];
+        if(this.spec.namedGroups.indexOf(id) === -1) this.spec.namedGroups.push(id);
       }
       else if(type === 'termin') {
         if(!this.spec.termine) this.spec.termine = [];
@@ -442,10 +442,10 @@
             {id: 'users', label: GROUP_LABELS.users, meta: 'Rolle'}
           ];
 
-      (this.catalog.mailGroups || []).forEach(function(g) {
-        if((self.spec.mailGroups || []).indexOf(Number(g.id)) !== -1) return;
+      (this.catalog.namedGroups || []).forEach(function(g) {
+        if((self.spec.namedGroups || []).indexOf(Number(g.id)) !== -1) return;
         if(q === '' || normalize(g.label).indexOf(q) !== -1) {
-          items.push({type: 'mailGroup', id: g.id, label: g.label, meta: g.meta || 'Gruppe'});
+          items.push({type: 'namedGroup', id: g.id, label: g.label, meta: g.meta || 'Gruppe'});
         }
       });
 
@@ -611,8 +611,8 @@
         else if(this.spec.groups.length) {
           this.removeChip('group', this.spec.groups[this.spec.groups.length - 1]);
         }
-        else if(this.spec.mailGroups && this.spec.mailGroups.length) {
-          this.removeChip('mailGroup', this.spec.mailGroups[this.spec.mailGroups.length - 1]);
+        else if(this.spec.namedGroups && this.spec.namedGroups.length) {
+          this.removeChip('namedGroup', this.spec.namedGroups[this.spec.namedGroups.length - 1]);
         }
       }
     },

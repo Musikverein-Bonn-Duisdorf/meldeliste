@@ -70,7 +70,6 @@ include 'common/header.php';
 <div class="w3-panel w3-mobile w3-center w3-col s3 l4"></div>
 <div class="w3-card <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile w3-center w3-border w3-padding w3-col s6 l4">
 <?php echo renderFlashHtml(); ?>
-  <p class="w3-small w3-left-align">Primäre Stimme und Fallbacks für das Notenarchiv (Stimmsatz). Priorität: zuerst Primär, dann Fallbacks in Reihenfolge.</p>
   <form method="POST" class="w3-left-align">
     <input type="hidden" name="save_voice" value="1">
     <h4>Primär</h4>

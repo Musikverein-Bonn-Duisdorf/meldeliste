@@ -8,13 +8,13 @@ if(!requirePermission('perm_sendEmail')) {
     denyAccess();
 }
 
-MailGroup::ensureSchema();
+Group::ensureSchema();
 
 $msg = '';
 $err = '';
 
 if(isset($_POST['delete']) && isset($_POST['Index'])) {
-    $g = new MailGroup();
+    $g = new Group();
     $g->load_by_id((int)$_POST['Index']);
     if((int)$g->Index && $g->delete()) {
         $msg = 'Gruppe gelöscht.';
@@ -24,17 +24,13 @@ if(isset($_POST['delete']) && isset($_POST['Index'])) {
     }
 }
 
-$groups = MailGroup::listAll();
+$groups = Group::listAll();
 $actions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="group-edit.php">Neue Gruppe</a>'
     .' <a class="w3-button w3-border" href="mail.php">Email versenden</a>';
 adminListPageBegin('Kommunikation', 'Gruppen', array('actionsHtml' => $actions));
 ?>
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
-
-<div class="admin-list-intro">
-  <p>Benannte Gruppen mit Rollen, Registern und Personen – nutzbar beim Mailversand und bei der Termin-Sichtbarkeit.</p>
-</div>
 
   <div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
@@ -50,9 +46,34 @@ foreach($groups as $g) {
     $id = (int)$g->Index;
     $count = (int)$g->memberCount(false);
     $countMail = (int)$g->memberCount(true);
+    $permKeys = $g->getPermissionSpecArray();
+    $permKeySet = array_fill_keys($permKeys, true);
+    $permTiles = array();
+    if(count($permKeys)) {
+        foreach(Permissions::permissionCatalog() as $item) {
+            if(empty($permKeySet[$item['key']])) {
+                continue;
+            }
+            $permTiles[] = $item;
+        }
+    }
 ?>
     <div class="mail-list-item">
-      <div class="mail-list-primary"><?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="mail-list-primary">
+        <?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?>
+<?php if(count($permTiles)) { ?>
+        <div class="profile-perm-tiles mail-list-perm-tiles" aria-label="Vererbte Rechte">
+<?php
+            foreach($permTiles as $item) {
+                $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
+                echo '<span class="profile-perm-tile profile-perm-tile--'.$gid.'">'
+                    .htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')
+                    .'</span>';
+            }
+?>
+        </div>
+<?php } ?>
+      </div>
       <div class="mail-list-status"><?php echo $count; ?> <span class="w3-small w3-text-gray">(<?php echo $countMail; ?> mit Mail)</span></div>
       <div class="mail-list-actions">
         <a class="w3-button w3-small w3-blue" href="group-edit.php?id=<?php echo $id; ?>">Bearbeiten</a>

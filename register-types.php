@@ -61,9 +61,7 @@ adminListPageBegin('Register', 'Register');
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
 
 <div class="admin-list-intro">
-  <p>Register steuern Gruppierung, Orchester-Sitzplan und Farben in der <a href="register.php">Registerübersicht</a>.</p>
-  <p><a href="instrument-types.php">Instrument-Typen verwalten</a></p>
-  <p class="w3-small"><b>Reihe</b> = Abstand vom Dirigenten (0 = Dirigent). <b>ArcMin/ArcMax</b> = Winkelbereich (0° links, 90° vorne, 180° rechts). Nach dem Speichern aktualisiert sich die Vorschau.</p>
+  <p><a href="register.php">Registerübersicht</a> · <a href="instrument-types.php">Instrument-Typen verwalten</a></p>
 </div>
 
 <div class="w3-center orchestra-svg-wrap">

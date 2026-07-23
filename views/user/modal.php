@@ -152,12 +152,17 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
       </div>
 <?php
 if($showUserDetails && !empty($permissions)) {
+    $inherited = Group::inheritedPermissionSources((int)$user->Index);
     $activePerms = array();
     foreach(Permissions::permissionCatalog() as $item) {
         $key = $item['key'];
-        if((int)$permissions->$key !== 1) {
+        $personal = ((int)$permissions->$key) === 1;
+        $groups = isset($inherited[$key]) ? $inherited[$key] : array();
+        if(!$personal && !count($groups)) {
             continue;
         }
+        $item['personal'] = $personal;
+        $item['groups'] = $groups;
         $activePerms[] = $item;
     }
     if(count($activePerms)) {
@@ -168,7 +173,19 @@ if($showUserDetails && !empty($permissions)) {
 <?php
         foreach($activePerms as $item) {
             $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
-            echo '<span class="profile-perm-tile profile-perm-tile--'.$gid.'">'
+            $inheritedOnly = empty($item['personal']) && count($item['groups']) > 0;
+            $cls = 'profile-perm-tile profile-perm-tile--'.$gid;
+            if($inheritedOnly) {
+                $cls .= ' profile-perm-tile--inherited';
+            }
+            $title = '';
+            if(count($item['groups'])) {
+                $title = ($inheritedOnly ? 'Nur über Gruppe: ' : 'Auch Gruppe: ')
+                    .implode(', ', $item['groups']);
+            }
+            echo '<span class="'.$cls.'"'
+                .($title !== '' ? ' title="'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'"' : '')
+                .'>'
                 .htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')
                 .'</span>';
         }

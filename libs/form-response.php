@@ -73,12 +73,12 @@ function handleUserFormPost($options = array()) {
                 $n->save();
             }
 
-            if(isset($_POST['userMailGroupsPosted']) && (int)$n->Index > 0) {
-                $ids = isset($_POST['userMailGroups']) ? $_POST['userMailGroups'] : array();
+            if(isset($_POST['userNamedGroupsPosted']) && (int)$n->Index > 0) {
+                $ids = isset($_POST['userNamedGroups']) ? $_POST['userNamedGroups'] : array();
                 if(!is_array($ids)) {
                     $ids = array();
                 }
-                MailGroup::syncUserExplicitMembership((int)$n->Index, $ids);
+                Group::syncUserExplicitMembership((int)$n->Index, $ids);
             }
 
             if(isset($_POST['userPermissionsPosted']) && (int)$n->Index > 0) {
