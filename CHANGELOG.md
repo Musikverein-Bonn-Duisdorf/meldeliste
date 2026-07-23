@@ -2,6 +2,14 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-7a911 (2026-07-23)
+
+- MELD-140: Schichtzeilen am Termin-Strich ausrichten
+- MELD-148: Log-Trennlinie auf schmalen Screens enger an Datum/Chip
+- MELD-140: Schichten & Aufgaben umbenennen, optionale Zeiten, Tabellen-Editor
+- MELD-148: Log-Trennlinie auf schmalen Screens enger
+- MELD-140: Schichten & Aufgaben, optionale Zeiten, Tabellen-Editor
+
 ## 2026-07-23-f1fec (2026-07-23)
 
 - MELD-148: kompakte Log-Zeilen im Inventar-Layout mit Typ-Chips
