@@ -17,13 +17,16 @@ elseif(!$fill) {
 else {
     $profileKicker = 'Nutzer bearbeiten';
 }
+$profileHeroClass = !empty($_SESSION['adminpage'])
+    ? adminHeroClass(array('kicker' => $profileKicker, 'permKey' => 'perm_editUsers'))
+    : 'profile-hero';
 ?>
 <div class="profile-shell profile-layout-a">
   <form class="profile-form" action="<?php echo htmlspecialchars($formAction, ENT_QUOTES, 'UTF-8'); ?>" method="POST">
     <?php include __DIR__.'/form_hidden.php'; ?>
     <input type="hidden" name="Index" <?php if($fill) echo 'value="'.(int)$n->Index.'"'; ?>>
 
-    <header class="profile-hero">
+    <header class="<?php echo htmlspecialchars($profileHeroClass, ENT_QUOTES, 'UTF-8'); ?>">
       <div class="profile-hero-text">
         <p class="profile-kicker"><?php echo htmlspecialchars($profileKicker, ENT_QUOTES, 'UTF-8'); ?></p>
         <h2 class="profile-title"><?php echo htmlspecialchars($profileTitle, ENT_QUOTES, 'UTF-8'); ?></h2>

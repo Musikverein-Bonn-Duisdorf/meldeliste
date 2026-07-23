@@ -74,12 +74,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_confirm'])) {
 $manifest = buildBackupManifest();
 $ver = $manifest['version'];
 $schema = $manifest['schemaVersion'];
+adminListPageBegin('System', 'Backup & Restore', array('permKey' => 'perm_editConfig'));
 ?>
-<div id="header" class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
-  <h2>Backup &amp; Restore</h2>
-</div>
-
-<div class="w3-container w3-margin-top">
 <?php if($flash) {
     $panel = ($flash['type'] === 'ok') ? $GLOBALS['optionsDB']['colorSuccess'] : $GLOBALS['optionsDB']['colorLogError'];
     echo '<div class="w3-panel '.$panel.'"><p>'.htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8').'</p></div>';
@@ -118,8 +114,7 @@ $schema = $manifest['schemaVersion'];
       <button type="submit" class="w3-button w3-border w3-red">Backup einspielen</button>
     </form>
   </div>
-</div>
-
 <?php
+adminListPageEnd();
 include 'common/footer.php';
 ?>

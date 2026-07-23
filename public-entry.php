@@ -13,13 +13,12 @@ $state = 1;
 if(isset($_POST['letter'])) {
     $state = 2;
 }
+
+adminListPageBegin('Meldungen', 'Im Auftrag melden', array('permKey' => 'perm_editResponse'));
 ?>
-<div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-    <h2>Im Namen eines Anderen anmelden</h2>
-</div>
 <?php if($state == 1) { ?>
-    <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-	<h3>Erster Buchstabe des Nachnamens</h3>
+    <div class="admin-list-intro">
+      <p>Erster Buchstabe des Nachnamens</p>
     </div>
     <form class="w3-container w3-row" action="" method="POST">
 	<?php
@@ -32,14 +31,14 @@ if(isset($_POST['letter'])) {
 <?php } ?>
 
 <?php if($state == 2) { ?>
-    <div class="w3-container <?php echo $GLOBALS['optionsDB']['colorTitleBar'] ;?>">
-	<h3>Name</h3>
+    <div class="admin-list-intro">
+      <p>Name</p>
     </div>
     <form class="w3-container w3-row" action="index.php" method="POST">
 	<?php
 	$sql = sprintf('SELECT * FROM `%sUser` WHERE `Nachname` LIKE "%s%%" AND `Deleted` = 0;',
     $GLOBALS['dbprefix'],
-    $_POST['letter']);
+    mysqli_real_escape_string($conn, (string)$_POST['letter']));
 	$dbr = mysqli_query($conn, $sql);
     sqlerror();
 	while($row = mysqli_fetch_array($dbr)) {
@@ -50,11 +49,11 @@ if(isset($_POST['letter'])) {
 <?php } ?>
 
 <?php if($state > 1) { ?>
-    <form class="w3-container w3-row" action="" method="POST">
+    <form class="w3-container w3-row w3-margin-top" action="" method="POST">
 	<button class="w3-btn w3-border w3-margin-top w3-border-black s12 m12 l12 <?php echo $GLOBALS['optionsDB']['colorBtnEdit'] ;?>" type="submit">zur&uuml;ck</button>
     </form>
 <?php } ?>
-
 <?php
+adminListPageEnd();
 include "common/footer.php";
 ?>
