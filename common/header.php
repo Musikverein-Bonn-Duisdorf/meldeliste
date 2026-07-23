@@ -47,12 +47,16 @@
               <?php
               die("<div class=\"w3-panel ".$optionsDB['colorLogWarning']."\"><h2>Passwort &auml;ndern...</h2></div>");
           }
-          // Proxy für AJAX-Modals (getModal) über die Seitenaufrufe hinweg merken
-          if(isset($_POST['proxy']) && (int)$_POST['proxy'] > 0) {
-              $_SESSION['proxy'] = (int)$_POST['proxy'];
-          }
-          else {
-              unset($_SESSION['proxy']);
+          // Proxy für „im Auftrag melden“ und AJAX-Zeilen merken (MELD-153).
+          // Nur setzen/löschen bei explizitem POST — nicht bei jedem Seitenaufruf leeren.
+          if(isset($_POST['proxy'])) {
+              $proxyId = (int)$_POST['proxy'];
+              if($proxyId > 0) {
+                  $_SESSION['proxy'] = $proxyId;
+              }
+              else {
+                  unset($_SESSION['proxy']);
+              }
           }
       ?>
       <title><?php echo $optionsDB['WebSiteName']; ?></title>

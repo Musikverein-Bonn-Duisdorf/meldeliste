@@ -17,11 +17,16 @@ function melde(user, termin, wert, Children, Guests) {
 	}
             var oldel = document.getElementById("entry"+termin+"_user"+user);
             if(oldel && oldel.parentNode && xmlhttp.responseText) {
-                var newel = document.createElement('div');
-                newel.innerHTML = xmlhttp.responseText;
-                var replacement = newel.firstElementChild || newel.firstChild;
-                if(replacement) {
-                    oldel.parentNode.replaceChild(replacement, oldel);
+                if(typeof replaceElementWithHtml === 'function') {
+                    replaceElementWithHtml(oldel, xmlhttp.responseText);
+                }
+                else {
+                    var newel = document.createElement('div');
+                    newel.innerHTML = xmlhttp.responseText;
+                    var replacement = newel.firstElementChild || newel.firstChild;
+                    if(replacement) {
+                        oldel.parentNode.replaceChild(replacement, oldel);
+                    }
                 }
             }
             if(typeof scheduleRefreshOpenTerminResponseModal === 'function') {

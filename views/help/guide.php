@@ -193,7 +193,7 @@ $sections[] = array(
 <li>Termine wie gewohnt melden</li>
 <li>Instrument für den Termin ggf. für diese Person setzen</li>
 </ol>
-<p>Solange du im Auftrag arbeitest, beziehen sich Meldungen und Instrument-Änderungen auf die ausgewählte Person, nicht auf dich.</p>
+<p>Solange du im Auftrag arbeitest, beziehen sich Meldungen und Instrument-Änderungen auf die ausgewählte Person, nicht auf dich. Die Terminliste aktualisiert den Status der Proxy-Person sofort nach dem Melden.</p>
 '
 );
 

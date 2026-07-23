@@ -3372,7 +3372,7 @@ body.meld-cal-print {
 
 .modal-shell .profile-hero {
   padding-right: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.85rem 1.25rem;
 }
@@ -3395,11 +3395,13 @@ body.meld-cal-print {
 
 .modal-shell .profile-hero-actions .profile-actions {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.45rem;
   margin: 0;
   min-width: 0;
+  /* Do not shrink children under each other (MELD-154) */
+  flex: 0 1 auto;
 }
 
 .modal-shell .profile-actions-primary {
@@ -3407,11 +3409,13 @@ body.meld-cal-print {
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.45rem;
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: auto;
 }
 
 .modal-shell .profile-actions-primary form {
   margin: 0;
+  flex: 0 0 auto;
 }
 
 .modal-shell .profile-btn-primary {
@@ -3425,19 +3429,21 @@ body.meld-cal-print {
   align-items: center;
   justify-content: center;
   width: auto !important;
-  max-width: 100%;
+  max-width: none;
   box-sizing: border-box;
   margin: 0 !important;
   padding: 0.45rem 0.9rem;
   font-size: 0.95rem;
   line-height: 1.25;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .modal-shell .profile-actions-more {
   position: relative;
   display: block;
   flex: 0 0 auto;
+  min-width: auto;
 }
 
 .modal-shell .profile-actions-more > summary {

@@ -168,7 +168,7 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
                 $html .= $M->printResponseLine();
             }
             else {
-                $html .= $M->printBasicTableLine();
+                $html .= $M->printBasicTableLine((int)$userId);
             }
             $emitted++;
             if($emitted >= $limit) {
