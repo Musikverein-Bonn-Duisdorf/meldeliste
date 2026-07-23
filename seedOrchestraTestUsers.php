@@ -71,8 +71,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="w3-container w3-padding">
   <p>Legt lokal/staging 50 Test-User mit ausgewogener Registerverteilung an (Login <code>orchestertest_01</code> … <code>orchestertest_50</code>, Passwort <code>test1234</code>).</p>
 <?php if($flash) {
-    $panel = ($flash['type'] === 'ok') ? 'w3-green' : 'w3-red';
-    echo '<div class="w3-panel '.$panel.' w3-padding"><p>'.htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8').'</p></div>';
+    $toastType = ($flash['type'] === 'ok') ? 'success' : 'error';
+    echo renderFlashHtml(array('type' => $toastType, 'message' => $flash['message']));
 } ?>
   <form method="post" class="w3-margin-bottom" style="display:inline-block;margin-right:0.5rem;">
     <?php echo csrf_field(); ?>
