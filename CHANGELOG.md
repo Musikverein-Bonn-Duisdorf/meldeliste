@@ -2,6 +2,49 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-c35f4 (2026-07-23)
+
+- MELD-145: Mein Inventar Nav/Leihe und Listen-Layout polarisieren
+- MELD-147: Kalender-Abo-Modal volle Breite und Admin-Menü aktiv offen
+- MELD-147: Kalender-Abo-Modal polish und Meldezeilen-Opazität korrigieren
+- MELD-147: Overlay-Kollisionen beheben und Termin-Löschen modernisieren
+- MELD-145: Einheitliche Melde-Buttons und Kapazität links davon
+- MELD-145: Mein Inventar Card-Layout, Versichert-Filter und Modal-Fixes
+- MELD-141: Kompaktes Wochentags-Datum und klickbare Meldezeilen
+- MELD-139: App-Nav links/unten, Listen-Chrome und einheitliche Seitenköpfe
+- MELD-143: Mit User-Bearbeiten-Recht volles Speichern unter Mein Profil
+- MELD-137: sichere Group-Migration, vererbte Rechte in UI, Hilfe statt Intros
+- MELD-138: Alle Admin-Nav-Seiten auf Listen-Layout und Hero-Farben
+- MELD-138: Rechte-Farben auch für Termin-/Admin-Formulare
+- MELD-138: Admin-Überschriften in Rechte-Farben
+- MELD-137: MailGroup in Group umbenennen
+- MELD-137: Rechte-Vererbung über Gruppen
+- MELD-138: Admin-Listen-Überschriften mit colorTitleBar
+- MELD-136: Register-Rechte, Admin-Listen-Shell und Permission-Gates
+- MELD-134: Aushilfe entfernen, Admin-Nav und DB-Bericht
+- MELD-134: Gastmusiker über Active=0 und Termin-GuestMusicians
+- MELD-135: Poll-Termine nach Created sortieren
+- MELD-135: merge origin/dev for pre-push tests
+- MELD-135: Email-Verteiler-Chips für Termin-Teilnehmer
+- MELD-125: Rechte als Chip-Picker beim User anlegen/bearbeiten
+- MELD-125: Profil-Shell für Inventar-/Kalender-/Schicht-Modals
+- MELD-125: Profil-Shell-UI für User- und Termin-Modals
+- MELD-125: Profil-Gruppen, Auto-Zugehörigkeit, Defaults und Update-Logs
+- MELD-125: Profil-Layout und Benachrichtigungs-Kanäle (MVP)
+- MELD-145: Mein Inventar Nav, Leihe und Listen-Layout
+- MELD-147: Kalender-Abo Desktop-Layout und Admin-Menü offen halten
+- MELD-147: Kalender-Abo-Modal und Meldezeilen-Opazität
+- MELD-147: Overlay-Kollisionen und Termin-Löschen-Modal
+- MELD-145: Einheitliche Melde-Buttons und Kapazität links
+- MELD-141: Wochentag abkürzen und Meldezeilen neu
+- MELD-139: Navigationsleiste links / unten + einheitliche Seitenköpfe
+- MELD-143: Mein Profil mit User-Bearbeiten-Recht voll editierbar
+- MELD-137: Gruppen-Rechte und Group-Migration
+- MELD-136: Register-Rechte und Admin-Listen-Shell
+- MELD-135: Email an Termin-Gruppe
+- MELD-125: Rechte-Chips und Profil-Nachbesserungen
+- MELD-125: Profil-Layout und Benachrichtigungen
+
 ## 2026-07-22-1aa82 (2026-07-22)
 
 - MELD-133: calendars/-Ordner entfernen
