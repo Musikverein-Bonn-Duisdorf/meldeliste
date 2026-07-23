@@ -4596,6 +4596,10 @@ select.profile-control {
   word-break: break-word;
 }
 
+.log-clock::before {
+  content: ' ';
+}
+
 .log-rail {
   width: var(--log-rail-w);
   align-self: stretch;
@@ -4682,11 +4686,28 @@ select.profile-control {
 
 @media (max-width: 600px) {
   .log-row {
-    --log-id-col-w: 8.5rem;
+    --log-id-col-w: max-content;
     --log-row-pad-y: 0.25rem;
+    grid-template-columns: max-content var(--log-rail-w) minmax(0, 1fr);
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    column-gap: 0.4rem;
+    column-gap: 0.35rem;
+  }
+
+  .log-id {
+    width: max-content;
+    max-width: none;
+  }
+
+  .log-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .log-clock::before {
+    content: none;
   }
 }
 
