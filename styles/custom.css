@@ -2791,20 +2791,25 @@ body.meld-cal-print {
 }
 
 .calendar-melde-modal .melde-btns--modal {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: auto;
   max-width: none;
-  width: 100%;
   gap: 0.5rem;
+  justify-content: flex-start;
 }
 
 .calendar-melde-modal .melde-btns--modal .melde-btn {
+  width: 3.1rem;
+  min-width: 3.1rem;
   min-height: 2.75rem;
   font-size: 1.15rem;
-  padding: 0.45rem 0.55rem !important;
+  padding: 0.45rem 0.2rem !important;
 }
 
 @media (max-width: 600px) {
   .calendar-melde-modal .melde-btns--modal .melde-btn {
+    width: 3.25rem;
+    min-width: 3.25rem;
     min-height: 3rem;
   }
 }
@@ -3639,19 +3644,23 @@ select.profile-control {
 
 .melde-btns {
   display: flex;
-  flex: 1 1 8rem;
+  flex: 0 0 auto;
   flex-wrap: nowrap;
   align-items: stretch;
+  justify-content: flex-end;
   gap: 0.4rem;
   min-width: 0;
-  max-width: 16rem;
+  width: auto;
+  max-width: none;
 }
 
 .melde-btn {
-  flex: 1 1 0;
-  min-width: 2.6rem;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 2.85rem;
+  min-width: 2.85rem;
   min-height: 2.6rem;
-  padding: 0.35rem 0.45rem !important;
+  padding: 0.35rem 0.2rem !important;
   margin: 0 !important;
   font-size: 1.05rem;
   line-height: 1;
@@ -3765,15 +3774,17 @@ select.profile-control {
 
   .melde-actions {
     grid-column: 1 / -1;
-    justify-content: stretch;
+    justify-content: flex-end;
   }
 
   .melde-btns {
-    flex: 1 1 100%;
-    max-width: none;
+    flex: 0 0 auto;
+    width: auto;
   }
 
   .melde-btn {
+    width: 3rem;
+    min-width: 3rem;
     min-height: 2.85rem;
   }
 }

@@ -1824,6 +1824,7 @@ class Termin
             $str .= '</form>';
         }
 
+        $str .= $this->makeListMetaHtml($user);
         if(!$this->Shifts) {
             $str .= '<div class="melde-btns">';
             if($this->Capacity) {
@@ -1839,7 +1840,6 @@ class Termin
             }
             $str .= '</div>';
         }
-        $str .= $this->makeListMetaHtml($user);
         $str .= '</div>'; // melde-actions
         $str .= '</div>'; // melde-row-main
 
@@ -1892,6 +1892,9 @@ class Termin
                 }
                 $str .= '</div>';
                 $str .= '<div class="melde-actions">';
+                if($s->Bedarf) {
+                    $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
+                }
                 $str .= '<div class="melde-btns">';
                 if($s->Bedarf) {
                     if($s->Bedarf > $s->getMeldungenVal(1) || $m->Wert == 1 || requirePermission('perm_editResponse')) {
@@ -1905,9 +1908,6 @@ class Termin
                     $str .= $this->makeShiftButtonsUser(3, 0, $s->Index, $m->Wert, $user, true);
                 }
                 $str .= '</div>';
-                if($s->Bedarf) {
-                    $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
-                }
                 $str .= '</div>';
                 $str .= '</div>';
             }
