@@ -2,6 +2,13 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-a0884 (2026-07-23)
+
+- MELD-154: Modal-Header Bearbeiten und Weitere Aktionen nicht überlappen
+- MELD-153: Terminliste bei im Auftrag melden korrekt aktualisieren
+- MELD-152: zukünftige Meldungen bei Nutzer-Löschung, Inventar-Prüfung
+- MELD-153 / MELD-154: Auftrag-Liste und Modal-Aktionen
+
 ## 2026-07-23-84775 (2026-07-23)
 
 - MELD-149: Meldungen-Übersicht und Modal in melde-row-Optik
