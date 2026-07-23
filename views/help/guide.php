@@ -111,14 +111,14 @@ $sections[] = array(
     'title' => 'Mein Profil',
     'body' => '
 <p>Unter <b>Mein Profil</b> pflegst du deine Kontaktdaten, E-Mail-Adressen und weitere Angaben.</p>
-<p>Halte insbesondere E-Mail und Instrument aktuell – davon hängen Benachrichtigungen und die Orchesterdarstellung ab.</p>
+<p>Halte insbesondere E-Mail und Instrument aktuell – davon hängen Benachrichtigungen und die Orchesterdarstellung ab. Ohne das Recht <b>Benutzer bearbeiten</b> sind Name, Instrument, Mitglied-Status, Gruppen und Rechte hier nur lesbar bzw. nicht änderbar; mit diesem Recht kannst du dein Profil unter <b>Mein Profil</b> genauso vollständig bearbeiten wie in der User-Verwaltung.</p>
 <p><b>Benachrichtigungen</b> (unabhängig wählbar):</p>
 <ul>
 <li><b>E-Mail</b> – Nachrichten per E-Mail (Mailverteiler / SMTP)</li>
 <li><b>Nachrichten</b> – Eintrag unter „Meine Nachrichten“ in der Meldeliste</li>
 <li><b>App: …</b> – lokale Hinweise in der Android-App (Poll, kein Push-Dienst). Pro Ereignisart: neue Nachricht, neuer Termin, Termin geändert, Termin bald (nächste Tage; standardmäßig aus)</li>
 </ul>
-<p>Unter <b>Gruppen</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit. <b>Mitglied</b>-Status und benannte Gruppen ändert nur ein Admin (beim Anlegen oder Bearbeiten); im eigenen Profil sind sie nur sichtbar. <b>Automatisch</b> zeigt dem Admin live die daraus folgenden Rollen/Register/regelbasierten Gruppen. Änderungen an Benachrichtigungen und Profilfeldern werden im Anwendungsprotokoll festgehalten.</p>
+<p>Unter <b>Gruppen</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit. <b>Mitglied</b>-Status und benannte Gruppen ändert nur, wer <b>Benutzer bearbeiten</b> hat (unter Musiker anlegen/bearbeiten oder im eigenen Profil). <b>Automatisch</b> zeigt dem Admin live die daraus folgenden Rollen/Register/regelbasierten Gruppen. Änderungen an Benachrichtigungen und Profilfeldern werden im Anwendungsprotokoll festgehalten.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 <p>Die Android-App speichert nach dem Login ein Gerätetoken und meldet dich beim nächsten Öffnen automatisch an. Abmelden in der App widerruft dieses Token.</p>
 <p>Unter <b>Persönlichen Kalender abonnieren</b> findest du deinen persönlichen ICS-Link für Google, Apple oder Outlook (siehe auch <a href="#help-kalender-abo">Persönlichen Kalender abonnieren</a>).</p>

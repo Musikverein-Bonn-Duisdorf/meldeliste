@@ -18,11 +18,11 @@
 <label>Emailadressen</label>
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="Email" type="email" placeholder="Email" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Email, ENT_QUOTES, 'UTF-8').'"'; ?>>
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="Email2" type="email" placeholder="Email 2 (optional)" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Email2, ENT_QUOTES, 'UTF-8').'"'; ?>>
-<?php if($edit != 2) { ?>
+<?php if($edit != 2 || !empty($canEditUsers)) { ?>
 <label class="w3-text-gray">Loginname (optional)</label>
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="login" type="text" placeholder="Loginname" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
 <?php } ?>
-<?php if($fill && ($n->login || $edit == 3)) { ?>
+<?php if($fill && ($n->login || $edit == 3 || !empty($canEditUsers))) { ?>
 <label class="w3-text-gray">neues Passwort (optional)</label>
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="pw1" type="password" placeholder="*****" autocomplete="new-password">
 <label class="w3-text-gray">neues Passwort wiederholen (optional)</label>

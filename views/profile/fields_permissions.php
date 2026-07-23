@@ -4,7 +4,7 @@
  * Expects: $adminUserEdit; optional $n, $fill, $inputBg
  */
 if(!isset($adminUserEdit)) {
-    $adminUserEdit = !empty($canEditUsers) && isset($edit) && (int)$edit === 3;
+    $adminUserEdit = !empty($canEditUsers) && isset($edit) && ((int)$edit === 3 || (int)$edit === 2);
 }
 if(empty($adminUserEdit) || !requirePermission('perm_editPermissions')) {
     return;
