@@ -45,7 +45,7 @@ $sections[] = array(
 <li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers (auf dem Smartphone dauerhaft in der unteren Leiste)</li>
-'.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir zugeordnetes bzw. ausgeliehenes Inventar</li>' : '').'
+'.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir gehörendes oder an dich ausgeliehenes Inventar</li>' : '').'
 <li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen (Desktop in der Seitenleiste, Smartphone unter <b>Mehr</b>)</li>
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
 <li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
@@ -101,8 +101,8 @@ if($helpUser->hasInventories()) {
         'id' => 'mein-inventar',
         'title' => 'Mein Inventar',
         'body' => '
-<p>Wenn dir Inventar gehört oder an dich ausgeliehen ist, erscheint <b>Mein Inventar</b> in der Navigation.</p>
-<p>Dort siehst du deine Stücke (Instrumente, Kleidung, …) als Liste bzw. auf dem Handy als Karten – mit Nr., Typ, Hersteller und Modell; eine Beschreibung erscheint nur, wenn sie hinterlegt ist. Ein Tippen/Klick öffnet die Details im Modal. Bearbeiten ist nur möglich, wenn du die entsprechenden Rechte hast bzw. für dein eigenes Inventar freigegeben bist.</p>
+<p>Wenn dir Inventar gehört <b>oder an dich ausgeliehen</b> ist (aktive Leihe), erscheint <b>Mein Inventar</b> in der Navigation.</p>
+<p>Dort siehst du zuerst geliehene Stücke (Chip „geliehen“), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Ein Tippen/Klick öffnet die Details im Modal. Bearbeiten ist nur möglich, wenn du die entsprechenden Rechte hast.</p>
 '
     );
 }

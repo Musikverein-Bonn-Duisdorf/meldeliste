@@ -338,6 +338,12 @@ function deferPageModalHtml($html) {
     $GLOBALS['mlDeferredPageModals'] .= $html;
 }
 
+/**
+ * Start list page shell (hero in sticky chrome).
+ * Content after this (or after an optional toolbar/search) goes into padded .admin-list-body.
+ *
+ * @param array $options actionsHtml, shellClass, groupId, permKey
+ */
 function adminListPageBegin($kicker, $title, $options = array()) {
     $actionsHtml = isset($options['actionsHtml']) ? (string)$options['actionsHtml'] : '';
     $shellClass = isset($options['shellClass']) ? trim((string)$options['shellClass']) : '';
@@ -363,29 +369,54 @@ function adminListPageBegin($kicker, $title, $options = array()) {
     }
     echo '    </header>'."\n";
     $GLOBALS['mlAdminListChrome'] = 'open';
+    $GLOBALS['mlAdminListBody'] = null;
+    /* Buffer until Search/ChromeClose/End so content lands in padded body */
+    ob_start();
+    $GLOBALS['mlAdminListCapturing'] = true;
+}
+
+/**
+ * Flush chrome capture buffer into open chrome (toolbar etc.), then stop capturing.
+ */
+function adminListFlushChromeCapture() {
+    if(empty($GLOBALS['mlAdminListCapturing'])) {
+        return '';
+    }
+    $chunk = ob_get_clean();
+    $GLOBALS['mlAdminListCapturing'] = false;
+    return ($chunk === false) ? '' : $chunk;
 }
 
 /**
  * Close open app-page-chrome and open scrollable body (after search or before other content).
+ *
+ * @param bool $captureToBody true = buffered content belongs in body (End without toolbar)
  */
-function adminListChromeClose() {
-    if(!empty($GLOBALS['mlAdminListChrome']) && $GLOBALS['mlAdminListChrome'] === 'open') {
-        echo '    </div><!-- .app-page-chrome -->'."\n";
-        echo '    <div class="admin-list-body">'."\n";
-        $GLOBALS['mlAdminListChrome'] = 'closed';
-        $GLOBALS['mlAdminListBody'] = 'open';
+function adminListChromeClose($captureToBody = false) {
+    if(empty($GLOBALS['mlAdminListChrome']) || $GLOBALS['mlAdminListChrome'] !== 'open') {
         return;
+    }
+    $chunk = adminListFlushChromeCapture();
+    if(!$captureToBody && $chunk !== '') {
+        echo $chunk;
+        $chunk = '';
+    }
+    echo '    </div><!-- .app-page-chrome -->'."\n";
+    echo '    <div class="admin-list-body">'."\n";
+    $GLOBALS['mlAdminListChrome'] = 'closed';
+    $GLOBALS['mlAdminListBody'] = 'open';
+    if($captureToBody && $chunk !== '') {
+        echo $chunk;
     }
 }
 
 /** Close adminListPageBegin(). */
 function adminListPageEnd() {
     if(!empty($GLOBALS['mlAdminListChrome']) && $GLOBALS['mlAdminListChrome'] === 'open') {
-        /* Kein Search/ChromeClose: Inhalt liegt im Chrome — nur Chrome schließen */
-        echo '    </div><!-- .app-page-chrome -->'."\n";
-        $GLOBALS['mlAdminListChrome'] = 'closed';
+        /* Kein Search/ChromeClose: Capture → Body mit Seiten-Gutter */
+        adminListChromeClose(true);
     }
-    elseif(!empty($GLOBALS['mlAdminListBody']) && $GLOBALS['mlAdminListBody'] === 'open') {
+    if(!empty($GLOBALS['mlAdminListBody']) && $GLOBALS['mlAdminListBody'] === 'open') {
         echo '    </div><!-- .admin-list-body -->'."\n";
         $GLOBALS['mlAdminListBody'] = 'closed';
     }
@@ -408,6 +439,10 @@ function adminListSearchField($placeholder, $options = array()) {
     $aria = isset($options['ariaLabel']) && (string)$options['ariaLabel'] !== ''
         ? (string)$options['ariaLabel']
         : (string)$placeholder;
+    $pre = adminListFlushChromeCapture();
+    if($pre !== '') {
+        echo $pre;
+    }
     echo '    <div class="admin-list-toolbar">'."\n";
     echo '      <div class="profile-field admin-list-search">'."\n";
     echo '        <input type="search" id="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'"'
@@ -424,7 +459,7 @@ function adminListSearchField($placeholder, $options = array()) {
         echo '      <div class="admin-list-toolbar-extra">'.$extra.'</div>'."\n";
     }
     echo '    </div>'."\n";
-    adminListChromeClose();
+    adminListChromeClose(false);
 }
 
 function getNextRegInventoryNumber($inventoryTypeId = 0) {

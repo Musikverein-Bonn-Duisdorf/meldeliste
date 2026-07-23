@@ -345,12 +345,27 @@ class Inventories
         if($insured) {
             $classes[] = 'inv-row--insured';
         }
+        $viewerId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        $loanedToViewer = false;
+        if($viewerId > 0 && (int)$this->Owner !== $viewerId) {
+            $activeLoanId = $this->getActiveLoan();
+            if($activeLoanId) {
+                $activeLoan = new InventoriesLoan;
+                $activeLoan->load_by_id($activeLoanId);
+                $loanedToViewer = ((int)$activeLoan->User === $viewerId);
+            }
+        }
+        if($loanedToViewer) {
+            $classes[] = 'inv-row--loaned';
+            $searchParts[] = 'geliehen ausleihe';
+        }
         $hover = $GLOBALS['optionsDB']['HoverEffect'];
         if($hover) {
             $classes[] = $hover;
         }
 
         $attrs = 'data-insured="'.($insured ? '1' : '0').'"'
+            .' data-loaned="'.($loanedToViewer ? '1' : '0').'"'
             .' data-sort-regnumber="'.$h((string)(int)$row['RegNumber']).'"'
             .' data-sort-typ="'.$h($typLabel).'"'
             .' data-sort-description="'.$h($desc).'"'
@@ -373,6 +388,9 @@ class Inventories
         $str .= '<div class="inv-typ">'.$h($typLabel).'</div>';
         if($insured) {
             $str .= '<span class="mail-recipient-chip mail-recipient-chip--insured">versichert</span>';
+        }
+        if($loanedToViewer) {
+            $str .= '<span class="mail-recipient-chip mail-recipient-chip--loaned">geliehen</span>';
         }
         $str .= '</div>';
         $str .= '<div class="inv-rail" aria-hidden="true"></div>';
@@ -398,7 +416,11 @@ class Inventories
         if($comment !== '') {
             $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Kommentar</span> '.$h($comment).'</span>';
         }
-        if($loanShort !== '' || $loanDate !== '') {
+        if($loanedToViewer) {
+            $loanLabel = $loanDate !== '' ? 'seit '.$h($loanDate) : 'aktiv';
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.$loanLabel.'</span>';
+        }
+        elseif($loanShort !== '' || $loanDate !== '') {
             $loanBits = array();
             if($loanShort !== '') {
                 $loanBits[] = $h($loanShort);
@@ -610,20 +632,14 @@ class Inventories
     }
 
     public function getActiveLoan() {
-        $loans = $this->getLoans();
-        if($loans) {
+        foreach($this->getLoans() as $loanId) {
             $l = new InventoriesLoan;
-            $l->load_by_id($loans[0]);
-            
-            if($l->EndDate) {
-                $end = new DateTime($l->EndDate);
-                $now = new DateTime(date("Y-m-d"));
-                if($end > $now) return $loans[0];
-            }
-            else {
-                return $loans[0];
+            $l->load_by_id($loanId);
+            if($l->isActive()) {
+                return (int)$loanId;
             }
         }
+        return null;
     }
 
     /**

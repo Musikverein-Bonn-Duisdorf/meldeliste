@@ -1769,7 +1769,7 @@ class Termin
         };
 
         $isShifts = (bool)$this->Shifts;
-        $classes = array('melde-row', 'w3-card-4', 'w3-margin');
+        $classes = array('melde-row', 'w3-card-4');
         $mainColor = $this->mainColor();
         $mainHover = $this->mainHover();
         if($mainHover) {

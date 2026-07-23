@@ -197,5 +197,27 @@ class InventoriesLoan
         $u->load_by_id($this->User);
         return $u->getName();
     }
+
+    /**
+     * Offene/aktive Leihe: kein EndDate oder Rückgabe liegt in der Zukunft.
+     * (EndDate = heute oder früher = beendet)
+     */
+    public static function isOpen($endDate) {
+        if($endDate === null || $endDate === '' || $endDate === '0000-00-00') {
+            return true;
+        }
+        try {
+            $end = new DateTime((string)$endDate);
+            $now = new DateTime(date('Y-m-d'));
+            return $end > $now;
+        }
+        catch(Exception $e) {
+            return false;
+        }
+    }
+
+    public function isActive() {
+        return self::isOpen($this->EndDate);
+    }
 };
 ?>

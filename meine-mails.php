@@ -83,7 +83,7 @@ adminListPageBegin('Kommunikation', 'Meine Nachrichten');
     $job->load_by_id((int)$viewMail->Job);
     $sender = htmlspecialchars($resolveSender((int)$job->CreatedBy), ENT_QUOTES, 'UTF-8');
 ?>
-<div class="w3-container w3-padding">
+<div class="w3-container">
   <div class="w3-card w3-padding">
     <h3 class="w3-margin-top"><?php echo $subj !== '' ? $subj : '<em>(ohne Betreff)</em>'; ?></h3>
     <p class="w3-small"><?php echo $when; ?> · von <?php echo $sender; ?></p>
@@ -99,8 +99,7 @@ adminListPageBegin('Kommunikation', 'Meine Nachrichten');
 </div>
 <?php } ?>
 
-<div class="w3-container w3-padding">
-  <div class="mail-list">
+<div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <div>Betreff</div>
       <div></div>
@@ -141,7 +140,6 @@ else {
     }
 }
 ?>
-  </div>
 </div>
 <?php
 adminListPageEnd();

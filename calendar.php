@@ -39,7 +39,7 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
 .meld-cal-page {
   max-width: 72rem;
   margin: 0 auto;
-  padding: 0 16px 1rem;
+  padding: 0 0 1rem;
   box-sizing: border-box;
   width: 100%;
 }

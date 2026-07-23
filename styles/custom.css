@@ -25,7 +25,7 @@ body.app-layout {
   align-items: flex-start;
   justify-content: center;
   gap: 0.15rem;
-  padding: 0.5rem 4.5rem 0.5rem 1rem;
+  padding: 0.5rem 5rem 0.5rem 1rem;
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
@@ -52,15 +52,17 @@ body.app-layout {
 
 .app-titlebar-logo {
   position: absolute;
-  top: 50%;
+  top: 0.35rem;
+  bottom: 0.35rem;
   right: 0.65rem;
-  transform: translateY(-50%);
-  height: 2.75rem;
+  height: auto;
   width: auto;
-  max-height: 2.75rem;
-  max-width: 3.5rem;
+  max-height: none;
+  max-width: min(4.5rem, 22vw);
+  aspect-ratio: 1;
   display: block;
   object-fit: contain;
+  box-sizing: border-box;
 }
 
 a.app-titlebar-logo {
@@ -70,10 +72,10 @@ a.app-titlebar-logo {
 }
 
 .app-titlebar-logo img {
-  height: 2.75rem;
-  width: auto;
-  max-height: 2.75rem;
-  max-width: 3.5rem;
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
   display: block;
   object-fit: contain;
 }
@@ -91,18 +93,15 @@ a.app-titlebar-logo {
 
 @media (max-width: 600px) {
   .app-titlebar {
-    padding-right: 3.75rem;
+    padding-right: 4rem;
   }
 
   .app-titlebar-name {
     font-size: 1.4rem;
   }
 
-  .app-titlebar-logo,
-  .app-titlebar-logo img {
-    height: 2.25rem;
-    max-height: 2.25rem;
-    max-width: 2.75rem;
+  .app-titlebar-logo {
+    max-width: min(3.25rem, 28vw);
   }
 }
 
@@ -289,6 +288,18 @@ a.app-titlebar-logo {
 .admin-list-shell > .app-page-chrome > .perm-toolbar {
   margin-left: 1.25rem;
   margin-right: 1.25rem;
+}
+
+/* Listeninhalt: seitlich wie Suchleiste — kein Extra von .w3-margin */
+.admin-list-body .w3-margin {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.admin-list-body #Liste > [id^="responseLine"],
+.admin-list-body #Liste > .w3-card {
+  margin-top: 0.65rem !important;
+  margin-bottom: 0 !important;
 }
 
 /* Seiten ohne Body (Hilfe, …): Chrome padded, Hero negativ zurück auf Kanten */
@@ -2092,6 +2103,11 @@ a.app-titlebar-logo {
   border-color: #7f9dc1;
 }
 
+.mail-recipient-chip--loaned {
+  background: #fff3e0;
+  border-color: #ffb74d;
+}
+
 .mail-recipient-chip--audience,
 .mail-recipient-chip--group {
   background: #345a95;
@@ -3625,6 +3641,9 @@ select.profile-control {
   overflow: hidden;
   cursor: pointer;
   position: relative;
+  /* Horizontal wie Suchleiste (.admin-list-body Padding); nur vertikaler Abstand */
+  margin: 0 0 0.65rem;
+  box-sizing: border-box;
 }
 
 /* Soften tint (config: meldeRowResponseOpacity) without fading buttons/text.
@@ -3683,9 +3702,9 @@ select.profile-control {
   max-width: var(--melde-date-col-w);
   min-width: 0;
   box-sizing: border-box;
-  align-self: center;
+  align-self: start;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   overflow: hidden;
 }
 
@@ -3701,7 +3720,7 @@ select.profile-control {
 
 .melde-date {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   line-height: 1.2;
   min-width: 0;
@@ -3950,8 +3969,12 @@ select.profile-control {
 .inv-sort-bar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.45rem 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0.4rem 0 0.7rem;
   margin: 0 0 0.35rem;
   background: transparent;
@@ -3971,7 +3994,7 @@ select.profile-control {
 .admin-list-shell > #listHeader.inv-sort-bar {
   position: sticky;
   top: 0;
-  background: transparent;
+  background: #fff;
   color: inherit;
   font-weight: 400;
   box-shadow: none;
@@ -3981,26 +4004,31 @@ select.profile-control {
   padding: 0.4rem 0 0.7rem;
 }
 
+#listHeader.inv-sort-bar > .inv-sort-bar-filters,
+#listHeader.inv-sort-bar > .inv-sort-bar-sorts {
+  padding-top: 0;
+  padding-bottom: 0;
+  border: none;
+  color: inherit;
+}
+
 .inv-sort-bar-filters,
 .inv-sort-bar-sorts {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
   min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  padding-bottom: 0.1rem;
+  box-sizing: border-box;
 }
 
 .inv-sort-bar-filters {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
 }
 
 .inv-sort-bar-sorts {
-  flex: 1 1 auto;
+  flex: 1 1 14rem;
 }
 
 .inv-sort-chip {
@@ -4184,11 +4212,13 @@ select.profile-control {
 
   .inv-sort-bar-filters,
   .inv-sort-bar-sorts {
+    flex: 1 1 auto;
     width: 100%;
   }
 
   .inv-sort-chip {
-    padding: 0.32rem 0.6rem;
+    padding: 0.32rem 0.55rem;
+    font-size: clamp(0.68rem, 0.6rem + 0.5vw, 0.82rem);
   }
 
   .inv-row {
