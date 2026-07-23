@@ -213,9 +213,12 @@ function adminListPageBegin($kicker, $title, $options = array()) {
     $actionsHtml = isset($options['actionsHtml']) ? (string)$options['actionsHtml'] : '';
     $shellClass = isset($options['shellClass']) ? trim((string)$options['shellClass']) : '';
     $shellCls = 'profile-shell admin-list-shell'.($shellClass !== '' ? ' '.$shellClass : '');
+    $titleBar = isset($GLOBALS['optionsDB']['colorTitleBar'])
+        ? trim((string)$GLOBALS['optionsDB']['colorTitleBar']) : '';
+    $heroCls = 'profile-hero'.($titleBar !== '' ? ' '.$titleBar : '');
     echo '<div class="w3-container w3-margin-bottom profile-page">'."\n";
     echo '  <div class="'.htmlspecialchars($shellCls, ENT_QUOTES, 'UTF-8').'">'."\n";
-    echo '    <header class="profile-hero">'."\n";
+    echo '    <header class="'.htmlspecialchars($heroCls, ENT_QUOTES, 'UTF-8').'">'."\n";
     echo '      <div class="profile-hero-text">'."\n";
     echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
     echo '        <h2 class="profile-title">'.htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8').'</h2>'."\n";
