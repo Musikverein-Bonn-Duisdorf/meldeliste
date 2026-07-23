@@ -1,0 +1,34 @@
+---
+description: Modal-/Overlay-Design und Platzierung außerhalb von .app-main
+alwaysApply: true
+---
+
+# Modals & Overlays
+
+## Shell-Markup (Pflicht für neue Dialoge)
+
+- Inhalt in `profile-shell modal-shell` (Referenz: `views/termin/calendar_melde_modal.php`, Kalender-Abo, Termin-Löschen).
+- Hero: `profile-hero` mit `profile-kicker`, `profile-title`, optional `profile-actions` / `profile-btn-primary`, Schließen als `modal-close w3-button`.
+- Körper: `termin-grid` / `profile-grid` + `profile-col` / `profile-field` — **kein** altes `w3-container`+`colorTitleBar`-Header-Card-Layout.
+- Bestätigungen (Löschen): gleiche Shell; Primäraktion klar („Löschen“), Abbrechen sekundär — nicht „ja“/„nein“ in alten Grid-Spalten.
+
+## Platzierung (MELD-147)
+
+`.app-main` hat Overflow + `z-index: 1` → feste Overlays darin kollidieren mit Titlebar/Nav/Inhalt.
+
+- **AJAX-Dialoge:** nur in `#ajaxModalHost` (`common/footer.php`, außerhalb `.app-shell`).
+- **Seiten-lokale `.w3-modal`:** mit `deferPageModalHtml()` puffern; Footer gibt sie neben `#ajaxModalHost` aus. Nicht in die Seitenkarte legen.
+- **Safety-Net:** `liftPageModalsOutOfAppMain()` in `js/modal.js` — trotzdem PHP-seitig korrekt deferren (MOTD öffnet sofort).
+- Sheets/Bottom-Bars (`orchestra-seat-sheet` u. Ä.): an `document.body` hängen, nicht in `#ajaxModalHost`.
+- `.w3-modal` hat global `z-index: 2000` (über Titlebar 1100 / Nav 1000).
+
+## Nicht tun
+
+- Keine neuen Dialoge im Stil `w3-modal-content w3-card` + farbiger `w3-container`-Titelbalken.
+- Kein `position:fixed`-Overlay als Kind von `.app-main` / `.admin-list-body` ohne Defer/Lift.
+- Keine doppelte Modal-Infrastruktur neben `#ajaxModalHost`, wenn AJAX reicht.
+
+# Melde-Zeilen (Kapazität)
+
+- Melde-Buttons: feste Größe (`.melde-btn`), nicht `flex: 1` über die Aktionsbreite — 2 Buttons (Kapazität) müssen wie 3 Buttons wirken.
+- Kapazitäts-/Bedarfsinfo (`.melde-meta`) **links** der Buttons, nicht rechts.
