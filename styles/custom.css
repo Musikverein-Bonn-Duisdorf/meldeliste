@@ -1366,6 +1366,15 @@ a.app-titlebar-logo {
   background-color: #ffffcc;
 }
 
+.mail-list-item.list-filtered-out,
+.mail-list-item.mail-list-empty.list-filtered-out {
+  display: none !important;
+}
+
+.mail-list > #listSentinel {
+  grid-column: 1 / -1;
+}
+
 .mail-list-primary {
   grid-area: primary;
   min-width: 0;
@@ -1484,41 +1493,102 @@ a.app-titlebar-logo {
 }
 
 @media (max-width: 600px) {
+  .mail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   .mail-list-header {
     display: none;
   }
 
   .mail-list-item {
-    display: block;
-    padding: 0.85rem 0.6rem;
-    margin-bottom: 0.65rem;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "primary status"
+      "meta meta"
+      "actions actions";
+    column-gap: 0.5rem;
+    row-gap: 0.3rem;
+    align-items: start;
+    padding: 0.65rem 0.7rem;
+    margin-bottom: 0;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    background: #fff;
   }
 
   .mail-list-primary {
-    display: block;
-    font-size: 1.05em;
-    margin-bottom: 0.35rem;
+    grid-area: primary;
+    font-size: 1em;
+    margin: 0;
+    line-height: 1.3;
   }
 
-  .mail-list-meta,
-  .mail-list-status {
-    display: block;
+  .mail-list-primary a {
+    text-decoration: none;
+  }
+
+  .mail-list-meta {
+    grid-area: meta;
+    margin: 0;
     text-align: left;
     white-space: normal;
-    margin-bottom: 0.25rem;
+    line-height: 1.35;
+    font-size: 0.8em;
+  }
+
+  .mail-list-status {
+    grid-area: status;
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+    justify-self: end;
+    align-self: start;
+    line-height: 1.3;
+  }
+
+  .mail-list-status .mail-counts-cell {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85em;
+    opacity: 0.85;
+    text-align: right;
   }
 
   .mail-list-actions {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 0.5rem;
+    grid-area: actions;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+    justify-content: stretch;
+  }
+
+  .mail-list-actions form {
+    display: block;
+    margin: 0;
   }
 
   .mail-list-actions .w3-button,
   .mail-list-actions .w3-btn {
-    width: auto;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Odd last child (1 or 3 buttons): full-width bottom row */
+  .mail-list-actions > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .mail-list > #listSentinel {
+    margin-top: 0.25rem;
   }
 
   .mail-compose-panel {

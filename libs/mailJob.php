@@ -688,6 +688,89 @@ class MailJob
     }
 
     /**
+     * One admin overview row (Betreff / Status / Aktion).
+     * @param array $userNameCache by-ref map userId => display name
+     * @param array|null $sendingIds collected job ids that are queued/processing
+     * @return string HTML
+     */
+    public function renderAdminListItemHtml(&$userNameCache = null, &$sendingIds = null) {
+        if(!is_array($userNameCache)) {
+            $userNameCache = array();
+        }
+        $id = (int)$this->Index;
+        $subject = $this->Subject !== '' && $this->Subject !== null
+            ? htmlspecialchars((string)$this->Subject, ENT_QUOTES, 'UTF-8')
+            : '<em>(ohne Betreff)</em>';
+        $createdRaw = (string)$this->listTimestamp();
+        $created = htmlspecialchars(mailListFormatDate($createdRaw), ENT_QUOTES, 'UTF-8');
+        $byId = (int)$this->CreatedBy;
+        if($byId > 0) {
+            if(!isset($userNameCache[$byId])) {
+                $u = new User;
+                $u->load_by_id($byId);
+                $userNameCache[$byId] = $u->Index ? $u->getName() : ('User '.$byId);
+            }
+            $byName = htmlspecialchars($userNameCache[$byId], ENT_QUOTES, 'UTF-8');
+        }
+        else {
+            $byName = 'System';
+        }
+        $status = htmlspecialchars($this->statusLabel(), ENT_QUOTES, 'UTF-8');
+        $statusCls = $this->statusClass();
+        if($this->Status !== 'draft') {
+            $counts = MailJob::formatCounts($this->Sent, $this->Total, $this->Failed);
+        }
+        else {
+            $counts = '—';
+        }
+        $isSending = in_array((string)$this->Status, array('queued', 'processing'), true);
+        if($isSending && is_array($sendingIds)) {
+            $sendingIds[] = $id;
+        }
+        $searchBits = array(
+            (string)$this->Subject,
+            '#'.$id,
+            $this->statusLabel(),
+            isset($userNameCache[$byId]) ? (string)$userNameCache[$byId] : $byName,
+            $createdRaw,
+        );
+        $html = '<div class="mail-list-item" data-mail-id="'.$id.'"'
+            .($isSending ? ' data-mail-sending="1"' : '')
+            .' data-search="'.htmlspecialchars(implode(' ', $searchBits), ENT_QUOTES, 'UTF-8').'">';
+        $html .= '<div class="mail-list-primary"><a href="mail.php?id='.$id.'">'.$subject.'</a></div>';
+        $html .= '<div class="mail-list-meta">#'.$id.' · '.$created.' · '.$byName.'</div>';
+        $html .= '<div class="mail-list-status"><span class="w3-tag mail-status-tag '.$statusCls.'">'.$status.'</span>';
+        $html .= ' <span class="mail-counts-cell">'.htmlspecialchars($counts, ENT_QUOTES, 'UTF-8').'</span></div>';
+        $html .= '<div class="mail-list-actions mail-actions-cell">';
+        if($this->Status === 'draft') {
+            $html .= '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="mail.php?id='.$id.'">Bearbeiten</a>';
+        }
+        if($this->canCancel()) {
+            $html .= '<span class="mail-cancel-wrap">';
+            $html .= '<form method="post" action="mail.php" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
+            $html .= '<input type="hidden" name="id" value="'.$id.'" />';
+            $html .= '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
+            $html .= '</form>';
+            $html .= '</span>';
+        }
+        if($this->canDelete()) {
+            $delConfirm = $this->Status === 'draft'
+                ? 'Entwurf #'.$id.' wirklich löschen?'
+                : 'Email-ID '.$id.' wirklich löschen? (noch an niemanden per PHPMailer versendet)';
+            $html .= '<span class="mail-delete-wrap">';
+            $html .= '<form method="post" action="mail.php" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
+            $html .= '<input type="hidden" name="id" value="'.$id.'" />';
+            $html .= '<button type="submit" name="delete_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Löschen</button>';
+            $html .= '</form>';
+            $html .= '</span>';
+        }
+        $html .= '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="mail.php?copy='.$id.'">Als Entwurf kopieren</a>';
+        $html .= '</div>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
      * @param string|null $statusFilter null = all
      * @return MailJob[]
      */
