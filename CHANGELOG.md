@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-52bf1 (2026-07-23)
+
+- MELD-151: SMTP-Versand und Fehlerzählung im Mail-Menü
+- MELD-146: Flash-Banner als schwebende Toasts
+- MELD-151: SMTP-Versand und Fehlerzählung
+
 ## 2026-07-23-cce09 (2026-07-23)
 
 - MELD-150: Inventar-Labels oben links ausrichten
