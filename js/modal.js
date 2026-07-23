@@ -59,6 +59,30 @@ document.addEventListener('keydown', function(e) {
 });
 
 /**
+ * Melde-Zeile (Hauptseite): Klick auf die Karte öffnet Termin-Modal.
+ * Buttons/Formulare mit [data-melde-stop] bleiben ausgenommen.
+ */
+document.addEventListener('click', function(e) {
+    var row = e.target.closest ? e.target.closest('.melde-row[data-termin-id]') : null;
+    if(!row) return;
+    if(e.target.closest && e.target.closest('[data-melde-stop], button, a, input, select, textarea, label, form')) {
+        return;
+    }
+    var id = parseInt(row.getAttribute('data-termin-id'), 10);
+    if(!id) return;
+    openModal('termin', id);
+});
+
+document.addEventListener('keydown', function(e) {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    var row = e.target.closest ? e.target.closest('.melde-row[data-termin-id]') : null;
+    if(!row || e.target !== row) return;
+    e.preventDefault();
+    var id = parseInt(row.getAttribute('data-termin-id'), 10);
+    if(id) openModal('termin', id);
+});
+
+/**
  * Toggle between full seating plan and packed active-only (ja/vielleicht) layout.
  */
 function toggleActiveOrchestra(checkbox) {

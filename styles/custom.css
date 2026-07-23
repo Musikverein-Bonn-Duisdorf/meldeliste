@@ -3151,3 +3151,283 @@ select.profile-control {
     width: 100%;
   }
 }
+
+/* MELD-141: Hauptseite melde rows — date badge + content + scalable buttons */
+.melde-row {
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.melde-row:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.45);
+  outline-offset: 2px;
+}
+
+.melde-row-main {
+  --melde-date-col-w: 9.5rem;
+  --melde-date-rail-w: 0.35rem;
+  --melde-date-rail-color: #fff;
+  --melde-row-pad-y: 0.85rem;
+  --melde-date-rail-inset: 0.4rem;
+  display: grid;
+  grid-template-columns: var(--melde-date-col-w) var(--melde-date-rail-w) minmax(0, 1fr) auto;
+  column-gap: 0.85rem;
+  row-gap: 0.65rem;
+  align-items: start;
+  padding: var(--melde-row-pad-y) 1rem;
+}
+
+.melde-date-col {
+  width: var(--melde-date-col-w);
+  max-width: var(--melde-date-col-w);
+  min-width: 0;
+  box-sizing: border-box;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.melde-date-rail {
+  width: var(--melde-date-rail-w);
+  align-self: stretch;
+  margin-top: calc(-1 * var(--melde-row-pad-y) + var(--melde-date-rail-inset));
+  margin-bottom: calc(-1 * var(--melde-row-pad-y) + var(--melde-date-rail-inset));
+  min-height: calc(100% + 2 * var(--melde-row-pad-y) - 2 * var(--melde-date-rail-inset));
+  background: var(--melde-date-rail-color);
+  border-radius: 2px;
+}
+
+.melde-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.2;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.melde-weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 2.35rem;
+  height: 2.35rem;
+  padding: 0 0.3rem;
+  box-sizing: border-box;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.melde-date-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.melde-date-day {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.melde-date-time {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.melde-main {
+  min-width: 0;
+  border-radius: 0.25rem;
+}
+
+.melde-row:hover .melde-title {
+  text-decoration: underline;
+}
+
+.melde-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.melde-desc {
+  margin-top: 0.25rem;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  opacity: 0.92;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.melde-ort {
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  opacity: 0.85;
+}
+
+.melde-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem 0.55rem;
+  min-width: 0;
+  cursor: default;
+}
+
+.melde-btns {
+  display: flex;
+  flex: 1 1 8rem;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 16rem;
+}
+
+.melde-btn {
+  flex: 1 1 0;
+  min-width: 2.6rem;
+  min-height: 2.6rem;
+  padding: 0.35rem 0.45rem !important;
+  margin: 0 !important;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.melde-full {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.melde-meta {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.melde-meta-btn {
+  flex: 0 1 auto;
+  white-space: nowrap;
+  font-size: 0.85rem !important;
+  padding: 0.4rem 0.55rem !important;
+  cursor: pointer;
+}
+
+.melde-ical {
+  display: inline-flex;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.melde-ical-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  font-size: 1.15rem;
+}
+
+.melde-ical-btn:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.melde-extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0 1rem 0.85rem;
+  cursor: default;
+}
+
+.melde-extra-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.melde-freetext-input {
+  flex: 1 1 12rem;
+  min-width: 8rem;
+}
+
+.melde-num {
+  width: 5em;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 0.2rem;
+}
+
+.melde-shift {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 1rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.65);
+  cursor: default;
+}
+
+.melde-shift-info {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.melde-shift-name {
+  font-weight: 700;
+}
+
+.melde-shift-time {
+  margin-top: 0.15rem;
+  font-size: 0.88rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .melde-row-main {
+    --melde-row-pad-y: 0.75rem;
+    grid-template-columns: var(--melde-date-col-w) var(--melde-date-rail-w) minmax(0, 1fr);
+    padding: var(--melde-row-pad-y) 0.75rem;
+  }
+
+  .melde-actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .melde-btns {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .melde-btn {
+    min-height: 2.85rem;
+  }
+}

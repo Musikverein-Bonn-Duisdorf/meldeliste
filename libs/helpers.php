@@ -133,6 +133,28 @@ function germanDateSpan($string1, $string2) {
     return germanDates($string1, true, true)." - ".germanDates($string2, true, true);
 }
 
+/**
+ * Two-letter German weekday (Mo…So) for a YYYY-MM-DD date.
+ */
+function germanWeekdayShort($string) {
+    if($string == '' || $string == null) {
+        return '';
+    }
+    $y = substr($string, 0, 4);
+    $m = substr($string, 5, 2);
+    $d = substr($string, 8, 2);
+    $date = mktime(0, 0, 0, (int)$m, (int)$d, (int)$y);
+    $dows = array(1 => 'Mo', 2 => 'Di', 3 => 'Mi', 4 => 'Do', 5 => 'Fr', 6 => 'Sa', 7 => 'So');
+    return $dows[(int)date('N', $date)];
+}
+
+/**
+ * Compact numeric date dd.mm.yyyy (no weekday).
+ */
+function germanDateCompact($string) {
+    return germanDates($string, false, true);
+}
+
 function getActiveUsers($date) {
     $users = array();
     if($GLOBALS['optionsDB']['showConductor']) {
@@ -741,13 +763,20 @@ function colorToCssClass($value) {
 }
 
 function renderConfigColorCss($wrapStyleTag = true) {
-    if(empty($GLOBALS['cfgColorCssRules']) || !is_array($GLOBALS['cfgColorCssRules'])) {
-        return '';
-    }
     $css = '';
-    foreach($GLOBALS['cfgColorCssRules'] as $class => $colors) {
-        $css .= '.'.preg_replace('/[^a-z0-9\-]/i', '', $class)
-            .'{color:'.$colors['fg'].' !important;background-color:'.$colors['bg'].' !important;}';
+    $pageBg = '#FDFFFC';
+    $bgClass = isset($GLOBALS['optionsDB']['colorBackground']) ? (string)$GLOBALS['optionsDB']['colorBackground'] : '';
+    if($bgClass !== ''
+        && !empty($GLOBALS['cfgColorCssRules'][$bgClass]['bg'])
+        && isHexColor($GLOBALS['cfgColorCssRules'][$bgClass]['bg'])) {
+        $pageBg = normalizeHexColor($GLOBALS['cfgColorCssRules'][$bgClass]['bg']);
+    }
+    $css .= ':root{--app-page-bg:'.$pageBg.';}';
+    if(!empty($GLOBALS['cfgColorCssRules']) && is_array($GLOBALS['cfgColorCssRules'])) {
+        foreach($GLOBALS['cfgColorCssRules'] as $class => $colors) {
+            $css .= '.'.preg_replace('/[^a-z0-9\-]/i', '', $class)
+                .'{color:'.$colors['fg'].' !important;background-color:'.$colors['bg'].' !important;}';
+        }
     }
     if($css === '') return '';
     return $wrapStyleTag ? '<style type="text/css">'.$css.'</style>' : $css;
