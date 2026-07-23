@@ -548,6 +548,10 @@
   word-break: break-word;
 }
 
+.mail-list-primary .mail-list-perm-tiles {
+  margin-top: 0.35rem;
+}
+
 .mail-list-meta {
   grid-area: meta;
   font-size: 0.85em;
@@ -2265,6 +2269,12 @@ select.profile-control {
   line-height: 1.3;
   background: #eef1f4;
   color: #222;
+}
+
+.profile-perm-tile--inherited {
+  outline: 2px dashed rgba(0, 0, 0, 0.35);
+  outline-offset: 1px;
+  cursor: help;
 }
 
 .profile-perm-picker #profile-perm-chips {

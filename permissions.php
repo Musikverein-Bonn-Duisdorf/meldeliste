@@ -62,7 +62,6 @@ adminListPageBegin('System', 'Berechtigungen', array(
         </label>
       </div>
     </div>
-    <p class="admin-list-intro w3-small">Persönliche Rechte sind editierbar. Haken mit gestricheltem Rahmen kommen nur über eine Gruppe und lassen sich hier nicht entfernen.</p>
 
     <h3 class="profile-col-title">Rechte-Matrix</h3>
     <div class="perm-matrix-wrap">

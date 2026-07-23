@@ -47,9 +47,6 @@ $mailHintLabel = count($mailHint) ? implode(' · ', $mailHint) : 'keine Kanäle'
     <section class="profile-c-edit" data-profile-c-edit hidden>
       <h3>Stammdaten</h3>
       <?php include __DIR__.'/fields_stammdaten.php'; ?>
-<?php if($fill && $edit != 2) { ?>
-      <p class="w3-small w3-text-gray">Admin-Aktionen stehen in der Leiste unter „speichern“.</p>
-<?php } ?>
       <button type="button" class="w3-btn w3-border w3-mobile" data-profile-c-toggle="edit">Schließen</button>
     </section>
   </form>

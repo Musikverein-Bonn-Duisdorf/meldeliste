@@ -56,7 +56,7 @@ class Group
     public static function ensureSchema() {
         static $done = false;
         if($done) return true;
-        self::migrateLegacyTableName();
+        self::migrateTableFromMailGroup();
         $table = new SQLtable('Group');
         if(!$table->exists()
             || !$table->columnExists('MemberSpec')
@@ -64,22 +64,159 @@ class Group
             $manager = new DatabaseManager();
             $manager->create();
             $manager->repair();
-            self::migrateLegacyTableName();
+            self::migrateTableFromMailGroup();
         }
         $done = true;
         return (new SQLtable('Group'))->exists();
     }
 
-    /** Rename legacy MailGroup table to Group when present. */
-    private static function migrateLegacyTableName() {
+    /**
+     * MELD-137: MailGroup → Group ohne Datenverlust.
+     * - Nur MailGroup: RENAME (inkl. Index/AUTO_INCREMENT/PermissionSpec).
+     * - Leere Group + MailGroup mit Daten: leere Group droppen, dann RENAME
+     *   (passiert, wenn repair() Group aus DBconfig anlegt, bevor umbenannt wurde).
+     * - Beide mit Daten: fehlende Zeilen aus MailGroup nach Group kopieren, dann MailGroup droppen.
+     *
+     * @return bool true wenn kein MailGroup mit Daten mehr übrig ist
+     */
+    public static function migrateTableFromMailGroup() {
         $prefix = isset($GLOBALS['dbprefix']) ? (string)$GLOBALS['dbprefix'] : '';
+        $conn = $GLOBALS['conn'];
         $old = new SQLtable('MailGroup');
         $new = new SQLtable('Group');
-        if($old->exists() && !$new->exists()) {
-            $sql = sprintf('RENAME TABLE `%sMailGroup` TO `%sGroup`;', $prefix, $prefix);
-            mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
+        if(!$old->exists()) {
+            return true;
         }
+
+        $oldName = $prefix.'MailGroup';
+        $newName = $prefix.'Group';
+
+        if(!$new->exists()) {
+            $sql = sprintf('RENAME TABLE `%s` TO `%s`;', $oldName, $newName);
+            $ok = mysqli_query($conn, $sql);
+            sqlerror();
+            return (bool)$ok && !(new SQLtable('MailGroup'))->exists() && (new SQLtable('Group'))->exists();
+        }
+
+        $oldCount = self::tableRowCount($oldName);
+        $newCount = self::tableRowCount($newName);
+        if($oldCount < 0 || $newCount < 0) {
+            return false;
+        }
+
+        // Empty Group shell from processSchema while MailGroup still holds data.
+        if($newCount === 0) {
+            $drop = sprintf('DROP TABLE `%s`;', $newName);
+            if(!mysqli_query($conn, $drop)) {
+                sqlerror();
+                return false;
+            }
+            $sql = sprintf('RENAME TABLE `%s` TO `%s`;', $oldName, $newName);
+            $ok = mysqli_query($conn, $sql);
+            sqlerror();
+            return (bool)$ok && !(new SQLtable('MailGroup'))->exists();
+        }
+
+        // Both have rows: copy any MailGroup rows missing in Group, then drop legacy table.
+        if(!self::copyMissingMailGroupRows($oldName, $newName)) {
+            return false;
+        }
+        $remaining = self::tableRowCount($oldName);
+        if($remaining !== 0) {
+            // Still rows that could not be copied (should not happen after INSERT IGNORE by Index).
+            return false;
+        }
+        $dropOld = sprintf('DROP TABLE `%s`;', $oldName);
+        $ok = mysqli_query($conn, $dropOld);
+        sqlerror();
+        return (bool)$ok;
+    }
+
+    /**
+     * @param string $tableName fully prefixed table name
+     * @return int row count, or -1 on error
+     */
+    private static function tableRowCount($tableName) {
+        $sql = sprintf('SELECT COUNT(*) AS `c` FROM `%s`;', $tableName);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if(!$dbr) {
+            sqlerror();
+            return -1;
+        }
+        $row = mysqli_fetch_assoc($dbr);
+        return $row ? (int)$row['c'] : 0;
+    }
+
+    /**
+     * Insert MailGroup rows whose Index is not yet in Group (never overwrite Group rows).
+     * @param string $oldName
+     * @param string $newName
+     * @return bool
+     */
+    private static function copyMissingMailGroupRows($oldName, $newName) {
+        $conn = $GLOBALS['conn'];
+        $old = new SQLtable('MailGroup');
+        $new = new SQLtable('Group');
+        $hasPerm = $old->columnExists('PermissionSpec');
+        if(!$new->columnExists('PermissionSpec')) {
+            $add = sprintf(
+                'ALTER TABLE `%s` ADD `PermissionSpec` text NULL COLLATE utf8mb4_unicode_ci;',
+                $newName
+            );
+            if(!mysqli_query($conn, $add)) {
+                sqlerror();
+                return false;
+            }
+        }
+        $hasNewPerm = (new SQLtable('Group'))->columnExists('PermissionSpec');
+
+        if($hasPerm && $hasNewPerm) {
+            $sql = sprintf(
+                'INSERT INTO `%s` (`Index`, `Name`, `MemberSpec`, `PermissionSpec`, `CreatedBy`, `Created`)'
+                .' SELECT `o`.`Index`, `o`.`Name`, `o`.`MemberSpec`, `o`.`PermissionSpec`, `o`.`CreatedBy`, `o`.`Created`'
+                .' FROM `%s` `o`'
+                .' LEFT JOIN `%s` `g` ON `g`.`Index` = `o`.`Index`'
+                .' WHERE `g`.`Index` IS NULL;',
+                $newName,
+                $oldName,
+                $newName
+            );
+        }
+        else {
+            $sql = sprintf(
+                'INSERT INTO `%s` (`Index`, `Name`, `MemberSpec`, `CreatedBy`, `Created`)'
+                .' SELECT `o`.`Index`, `o`.`Name`, `o`.`MemberSpec`, `o`.`CreatedBy`, `o`.`Created`'
+                .' FROM `%s` `o`'
+                .' LEFT JOIN `%s` `g` ON `g`.`Index` = `o`.`Index`'
+                .' WHERE `g`.`Index` IS NULL;',
+                $newName,
+                $oldName,
+                $newName
+            );
+        }
+        if(!mysqli_query($conn, $sql)) {
+            sqlerror();
+            return false;
+        }
+
+        // Remove successfully migrated legacy rows (matched by Index).
+        $del = sprintf(
+            'DELETE `o` FROM `%s` `o` INNER JOIN `%s` `g` ON `g`.`Index` = `o`.`Index`;',
+            $oldName,
+            $newName
+        );
+        if(!mysqli_query($conn, $del)) {
+            sqlerror();
+            return false;
+        }
+
+        // Keep AUTO_INCREMENT above max Index.
+        $maxSql = sprintf('SELECT COALESCE(MAX(`Index`), 0) AS `m` FROM `%s`;', $newName);
+        $dbr = mysqli_query($conn, $maxSql);
+        $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+        $next = $row ? ((int)$row['m'] + 1) : 1;
+        mysqli_query($conn, sprintf('ALTER TABLE `%s` AUTO_INCREMENT = %d;', $newName, $next));
+        return true;
     }
 
     /**

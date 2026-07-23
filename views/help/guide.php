@@ -160,8 +160,8 @@ $sections[] = array(
 '.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
 '.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
 <li><b>Registerübersicht</b> – Orchester-/Registeransicht (Überschrift in Registerfarbe); Klick auf einen Sitz öffnet das User-Modal</li>
-'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte; <b>Deaktivieren</b> setzt Gastmusiker; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
-'.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
+'.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte (persönlich editierbar; über Gruppen vererbte Rechte erscheinen mit gestricheltem Rahmen und sind hier nicht entfernbar); <b>Deaktivieren</b> setzt Gastmusiker; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
+'.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); Priorität zuerst Primär, dann Fallbacks in Reihenfolge; im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 </ul>
 '
 );
@@ -213,7 +213,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_sendEmail'),
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
-<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an (Rollen, Register, Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Zusätzlich kannst du einer Gruppe <b>Rechte vererben</b> (z.&nbsp;B. „Versteckte Termine“ für den Vorstand) – alle Mitglieder erhalten diese Rechte zusätzlich zu ihren persönlichen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
+<p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an. <b>Mitglieder</b> sind die Union aus Rollen, Registern und einzelnen Personen (z.&nbsp;B. Posaunen + Schlagwerk + Klarinetten + einzelne Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Unter <b>Vererbte Rechte</b> kannst du einer Gruppe Rechte setzen (z.&nbsp;B. „Versteckte Termine“ für den Vorstand) – alle Mitglieder erhalten diese zusätzlich zu ihren persönlichen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
 <p>Beim Mailversand kannst du Chips für Rollen, Gruppen, Register, Personen und <b>Teilnehmer</b> (ja/vielleicht) zukünftiger Termine wählen. Über <b>Email an Teilnehmer</b> am Termin wird der passende Teilnehmer-Chip vorausgewählt. Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht. Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b>.</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
 '
@@ -230,7 +230,7 @@ $sections[] = array(
 <li><b>Versicherung</b> – versicherte Stücke; Klick öffnet das Inventar-Modal; Spalten sortierbar; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
-<li><b>Inventar-Typen</b> – Typen und Nummernkreise pflegen</li>
+<li><b>Inventar-Typen</b> – Prefix bestimmt den Nummernkreis (z.&nbsp;B. <code>MARSCH-001</code>, <code>INSTR-42</code>); die Beschriftung erscheint in Listen und Formularen</li>
 <li>Anlegen, Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> neue Ausleihen eintragen, offene Leihen beenden oder einzelne Historie-Einträge löschen</li>
 ' : '').'
 </ul>
@@ -243,8 +243,8 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_editRegisters'),
     'body' => '
 <ul class="help-list">
-<li><b>Register</b> – Register anlegen, sortieren und einfärben (Sitzplan und Gruppenbildung)</li>
-<li><b>Instrument-Typen</b> – Instrumente den Registern zuordnen, sortieren und Spielbarkeit setzen</li>
+<li><b>Register</b> – anlegen, sortieren und einfärben (Sitzplan und Gruppenbildung). <b>Reihe</b> = Abstand vom Dirigenten (0 = Dirigent); <b>ArcMin/ArcMax</b> = Winkelbereich (0° links, 90° vorne, 180° rechts). Nach dem Speichern aktualisiert sich die Vorschau</li>
+<li><b>Instrument-Typen</b> – Instrumente (z.&nbsp;B. Flöte, Trompete) den Registern zuordnen, sortieren und Spielbarkeit setzen; Farbe in der Typen-Übersicht, Register-Farben steuern die Orchesterdarstellung</li>
 <li>Beide Seiten brauchen das Recht <b>Register bearbeiten</b></li>
 </ul>
 '
@@ -257,14 +257,14 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_editPermissions') ? '
-<li><b>Berechtigungen</b> – Matrix aller User (Autosave); Klick auf den Namen öffnet das User-Modal; Rechte aus Gruppen erscheinen als nicht editierbare Haken; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
+<li><b>Berechtigungen</b> – Matrix aller User (Autosave); persönliche Rechte sind editierbar; Haken mit gestricheltem Rahmen kommen nur über eine Gruppe und lassen sich hier nicht entfernen; Klick auf den Namen öffnet das User-Modal; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>
 <li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
-<li><b>Statistik</b> – Auswertungen mit Abschnittsnavigation; auf breiten Bildschirmen Diagramme und Tabellen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (sortierbar)</li>
+<li><b>Statistik</b> – Auswertungen mit Abschnittsnavigation; auf breiten Bildschirmen Diagramme und Tabellen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking (Quote = Ja-Meldungen / Termine im Zeitraum; Spalten sortierbar) und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>)</li>
 <li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung)</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '

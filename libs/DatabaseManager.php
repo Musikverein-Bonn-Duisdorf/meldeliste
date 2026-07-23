@@ -260,10 +260,49 @@ class DatabaseManager
     public function check() {
         $this->report = array();
         $this->migratePermissionsRegisterColumns(false);
+        $this->migrateMailGroupTableToGroup(false);
         $this->processSchema(false, false);
         $this->pruneObsoleteSchema(false);
         $this->checkConfigDefaults(false);
         return $this->report;
+    }
+
+    /**
+     * MELD-137: rename/merge MailGroup → Group before processSchema can create an empty Group.
+     *
+     * @param bool $apply
+     */
+    private function migrateMailGroupTableToGroup($apply = true) {
+        $old = new SQLtable('MailGroup');
+        if(!$old->exists()) {
+            return;
+        }
+        $new = new SQLtable('Group');
+        if(!$apply) {
+            $msg = $new->exists()
+                ? 'MailGroup noch vorhanden — Merge/Rename nach Group nötig'
+                : 'MailGroup → Group Rename nötig';
+            $this->addReport('table', 'Group', 'missing', $msg);
+            return;
+        }
+        if(!class_exists('Group')) {
+            require_once dirname(__DIR__).'/libs/group.php';
+        }
+        $ok = Group::migrateTableFromMailGroup();
+        if($ok && !(new SQLtable('MailGroup'))->exists() && (new SQLtable('Group'))->exists()) {
+            $this->addReport('table', 'Group', 'fixed', 'MailGroup nach Group migriert (Daten erhalten)');
+            return;
+        }
+        if((new SQLtable('MailGroup'))->exists()) {
+            $this->addReport(
+                'table',
+                'MailGroup',
+                'error',
+                'Migration MailGroup → Group unvollständig — Daten nicht verworfen'
+            );
+            return;
+        }
+        $this->addReport('table', 'Group', 'ok', 'Group-Tabelle vorhanden');
     }
 
     /**
@@ -369,7 +408,9 @@ class DatabaseManager
     public function create() {
         $this->report = array();
         $this->migratePermissionsRegisterColumns();
+        $this->migrateMailGroupTableToGroup();
         $this->processSchema(true, false);
+        $this->migrateMailGroupTableToGroup();
         $this->migrateAudienceLegacyColumns();
         $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
@@ -388,7 +429,9 @@ class DatabaseManager
     public function repair() {
         $this->report = array();
         $this->migratePermissionsRegisterColumns();
+        $this->migrateMailGroupTableToGroup();
         $this->processSchema(true, true);
+        $this->migrateMailGroupTableToGroup();
         $this->migrateAudienceLegacyColumns();
         $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
@@ -1058,11 +1101,42 @@ class DatabaseManager
             }
         }
 
-        // Leftover tables after inventory migration / MELD-134 Gastmusiker.
-        foreach(array('Instruments', 'Loans', 'Aushilfen', 'AushilfenShift') as $obsoleteTable) {
+        // Leftover tables after inventory migration / MELD-134 Gastmusiker / MELD-137 Group rename.
+        foreach(array('Instruments', 'Loans', 'Aushilfen', 'AushilfenShift', 'MailGroup') as $obsoleteTable) {
             $SQL = new SQLtable($obsoleteTable);
             if(!$SQL->exists()) {
                 continue;
+            }
+            if($obsoleteTable === 'MailGroup') {
+                // Never drop MailGroup with rows — migrate first.
+                if(!class_exists('Group')) {
+                    require_once dirname(__DIR__).'/libs/group.php';
+                }
+                if($apply) {
+                    Group::migrateTableFromMailGroup();
+                }
+                if((new SQLtable('MailGroup'))->exists()) {
+                    $cntSql = sprintf(
+                        'SELECT COUNT(*) AS `c` FROM `%sMailGroup`;',
+                        $GLOBALS['dbprefix']
+                    );
+                    $dbr = mysqli_query($GLOBALS['conn'], $cntSql);
+                    $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+                    $cnt = $row ? (int)$row['c'] : -1;
+                    if($cnt > 0) {
+                        $this->addReport(
+                            'table',
+                            'MailGroup',
+                            'error',
+                            'MailGroup enthält noch '.$cnt.' Zeile(n) — nicht gelöscht'
+                        );
+                        continue;
+                    }
+                }
+                else {
+                    $this->addReport('table', 'MailGroup', 'removed', 'Leere/migrierte MailGroup entfernt');
+                    continue;
+                }
             }
             if(!$apply) {
                 $this->addReport('table', $obsoleteTable, 'obsolete', 'Tabelle nicht mehr benötigt');

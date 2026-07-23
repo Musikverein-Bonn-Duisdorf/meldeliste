@@ -64,10 +64,6 @@ adminListPageBegin('Inventar', 'Inventar-Typen');
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err); ?></div><?php } ?>
 
-<div class="admin-list-intro">
-  <p>Prefix bestimmt den Nummernkreis (z.B. <b>MARSCH-001</b>, <b>INSTR-42</b>). Die Beschriftung erscheint in Listen und Formularen.</p>
-</div>
-
 <div class="w3-row w3-padding w3-teal type-edit-header">
   <div class="w3-col l2 m2 s3"><b>Prefix</b></div>
   <div class="w3-col l3 m3 s4"><b>Beschriftung</b></div>

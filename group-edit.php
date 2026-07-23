@@ -64,11 +64,19 @@ if(isset($_GET['saved'])) {
 
 $memberSpec = $g->Index ? $g->getMemberSpecArray() : AudienceSpec::emptySpec();
 $groupPerms = $g->Index ? $g->getPermissionSpecArray() : array();
-$groupPermFlip = array_flip($groupPerms);
 $catalog = AudienceSpec::buildCatalog(array(
     'forMail' => false,
     'includeNamedGroups' => false,
 ));
+$permCatalog = Permissions::permissionCatalog();
+$permCatalogJson = json_encode(
+    array('permissions' => $permCatalog),
+    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+);
+$groupPermsJson = json_encode(
+    array_values($groupPerms),
+    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+);
 
 include 'common/header.php';
 $inputCls = $GLOBALS['optionsDB']['colorInputBackground'];
@@ -92,7 +100,6 @@ adminListPageBegin('Kommunikation', $groupTitle, array('actionsHtml' => $backLin
 
   <div class="profile-field">
     <label class="profile-label">Mitglieder</label>
-    <p class="w3-small w3-text-gray">Rollen, Register und Personen (Union). Beispiel: Posaunen + Schlagwerk + Klarinetten + einzelne Personen.</p>
     <div class="w3-mobile w3-margin-bottom w3-padding w3-border <?php echo $inputCls; ?>">
       <div id="mailRecipientChips" class="mail-recipient-chips" aria-live="polite"></div>
       <input type="text" id="mailRecipientInput" class="w3-input w3-border <?php echo $inputCls; ?>" placeholder="Rolle, Register oder Person tippen…" autocomplete="off" />
@@ -104,26 +111,17 @@ adminListPageBegin('Kommunikation', $groupTitle, array('actionsHtml' => $backLin
     </div>
   </div>
 
-  <div class="profile-field">
+  <div class="profile-field" id="profile-perms-wrap"
+       data-perm-catalog="<?php echo htmlspecialchars((string)$permCatalogJson, ENT_QUOTES, 'UTF-8'); ?>"
+       data-selected-perms="<?php echo htmlspecialchars((string)$groupPermsJson, ENT_QUOTES, 'UTF-8'); ?>"
+       data-perm-input-name="groupPermissions[]"
+       data-locked-perm="">
     <label class="profile-label">Vererbte Rechte</label>
-    <p class="w3-small w3-text-gray">Mitglieder dieser Gruppe erhalten die gesetzten Rechte zusätzlich zu ihren persönlichen Rechten.</p>
-    <div class="profile-perm-tiles w3-padding w3-border <?php echo htmlspecialchars($inputCls, ENT_QUOTES, 'UTF-8'); ?>">
-<?php foreach(Permissions::permissionCatalog() as $item) {
-    $key = $item['key'];
-    $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
-    if($gid === '') {
-        $gid = 'system';
-    }
-    $checked = isset($groupPermFlip[$key]);
-    $id = 'groupPerm_'.$key;
-?>
-      <label class="profile-pref perm-group perm-group--<?php echo htmlspecialchars($gid, ENT_QUOTES, 'UTF-8'); ?>" for="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
-        <input type="checkbox" id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>"
-          name="groupPermissions[]" value="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"
-          <?php echo $checked ? 'checked' : ''; ?>>
-        <span><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></span>
-      </label>
-<?php } ?>
+    <div class="profile-group-picker profile-perm-picker w3-border <?php echo htmlspecialchars($inputCls, ENT_QUOTES, 'UTF-8'); ?>">
+      <div id="profile-perm-chips" class="mail-recipient-chips profile-perm-tiles" aria-live="polite"></div>
+      <input type="text" id="profile-perm-input" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputCls, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Recht tippen…" autocomplete="off" aria-label="Recht hinzufügen">
+      <div id="profile-perm-suggest" class="mail-recipient-suggest" hidden></div>
+      <div id="profile-perm-hiddens" hidden></div>
     </div>
   </div>
 
@@ -132,6 +130,7 @@ adminListPageBegin('Kommunikation', $groupTitle, array('actionsHtml' => $backLin
 
 <script type="application/json" id="mailRecipientCatalog"><?php echo json_encode($catalog, JSON_UNESCAPED_UNICODE); ?></script>
 <script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
+<script src="js/profile-layout.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/profile-layout.js'); ?>"></script>
 <script>
 (function() {
   if(typeof MailRecipientChips === 'undefined') return;

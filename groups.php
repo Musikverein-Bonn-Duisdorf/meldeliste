@@ -32,10 +32,6 @@ adminListPageBegin('Kommunikation', 'Gruppen', array('actionsHtml' => $actions))
 <?php if($msg) { ?><div class="w3-panel w3-green w3-padding"><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 <?php if($err) { ?><div class="w3-panel w3-red w3-padding"><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div><?php } ?>
 
-<div class="admin-list-intro">
-  <p>Benannte Gruppen mit Rollen, Registern und Personen – nutzbar beim Mailversand und bei der Termin-Sichtbarkeit. Gruppen können zusätzlich Rechte an ihre Mitglieder vererben.</p>
-</div>
-
   <div class="mail-list">
     <div class="mail-list-header <?php echo $GLOBALS['optionsDB']['colorTitleBar']; ?>">
       <div>Name</div>
@@ -50,13 +46,32 @@ foreach($groups as $g) {
     $id = (int)$g->Index;
     $count = (int)$g->memberCount(false);
     $countMail = (int)$g->memberCount(true);
-    $permLabel = $g->getPermissionLabel();
+    $permKeys = $g->getPermissionSpecArray();
+    $permKeySet = array_fill_keys($permKeys, true);
+    $permTiles = array();
+    if(count($permKeys)) {
+        foreach(Permissions::permissionCatalog() as $item) {
+            if(empty($permKeySet[$item['key']])) {
+                continue;
+            }
+            $permTiles[] = $item;
+        }
+    }
 ?>
     <div class="mail-list-item">
       <div class="mail-list-primary">
         <?php echo htmlspecialchars((string)$g->Name, ENT_QUOTES, 'UTF-8'); ?>
-<?php if($permLabel !== '') { ?>
-        <div class="w3-small w3-text-gray">Rechte: <?php echo htmlspecialchars($permLabel, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php if(count($permTiles)) { ?>
+        <div class="profile-perm-tiles mail-list-perm-tiles" aria-label="Vererbte Rechte">
+<?php
+            foreach($permTiles as $item) {
+                $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
+                echo '<span class="profile-perm-tile profile-perm-tile--'.$gid.'">'
+                    .htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')
+                    .'</span>';
+            }
+?>
+        </div>
 <?php } ?>
       </div>
       <div class="mail-list-status"><?php echo $count; ?> <span class="w3-small w3-text-gray">(<?php echo $countMail; ?> mit Mail)</span></div>
