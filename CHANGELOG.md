@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-23-cce09 (2026-07-23)
+
+- MELD-150: Inventar-Labels oben links ausrichten
+
 ## 2026-07-23-c35f4 (2026-07-23)
 
 - MELD-145: Mein Inventar Nav/Leihe und Listen-Layout polarisieren
