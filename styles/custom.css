@@ -3093,6 +3093,34 @@ body.meld-cal-print {
   z-index: 2000;
 }
 
+/* MELD-147: Kalender-Abo-Modal (rendered outside .app-main via footer) */
+#calSubscribeModal .w3-modal-content {
+  max-width: 36rem;
+  margin: 4vh auto;
+}
+
+#calSubscribeModal .calendar-subscribe-modal {
+  margin: 0.75rem;
+}
+
+/* Confirm-delete modals (Termin etc.) */
+#delmodal .w3-modal-content {
+  max-width: 32rem;
+  margin: 8vh auto;
+}
+
+.confirm-delete-modal .profile-actions--confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.confirm-delete-modal .profile-actions--confirm .profile-actions-primary {
+  margin: 0;
+}
+
 /* Keep modal content in the safe viewport (notches + breathing room) */
 @media (max-width: 600px) {
   .w3-modal {

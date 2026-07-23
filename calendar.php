@@ -111,10 +111,6 @@ button.w3-button.meld-cal-nav-icon {
   padding-left: 0;
   padding-right: 0;
 }
-#calSubscribeModal .w3-modal-content {
-  max-width: 36rem;
-  margin: 4vh auto;
-}
 </style>
 
 <div class="meld-cal-page">
@@ -181,16 +177,27 @@ if($showCalendarSubscribe) {
     $n = $calUser;
     $calendarSubscribeUid = 'page-cal';
     $calendarSubscribeInModal = true;
+    ob_start();
 ?>
 <div id="calSubscribeModal" class="w3-modal" role="dialog" aria-modal="true" aria-labelledby="calSubscribeModalTitle" style="display:none;"
      onclick="if(event.target===this){ this.style.display='none'; }">
-  <div class="w3-modal-content w3-card">
-    <header class="w3-container <?php echo htmlspecialchars($GLOBALS['optionsDB']['colorTitleBar'], ENT_QUOTES, 'UTF-8'); ?>">
-      <button type="button" class="w3-button w3-display-topright" id="calSubscribeClose" aria-label="Schließen">&times;</button>
-      <h2 id="calSubscribeModalTitle"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Persönlichen Kalender abonnieren</h2>
-    </header>
-    <div class="w3-container w3-padding">
+  <div class="w3-modal-content">
+    <div class="profile-shell modal-shell calendar-subscribe-modal">
+      <header class="profile-hero">
+        <div class="profile-hero-text">
+          <p class="profile-kicker">Kalender</p>
+          <h2 class="profile-title" id="calSubscribeModalTitle">Persönlichen Kalender abonnieren</h2>
+        </div>
+        <div class="profile-hero-actions">
+          <button type="button" class="modal-close w3-button" id="calSubscribeClose" aria-label="Schließen">&times;</button>
+        </div>
+      </header>
+      <div class="termin-grid">
+        <section class="profile-col" aria-labelledby="cal-subscribe-links">
+          <h3 id="cal-subscribe-links" class="profile-col-title">Abo-Link</h3>
 <?php include __DIR__.'/views/calendar/subscribe.php'; ?>
+        </section>
+      </div>
     </div>
   </div>
 </div>
@@ -210,6 +217,7 @@ if($showCalendarSubscribe) {
 })();
 </script>
 <?php
+    deferPageModalHtml(ob_get_clean());
 }
 
 include 'common/footer.php';
