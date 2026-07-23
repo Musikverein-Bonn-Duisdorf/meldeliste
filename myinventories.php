@@ -13,29 +13,35 @@ if(handleInventoriesMutations()) {
     redirectAfterPost('myinventories.php');
 }
 
+$u = new User;
+$u->load_by_id($_SESSION['userid']);
+if(!$u->hasInventories()) {
+    header('Location: '.$GLOBALS['optionsDB']['WebSiteURL']);
+    exit;
+}
+
 include "common/header.php";
 adminListPageBegin('Inventar', 'Mein Inventar');
 
-$u = new User;
-$u->load_by_id($_SESSION['userid']);
 $shown = array();
 $html = '';
 
-$owned = $u->getInventories();
-for($i=0; $i < count($owned); $i++) {
-    $id = (int)$owned[$i];
-    if(isset($shown[$id])) continue;
+// Zuerst aktive Leihen (typisch Vereinsinventar), dann Eigentum
+$loans = $u->getInventoriesLoans();
+for($i=0; $i < count($loans); $i++) {
+    $loan = new InventoriesLoan;
+    $loan->load_by_id($loans[$i]);
+    $id = (int)$loan->Inventory;
+    if($id < 1 || isset($shown[$id])) continue;
     $shown[$id] = true;
     $inventory = new Inventories;
     $inventory->load_by_id($id);
     $html .= $inventory->printTableLine(false);
 }
 
-$loans = $u->getInventoriesLoans();
-for($i=0; $i < count($loans); $i++) {
-    $loan = new InventoriesLoan;
-    $loan->load_by_id($loans[$i]);
-    $id = (int)$loan->Inventory;
+$owned = $u->getInventories();
+for($i=0; $i < count($owned); $i++) {
+    $id = (int)$owned[$i];
     if(isset($shown[$id])) continue;
     $shown[$id] = true;
     $inventory = new Inventories;

@@ -678,9 +678,21 @@ class User
     }
 
     public function getInventoriesLoans() {
-        $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `User` = %d AND `EndDate` IS NULL;',
-        $GLOBALS['dbprefix'],
-        $this->Index
+        $userId = (int)$this->Index;
+        // Owner=0 = Verein; ohne gültige User-ID darf nichts als „mein“ gelten
+        if($userId < 1) {
+            return array();
+        }
+        // Aktive Leihe (auch mit geplanter Rückgabe in der Zukunft); nur existierende Stücke
+        $sql = sprintf(
+            'SELECT l.`Index` FROM `%sInventoriesLoans` l
+             INNER JOIN `%sInventories` i ON i.`Index` = l.`Inventory`
+             WHERE l.`User` = %d
+               AND (l.`EndDate` IS NULL OR l.`EndDate` > CURDATE())
+             ORDER BY l.`StartDate` DESC;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $userId
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -692,10 +704,15 @@ class User
     }
 
     public function getInventories() {
+        $userId = (int)$this->Index;
+        // Owner=0 = Verein (orgNameShort); nie mit „persönlichem“ Eigentum verwechseln
+        if($userId < 1) {
+            return array();
+        }
         $sql = sprintf(
             'SELECT `Index` FROM `%sInventories` WHERE `Owner` = %d',
             $GLOBALS['dbprefix'],
-            $this->Index
+            $userId
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -706,8 +723,9 @@ class User
         return $inventories;
     }
 
+    /** Eigentum oder aktive Ausleihe (geliehenes Vereinsinventar zählt). */
     public function hasInventories() {
-        return count($this->getInventoriesLoans()) + count($this->getInventories());
+        return count($this->getInventoriesLoans()) > 0 || count($this->getInventories()) > 0;
     }
     
     public function getModalHtml($forceEditButton = false) {
