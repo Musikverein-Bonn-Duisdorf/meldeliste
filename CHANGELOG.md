@@ -2,6 +2,16 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-24-c659e (2026-07-24)
+
+- MELD-161: Sticky Tabellenköpfe mit deckendem Hintergrund
+- MELD-161: Statistik-Tabellen-Grid von Filter trennen
+- MELD-161: Statistik-Filter aus Tabellen-Grid herausnehmen
+- MELD-161: Anker-Navigation in Statistik entfernen
+- MELD-161: Gemeinsamer Chip-Filter für Ranking und Inaktive
+- MELD-161: Inaktive in Statistik nach Personenkreis filtern
+- MELD-161: Statistik Chip-Filter für Ranking und Inaktive
+
 ## 2026-07-24-4942d (2026-07-24)
 
 - MELD-162: Log-Chunk konfigurierbar; Filter stoppt Endlos-Nachladen
