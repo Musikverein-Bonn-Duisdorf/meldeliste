@@ -2175,18 +2175,11 @@ ORDER BY `Nachname`, `Vorname`;",
 
         if($this->Auftritt) {
             $aMeldungen = $this->fetchResponseMeldungenRows();
-            if($GLOBALS['optionsDB']['showConductor']) {
-                $sql = sprintf(
-                    "SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
-                    $GLOBALS['dbprefix']
-                );
-            }
-            else {
-                $sql = sprintf(
-                    "SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
-                    $GLOBALS['dbprefix']
-                );
-            }
+            // Include all registers except 'keins' (Dirigent included; parity with orchestra SVG).
+            $sql = sprintf(
+                "SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                $GLOBALS['dbprefix']
+            );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
             $memberCounts = $this->getRegisterMemberCounts();
@@ -2443,16 +2436,10 @@ ORDER BY `Nachname`, `Vorname`;",
                 $registerIds = array($filterregister);
             }
             else {
-                if($GLOBALS['optionsDB']['showConductor']) {
-                    $sql = sprintf("SELECT `Index` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                $sql = sprintf(
+                    "SELECT `Index` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
                     $GLOBALS['dbprefix']
-                    );
-                }
-                else {
-                    $sql = sprintf("SELECT `Index` FROM `%sRegister` WHERE `Name` != 'Dirigent' AND `Name` != 'keins' ORDER BY `Sortierung`;",
-                    $GLOBALS['dbprefix']
-                    );
-                }
+                );
                 $dbr = mysqli_query($GLOBALS['conn'], $sql);
                 sqlerror();
                 $registerIds = array();

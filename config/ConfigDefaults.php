@@ -480,12 +480,6 @@ function getConfigDefaults() {
             'Description' => 'Nicht-Mitgliederliste anzeigen',
         ),
         array(
-            'Parameter' => 'showConductor',
-            'Value' => '1',
-            'Type' => 'bool',
-            'Description' => 'Dirigent in Listen anzeigen',
-        ),
-        array(
             'Parameter' => 'showRegisterLead',
             'Value' => '1',
             'Type' => 'bool',

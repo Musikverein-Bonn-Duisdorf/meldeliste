@@ -1171,7 +1171,8 @@ class DatabaseManager
         }
 
         // MELD-84: Termine-Seite entfällt; verwaiste Schalter entfernen
-        $obsoleteParams = array('entriesMainPage', 'showAppmntPage');
+        // MELD-163: Dirigent immer in Listen; showConductor entfällt
+        $obsoleteParams = array('entriesMainPage', 'showAppmntPage', 'showConductor');
         foreach($obsoleteParams as $param) {
             $sql = sprintf(
                 "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
