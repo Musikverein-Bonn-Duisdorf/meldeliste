@@ -178,29 +178,33 @@ function evaluateTerminCount($days, $besetzungOnly = false) {
 }
 
 /**
- * Per-user attendance ranking in the window.
+ * Per-user attendance ranking in the window (all non-deleted users; filter client-side).
  *
  * @param int $days
  * @param bool $besetzungOnly
- * @return array<int,array{id:int,name:string,yes:int,no:int,maybe:int,termine:int,quote:float}>
+ * @return array<int,array<string,mixed>>
  */
 function evaluateAttendanceRanking($days, $besetzungOnly = false) {
     $days = evaluateNormalizeDays($days);
     $prefix = $GLOBALS['dbprefix'];
     $termineCount = evaluateTerminCount($days, $besetzungOnly);
     $window = evaluateTerminWindowSql($days, $besetzungOnly);
+    $groupMap = evaluateUserGroupIdsByUser();
 
     $sql = sprintf(
-        'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`,'
+        'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`,'
+        .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 1 THEN 1 ELSE 0 END), 0) AS `Yes`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 2 THEN 1 ELSE 0 END), 0) AS `No`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 3 THEN 1 ELSE 0 END), 0) AS `Maybe`'
         .' FROM `%sUser` `u`'
+        .' LEFT JOIN `%sInstrument` `i` ON `i`.`Index` = `u`.`Instrument`'
         .' LEFT JOIN `%sMeldungen` `m` ON `m`.`User` = `u`.`Index`'
         .' AND `m`.`Termin` IN (SELECT `Index` FROM `%sTermine` WHERE %s)'
-        .' WHERE `u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0'
-        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`'
+        .' WHERE `u`.`Deleted` != 1'
+        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`, `i`.`Register`'
         .' ORDER BY `u`.`Nachname` ASC, `u`.`Vorname` ASC;',
+        $prefix,
         $prefix,
         $prefix,
         $prefix,
@@ -214,15 +218,24 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
     if($dbr) {
         while($row = mysqli_fetch_assoc($dbr)) {
             $yes = (int)$row['Yes'];
+            $uid = (int)$row['UserId'];
             $quote = $termineCount > 0 ? round($yes / $termineCount, 4) : 0.0;
-            $rows[] = array(
-                'id' => (int)$row['UserId'],
-                'name' => trim($row['Nachname'].', '.$row['Vorname']),
-                'yes' => $yes,
-                'no' => (int)$row['No'],
-                'maybe' => (int)$row['Maybe'],
-                'termine' => $termineCount,
-                'quote' => $quote,
+            $rows[] = array_merge(
+                array(
+                    'id' => $uid,
+                    'name' => trim($row['Nachname'].', '.$row['Vorname']),
+                    'yes' => $yes,
+                    'no' => (int)$row['No'],
+                    'maybe' => (int)$row['Maybe'],
+                    'termine' => $termineCount,
+                    'quote' => $quote,
+                ),
+                evaluatePersonFilterMeta(
+                    (int)$row['Active'],
+                    (int)$row['Mitglied'],
+                    (int)$row['RegisterId'],
+                    isset($groupMap[$uid]) ? $groupMap[$uid] : array()
+                )
             );
         }
     }
@@ -241,81 +254,24 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
 }
 
 /**
- * Parse inactive-list scope (MELD-161).
- * Values: musiker | users | register:<id> | group:<id>
+ * Register chips for evaluate person filter (MELD-161).
  *
- * @param mixed $raw
- * @return array{type:string,id:int}
+ * @return array<int,array{Index:int,Name:string,Color:string}>
  */
-function evaluateParseInactiveScope($raw) {
-    $raw = trim((string)$raw);
-    if($raw === 'users') {
-        return array('type' => 'users', 'id' => 0);
-    }
-    if(preg_match('/^register:(\d+)$/', $raw, $m)) {
-        return array('type' => 'register', 'id' => (int)$m[1]);
-    }
-    if(preg_match('/^group:(\d+)$/', $raw, $m)) {
-        return array('type' => 'group', 'id' => (int)$m[1]);
-    }
-    return array('type' => 'musiker', 'id' => 0);
-}
-
-/**
- * Canonical scope string for forms / GET.
- *
- * @param array{type:string,id:int} $scope
- * @return string
- */
-function evaluateInactiveScopeValue(array $scope) {
-    if($scope['type'] === 'users') {
-        return 'users';
-    }
-    if($scope['type'] === 'register' && (int)$scope['id'] > 0) {
-        return 'register:'.(int)$scope['id'];
-    }
-    if($scope['type'] === 'group' && (int)$scope['id'] > 0) {
-        return 'group:'.(int)$scope['id'];
-    }
-    return 'musiker';
-}
-
-/**
- * Select options for inactive scope (optgroups via group key).
- *
- * @return array<int,array{value:string,label:string,optgroup:?string}>
- */
-function evaluateInactiveScopeOptions() {
-    $opts = array(
-        array('value' => 'musiker', 'label' => 'Alle Musiker', 'optgroup' => null),
-        array('value' => 'users', 'label' => 'Alle User', 'optgroup' => null),
-    );
-    $prefix = $GLOBALS['dbprefix'];
+function evaluateRegisterFilterOptions() {
+    $opts = array();
     $sql = sprintf(
-        'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
-        $prefix
+        'SELECT `Index`, `Name`, `Color` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
+        $GLOBALS['dbprefix']
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     if($dbr) {
         while($row = mysqli_fetch_assoc($dbr)) {
             $opts[] = array(
-                'value' => 'register:'.(int)$row['Index'],
-                'label' => (string)$row['Name'],
-                'optgroup' => 'Register',
-            );
-        }
-    }
-    if(class_exists('Group')) {
-        Group::ensureSchema();
-        foreach(Group::listAll() as $g) {
-            if(!(int)$g->Index) {
-                continue;
-            }
-            $opts[] = array(
-                'value' => 'group:'.(int)$g->Index,
-                'label' => (string)$g->Name,
-                'optgroup' => 'Gruppen',
+                'Index' => (int)$row['Index'],
+                'Name' => (string)$row['Name'],
+                'Color' => isset($row['Color']) ? (string)$row['Color'] : '',
             );
         }
     }
@@ -323,70 +279,161 @@ function evaluateInactiveScopeOptions() {
 }
 
 /**
- * SQL WHERE on alias `u` for inactive scope.
+ * Named group chips for evaluate person filter.
  *
- * @param array{type:string,id:int} $scope
- * @return string
+ * @return array<int,array{Index:int,Name:string}>
  */
-function evaluateInactiveScopeWhereSql(array $scope) {
-    $prefix = $GLOBALS['dbprefix'];
-    if($scope['type'] === 'users') {
-        return '`u`.`Deleted` != 1';
+function evaluateGroupFilterOptions() {
+    $opts = array();
+    if(!class_exists('Group')) {
+        return $opts;
     }
-    if($scope['type'] === 'register' && (int)$scope['id'] > 0) {
-        return sprintf(
-            '`u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` IN ('
-            .'SELECT `Index` FROM `%sInstrument` WHERE `Register` = %d)',
-            $prefix,
-            (int)$scope['id']
+    Group::ensureSchema();
+    foreach(Group::listAll() as $g) {
+        if(!(int)$g->Index) {
+            continue;
+        }
+        $opts[] = array(
+            'Index' => (int)$g->Index,
+            'Name' => (string)$g->Name,
         );
     }
-    if($scope['type'] === 'group' && (int)$scope['id'] > 0) {
-        $g = new Group();
-        $g->load_by_id((int)$scope['id']);
-        $ids = array();
-        if((int)$g->Index > 0) {
-            foreach(AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false) as $uid) {
-                $uid = (int)$uid;
-                if($uid > 0) {
-                    $ids[$uid] = $uid;
-                }
+    return $opts;
+}
+
+/**
+ * @return array<int,int[]>
+ */
+function evaluateUserGroupIdsByUser() {
+    $map = array();
+    if(!class_exists('Group') || !class_exists('AudienceSpec')) {
+        return $map;
+    }
+    Group::ensureSchema();
+    foreach(Group::listAll() as $g) {
+        $gid = (int)$g->Index;
+        if($gid < 1) {
+            continue;
+        }
+        foreach(AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false) as $uid) {
+            $uid = (int)$uid;
+            if($uid < 1) {
+                continue;
+            }
+            if(!isset($map[$uid])) {
+                $map[$uid] = array();
+            }
+            if(!in_array($gid, $map[$uid], true)) {
+                $map[$uid][] = $gid;
             }
         }
-        if(!$ids) {
-            return '0 = 1';
-        }
-        return '`u`.`Deleted` != 1 AND `u`.`Index` IN ('.implode(',', $ids).')';
     }
-    return '`u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0';
+    return $map;
+}
+
+/**
+ * @param int $active
+ * @param int $mitglied
+ * @param int $registerId
+ * @param int[] $groupIds
+ * @return array{active:int,mitglied:int,registerId:int,groupIds:int[]}
+ */
+function evaluatePersonFilterMeta($active, $mitglied, $registerId, array $groupIds) {
+    $gids = array();
+    foreach($groupIds as $gid) {
+        $gid = (int)$gid;
+        if($gid > 0) {
+            $gids[] = $gid;
+        }
+    }
+    return array(
+        'active' => ((int)$active) ? 1 : 0,
+        'mitglied' => ((int)$mitglied) ? 1 : 0,
+        'registerId' => max(0, (int)$registerId),
+        'groupIds' => $gids,
+    );
+}
+
+/**
+ * Same rules as Personenliste chips (+ optional group chips).
+ *
+ * @param array<string,mixed> $row
+ * @param array{showAktive:bool,showGaeste:bool,showMitglied:bool,showNoMitglied:bool,registers:string[],groups:string[]} $filter
+ * @return bool
+ */
+function evaluateRowMatchesPersonFilter(array $row, array $filter) {
+    $active = !empty($row['active']);
+    $mitglied = !empty($row['mitglied']);
+    $regId = (string)(isset($row['registerId']) ? (int)$row['registerId'] : 0);
+    $groupIds = array();
+    if(isset($row['groupIds']) && is_array($row['groupIds'])) {
+        foreach($row['groupIds'] as $gid) {
+            $groupIds[] = (string)(int)$gid;
+        }
+    }
+
+    if($active && empty($filter['showAktive'])) {
+        return false;
+    }
+    if(!$active && empty($filter['showGaeste'])) {
+        return false;
+    }
+    if($mitglied && empty($filter['showMitglied'])) {
+        return false;
+    }
+    if(!$mitglied && empty($filter['showNoMitglied'])) {
+        return false;
+    }
+
+    $regs = isset($filter['registers']) && is_array($filter['registers']) ? $filter['registers'] : array();
+    if(count($regs) > 0 && !in_array($regId, $regs, true)) {
+        return false;
+    }
+
+    $groups = isset($filter['groups']) && is_array($filter['groups']) ? $filter['groups'] : array();
+    if(count($groups) > 0) {
+        $hit = false;
+        foreach($groupIds as $gid) {
+            if(in_array($gid, $groups, true)) {
+                $hit = true;
+                break;
+            }
+        }
+        if(!$hit) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
  * Users considered inactive by last login / last attendance (Wert=1).
+ * All non-deleted users; person chips filter client-side (MELD-161).
  *
  * @param int $thresholdDays
- * @param mixed $scopeRaw musiker|users|register:n|group:n
- * @return array<int,array{id:int,name:string,lastLogin:?string,lastAttend:?string,quote:float}>
+ * @return array<int,array<string,mixed>>
  */
-function evaluateInactiveUsers($thresholdDays, $scopeRaw = 'musiker') {
+function evaluateInactiveUsers($thresholdDays) {
     $thresholdDays = max(1, (int)$thresholdDays);
     $prefix = $GLOBALS['dbprefix'];
-    $scope = evaluateParseInactiveScope($scopeRaw);
-    $where = evaluateInactiveScopeWhereSql($scope);
+    $groupMap = evaluateUserGroupIdsByUser();
 
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`LastLogin`, `u`.`Joined`,'
+        .' `u`.`Active`, `u`.`Mitglied`, COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' ('
         .'   SELECT MAX(`t`.`Datum`) FROM `%sMeldungen` `m`'
         .'   INNER JOIN `%sTermine` `t` ON `t`.`Index` = `m`.`Termin`'
         .'   WHERE `m`.`User` = `u`.`Index` AND `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE()'
         .' ) AS `LastAttend`'
         .' FROM `%sUser` `u`'
-        .' WHERE %s;',
+        .' LEFT JOIN `%sInstrument` `i` ON `i`.`Index` = `u`.`Instrument`'
+        .' WHERE `u`.`Deleted` != 1;',
         $prefix,
         $prefix,
         $prefix,
-        $where
+        $prefix
     );
 
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -417,19 +464,28 @@ function evaluateInactiveUsers($thresholdDays, $scopeRaw = 'musiker') {
                 continue;
             }
 
+            $uid = (int)$row['UserId'];
             $user = new User();
-            $user->load_by_id((int)$row['UserId']);
+            $user->load_by_id($uid);
             $quote = 0.0;
             if($user->Index) {
                 $quote = (float)$user->getMeldeQuote();
             }
 
-            $rows[] = array(
-                'id' => (int)$row['UserId'],
-                'name' => trim($row['Nachname'].', '.$row['Vorname']),
-                'lastLogin' => $lastLogin,
-                'lastAttend' => $lastAttend,
-                'quote' => $quote,
+            $rows[] = array_merge(
+                array(
+                    'id' => $uid,
+                    'name' => trim($row['Nachname'].', '.$row['Vorname']),
+                    'lastLogin' => $lastLogin,
+                    'lastAttend' => $lastAttend,
+                    'quote' => $quote,
+                ),
+                evaluatePersonFilterMeta(
+                    (int)$row['Active'],
+                    (int)$row['Mitglied'],
+                    (int)$row['RegisterId'],
+                    isset($groupMap[$uid]) ? $groupMap[$uid] : array()
+                )
             );
         }
     }

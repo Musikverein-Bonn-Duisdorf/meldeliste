@@ -2933,12 +2933,8 @@ body.meld-cal-print {
   max-width: 6rem;
 }
 
-.eval-filter--inactive {
-  margin: 0 0 0.75rem;
-}
-
-.eval-filter--inactive select {
-  max-width: 16rem;
+.eval-person-filter {
+  margin: 0 0 1rem;
 }
 
 .eval-toc {

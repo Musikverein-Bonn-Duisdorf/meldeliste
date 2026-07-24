@@ -15,14 +15,13 @@ $besetzungOnly = !empty($_GET['besetzung']);
 $inactiveDays = isset($GLOBALS['optionsDB']['inactiveUsersDays'])
     ? max(1, (int)$GLOBALS['optionsDB']['inactiveUsersDays'])
     : 90;
-$inactiveScope = evaluateParseInactiveScope(isset($_GET['inactiveScope']) ? $_GET['inactiveScope'] : 'musiker');
-$inactiveScopeValue = evaluateInactiveScopeValue($inactiveScope);
 
 $attendance = evaluateAttendanceSeries($days, $besetzungOnly);
 $logSeries = evaluateLogSeries($days);
 $ranking = evaluateAttendanceRanking($days, $besetzungOnly);
-$inactive = evaluateInactiveUsers($inactiveDays, $inactiveScopeValue);
-$inactiveScopeOptions = evaluateInactiveScopeOptions();
+$inactive = evaluateInactiveUsers($inactiveDays);
+$registers = evaluateRegisterFilterOptions();
+$groups = evaluateGroupFilterOptions();
 
 $assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
 $jsMtime = @filemtime(__DIR__.'/js/evaluate.js');
@@ -50,7 +49,6 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
       <input type="checkbox" name="besetzung" value="1"<?php echo $besetzungOnly ? ' checked' : ''; ?> onchange="this.form.submit()">
       nur Besetzung
     </label>
-    <input type="hidden" name="inactiveScope" value="<?php echo htmlspecialchars($inactiveScopeValue, ENT_QUOTES, 'UTF-8'); ?>">
   </form>
 </div>
 
@@ -80,6 +78,32 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
   </div>
 
   <div class="eval-tables">
+    <div id="evalPersonFilter" class="inv-sort-bar eval-person-filter">
+      <div class="inv-sort-bar-filters" role="toolbar" aria-label="Filter">
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="aktive" aria-pressed="true">Aktive</button>
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="gaeste" aria-pressed="true">Gäste</button>
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="mitglied" aria-pressed="true">Mitglieder</button>
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="nomitglied" aria-pressed="true">Nicht-Mitglieder</button>
+      </div>
+      <div class="inv-sort-bar-filters inv-sort-bar-filters--registers" role="toolbar" aria-label="Register">
+        <button type="button" class="inv-sort-chip inv-filter-chip" data-register-filter="0" aria-pressed="false">ohne Register</button>
+<?php foreach($registers as $reg) {
+    $hex = normalizeHexColor(isset($reg['Color']) ? $reg['Color'] : '');
+    $style = $hex !== '' ? ' style="--reg-filter-color:'.$hex.'"' : '';
+    $label = htmlspecialchars((string)$reg['Name'], ENT_QUOTES, 'UTF-8');
+?>
+        <button type="button" class="inv-sort-chip inv-filter-chip inv-filter-chip--register" data-register-filter="<?php echo (int)$reg['Index']; ?>" aria-pressed="false"<?php echo $style; ?>><?php echo $label; ?></button>
+<?php } ?>
+      </div>
+<?php if(count($groups) > 0) { ?>
+      <div class="inv-sort-bar-filters" role="toolbar" aria-label="Gruppen">
+<?php foreach($groups as $g) { ?>
+        <button type="button" class="inv-sort-chip inv-filter-chip" data-group-filter="<?php echo (int)$g['Index']; ?>" aria-pressed="false"><?php echo htmlspecialchars((string)$g['Name'], ENT_QUOTES, 'UTF-8'); ?></button>
+<?php } ?>
+      </div>
+<?php } ?>
+    </div>
+
     <section class="eval-panel" id="eval-ranking">
       <h3>Ranking nach Teilnahme</h3>
       <div class="eval-table-scroll">
@@ -101,36 +125,6 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
 
     <section class="eval-panel" id="eval-inactive">
       <h3>Inaktive</h3>
-      <form method="get" action="evaluate.php" class="eval-filter eval-filter--inactive">
-        <input type="hidden" name="days" value="<?php echo (int)$days; ?>">
-        <?php if($besetzungOnly) { ?>
-        <input type="hidden" name="besetzung" value="1">
-        <?php } ?>
-        <label for="eval-inactive-scope">Kreis</label>
-        <select id="eval-inactive-scope" name="inactiveScope" class="w3-select w3-border" onchange="this.form.submit()">
-<?php
-$currentGroup = null;
-foreach($inactiveScopeOptions as $opt) {
-    $g = $opt['optgroup'];
-    if($g !== $currentGroup) {
-        if($currentGroup !== null) {
-            echo "</optgroup>\n";
-        }
-        if($g !== null) {
-            echo '<optgroup label="'.htmlspecialchars($g, ENT_QUOTES, 'UTF-8').'">'."\n";
-        }
-        $currentGroup = $g;
-    }
-    $sel = ($opt['value'] === $inactiveScopeValue) ? ' selected' : '';
-    echo '<option value="'.htmlspecialchars($opt['value'], ENT_QUOTES, 'UTF-8').'"'.$sel.'>'
-        .htmlspecialchars($opt['label'], ENT_QUOTES, 'UTF-8')."</option>\n";
-}
-if($currentGroup !== null) {
-    echo "</optgroup>\n";
-}
-?>
-        </select>
-      </form>
       <div class="eval-table-scroll">
         <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
           <thead>
