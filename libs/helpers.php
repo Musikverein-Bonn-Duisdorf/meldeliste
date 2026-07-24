@@ -687,6 +687,9 @@ function renderPermissionGroupColorCss($wrapStyleTag = true) {
             .',.w3-container.admin-list-hero--'.$id
             .'{background:'.$strong.';border-left-color:'.$accent.';--page-title-accent:'.$accent.';}';
 
+        $css .= '.eval-table-scroll thead th.admin-list-hero--'.$id
+            .'{background:'.$strong.';color:'.$fg.';}';
+
         $css .= '.perm-matrix thead th.perm-group--'.$id
             .'{background:'.$soft.';box-shadow:inset 0 -3px 0 '.$accent.';}';
 
