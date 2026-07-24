@@ -2937,22 +2937,6 @@ body.meld-cal-print {
   margin: 0 0 1rem;
 }
 
-.eval-toc {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  position: sticky;
-  top: calc(var(--app-page-head-h, 0px) + var(--app-page-toolbar-h, 0px));
-  z-index: 5;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  background: inherit;
-}
-
-.eval-toc a {
-  text-decoration: none;
-}
-
 .eval-panel {
   margin-bottom: 1.25rem;
   scroll-margin-top: 3.5rem;

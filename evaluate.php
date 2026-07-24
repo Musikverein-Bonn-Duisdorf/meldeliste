@@ -52,13 +52,6 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
   </form>
 </div>
 
-<nav class="eval-toc w3-container w3-margin-bottom" aria-label="Seitenabschnitte">
-  <a class="w3-button w3-border w3-round" href="#eval-attendance">Teilnahme</a>
-  <a class="w3-button w3-border w3-round" href="#eval-log">System-Log</a>
-  <a class="w3-button w3-border w3-round" href="#eval-ranking">Ranking</a>
-  <a class="w3-button w3-border w3-round" href="#eval-inactive">Inaktive</a>
-</nav>
-
 <div class="eval-layout w3-container">
   <div class="eval-charts">
     <section class="eval-panel" id="eval-attendance">
