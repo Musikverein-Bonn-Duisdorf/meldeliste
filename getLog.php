@@ -19,17 +19,10 @@ if($maxIndex === null || !is_numeric($maxIndex)) {
     die('invalid maxIndex');
 }
 
-$sql = sprintf('SELECT `Index` FROM `%sLog` WHERE `Index` > %d ORDER BY `Timestamp` ASC LIMIT 1;',
-    $GLOBALS['dbprefix'],
-    (int)$maxIndex
-);
-$dbr = mysqli_query($conn, $sql);
-sqlerror();
-while($row = mysqli_fetch_array($dbr)) {
-    $M = new Log;
-    $M->load_by_id($row['Index']);
-    if($M->Index > 0) {
-        echo $M->printTableLine();
-    }
+$topTimestamp = meldeRequest('topTimestamp');
+if($topTimestamp === null) {
+    $topTimestamp = '';
 }
+
+echo logPollNextHtml((int)$maxIndex, (string)$topTimestamp);
 ?>

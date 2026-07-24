@@ -223,7 +223,8 @@ class Log
             $timePart = substr($tsRaw, 11, 5);
         }
 
-        echo '<div id="'.(int)$this->Index.'" class="'.htmlspecialchars($classes, ENT_QUOTES, 'UTF-8').'">';
+        echo '<div id="'.(int)$this->Index.'" class="'.htmlspecialchars($classes, ENT_QUOTES, 'UTF-8').'"'
+            .' data-timestamp="'.htmlspecialchars($tsRaw, ENT_QUOTES, 'UTF-8').'">';
         echo '<div class="log-id">';
         echo '<div class="log-time">';
         echo '<span class="log-date">'.htmlspecialchars($datePart, ENT_QUOTES, 'UTF-8').'</span>';
@@ -244,4 +245,54 @@ class Log
         echo '</div>';
     }
 };
+
+/**
+ * Live-Poll HTML for the log page (MELD-160).
+ * Returns a new row when Index > $maxIndex, or the same row when its Timestamp
+ * was bumped by Log dedupe (identical Message+User → UPDATE Timestamp only).
+ *
+ * @return string HTML of one log row, or empty string
+ */
+function logPollNextHtml($maxIndex, $topTimestamp = '') {
+    $maxIndex = (int)$maxIndex;
+    if($maxIndex < 1) {
+        return '';
+    }
+    $sql = sprintf(
+        'SELECT `Index` FROM `%sLog` WHERE `Index` > %d ORDER BY `Timestamp` ASC LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        $maxIndex
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    if($dbr && ($row = mysqli_fetch_array($dbr))) {
+        $M = new Log;
+        $M->load_by_id((int)$row['Index']);
+        if($M->Index > 0) {
+            ob_start();
+            $M->printTableLine();
+            $html = ob_get_clean();
+            return $html === false ? '' : $html;
+        }
+        return '';
+    }
+
+    $topTimestamp = trim((string)$topTimestamp);
+    if($topTimestamp === '') {
+        return '';
+    }
+    $M = new Log;
+    $M->load_by_id($maxIndex);
+    if($M->Index < 1) {
+        return '';
+    }
+    $serverTs = (string)$M->Timestamp;
+    if($serverTs === '' || strcmp($serverTs, $topTimestamp) <= 0) {
+        return '';
+    }
+    ob_start();
+    $M->printTableLine();
+    $html = ob_get_clean();
+    return $html === false ? '' : $html;
+}
 ?>
