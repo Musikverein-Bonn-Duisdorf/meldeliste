@@ -7,9 +7,11 @@
  * Optional data-sort / data-dir: server-side sort for user lists (MELD-96).
  * Exposes window.listInfiniteReload(sort, dir) to reset and reload from offset 0.
  *
- * MELD-164: With an active client-side filter, keep loading while the server reports
- * hasMore (sparse hits like „Adventskonzert“). No hard pause after empty chunks —
- * only stop on !hasMore or explicit user cancel. MELD-162 pause removed.
+ * MELD-164: With an active client-side filter and no visible matches yet, keep
+ * auto-scanning while hasMore (sparse hits like „Adventskonzert“). Once at least
+ * one match is visible, stop auto-chain (sentinel stays in view on a collapsed
+ * list) — Weiter loads the next chunk. No hard pause after 2 empties while still
+ * seeking the first hit (MELD-162 pause removed for that phase).
  */
 (function() {
     var loading = false;
@@ -117,8 +119,9 @@
         pausedByUser = false;
         var sentinel = getSentinel();
         if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
-        setStatus('', false);
-        reobserveSoon();
+        // One explicit chunk (not IntersectionObserver) — sentinel often stays in view
+        // when the filter collapses the list.
+        loadMore();
     }
 
     function applyFilter(sentinel) {
@@ -130,22 +133,26 @@
         }
     }
 
-    function countVisibleNodes(nodes) {
+    function isRowVisible(el) {
+        if(!el || el.nodeType !== 1) return false;
+        if(el.classList && el.classList.contains('list-filtered-out')) return false;
+        if(el.style && el.style.display === 'none') return false;
+        return true;
+    }
+
+    function countVisibleInList(list, sentinel) {
         var n = 0;
         var i;
-        for(i = 0; i < nodes.length; i++) {
-            var el = nodes[i];
-            if(!el || el.nodeType !== 1) continue;
-            if(el.classList && el.classList.contains('list-filtered-out')) continue;
-            if(el.style && el.style.display === 'none') continue;
-            n++;
+        for(i = 0; i < list.children.length; i++) {
+            var el = list.children[i];
+            if(el === sentinel) continue;
+            if(isRowVisible(el)) n++;
         }
         return n;
     }
 
     function appendHtml(list, sentinel, html) {
-        var appended = [];
-        if(!html) return appended;
+        if(!html) return;
         var wrap = document.createElement('div');
         wrap.innerHTML = html;
         while(wrap.firstChild) {
@@ -155,11 +162,7 @@
                 continue;
             }
             list.insertBefore(node, sentinel);
-            if(node.nodeType === 1) {
-                appended.push(node);
-            }
         }
-        return appended;
     }
 
     function clearRows(list, sentinel) {
@@ -208,6 +211,23 @@
         }, 100);
     }
 
+    /** Auto-chain next chunk while seeking the first filter match (no IO race). */
+    function chainFilterScanSoon() {
+        setTimeout(function() {
+            if(pausedByUser || loading) return;
+            var sentinel = getSentinel();
+            var list = getList();
+            if(!sentinel || !list) return;
+            if(sentinel.getAttribute('data-has-more') !== '1') return;
+            if(!filterActive()) {
+                reobserveSoon();
+                return;
+            }
+            if(countVisibleInList(list, sentinel) > 0) return;
+            loadMore();
+        }, 0);
+    }
+
     function loadMore() {
         var sentinel = getSentinel();
         var list = getList();
@@ -219,9 +239,11 @@
         var cursor = sentinel.getAttribute('data-cursor') || '';
         if(!type || cursor === '') return;
 
+        var seekingFirstMatch = filterActive() && countVisibleInList(list, sentinel) === 0;
+
         loading = true;
         if(observer) observer.unobserve(sentinel);
-        if(filterActive()) {
+        if(seekingFirstMatch) {
             setStatus(MSG_FILTER_SCAN, true, {
                 label: 'Stoppen',
                 onClick: pauseByUser
@@ -262,7 +284,7 @@
             sentinel.setAttribute('data-has-more', hasMore ? '1' : '0');
             sentinel.setAttribute('data-cursor', nextCursor);
 
-            var appended = appendHtml(list, sentinel, xhr.responseText);
+            appendHtml(list, sentinel, xhr.responseText);
             applyFilter(sentinel);
 
             if(!hasMore) {
@@ -277,16 +299,27 @@
             }
 
             if(filterActive()) {
-                var visibleNew = countVisibleNodes(appended);
-                if(visibleNew === 0) {
-                    // Sparse filter: keep scanning — status stays „Suche…“ + Stoppen
+                var visibleTotal = countVisibleInList(list, sentinel);
+
+                if(visibleTotal === 0) {
+                    // Still no hits: keep scanning (direct chain, not IO — sentinel
+                    // always intersects on a fully collapsed list).
                     setStatus(MSG_FILTER_SCAN, true, {
                         label: 'Stoppen',
                         onClick: pauseByUser
                     });
-                    reobserveSoon();
+                    chainFilterScanSoon();
                     return;
                 }
+
+                // At least one match is visible. Do not auto-chain further empties:
+                // with a collapsed filter list the sentinel stays in view and would
+                // otherwise load forever (never “settling” on the result).
+                // Weiter loads the next chunk explicitly.
+                pausedByUser = true;
+                if(observer) observer.unobserve(sentinel);
+                showUserPaused();
+                return;
             }
 
             setStatus('', false);
@@ -320,11 +353,26 @@
         input.addEventListener('input', function() {
             pausedByUser = false;
             var sentinel = getSentinel();
+            var list = getList();
             if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
             if(!filterActive()) {
                 setStatus('', false);
+                reobserveSoon();
+                return;
             }
-            reobserveSoon();
+            // New/changed filter: if nothing visible yet, start sparse scan;
+            // otherwise settle (sentinel often already in view → would endless-load).
+            if(list && countVisibleInList(list, sentinel) === 0) {
+                setStatus(MSG_FILTER_SCAN, true, {
+                    label: 'Stoppen',
+                    onClick: pauseByUser
+                });
+                chainFilterScanSoon();
+                return;
+            }
+            pausedByUser = true;
+            if(observer) observer.unobserve(sentinel);
+            showUserPaused();
         });
     }
 
