@@ -262,7 +262,7 @@ $sections[] = array(
 <li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
-<li><b>Statistik</b> – Auswertungen mit Abschnittsnavigation; auf breiten Bildschirmen Diagramme und Tabellen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking (Quote = Ja-Meldungen / Termine im Zeitraum; Spalten sortierbar) und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>)</li>
+<li><b>Statistik</b> – Auswertungen mit Abschnittsnavigation; auf breiten Bildschirmen Diagramme und Tabellen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking (Quote = Ja-Meldungen / Termine im Zeitraum; Spalten sortierbar) und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>; Kreis: Alle Musiker, Alle User, Register oder Gruppe)</li>
 <li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung); Chunk-Größe über <code>logListChunkSize</code> in der Konfiguration</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '

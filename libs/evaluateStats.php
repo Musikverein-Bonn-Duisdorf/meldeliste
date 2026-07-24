@@ -241,14 +241,138 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
 }
 
 /**
+ * Parse inactive-list scope (MELD-161).
+ * Values: musiker | users | register:<id> | group:<id>
+ *
+ * @param mixed $raw
+ * @return array{type:string,id:int}
+ */
+function evaluateParseInactiveScope($raw) {
+    $raw = trim((string)$raw);
+    if($raw === 'users') {
+        return array('type' => 'users', 'id' => 0);
+    }
+    if(preg_match('/^register:(\d+)$/', $raw, $m)) {
+        return array('type' => 'register', 'id' => (int)$m[1]);
+    }
+    if(preg_match('/^group:(\d+)$/', $raw, $m)) {
+        return array('type' => 'group', 'id' => (int)$m[1]);
+    }
+    return array('type' => 'musiker', 'id' => 0);
+}
+
+/**
+ * Canonical scope string for forms / GET.
+ *
+ * @param array{type:string,id:int} $scope
+ * @return string
+ */
+function evaluateInactiveScopeValue(array $scope) {
+    if($scope['type'] === 'users') {
+        return 'users';
+    }
+    if($scope['type'] === 'register' && (int)$scope['id'] > 0) {
+        return 'register:'.(int)$scope['id'];
+    }
+    if($scope['type'] === 'group' && (int)$scope['id'] > 0) {
+        return 'group:'.(int)$scope['id'];
+    }
+    return 'musiker';
+}
+
+/**
+ * Select options for inactive scope (optgroups via group key).
+ *
+ * @return array<int,array{value:string,label:string,optgroup:?string}>
+ */
+function evaluateInactiveScopeOptions() {
+    $opts = array(
+        array('value' => 'musiker', 'label' => 'Alle Musiker', 'optgroup' => null),
+        array('value' => 'users', 'label' => 'Alle User', 'optgroup' => null),
+    );
+    $prefix = $GLOBALS['dbprefix'];
+    $sql = sprintf(
+        'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
+        $prefix
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    if($dbr) {
+        while($row = mysqli_fetch_assoc($dbr)) {
+            $opts[] = array(
+                'value' => 'register:'.(int)$row['Index'],
+                'label' => (string)$row['Name'],
+                'optgroup' => 'Register',
+            );
+        }
+    }
+    if(class_exists('Group')) {
+        Group::ensureSchema();
+        foreach(Group::listAll() as $g) {
+            if(!(int)$g->Index) {
+                continue;
+            }
+            $opts[] = array(
+                'value' => 'group:'.(int)$g->Index,
+                'label' => (string)$g->Name,
+                'optgroup' => 'Gruppen',
+            );
+        }
+    }
+    return $opts;
+}
+
+/**
+ * SQL WHERE on alias `u` for inactive scope.
+ *
+ * @param array{type:string,id:int} $scope
+ * @return string
+ */
+function evaluateInactiveScopeWhereSql(array $scope) {
+    $prefix = $GLOBALS['dbprefix'];
+    if($scope['type'] === 'users') {
+        return '`u`.`Deleted` != 1';
+    }
+    if($scope['type'] === 'register' && (int)$scope['id'] > 0) {
+        return sprintf(
+            '`u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` IN ('
+            .'SELECT `Index` FROM `%sInstrument` WHERE `Register` = %d)',
+            $prefix,
+            (int)$scope['id']
+        );
+    }
+    if($scope['type'] === 'group' && (int)$scope['id'] > 0) {
+        $g = new Group();
+        $g->load_by_id((int)$scope['id']);
+        $ids = array();
+        if((int)$g->Index > 0) {
+            foreach(AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false) as $uid) {
+                $uid = (int)$uid;
+                if($uid > 0) {
+                    $ids[$uid] = $uid;
+                }
+            }
+        }
+        if(!$ids) {
+            return '0 = 1';
+        }
+        return '`u`.`Deleted` != 1 AND `u`.`Index` IN ('.implode(',', $ids).')';
+    }
+    return '`u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0';
+}
+
+/**
  * Users considered inactive by last login / last attendance (Wert=1).
  *
  * @param int $thresholdDays
+ * @param mixed $scopeRaw musiker|users|register:n|group:n
  * @return array<int,array{id:int,name:string,lastLogin:?string,lastAttend:?string,quote:float}>
  */
-function evaluateInactiveUsers($thresholdDays) {
+function evaluateInactiveUsers($thresholdDays, $scopeRaw = 'musiker') {
     $thresholdDays = max(1, (int)$thresholdDays);
     $prefix = $GLOBALS['dbprefix'];
+    $scope = evaluateParseInactiveScope($scopeRaw);
+    $where = evaluateInactiveScopeWhereSql($scope);
 
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`LastLogin`, `u`.`Joined`,'
@@ -258,10 +382,11 @@ function evaluateInactiveUsers($thresholdDays) {
         .'   WHERE `m`.`User` = `u`.`Index` AND `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE()'
         .' ) AS `LastAttend`'
         .' FROM `%sUser` `u`'
-        .' WHERE `u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0;',
+        .' WHERE %s;',
         $prefix,
         $prefix,
-        $prefix
+        $prefix,
+        $where
     );
 
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
