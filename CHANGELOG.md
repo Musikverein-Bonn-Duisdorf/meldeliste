@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-24-4942d (2026-07-24)
+
+- MELD-162: Log-Chunk konfigurierbar; Filter stoppt Endlos-Nachladen
+- MELD-162: Log-Chunk konfigurierbar, Filter-Nachladen stoppen
+
 ## 2026-07-24-3c672 (2026-07-24)
 
 - MELD-163: Schema-Version 25 für showConductor-Cleanup
