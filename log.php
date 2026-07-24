@@ -26,6 +26,12 @@ adminListSearchField('Log durchsuchen…', array('onkeyup' => 'filterLog()'));
 </div>
 <?php adminListPageEnd(); ?>
 <script>
+function getLogTopRow() {
+    var parent = document.getElementById("Liste");
+    if(!parent) return null;
+    return parent.querySelector(":scope > div[id]:not(#listSentinel)");
+}
+
 function getLogMaxIndex() {
     var parent = document.getElementById("Liste");
     if(!parent) return 0;
@@ -39,9 +45,16 @@ function getLogMaxIndex() {
     return max;
 }
 
+function getLogTopTimestamp() {
+    var top = getLogTopRow();
+    if(!top) return '';
+    return top.getAttribute('data-timestamp') || '';
+}
+
 function getLog() {
     var maxIndex = getLogMaxIndex();
     if(!(maxIndex > 0)) return;
+    var topTimestamp = getLogTopTimestamp();
 
     var xmlhttp;
     if (window.XMLHttpRequest) {
@@ -57,7 +70,12 @@ function getLog() {
             var doc = new DOMParser().parseFromString(xmlhttp.responseText, 'text/html');
             var div = doc.body.firstElementChild;
             if(!div || !div.id) return;
-            if(document.getElementById(div.id)) return;
+            var existing = document.getElementById(div.id);
+            if(existing) {
+                // Deduped log: same Index, newer Timestamp — refresh in place (MELD-160)
+                existing.parentNode.replaceChild(div, existing);
+                return;
+            }
             var first = parent.querySelector(":scope > div[id]:not(#listSentinel)");
             if(first) {
                 parent.insertBefore(div, first);
@@ -69,7 +87,8 @@ function getLog() {
             }
 	}
     }
-    var body = "maxIndex="+encodeURIComponent(maxIndex);
+    var body = "maxIndex="+encodeURIComponent(maxIndex)
+        +"&topTimestamp="+encodeURIComponent(topTimestamp);
     xmlhttp.open("POST", "getLog.php", true);
     xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xmlhttp.send(body);
