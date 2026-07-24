@@ -1069,6 +1069,7 @@ class DatabaseManager
 
     /**
      * Drop columns / tables that are no longer in DBconfig (or known obsolete leftovers).
+     * MELD-159: also auto-discovers orphan tables under $dbprefix.
      *
      * @param bool $apply
      */
@@ -1103,54 +1104,120 @@ class DatabaseManager
             }
         }
 
-        // Leftover tables after inventory migration / MELD-134 Gastmusiker / MELD-137 Group rename.
-        foreach(array('Instruments', 'Loans', 'Aushilfen', 'AushilfenShift', 'MailGroup') as $obsoleteTable) {
-            $SQL = new SQLtable($obsoleteTable);
+        // MELD-137: MailGroup migrate-before-drop (must run before orphan discovery).
+        $mailGroup = new SQLtable('MailGroup');
+        if($mailGroup->exists()) {
+            if(!class_exists('Group')) {
+                require_once dirname(__DIR__).'/libs/group.php';
+            }
+            if($apply) {
+                Group::migrateTableFromMailGroup();
+            }
+            if((new SQLtable('MailGroup'))->exists()) {
+                $cntSql = sprintf(
+                    'SELECT COUNT(*) AS `c` FROM `%sMailGroup`;',
+                    $GLOBALS['dbprefix']
+                );
+                $dbr = mysqli_query($GLOBALS['conn'], $cntSql);
+                $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+                $cnt = $row ? (int)$row['c'] : -1;
+                if($cnt > 0) {
+                    $this->addReport(
+                        'table',
+                        'MailGroup',
+                        'error',
+                        'MailGroup enthält noch '.$cnt.' Zeile(n) — nicht gelöscht'
+                    );
+                }
+                elseif(!$apply) {
+                    $this->addReport('table', 'MailGroup', 'obsolete', 'Tabelle nicht mehr benötigt');
+                }
+                elseif($mailGroup->dropTable()) {
+                    $this->addReport('table', 'MailGroup', 'removed', 'Veraltete Tabelle entfernt');
+                }
+                else {
+                    $this->addReport(
+                        'table',
+                        'MailGroup',
+                        'error',
+                        'Veraltete Tabelle konnte nicht entfernt werden',
+                        $mailGroup->getLastError()
+                    );
+                }
+            }
+            else {
+                $this->addReport('table', 'MailGroup', 'removed', 'Leere/migrierte MailGroup entfernt');
+            }
+        }
+
+        // MELD-159: drop orphan tables under exact Meldeliste prefix that are not in DBconfig.
+        $this->pruneOrphanPrefixedTables($apply);
+    }
+
+    /**
+     * MELD-159: SHOW TABLES under $dbprefix; drop short names missing from DBconfig.
+     * Refuses when prefix is empty (would match every table in the shared DB).
+     *
+     * @param bool $apply
+     */
+    private function pruneOrphanPrefixedTables($apply) {
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        $prefix = (string)$GLOBALS['dbprefix'];
+        if($prefix === '') {
+            return;
+        }
+
+        // Escape LIKE wildcards in prefix (_ and %) so meldeliste_ does not match meldelisteX…
+        $likePattern = str_replace(
+            array('\\', '%', '_'),
+            array('\\\\', '\\%', '\\_'),
+            $prefix
+        ).'%';
+        $likeEscaped = mysqli_real_escape_string($GLOBALS['conn'], $likePattern);
+        $dbr = mysqli_query($GLOBALS['conn'], "SHOW TABLES LIKE '".$likeEscaped."'");
+        if(!$dbr) {
+            $this->addReport(
+                'table',
+                $prefix.'*',
+                'error',
+                'Orphan-Tabellen konnten nicht ermittelt werden',
+                mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+            );
+            return;
+        }
+
+        $prefixLen = strlen($prefix);
+        while($row = mysqli_fetch_row($dbr)) {
+            $fullName = isset($row[0]) ? (string)$row[0] : '';
+            if($fullName === '' || strpos($fullName, $prefix) !== 0) {
+                continue;
+            }
+            $shortName = substr($fullName, $prefixLen);
+            if($shortName === '' || isset($this->schema[$shortName])) {
+                continue;
+            }
+            // MailGroup already handled above (migrate guard / drop / error).
+            if($shortName === 'MailGroup') {
+                continue;
+            }
+
+            $SQL = new SQLtable($shortName);
             if(!$SQL->exists()) {
                 continue;
             }
-            if($obsoleteTable === 'MailGroup') {
-                // Never drop MailGroup with rows — migrate first.
-                if(!class_exists('Group')) {
-                    require_once dirname(__DIR__).'/libs/group.php';
-                }
-                if($apply) {
-                    Group::migrateTableFromMailGroup();
-                }
-                if((new SQLtable('MailGroup'))->exists()) {
-                    $cntSql = sprintf(
-                        'SELECT COUNT(*) AS `c` FROM `%sMailGroup`;',
-                        $GLOBALS['dbprefix']
-                    );
-                    $dbr = mysqli_query($GLOBALS['conn'], $cntSql);
-                    $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
-                    $cnt = $row ? (int)$row['c'] : -1;
-                    if($cnt > 0) {
-                        $this->addReport(
-                            'table',
-                            'MailGroup',
-                            'error',
-                            'MailGroup enthält noch '.$cnt.' Zeile(n) — nicht gelöscht'
-                        );
-                        continue;
-                    }
-                }
-                else {
-                    $this->addReport('table', 'MailGroup', 'removed', 'Leere/migrierte MailGroup entfernt');
-                    continue;
-                }
-            }
             if(!$apply) {
-                $this->addReport('table', $obsoleteTable, 'obsolete', 'Tabelle nicht mehr benötigt');
+                $this->addReport('table', $shortName, 'obsolete', 'Tabelle nicht mehr in DBconfig');
                 continue;
             }
             if($SQL->dropTable()) {
-                $this->addReport('table', $obsoleteTable, 'removed', 'Veraltete Tabelle entfernt');
+                $this->addReport('table', $shortName, 'removed', 'Veraltete Tabelle entfernt');
             }
             else {
                 $this->addReport(
                     'table',
-                    $obsoleteTable,
+                    $shortName,
                     'error',
                     'Veraltete Tabelle konnte nicht entfernt werden',
                     $SQL->getLastError()
@@ -1170,9 +1237,16 @@ class DatabaseManager
             return;
         }
 
-        // MELD-84: Termine-Seite entfällt; verwaiste Schalter entfernen
-        // MELD-163: Dirigent immer in Listen; showConductor entfällt
+        $defaultParams = array();
+        foreach($defaults as $item) {
+            if(isset($item['Parameter'])) {
+                $defaultParams[(string)$item['Parameter']] = true;
+            }
+        }
+
+        // MELD-84 / MELD-163: known obsolete params (messages kept for clarity)
         $obsoleteParams = array('entriesMainPage', 'showAppmntPage', 'showConductor');
+        $handledObsolete = array();
         foreach($obsoleteParams as $param) {
             $sql = sprintf(
                 "SELECT `Parameter` FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
@@ -1185,6 +1259,7 @@ class DatabaseManager
             if(!$exists) {
                 continue;
             }
+            $handledObsolete[$param] = true;
             if(!$apply) {
                 $this->addReport('config', $param, 'obsolete', 'Config-Parameter veraltet');
                 continue;
@@ -1205,6 +1280,45 @@ class DatabaseManager
                     'Veralteter Config-Parameter konnte nicht entfernt werden',
                     mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
                 );
+            }
+        }
+
+        // MELD-159: remove any config Parameter not listed in getConfigDefaults().
+        $listSql = sprintf(
+            'SELECT `Parameter` FROM `%sconfig`;',
+            $GLOBALS['dbprefix']
+        );
+        $listDbr = mysqli_query($GLOBALS['conn'], $listSql);
+        if($listDbr) {
+            while($cfgRow = mysqli_fetch_assoc($listDbr)) {
+                $param = isset($cfgRow['Parameter']) ? (string)$cfgRow['Parameter'] : '';
+                if($param === '' || isset($defaultParams[$param])) {
+                    continue;
+                }
+                if(isset($handledObsolete[$param])) {
+                    continue;
+                }
+                if(!$apply) {
+                    $this->addReport('config', $param, 'obsolete', 'Config-Parameter nicht in Defaults');
+                    continue;
+                }
+                $delete = sprintf(
+                    "DELETE FROM `%sconfig` WHERE `Parameter` = '%s' LIMIT 1;",
+                    $GLOBALS['dbprefix'],
+                    mysqli_real_escape_string($GLOBALS['conn'], $param)
+                );
+                if(mysqli_query($GLOBALS['conn'], $delete)) {
+                    $this->addReport('config', $param, 'removed', 'Veralteter Config-Parameter entfernt');
+                }
+                else {
+                    $this->addReport(
+                        'config',
+                        $param,
+                        'error',
+                        'Veralteter Config-Parameter konnte nicht entfernt werden',
+                        mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+                    );
+                }
             }
         }
 
