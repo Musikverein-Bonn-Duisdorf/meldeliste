@@ -2934,7 +2934,13 @@ body.meld-cal-print {
 }
 
 .eval-person-filter {
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
+  position: static;
+  top: auto;
+  z-index: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .eval-panel {
@@ -3158,7 +3164,7 @@ body.meld-cal-print {
 
 @media (min-width: 993px) {
   .eval-charts,
-  .eval-tables {
+  .eval-tables-grid {
     grid-template-columns: 1fr 1fr;
     align-items: start;
   }
