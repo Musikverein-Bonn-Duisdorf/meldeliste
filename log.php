@@ -9,8 +9,9 @@ if(!requirePermission("perm_showLog")) {
 }
 
 // Buffer chunk build so any echo cannot appear above the search field
+$logChunkLimit = listChunkLogConfiguredLimit();
 ob_start();
-$chunk = listChunkLog(0, 50);
+$chunk = listChunkLog(0, $logChunkLimit);
 $leak = ob_get_clean();
 if($leak !== false && $leak !== '') {
     $chunk['html'] = $leak.$chunk['html'];
@@ -22,7 +23,7 @@ adminListSearchField('Log durchsuchen…', array('onkeyup' => 'filterLog()'));
 ?>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>
-<?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog'); ?>
+<?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog', ' data-limit="'.(int)$logChunkLimit.'"'); ?>
 </div>
 <?php adminListPageEnd(); ?>
 <script>
