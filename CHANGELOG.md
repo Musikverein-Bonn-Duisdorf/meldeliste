@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-24-3c6ef (2026-07-24)
+
+- MELD-159: Orphan-Tabellen und Config unter DB-Präfix bereinigen
+
 ## 2026-07-24-c659e (2026-07-24)
 
 - MELD-161: Sticky Tabellenköpfe mit deckendem Hintergrund
