@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-24-9cebd (2026-07-24)
+
+- MELD-155: Personenliste zusammenlegen und User-Zeilen-Design
+
 ## 2026-07-24-b80e9 (2026-07-24)
 
 - MELD-160: Log-Zeitstempel bei Dedup per Ajax aktualisieren
