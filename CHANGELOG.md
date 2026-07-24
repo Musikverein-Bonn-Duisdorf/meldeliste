@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-24-b80e9 (2026-07-24)
+
+- MELD-160: Log-Zeitstempel bei Dedup per Ajax aktualisieren
+- MELD-157: Ownership-Matrix und Phasenreihenfolge in PLATFORM.md
+- MELD-157: Ownership-Matrix in PLATFORM.md
+
 ## 2026-07-23-a0884 (2026-07-23)
 
 - MELD-154: Modal-Header Bearbeiten und Weitere Aktionen nicht überlappen
