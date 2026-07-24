@@ -157,10 +157,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_showUsers'),
     'body' => '
 <ul class="help-list">
-<li><b>Musikerliste / Gastmusiker / Userliste</b> – Personen suchen, filtern und öffnen; Spaltenköpfe sortieren die Liste. <b>Gastmusiker</b> listet alle ohne Haken <b>aktiv</b></li>
-'.(!empty($optionsDB['showMembers']) ? '<li><b>Mitgliederliste</b> – nur Vereinsmitglieder</li>' : '').'
-'.(!empty($optionsDB['showNonMembers']) ? '<li><b>Nicht-Mitgliederliste</b></li>' : '').'
-<li><b>Registerübersicht</b> – Orchester-/Registeransicht (Überschrift in Registerfarbe); Klick auf einen Sitz öffnet das User-Modal</li>
+<li><b>Personenliste</b> – alle Nutzer an einem Ort; Suche, Filter-Chips (Aktive/Gäste, Mitglieder/Nicht-Mitglieder, Register) und Sortier-Chips (Standard: Register-Prio). Zeilen in Registerfarbe; Instrument, Gruppen und Rechte als Chips (Rechte über Gruppe gestrichelt). Orchestergrafik ist aufklappbar (standardmäßig offen)</li>
 '.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte (persönlich editierbar; über Gruppen vererbte Rechte erscheinen mit gestricheltem Rahmen und sind hier nicht entfernbar); <b>Deaktivieren</b> setzt Gastmusiker; <b>Löschen</b> prüft zuerst Inventar (Eigentum/aktive Ausleihe blockiert das Löschen mit Hinweis), entfernt danach zukünftige Meldungen/Schichtmeldungen und soft-löscht die Person – zurückliegende Meldungen bleiben für Statistik/Archiv; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
 '.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); Priorität zuerst Primär, dann Fallbacks in Reihenfolge; im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 </ul>

@@ -183,7 +183,7 @@ if($showUserDetails && !empty($permissions)) {
                 $title = ($inheritedOnly ? 'Nur über Gruppe: ' : 'Auch Gruppe: ')
                     .implode(', ', $item['groups']);
             }
-            echo '<span class="'.$cls.'"'
+            echo '<span class="mail-recipient-chip '.$cls.'"'
                 .($title !== '' ? ' title="'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'"' : '')
                 .'>'
                 .htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')

@@ -949,52 +949,239 @@ class User
         ));
     }
 
+    /** Personen-/Register-Listen (MELD-155). */
     public function printTableLine() {
-        $lastVisit = $this->getLastVisit();
-        $attrs = ' data-sort-nachname="'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-vorname="'.htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-name="'.htmlspecialchars(trim($this->Vorname.' '.$this->Nachname), ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-instrument="'.htmlspecialchars((string)$this->iName, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-email="'.htmlspecialchars((string)$this->Email, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-lastlogin="'.htmlspecialchars((string)$this->LastLogin, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-lastvisit="'.htmlspecialchars((string)$lastVisit, ENT_QUOTES, 'UTF-8').'"';
-        if($this->Mitglied) {
-            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserMember']." w3-mobile w3-border-bottom w3-border-black\"".$attrs.">\n";
-        }
-        else {
-            echo "<div class=\"w3-row list-row ".$GLOBALS['optionsDB']['HoverEffect']." w3-padding ".$GLOBALS['optionsDB']['colorUserNoMember']." w3-mobile w3-border-bottom w3-border-black\"".$attrs.">\n";
-        }
-        echo "  <div onclick=\"openModal('user', ".$this->Index.")\" class=\"w3-col l3 m6 s12 w3-container list-primary\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-secondary\">".$this->iName."</div>\n";
-        echo "  <div class=\"w3-col l3 m12 s12 w3-container list-secondary\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($lastVisit, 1)."</div>\n";
-        echo "</div>\n";
+        $this->renderUserListRow();
     }
 
+    /** Alias: gleiche Zeile (ID in Meta). */
     public function printUserTableLine() {
-        $main = new div;
-        $main->class="w3-row list-row w3-padding w3-mobile w3-border-bottom w3-border-black";
-        $main->class=$GLOBALS['optionsDB']['HoverEffect'];
-        $main->onclick="openModal('user', ".$this->Index.")";
-        if(!$this->Instrument) {
-            $main->class=$GLOBALS['optionsDB']['colorDisabled'];
+        $this->renderUserListRow();
+    }
+
+    /**
+     * Register meta for list rows (cached per Instrument).
+     *
+     * @return array{id:int,name:string,sort:int,color:string}
+     */
+    private function getRegisterMeta() {
+        static $byInstrument = array();
+        $instr = (int)$this->Instrument;
+        if($instr <= 0) {
+            return array('id' => 0, 'name' => '', 'sort' => 9999, 'color' => '');
         }
+        if(isset($byInstrument[$instr])) {
+            return $byInstrument[$instr];
+        }
+        $meta = array('id' => 0, 'name' => '', 'sort' => 9999, 'color' => '');
+        $sql = sprintf(
+            'SELECT r.`Index` AS `rIndex`, r.`Name` AS `rName`, r.`Sortierung` AS `rSort`, r.`Color` AS `rColor`
+             FROM `%sInstrument` i
+             INNER JOIN `%sRegister` r ON i.`Register` = r.`Index`
+             WHERE i.`Index` = %d
+             LIMIT 1;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $instr
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+        if(is_array($row)) {
+            $rName = html_entity_decode((string)$row['rName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if(strtolower(trim($rName)) === 'keins') {
+                $rName = '';
+            }
+            $meta = array(
+                'id' => (int)$row['rIndex'],
+                'name' => $rName,
+                'sort' => (int)$row['rSort'],
+                'color' => normalizeHexColor(isset($row['rColor']) ? $row['rColor'] : ''),
+            );
+        }
+        $byInstrument[$instr] = $meta;
+        return $meta;
+    }
+
+    private function renderUserListRow() {
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
         $lastVisit = $this->getLastVisit();
-        $main->extraAttrs = 'data-sort-index="'.htmlspecialchars((string)(int)$this->Index, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-nachname="'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-vorname="'.htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-name="'.htmlspecialchars(trim($this->Vorname.' '.$this->Nachname), ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-email="'.htmlspecialchars((string)$this->Email, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-lastlogin="'.htmlspecialchars((string)$this->LastLogin, ENT_QUOTES, 'UTF-8').'"'
-            .' data-sort-lastvisit="'.htmlspecialchars((string)$lastVisit, ENT_QUOTES, 'UTF-8').'"';
-        echo $main->open();
-        echo "  <div class=\"w3-col l1 m2 s12 w3-container list-meta\">".$this->Index."</div>\n";
-        echo "  <div class=\"w3-col l3 m5 s12 w3-container list-primary\"><b>".$this->Vorname." ".$this->Nachname."</b></div>\n";
-        echo "  <div class=\"w3-col l3 m5 s12 w3-container list-secondary\"><a href=\"mailto:".$this->Email."\">".$this->Email."</a></div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($this->LastLogin, 1)."</div>\n";
-        echo "  <div class=\"w3-col l2 m6 s12 w3-container list-meta\">".germanDate($lastVisit, 1)."</div>\n";
-        echo $main->close();
+        $name = trim((string)$this->Vorname.' '.(string)$this->Nachname);
+        $instrument = trim((string)$this->iName);
+        $email = trim((string)$this->Email);
+        $loginLabel = germanDate($this->LastLogin, 1);
+        $visitLabel = germanDate($lastVisit, 1);
+        $isMember = ((int)$this->Mitglied === 1);
+        $isActive = ((int)$this->Active === 1);
+        $hasInstrument = (int)$this->Instrument > 0;
+        $reg = $this->getRegisterMeta();
+        $regId = (int)$reg['id'];
+        $regSort = (int)$reg['sort'];
+        $regColor = (string)$reg['color'];
+        $regName = (string)$reg['name'];
+        $namedGroups = AudienceSpec::namedGroupNamesByUser();
+        $groupNames = isset($namedGroups[(int)$this->Index]) ? $namedGroups[(int)$this->Index] : array();
+        $groupChips = array();
+        foreach(AudienceSpec::previewDerivedMembership(array(
+            'mitglied' => $isMember,
+            'active' => $isActive,
+            'registerId' => $regId,
+            'registerName' => $regName,
+            'userId' => (int)$this->Index,
+        )) as $chip) {
+            $type = isset($chip['type']) ? (string)$chip['type'] : '';
+            if($type === 'group' || $type === 'register') {
+                $groupChips[] = $chip;
+            }
+        }
+        foreach($groupNames as $gName) {
+            $groupChips[] = array(
+                'type' => 'namedGroup',
+                'label' => 'Gruppe: '.$gName,
+            );
+        }
+        $permChips = Permissions::activePermissionChipsForUser((int)$this->Index);
+        $permSearch = array();
+        foreach($permChips as $pc) {
+            $permSearch[] = $pc['short'];
+            $permSearch[] = $pc['label'];
+        }
+        $groupSearch = array();
+        foreach($groupChips as $gc) {
+            $groupSearch[] = isset($gc['label']) ? (string)$gc['label'] : '';
+        }
+
+        $searchParts = array(
+            $name,
+            (string)$this->Vorname,
+            (string)$this->Nachname,
+            $instrument,
+            $email,
+            $regName,
+            (string)(int)$this->Index,
+            $isMember ? 'mitglied' : 'nicht-mitglied',
+            $isActive ? 'aktiv' : 'gastmusiker gast inaktiv',
+            !$hasInstrument ? 'ohne instrument' : '',
+            implode(' ', $groupSearch),
+            implode(' ', $permSearch),
+        );
+
+        $classes = array('user-row', 'list-row');
+        if($isMember) {
+            $classes[] = 'user-row--member';
+        }
+        else {
+            $classes[] = 'user-row--nomember';
+        }
+        if(!$isActive) {
+            $classes[] = 'user-row--inactive';
+        }
+        if(!$hasInstrument || $regId <= 0) {
+            $classes[] = 'user-row--no-register';
+        }
+        $hover = isset($GLOBALS['optionsDB']['HoverEffect']) ? $GLOBALS['optionsDB']['HoverEffect'] : '';
+        if($hover) {
+            $classes[] = $hover;
+        }
+
+        $sortRegister = sprintf('%05d|%s|%s', $regSort, (string)$this->Nachname, (string)$this->Vorname);
+        $style = '';
+        if($regColor !== '') {
+            $style = ' style="--user-register-color:'.$h($regColor).'"';
+            $classes[] = 'user-row--register-color';
+        }
+
+        $attrs = 'data-sort-nachname="'.$h($this->Nachname).'"'
+            .' data-sort-vorname="'.$h($this->Vorname).'"'
+            .' data-sort-name="'.$h($name).'"'
+            .' data-sort-instrument="'.$h($instrument).'"'
+            .' data-sort-email="'.$h($email).'"'
+            .' data-sort-lastlogin="'.$h($this->LastLogin).'"'
+            .' data-sort-lastvisit="'.$h($lastVisit).'"'
+            .' data-sort-index="'.$h((string)(int)$this->Index).'"'
+            .' data-sort-register="'.$h($sortRegister).'"'
+            .' data-active="'.($isActive ? '1' : '0').'"'
+            .' data-mitglied="'.($isMember ? '1' : '0').'"'
+            .' data-register-id="'.$h((string)$regId).'"'
+            .' data-search="'.$h(trim(implode(' ', $searchParts))).'"'
+            .' onclick="openModal(\'user\', '.(int)$this->Index.')"'
+            .' role="button" tabindex="0"'
+            .' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openModal(\'user\', '.(int)$this->Index.');}"';
+
+        echo '<div class="'.$h(implode(' ', $classes)).'"'.$style.' '.$attrs.'>';
+        echo '<div class="user-id">';
+        echo '<div class="user-id-num"><span class="user-id-k">User-ID</span> '.$h((string)(int)$this->Index).'</div>';
+        echo '<div class="user-id-chips" aria-label="Instrument und Mitgliedschaft">';
+        if($instrument !== '') {
+            echo '<div class="user-id-chip-line mail-recipient-chips">';
+            echo '<span class="mail-recipient-chip mail-recipient-chip--instrument">'.$h($instrument).'</span>';
+            echo '</div>';
+        }
+        echo '<div class="user-id-chip-line mail-recipient-chips">';
+        if(!$isActive) {
+            echo '<span class="mail-recipient-chip mail-recipient-chip--guestMusician">Gast</span>';
+        }
+        elseif($isMember) {
+            echo '<span class="mail-recipient-chip mail-recipient-chip--member">Mitglied</span>';
+        }
+        else {
+            echo '<span class="mail-recipient-chip mail-recipient-chip--nomember">kein Mitglied</span>';
+        }
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="user-rail" aria-hidden="true"></div>';
+        echo '<div class="user-main">';
+        echo '<div class="user-name">'.$h($name).'</div>';
+        if($email !== '') {
+            echo '<div class="user-email"><a href="mailto:'.$h($email).'" onclick="event.stopPropagation()">'.$h($email).'</a></div>';
+        }
+        if(count($groupChips)) {
+            echo '<div class="user-chip-row">';
+            echo '<span class="user-chip-row-k">Gruppen</span>';
+            echo '<div class="user-chips mail-recipient-chips" aria-label="Gruppen">';
+            foreach($groupChips as $gc) {
+                $type = isset($gc['type']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', (string)$gc['type']) : 'group';
+                $label = isset($gc['label']) ? (string)$gc['label'] : '';
+                if($label === '') {
+                    continue;
+                }
+                echo '<span class="mail-recipient-chip mail-recipient-chip--'.$h($type).'">'.$h($label).'</span>';
+            }
+            echo '</div>';
+            echo '</div>';
+        }
+        if(count($permChips)) {
+            echo '<div class="user-chip-row">';
+            echo '<span class="user-chip-row-k">Rechte</span>';
+            echo '<div class="user-chips mail-recipient-chips profile-perm-tiles" aria-label="Rechte">';
+            foreach($permChips as $pc) {
+                $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$pc['groupId']);
+                $inheritedOnly = empty($pc['personal']) && count($pc['groups']) > 0;
+                $cls = 'mail-recipient-chip profile-perm-tile profile-perm-tile--'.$gid;
+                if($inheritedOnly) {
+                    $cls .= ' profile-perm-tile--inherited';
+                }
+                $title = '';
+                if(count($pc['groups'])) {
+                    $title = ($inheritedOnly ? 'Nur über Gruppe: ' : 'Auch Gruppe: ')
+                        .implode(', ', $pc['groups']);
+                }
+                echo '<span class="'.$h($cls).'"'
+                    .($title !== '' ? ' title="'.$h($title).'"' : '')
+                    .'>'.$h($pc['label']).'</span>';
+            }
+            echo '</div>';
+            echo '</div>';
+        }
+        echo '<div class="user-meta-line">';
+        echo '<span class="user-meta-item"><span class="user-meta-k">Login</span> '.$h($loginLabel).'</span>';
+        echo '<span class="user-meta-item"><span class="user-meta-k">Teilnahme</span> '.$h($visitLabel).'</span>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
     }
 };
 ?>

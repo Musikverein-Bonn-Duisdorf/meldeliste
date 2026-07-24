@@ -62,7 +62,7 @@ adminListChromeClose();
 <?php if($err) { echo renderFlashHtml(array('type' => 'error', 'message' => $err)); } ?>
 
 <div class="admin-list-intro">
-  <p><a href="register.php">Registerübersicht</a> · <a href="instrument-types.php">Instrument-Typen verwalten</a></p>
+  <p><a href="musiker.php">Personenliste</a> · <a href="instrument-types.php">Instrument-Typen verwalten</a></p>
 </div>
 
 <div class="w3-center orchestra-svg-wrap">

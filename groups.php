@@ -66,7 +66,7 @@ foreach($groups as $g) {
 <?php
             foreach($permTiles as $item) {
                 $gid = preg_replace('/[^a-z0-9_-]/i', '', (string)$item['groupId']);
-                echo '<span class="profile-perm-tile profile-perm-tile--'.$gid.'">'
+                echo '<span class="mail-recipient-chip profile-perm-tile profile-perm-tile--'.$gid.'">'
                     .htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')
                     .'</span>';
             }

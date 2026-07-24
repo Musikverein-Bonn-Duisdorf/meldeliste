@@ -449,13 +449,49 @@ class AudienceSpec
         return in_array($userId, $ids, true);
     }
 
+    /** @var array<int, list<string>>|null */
+    private static $namedGroupNamesCache = null;
+
     /**
-     * Labels for roles / register / named groups the user belongs to (profile display).
-     * Uses resolveUserIds (not userMatches), so empty MemberSpec ≠ everyone.
-     *
-     * @param int $userId
-     * @return array<int,array{type:string,label:string}>
+     * Drop request-level caches (after user/group mutations in long-lived PHPUnit processes).
      */
+    public static function clearRequestCaches() {
+        self::$namedGroupNamesCache = null;
+    }
+
+    /**
+     * Named-group display names per user (MemberSpec resolved once per request).
+     * Used by person list rows; skips role chips (Alle Musiker etc.).
+     *
+     * @return array<int, list<string>>
+     */
+    public static function namedGroupNamesByUser() {
+        if(self::$namedGroupNamesCache !== null) {
+            return self::$namedGroupNamesCache;
+        }
+        $map = array();
+        foreach(Group::listAll() as $g) {
+            $label = trim((string)$g->Name);
+            if($label === '') {
+                continue;
+            }
+            foreach(self::resolveUserIds($g->getMemberSpecArray(), false) as $uid) {
+                $uid = (int)$uid;
+                if($uid <= 0) {
+                    continue;
+                }
+                if(!isset($map[$uid])) {
+                    $map[$uid] = array();
+                }
+                if(!in_array($label, $map[$uid], true)) {
+                    $map[$uid][] = $label;
+                }
+            }
+        }
+        self::$namedGroupNamesCache = $map;
+        return $map;
+    }
+
     public static function membershipForUser($userId) {
         $userId = (int)$userId;
         $items = array();
@@ -486,12 +522,12 @@ class AudienceSpec
             }
         }
 
-        foreach(Group::listAll() as $g) {
-            $memberIds = self::resolveUserIds($g->getMemberSpecArray(), false);
-            if(in_array($userId, $memberIds, true)) {
+        $named = self::namedGroupNamesByUser();
+        if(!empty($named[$userId])) {
+            foreach($named[$userId] as $gName) {
                 $items[] = array(
                     'type' => 'namedGroup',
-                    'label' => 'Gruppe: '.(string)$g->Name,
+                    'label' => 'Gruppe: '.$gName,
                 );
             }
         }

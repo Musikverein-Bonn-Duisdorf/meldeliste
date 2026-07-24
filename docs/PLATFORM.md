@@ -39,7 +39,7 @@ Sibling-Apps: Integration nur über **DB + SSO**. Kein Melde-Host für Archiv-/M
 | `User` / `Permissions` / Gruppen | Identity-Owner |
 | SSO **Issue** (`sso.php`, Ticket-Tabelle schreiben) | Melde ist Issuer |
 | Termine, Meldungen, Inventar, Mail, App-API | Melde-Domain |
-| `backup.php`, `updater.php` als Melde-Ops-UI | Eine DB → Backup/Deploy ist Hosting-Ops; Melde-UI deckt Melde-Artefakte ab |
+| `backup.php`, `updater.php` als Melde-Ops-UI | Decken Melde-Artefakte; Sibling-Apps haben eigene Ops-UIs für ihren Prefix (Archiv: ARCHIV-2) |
 | App-Token / Push / MVDApp | Melde-Client |
 
 ### B — Pro Modul behalten (jetzt kopieren / parallel pflegen)
@@ -49,10 +49,11 @@ Sibling-Apps: Integration nur über **DB + SSO**. Kein Melde-Host für Archiv-/M
 | Config-UI (`config-menu` + Modul-`config`) | Eigenes Modul-Config; gleiche UX-Muster, keine Melde-Config schreiben |
 | Schema / Update (`update.php`, SchemaManager) | Nur eigener Prefix (`archiv_*` / `mit_*`) |
 | Install / Log / Domain-Seiten | Modul-eigen |
+| Backup-UI (`backup.php` / `cron.php`) | Nur eigener Prefix; Identity/`meldeliste_*` nie anfassen. Dateien (`data/`) bleiben Hosting/rsync |
 | UI-Shell-Assets (`custom.css`, FA6, `app-nav.js`, Shell-Helfer) | Vorerst Copy; später Kit-Kandidat |
 | SSO **Redeem**, Session, Identity-Read | Copy bis Kit |
 
-**Backup in Archiv/MIT:** keine eigene Backup-UI. Backup = mysqldump/Host der gemeinsamen DB (+ optional Dateien wie `data/`).
+**Hinweis:** Melde-`backup.php` deckt Melde-Artefakte ab; Archiv hat eine **eigene** Backup-UI nur für `archiv_*` (ARCHIV-2). Gemeinsames Hosting-Dump der ganzen DB bleibt optional parallel.
 
 ### C — Später Kit `mvd-platform` (MELD-158, kein Blocker für ARCHIV-4)
 

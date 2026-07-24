@@ -163,19 +163,10 @@ if(requirePermission('perm_editConfig')) {
           <div class="app-nav-admin-title"><i class="fas fa-wrench" aria-hidden="true"></i><span class="nav-label">Admin</span></div>
           <div class="w3-bar-block <?php echo $navAdminColor; ?>">
 <?php if($showPersonen) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('musiker', 'gastmusiker', 'users', 'mitglied', 'nomitglied', 'register', 'newmusiker')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('musiker', 'newmusiker')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showUsers'); ?>">Personen <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
-                <a title="Musikerliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('musiker', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Musikerliste</a>
-                <a title="Gastmusiker" href="gastmusiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('gastmusiker', 'perm_showUsers'); ?>"><i class="fas fa-user-clock"></i> Gastmusiker</a>
-                <a title="Userliste" href="users.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('users', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Userliste</a>
-<?php if(!empty($GLOBALS['optionsDB']['showMembers'])) { ?>
-                <a title="Mitgliederliste" href="mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('mitglied', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Mitgliederliste</a>
-<?php } ?>
-<?php if(!empty($GLOBALS['optionsDB']['showNonMembers'])) { ?>
-                <a title="Nicht-Mitgliederliste" href="no-mitglied.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('nomitglied', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Nicht-Mitgliederliste</a>
-<?php } ?>
-                <a title="Registerübersicht" href="register.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('register', 'perm_showUsers'); ?>"><i class="fas fa-list"></i> Registerübersicht</a>
+                <a title="Personenliste" href="musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('musiker', 'perm_showUsers'); ?>"><i class="fas fa-users"></i> Personenliste</a>
 <?php if(requirePermission('perm_editUsers')) { ?>
                 <a title="Musiker anlegen" href="new-musiker.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newmusiker', 'perm_editUsers'); ?>"><i class="fas fa-plus-circle"></i> Musiker anlegen</a>
 <?php } ?>

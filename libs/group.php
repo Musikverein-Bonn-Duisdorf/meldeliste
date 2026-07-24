@@ -309,35 +309,66 @@ class Group
         return array_keys($sources);
     }
 
+    /** @var array<int, array<string, string[]>>|null */
+    private static $inheritedPermissionSourcesCache = null;
+
     /**
-     * Map permission key => group names that grant it (membership via MemberSpec).
-     * @return array<string,string[]>
+     * Drop request-level caches (after user/group mutations in long-lived PHPUnit processes).
      */
-    public static function inheritedPermissionSources($userId) {
-        $userId = (int)$userId;
-        $out = array();
-        if($userId < 1) {
-            return $out;
+    public static function clearRequestCaches() {
+        self::$inheritedPermissionSourcesCache = null;
+    }
+
+    /**
+     * All users: permission key => group names (request-cached).
+     *
+     * @return array<int, array<string, string[]>>
+     */
+    public static function inheritedPermissionSourcesByUser() {
+        if(self::$inheritedPermissionSourcesCache !== null) {
+            return self::$inheritedPermissionSourcesCache;
         }
+        $map = array();
         self::ensureSchema();
         foreach(self::listAll() as $g) {
             $granted = $g->getPermissionSpecArray();
             if(!count($granted)) {
                 continue;
             }
-            $memberIds = AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false);
-            if(!in_array($userId, array_map('intval', $memberIds), true)) {
-                continue;
-            }
             $name = (string)$g->Name;
-            foreach($granted as $key) {
-                if(!isset($out[$key])) {
-                    $out[$key] = array();
+            foreach(AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false) as $uid) {
+                $uid = (int)$uid;
+                if($uid < 1) {
+                    continue;
                 }
-                $out[$key][] = $name;
+                if(!isset($map[$uid])) {
+                    $map[$uid] = array();
+                }
+                foreach($granted as $key) {
+                    if(!isset($map[$uid][$key])) {
+                        $map[$uid][$key] = array();
+                    }
+                    if(!in_array($name, $map[$uid][$key], true)) {
+                        $map[$uid][$key][] = $name;
+                    }
+                }
             }
         }
-        return $out;
+        self::$inheritedPermissionSourcesCache = $map;
+        return $map;
+    }
+
+    /**
+     * Map permission key => group names that grant it (membership via MemberSpec).
+     * @return array<string,string[]>
+     */
+    public static function inheritedPermissionSources($userId) {
+        $userId = (int)$userId;
+        if($userId < 1) {
+            return array();
+        }
+        $all = self::inheritedPermissionSourcesByUser();
+        return isset($all[$userId]) ? $all[$userId] : array();
     }
 
     public function memberCount($requireMail = false) {
