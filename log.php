@@ -75,16 +75,22 @@ function getLog() {
             if(existing) {
                 // Deduped log: same Index, newer Timestamp — refresh in place (MELD-160)
                 existing.parentNode.replaceChild(div, existing);
-                return;
-            }
-            var first = parent.querySelector(":scope > div[id]:not(#listSentinel)");
-            if(first) {
-                parent.insertBefore(div, first);
             }
             else {
-                var sentinel = document.getElementById("listSentinel");
-                if(sentinel) parent.insertBefore(div, sentinel);
-                else parent.appendChild(div);
+                var first = parent.querySelector(":scope > div[id]:not(#listSentinel)");
+                if(first) {
+                    parent.insertBefore(div, first);
+                }
+                else {
+                    var sentinel = document.getElementById("listSentinel");
+                    if(sentinel) parent.insertBefore(div, sentinel);
+                    else parent.appendChild(div);
+                }
+            }
+            // MELD-164: live prepend/refresh must respect active filter
+            var filterInput = document.getElementById("filterString");
+            if(filterInput && filterInput.value && typeof filterLog === "function") {
+                filterLog();
             }
 	}
     }

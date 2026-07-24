@@ -7,19 +7,19 @@
  * Optional data-sort / data-dir: server-side sort for user lists (MELD-96).
  * Exposes window.listInfiniteReload(sort, dir) to reset and reload from offset 0.
  *
- * MELD-162: With an active client-side filter, stop auto-loading after consecutive
- * chunks that add no visible matches (avoids endless load when the list collapses).
+ * MELD-164: With an active client-side filter, keep loading while the server reports
+ * hasMore (sparse hits like „Adventskonzert“). No hard pause after empty chunks —
+ * only stop on !hasMore or explicit user cancel. MELD-162 pause removed.
  */
 (function() {
     var loading = false;
     var observer = null;
-    var emptyFilterLoads = 0;
-    var pausedForFilter = false;
-    var MAX_EMPTY_FILTER_LOADS = 2;
+    var pausedByUser = false;
     var MSG_LOADING = 'Weitere Einträge werden geladen…';
+    var MSG_FILTER_SCAN = 'Suche…';
     var MSG_END = 'Keine weiteren Einträge';
     var MSG_ERROR = 'Laden fehlgeschlagen. Bitte erneut versuchen.';
-    var MSG_FILTER_PAUSE = 'Keine Treffer in nachgeladenen Einträgen — Filter anpassen oder leeren';
+    var MSG_USER_PAUSE = 'Angehalten';
 
     function getSentinel() {
         return document.getElementById('listSentinel');
@@ -48,12 +48,38 @@
         }
     }
 
-    function setStatus(text, isLoading) {
+    function clearSentinelContent(sentinel) {
+        while(sentinel.firstChild) {
+            sentinel.removeChild(sentinel.firstChild);
+        }
+    }
+
+    function appendActionButton(sentinel, label, onClick) {
+        sentinel.appendChild(document.createTextNode(' '));
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w3-button w3-small w3-border';
+        btn.textContent = label;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+        });
+        sentinel.appendChild(btn);
+    }
+
+    function setStatus(text, isLoading, action) {
         var sentinel = getSentinel();
         if(!sentinel) return;
         if(text) {
             setBarVisible(true);
-            sentinel.textContent = text;
+            clearSentinelContent(sentinel);
+            var span = document.createElement('span');
+            span.textContent = text;
+            sentinel.appendChild(span);
+            if(action && action.label && typeof action.onClick === 'function') {
+                appendActionButton(sentinel, action.label, action.onClick);
+            }
         }
         else {
             setBarVisible(false);
@@ -71,6 +97,28 @@
         if(!sentinel) return;
         sentinel.setAttribute('data-has-more', '0');
         setStatus(MSG_END, false);
+    }
+
+    function showUserPaused() {
+        setStatus(MSG_USER_PAUSE, false, {
+            label: 'Weiter',
+            onClick: resumeByUser
+        });
+    }
+
+    function pauseByUser() {
+        pausedByUser = true;
+        var sentinel = getSentinel();
+        if(observer && sentinel) observer.unobserve(sentinel);
+        showUserPaused();
+    }
+
+    function resumeByUser() {
+        pausedByUser = false;
+        var sentinel = getSentinel();
+        if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
+        setStatus('', false);
+        reobserveSoon();
     }
 
     function applyFilter(sentinel) {
@@ -151,10 +199,10 @@
     function reobserveSoon() {
         var sentinel = getSentinel();
         if(!observer || !sentinel) return;
-        if(pausedForFilter) return;
+        if(pausedByUser) return;
         if(sentinel.getAttribute('data-has-more') !== '1') return;
         setTimeout(function() {
-            if(observer && !pausedForFilter && sentinel.getAttribute('data-has-more') === '1') {
+            if(observer && !pausedByUser && sentinel.getAttribute('data-has-more') === '1') {
                 observer.observe(sentinel);
             }
         }, 100);
@@ -164,7 +212,7 @@
         var sentinel = getSentinel();
         var list = getList();
         if(!sentinel || !list || loading) return;
-        if(pausedForFilter) return;
+        if(pausedByUser) return;
         if(sentinel.getAttribute('data-has-more') !== '1') return;
 
         var type = sentinel.getAttribute('data-list-type') || '';
@@ -173,7 +221,15 @@
 
         loading = true;
         if(observer) observer.unobserve(sentinel);
-        setStatus(MSG_LOADING, true);
+        if(filterActive()) {
+            setStatus(MSG_FILTER_SCAN, true, {
+                label: 'Stoppen',
+                onClick: pauseByUser
+            });
+        }
+        else {
+            setStatus(MSG_LOADING, true);
+        }
 
         var xhr;
         if(window.XMLHttpRequest) {
@@ -189,7 +245,7 @@
                 setStatus(MSG_ERROR, false);
                 if(observer && sentinel.getAttribute('data-has-more') === '1') {
                     setTimeout(function() {
-                        if(observer && !pausedForFilter) observer.observe(sentinel);
+                        if(observer && !pausedByUser) observer.observe(sentinel);
                     }, 500);
                 }
                 return;
@@ -209,34 +265,30 @@
             var appended = appendHtml(list, sentinel, xhr.responseText);
             applyFilter(sentinel);
 
-            if(filterActive()) {
-                var visibleNew = countVisibleNodes(appended);
-                if(visibleNew === 0) {
-                    emptyFilterLoads++;
-                    if(emptyFilterLoads >= MAX_EMPTY_FILTER_LOADS) {
-                        pausedForFilter = true;
-                        if(hasMore) {
-                            setStatus(MSG_FILTER_PAUSE, false);
-                        }
-                        else {
-                            showEnd();
-                        }
-                        return;
-                    }
-                }
-                else {
-                    emptyFilterLoads = 0;
-                }
-            }
-            else {
-                emptyFilterLoads = 0;
-                pausedForFilter = false;
-            }
-
             if(!hasMore) {
                 showEnd();
                 return;
             }
+
+            // User may have clicked Stop during this request — keep cursor progress
+            if(pausedByUser) {
+                showUserPaused();
+                return;
+            }
+
+            if(filterActive()) {
+                var visibleNew = countVisibleNodes(appended);
+                if(visibleNew === 0) {
+                    // Sparse filter: keep scanning — status stays „Suche…“ + Stoppen
+                    setStatus(MSG_FILTER_SCAN, true, {
+                        label: 'Stoppen',
+                        onClick: pauseByUser
+                    });
+                    reobserveSoon();
+                    return;
+                }
+            }
+
             setStatus('', false);
             reobserveSoon();
         };
@@ -250,8 +302,7 @@
         if(!sentinel || !list) return;
         if(observer) observer.unobserve(sentinel);
         loading = false;
-        emptyFilterLoads = 0;
-        pausedForFilter = false;
+        pausedByUser = false;
         if(sort) sentinel.setAttribute('data-sort', sort);
         if(dir) sentinel.setAttribute('data-dir', dir);
         clearRows(list, sentinel);
@@ -267,8 +318,7 @@
         if(!input || input.getAttribute('data-infinite-bound') === '1') return;
         input.setAttribute('data-infinite-bound', '1');
         input.addEventListener('input', function() {
-            emptyFilterLoads = 0;
-            pausedForFilter = false;
+            pausedByUser = false;
             var sentinel = getSentinel();
             if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
             if(!filterActive()) {
@@ -301,7 +351,7 @@
         }
         else {
             window.addEventListener('scroll', function() {
-                if(pausedForFilter) return;
+                if(pausedByUser) return;
                 var rect = sentinel.getBoundingClientRect();
                 if(rect.top < window.innerHeight + 80) loadMore();
             });
