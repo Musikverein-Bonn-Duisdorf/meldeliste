@@ -97,6 +97,7 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
 <?php } ?>
     </div>
 
+    <div class="eval-tables-grid">
     <section class="eval-panel" id="eval-ranking">
       <h3>Ranking nach Teilnahme</h3>
       <div class="eval-table-scroll">
@@ -132,6 +133,7 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
         </table>
       </div>
     </section>
+    </div>
   </div>
 </div>
 <script type="application/json" id="evaluate-data"><?php echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS); ?></script>
