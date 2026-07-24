@@ -20,6 +20,8 @@ $attendance = evaluateAttendanceSeries($days, $besetzungOnly);
 $logSeries = evaluateLogSeries($days);
 $ranking = evaluateAttendanceRanking($days, $besetzungOnly);
 $inactive = evaluateInactiveUsers($inactiveDays);
+$registers = evaluateRegisterFilterOptions();
+$groups = evaluateGroupFilterOptions();
 
 $assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
 $jsMtime = @filemtime(__DIR__.'/js/evaluate.js');
@@ -50,13 +52,6 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
   </form>
 </div>
 
-<nav class="eval-toc w3-container w3-margin-bottom" aria-label="Seitenabschnitte">
-  <a class="w3-button w3-border w3-round" href="#eval-attendance">Teilnahme</a>
-  <a class="w3-button w3-border w3-round" href="#eval-log">System-Log</a>
-  <a class="w3-button w3-border w3-round" href="#eval-ranking">Ranking</a>
-  <a class="w3-button w3-border w3-round" href="#eval-inactive">Inaktive</a>
-</nav>
-
 <div class="eval-layout w3-container">
   <div class="eval-charts">
     <section class="eval-panel" id="eval-attendance">
@@ -76,6 +71,33 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
   </div>
 
   <div class="eval-tables">
+    <div id="evalPersonFilter" class="inv-sort-bar eval-person-filter">
+      <div class="inv-sort-bar-filters" role="toolbar" aria-label="Filter">
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="aktive" aria-pressed="true">Aktive</button>
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="gaeste" aria-pressed="true">Gäste</button>
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="mitglied" aria-pressed="true">Mitglieder</button>
+        <button type="button" class="inv-sort-chip inv-filter-chip is-active" data-eval-filter="nomitglied" aria-pressed="true">Nicht-Mitglieder</button>
+      </div>
+      <div class="inv-sort-bar-filters inv-sort-bar-filters--registers" role="toolbar" aria-label="Register">
+        <button type="button" class="inv-sort-chip inv-filter-chip" data-register-filter="0" aria-pressed="false">ohne Register</button>
+<?php foreach($registers as $reg) {
+    $hex = normalizeHexColor(isset($reg['Color']) ? $reg['Color'] : '');
+    $style = $hex !== '' ? ' style="--reg-filter-color:'.$hex.'"' : '';
+    $label = htmlspecialchars((string)$reg['Name'], ENT_QUOTES, 'UTF-8');
+?>
+        <button type="button" class="inv-sort-chip inv-filter-chip inv-filter-chip--register" data-register-filter="<?php echo (int)$reg['Index']; ?>" aria-pressed="false"<?php echo $style; ?>><?php echo $label; ?></button>
+<?php } ?>
+      </div>
+<?php if(count($groups) > 0) { ?>
+      <div class="inv-sort-bar-filters" role="toolbar" aria-label="Gruppen">
+<?php foreach($groups as $g) { ?>
+        <button type="button" class="inv-sort-chip inv-filter-chip" data-group-filter="<?php echo (int)$g['Index']; ?>" aria-pressed="false"><?php echo htmlspecialchars((string)$g['Name'], ENT_QUOTES, 'UTF-8'); ?></button>
+<?php } ?>
+      </div>
+<?php } ?>
+    </div>
+
+    <div class="eval-tables-grid">
     <section class="eval-panel" id="eval-ranking">
       <h3>Ranking nach Teilnahme</h3>
       <div class="eval-table-scroll">
@@ -96,7 +118,7 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
     </section>
 
     <section class="eval-panel" id="eval-inactive">
-      <h3>Inaktive Nutzer</h3>
+      <h3>Inaktive</h3>
       <div class="eval-table-scroll">
         <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
           <thead>
@@ -111,9 +133,9 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
         </table>
       </div>
     </section>
+    </div>
   </div>
 </div>
-
 <script type="application/json" id="evaluate-data"><?php echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS); ?></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script src="<?php echo $evaluateJs; ?>"></script>

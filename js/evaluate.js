@@ -16,6 +16,10 @@
   var attendance = data.attendance || { labels: [], yes: [], no: [], maybe: [], rate: [] };
   var log = data.log || { labels: [], series: {} };
   var logLabels = data.logLabels || [];
+  var rankingAll = data.ranking || [];
+  var inactiveAll = data.inactive || [];
+  var rankingCtl = null;
+  var inactiveCtl = null;
 
   function drawAttendance() {
     var canvas = document.getElementById('chartAttendance');
@@ -144,15 +148,75 @@
     });
   }
 
-  function bindSortableTable(tableId, rows, renderRow, defaultKey, defaultDir) {
+  function readPersonFilter() {
+    var root = document.getElementById('evalPersonFilter');
+    var filter = {
+      showAktive: true,
+      showGaeste: true,
+      showMitglied: true,
+      showNoMitglied: true,
+      registers: [],
+      groups: []
+    };
+    if (!root) {
+      return filter;
+    }
+    var aktiveBtn = root.querySelector('[data-eval-filter="aktive"]');
+    var gaesteBtn = root.querySelector('[data-eval-filter="gaeste"]');
+    var mitgliedBtn = root.querySelector('[data-eval-filter="mitglied"]');
+    var noMitgliedBtn = root.querySelector('[data-eval-filter="nomitglied"]');
+    if (aktiveBtn) filter.showAktive = aktiveBtn.classList.contains('is-active');
+    if (gaesteBtn) filter.showGaeste = gaesteBtn.classList.contains('is-active');
+    if (mitgliedBtn) filter.showMitglied = mitgliedBtn.classList.contains('is-active');
+    if (noMitgliedBtn) filter.showNoMitglied = noMitgliedBtn.classList.contains('is-active');
+
+    Array.prototype.forEach.call(root.querySelectorAll('[data-register-filter]'), function (btn) {
+      if (btn.classList.contains('is-active')) {
+        filter.registers.push(String(btn.getAttribute('data-register-filter') || '0'));
+      }
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-group-filter]'), function (btn) {
+      if (btn.classList.contains('is-active')) {
+        filter.groups.push(String(btn.getAttribute('data-group-filter') || '0'));
+      }
+    });
+    return filter;
+  }
+
+  function rowMatchesPersonFilter(row, filter) {
+    var active = Number(row.active) === 1;
+    var mitglied = Number(row.mitglied) === 1;
+    var regId = String(row.registerId == null ? 0 : row.registerId);
+    var groupIds = Array.isArray(row.groupIds) ? row.groupIds.map(function (g) { return String(g); }) : [];
+
+    if (active && !filter.showAktive) return false;
+    if (!active && !filter.showGaeste) return false;
+    if (mitglied && !filter.showMitglied) return false;
+    if (!mitglied && !filter.showNoMitglied) return false;
+    if (filter.registers.length && filter.registers.indexOf(regId) === -1) return false;
+    if (filter.groups.length) {
+      var hit = false;
+      for (var i = 0; i < groupIds.length; i++) {
+        if (filter.groups.indexOf(groupIds[i]) !== -1) {
+          hit = true;
+          break;
+        }
+      }
+      if (!hit) return false;
+    }
+    return true;
+  }
+
+  function bindSortableTable(tableId, getRows, renderRow, defaultKey, defaultDir) {
     var table = document.getElementById(tableId);
     if (!table) {
-      return;
+      return null;
     }
     var tbody = table.querySelector('tbody');
     var state = { key: defaultKey, dir: defaultDir, type: 'number' };
 
     function paint() {
+      var rows = typeof getRows === 'function' ? getRows() : [];
       var sorted = sortRows(rows, state.key, state.type, state.dir);
       tbody.innerHTML = '';
       if (!sorted.length) {
@@ -198,7 +262,7 @@
     if (defaultTh) {
       state.type = defaultTh.getAttribute('data-type') || 'number';
     }
-    paint();
+    return { paint: paint };
   }
 
   function cellsWithLabels(tr, pairs) {
@@ -231,8 +295,36 @@
     ]);
   }
 
+  function filteredRows(all) {
+    var filter = readPersonFilter();
+    return all.filter(function (row) {
+      return rowMatchesPersonFilter(row, filter);
+    });
+  }
+
+  function repaintTables() {
+    if (rankingCtl) rankingCtl.paint();
+    if (inactiveCtl) inactiveCtl.paint();
+  }
+
+  function bindPersonFilter() {
+    var root = document.getElementById('evalPersonFilter');
+    if (!root) return;
+    root.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('[data-eval-filter], [data-register-filter], [data-group-filter]');
+      if (!btn || !root.contains(btn)) return;
+      ev.preventDefault();
+      var on = !btn.classList.contains('is-active');
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      repaintTables();
+    });
+  }
+
   drawAttendance();
   drawLog();
-  bindSortableTable('evalRanking', data.ranking || [], rankingRow, 'quote', 'desc');
-  bindSortableTable('evalInactive', data.inactive || [], inactiveRow, 'lastLogin', 'asc');
+  rankingCtl = bindSortableTable('evalRanking', function () { return filteredRows(rankingAll); }, rankingRow, 'quote', 'desc');
+  inactiveCtl = bindSortableTable('evalInactive', function () { return filteredRows(inactiveAll); }, inactiveRow, 'lastLogin', 'asc');
+  bindPersonFilter();
+  repaintTables();
 })();

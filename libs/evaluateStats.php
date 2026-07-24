@@ -178,29 +178,33 @@ function evaluateTerminCount($days, $besetzungOnly = false) {
 }
 
 /**
- * Per-user attendance ranking in the window.
+ * Per-user attendance ranking in the window (all non-deleted users; filter client-side).
  *
  * @param int $days
  * @param bool $besetzungOnly
- * @return array<int,array{id:int,name:string,yes:int,no:int,maybe:int,termine:int,quote:float}>
+ * @return array<int,array<string,mixed>>
  */
 function evaluateAttendanceRanking($days, $besetzungOnly = false) {
     $days = evaluateNormalizeDays($days);
     $prefix = $GLOBALS['dbprefix'];
     $termineCount = evaluateTerminCount($days, $besetzungOnly);
     $window = evaluateTerminWindowSql($days, $besetzungOnly);
+    $groupMap = evaluateUserGroupIdsByUser();
 
     $sql = sprintf(
-        'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`,'
+        'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`,'
+        .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 1 THEN 1 ELSE 0 END), 0) AS `Yes`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 2 THEN 1 ELSE 0 END), 0) AS `No`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 3 THEN 1 ELSE 0 END), 0) AS `Maybe`'
         .' FROM `%sUser` `u`'
+        .' LEFT JOIN `%sInstrument` `i` ON `i`.`Index` = `u`.`Instrument`'
         .' LEFT JOIN `%sMeldungen` `m` ON `m`.`User` = `u`.`Index`'
         .' AND `m`.`Termin` IN (SELECT `Index` FROM `%sTermine` WHERE %s)'
-        .' WHERE `u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0'
-        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`'
+        .' WHERE `u`.`Deleted` != 1'
+        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`, `i`.`Register`'
         .' ORDER BY `u`.`Nachname` ASC, `u`.`Vorname` ASC;',
+        $prefix,
         $prefix,
         $prefix,
         $prefix,
@@ -214,15 +218,24 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
     if($dbr) {
         while($row = mysqli_fetch_assoc($dbr)) {
             $yes = (int)$row['Yes'];
+            $uid = (int)$row['UserId'];
             $quote = $termineCount > 0 ? round($yes / $termineCount, 4) : 0.0;
-            $rows[] = array(
-                'id' => (int)$row['UserId'],
-                'name' => trim($row['Nachname'].', '.$row['Vorname']),
-                'yes' => $yes,
-                'no' => (int)$row['No'],
-                'maybe' => (int)$row['Maybe'],
-                'termine' => $termineCount,
-                'quote' => $quote,
+            $rows[] = array_merge(
+                array(
+                    'id' => $uid,
+                    'name' => trim($row['Nachname'].', '.$row['Vorname']),
+                    'yes' => $yes,
+                    'no' => (int)$row['No'],
+                    'maybe' => (int)$row['Maybe'],
+                    'termine' => $termineCount,
+                    'quote' => $quote,
+                ),
+                evaluatePersonFilterMeta(
+                    (int)$row['Active'],
+                    (int)$row['Mitglied'],
+                    (int)$row['RegisterId'],
+                    isset($groupMap[$uid]) ? $groupMap[$uid] : array()
+                )
             );
         }
     }
@@ -241,24 +254,183 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
 }
 
 /**
+ * Register chips for evaluate person filter (MELD-161).
+ *
+ * @return array<int,array{Index:int,Name:string,Color:string}>
+ */
+function evaluateRegisterFilterOptions() {
+    $opts = array();
+    $sql = sprintf(
+        'SELECT `Index`, `Name`, `Color` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
+        $GLOBALS['dbprefix']
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    if($dbr) {
+        while($row = mysqli_fetch_assoc($dbr)) {
+            $opts[] = array(
+                'Index' => (int)$row['Index'],
+                'Name' => (string)$row['Name'],
+                'Color' => isset($row['Color']) ? (string)$row['Color'] : '',
+            );
+        }
+    }
+    return $opts;
+}
+
+/**
+ * Named group chips for evaluate person filter.
+ *
+ * @return array<int,array{Index:int,Name:string}>
+ */
+function evaluateGroupFilterOptions() {
+    $opts = array();
+    if(!class_exists('Group')) {
+        return $opts;
+    }
+    Group::ensureSchema();
+    foreach(Group::listAll() as $g) {
+        if(!(int)$g->Index) {
+            continue;
+        }
+        $opts[] = array(
+            'Index' => (int)$g->Index,
+            'Name' => (string)$g->Name,
+        );
+    }
+    return $opts;
+}
+
+/**
+ * @return array<int,int[]>
+ */
+function evaluateUserGroupIdsByUser() {
+    $map = array();
+    if(!class_exists('Group') || !class_exists('AudienceSpec')) {
+        return $map;
+    }
+    Group::ensureSchema();
+    foreach(Group::listAll() as $g) {
+        $gid = (int)$g->Index;
+        if($gid < 1) {
+            continue;
+        }
+        foreach(AudienceSpec::resolveUserIds($g->getMemberSpecArray(), false) as $uid) {
+            $uid = (int)$uid;
+            if($uid < 1) {
+                continue;
+            }
+            if(!isset($map[$uid])) {
+                $map[$uid] = array();
+            }
+            if(!in_array($gid, $map[$uid], true)) {
+                $map[$uid][] = $gid;
+            }
+        }
+    }
+    return $map;
+}
+
+/**
+ * @param int $active
+ * @param int $mitglied
+ * @param int $registerId
+ * @param int[] $groupIds
+ * @return array{active:int,mitglied:int,registerId:int,groupIds:int[]}
+ */
+function evaluatePersonFilterMeta($active, $mitglied, $registerId, array $groupIds) {
+    $gids = array();
+    foreach($groupIds as $gid) {
+        $gid = (int)$gid;
+        if($gid > 0) {
+            $gids[] = $gid;
+        }
+    }
+    return array(
+        'active' => ((int)$active) ? 1 : 0,
+        'mitglied' => ((int)$mitglied) ? 1 : 0,
+        'registerId' => max(0, (int)$registerId),
+        'groupIds' => $gids,
+    );
+}
+
+/**
+ * Same rules as Personenliste chips (+ optional group chips).
+ *
+ * @param array<string,mixed> $row
+ * @param array{showAktive:bool,showGaeste:bool,showMitglied:bool,showNoMitglied:bool,registers:string[],groups:string[]} $filter
+ * @return bool
+ */
+function evaluateRowMatchesPersonFilter(array $row, array $filter) {
+    $active = !empty($row['active']);
+    $mitglied = !empty($row['mitglied']);
+    $regId = (string)(isset($row['registerId']) ? (int)$row['registerId'] : 0);
+    $groupIds = array();
+    if(isset($row['groupIds']) && is_array($row['groupIds'])) {
+        foreach($row['groupIds'] as $gid) {
+            $groupIds[] = (string)(int)$gid;
+        }
+    }
+
+    if($active && empty($filter['showAktive'])) {
+        return false;
+    }
+    if(!$active && empty($filter['showGaeste'])) {
+        return false;
+    }
+    if($mitglied && empty($filter['showMitglied'])) {
+        return false;
+    }
+    if(!$mitglied && empty($filter['showNoMitglied'])) {
+        return false;
+    }
+
+    $regs = isset($filter['registers']) && is_array($filter['registers']) ? $filter['registers'] : array();
+    if(count($regs) > 0 && !in_array($regId, $regs, true)) {
+        return false;
+    }
+
+    $groups = isset($filter['groups']) && is_array($filter['groups']) ? $filter['groups'] : array();
+    if(count($groups) > 0) {
+        $hit = false;
+        foreach($groupIds as $gid) {
+            if(in_array($gid, $groups, true)) {
+                $hit = true;
+                break;
+            }
+        }
+        if(!$hit) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Users considered inactive by last login / last attendance (Wert=1).
+ * All non-deleted users; person chips filter client-side (MELD-161).
  *
  * @param int $thresholdDays
- * @return array<int,array{id:int,name:string,lastLogin:?string,lastAttend:?string,quote:float}>
+ * @return array<int,array<string,mixed>>
  */
 function evaluateInactiveUsers($thresholdDays) {
     $thresholdDays = max(1, (int)$thresholdDays);
     $prefix = $GLOBALS['dbprefix'];
+    $groupMap = evaluateUserGroupIdsByUser();
 
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`LastLogin`, `u`.`Joined`,'
+        .' `u`.`Active`, `u`.`Mitglied`, COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' ('
         .'   SELECT MAX(`t`.`Datum`) FROM `%sMeldungen` `m`'
         .'   INNER JOIN `%sTermine` `t` ON `t`.`Index` = `m`.`Termin`'
         .'   WHERE `m`.`User` = `u`.`Index` AND `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE()'
         .' ) AS `LastAttend`'
         .' FROM `%sUser` `u`'
-        .' WHERE `u`.`Deleted` != 1 AND `u`.`Active` = 1 AND `u`.`Instrument` > 0;',
+        .' LEFT JOIN `%sInstrument` `i` ON `i`.`Index` = `u`.`Instrument`'
+        .' WHERE `u`.`Deleted` != 1;',
+        $prefix,
         $prefix,
         $prefix,
         $prefix
@@ -292,19 +464,28 @@ function evaluateInactiveUsers($thresholdDays) {
                 continue;
             }
 
+            $uid = (int)$row['UserId'];
             $user = new User();
-            $user->load_by_id((int)$row['UserId']);
+            $user->load_by_id($uid);
             $quote = 0.0;
             if($user->Index) {
                 $quote = (float)$user->getMeldeQuote();
             }
 
-            $rows[] = array(
-                'id' => (int)$row['UserId'],
-                'name' => trim($row['Nachname'].', '.$row['Vorname']),
-                'lastLogin' => $lastLogin,
-                'lastAttend' => $lastAttend,
-                'quote' => $quote,
+            $rows[] = array_merge(
+                array(
+                    'id' => $uid,
+                    'name' => trim($row['Nachname'].', '.$row['Vorname']),
+                    'lastLogin' => $lastLogin,
+                    'lastAttend' => $lastAttend,
+                    'quote' => $quote,
+                ),
+                evaluatePersonFilterMeta(
+                    (int)$row['Active'],
+                    (int)$row['Mitglied'],
+                    (int)$row['RegisterId'],
+                    isset($groupMap[$uid]) ? $groupMap[$uid] : array()
+                )
             );
         }
     }
