@@ -582,6 +582,12 @@ function getConfigDefaults() {
             'Description' => 'Termine.published nach VisibilitySpec (Alle User) migriert',
         ),
         array(
+            'Parameter' => 'logListChunkSize',
+            'Value' => '100',
+            'Type' => 'int',
+            'Description' => 'Log-Liste: Einträge pro AJAX-Nachladen (1–500)',
+        ),
+        array(
             'Parameter' => 'SchemaVersion',
             'Value' => '0',
             'Type' => 'int',

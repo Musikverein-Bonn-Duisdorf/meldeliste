@@ -27,6 +27,9 @@ case 'log':
         header('X-Has-More: 0');
         exit;
     }
+    if(!isset($_GET['limit']) || (int)$_GET['limit'] < 1) {
+        $limit = listChunkLogConfiguredLimit();
+    }
     $result = listChunkLog($cursor !== '' ? (int)$cursor : 0, $limit);
     break;
 

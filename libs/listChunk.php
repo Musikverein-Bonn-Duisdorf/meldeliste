@@ -11,8 +11,31 @@ function listChunkLimit($requested = 50) {
     return $n;
 }
 
+/**
+ * Configured page size for log infinite scroll (MELD-162).
+ * Clamped to 1–500; default 100 when unset/invalid.
+ */
+function listChunkLogConfiguredLimit() {
+    $n = 100;
+    if(isset($GLOBALS['optionsDB']['logListChunkSize'])) {
+        $n = (int)$GLOBALS['optionsDB']['logListChunkSize'];
+    }
+    if($n < 1) $n = 100;
+    if($n > 500) $n = 500;
+    return $n;
+}
+
+function listChunkLogLimit($requested = 0) {
+    $n = (int)$requested;
+    if($n < 1) {
+        return listChunkLogConfiguredLimit();
+    }
+    if($n > 500) $n = 500;
+    return $n;
+}
+
 function listChunkLog($beforeIndex, $limit) {
-    $limit = listChunkLimit($limit);
+    $limit = listChunkLogLimit($limit);
     $beforeIndex = (int)$beforeIndex;
     if($beforeIndex > 0) {
         $sql = sprintf(
