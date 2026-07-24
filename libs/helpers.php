@@ -1612,13 +1612,8 @@ function stripMailBodyGreeting($body, $vorname) {
 /** Allowed return targets for form POST redirects (MELD-15 / MELD-57). */
 function allowedReturnUrls() {
     return array(
-        'users.php',
         'musiker.php',
-        'gastmusiker.php',
-        'mitglied.php',
-        'no-mitglied.php',
         'new-musiker.php',
-        'register.php',
         'mein-register.php',
         'index.php',
         'termine-archiv.php',
@@ -1636,16 +1631,42 @@ function allowedReturnUrls() {
     );
 }
 
+/**
+ * Map retired person-list URLs onto musiker.php (MELD-155).
+ *
+ * @param string $path path or basename, optional query
+ * @return string
+ */
+function canonicalizeReturnUrl($path) {
+    $path = trim((string)$path);
+    if($path === '') {
+        return $path;
+    }
+    $parts = parse_url($path);
+    $file = isset($parts['path']) ? basename((string)$parts['path']) : basename($path);
+    $legacy = array(
+        'users.php',
+        'gastmusiker.php',
+        'mitglied.php',
+        'no-mitglied.php',
+        'register.php',
+    );
+    if(in_array($file, $legacy, true)) {
+        return 'musiker.php';
+    }
+    return $path;
+}
+
 /** Map $_SESSION['page'] to list/edit PHP file. */
 function pageToReturnUrl($page) {
     $map = array(
-        'users' => 'users.php',
+        'users' => 'musiker.php',
         'musiker' => 'musiker.php',
-        'gastmusiker' => 'gastmusiker.php',
-        'mitglied' => 'mitglied.php',
-        'nomitglied' => 'no-mitglied.php',
+        'gastmusiker' => 'musiker.php',
+        'mitglied' => 'musiker.php',
+        'nomitglied' => 'musiker.php',
         'newmusiker' => 'new-musiker.php',
-        'register' => 'register.php',
+        'register' => 'musiker.php',
         'meinregister' => 'mein-register.php',
         'user-voice' => 'user-voice.php',
         'groups' => 'groups.php',
@@ -1682,9 +1703,13 @@ function safeReturnUrl($url, $default = 'index.php') {
     if(!preg_match('/^([a-zA-Z0-9_-]+\.php)(?:\?([a-zA-Z0-9_&=%-]*))?$/', $url, $m)) {
         return $default;
     }
-    $base = $m[1];
+    $base = canonicalizeReturnUrl($m[1]);
     if(!in_array($base, $allowed, true)) {
         return $default;
+    }
+    // Legacy person-list pages drop their query (filters live on musiker.php now).
+    if($base !== $m[1]) {
+        return $base;
     }
     if(empty($m[2])) {
         return $base;

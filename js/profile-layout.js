@@ -283,7 +283,7 @@
         var groups = groupNamesFor(key);
         var inheritedOnly = isInheritedOnly(key);
         var chip = document.createElement('span');
-        chip.className = 'profile-perm-tile profile-perm-tile--' + gid;
+        chip.className = 'mail-recipient-chip profile-perm-tile profile-perm-tile--' + gid;
         if (inheritedOnly) {
           chip.className += ' profile-perm-tile--inherited';
         }

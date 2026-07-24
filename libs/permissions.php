@@ -206,16 +206,61 @@ class Permissions
     /** @var array<int,Permissions> */
     private static $effectiveCache = array();
 
+    /** @var array<int, string[]>|null */
+    private static $personalGrantedKeysCache = null;
+
     /**
      * Drop request-level effective-permission cache (after personal or group changes).
      * @param int|null $userId null = clear all
      */
     public static function clearEffectiveCache($userId = null) {
+        self::$personalGrantedKeysCache = null;
+        if(class_exists('Group', false) && method_exists('Group', 'clearRequestCaches')) {
+            Group::clearRequestCaches();
+        }
+        if(class_exists('AudienceSpec', false) && method_exists('AudienceSpec', 'clearRequestCaches')) {
+            AudienceSpec::clearRequestCaches();
+        }
         if($userId === null) {
             self::$effectiveCache = array();
             return;
         }
         unset(self::$effectiveCache[(int)$userId]);
+    }
+
+    /**
+     * Personal (row) permission keys that are on, keyed by user (request-cached, no auto-insert).
+     *
+     * @return array<int, string[]>
+     */
+    public static function personalGrantedKeysByUser() {
+        if(self::$personalGrantedKeysCache !== null) {
+            return self::$personalGrantedKeysCache;
+        }
+        $map = array();
+        $keys = self::permissionKeys();
+        $sql = sprintf('SELECT * FROM `%sPermissions`;', $GLOBALS['dbprefix']);
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) {
+            self::$personalGrantedKeysCache = $map;
+            return $map;
+        }
+        while($row = mysqli_fetch_assoc($dbr)) {
+            $uid = isset($row['User']) ? (int)$row['User'] : 0;
+            if($uid < 1) {
+                continue;
+            }
+            $granted = array();
+            foreach($keys as $key) {
+                if(!empty($row[$key])) {
+                    $granted[] = $key;
+                }
+            }
+            $map[$uid] = $granted;
+        }
+        self::$personalGrantedKeysCache = $map;
+        return $map;
     }
 
     /**
@@ -417,6 +462,43 @@ class Permissions
             }
         }
         return false;
+    }
+
+    /**
+     * Active permission chips for list/modal (personal + group-inherited).
+     *
+     * @param int $userId
+     * @return list<array{key:string,label:string,short:string,groupId:string,personal:bool,groups:string[]}>
+     */
+    public static function activePermissionChipsForUser($userId) {
+        $userId = (int)$userId;
+        $out = array();
+        if($userId < 1) {
+            return $out;
+        }
+        $personalMap = self::personalGrantedKeysByUser();
+        $personalKeys = isset($personalMap[$userId]) ? $personalMap[$userId] : array();
+        $personalFlip = array_fill_keys($personalKeys, true);
+        $inherited = Group::inheritedPermissionSources($userId);
+        $labels = self::permissionLabels();
+        foreach(self::permissionCatalog() as $item) {
+            $key = $item['key'];
+            $personal = !empty($personalFlip[$key]);
+            $groups = isset($inherited[$key]) ? $inherited[$key] : array();
+            if(!$personal && !count($groups)) {
+                continue;
+            }
+            $meta = isset($labels[$key]) ? $labels[$key] : array('short' => $key, 'label' => $key);
+            $out[] = array(
+                'key' => $key,
+                'label' => (string)$item['label'],
+                'short' => isset($meta['short']) ? (string)$meta['short'] : (string)$item['label'],
+                'groupId' => (string)$item['groupId'],
+                'personal' => $personal,
+                'groups' => $groups,
+            );
+        }
+        return $out;
     }
 
     /**
