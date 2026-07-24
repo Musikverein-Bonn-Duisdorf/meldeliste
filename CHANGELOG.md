@@ -2,6 +2,13 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-07-24-3c672 (2026-07-24)
+
+- MELD-163: Schema-Version 25 für showConductor-Cleanup
+- MELD-163: Dirigent immer in Meldungsliste; showConductor entfernen
+- MELD-163: Schema-Version 25 für Config-Cleanup
+- MELD-163: Dirigent immer in Meldungsliste
+
 ## 2026-07-24-9cebd (2026-07-24)
 
 - MELD-155: Personenliste zusammenlegen und User-Zeilen-Design
