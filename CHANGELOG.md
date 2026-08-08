@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-11984 (2026-08-08)
+
+- MELD-166: Statistik-Userlisten im Personenlisten-Stil
+- MELD-166: Statistik-Tabellenstil
+
 ## 2026-08-08-02301 (2026-08-08)
 
 - MELD-172: Termin-Zeilen auf Smartphone kompakter
