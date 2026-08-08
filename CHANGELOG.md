@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-cb4f7 (2026-08-08)
+
+- MELD-168: Time-Inputs ohne Sekunden (HH:MM, step=60)
+- MELD-168: Uhrzeiten in Log-Payload ohne Sekunden
+- MELD-168: Uhrzeiten ohne Sekunden in Log und Time-Inputs
+
 ## 2026-08-08-92b42 (2026-08-08)
 
 - MELD-165: Live-Log in Chunks statt einzeln nachladen
