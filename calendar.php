@@ -58,6 +58,7 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  flex-shrink: 0;
 }
 .meld-cal-nav {
   display: flex;
@@ -68,6 +69,7 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
   margin: 0 0 0 auto;
   padding: 0;
   box-sizing: border-box;
+  min-width: 0;
 }
 .meld-cal-nav-icon,
 a.w3-button.meld-cal-nav-icon,
@@ -110,6 +112,48 @@ button.w3-button.meld-cal-nav-icon {
 .meld-cal-page .meld-cal-wrap {
   padding-left: 0;
   padding-right: 0;
+}
+/* MELD-174: phone — stack actions above nav; shrink month/year fields */
+@media (max-width: 600px) {
+  .meld-cal-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+  .meld-cal-actions {
+    gap: 0.5rem;
+  }
+  .meld-cal-nav {
+    margin: 0;
+    justify-content: flex-start;
+    gap: 0.45rem 0.55rem;
+    width: 100%;
+  }
+  .meld-cal-nav-icon,
+  a.w3-button.meld-cal-nav-icon,
+  button.w3-button.meld-cal-nav-icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    min-width: 2.35rem;
+  }
+  .meld-cal-spinner {
+    min-width: 0;
+    flex: 1 1 0;
+    max-width: 9rem;
+  }
+  .meld-cal-spinner select {
+    padding: 4px 4px;
+    font-size: 0.9rem;
+  }
+  .meld-cal-spinner .meld-cal-step {
+    padding: 2px 8px;
+    min-width: 1.85rem;
+    font-size: 0.85rem;
+  }
+  .meld-cal-nav-today {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.9rem;
+  }
 }
 </style>
 
