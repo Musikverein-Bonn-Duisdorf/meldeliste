@@ -51,7 +51,7 @@ class Meldung
         $this->Termin,
         $t->Name,
         medDate($t->Datum),
-        $t->Uhrzeit,
+        sql2timeRaw($t->Uhrzeit),
         $u->getName()
         );
         if($this->Wert != $old->Wert) $str.=meldeSymbol($this->Wert)." (vorher:".meldeWert($old->Wert)."), ";
@@ -93,7 +93,7 @@ class Meldung
         $this->Termin,
         $t->Name,
         medDate($t->Datum),
-        $t->Uhrzeit,
+        sql2timeRaw($t->Uhrzeit),
         $u->getName(),
         $instr->Name
         );

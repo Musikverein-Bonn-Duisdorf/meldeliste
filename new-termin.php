@@ -131,11 +131,11 @@ if($fill && $n) {
       <div class="termin-field-pair">
         <div class="profile-field">
           <label class="profile-label" for="termin-uhrzeit">Beginn <b class="termin-form-clear" onclick="clearInput('Uhrzeit')" title="leeren">&#10006;</b></label>
-          <input id="termin-uhrzeit" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uhrzeit" type="time" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Uhrzeit, ENT_QUOTES, 'UTF-8').'"'; ?>>
+          <input id="termin-uhrzeit" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uhrzeit" type="time" step="60" <?php if($fill) echo 'value="'.htmlspecialchars(sql2timeRaw($n->Uhrzeit), ENT_QUOTES, 'UTF-8').'"'; ?>>
         </div>
         <div class="profile-field">
           <label class="profile-label" for="termin-uhrzeit2">Ende <b class="termin-form-clear" onclick="clearInput('Uhrzeit2')" title="leeren">&#10006;</b></label>
-          <input id="termin-uhrzeit2" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uhrzeit2" type="time" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Uhrzeit2, ENT_QUOTES, 'UTF-8').'"'; ?>>
+          <input id="termin-uhrzeit2" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uhrzeit2" type="time" step="60" <?php if($fill) echo 'value="'.htmlspecialchars(sql2timeRaw($n->Uhrzeit2), ENT_QUOTES, 'UTF-8').'"'; ?>>
         </div>
       </div>
 <?php if($GLOBALS['optionsDB']['showVehicle'] || $GLOBALS['optionsDB']['showTravelTime']) { ?>
@@ -157,7 +157,7 @@ if($fill && $n) {
 <?php if($GLOBALS['optionsDB']['showTravelTime']) { ?>
         <div class="profile-field">
           <label class="profile-label" for="termin-abfahrt">Abfahrt</label>
-          <input id="termin-abfahrt" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Abfahrt" type="time" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Abfahrt, ENT_QUOTES, 'UTF-8').'"'; ?>>
+          <input id="termin-abfahrt" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Abfahrt" type="time" step="60" <?php if($fill) echo 'value="'.htmlspecialchars(sql2timeRaw($n->Abfahrt), ENT_QUOTES, 'UTF-8').'"'; ?>>
         </div>
 <?php } ?>
       </div>

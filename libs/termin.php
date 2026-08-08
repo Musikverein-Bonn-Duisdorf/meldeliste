@@ -97,11 +97,11 @@ class Termin
         );
         if($this->Datum != $old->Datum) $str.=", Datum: ".$old->getDate()." &rArr; <b>".$this->getDate()."</b>";
         if($this->EndDatum != $old->EndDatum) $str.=", Enddatum: ".medDate($old->EndDatum)." &rArr; <b>".medDate($this->EndDatum)."</b>";
-        if($this->Uhrzeit != $old->Uhrzeit) $str.=", Uhrzeit: ".$old->Uhrzeit." &rArr; <b>".$this->Uhrzeit."</b>";
-        if($this->Uhrzeit2 != $old->Uhrzeit2) $str.=", Uhrzeit2: ".$old->Uhrzeit2." &rArr; <b>".$this->Uhrzeit2."</b>";
+        if($this->Uhrzeit != $old->Uhrzeit) $str.=", Uhrzeit: ".sql2timeRaw($old->Uhrzeit)." &rArr; <b>".sql2timeRaw($this->Uhrzeit)."</b>";
+        if($this->Uhrzeit2 != $old->Uhrzeit2) $str.=", Uhrzeit2: ".sql2timeRaw($old->Uhrzeit2)." &rArr; <b>".sql2timeRaw($this->Uhrzeit2)."</b>";
         if($this->Capacity != $old->Capacity) $str.=", Capacity: ".$old->Capacity." &rArr; <b>".$this->Capacity."</b>";
         if(!empty($GLOBALS['optionsDB']['showTravelTime']) && $this->Abfahrt != $old->Abfahrt) {
-            $str.=", Abfahrt: ".$old->Abfahrt." &rArr; <b>".$this->Abfahrt."</b>";
+            $str.=", Abfahrt: ".sql2timeRaw($old->Abfahrt)." &rArr; <b>".sql2timeRaw($this->Abfahrt)."</b>";
         }
         if(!empty($GLOBALS['optionsDB']['showVehicle']) && $this->Vehicle != $old->Vehicle) {
             $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
@@ -163,13 +163,13 @@ class Termin
             $parts[] = sprintf("Datum: <b>%s</b>", $dateStr);
         }
         if($this->Uhrzeit !== null && $this->Uhrzeit !== '') {
-            $parts[] = sprintf("Beginn: <b>%s</b>", $this->Uhrzeit);
+            $parts[] = sprintf("Beginn: <b>%s</b>", sql2timeRaw($this->Uhrzeit));
         }
         if($this->Uhrzeit2 !== null && $this->Uhrzeit2 !== '') {
-            $parts[] = sprintf("Ende: <b>%s</b>", $this->Uhrzeit2);
+            $parts[] = sprintf("Ende: <b>%s</b>", sql2timeRaw($this->Uhrzeit2));
         }
         if(!empty($GLOBALS['optionsDB']['showTravelTime']) && $this->Abfahrt !== null && $this->Abfahrt !== '') {
-            $parts[] = sprintf("Abfahrt: <b>%s</b>", $this->Abfahrt);
+            $parts[] = sprintf("Abfahrt: <b>%s</b>", sql2timeRaw($this->Abfahrt));
         }
         if(!empty($GLOBALS['optionsDB']['showVehicle']) && $this->vName !== null && $this->vName !== '') {
             $parts[] = sprintf("mit: <b>%s</b>", $this->vName);
@@ -1097,13 +1097,13 @@ class Termin
         $str .= '</td>';
         $str .= '<td data-label="Beginn">';
         $str .= '<div class="shift-edit-time-wrap">';
-        $str .= '<input id="shift-start-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Start]" type="time"'.$startAttr.'>';
+        $str .= '<input id="shift-start-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Start]" type="time" step="60"'.$startAttr.'>';
         $str .= '<button type="button" class="termin-form-clear shift-edit-clear" title="Beginn leeren" aria-label="Beginn leeren">&#10006;</button>';
         $str .= '</div>';
         $str .= '</td>';
         $str .= '<td data-label="Ende">';
         $str .= '<div class="shift-edit-time-wrap">';
-        $str .= '<input id="shift-end-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[End]" type="time"'.$endAttr.'>';
+        $str .= '<input id="shift-end-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[End]" type="time" step="60"'.$endAttr.'>';
         $str .= '<button type="button" class="termin-form-clear shift-edit-clear" title="Ende leeren" aria-label="Ende leeren">&#10006;</button>';
         $str .= '</div>';
         $str .= '</td>';

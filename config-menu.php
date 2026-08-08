@@ -238,7 +238,9 @@ while($row = mysqli_fetch_array($dbr)) {
         echo "</div>\n";
         break;
     case 'time':
-        echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"time\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
+        echo '<input class="w3-col l4 m4 s12 w3-center" type="time" step="60" name="'
+            .htmlspecialchars((string)$row['Parameter'], ENT_QUOTES, 'UTF-8')
+            .'" value="'.htmlspecialchars(sql2timeRaw($row['Value']), ENT_QUOTES, 'UTF-8').'" />'."\n";
         break;
     case 'int':
         echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"number\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";

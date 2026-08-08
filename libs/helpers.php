@@ -1217,7 +1217,11 @@ function sql2time($time) {
 }
 
 function sql2timeRaw($time) {
-    return substr($time, 0, 5);
+    if($time === null || $time === '') {
+        return '';
+    }
+    // Log payloads and UI: HH:MM without seconds (MELD-168)
+    return substr((string)$time, 0, 5);
 }
 
 function sqlerror() {
