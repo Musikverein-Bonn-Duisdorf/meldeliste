@@ -258,6 +258,7 @@ class LoanForm
 
         $borrowerLabel = 'Entleiher';
         $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
+        $borrowerAddress = trim((string)$loan->BorrowerAddress);
 
         $ctx = array(
             'kind' => $kind,
@@ -265,6 +266,7 @@ class LoanForm
             'orgName' => $orgName,
             'loanId' => (int)$loan->Index,
             'inventoryId' => (int)$inv->Index,
+            'borrowerUserId' => (int)$user->Index,
             'itemLabel' => $itemLabel,
             'itemDetails' => $details,
             'borrowerName' => trim($user->getName()),
@@ -272,7 +274,9 @@ class LoanForm
             'borrowerLabel' => $borrowerLabel,
             'isMember' => $isMember,
             'mitgliedsnummer' => $mitgliedsnummer,
+            'needMitgliedsnummerField' => $isMember && $mitgliedsnummer === '',
             'needAddressField' => !$isMember,
+            'borrowerAddress' => $borrowerAddress,
             'startDate' => (string)$loan->StartDate,
             'startDateDe' => germanDate($loan->StartDate, 0),
             'endDate' => $hasEnd ? (string)$loan->EndDate : '',
@@ -291,24 +295,71 @@ class LoanForm
         return $ctx;
     }
 
+    /** Escape text and wrap in strong for contract body HTML. */
+    public static function em($text) {
+        return '<strong class="loan-form-em">'.htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8').'</strong>';
+    }
+
     /**
-     * Legal clauses for loan or return form (plain German sentences).
+     * Persist free fields from the online contract form.
+     * Mitgliedsnummer → User.RefID; Adresse → InventoriesLoans.BorrowerAddress.
+     * @return bool
+     */
+    public static function saveContractFields(InventoriesLoan $loan, array $post) {
+        if(!(int)$loan->Index || !(int)$loan->User) {
+            return false;
+        }
+        $user = new User;
+        $user->load_by_id($loan->User);
+        if(!(int)$user->Index) {
+            return false;
+        }
+        $isMember = ((int)$user->Mitglied === 1);
+
+        // Mitgliedsnummer only fillable when still empty (online free field).
+        if($isMember && array_key_exists('Mitgliedsnummer', $post)) {
+            $hasRef = $user->RefID !== null && $user->RefID !== '' && (int)$user->RefID > 0;
+            if(!$hasRef) {
+                $digits = preg_replace('/\D+/', '', trim((string)$post['Mitgliedsnummer']));
+                $num = (int)$digits;
+                if($num > 0) {
+                    $user->RefID = $num;
+                    $user->save();
+                }
+            }
+        }
+
+        if(!$isMember && array_key_exists('BorrowerAddress', $post)) {
+            $addr = trim((string)$post['BorrowerAddress']);
+            if((string)$loan->BorrowerAddress !== $addr) {
+                $loan->BorrowerAddress = $addr;
+                $loan->save();
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Legal clauses as HTML list items (values escaped; emphasis via self::em).
      * @param array $ctx from buildContext
      * @return list<string>
      */
     public static function buildClauses(array $ctx) {
         $kind = isset($ctx['kind']) ? self::normalizeKind($ctx['kind']) : self::KIND_LOAN;
-        $org = isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein';
-        $item = isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'das Leihgut';
-        $borrower = isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher';
+        $org = self::em(isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein');
+        $item = self::em(isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'das Leihgut');
+        $borrower = self::em(isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher');
         $isMember = !empty($ctx['isMember']);
         $hasKaution = !empty($ctx['hasKaution']);
         $hasLeihgebuehr = !empty($ctx['hasLeihgebuehr']);
         $hasFixedEnd = !empty($ctx['hasFixedEnd']);
-        $kautionFmt = isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : '';
-        $leihgebuehrFmt = isset($ctx['leihgebuehrFormatted']) ? (string)$ctx['leihgebuehrFormatted'] : '';
-        $startDe = isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '';
-        $endDe = isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '';
+        $kautionFmt = self::em(isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : '');
+        $leihgebuehrFmt = self::em(isset($ctx['leihgebuehrFormatted']) ? (string)$ctx['leihgebuehrFormatted'] : '');
+        $startDe = self::em(isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '');
+        $endDe = self::em(isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '');
+        $kautionWord = self::em('Kaution');
+        $feeWord = self::em('Leihgebühr');
 
         if($kind === self::KIND_RETURN) {
             $clauses = array();
@@ -318,7 +369,7 @@ class LoanForm
                 .' Offensichtliche Mängel sind auf diesem Protokoll zu vermerken;'
                 .' andernfalls gilt die Rückgabe als äußerlich ordnungsgemäß.';
             if($hasKaution) {
-                $clauses[] = 'Die bei Überlassung hinterlegte Kaution in Höhe von '.$kautionFmt
+                $clauses[] = 'Die bei Überlassung hinterlegte '.$kautionWord.' in Höhe von '.$kautionFmt
                     .' wird mit der Rückgabe – soweit keine berechtigten Abzüge wegen Beschädigung,'
                     .' Verlust oder fehlender Bestandteile bestehen – an '.$borrower.' zurückgezahlt.';
             }
@@ -345,12 +396,12 @@ class LoanForm
         $clauses[] = 'Verlust, Diebstahl oder wesentliche Schäden sind dem Verein unverzüglich anzuzeigen.';
 
         if($hasLeihgebuehr) {
-            $clauses[] = 'Für die Überlassung erhebt der Verein eine Leihgebühr in Höhe von '.$leihgebuehrFmt
+            $clauses[] = 'Für die Überlassung erhebt der Verein eine '.$feeWord.' in Höhe von '.$leihgebuehrFmt
                 .'. Die Leihgebühr ist mit Vertragsschluss fällig und wird nicht erstattet.';
         }
 
         if($hasKaution) {
-            $clauses[] = 'Für die Dauer der Leihe hinterlegt der Entleiher eine Kaution in Höhe von '.$kautionFmt
+            $clauses[] = 'Für die Dauer der Leihe hinterlegt der Entleiher eine '.$kautionWord.' in Höhe von '.$kautionFmt
                 .'. Die Kaution wird bei ordnungsgemäßer Rückgabe zurückgezahlt;'
                 .' berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile sind zulässig.';
         }
