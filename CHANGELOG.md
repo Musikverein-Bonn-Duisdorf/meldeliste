@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-920a8 (2026-08-08)
+
+- MELD-174: Kalender-Toolbar als Grid, horizontale Monat/Jahr-Auswahl
+- MELD-174: Kalender-Toolbar Grid-Fix (Follow-up)
+
 ## 2026-08-08-0d609 (2026-08-08)
 
 - MELD-174: Kalendersteuerung auf Smartphone stapeln und verkleinern
