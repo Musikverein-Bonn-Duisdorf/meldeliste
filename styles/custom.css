@@ -4790,10 +4790,166 @@ select.profile-control {
     width: auto;
   }
 
+  /* Keep fixed melde-btn size (do not grow on tablet/phone) */
   .melde-btn {
-    width: 3rem;
-    min-width: 3rem;
-    min-height: 2.85rem;
+    width: 2.85rem;
+    min-width: 2.85rem;
+    min-height: 2.6rem;
+  }
+}
+
+/* MELD-172: Smartphone termin rows — substantially denser */
+@media (max-width: 600px) {
+  .admin-list-body #Liste > [id^="responseLine"],
+  .admin-list-body #Liste > .melde-response-row,
+  .admin-list-body #Liste > .w3-card {
+    margin-top: 0.35rem !important;
+  }
+
+  .melde-row {
+    --melde-pad-x: 0.55rem;
+    --melde-col-gap: 0.4rem;
+    --melde-date-rail-inset: 0.25rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .melde-row-main {
+    --melde-row-pad-y: 0.4rem;
+    row-gap: 0.35rem;
+    padding: var(--melde-row-pad-y) var(--melde-pad-x);
+  }
+
+  .melde-date {
+    gap: 0.3rem;
+  }
+
+  .melde-weekday {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding: 0 0.2rem;
+    font-size: 0.72rem;
+  }
+
+  .melde-date-details {
+    gap: 0.05rem;
+  }
+
+  .melde-date-day {
+    font-size: 0.8rem;
+  }
+
+  .melde-date-time {
+    font-size: 0.7rem;
+  }
+
+  .melde-title {
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .melde-desc {
+    margin-top: 0.1rem;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 1;
+  }
+
+  .melde-ort {
+    margin-top: 0.08rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .melde-actions {
+    gap: 0.3rem 0.4rem;
+  }
+
+  .melde-btns {
+    gap: 0.3rem;
+  }
+
+  .melde-btn {
+    width: 2.55rem;
+    min-width: 2.55rem;
+    min-height: 2.35rem;
+    padding: 0.25rem 0.15rem !important;
+    font-size: 0.95rem;
+  }
+
+  .melde-meta {
+    font-size: 0.75rem;
+  }
+
+  .melde-meta-btn {
+    font-size: 0.75rem !important;
+    padding: 0.28rem 0.4rem !important;
+  }
+
+  .melde-full {
+    padding: 0.25rem 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .melde-ical-btn {
+    width: 2.15rem;
+    height: 2.15rem;
+    font-size: 1rem;
+  }
+
+  .melde-extra {
+    gap: 0.35rem 0.5rem;
+    padding: 0 var(--melde-pad-x) 0.45rem;
+  }
+
+  .melde-extra-label {
+    font-size: 0.8rem;
+  }
+
+  .melde-shift {
+    gap: 0.35rem 0.55rem;
+    padding: 0.4rem var(--melde-pad-x);
+  }
+
+  .melde-shift-name {
+    font-size: 0.9rem;
+  }
+
+  .melde-shift-time {
+    margin-top: 0.05rem;
+    font-size: 0.75rem;
+  }
+
+  .melde-response-row .melde-row-main {
+    column-gap: 0.45rem;
+  }
+
+  .melde-response-body {
+    gap: 0.2rem;
+    padding: 0 var(--melde-pad-x) 0.4rem;
+  }
+
+  .melde-response-body > .melde-shift,
+  .melde-response-body > .melde-response-shift {
+    padding: 0.35rem 0;
+  }
+
+  .melde-response-chip {
+    padding: 0.12rem 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .melde-response-reg {
+    gap: 0.2rem;
+    padding: 0.28rem 0.35rem;
+  }
+
+  .melde-response-reg-name {
+    font-size: 0.82rem;
+  }
+
+  .melde-response-empty {
+    padding: 0.2rem 0;
+    font-size: 0.8rem;
   }
 }
 
