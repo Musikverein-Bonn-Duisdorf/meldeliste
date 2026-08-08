@@ -2916,18 +2916,20 @@ body.meld-cal-print {
   }
 }
 
-/* Loan / return print forms (MELD-181) — corporate A4 contract */
+/* Loan / return print forms (MELD-181) — A4 WYSIWYG contract */
 body.loan-form-print {
   --loan-brand: #345A95;
   --loan-ink: #1c2430;
   --loan-muted: #5a6570;
-  --loan-line: #9aa5b1;
+  --loan-line: #c5ccd4;
   --loan-panel: #f7f8fa;
+  --loan-page-pad-y: 10mm;
+  --loan-page-pad-x: 12mm;
   margin: 0;
   padding: 1rem 1.25rem 1.5rem;
   font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 10pt;
-  line-height: 1.35;
+  font-size: 9.25pt;
+  line-height: 1.28;
   color: var(--loan-ink);
   background: #eceff3;
 }
@@ -2937,8 +2939,9 @@ body.loan-form-print {
   flex-wrap: wrap;
   gap: 0.45rem;
   align-items: center;
-  max-width: 210mm;
-  margin: 0 auto 0.85rem;
+  width: 210mm;
+  max-width: 100%;
+  margin: 0 auto 0.75rem;
 }
 
 .loan-form-btn {
@@ -2989,42 +2992,44 @@ body.loan-form-print {
   margin: 0;
 }
 
-/* Document surface matches print content (A4 width + page margins). */
+/*
+ * Fixed A4 preview surface.
+ * Padding = @page margins → content box matches printable area.
+ * Height grows with content (no flex spacer) so preview ≈ print.
+ */
 .loan-form-doc {
   --loan-brand: #345A95;
   box-sizing: border-box;
   width: 210mm;
   max-width: 100%;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 297mm;
+  display: block;
   background: #fff;
   border: 1px solid #d5dde6;
   box-shadow: 0 1px 2px rgba(28, 36, 48, 0.04), 0 8px 24px rgba(28, 36, 48, 0.06);
-  padding: 12mm 14mm;
+  padding: var(--loan-page-pad-y) var(--loan-page-pad-x);
   color: var(--loan-ink);
-  font-size: 10pt;
-  line-height: 1.35;
+  font-size: 9.25pt;
+  line-height: 1.28;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
 .loan-form-header {
-  margin: 0 0 0.85rem;
-  padding: 0 0 0.65rem;
-  border-bottom: 3px solid var(--loan-brand);
+  margin: 0 0 0.55rem;
+  padding: 0 0 0.4rem;
+  border-bottom: 2.5px solid var(--loan-brand);
 }
 
 .loan-form-brand {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.55rem;
   align-items: center;
 }
 
 .loan-form-logo {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.15rem;
+  height: 2.15rem;
   object-fit: contain;
   flex: 0 0 auto;
 }
@@ -3034,8 +3039,8 @@ body.loan-form-print {
 }
 
 .loan-form-org {
-  margin: 0 0 0.15rem;
-  font-size: 0.82rem;
+  margin: 0 0 0.1rem;
+  font-size: 0.72rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--loan-muted);
@@ -3043,16 +3048,16 @@ body.loan-form-print {
 
 .loan-form-header h1 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.15;
   color: var(--loan-ink);
 }
 
 .loan-form-meta {
-  margin: 0.4rem 0 0;
+  margin: 0.28rem 0 0;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--loan-muted);
 }
 
@@ -3061,19 +3066,19 @@ body.loan-form-print {
 }
 
 .loan-form-section {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.45rem;
 }
 
 .loan-form-panel {
   background: var(--loan-panel);
   border: 1px solid var(--loan-line);
   border-radius: 2px;
-  padding: 0.65rem 0.75rem 0.7rem;
+  padding: 0.45rem 0.55rem 0.5rem;
 }
 
 .loan-form-section h2 {
-  margin: 0 0 0.5rem;
-  font-size: 0.78rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3085,30 +3090,30 @@ body.loan-form-print {
 .loan-form-parties {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem 1.25rem;
+  gap: 0.45rem 1rem;
 }
 
 .loan-form-party-role {
-  margin: 0 0 0.2rem;
+  margin: 0 0 0.12rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--loan-muted);
 }
 
 .loan-form-party-name {
-  margin: 0 0 0.35rem;
-  font-size: 1.02rem;
-  line-height: 1.25;
+  margin: 0 0 0.2rem;
+  font-size: 0.98rem;
+  line-height: 1.2;
 }
 
 .loan-form-field-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem 0.55rem;
+  gap: 0.25rem 0.45rem;
   align-items: baseline;
-  margin: 0.35rem 0 0;
+  margin: 0.25rem 0 0;
 }
 
 .loan-form-field-row--stack {
@@ -3118,7 +3123,7 @@ body.loan-form-print {
 
 .loan-form-field-label {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--loan-muted);
 }
@@ -3131,7 +3136,7 @@ body.loan-form-print {
   border: none;
   border-bottom: 1px solid #8b96a3;
   border-radius: 0;
-  padding: 0.15rem 0.1rem;
+  padding: 0.1rem 0.05rem;
   outline: none;
 }
 
@@ -3140,23 +3145,23 @@ body.loan-form-print {
 }
 
 .loan-form-input--short {
-  width: 7.5rem;
+  width: 7rem;
   max-width: 100%;
 }
 
 .loan-form-input--address {
   width: 100%;
-  min-height: 2.6em;
+  min-height: 2.2em;
   resize: vertical;
   border: 1px solid var(--loan-line);
   border-radius: 2px;
-  padding: 0.35rem 0.45rem;
-  line-height: 1.3;
+  padding: 0.28rem 0.4rem;
+  line-height: 1.25;
   background: #fff;
 }
 
 .loan-form-address-value {
-  margin: 0.15rem 0 0;
+  margin: 0.1rem 0 0;
   white-space: pre-wrap;
   font-weight: 400;
 }
@@ -3164,19 +3169,19 @@ body.loan-form-print {
 .loan-form-blank {
   display: inline-block;
   border-bottom: 1px solid #6b7682;
-  min-height: 1.05em;
+  min-height: 1em;
   vertical-align: bottom;
 }
 
 .loan-form-blank--short {
-  width: 6.5rem;
+  width: 6rem;
 }
 
 .loan-form-blank--address {
   display: block;
   width: 100%;
-  min-height: 2.5em;
-  margin-top: 0.2rem;
+  min-height: 2.1em;
+  margin-top: 0.15rem;
 }
 
 .loan-form-blank--line {
@@ -3187,105 +3192,105 @@ body.loan-form-print {
 .loan-form-item-title {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.55rem;
+  gap: 0.25rem 0.45rem;
   align-items: baseline;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.35rem;
 }
 
 .loan-form-item-label {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--loan-muted);
 }
 
 .loan-form-item-value {
   font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 400;
   color: var(--loan-ink);
 }
 
-/* Leihgut detail table: vertical column separators, no horizontal row rules */
+/* Borderless definition list (pre-table-border look) */
 .loan-form-dl {
   margin: 0;
   display: grid;
-  border: 1px solid var(--loan-line);
-  background: #fff;
-  row-gap: 0.2rem;
-  column-gap: 0;
+  gap: 0.18rem 0.85rem;
+  border: 0;
+  background: transparent;
 }
 
 .loan-form-dl > div {
   display: grid;
-  grid-template-columns: 7.25rem 1fr;
-  align-items: stretch;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.1rem 0.45rem;
+  align-items: baseline;
   min-width: 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .loan-form-dl--2col {
   grid-template-columns: 1fr 1fr;
+  column-gap: 1rem;
+  row-gap: 0.18rem;
 }
 
 .loan-form-dl--2col > div {
-  grid-template-columns: 6.75rem 1fr;
-}
-
-.loan-form-dl--2col > div:nth-child(odd) {
-  border-right: 1px solid var(--loan-line);
-}
-
-.loan-form-dl dt,
-.loan-form-dl dd {
-  margin: 0;
-  padding: 0.32rem 0.45rem;
-  box-sizing: border-box;
+  grid-template-columns: 6.5rem 1fr;
+  border: 0;
 }
 
 .loan-form-dl dt {
+  margin: 0;
+  padding: 0;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--loan-ink);
-  border-right: 1px solid var(--loan-line);
-  background: #f0f2f5;
+  color: var(--loan-muted);
+  background: transparent;
+  border: 0;
 }
 
 .loan-form-dl dd {
+  margin: 0;
+  padding: 0;
   font-weight: 400;
   color: var(--loan-ink);
   word-break: break-word;
+  border: 0;
+  background: transparent;
 }
 
 .loan-form-muted {
-  margin: 0.25rem 0 0;
+  margin: 0.18rem 0 0;
   color: var(--loan-muted);
-  font-size: 0.88em;
+  font-size: 0.85em;
   font-weight: 400;
 }
 
 .loan-form-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
+  display: block;
 }
 
-.loan-form-terms {
-  flex: 1 1 auto;
+.loan-form-leihgut {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .loan-form-clauses {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 1.1rem;
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
 }
 
 .loan-form-clauses li {
-  margin: 0 0 0.38rem;
-  padding-left: 0.15rem;
+  margin: 0 0 0.22rem;
+  padding-left: 0.1rem;
+  orphans: 2;
+  widows: 2;
 }
 
 .loan-form-clauses .loan-form-em {
@@ -3300,54 +3305,56 @@ body.loan-form-print {
 
 .loan-form-checks li {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   align-items: flex-start;
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.28rem;
 }
 
 .loan-form-box {
   display: inline-block;
-  width: 0.85rem;
-  height: 0.85rem;
-  margin-top: 0.15rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-top: 0.12rem;
   border: 1.5px solid #4a5560;
   flex: 0 0 auto;
   background: #fff;
 }
 
 .loan-form-signatures {
-  margin-top: auto;
-  padding-top: 0.35rem;
+  margin-top: 0.55rem;
+  padding-top: 0.15rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .loan-form-sign-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem 1.5rem;
+  gap: 0.65rem 1.15rem;
 }
 
 .loan-form-sign {
   border-top: 1px solid var(--loan-line);
-  padding-top: 0.65rem;
+  padding-top: 0.4rem;
 }
 
 .loan-form-sign-space {
-  height: 2rem;
+  height: 1.35rem;
   border-bottom: 1px solid #4a5560;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.15rem;
 }
 
 .loan-form-sign-caption {
-  margin: 0 0 0.85rem;
-  font-size: 0.82rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
   color: var(--loan-ink);
 }
 
 .loan-form-sign-role {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--loan-muted);
@@ -3362,11 +3369,11 @@ body.loan-form-print {
   align-items: center;
 }
 
-/* Print: same document styling as screen; only hide chrome / fit page. */
+/* Print: identical metrics; only strip screen chrome. */
 @media print {
   @page {
     size: A4;
-    margin: 12mm 14mm;
+    margin: 10mm 12mm;
   }
 
   html,
@@ -3378,8 +3385,9 @@ body.loan-form-print {
 
   body.loan-form-print {
     padding: 0;
-    font-size: 10pt;
-    line-height: 1.35;
+    margin: 0;
+    font-size: 9.25pt;
+    line-height: 1.28;
   }
 
   .no-print {
@@ -3389,14 +3397,20 @@ body.loan-form-print {
   .loan-form-doc {
     width: auto;
     max-width: none;
-    min-height: calc(297mm - 24mm);
+    min-height: 0;
+    height: auto;
     margin: 0;
     border: 0;
     box-shadow: none;
     padding: 0;
   }
 
+  .loan-form-leihgut,
+  .loan-form-dl > div,
+  .loan-form-parties,
+  .loan-form-signatures,
   .loan-form-sign-grid {
+    break-inside: avoid;
     page-break-inside: avoid;
   }
 
@@ -3412,18 +3426,13 @@ body.loan-form-print {
     grid-template-columns: 1fr;
   }
 
-  .loan-form-dl--2col > div:nth-child(odd) {
-    border-right: 0;
-  }
-
   .loan-form-dl > div,
   .loan-form-dl--2col > div {
-    grid-template-columns: 7.25rem 1fr;
+    grid-template-columns: 7rem 1fr;
   }
 
   .loan-form-doc {
     width: auto;
-    min-height: 0;
     padding: 1rem;
   }
 }
