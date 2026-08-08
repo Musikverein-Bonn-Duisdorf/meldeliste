@@ -697,7 +697,7 @@ function renderPermissionGroupColorCss($wrapStyleTag = true) {
         $css .= '.perm-matrix td.perm-group--'.$id.'.perm-on{background:'.$strong.';}';
     }
 
-    $css .= '@media (max-width:600px){';
+    $css .= '@media (max-width:992px){';
     foreach($palettes as $id => $tone) {
         $accent = $tone['accent'];
         $css .= '.app-nav>.app-nav-primary>.app-nav-item.admin-nav-perm--'.$id

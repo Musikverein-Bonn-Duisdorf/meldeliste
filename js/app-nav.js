@@ -1,6 +1,6 @@
 (function () {
   function isNarrow() {
-    return window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+    return window.matchMedia && window.matchMedia('(max-width: 992px)').matches;
   }
 
   /** Close open admin accordion groups; on desktop keep the active-page section open. */
