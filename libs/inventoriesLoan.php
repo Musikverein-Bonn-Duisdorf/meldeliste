@@ -1,7 +1,17 @@
 <?php
 class InventoriesLoan
 {
-    private $_data = array('Index' => null, 'User' => null, 'Inventory' => null, 'StartDate' => null, 'EndDate' => null, 'ContractFile' => null);
+    private $_data = array(
+        'Index' => null,
+        'User' => null,
+        'Inventory' => null,
+        'StartDate' => null,
+        'EndDate' => null,
+        'Kaution' => null,
+        'ContractFile' => null,
+        'ReturnContractFile' => null,
+    );
+
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -9,9 +19,10 @@ class InventoriesLoan
 	    case 'Inventory':
 	    case 'StartDate':
 	    case 'EndDate':
+	    case 'Kaution':
 	    case 'ContractFile':
+	    case 'ReturnContractFile':
             return $this->_data[$key];
-            break;
         default:
             break;
         }
@@ -22,7 +33,16 @@ class InventoriesLoan
 	    case 'StartDate':
 	    case 'EndDate':
 	    case 'ContractFile':
+	    case 'ReturnContractFile':
             $this->_data[$key] = $val;
+            break;
+	    case 'Kaution':
+            if($val === null || $val === '') {
+                $this->_data[$key] = '0.00';
+            }
+            else {
+                $this->_data[$key] = number_format(LoanForm::parseKaution($val), 2, '.', '');
+            }
             break;
 	    case 'Index':
 	    case 'Inventory':
@@ -31,7 +51,7 @@ class InventoriesLoan
             break;
         default:
             break;
-        }	
+        }
     }
 
     public function is_valid() {
@@ -52,6 +72,10 @@ class InventoriesLoan
             $typeName,
             RegNumber::displayInventory($inv->Inventory, $inv->RegNumber)
         );
+    }
+
+    private function escapeDb($val) {
+        return mysqli_real_escape_string($GLOBALS['conn'], (string)$val);
     }
 
     public function getChanges() {
@@ -85,9 +109,17 @@ class InventoriesLoan
             $str .= ', EndDate: '.germanDate($old->EndDate, 0)
                 .' &rArr; <b>'.germanDate($this->EndDate, 0).'</b>';
         }
+        if(LoanForm::parseKaution($this->Kaution) !== LoanForm::parseKaution($old->Kaution)) {
+            $str .= ', Kaution: '.LoanForm::formatKaution($old->Kaution)
+                .' &rArr; <b>'.LoanForm::formatKaution($this->Kaution).'</b>';
+        }
         if($this->ContractFile != $old->ContractFile) {
             $str .= ', ContractFile: '.$old->ContractFile
                 .' &rArr; <b>'.$this->ContractFile.'</b>';
+        }
+        if($this->ReturnContractFile != $old->ReturnContractFile) {
+            $str .= ', ReturnContractFile: '.$old->ReturnContractFile
+                .' &rArr; <b>'.$this->ReturnContractFile.'</b>';
         }
 
         return $str;
@@ -105,12 +137,19 @@ class InventoriesLoan
         logAppendFilled($parts, 'StartDate', $start, (string)$start);
         $end = germanDate($this->EndDate, 0);
         logAppendFilled($parts, 'EndDate', $end, (string)$end);
+        if(LoanForm::hasKaution($this->Kaution)) {
+            $parts[] = logPart('Kaution', LoanForm::formatKaution($this->Kaution));
+        }
         logAppendFilled($parts, 'ContractFile', $this->ContractFile, (string)$this->ContractFile);
+        logAppendFilled($parts, 'ReturnContractFile', $this->ReturnContractFile, (string)$this->ReturnContractFile);
         return implode(', ', $parts);
     }
 
     public function save() {
         if(!$this->is_valid()) return false;
+        if($this->Kaution === null || $this->Kaution === '') {
+            $this->Kaution = '0.00';
+        }
         if($this->Index > 0) {
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
@@ -124,13 +163,16 @@ class InventoriesLoan
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", %s, %s, "%s");',
-        $GLOBALS['dbprefix'],
-        $this->User,
-        $this->Inventory,
-        mkNULLstr($this->StartDate),
-        mkNULLstr($this->EndDate),
-        $this->ContractFile
+        $sql = sprintf(
+            'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `Kaution`, `ContractFile`, `ReturnContractFile`) VALUES ("%d", "%d", %s, %s, "%s", "%s", "%s");',
+            $GLOBALS['dbprefix'],
+            $this->User,
+            $this->Inventory,
+            mkNULLstr($this->StartDate),
+            mkNULLstr($this->EndDate),
+            $this->escapeDb(number_format(LoanForm::parseKaution($this->Kaution), 2, '.', '')),
+            $this->escapeDb($this->ContractFile),
+            $this->escapeDb($this->ReturnContractFile)
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -138,16 +180,19 @@ class InventoriesLoan
         $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
         return true;
     }
-    
+
     protected function update() {
-        $sql = sprintf('UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `ContractFile` = "%s" WHERE `Index` = "%d";',
-        $GLOBALS['dbprefix'],
-        $this->User,
-        $this->Inventory,
-        mkNULLstr($this->StartDate),
-        mkNULLstr($this->EndDate),
-        $this->ContractFile,
-        $this->Index
+        $sql = sprintf(
+            'UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `Kaution` = "%s", `ContractFile` = "%s", `ReturnContractFile` = "%s" WHERE `Index` = "%d";',
+            $GLOBALS['dbprefix'],
+            $this->User,
+            $this->Inventory,
+            mkNULLstr($this->StartDate),
+            mkNULLstr($this->EndDate),
+            $this->escapeDb(number_format(LoanForm::parseKaution($this->Kaution), 2, '.', '')),
+            $this->escapeDb($this->ContractFile),
+            $this->escapeDb($this->ReturnContractFile),
+            $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -167,14 +212,25 @@ class InventoriesLoan
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-        
+
         $this->_data['Index'] = null;
         return true;
     }
 
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            if(!array_key_exists($key, $this->_data)) {
+                continue;
+            }
+            if($key === 'Kaution') {
+                $this->Kaution = $val;
+                continue;
+            }
+            if($key === 'Index' || $key === 'Inventory' || $key === 'User') {
+                $this->_data[$key] = (int)$val;
+                continue;
+            }
+            $this->_data[$key] = $val;
         }
     }
 

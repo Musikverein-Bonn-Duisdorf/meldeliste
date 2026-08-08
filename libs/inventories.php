@@ -541,15 +541,23 @@ class Inventories
             .'<input id="loan-start" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="StartDate" required></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-end">Bis</label>'
             .'<input id="loan-end" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="EndDate"></div>';
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-kaution">Kaution</label>'
+            .'<input id="loan-kaution" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value=""></div>';
         $str .= '<div class="profile-field"><button type="submit" name="newLoan" value="1" class="w3-btn profile-btn-primary '.$btn.' w3-border w3-mobile">Leihe eintragen</button></div>';
         $str .= $form->close();
         return $str;
     }
 
     private function getLoanRowHtml($indent, InventoriesLoan $L, $canEdit) {
-        $active = ($L->EndDate === null || $L->EndDate === '');
+        $active = ($L->EndDate === null || $L->EndDate === '' || $L->EndDate === '0000-00-00');
+        $ended = !InventoriesLoan::isOpen($L->EndDate);
         $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
         $btnDelete = $GLOBALS['optionsDB']['colorBtnDelete'];
+        $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
+        $loanId = (int)$L->Index;
+        $hasKaution = LoanForm::hasKaution($L->Kaution);
+        $hasLoanScan = trim((string)$L->ContractFile) !== '';
+        $hasReturnScan = trim((string)$L->ReturnContractFile) !== '';
 
         $row = new div;
         $row->indent = $indent;
@@ -572,25 +580,65 @@ class Inventories
         $until = $active
             ? '<span class="w3-tag w3-teal w3-round">offen</span>'
             : htmlspecialchars((string)germanDate($L->EndDate, 0), ENT_QUOTES, 'UTF-8');
+        $meta = $from.' &ndash; '.$until;
+        if($hasKaution) {
+            $meta .= ' · Kaution '.htmlspecialchars(LoanForm::formatKaution($L->Kaution), ENT_QUOTES, 'UTF-8');
+        }
         $info->body = '<div><b>'.$name.'</b></div>'
-            .'<div class="w3-small" style="margin-top:4px;">'.$from.' &ndash; '.$until.'</div>';
+            .'<div class="w3-small" style="margin-top:4px;">'.$meta.'</div>';
         $str .= $info->print();
 
+        $actions = new div;
+        $actions->indent = $indent + 2;
+        $actions->col(5, 12, 12);
+        $actions->class = "w3-right-align inventory-loan-actions";
+        $str .= $actions->open();
+        $str .= '<a class="w3-button w3-small w3-border" target="_blank" rel="noopener" '
+            .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a> ';
+        if(!$active || $ended) {
+            $str .= '<a class="w3-button w3-small w3-border" target="_blank" rel="noopener" '
+                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a> ';
+        }
+        if($hasLoanScan) {
+            $str .= '<a class="w3-button w3-small" target="_blank" rel="noopener" '
+                .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan" title="Scan Leihvertrag">Scan</a> ';
+        }
+        if($hasReturnScan) {
+            $str .= '<a class="w3-button w3-small" target="_blank" rel="noopener" '
+                .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return" title="Scan Rückgabe">Scan Rückgabe</a> ';
+        }
         if($canEdit) {
-            $actions = new div;
-            $actions->indent = $indent + 2;
-            $actions->col(5, 12, 12);
-            $actions->class = "w3-right-align";
-            $str .= $actions->open();
             $str .= '<form method="POST" action="" style="display:inline;" '
                 .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
-                .'<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">'
+                .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
                 .'<button type="submit" name="deleteLoan" value="1" class="w3-button w3-small '.$btnDelete.'">Löschen</button>'
                 .'</form>';
-            $str .= $actions->close();
         }
+        $str .= $actions->close();
 
         $str .= $head->close();
+
+        if($canEdit) {
+            $kForm = new div;
+            $kForm->indent = $indent + 1;
+            $kForm->tag = "form";
+            $kForm->method = "POST";
+            $kForm->action = "";
+            $kForm->class = "w3-row w3-padding-small";
+            $str .= $kForm->open();
+            $str .= '<input type="hidden" name="LoanIndex" value="'.$loanId.'">';
+            $kautionVal = $hasKaution
+                ? htmlspecialchars(number_format(LoanForm::parseKaution($L->Kaution), 2, ',', ''), ENT_QUOTES, 'UTF-8')
+                : '';
+            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-kaution-'.$loanId.'">Kaution</label></div>';
+            $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
+                .'<input id="loan-kaution-'.$loanId.'" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value="'.$kautionVal.'">'
+                .'</div>';
+            $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
+                .'<button type="submit" name="updateLoanKaution" value="1" class="w3-button '.$btnSubmit.'">Setzen</button>'
+                .'</div>';
+            $str .= $kForm->close();
+        }
 
         if($active && $canEdit) {
             $endForm = new div;
@@ -600,10 +648,10 @@ class Inventories
             $endForm->action = "";
             $endForm->class = "w3-row w3-padding-16";
             $str .= $endForm->open();
-            $str .= '<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">';
-            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-end-'.(int)$L->Index.'">Rückgabe</label></div>';
+            $str .= '<input type="hidden" name="LoanIndex" value="'.$loanId.'">';
+            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-end-'.$loanId.'">Rückgabe</label></div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
-                .'<input id="loan-end-'.(int)$L->Index.'" class="w3-input w3-border profile-control" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
+                .'<input id="loan-end-'.$loanId.'" class="w3-input w3-border profile-control" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
                 .'</div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
                 .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">Beenden</button>'
@@ -702,6 +750,7 @@ class Inventories
  */
 function handleInventoriesMutations() {
     $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['deleteLoan'])
+        || isset($_POST['updateLoanKaution'])
         || isset($_POST['insert']) || isset($_POST['update']) || isset($_POST['delete']);
     if(!$mutating) {
         return false;
@@ -713,7 +762,19 @@ function handleInventoriesMutations() {
     if(isset($_POST['newLoan'])) {
         $n = new InventoriesLoan;
         $n->fill_from_array($_POST);
+        if(!isset($_POST['Kaution']) || $_POST['Kaution'] === '') {
+            $n->Kaution = '0.00';
+        }
         $n->save();
+    }
+    if(isset($_POST['updateLoanKaution'])) {
+        $n = new InventoriesLoan;
+        $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
+        $n->load_by_id($loanId);
+        if($n->Index) {
+            $n->Kaution = isset($_POST['Kaution']) ? $_POST['Kaution'] : '0.00';
+            $n->save();
+        }
     }
     if(isset($_POST['endLoan'])) {
         $n = new InventoriesLoan;
