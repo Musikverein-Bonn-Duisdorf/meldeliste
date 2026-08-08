@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-0d609 (2026-08-08)
+
+- MELD-174: Kalendersteuerung auf Smartphone stapeln und verkleinern
+- MELD-174: Kalendersteuerung auf Smartphone
+
 ## 2026-08-08-2df2c (2026-08-08)
 
 - MELD-164: Log-Filter automatisch weiter nachladen
