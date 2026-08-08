@@ -247,34 +247,47 @@ class Log
 };
 
 /**
- * Live-Poll HTML for the log page (MELD-160).
- * Returns a new row when Index > $maxIndex, or the same row when its Timestamp
- * was bumped by Log dedupe (identical Message+User → UPDATE Timestamp only).
+ * Live-Poll HTML for the log page (MELD-160 / MELD-165).
+ * Returns newer rows (Index > $maxIndex) in batches of up to logListChunkSize
+ * (newest first), or the same top row when its Timestamp was bumped by Log
+ * dedupe (identical Message+User → UPDATE Timestamp only).
  *
- * @return string HTML of one log row, or empty string
+ * @param int $limit 0 = configured logListChunkSize (clamped via listChunkLogLimit)
+ * @return string HTML of one or more log rows, or empty string
  */
-function logPollNextHtml($maxIndex, $topTimestamp = '') {
+function logPollNextHtml($maxIndex, $topTimestamp = '', $limit = 0) {
     $maxIndex = (int)$maxIndex;
     if($maxIndex < 1) {
         return '';
     }
+    $limit = listChunkLogLimit($limit);
     $sql = sprintf(
-        'SELECT `Index` FROM `%sLog` WHERE `Index` > %d ORDER BY `Timestamp` ASC LIMIT 1;',
+        'SELECT `Index` FROM `%sLog` WHERE `Index` > %d ORDER BY `Index` ASC LIMIT %d;',
         $GLOBALS['dbprefix'],
-        $maxIndex
+        $maxIndex,
+        $limit
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
-    if($dbr && ($row = mysqli_fetch_array($dbr))) {
-        $M = new Log;
-        $M->load_by_id((int)$row['Index']);
-        if($M->Index > 0) {
-            ob_start();
-            $M->printTableLine();
-            $html = ob_get_clean();
-            return $html === false ? '' : $html;
+    $ids = array();
+    if($dbr) {
+        while($row = mysqli_fetch_array($dbr)) {
+            $ids[] = (int)$row['Index'];
         }
-        return '';
+    }
+    if(count($ids) > 0) {
+        // Newest first so the client can prepend the fragment as-is
+        $ids = array_reverse($ids);
+        ob_start();
+        foreach($ids as $id) {
+            $M = new Log;
+            $M->load_by_id($id);
+            if($M->Index > 0) {
+                $M->printTableLine();
+            }
+        }
+        $html = ob_get_clean();
+        return $html === false ? '' : $html;
     }
 
     $topTimestamp = trim((string)$topTimestamp);

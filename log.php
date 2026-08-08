@@ -52,10 +52,18 @@ function getLogTopTimestamp() {
     return top.getAttribute('data-timestamp') || '';
 }
 
+function getLogPollLimit() {
+    var sentinel = document.getElementById("listSentinel");
+    if(!sentinel) return 0;
+    var n = parseInt(sentinel.getAttribute("data-limit") || "0", 10);
+    return n > 0 ? n : 0;
+}
+
 function getLog() {
     var maxIndex = getLogMaxIndex();
     if(!(maxIndex > 0)) return;
     var topTimestamp = getLogTopTimestamp();
+    var limit = getLogPollLimit();
 
     var xmlhttp;
     if (window.XMLHttpRequest) {
@@ -69,22 +77,36 @@ function getLog() {
             var parent = document.getElementById("Liste");
             if(!parent) return;
             var doc = new DOMParser().parseFromString(xmlhttp.responseText, 'text/html');
-            var div = doc.body.firstElementChild;
-            if(!div || !div.id) return;
-            var existing = document.getElementById(div.id);
-            if(existing) {
-                // Deduped log: same Index, newer Timestamp — refresh in place (MELD-160)
-                existing.parentNode.replaceChild(div, existing);
+            var nodes = [];
+            for(var c = doc.body.firstElementChild; c; c = c.nextElementSibling) {
+                if(c.id) nodes.push(c);
             }
-            else {
+            if(!nodes.length) return;
+
+            var frag = document.createDocumentFragment();
+            var hasNew = false;
+            for(var i = 0; i < nodes.length; i++) {
+                var div = nodes[i];
+                var existing = document.getElementById(div.id);
+                if(existing) {
+                    // Deduped log: same Index, newer Timestamp — refresh in place (MELD-160)
+                    existing.parentNode.replaceChild(div, existing);
+                }
+                else {
+                    frag.appendChild(div);
+                    hasNew = true;
+                }
+            }
+            if(hasNew) {
+                // MELD-165: batch prepend (HTML is newest-first)
                 var first = parent.querySelector(":scope > div[id]:not(#listSentinel)");
                 if(first) {
-                    parent.insertBefore(div, first);
+                    parent.insertBefore(frag, first);
                 }
                 else {
                     var sentinel = document.getElementById("listSentinel");
-                    if(sentinel) parent.insertBefore(div, sentinel);
-                    else parent.appendChild(div);
+                    if(sentinel) parent.insertBefore(frag, sentinel);
+                    else parent.appendChild(frag);
                 }
             }
             // MELD-164: live prepend/refresh must respect active filter
@@ -95,7 +117,8 @@ function getLog() {
 	}
     }
     var body = "maxIndex="+encodeURIComponent(maxIndex)
-        +"&topTimestamp="+encodeURIComponent(topTimestamp);
+        +"&topTimestamp="+encodeURIComponent(topTimestamp)
+        +"&limit="+encodeURIComponent(limit);
     xmlhttp.open("POST", "getLog.php", true);
     xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xmlhttp.send(body);

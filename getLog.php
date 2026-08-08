@@ -24,5 +24,8 @@ if($topTimestamp === null) {
     $topTimestamp = '';
 }
 
-echo logPollNextHtml((int)$maxIndex, (string)$topTimestamp);
+$limit = meldeRequest('limit');
+$limit = ($limit !== null && is_numeric($limit)) ? (int)$limit : 0;
+
+echo logPollNextHtml((int)$maxIndex, (string)$topTimestamp, $limit);
 ?>

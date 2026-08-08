@@ -263,7 +263,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Statistik</b> – Auswertungen; auf breiten Bildschirmen Diagramme und Tabellen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>). Ranking und Inaktive teilen sich denselben Chip-Filter wie die Personenliste (Aktive/Gäste/Mitglieder, Register, Gruppen)</li>
-<li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung); Chunk-Größe über <code>logListChunkSize</code> in der Konfiguration</li>
+<li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung); Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>

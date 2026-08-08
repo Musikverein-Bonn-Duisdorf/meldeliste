@@ -585,7 +585,7 @@ function getConfigDefaults() {
             'Parameter' => 'logListChunkSize',
             'Value' => '100',
             'Type' => 'int',
-            'Description' => 'Log-Liste: Einträge pro AJAX-Nachladen (1–500)',
+            'Description' => 'Log-Liste / Live-Poll: Einträge pro Nachladen (1–500)',
         ),
         array(
             'Parameter' => 'SchemaVersion',
