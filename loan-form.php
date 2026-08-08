@@ -33,7 +33,7 @@ $canEdit = LoanForm::userMayEdit($userId);
 
 if($canEdit && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
     && isset($_POST['action']) && (string)$_POST['action'] === 'saveFields') {
-    LoanForm::saveContractFields($loan, $_POST);
+    LoanForm::saveContractFields($loan, $_POST, $kind);
     $loan->load_by_id($loanId);
     header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind));
     exit;
@@ -84,7 +84,15 @@ $showMemberNr = !empty($ctx['isMember']);
 $editMemberNr = $canEdit && !empty($ctx['needMitgliedsnummerField']);
 $showAddress = !empty($ctx['needAddressField']);
 $editAddress = $canEdit && !empty($ctx['needAddressEditField']);
-$hasEditableFields = $editMemberNr || $editAddress;
+$editChecklist = $canEdit && $kind === LoanForm::KIND_RETURN;
+$hasEditableFields = $editMemberNr || $editAddress || $editChecklist;
+$checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
+    ? $ctx['checklist']
+    : LoanForm::defaultChecklist();
+$checkReturned = !empty($checklist['returned']);
+$checkDeposit = !empty($checklist['depositReturned']);
+$checkDeductions = isset($checklist['deductions']) ? (string)$checklist['deductions'] : '';
+$checkNotes = isset($checklist['notes']) ? (string)$checklist['notes'] : '';
 
 header('Content-Type: text/html; charset=utf-8');
 ?><!DOCTYPE html>
@@ -124,6 +132,9 @@ header('Content-Type: text/html; charset=utf-8');
     <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
     <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
     <input type="hidden" name="action" value="saveFields">
+<?php   if($editChecklist) { ?>
+    <input type="hidden" name="checklist_save" value="1">
+<?php   } ?>
 <?php } ?>
 
   <article class="loan-form-doc" style="--loan-brand: <?php echo $h($brandBar); ?>;">
@@ -234,12 +245,50 @@ header('Content-Type: text/html; charset=utf-8');
       <section class="loan-form-section loan-form-panel">
         <h2>Checkliste</h2>
         <ul class="loan-form-checks">
-          <li><span class="loan-form-box" aria-hidden="true"></span> Leihgut zurückgegeben</li>
-<?php   if($ctx['hasKaution']) { ?>
-          <li><span class="loan-form-box" aria-hidden="true"></span> <strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</li>
-          <li><span class="loan-form-box" aria-hidden="true"></span> Abzüge (Betrag / Grund): <span class="loan-form-blank loan-form-blank--line"></span></li>
+          <li>
+<?php   if($editChecklist) { ?>
+            <label class="loan-form-check">
+              <input type="checkbox" name="checklist_returned" value="1"<?php echo $checkReturned ? ' checked' : ''; ?>>
+              <span>Leihgut zurückgegeben</span>
+            </label>
+<?php   } else { ?>
+            <span class="loan-form-box<?php echo $checkReturned ? ' loan-form-box--on' : ''; ?>" aria-hidden="true"></span>
+            <span>Leihgut zurückgegeben</span>
 <?php   } ?>
-          <li><span class="loan-form-box" aria-hidden="true"></span> Mängel / Bemerkungen: <span class="loan-form-blank loan-form-blank--line"></span></li>
+          </li>
+<?php   if($ctx['hasKaution']) { ?>
+          <li>
+<?php     if($editChecklist) { ?>
+            <label class="loan-form-check">
+              <input type="checkbox" name="checklist_depositReturned" value="1"<?php echo $checkDeposit ? ' checked' : ''; ?>>
+              <span><strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
+            </label>
+<?php     } else { ?>
+            <span class="loan-form-box<?php echo $checkDeposit ? ' loan-form-box--on' : ''; ?>" aria-hidden="true"></span>
+            <span><strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
+<?php     } ?>
+          </li>
+          <li class="loan-form-check-note-row">
+            <span class="loan-form-field-label">Abzüge</span>
+<?php     if($editChecklist) { ?>
+            <input class="loan-form-input loan-form-input--inline" type="text" name="checklist_deductions" value="<?php echo $h($checkDeductions); ?>" autocomplete="off">
+<?php     } elseif($checkDeductions !== '') { ?>
+            <span class="loan-form-field-value"><?php echo $h($checkDeductions); ?></span>
+<?php     } else { ?>
+            <span class="loan-form-blank loan-form-blank--line"></span>
+<?php     } ?>
+          </li>
+<?php   } ?>
+          <li class="loan-form-check-note-row">
+            <span class="loan-form-field-label">Bemerkungen</span>
+<?php   if($editChecklist) { ?>
+            <input class="loan-form-input loan-form-input--inline" type="text" name="checklist_notes" value="<?php echo $h($checkNotes); ?>" autocomplete="off">
+<?php   } elseif($checkNotes !== '') { ?>
+            <span class="loan-form-field-value"><?php echo $h($checkNotes); ?></span>
+<?php   } else { ?>
+            <span class="loan-form-blank loan-form-blank--line"></span>
+<?php   } ?>
+          </li>
         </ul>
       </section>
 <?php } ?>

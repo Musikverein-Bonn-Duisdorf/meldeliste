@@ -291,6 +291,7 @@ class LoanForm
             'hasLeihgebuehr' => $hasLeihgebuehr,
             'contractFile' => trim((string)$loan->ContractFile),
             'returnContractFile' => trim((string)$loan->ReturnContractFile),
+            'checklist' => self::parseChecklist($loan->ReturnChecklist),
         );
         $ctx['clauses'] = self::buildClauses($ctx);
         return $ctx;
@@ -301,21 +302,87 @@ class LoanForm
         return '<strong class="loan-form-em">'.htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8').'</strong>';
     }
 
+    /** @return array{returned:bool,depositReturned:bool,deductions:string,notes:string} */
+    public static function defaultChecklist() {
+        return array(
+            'returned' => false,
+            'depositReturned' => false,
+            'deductions' => '',
+            'notes' => '',
+        );
+    }
+
+    /**
+     * Decode ReturnChecklist JSON (or array) into a normalized checklist.
+     * @param mixed $raw
+     * @return array{returned:bool,depositReturned:bool,deductions:string,notes:string}
+     */
+    public static function parseChecklist($raw) {
+        $out = self::defaultChecklist();
+        if(is_array($raw)) {
+            $data = $raw;
+        }
+        else {
+            $s = trim((string)$raw);
+            if($s === '') {
+                return $out;
+            }
+            $data = json_decode($s, true);
+            if(!is_array($data)) {
+                return $out;
+            }
+        }
+        $out['returned'] = !empty($data['returned']);
+        $out['depositReturned'] = !empty($data['depositReturned']);
+        $deductions = isset($data['deductions']) ? trim((string)$data['deductions']) : '';
+        $notes = isset($data['notes']) ? trim((string)$data['notes']) : '';
+        if(strlen($deductions) > 500) {
+            $deductions = substr($deductions, 0, 500);
+        }
+        if(strlen($notes) > 1000) {
+            $notes = substr($notes, 0, 1000);
+        }
+        $out['deductions'] = $deductions;
+        $out['notes'] = $notes;
+        return $out;
+    }
+
+    /** @param array|string $raw */
+    public static function encodeChecklist($raw) {
+        return json_encode(self::parseChecklist($raw), JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Build checklist from return-form POST (unchecked boxes omitted → false).
+     * @return array{returned:bool,depositReturned:bool,deductions:string,notes:string}
+     */
+    public static function checklistFromPost(array $post) {
+        return self::parseChecklist(array(
+            'returned' => !empty($post['checklist_returned']),
+            'depositReturned' => !empty($post['checklist_depositReturned']),
+            'deductions' => isset($post['checklist_deductions']) ? $post['checklist_deductions'] : '',
+            'notes' => isset($post['checklist_notes']) ? $post['checklist_notes'] : '',
+        ));
+    }
+
     /**
      * Persist free fields from the online contract form.
-     * Mitgliedsnummer → User.RefID; Adresse → InventoriesLoans.BorrowerAddress.
+     * Mitgliedsnummer → User.RefID; Adresse → InventoriesLoans.BorrowerAddress;
+     * return checklist → InventoriesLoans.ReturnChecklist (JSON).
      * @return bool
      */
-    public static function saveContractFields(InventoriesLoan $loan, array $post) {
+    public static function saveContractFields(InventoriesLoan $loan, array $post, $kind = self::KIND_LOAN) {
         if(!(int)$loan->Index || !(int)$loan->User) {
             return false;
         }
+        $kind = self::normalizeKind($kind);
         $user = new User;
         $user->load_by_id($loan->User);
         if(!(int)$user->Index) {
             return false;
         }
         $isMember = ((int)$user->Mitglied === 1);
+        $loanDirty = false;
 
         // Mitgliedsnummer only fillable when still empty (online free field).
         if($isMember && array_key_exists('Mitgliedsnummer', $post)) {
@@ -334,8 +401,20 @@ class LoanForm
             $addr = trim((string)$post['BorrowerAddress']);
             if((string)$loan->BorrowerAddress !== $addr) {
                 $loan->BorrowerAddress = $addr;
-                $loan->save();
+                $loanDirty = true;
             }
+        }
+
+        if($kind === self::KIND_RETURN && !empty($post['checklist_save'])) {
+            $encoded = self::encodeChecklist(self::checklistFromPost($post));
+            if((string)$loan->ReturnChecklist !== $encoded) {
+                $loan->ReturnChecklist = $encoded;
+                $loanDirty = true;
+            }
+        }
+
+        if($loanDirty) {
+            $loan->save();
         }
 
         return true;

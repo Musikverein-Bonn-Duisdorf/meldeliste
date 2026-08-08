@@ -3310,7 +3310,40 @@ body.loan-form-print {
   display: flex;
   gap: 0.4rem;
   align-items: flex-start;
-  margin: 0 0 0.28rem;
+  margin: 0 0 0.35rem;
+}
+
+.loan-form-check {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  margin: 0;
+  cursor: pointer;
+}
+
+.loan-form-check input[type="checkbox"] {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0.12rem 0 0;
+  flex: 0 0 auto;
+  accent-color: #1c2430;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.loan-form-check-note-row {
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.loan-form-check-note-row .loan-form-field-label {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+}
+
+.loan-form-input--inline {
+  flex: 1 1 10rem;
+  min-width: 8rem;
 }
 
 .loan-form-box {
@@ -3321,6 +3354,25 @@ body.loan-form-print {
   border: 1.5px solid #4a5560;
   flex: 0 0 auto;
   background: #fff;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.loan-form-box--on {
+  background: #1c2430;
+  border-color: #1c2430;
+}
+
+.loan-form-box--on::after {
+  content: "";
+  position: absolute;
+  left: 0.18rem;
+  top: 0.02rem;
+  width: 0.22rem;
+  height: 0.4rem;
+  border: solid #fff;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
 }
 
 .loan-form-signatures {
