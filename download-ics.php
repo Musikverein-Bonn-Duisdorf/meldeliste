@@ -9,20 +9,35 @@ if(!loggedIn()) {
     die('forbidden');
 }
 
-if(!isset($_POST['appID'])) {
+$appId = 0;
+if(isset($_GET['appID'])) {
+    $appId = (int)$_GET['appID'];
+} elseif(isset($_POST['appID'])) {
+    // Legacy POST forms (pre-MELD-180)
+    $appId = (int)$_POST['appID'];
+}
+
+if($appId <= 0) {
     http_response_code(400);
     die('Error: Appointment not found.');
 }
 
 $n = new Termin;
-$n->load_by_id($_POST['appID']);
+$n->load_by_id($appId);
 if(!(int)$n->Index) {
     http_response_code(404);
     die('Error: Appointment not found.');
 }
 
+$rawName = preg_replace('/[^\w.\-]+/u', '_', (string)$n->Name);
+if($rawName === null || $rawName === '') {
+    $rawName = 'termin';
+}
+$filename = preg_replace('/[^\w.\-]+/u', '_', (string)$n->Datum).'_'.$rawName.'.ics';
+
 header('Content-Type: text/calendar; charset=utf-8');
-header('Content-Disposition: attachment; filename='.$n->Datum."_".$n->Name.'.ics');
+header('Content-Disposition: attachment; filename="'.$filename.'"');
+header('X-Content-Type-Options: nosniff');
 
 date_default_timezone_set('Europe/Berlin');
 if($n->EndDatum) {
