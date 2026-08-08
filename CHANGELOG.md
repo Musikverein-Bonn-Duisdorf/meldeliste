@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-241b5 (2026-08-08)
+
+- MELD-177: Inventarliste per Infinite Scroll nachladen
+
 ## 2026-08-08-11984 (2026-08-08)
 
 - MELD-166: Statistik-Userlisten im Personenlisten-Stil
