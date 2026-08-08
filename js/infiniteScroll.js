@@ -7,9 +7,10 @@
  * Optional data-sort / data-dir: server-side sort for user lists (MELD-96).
  * Exposes window.listInfiniteReload(sort, dir) to reset and reload from offset 0.
  *
- * MELD-164: With an active client-side filter, keep loading while the server reports
- * hasMore (sparse hits like „Adventskonzert“). No hard pause after empty chunks —
- * only stop on !hasMore or explicit user cancel. MELD-162 pause removed.
+ * MELD-164: With an active client-side filter, keep auto-loading while hasMore
+ * (sparse hits like „Adventskonzert“). Chain via timeout — not only IntersectionObserver —
+ * because a collapsed filter list keeps the sentinel in view. Optional Stoppen;
+ * no manual Weiter required. (MELD-162 hard pause after 2 empties removed.)
  */
 (function() {
     var loading = false;
@@ -117,8 +118,11 @@
         pausedByUser = false;
         var sentinel = getSentinel();
         if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
-        setStatus('', false);
-        reobserveSoon();
+        if(filterActive()) {
+            chainFilterLoadSoon();
+            return;
+        }
+        loadMore();
     }
 
     function applyFilter(sentinel) {
@@ -130,22 +134,26 @@
         }
     }
 
-    function countVisibleNodes(nodes) {
+    function isRowVisible(el) {
+        if(!el || el.nodeType !== 1) return false;
+        if(el.classList && el.classList.contains('list-filtered-out')) return false;
+        if(el.style && el.style.display === 'none') return false;
+        return true;
+    }
+
+    function countVisibleInList(list, sentinel) {
         var n = 0;
         var i;
-        for(i = 0; i < nodes.length; i++) {
-            var el = nodes[i];
-            if(!el || el.nodeType !== 1) continue;
-            if(el.classList && el.classList.contains('list-filtered-out')) continue;
-            if(el.style && el.style.display === 'none') continue;
-            n++;
+        for(i = 0; i < list.children.length; i++) {
+            var el = list.children[i];
+            if(el === sentinel) continue;
+            if(isRowVisible(el)) n++;
         }
         return n;
     }
 
     function appendHtml(list, sentinel, html) {
-        var appended = [];
-        if(!html) return appended;
+        if(!html) return;
         var wrap = document.createElement('div');
         wrap.innerHTML = html;
         while(wrap.firstChild) {
@@ -155,11 +163,7 @@
                 continue;
             }
             list.insertBefore(node, sentinel);
-            if(node.nodeType === 1) {
-                appended.push(node);
-            }
         }
-        return appended;
     }
 
     function clearRows(list, sentinel) {
@@ -208,6 +212,24 @@
         }, 100);
     }
 
+    /**
+     * Auto-chain next chunk while filter is active (timeout, not IO).
+     * Collapsed filter lists keep the sentinel intersecting forever.
+     */
+    function chainFilterLoadSoon() {
+        setTimeout(function() {
+            if(pausedByUser || loading) return;
+            var sentinel = getSentinel();
+            if(!sentinel) return;
+            if(sentinel.getAttribute('data-has-more') !== '1') return;
+            if(!filterActive()) {
+                reobserveSoon();
+                return;
+            }
+            loadMore();
+        }, 0);
+    }
+
     function loadMore() {
         var sentinel = getSentinel();
         var list = getList();
@@ -219,10 +241,13 @@
         var cursor = sentinel.getAttribute('data-cursor') || '';
         if(!type || cursor === '') return;
 
+        var filtering = filterActive();
+        var seekingFirstMatch = filtering && countVisibleInList(list, sentinel) === 0;
+
         loading = true;
         if(observer) observer.unobserve(sentinel);
-        if(filterActive()) {
-            setStatus(MSG_FILTER_SCAN, true, {
+        if(filtering) {
+            setStatus(seekingFirstMatch ? MSG_FILTER_SCAN : MSG_LOADING, true, {
                 label: 'Stoppen',
                 onClick: pauseByUser
             });
@@ -262,7 +287,7 @@
             sentinel.setAttribute('data-has-more', hasMore ? '1' : '0');
             sentinel.setAttribute('data-cursor', nextCursor);
 
-            var appended = appendHtml(list, sentinel, xhr.responseText);
+            appendHtml(list, sentinel, xhr.responseText);
             applyFilter(sentinel);
 
             if(!hasMore) {
@@ -277,16 +302,14 @@
             }
 
             if(filterActive()) {
-                var visibleNew = countVisibleNodes(appended);
-                if(visibleNew === 0) {
-                    // Sparse filter: keep scanning — status stays „Suche…“ + Stoppen
-                    setStatus(MSG_FILTER_SCAN, true, {
-                        label: 'Stoppen',
-                        onClick: pauseByUser
-                    });
-                    reobserveSoon();
-                    return;
-                }
+                // Keep scanning automatically until end or Stoppen (no Weiter).
+                var visibleTotal = countVisibleInList(list, sentinel);
+                setStatus(visibleTotal === 0 ? MSG_FILTER_SCAN : MSG_LOADING, true, {
+                    label: 'Stoppen',
+                    onClick: pauseByUser
+                });
+                chainFilterLoadSoon();
+                return;
             }
 
             setStatus('', false);
@@ -323,8 +346,14 @@
             if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
             if(!filterActive()) {
                 setStatus('', false);
+                reobserveSoon();
+                return;
             }
-            reobserveSoon();
+            setStatus(MSG_FILTER_SCAN, true, {
+                label: 'Stoppen',
+                onClick: pauseByUser
+            });
+            chainFilterLoadSoon();
         });
     }
 
