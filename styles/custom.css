@@ -3132,16 +3132,15 @@ body.loan-form-print {
   font: inherit;
   font-weight: 400;
   color: var(--loan-ink);
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #8b96a3;
-  border-radius: 0;
-  padding: 0.1rem 0.05rem;
+  background: #fff;
+  border: 1px solid var(--loan-line);
+  border-radius: 2px;
+  padding: 0.2rem 0.4rem;
   outline: none;
 }
 
 .loan-form-input:focus {
-  border-bottom-color: var(--loan-brand);
+  border-color: var(--loan-brand);
 }
 
 .loan-form-input--short {
@@ -3153,11 +3152,11 @@ body.loan-form-print {
   width: 100%;
   min-height: 2.2em;
   resize: vertical;
-  border: 1px solid var(--loan-line);
-  border-radius: 2px;
-  padding: 0.28rem 0.4rem;
   line-height: 1.25;
-  background: #fff;
+}
+
+.loan-form-field-value {
+  font-weight: 400;
 }
 
 .loan-form-address-value {
@@ -3187,6 +3186,10 @@ body.loan-form-print {
 .loan-form-blank--line {
   flex: 1 1 8rem;
   min-width: 6rem;
+}
+
+.loan-form-print-only {
+  display: none;
 }
 
 .loan-form-item-title {
@@ -3401,6 +3404,14 @@ body.loan-form-print {
     display: none !important;
   }
 
+  .loan-form-print-only {
+    display: inline-block;
+  }
+
+  .loan-form-print-only.loan-form-blank--address {
+    display: block;
+  }
+
   .loan-form-doc {
     /* Keep a definite content width so 2-col grids do not collapse in print. */
     box-sizing: border-box;
@@ -3433,10 +3444,6 @@ body.loan-form-print {
   .loan-form-sign-grid {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-
-  .loan-form-input:focus {
-    border-bottom-color: #8b96a3;
   }
 }
 

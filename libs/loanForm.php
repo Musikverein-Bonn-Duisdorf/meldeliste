@@ -276,6 +276,7 @@ class LoanForm
             'mitgliedsnummer' => $mitgliedsnummer,
             'needMitgliedsnummerField' => $isMember && $mitgliedsnummer === '',
             'needAddressField' => !$isMember,
+            'needAddressEditField' => !$isMember && $borrowerAddress === '',
             'borrowerAddress' => $borrowerAddress,
             'startDate' => (string)$loan->StartDate,
             'startDateDe' => germanDate($loan->StartDate, 0),

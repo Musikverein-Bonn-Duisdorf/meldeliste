@@ -83,7 +83,7 @@ $backHref = 'inventories.php';
 $showMemberNr = !empty($ctx['isMember']);
 $editMemberNr = $canEdit && !empty($ctx['needMitgliedsnummerField']);
 $showAddress = !empty($ctx['needAddressField']);
-$editAddress = $canEdit && $showAddress;
+$editAddress = $canEdit && !empty($ctx['needAddressEditField']);
 $hasEditableFields = $editMemberNr || $editAddress;
 
 header('Content-Type: text/html; charset=utf-8');
@@ -152,11 +152,12 @@ header('Content-Type: text/html; charset=utf-8');
           <p class="loan-form-party-name"><strong class="loan-form-em"><?php echo $h($ctx['borrowerName']); ?></strong></p>
 <?php if($showMemberNr) { ?>
           <div class="loan-form-field-row">
-            <label class="loan-form-field-label" for="loan-mitgliedsnummer">Mitgliedsnummer</label>
+            <span class="loan-form-field-label">Mitgliedsnummer</span>
 <?php   if($editMemberNr) { ?>
-            <input id="loan-mitgliedsnummer" class="loan-form-input loan-form-input--short" type="text" name="Mitgliedsnummer" inputmode="numeric" value="" autocomplete="off">
+            <input id="loan-mitgliedsnummer" class="loan-form-input loan-form-input--short no-print" type="text" name="Mitgliedsnummer" inputmode="numeric" value="" autocomplete="off" aria-label="Mitgliedsnummer">
+            <span class="loan-form-blank loan-form-blank--short loan-form-print-only" aria-hidden="true"></span>
 <?php   } elseif($ctx['mitgliedsnummer'] !== '') { ?>
-            <strong class="loan-form-em"><?php echo $h($ctx['mitgliedsnummer']); ?></strong>
+            <span class="loan-form-field-value"><?php echo $h($ctx['mitgliedsnummer']); ?></span>
 <?php   } else { ?>
             <span class="loan-form-blank loan-form-blank--short"></span>
 <?php   } ?>
@@ -167,9 +168,10 @@ header('Content-Type: text/html; charset=utf-8');
 <?php } ?>
 <?php if($showAddress) { ?>
           <div class="loan-form-field-row loan-form-field-row--stack">
-            <label class="loan-form-field-label" for="loan-adresse">Adresse</label>
+            <span class="loan-form-field-label">Adresse</span>
 <?php   if($editAddress) { ?>
-            <textarea id="loan-adresse" class="loan-form-input loan-form-input--address" name="BorrowerAddress" rows="2"><?php echo $h($ctx['borrowerAddress']); ?></textarea>
+            <textarea id="loan-adresse" class="loan-form-input loan-form-input--address no-print" name="BorrowerAddress" rows="2" aria-label="Adresse"></textarea>
+            <span class="loan-form-blank loan-form-blank--address loan-form-print-only" aria-hidden="true"></span>
 <?php   } elseif($ctx['borrowerAddress'] !== '') { ?>
             <p class="loan-form-address-value"><?php echo nl2br($h($ctx['borrowerAddress'])); ?></p>
 <?php   } else { ?>
