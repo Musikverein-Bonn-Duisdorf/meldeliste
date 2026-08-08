@@ -36,6 +36,16 @@
         // Inventory "Versichert" chip (MELD-177) — keep scanning while sparse
         var insured = document.getElementById('filterInsured');
         if(insured && insured.classList.contains('is-active')) return true;
+        // Personenliste chips (MELD-178): restrictive when a status chip is off
+        // or any register chip is on (default = all status on, no register)
+        var personenChips = document.querySelectorAll('[data-personen-filter]');
+        if(personenChips.length) {
+            var i;
+            for(i = 0; i < personenChips.length; i++) {
+                if(!personenChips[i].classList.contains('is-active')) return true;
+            }
+            if(document.querySelector('[data-register-filter].is-active')) return true;
+        }
         return false;
     }
 
