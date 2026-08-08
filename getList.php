@@ -109,6 +109,15 @@ case 'meineMails':
     $result = listChunkUserMails((int)$_SESSION['userid'], $cursor, $limit);
     break;
 
+case 'inventories':
+    if(!requirePermission('perm_showInventories')) {
+        http_response_code(403);
+        header('X-Has-More: 0');
+        exit;
+    }
+    $result = listChunkInventories($cursor !== '' ? (int)$cursor : 0, $limit, $sort, $dir);
+    break;
+
 default:
     http_response_code(400);
     header('X-Has-More: 0');

@@ -23,6 +23,8 @@ if(requirePermission("perm_showInventories")) {
     sqlerror();
     $row = mysqli_fetch_array($dbr);
     $nInventories = $row['Count'];
+
+    $chunk = listChunkInventories(0, 50);
 ?>
 <?php
 $filterInsured = isset($_GET['versichert']) && (string)$_GET['versichert'] === '1';
@@ -55,27 +57,15 @@ adminListSearchField('Nach Inventar suchen…', array(
   </div>
 </div>
 <div id="Liste" class="inv-list">
-<?php
-    $sql = sprintf(
-        'SELECT `Index` FROM `%sInventories` INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory` ON `Inventory` = `iIndex` ORDER BY `iSort`;',
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix']
-    );
-    $dbr = mysqli_query($conn, $sql);
-    sqlerror();
-    while($row = mysqli_fetch_array($dbr)) {
-        $M = new Inventories;
-        $M->load_by_id($row['Index']);
-        echo $M->printTableLine();
-    }
-?>
+<?php echo $chunk['html']; ?>
+<?php echo listChunkRenderSentinel('inventories', $chunk['nextCursor'], $chunk['hasMore'], 'filterMusiker'); ?>
 </div>
 <?php adminListPageEnd(); ?>
 <script src="<?php echo assetUrl('js/filterInstruments.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/sortList.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/infiniteScroll.js'); ?>"></script>
 <script>
-bindListSort({ headerId: 'listHeader', listId: 'Liste', mode: 'client' });
+bindListSort({ headerId: 'listHeader', listId: 'Liste', mode: 'server' });
 (function () {
   var chip = document.getElementById('filterInsured');
   if (chip) {

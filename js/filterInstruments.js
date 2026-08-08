@@ -51,6 +51,9 @@ function setInsuredFilter(on, updateUrl) {
         window.history.replaceState({}, "", url.pathname + url.search + url.hash);
     }
     filterMusiker();
+    if (typeof window.listInfiniteFilterChanged === "function") {
+        window.listInfiniteFilterChanged();
+    }
 }
 
 function toggleInsuredFilter() {
