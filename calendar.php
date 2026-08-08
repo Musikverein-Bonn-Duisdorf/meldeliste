@@ -43,33 +43,42 @@ $yearTo = min(2100, max($calYear, (int)date('Y')) + 10);
   box-sizing: border-box;
   width: 100%;
 }
+/* MELD-174: toolbar is a 3-zone grid so Info/Druck never share a wrap line with month/year */
 .meld-cal-toolbar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "actions pickers today";
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.25rem;
+  column-gap: 0.75rem;
+  row-gap: 0.55rem;
   padding: 0.75rem 0;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
 }
 .meld-cal-actions {
+  grid-area: actions;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
-.meld-cal-nav {
+.meld-cal-pickers {
+  grid-area: pickers;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   align-items: center;
-  gap: 0.75rem 1rem;
-  margin: 0 0 0 auto;
+  gap: 0.45rem;
+  min-width: 0;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
-  min-width: 0;
+}
+.meld-cal-nav-today {
+  grid-area: today;
+  align-self: center;
+  white-space: nowrap;
 }
 .meld-cal-nav-icon,
 a.w3-button.meld-cal-nav-icon,
@@ -77,9 +86,9 @@ button.w3-button.meld-cal-nav-icon {
   margin: 0;
   padding: 0;
   line-height: 1;
-  width: 2.75rem;
-  height: 2.75rem;
-  min-width: 2.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -88,70 +97,86 @@ button.w3-button.meld-cal-nav-icon {
 }
 .meld-cal-spinner {
   display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 8rem;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  min-width: 0;
+  flex: 0 1 auto;
 }
 .meld-cal-spinner select {
   text-align: center;
   text-align-last: center;
   font-weight: bold;
-  padding: 8px 6px;
+  padding: 6px 4px;
   margin: 0;
   border-radius: 0;
-  width: 100%;
-}
-.meld-cal-spinner .meld-cal-step {
-  margin: 0;
-  padding: 4px 10px;
   width: auto;
-  min-width: 2.25rem;
-  line-height: 1;
+  min-width: 0;
+  max-width: 9.5rem;
+  box-sizing: border-box;
 }
-.meld-cal-nav-today { align-self: center; }
+#calYearSelect {
+  max-width: 5.5rem;
+}
+.meld-cal-spinner .meld-cal-step,
+a.w3-button.meld-cal-step {
+  margin: 0;
+  padding: 0;
+  width: 2.15rem;
+  min-width: 2.15rem;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-sizing: border-box;
+}
 .meld-cal-page .meld-cal-wrap {
   padding-left: 0;
   padding-right: 0;
 }
-/* MELD-174: phone — stack actions above nav; shrink month/year fields */
-@media (max-width: 600px) {
+/* Smartphone / narrow: Info+Druck | Heute on row 1; month+year full width on row 2 */
+@media (max-width: 720px) {
   .meld-cal-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.55rem;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "actions today"
+      "pickers pickers";
   }
-  .meld-cal-actions {
-    gap: 0.5rem;
-  }
-  .meld-cal-nav {
-    margin: 0;
-    justify-content: flex-start;
-    gap: 0.45rem 0.55rem;
+  .meld-cal-pickers {
+    justify-content: stretch;
     width: 100%;
+    gap: 0.4rem;
+  }
+  .meld-cal-spinner {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .meld-cal-spinner select {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    padding: 5px 2px;
+    font-size: 0.9rem;
+  }
+  #calYearSelect {
+    max-width: none;
   }
   .meld-cal-nav-icon,
   a.w3-button.meld-cal-nav-icon,
   button.w3-button.meld-cal-nav-icon {
-    width: 2.35rem;
-    height: 2.35rem;
-    min-width: 2.35rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
   }
-  .meld-cal-spinner {
-    min-width: 0;
-    flex: 1 1 0;
-    max-width: 9rem;
-  }
-  .meld-cal-spinner select {
-    padding: 4px 4px;
-    font-size: 0.9rem;
-  }
-  .meld-cal-spinner .meld-cal-step {
-    padding: 2px 8px;
-    min-width: 1.85rem;
-    font-size: 0.85rem;
+  .meld-cal-spinner .meld-cal-step,
+  a.w3-button.meld-cal-step {
+    width: 2rem;
+    min-width: 2rem;
   }
   .meld-cal-nav-today {
-    padding: 0.4rem 0.65rem;
+    justify-self: end;
+    padding: 0.35rem 0.6rem;
     font-size: 0.9rem;
   }
 }
@@ -172,27 +197,27 @@ button.w3-button.meld-cal-nav-icon {
       <i class="fas fa-print" aria-hidden="true"></i>
     </a>
   </div>
-  <div class="meld-cal-nav">
+  <div class="meld-cal-pickers">
     <div class="meld-cal-spinner" role="group" aria-label="Monat">
-      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriger Monat" aria-label="Früherer Monat"><i class="fas fa-chevron-up"></i></a>
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriger Monat" aria-label="Früherer Monat"><i class="fas fa-chevron-left" aria-hidden="true"></i></a>
       <select id="calMonthSelect" class="w3-select w3-border" aria-label="Monat wählen">
 <?php foreach($monthNames as $num => $name) { ?>
         <option value="<?php echo (int)$num; ?>"<?php echo $num === $calMonth ? ' selected' : ''; ?>><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></option>
 <?php } ?>
       </select>
-      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächster Monat" aria-label="Späterer Monat"><i class="fas fa-chevron-down"></i></a>
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächster Monat" aria-label="Späterer Monat"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>
     </div>
     <div class="meld-cal-spinner" role="group" aria-label="Jahr">
-      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriges Jahr" aria-label="Früheres Jahr"><i class="fas fa-chevron-up"></i></a>
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['prevYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Vorheriges Jahr" aria-label="Früheres Jahr"><i class="fas fa-chevron-left" aria-hidden="true"></i></a>
       <select id="calYearSelect" class="w3-select w3-border" aria-label="Jahr wählen">
 <?php for($y = $yearFrom; $y <= $yearTo; $y++) { ?>
         <option value="<?php echo $y; ?>"<?php echo $y === $calYear ? ' selected' : ''; ?>><?php echo $y; ?></option>
 <?php } ?>
       </select>
-      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächstes Jahr" aria-label="Späteres Jahr"><i class="fas fa-chevron-down"></i></a>
+      <a class="w3-button w3-border meld-cal-step" href="calendar.php?ym=<?php echo htmlspecialchars($bounds['nextYearYm'], ENT_QUOTES, 'UTF-8'); ?>" title="Nächstes Jahr" aria-label="Späteres Jahr"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>
     </div>
-    <a class="w3-button w3-border meld-cal-nav-today" href="calendar.php" title="Aktueller Monat">Heute</a>
   </div>
+  <a class="w3-button w3-border meld-cal-nav-today" href="calendar.php" title="Aktueller Monat">Heute</a>
 </div>
 <script>
 (function() {
