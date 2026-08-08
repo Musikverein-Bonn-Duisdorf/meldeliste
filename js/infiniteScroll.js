@@ -7,11 +7,10 @@
  * Optional data-sort / data-dir: server-side sort for user lists (MELD-96).
  * Exposes window.listInfiniteReload(sort, dir) to reset and reload from offset 0.
  *
- * MELD-164: With an active client-side filter and no visible matches yet, keep
- * auto-scanning while hasMore (sparse hits like „Adventskonzert“). Once at least
- * one match is visible, stop auto-chain (sentinel stays in view on a collapsed
- * list) — Weiter loads the next chunk. No hard pause after 2 empties while still
- * seeking the first hit (MELD-162 pause removed for that phase).
+ * MELD-164: With an active client-side filter, keep auto-loading while hasMore
+ * (sparse hits like „Adventskonzert“). Chain via timeout — not only IntersectionObserver —
+ * because a collapsed filter list keeps the sentinel in view. Optional Stoppen;
+ * no manual Weiter required. (MELD-162 hard pause after 2 empties removed.)
  */
 (function() {
     var loading = false;
@@ -119,8 +118,10 @@
         pausedByUser = false;
         var sentinel = getSentinel();
         if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
-        // One explicit chunk (not IntersectionObserver) — sentinel often stays in view
-        // when the filter collapses the list.
+        if(filterActive()) {
+            chainFilterLoadSoon();
+            return;
+        }
         loadMore();
     }
 
@@ -211,19 +212,20 @@
         }, 100);
     }
 
-    /** Auto-chain next chunk while seeking the first filter match (no IO race). */
-    function chainFilterScanSoon() {
+    /**
+     * Auto-chain next chunk while filter is active (timeout, not IO).
+     * Collapsed filter lists keep the sentinel intersecting forever.
+     */
+    function chainFilterLoadSoon() {
         setTimeout(function() {
             if(pausedByUser || loading) return;
             var sentinel = getSentinel();
-            var list = getList();
-            if(!sentinel || !list) return;
+            if(!sentinel) return;
             if(sentinel.getAttribute('data-has-more') !== '1') return;
             if(!filterActive()) {
                 reobserveSoon();
                 return;
             }
-            if(countVisibleInList(list, sentinel) > 0) return;
             loadMore();
         }, 0);
     }
@@ -239,12 +241,13 @@
         var cursor = sentinel.getAttribute('data-cursor') || '';
         if(!type || cursor === '') return;
 
-        var seekingFirstMatch = filterActive() && countVisibleInList(list, sentinel) === 0;
+        var filtering = filterActive();
+        var seekingFirstMatch = filtering && countVisibleInList(list, sentinel) === 0;
 
         loading = true;
         if(observer) observer.unobserve(sentinel);
-        if(seekingFirstMatch) {
-            setStatus(MSG_FILTER_SCAN, true, {
+        if(filtering) {
+            setStatus(seekingFirstMatch ? MSG_FILTER_SCAN : MSG_LOADING, true, {
                 label: 'Stoppen',
                 onClick: pauseByUser
             });
@@ -299,26 +302,13 @@
             }
 
             if(filterActive()) {
+                // Keep scanning automatically until end or Stoppen (no Weiter).
                 var visibleTotal = countVisibleInList(list, sentinel);
-
-                if(visibleTotal === 0) {
-                    // Still no hits: keep scanning (direct chain, not IO — sentinel
-                    // always intersects on a fully collapsed list).
-                    setStatus(MSG_FILTER_SCAN, true, {
-                        label: 'Stoppen',
-                        onClick: pauseByUser
-                    });
-                    chainFilterScanSoon();
-                    return;
-                }
-
-                // At least one match is visible. Do not auto-chain further empties:
-                // with a collapsed filter list the sentinel stays in view and would
-                // otherwise load forever (never “settling” on the result).
-                // Weiter loads the next chunk explicitly.
-                pausedByUser = true;
-                if(observer) observer.unobserve(sentinel);
-                showUserPaused();
+                setStatus(visibleTotal === 0 ? MSG_FILTER_SCAN : MSG_LOADING, true, {
+                    label: 'Stoppen',
+                    onClick: pauseByUser
+                });
+                chainFilterLoadSoon();
                 return;
             }
 
@@ -353,26 +343,17 @@
         input.addEventListener('input', function() {
             pausedByUser = false;
             var sentinel = getSentinel();
-            var list = getList();
             if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
             if(!filterActive()) {
                 setStatus('', false);
                 reobserveSoon();
                 return;
             }
-            // New/changed filter: if nothing visible yet, start sparse scan;
-            // otherwise settle (sentinel often already in view → would endless-load).
-            if(list && countVisibleInList(list, sentinel) === 0) {
-                setStatus(MSG_FILTER_SCAN, true, {
-                    label: 'Stoppen',
-                    onClick: pauseByUser
-                });
-                chainFilterScanSoon();
-                return;
-            }
-            pausedByUser = true;
-            if(observer) observer.unobserve(sentinel);
-            showUserPaused();
+            setStatus(MSG_FILTER_SCAN, true, {
+                label: 'Stoppen',
+                onClick: pauseByUser
+            });
+            chainFilterLoadSoon();
         });
     }
 
