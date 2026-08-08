@@ -2960,41 +2960,30 @@ body.meld-cal-print {
   max-width: 100%;
 }
 
-.eval-table-scroll {
+.eval-list-scroll {
   max-height: 28rem;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0.25rem;
+  min-width: 0;
 }
 
-.eval-table-scroll table.eval-data-table {
-  width: 100%;
-  min-width: 28rem;
-  margin: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.eval-table-scroll thead th {
+.eval-list-scroll .eval-sort-bar {
   position: sticky;
   top: 0;
   z-index: 3;
-  background-color: #e8eef0;
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0 0.55rem;
+  background: #fff;
   background-clip: padding-box;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 
-.eval-table-scroll tbody td {
-  position: relative;
-  z-index: 0;
-  background-clip: padding-box;
+.eval-user-list {
+  min-width: 0;
 }
 
-.eval-sort {
+.eval-user-list .user-row {
   cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
 }
 
 .list-sort {
@@ -3073,105 +3062,14 @@ body.meld-cal-print {
     height: 240px;
   }
 
-  .eval-table-scroll {
+  .eval-list-scroll {
     max-height: none;
     overflow: visible;
-    border: none;
-    border-radius: 0;
   }
 
-  .eval-table-scroll table.eval-data-table {
-    min-width: 0;
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-
-  .eval-table-scroll thead {
-    display: block;
-    margin-bottom: 0.75rem;
-  }
-
-  .eval-table-scroll thead tr {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-
-  .eval-table-scroll thead th {
+  .eval-list-scroll .eval-sort-bar {
     position: static;
-    display: inline-block;
-    float: none;
-    width: auto;
-    padding: 0.4rem 0.65rem;
-    border: none;
-    border-radius: 0.25rem;
     box-shadow: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-
-  .eval-table-scroll tbody {
-    display: block;
-  }
-
-  .eval-table-scroll tbody tr {
-    display: block;
-    margin-bottom: 0.75rem;
-    padding: 0.65rem 0.75rem;
-    border: 1px solid rgba(0, 0, 0, 0.14);
-    border-radius: 0.35rem;
-    background: #fff;
-  }
-
-  .eval-table-scroll tbody td {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 0.75rem;
-    padding: 0.3rem 0;
-    border: none;
-    text-align: right;
-    white-space: normal;
-    word-break: break-word;
-  }
-
-  .eval-table-scroll tbody td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    text-align: left;
-    flex: 0 0 42%;
-    color: rgba(0, 0, 0, 0.65);
-  }
-
-  .eval-table-scroll tbody td:first-child {
-    font-weight: 600;
-    padding-bottom: 0.45rem;
-    margin-bottom: 0.25rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  }
-}
-
-@media (min-width: 701px) {
-  .eval-table-scroll thead {
-    display: table-header-group;
-  }
-
-  .eval-table-scroll tbody {
-    display: table-row-group;
-  }
-
-  .eval-table-scroll tr {
-    display: table-row;
-  }
-
-  .eval-table-scroll th,
-  .eval-table-scroll td {
-    display: table-cell;
-  }
-
-  .eval-table-scroll tbody td::before {
-    content: none;
   }
 }
 

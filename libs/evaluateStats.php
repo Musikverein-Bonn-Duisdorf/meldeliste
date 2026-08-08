@@ -194,16 +194,22 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`,'
         .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
+        .' COALESCE(`i`.`Name`, \'\') AS `Instrument`,'
+        .' COALESCE(`r`.`Name`, \'\') AS `RegisterName`,'
+        .' COALESCE(`r`.`Color`, \'\') AS `RegisterColor`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 1 THEN 1 ELSE 0 END), 0) AS `Yes`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 2 THEN 1 ELSE 0 END), 0) AS `No`,'
         .' COALESCE(SUM(CASE WHEN `m`.`Wert` = 3 THEN 1 ELSE 0 END), 0) AS `Maybe`'
         .' FROM `%sUser` `u`'
         .' LEFT JOIN `%sInstrument` `i` ON `i`.`Index` = `u`.`Instrument`'
+        .' LEFT JOIN `%sRegister` `r` ON `r`.`Index` = `i`.`Register`'
         .' LEFT JOIN `%sMeldungen` `m` ON `m`.`User` = `u`.`Index`'
         .' AND `m`.`Termin` IN (SELECT `Index` FROM `%sTermine` WHERE %s)'
         .' WHERE `u`.`Deleted` != 1'
-        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`, `i`.`Register`'
+        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`,'
+        .' `i`.`Register`, `i`.`Name`, `r`.`Name`, `r`.`Color`'
         .' ORDER BY `u`.`Nachname` ASC, `u`.`Vorname` ASC;',
+        $prefix,
         $prefix,
         $prefix,
         $prefix,
@@ -223,7 +229,7 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
             $rows[] = array_merge(
                 array(
                     'id' => $uid,
-                    'name' => trim($row['Nachname'].', '.$row['Vorname']),
+                    'name' => trim($row['Vorname'].' '.$row['Nachname']),
                     'yes' => $yes,
                     'no' => (int)$row['No'],
                     'maybe' => (int)$row['Maybe'],
@@ -234,7 +240,10 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
                     (int)$row['Active'],
                     (int)$row['Mitglied'],
                     (int)$row['RegisterId'],
-                    isset($groupMap[$uid]) ? $groupMap[$uid] : array()
+                    isset($groupMap[$uid]) ? $groupMap[$uid] : array(),
+                    isset($row['Instrument']) ? (string)$row['Instrument'] : '',
+                    isset($row['RegisterName']) ? (string)$row['RegisterName'] : '',
+                    isset($row['RegisterColor']) ? (string)$row['RegisterColor'] : ''
                 )
             );
         }
@@ -332,13 +341,47 @@ function evaluateUserGroupIdsByUser() {
 }
 
 /**
+ * Normalize register id/color (treat „keins“ like ohne Register).
+ *
+ * @param int $registerId
+ * @param string $registerName
+ * @param string $registerColor
+ * @return array{registerId:int,registerColor:string}
+ */
+function evaluateNormalizeRegister($registerId, $registerName = '', $registerColor = '') {
+    $regId = max(0, (int)$registerId);
+    $rName = html_entity_decode(trim((string)$registerName), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    if($regId <= 0 || strtolower($rName) === 'keins') {
+        return array(
+            'registerId' => 0,
+            'registerColor' => '',
+        );
+    }
+    return array(
+        'registerId' => $regId,
+        'registerColor' => normalizeHexColor($registerColor),
+    );
+}
+
+/**
  * @param int $active
  * @param int $mitglied
  * @param int $registerId
  * @param int[] $groupIds
- * @return array{active:int,mitglied:int,registerId:int,groupIds:int[]}
+ * @param string $instrument
+ * @param string $registerName
+ * @param string $registerColor
+ * @return array{active:int,mitglied:int,registerId:int,groupIds:int[],instrument:string,registerColor:string}
  */
-function evaluatePersonFilterMeta($active, $mitglied, $registerId, array $groupIds) {
+function evaluatePersonFilterMeta(
+    $active,
+    $mitglied,
+    $registerId,
+    array $groupIds,
+    $instrument = '',
+    $registerName = '',
+    $registerColor = ''
+) {
     $gids = array();
     foreach($groupIds as $gid) {
         $gid = (int)$gid;
@@ -346,11 +389,14 @@ function evaluatePersonFilterMeta($active, $mitglied, $registerId, array $groupI
             $gids[] = $gid;
         }
     }
+    $reg = evaluateNormalizeRegister($registerId, $registerName, $registerColor);
     return array(
         'active' => ((int)$active) ? 1 : 0,
         'mitglied' => ((int)$mitglied) ? 1 : 0,
-        'registerId' => max(0, (int)$registerId),
+        'registerId' => $reg['registerId'],
         'groupIds' => $gids,
+        'instrument' => trim((string)$instrument),
+        'registerColor' => $reg['registerColor'],
     );
 }
 
@@ -422,6 +468,9 @@ function evaluateInactiveUsers($thresholdDays) {
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`LastLogin`, `u`.`Joined`,'
         .' `u`.`Active`, `u`.`Mitglied`, COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
+        .' COALESCE(`i`.`Name`, \'\') AS `Instrument`,'
+        .' COALESCE(`r`.`Name`, \'\') AS `RegisterName`,'
+        .' COALESCE(`r`.`Color`, \'\') AS `RegisterColor`,'
         .' ('
         .'   SELECT MAX(`t`.`Datum`) FROM `%sMeldungen` `m`'
         .'   INNER JOIN `%sTermine` `t` ON `t`.`Index` = `m`.`Termin`'
@@ -429,7 +478,9 @@ function evaluateInactiveUsers($thresholdDays) {
         .' ) AS `LastAttend`'
         .' FROM `%sUser` `u`'
         .' LEFT JOIN `%sInstrument` `i` ON `i`.`Index` = `u`.`Instrument`'
+        .' LEFT JOIN `%sRegister` `r` ON `r`.`Index` = `i`.`Register`'
         .' WHERE `u`.`Deleted` != 1;',
+        $prefix,
         $prefix,
         $prefix,
         $prefix,
@@ -475,7 +526,7 @@ function evaluateInactiveUsers($thresholdDays) {
             $rows[] = array_merge(
                 array(
                     'id' => $uid,
-                    'name' => trim($row['Nachname'].', '.$row['Vorname']),
+                    'name' => trim($row['Vorname'].' '.$row['Nachname']),
                     'lastLogin' => $lastLogin,
                     'lastAttend' => $lastAttend,
                     'quote' => $quote,
@@ -484,7 +535,10 @@ function evaluateInactiveUsers($thresholdDays) {
                     (int)$row['Active'],
                     (int)$row['Mitglied'],
                     (int)$row['RegisterId'],
-                    isset($groupMap[$uid]) ? $groupMap[$uid] : array()
+                    isset($groupMap[$uid]) ? $groupMap[$uid] : array(),
+                    isset($row['Instrument']) ? (string)$row['Instrument'] : '',
+                    isset($row['RegisterName']) ? (string)$row['RegisterName'] : '',
+                    isset($row['RegisterColor']) ? (string)$row['RegisterColor'] : ''
                 )
             );
         }
