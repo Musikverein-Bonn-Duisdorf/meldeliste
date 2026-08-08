@@ -2,7 +2,7 @@
   color: #111;
 }
 
-/* —— App navigation (MELD-139): sidebar ≥601px, bottom bar ≤600px —— */
+/* —— App navigation (MELD-173): sidebar ≥993px, bottom bar ≤992px (tablet+phone) —— */
 html {
   height: 100%;
 }
@@ -91,7 +91,7 @@ a.app-titlebar-logo {
   text-align: left;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 992px) {
   .app-titlebar {
     padding-right: 4rem;
   }
@@ -479,7 +479,7 @@ a.app-titlebar-logo {
   background: #fff;
 }
 
-@media (min-width: 601px) {
+@media (min-width: 993px) {
   .app-nav {
     width: 15rem;
     align-self: stretch;
@@ -503,7 +503,7 @@ a.app-titlebar-logo {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 992px) {
   .app-shell {
     flex-direction: column;
   }
@@ -917,7 +917,7 @@ a.app-titlebar-logo {
   padding: 0.65rem 0.85rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .updater-actions form {
     flex: 1 1 100%;
   }
@@ -1143,8 +1143,8 @@ a.app-titlebar-logo {
 }
 
 /* w3.css opens ALL nested .w3-dropdown-content on ancestor hover — reset that.
-   Desktop (MELD-139): Akkordeon nach unten in der Sidebar, nicht als Flyout über dem Content. */
-@media (min-width: 601px) {
+   Desktop (MELD-139/173): Akkordeon nach unten in der Sidebar, nicht als Flyout über dem Content. */
+@media (min-width: 993px) {
   .admin-nav:hover .admin-nav-group > .w3-dropdown-content,
   .admin-nav .admin-nav-group:hover > .w3-dropdown-content {
     display: none;
@@ -1182,7 +1182,7 @@ a.app-titlebar-logo {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 992px) {
   .admin-nav:hover .admin-nav-group > .w3-dropdown-content {
     display: none;
   }
@@ -1237,7 +1237,7 @@ a.app-titlebar-logo {
   filter: brightness(0.96);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 992px) {
   .app-nav > .app-nav-primary > .app-nav-item.admin-nav-perm,
   .app-nav > .app-nav-primary > .app-nav-form > .app-nav-item.admin-nav-perm,
   .app-nav > .app-nav-more-wrap > .app-nav-more-toggle.admin-nav-perm {
@@ -1270,7 +1270,7 @@ a.app-titlebar-logo {
   white-space: nowrap;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 992px) {
   /* Admin accordion inside Mehr-Sheet */
   .admin-nav .admin-nav-group > .w3-dropdown-content {
     position: static !important;
@@ -1317,7 +1317,7 @@ a.app-titlebar-logo {
   display: none !important;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .list-row {
     display: block;
     float: none !important;
@@ -1497,7 +1497,7 @@ a.app-titlebar-logo {
   margin: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .mail-list {
     display: flex;
     flex-direction: column;
@@ -4001,6 +4001,12 @@ body.meld-cal-print {
 
 @media (min-width: 720px) {
   .profile-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .profile-grid--3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -4219,7 +4225,7 @@ select.profile-control {
   padding: 0 0 0.85rem 1.1em;
 }
 
-@media (max-width: 719px) {
+@media (max-width: 992px) {
   .profile-prefs--grid {
     grid-template-columns: 1fr;
   }
@@ -4678,7 +4684,7 @@ select.profile-control {
   text-decoration: underline;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   /* Body bleibt rechts vom Strich (nicht margin-left: 0) */
   .melde-response-row .melde-actions {
     grid-column: 1 / -1;
@@ -4698,7 +4704,7 @@ select.profile-control {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .melde-row {
     --melde-pad-x: 0.75rem;
     --melde-date-col-w: max-content;
@@ -5033,7 +5039,7 @@ select.profile-control {
   margin-right: 0.25rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .inv-sort-bar {
     flex-direction: column;
     align-items: stretch;
@@ -5198,7 +5204,7 @@ select.profile-control {
   font-style: normal;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .log-row {
     --log-id-col-w: max-content;
     --log-row-pad-y: 0.25rem;
@@ -5423,7 +5429,7 @@ select.profile-control {
   color: #fff;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .user-row {
     --user-id-col-w: 8.5rem;
     --user-row-pad-y: 0.75rem;

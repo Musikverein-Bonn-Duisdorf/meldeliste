@@ -135,8 +135,8 @@ a.w3-button.meld-cal-step {
   padding-left: 0;
   padding-right: 0;
 }
-/* Smartphone / narrow: Info+Druck | Heute on row 1; month+year full width on row 2 */
-@media (max-width: 720px) {
+/* Smartphone / tablet: Info+Druck | Heute on row 1; month+year full width on row 2 */
+@media (max-width: 900px) {
   .meld-cal-toolbar {
     grid-template-columns: auto 1fr;
     grid-template-areas:

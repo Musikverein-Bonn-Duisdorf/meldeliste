@@ -418,7 +418,7 @@ window.syncDiscordDefault = function() {};
   <script src="js/tinymce/tinymce.min.js?<?php echo isset($GLOBALS['version']['Hash']) ? htmlspecialchars($GLOBALS['version']['Hash'], ENT_QUOTES, 'UTF-8') : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/tinymce/tinymce.min.js'); ?>"></script>
   <script>
   (function() {
-    var isNarrow = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+    var isNarrow = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
     tinymce.init({
     selector: '#mail-body',
     license_key: 'gpl',

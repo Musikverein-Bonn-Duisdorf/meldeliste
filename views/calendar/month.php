@@ -33,7 +33,7 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
 .meld-cal-events { max-height: 6.5rem; overflow-y: auto; }
 .meld-cal-cell--create { cursor: pointer; }
 .meld-cal-cell--create:hover { filter-color: #345A95; }
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .meld-cal-cell { min-height: 4.2rem; padding: 2px; }
   .meld-cal-chip { font-size: 0.6em; padding: 1px 2px; }
   .meld-cal-head { font-size: 0.75em; }
