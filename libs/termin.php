@@ -1750,11 +1750,10 @@ class Termin
 
         $str .= '<div class="melde-actions" data-melde-stop>';
         if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
-            $str .= '<form id="icalform'.$tid.'" method="post" action="download-ics.php" class="melde-ical">';
-            $str .= '<input type="hidden" name="appID" value="'.$tid.'">';
-            $str .= '<button type="submit" class="melde-ical-btn" title="In Kalender" aria-label="In Kalender eintragen">'
-                .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></button>';
-            $str .= '</form>';
+            // GET link so Android WebView can intercept/download (MELD-180); POST still accepted server-side
+            $str .= '<a id="icalform'.$tid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'"'
+                .' title="In Kalender" aria-label="In Kalender eintragen" download>'
+                .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
         }
 
         $str .= $this->makeListMetaHtml($user);
