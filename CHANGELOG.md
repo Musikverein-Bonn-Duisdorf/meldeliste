@@ -2,6 +2,14 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-2e811 (2026-08-08)
+
+- Release 2026-08-08-2e811
+
+## 2026-08-08-9ee67 (2026-08-08)
+
+- MELD-178: Personenliste per Infinite Scroll nachladen
+
 ## 2026-08-08-241b5 (2026-08-08)
 
 - MELD-177: Inventarliste per Infinite Scroll nachladen
