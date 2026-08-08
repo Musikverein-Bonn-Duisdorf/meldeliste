@@ -246,15 +246,15 @@ header('Content-Type: text/html; charset=utf-8');
         <h2>Unterschriften</h2>
         <div class="loan-form-sign-grid">
           <div class="loan-form-sign">
-            <div class="loan-form-sign-space"></div>
+            <div class="loan-form-sign-space loan-form-sign-space--date"></div>
             <p class="loan-form-sign-caption">Ort, Datum</p>
-            <div class="loan-form-sign-space"></div>
+            <div class="loan-form-sign-space loan-form-sign-space--sig"></div>
             <p class="loan-form-sign-caption"><strong class="loan-form-em"><?php echo $h($ctx['orgName']); ?></strong><span class="loan-form-sign-role">Verleiher</span></p>
           </div>
           <div class="loan-form-sign">
-            <div class="loan-form-sign-space"></div>
+            <div class="loan-form-sign-space loan-form-sign-space--date"></div>
             <p class="loan-form-sign-caption">Ort, Datum</p>
-            <div class="loan-form-sign-space"></div>
+            <div class="loan-form-sign-space loan-form-sign-space--sig"></div>
             <p class="loan-form-sign-caption"><strong class="loan-form-em"><?php echo $h($ctx['borrowerName']); ?></strong><span class="loan-form-sign-role">Entleiher</span></p>
           </div>
         </div>
