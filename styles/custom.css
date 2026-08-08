@@ -3206,24 +3206,21 @@ body.loan-form-print {
   color: var(--loan-ink);
 }
 
-/* Leihgut detail table: horizontal row rules + vertical column borders */
+/* Leihgut detail table: vertical column separators, no horizontal row rules */
 .loan-form-dl {
   margin: 0;
   display: grid;
   border: 1px solid var(--loan-line);
   background: #fff;
+  row-gap: 0.2rem;
+  column-gap: 0;
 }
 
 .loan-form-dl > div {
   display: grid;
   grid-template-columns: 7.25rem 1fr;
   align-items: stretch;
-  border-bottom: 1px solid var(--loan-line);
   min-width: 0;
-}
-
-.loan-form-dl > div:last-child {
-  border-bottom: 0;
 }
 
 .loan-form-dl--2col {
@@ -3236,11 +3233,6 @@ body.loan-form-print {
 
 .loan-form-dl--2col > div:nth-child(odd) {
   border-right: 1px solid var(--loan-line);
-}
-
-/* Even cell count: both cells in the last row lose the bottom rule. */
-.loan-form-dl--2col > div:nth-last-child(2):nth-child(odd) {
-  border-bottom: 0;
 }
 
 .loan-form-dl dt,
