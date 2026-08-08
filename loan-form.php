@@ -184,8 +184,8 @@ header('Content-Type: text/html; charset=utf-8');
     <section class="loan-form-section loan-form-panel loan-form-leihgut">
       <h2>Leihgut</h2>
       <p class="loan-form-item-title">
-        Leihgegenstand
-        <strong class="loan-form-em"><?php echo $h($ctx['itemLabel']); ?></strong>
+        <span class="loan-form-item-label">Leihgegenstand</span>
+        <span class="loan-form-item-value"><?php echo $h($ctx['itemLabel']); ?></span>
       </p>
       <dl class="loan-form-dl loan-form-dl--2col">
 <?php foreach($ctx['itemDetails'] as $row) { ?>
@@ -193,26 +193,26 @@ header('Content-Type: text/html; charset=utf-8');
 <?php } ?>
         <div>
           <dt>Leihbeginn</dt>
-          <dd><strong class="loan-form-em"><?php echo $h($ctx['startDateDe']); ?></strong></dd>
+          <dd><?php echo $h($ctx['startDateDe']); ?></dd>
         </div>
 <?php if($ctx['hasFixedEnd']) { ?>
         <div>
           <dt>Leihende</dt>
-          <dd><strong class="loan-form-em"><?php echo $h($ctx['endDateDe']); ?></strong></dd>
+          <dd><?php echo $h($ctx['endDateDe']); ?></dd>
         </div>
 <?php } else { ?>
         <div><dt>Dauer</dt><dd>unbefristet</dd></div>
 <?php } ?>
 <?php if($ctx['hasKaution']) { ?>
         <div>
-          <dt><strong class="loan-form-em">Kaution</strong></dt>
-          <dd><strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong></dd>
+          <dt>Kaution</dt>
+          <dd><?php echo $h($ctx['kautionFormatted']); ?></dd>
         </div>
 <?php } ?>
 <?php if(!empty($ctx['hasLeihgebuehr'])) { ?>
         <div>
-          <dt><strong class="loan-form-em">Leihgebühr</strong></dt>
-          <dd><strong class="loan-form-em"><?php echo $h($ctx['leihgebuehrFormatted']); ?></strong></dd>
+          <dt>Leihgebühr</dt>
+          <dd><?php echo $h($ctx['leihgebuehrFormatted']); ?></dd>
         </div>
 <?php } ?>
       </dl>
