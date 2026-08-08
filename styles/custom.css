@@ -3395,14 +3395,28 @@ body.loan-form-print {
   }
 
   .loan-form-doc {
-    width: auto;
-    max-width: none;
+    /* Keep a definite content width so 2-col grids do not collapse in print. */
+    box-sizing: border-box;
+    width: 210mm;
+    max-width: 210mm;
     min-height: 0;
     height: auto;
     margin: 0;
     border: 0;
     box-shadow: none;
     padding: 0;
+  }
+
+  /* Re-assert 2-col: print viewports are often <720px and would hit mobile rules. */
+  .loan-form-parties,
+  .loan-form-dl--2col,
+  .loan-form-sign-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .loan-form-dl--2col > div {
+    grid-template-columns: 6.5rem 1fr;
   }
 
   .loan-form-leihgut,
@@ -3419,7 +3433,8 @@ body.loan-form-print {
   }
 }
 
-@media (max-width: 720px) {
+/* Screen-only: do not apply when printing (print width is often <720px). */
+@media screen and (max-width: 720px) {
   .loan-form-parties,
   .loan-form-dl--2col,
   .loan-form-sign-grid {
