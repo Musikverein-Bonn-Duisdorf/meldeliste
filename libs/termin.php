@@ -1097,13 +1097,13 @@ class Termin
         $str .= '</td>';
         $str .= '<td data-label="Beginn">';
         $str .= '<div class="shift-edit-time-wrap">';
-        $str .= '<input id="shift-start-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Start]" type="time"'.$startAttr.'>';
+        $str .= '<input id="shift-start-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[Start]" type="time" step="60"'.$startAttr.'>';
         $str .= '<button type="button" class="termin-form-clear shift-edit-clear" title="Beginn leeren" aria-label="Beginn leeren">&#10006;</button>';
         $str .= '</div>';
         $str .= '</td>';
         $str .= '<td data-label="Ende">';
         $str .= '<div class="shift-edit-time-wrap">';
-        $str .= '<input id="shift-end-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[End]" type="time"'.$endAttr.'>';
+        $str .= '<input id="shift-end-'.$h($key).'" class="w3-input w3-border profile-control '.$h($inputBg).'" name="'.$prefix.'[End]" type="time" step="60"'.$endAttr.'>';
         $str .= '<button type="button" class="termin-form-clear shift-edit-clear" title="Ende leeren" aria-label="Ende leeren">&#10006;</button>';
         $str .= '</div>';
         $str .= '</td>';
