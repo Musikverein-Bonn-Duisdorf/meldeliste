@@ -214,10 +214,12 @@ class LoanForm
         if($reg !== '') {
             $details[] = array('label' => 'Inventarnummer', 'value' => $reg);
         }
-        if($typeName !== '' && $typeName !== $itemLabel) {
+        // Skip inventory-type row when the instrument family is already the heading
+        // (avoids redundant "Typ: Instrument" under e.g. "Flöte").
+        if($typeName !== '' && $typeName !== $itemLabel && $instrName === '') {
             $details[] = array('label' => 'Typ', 'value' => $typeName);
         }
-        if($instrName !== '') {
+        if($instrName !== '' && $instrName !== $itemLabel) {
             $details[] = array('label' => 'Instrument', 'value' => $instrName);
         }
         if(trim((string)$inv->Description) !== '') {
@@ -234,9 +236,7 @@ class LoanForm
         }
 
         $borrowerLabel = $isMember ? 'Mitglied' : 'Entleiher';
-        $title = $kind === self::KIND_RETURN
-            ? 'Rückgabeprotokoll'
-            : ($isMember ? 'Leihvertrag' : 'Leihvertrag (Nicht-Mitglied)');
+        $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
 
         $ctx = array(
             'kind' => $kind,
