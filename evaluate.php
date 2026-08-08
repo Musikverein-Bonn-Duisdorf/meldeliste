@@ -35,7 +35,6 @@ $payload = array(
     'logLabels' => array('FATAL', 'ERROR', 'WARNING', 'DBDELETE', 'DBINSERT', 'DBUPDATE', 'EMAIL', 'INFO'),
 );
 
-$tableHeadClass = adminHeroClass(array('kicker' => 'Datenauswertung', 'permKey' => 'perm_showLog', 'withProfileHero' => false));
 $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
 adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog'));
 ?>
@@ -99,38 +98,34 @@ adminListPageBegin('System', 'Datenauswertung', array('permKey' => 'perm_showLog
 
     <div class="eval-tables-grid">
     <section class="eval-panel" id="eval-ranking">
-      <h3>Ranking nach Teilnahme</h3>
-      <div class="eval-table-scroll">
-        <table id="evalRanking" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
-          <thead>
-            <tr>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="name" data-type="string">Name</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="yes" data-type="number">Ja</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="no" data-type="number">Nein</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="maybe" data-type="number">Vielleicht</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="termine" data-type="number">Termine</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="quote" data-type="number">Quote</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <h3>Ranking</h3>
+      <div class="eval-list-scroll">
+        <div id="evalRankingSort" class="inv-sort-bar eval-sort-bar" role="toolbar" aria-label="Sortierung Ranking">
+          <div class="inv-sort-bar-sorts">
+            <button type="button" class="inv-sort-chip list-sort" data-sort="name" data-type="string">Name</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="yes" data-type="number">Ja</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="no" data-type="number">Nein</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="maybe" data-type="number">Vielleicht</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="termine" data-type="number">Termine</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="quote" data-type="number">Quote</button>
+          </div>
+        </div>
+        <div id="evalRanking" class="user-list eval-user-list"></div>
       </div>
     </section>
 
     <section class="eval-panel" id="eval-inactive">
       <h3>Inaktive</h3>
-      <div class="eval-table-scroll">
-        <table id="evalInactive" class="w3-table w3-striped w3-bordered w3-hoverable eval-data-table">
-          <thead>
-            <tr>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="name" data-type="string">Name</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="lastLogin" data-type="string">Letzter Login</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="lastAttend" data-type="string">Letzte Teilnahme</th>
-              <th class="eval-sort <?php echo $tableHeadClass; ?>" data-sort="quote" data-type="number">Meldequote</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="eval-list-scroll">
+        <div id="evalInactiveSort" class="inv-sort-bar eval-sort-bar" role="toolbar" aria-label="Sortierung Inaktive">
+          <div class="inv-sort-bar-sorts">
+            <button type="button" class="inv-sort-chip list-sort" data-sort="name" data-type="string">Name</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="lastLogin" data-type="string">Login</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="lastAttend" data-type="string">Teilnahme</button>
+            <button type="button" class="inv-sort-chip list-sort" data-sort="quote" data-type="number">Quote</button>
+          </div>
+        </div>
+        <div id="evalInactive" class="user-list eval-user-list"></div>
       </div>
     </section>
     </div>

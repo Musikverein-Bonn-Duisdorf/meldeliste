@@ -138,7 +138,7 @@
         av = Number(av) || 0;
         bv = Number(bv) || 0;
         if (av === bv) {
-          return String(a.name || '').localeCompare(String(b.name || ''));
+          return String(a.name || '').localeCompare(String(b.name || ''), 'de');
         }
         return (av < bv ? -1 : 1) * mul;
       }
@@ -207,77 +207,145 @@
     return true;
   }
 
-  function bindSortableTable(tableId, getRows, renderRow, defaultKey, defaultDir) {
-    var table = document.getElementById(tableId);
-    if (!table) {
-      return null;
-    }
-    var tbody = table.querySelector('tbody');
-    var state = { key: defaultKey, dir: defaultDir, type: 'number' };
-
-    function paint() {
-      var rows = typeof getRows === 'function' ? getRows() : [];
-      var sorted = sortRows(rows, state.key, state.type, state.dir);
-      tbody.innerHTML = '';
-      if (!sorted.length) {
-        var empty = document.createElement('tr');
-        var td = document.createElement('td');
-        td.colSpan = table.querySelectorAll('thead th').length;
-        td.textContent = 'Keine Einträge';
-        td.className = 'w3-text-gray';
-        empty.appendChild(td);
-        tbody.appendChild(empty);
-        return;
+  function paintSortHeaders(header, state) {
+    if (!header) return;
+    Array.prototype.forEach.call(header.querySelectorAll('.list-sort'), function (btn) {
+      var label = btn.getAttribute('data-label');
+      if (!label) {
+        label = (btn.textContent || '').replace(/\s*[▲▼]\s*$/, '').trim();
+        btn.setAttribute('data-label', label);
       }
-      sorted.forEach(function (row) {
-        tbody.appendChild(renderRow(row));
-      });
-      Array.prototype.forEach.call(table.querySelectorAll('th.eval-sort'), function (th) {
-        var label = th.getAttribute('data-label') || th.textContent.replace(/\s*[▲▼]\s*$/, '');
-        th.setAttribute('data-label', label);
-        if (th.getAttribute('data-sort') === state.key) {
-          th.textContent = label + (state.dir === 'asc' ? ' ▲' : ' ▼');
-        } else {
-          th.textContent = label;
-        }
-      });
-    }
-
-    Array.prototype.forEach.call(table.querySelectorAll('th.eval-sort'), function (th) {
-      th.addEventListener('click', function () {
-        var key = th.getAttribute('data-sort');
-        var type = th.getAttribute('data-type') || 'string';
-        if (state.key === key) {
-          state.dir = state.dir === 'asc' ? 'desc' : 'asc';
-        } else {
-          state.key = key;
-          state.type = type;
-          state.dir = type === 'number' ? 'desc' : 'asc';
-        }
-        paint();
-      });
+      if (btn.getAttribute('data-sort') === state.key) {
+        btn.textContent = label + (state.dir === 'asc' ? ' ▲' : ' ▼');
+      } else {
+        btn.textContent = label;
+      }
     });
-
-    var defaultTh = table.querySelector('th.eval-sort[data-sort="' + defaultKey + '"]');
-    if (defaultTh) {
-      state.type = defaultTh.getAttribute('data-type') || 'number';
-    }
-    return { paint: paint };
   }
 
-  function cellsWithLabels(tr, pairs) {
-    pairs.forEach(function (pair) {
-      var td = document.createElement('td');
-      td.setAttribute('data-label', pair[0]);
-      td.textContent = pair[1] == null ? '' : String(pair[1]);
-      tr.appendChild(td);
+  function appendMetaItem(line, label, value) {
+    var item = document.createElement('span');
+    item.className = 'user-meta-item';
+    var k = document.createElement('span');
+    k.className = 'user-meta-k';
+    k.textContent = label;
+    item.appendChild(k);
+    item.appendChild(document.createTextNode(' ' + String(value)));
+    line.appendChild(item);
+  }
+
+  function buildUserRow(row, metaPairs) {
+    var el = document.createElement('div');
+    var classes = ['user-row', 'list-row'];
+    var active = Number(row.active) === 1;
+    var mitglied = Number(row.mitglied) === 1;
+    var regId = Number(row.registerId) || 0;
+    var instrument = row.instrument ? String(row.instrument) : '';
+    var color = row.registerColor ? String(row.registerColor) : '';
+
+    if (mitglied) {
+      classes.push('user-row--member');
+    } else {
+      classes.push('user-row--nomember');
+    }
+    if (!active) {
+      classes.push('user-row--inactive');
+    }
+    if (regId <= 0) {
+      classes.push('user-row--no-register');
+    }
+    if (color) {
+      classes.push('user-row--register-color');
+      el.style.setProperty('--user-register-color', color);
+    }
+    el.className = classes.join(' ');
+    el.setAttribute('data-active', active ? '1' : '0');
+    el.setAttribute('data-mitglied', mitglied ? '1' : '0');
+    el.setAttribute('data-register-id', String(regId));
+    el.setAttribute('role', 'button');
+    el.tabIndex = 0;
+
+    var uid = Number(row.id) || 0;
+    el.addEventListener('click', function () {
+      if (uid > 0 && typeof openModal === 'function') {
+        openModal('user', uid);
+      }
     });
-    return tr;
+    el.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        if (uid > 0 && typeof openModal === 'function') {
+          openModal('user', uid);
+        }
+      }
+    });
+
+    var idCol = document.createElement('div');
+    idCol.className = 'user-id';
+    var idNum = document.createElement('div');
+    idNum.className = 'user-id-num';
+    var idK = document.createElement('span');
+    idK.className = 'user-id-k';
+    idK.textContent = 'User-ID';
+    idNum.appendChild(idK);
+    idNum.appendChild(document.createTextNode(' ' + String(uid)));
+    idCol.appendChild(idNum);
+
+    var chips = document.createElement('div');
+    chips.className = 'user-id-chips';
+    chips.setAttribute('aria-label', 'Instrument und Mitgliedschaft');
+    if (instrument) {
+      var instLine = document.createElement('div');
+      instLine.className = 'user-id-chip-line mail-recipient-chips';
+      var instChip = document.createElement('span');
+      instChip.className = 'mail-recipient-chip mail-recipient-chip--instrument';
+      instChip.textContent = instrument;
+      instLine.appendChild(instChip);
+      chips.appendChild(instLine);
+    }
+    var statusLine = document.createElement('div');
+    statusLine.className = 'user-id-chip-line mail-recipient-chips';
+    var statusChip = document.createElement('span');
+    if (!active) {
+      statusChip.className = 'mail-recipient-chip mail-recipient-chip--guestMusician';
+      statusChip.textContent = 'Gast';
+    } else if (mitglied) {
+      statusChip.className = 'mail-recipient-chip mail-recipient-chip--member';
+      statusChip.textContent = 'Mitglied';
+    } else {
+      statusChip.className = 'mail-recipient-chip mail-recipient-chip--nomember';
+      statusChip.textContent = 'kein Mitglied';
+    }
+    statusLine.appendChild(statusChip);
+    chips.appendChild(statusLine);
+    idCol.appendChild(chips);
+    el.appendChild(idCol);
+
+    var rail = document.createElement('div');
+    rail.className = 'user-rail';
+    rail.setAttribute('aria-hidden', 'true');
+    el.appendChild(rail);
+
+    var main = document.createElement('div');
+    main.className = 'user-main';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'user-name';
+    nameEl.textContent = row.name ? String(row.name) : '';
+    main.appendChild(nameEl);
+
+    var meta = document.createElement('div');
+    meta.className = 'user-meta-line';
+    metaPairs.forEach(function (pair) {
+      appendMetaItem(meta, pair[0], pair[1]);
+    });
+    main.appendChild(meta);
+    el.appendChild(main);
+
+    return el;
   }
 
   function rankingRow(row) {
-    return cellsWithLabels(document.createElement('tr'), [
-      ['Name', row.name],
+    return buildUserRow(row, [
       ['Ja', row.yes],
       ['Nein', row.no],
       ['Vielleicht', row.maybe],
@@ -287,12 +355,65 @@
   }
 
   function inactiveRow(row) {
-    return cellsWithLabels(document.createElement('tr'), [
-      ['Name', row.name],
-      ['Letzter Login', formatDate(row.lastLogin)],
-      ['Letzte Teilnahme', formatDate(row.lastAttend)],
-      ['Meldequote', formatQuote(row.quote)]
+    return buildUserRow(row, [
+      ['Login', formatDate(row.lastLogin)],
+      ['Teilnahme', formatDate(row.lastAttend)],
+      ['Quote', formatQuote(row.quote)]
     ]);
+  }
+
+  function bindSortableList(listId, headerId, getRows, renderRow, defaultKey, defaultDir) {
+    var list = document.getElementById(listId);
+    var header = document.getElementById(headerId);
+    if (!list) {
+      return null;
+    }
+    var state = { key: defaultKey, dir: defaultDir, type: 'number' };
+
+    function paint() {
+      var rows = typeof getRows === 'function' ? getRows() : [];
+      var sorted = sortRows(rows, state.key, state.type, state.dir);
+      list.innerHTML = '';
+      if (!sorted.length) {
+        var empty = document.createElement('div');
+        empty.className = 'inv-list-empty w3-text-gray';
+        empty.textContent = 'Keine Einträge';
+        list.appendChild(empty);
+        paintSortHeaders(header, state);
+        return;
+      }
+      sorted.forEach(function (row) {
+        list.appendChild(renderRow(row));
+      });
+      paintSortHeaders(header, state);
+    }
+
+    if (header) {
+      Array.prototype.forEach.call(header.querySelectorAll('.list-sort'), function (btn) {
+        if (!btn.getAttribute('data-label')) {
+          btn.setAttribute('data-label', (btn.textContent || '').replace(/\s*[▲▼]\s*$/, '').trim());
+        }
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-sort');
+          var type = btn.getAttribute('data-type') || 'string';
+          if (!key) return;
+          if (state.key === key) {
+            state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            state.key = key;
+            state.type = type;
+            state.dir = type === 'number' ? 'desc' : 'asc';
+          }
+          paint();
+        });
+      });
+      var defaultBtn = header.querySelector('.list-sort[data-sort="' + defaultKey + '"]');
+      if (defaultBtn) {
+        state.type = defaultBtn.getAttribute('data-type') || 'number';
+      }
+    }
+
+    return { paint: paint };
   }
 
   function filteredRows(all) {
@@ -323,8 +444,8 @@
 
   drawAttendance();
   drawLog();
-  rankingCtl = bindSortableTable('evalRanking', function () { return filteredRows(rankingAll); }, rankingRow, 'quote', 'desc');
-  inactiveCtl = bindSortableTable('evalInactive', function () { return filteredRows(inactiveAll); }, inactiveRow, 'lastLogin', 'asc');
+  rankingCtl = bindSortableList('evalRanking', 'evalRankingSort', function () { return filteredRows(rankingAll); }, rankingRow, 'quote', 'desc');
+  inactiveCtl = bindSortableList('evalInactive', 'evalInactiveSort', function () { return filteredRows(inactiveAll); }, inactiveRow, 'lastLogin', 'asc');
   bindPersonFilter();
   repaintTables();
 })();
