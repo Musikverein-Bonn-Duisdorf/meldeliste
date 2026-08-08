@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-f2a08 (2026-08-08)
+
+- MELD-180: ICS-Download als GET-Link für Android WebView
+- MELD-173: Tablet-Layout — untere Nav bis 992px, dichtere Breakpoints
+- MELD-173: Tablet-Layout — untere Nav bis 992px
+
 ## 2026-08-08-920a8 (2026-08-08)
 
 - MELD-174: Kalender-Toolbar als Grid, horizontale Monat/Jahr-Auswahl
