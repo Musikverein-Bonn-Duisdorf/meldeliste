@@ -224,7 +224,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); Sortier-Chips und Suche filtern die Liste; Chip <b>Versichert</b> zeigt nur versicherte Stücke; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
+<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick öffnet Details im Modal; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>

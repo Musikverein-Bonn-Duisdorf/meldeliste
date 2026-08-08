@@ -420,6 +420,140 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
 }
 
 /**
+ * Admin inventory list chunks (MELD-177).
+ * Cursor = OFFSET; default order matches inventories.php (Inventory.Sortierung).
+ *
+ * @param int    $offset
+ * @param int    $limit
+ * @param string $sort regnumber|typ|vendor|model|description|comment|purchasedate|purchaseprize|loan|owner|''
+ * @param string $dir  asc|desc
+ * @return array{html:string,nextCursor:string,hasMore:bool}
+ */
+function listChunkInventories($offset, $limit, $sort = '', $dir = 'asc') {
+    $limit = listChunkLimit($limit);
+    $offset = max(0, (int)$offset);
+    $dirSql = (strtolower((string)$dir) === 'desc') ? 'DESC' : 'ASC';
+    $sort = strtolower(trim((string)$sort));
+    $p = $GLOBALS['dbprefix'];
+
+    $activeLoanCond = "(`EndDate` IS NULL OR `EndDate` = '' OR `EndDate` = '0000-00-00' OR `EndDate` > CURDATE())";
+    $loanJoin = sprintf(
+        'LEFT JOIN (
+            SELECT l.`Inventory` AS `loanInvId`,
+                   CONCAT(COALESCE(u.`Vorname`, \'\'), \' \', COALESCE(u.`Nachname`, \'\')) AS `loanName`
+            FROM `%sInventoriesLoan` l
+            INNER JOIN `%sUser` u ON u.`Index` = l.`User`
+            INNER JOIN (
+                SELECT `Inventory`, MAX(`Index`) AS `maxLoan`
+                FROM `%sInventoriesLoan`
+                WHERE %s
+                GROUP BY `Inventory`
+            ) latest ON latest.`maxLoan` = l.`Index`
+        ) `loan` ON `loan`.`loanInvId` = `%sInventories`.`Index`',
+        $p,
+        $p,
+        $p,
+        $activeLoanCond,
+        $p
+    );
+    $ownerJoin = sprintf(
+        'LEFT JOIN `%sUser` `owner` ON `owner`.`Index` = `%sInventories`.`Owner`',
+        $p,
+        $p
+    );
+    $typExpr = 'COALESCE(NULLIF(`instName`, \'\'), `iTyp`)';
+
+    $needLoan = ($sort === 'loan');
+    $needOwner = ($sort === 'owner');
+
+    switch($sort) {
+    case 'regnumber':
+        $orderBy = '`RegNumber` '.$dirSql.', `%sInventories`.`Index` ASC';
+        break;
+    case 'typ':
+        $orderBy = $typExpr.' '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'vendor':
+        $orderBy = '`Vendor` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'model':
+        $orderBy = '`Model` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'description':
+        $orderBy = '`Description` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'comment':
+        $orderBy = '`Comment` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'purchasedate':
+        $orderBy = '`PurchaseDate` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'purchaseprize':
+        $orderBy = '`PurchasePrize` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'loan':
+        $orderBy = '`loanName` '.$dirSql.', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    case 'owner':
+        $orderBy = 'CONCAT(COALESCE(`owner`.`Vorname`, \'\'), \' \', COALESCE(`owner`.`Nachname`, \'\')) '.$dirSql
+            .', `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    default:
+        $orderBy = '`iSort` ASC, `RegNumber` ASC, `%sInventories`.`Index` ASC';
+        break;
+    }
+    $orderBy = sprintf($orderBy, $p);
+
+    $sql = sprintf(
+        'SELECT `%sInventories`.`Index` FROM `%sInventories`
+         INNER JOIN (SELECT `Index` AS `iIndex`, `Typ` AS `iTyp`, `Sortierung` AS `iSort` FROM `%sInventory`) `%sInventory`
+           ON `Inventory` = `iIndex`
+         LEFT JOIN (SELECT `Index` AS `instIndex`, `Name` AS `instName` FROM `%sInstrument`) `%sInstrument`
+           ON `Instrument` = `instIndex`
+         %s
+         %s
+         ORDER BY %s
+         LIMIT %d OFFSET %d;',
+        $p,
+        $p,
+        $p,
+        $p,
+        $p,
+        $p,
+        $needLoan ? $loanJoin : '',
+        $needOwner ? $ownerJoin : '',
+        $orderBy,
+        $limit + 1,
+        $offset
+    );
+
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    sqlerror();
+    $ids = array();
+    if($dbr) {
+        while($row = mysqli_fetch_array($dbr)) {
+            $ids[] = (int)$row['Index'];
+        }
+    }
+    $hasMore = count($ids) > $limit;
+    if($hasMore) {
+        $ids = array_slice($ids, 0, $limit);
+    }
+    $html = '';
+    foreach($ids as $id) {
+        $M = new Inventories;
+        $M->load_by_id($id);
+        $html .= $M->printTableLine();
+    }
+    $nextOffset = $offset + count($ids);
+    return array(
+        'html' => $html,
+        'nextCursor' => (string)$nextOffset,
+        'hasMore' => $hasMore,
+    );
+}
+
+/**
  * Compact Created/list timestamps for mail list meta (short weekday + date).
  */
 function mailListFormatDate($raw) {

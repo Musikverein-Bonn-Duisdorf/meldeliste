@@ -32,7 +32,11 @@
 
     function filterActive() {
         var input = document.getElementById('filterString');
-        return !!(input && String(input.value).trim() !== '');
+        if(input && String(input.value).trim() !== '') return true;
+        // Inventory "Versichert" chip (MELD-177) — keep scanning while sparse
+        var insured = document.getElementById('filterInsured');
+        if(insured && insured.classList.contains('is-active')) return true;
+        return false;
     }
 
     function setBarVisible(visible) {
@@ -128,11 +132,27 @@
     function applyFilter(sentinel) {
         var filterFn = sentinel.getAttribute('data-filter-fn');
         if(!filterFn || typeof window[filterFn] !== 'function') return;
-        var input = document.getElementById('filterString');
-        if(input && input.value) {
-            window[filterFn]();
-        }
+        // Always re-run (text search and/or chips like Versichert)
+        window[filterFn]();
     }
+
+    function onClientFilterChanged() {
+        pausedByUser = false;
+        var sentinel = getSentinel();
+        if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
+        if(!filterActive()) {
+            setStatus('', false);
+            reobserveSoon();
+            return;
+        }
+        setStatus(MSG_FILTER_SCAN, true, {
+            label: 'Stoppen',
+            onClick: pauseByUser
+        });
+        chainFilterLoadSoon();
+    }
+
+    window.listInfiniteFilterChanged = onClientFilterChanged;
 
     function isRowVisible(el) {
         if(!el || el.nodeType !== 1) return false;
@@ -340,21 +360,7 @@
         var input = document.getElementById('filterString');
         if(!input || input.getAttribute('data-infinite-bound') === '1') return;
         input.setAttribute('data-infinite-bound', '1');
-        input.addEventListener('input', function() {
-            pausedByUser = false;
-            var sentinel = getSentinel();
-            if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
-            if(!filterActive()) {
-                setStatus('', false);
-                reobserveSoon();
-                return;
-            }
-            setStatus(MSG_FILTER_SCAN, true, {
-                label: 'Stoppen',
-                onClick: pauseByUser
-            });
-            chainFilterLoadSoon();
-        });
+        input.addEventListener('input', onClientFilterChanged);
     }
 
     function init() {
