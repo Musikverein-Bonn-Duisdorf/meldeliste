@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-92b42 (2026-08-08)
+
+- MELD-165: Live-Log in Chunks statt einzeln nachladen
+
 ## 2026-08-08-f2a08 (2026-08-08)
 
 - MELD-180: ICS-Download als GET-Link für Android WebView
