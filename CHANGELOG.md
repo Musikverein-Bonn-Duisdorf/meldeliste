@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-2df2c (2026-08-08)
+
+- MELD-164: Log-Filter automatisch weiter nachladen
+- MELD-164: Log-Filter-Scan nur bis zum ersten Treffer
+- MELD-164: Log-Filter bei seltenen Treffern weiter nachladen
+
 ## 2026-07-24-3c6ef (2026-07-24)
 
 - MELD-159: Orphan-Tabellen und Config unter DB-Präfix bereinigen
