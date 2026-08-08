@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-08-02301 (2026-08-08)
+
+- MELD-172: Termin-Zeilen auf Smartphone kompakter
+
 ## 2026-08-08-cb4f7 (2026-08-08)
 
 - MELD-168: Time-Inputs ohne Sekunden (HH:MM, step=60)
