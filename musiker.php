@@ -32,6 +32,8 @@ sqlerror();
 $row = mysqli_fetch_array($dbr);
 $nPersonen = (int)$row['Count'];
 
+$chunk = listChunkUsers('users', 0, 50);
+
 $filterAktive = !isset($_GET['aktive']) || (string)$_GET['aktive'] !== '0';
 $filterGaeste = !isset($_GET['gaeste']) || (string)$_GET['gaeste'] !== '0';
 $filterMitglied = !isset($_GET['mitglied']) || (string)$_GET['mitglied'] !== '0';
@@ -89,33 +91,15 @@ if($regDbr) {
   </div>
 </div>
 <div id="Liste" class="user-list">
-<?php
-$listSql = sprintf(
-    'SELECT u.`Index` FROM `%sUser` u
-     LEFT JOIN `%sInstrument` i ON u.`Instrument` = i.`Index`
-     LEFT JOIN `%sRegister` r ON i.`Register` = r.`Index`
-     WHERE u.`Deleted` != 1
-     ORDER BY COALESCE(r.`Sortierung`, 9999) ASC, u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC;',
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix'],
-    $GLOBALS['dbprefix']
-);
-$listDbr = mysqli_query($conn, $listSql);
-sqlerror();
-if($listDbr) {
-    while($listRow = mysqli_fetch_array($listDbr)) {
-        $M = new User;
-        $M->load_by_id((int)$listRow['Index']);
-        $M->printTableLine();
-    }
-}
-?>
+<?php echo $chunk['html']; ?>
+<?php echo listChunkRenderSentinel('users', $chunk['nextCursor'], $chunk['hasMore'], 'filterPersonen'); ?>
 </div>
 <?php adminListPageEnd(); ?>
-<script src="js/filterPersonen.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
-<script src="js/sortList.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="<?php echo assetUrl('js/filterPersonen.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/sortList.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/infiniteScroll.js'); ?>"></script>
 <script>
-bindListSort({ headerId: 'listHeader', listId: 'Liste', mode: 'client', defaultKey: 'register', defaultDir: 'asc', defaultType: 'string' });
+bindListSort({ headerId: 'listHeader', listId: 'Liste', mode: 'server', defaultKey: 'register', defaultDir: 'asc', defaultType: 'string' });
 (function () {
   var fold = document.getElementById('orchestraFold');
   if(!fold) return;

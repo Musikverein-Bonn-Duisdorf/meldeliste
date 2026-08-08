@@ -248,6 +248,18 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
  * @param string $sort Whitelisted column key (nachname|vorname|instrument|email|lastlogin|lastvisit|index)
  * @param string $dir asc|desc
  */
+/**
+ * User list chunks for infinite scroll.
+ * Kind `users` = unified Personenliste (MELD-178): all non-deleted, default register-prio.
+ * Legacy kinds musiker/mitglied/gastmusiker keep their filters.
+ *
+ * @param string $kind   users|musiker|mitglied|gastmusiker
+ * @param int    $offset
+ * @param int    $limit
+ * @param string $sort   register|nachname|vorname|instrument|email|lastlogin|lastvisit|index|''
+ * @param string $dir    asc|desc
+ * @return array{html:string,nextCursor:string,hasMore:bool}
+ */
 function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     $limit = listChunkLimit($limit);
     $offset = max(0, (int)$offset);
@@ -256,14 +268,43 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     $p = $GLOBALS['dbprefix'];
 
     $lastVisitJoin = sprintf(
-        'LEFT JOIN (SELECT `m`.`User` AS `lvUser`, MAX(`t`.`Datum`) AS `lastVisit` FROM `%sMeldungen` `m` INNER JOIN `%sTermine` `t` ON `m`.`Termin` = `t`.`Index` WHERE `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE() GROUP BY `m`.`User`) `lv` ON `lv`.`lvUser` = `%sUser`.`Index`',
-        $p,
+        'LEFT JOIN (SELECT `m`.`User` AS `lvUser`, MAX(`t`.`Datum`) AS `lastVisit` FROM `%sMeldungen` `m` INNER JOIN `%sTermine` `t` ON `m`.`Termin` = `t`.`Index` WHERE `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE() GROUP BY `m`.`User`) `lv` ON `lv`.`lvUser` = `u`.`Index`',
         $p,
         $p
     );
     $lastVisitOrder = '(lastVisit IS NULL) ASC, lastVisit '.$dirSql;
+    $instrJoin = sprintf(
+        'LEFT JOIN `%sInstrument` i ON u.`Instrument` = i.`Index`
+         LEFT JOIN `%sRegister` r ON i.`Register` = r.`Index`',
+        $p,
+        $p
+    );
 
-    $orderMusiker = function($sort, $dirSql) use ($p, $lastVisitOrder) {
+    $orderPersonen = function($sort, $dirSql) use ($lastVisitOrder) {
+        switch($sort) {
+        case 'vorname':
+            return 'u.`Vorname` '.$dirSql.', u.`Nachname` ASC, u.`Index` ASC';
+        case 'instrument':
+            return 'COALESCE(i.`Name`, \'\') '.$dirSql.', u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC';
+        case 'email':
+            return 'u.`Email` '.$dirSql.', u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC';
+        case 'lastlogin':
+            return 'u.`LastLogin` '.$dirSql.', u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC';
+        case 'lastvisit':
+            return $lastVisitOrder.', u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC';
+        case 'index':
+            return 'u.`Index` '.$dirSql;
+        case 'nachname':
+            return 'u.`Nachname` '.$dirSql.', u.`Vorname` ASC, u.`Index` ASC';
+        case 'register':
+            return 'COALESCE(r.`Sortierung`, 9999) '.$dirSql.', u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC';
+        default:
+            // Match musiker.php default (register priority)
+            return 'COALESCE(r.`Sortierung`, 9999) ASC, u.`Nachname` ASC, u.`Vorname` ASC, u.`Index` ASC';
+        }
+    };
+
+    $orderLegacy = function($sort, $dirSql) use ($p, $lastVisitOrder) {
         switch($sort) {
         case 'vorname':
             return '`Vorname` '.$dirSql.', `Nachname` ASC, `'.$p.'User`.`Index` ASC';
@@ -275,6 +316,8 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
             return '`LastLogin` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
         case 'lastvisit':
             return $lastVisitOrder.', `Nachname` ASC, `Vorname` ASC, `'.$p.'User`.`Index` ASC';
+        case 'index':
+            return '`'.$p.'User`.`Index` '.$dirSql;
         case 'nachname':
             return '`Nachname` '.$dirSql.', `Vorname` ASC, `'.$p.'User`.`Index` ASC';
         default:
@@ -282,112 +325,67 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
         }
     };
 
-    $orderPlain = function($sort, $dirSql) use ($lastVisitOrder) {
-        switch($sort) {
-        case 'vorname':
-            return '`Vorname` '.$dirSql.', `Nachname` ASC, `Index` ASC';
-        case 'email':
-            return '`Email` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
-        case 'lastlogin':
-            return '`LastLogin` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
-        case 'lastvisit':
-            return $lastVisitOrder.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
-        case 'index':
-            return '`Index` '.$dirSql;
-        case 'instrument':
-            return '`iName` '.$dirSql.', `Nachname` ASC, `Vorname` ASC, `Index` ASC';
-        case 'nachname':
-            return '`Nachname` '.$dirSql.', `Vorname` ASC, `Index` ASC';
-        default:
-            return '`Nachname` ASC, `Vorname` ASC, `Index` ASC';
-        }
-    };
-
     $needLastVisit = ($sort === 'lastvisit');
-    $needInstrument = ($sort === 'instrument');
+    // Legacy lastVisit join still references table with prefix alias style
+    $lastVisitJoinLegacy = sprintf(
+        'LEFT JOIN (SELECT `m`.`User` AS `lvUser`, MAX(`t`.`Datum`) AS `lastVisit` FROM `%sMeldungen` `m` INNER JOIN `%sTermine` `t` ON `m`.`Termin` = `t`.`Index` WHERE `m`.`Wert` = 1 AND `t`.`Datum` <= CURRENT_DATE() GROUP BY `m`.`User`) `lv` ON `lv`.`lvUser` = `%sUser`.`Index`',
+        $p,
+        $p,
+        $p
+    );
 
     switch($kind) {
     case 'musiker':
-        $orderBy = $orderMusiker($sort, $dirSql);
+        $orderBy = $orderLegacy($sort, $dirSql);
         $sql = sprintf(
             'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` %s WHERE `rName` != "keins" AND `Deleted` != 1 AND `Active` = 1 ORDER BY %s LIMIT %d OFFSET %d;',
             $p, $p, $p, $p, $p, $p,
+            $needLastVisit ? $lastVisitJoinLegacy : '',
+            $orderBy,
+            $limit + 1,
+            $offset
+        );
+        break;
+    case 'mitglied':
+        $orderBy = $orderLegacy($sort === '' ? 'nachname' : $sort, $dirSql);
+        $sql = sprintf(
+            'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            $p, $p, $p, $p,
+            $needLastVisit ? $lastVisitJoinLegacy : '',
+            $orderBy,
+            $limit + 1,
+            $offset
+        );
+        break;
+    case 'gastmusiker':
+        $orderBy = $orderLegacy($sort === '' ? 'nachname' : $sort, $dirSql);
+        $sql = sprintf(
+            'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Active` = 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            $p, $p, $p, $p,
+            $needLastVisit ? $lastVisitJoinLegacy : '',
+            $orderBy,
+            $limit + 1,
+            $offset
+        );
+        break;
+    case 'users':
+    default:
+        // Unified Personenliste (musiker.php / MELD-178)
+        $orderBy = $orderPersonen($sort, $dirSql);
+        $sql = sprintf(
+            'SELECT u.`Index` FROM `%sUser` u
+             %s
+             %s
+             WHERE u.`Deleted` != 1
+             ORDER BY %s
+             LIMIT %d OFFSET %d;',
+            $p,
+            $instrJoin,
             $needLastVisit ? $lastVisitJoin : '',
             $orderBy,
             $limit + 1,
             $offset
         );
-        $lineMethod = 'printTableLine';
-        break;
-    case 'mitglied':
-        $orderBy = $orderPlain($sort, $dirSql);
-        if($needInstrument || $needLastVisit) {
-            $sql = sprintf(
-                'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-                $p, $p, $p, $p,
-                $needLastVisit ? $lastVisitJoin : '',
-                $orderBy,
-                $limit + 1,
-                $offset
-            );
-        }
-        else {
-            $sql = sprintf(
-                'SELECT `Index` FROM `%sUser` WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-                $p,
-                $orderBy,
-                $limit + 1,
-                $offset
-            );
-        }
-        $lineMethod = 'printTableLine';
-        break;
-    case 'gastmusiker':
-        $orderBy = $orderPlain($sort, $dirSql);
-        if($needInstrument || $needLastVisit) {
-            $sql = sprintf(
-                'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Active` = 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-                $p, $p, $p, $p,
-                $needLastVisit ? $lastVisitJoin : '',
-                $orderBy,
-                $limit + 1,
-                $offset
-            );
-        }
-        else {
-            $sql = sprintf(
-                'SELECT `Index` FROM `%sUser` WHERE `Active` = 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-                $p,
-                $orderBy,
-                $limit + 1,
-                $offset
-            );
-        }
-        $lineMethod = 'printTableLine';
-        break;
-    case 'users':
-    default:
-        $orderBy = $orderPlain($sort === 'instrument' ? 'nachname' : $sort, $dirSql);
-        if($needLastVisit) {
-            $sql = sprintf(
-                'SELECT `%sUser`.`Index` FROM `%sUser` %s WHERE `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-                $p, $p,
-                $lastVisitJoin,
-                $orderBy,
-                $limit + 1,
-                $offset
-            );
-        }
-        else {
-            $sql = sprintf(
-                'SELECT `Index` FROM `%sUser` WHERE `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
-                $p,
-                $orderBy,
-                $limit + 1,
-                $offset
-            );
-        }
-        $lineMethod = 'printUserTableLine';
         break;
     }
 
@@ -408,7 +406,7 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
         $M = new User;
         $M->load_by_id($id);
         ob_start();
-        $M->$lineMethod();
+        $M->printTableLine();
         $html .= ob_get_clean();
     }
     $nextOffset = $offset + count($ids);

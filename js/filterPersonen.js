@@ -1,5 +1,6 @@
 /**
  * Personenliste: Suche + Aktive/Gäste/Mitglieder + Register-Filter (MELD-155).
+ * MELD-178: notify infinite scroll when chips change (keep-scanning).
  */
 (function (global) {
     'use strict';
@@ -70,6 +71,12 @@
         }
     }
 
+    function notifyInfiniteFilter() {
+        if (typeof global.listInfiniteFilterChanged === 'function') {
+            global.listInfiniteFilterChanged();
+        }
+    }
+
     function bindFilterChips() {
         var header = document.getElementById('listHeader');
         if (!header) return;
@@ -81,6 +88,7 @@
             btn.classList.toggle('is-active', on);
             btn.setAttribute('aria-pressed', on ? 'true' : 'false');
             filterPersonen();
+            notifyInfiniteFilter();
         });
     }
 
