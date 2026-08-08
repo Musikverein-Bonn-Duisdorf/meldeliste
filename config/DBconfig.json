@@ -56,6 +56,7 @@
 	"StartDate": {"Type": "date"},
 	"EndDate": {"Type": "date", "Null": "YES"},
 	"Kaution": {"Type": "decimal(10,2)", "Null": "YES", "Default": "0.00"},
+	"Leihgebuehr": {"Type": "decimal(10,2)", "Null": "YES", "Default": "0.00"},
 	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"ReturnContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },

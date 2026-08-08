@@ -18,8 +18,8 @@ class LoanForm
         return in_array($kind, self::kinds(), true) ? $kind : self::KIND_LOAN;
     }
 
-    /** Parse Kaution from form/DB (comma or dot decimals). */
-    public static function parseKaution($raw) {
+    /** Parse money amount from form/DB (comma or dot decimals). */
+    public static function parseAmount($raw) {
         if($raw === null || $raw === '') {
             return 0.0;
         }
@@ -42,13 +42,26 @@ class LoanForm
         return max(0.0, round((float)$s, 2));
     }
 
+    public static function hasAmount($raw) {
+        return self::parseAmount($raw) > 0.0;
+    }
+
+    public static function formatAmount($raw) {
+        $amount = self::parseAmount($raw);
+        return number_format($amount, 2, ',', '.').' €';
+    }
+
+    /** @deprecated Prefer parseAmount — kept for Kaution call sites. */
+    public static function parseKaution($raw) {
+        return self::parseAmount($raw);
+    }
+
     public static function hasKaution($raw) {
-        return self::parseKaution($raw) > 0.0;
+        return self::hasAmount($raw);
     }
 
     public static function formatKaution($raw) {
-        $amount = self::parseKaution($raw);
-        return number_format($amount, 2, ',', '.').' €';
+        return self::formatAmount($raw);
     }
 
     /** True if EndDate is set to a concrete calendar day (loan is/was fixed-term). */
@@ -189,8 +202,10 @@ class LoanForm
         }
 
         $isMember = ((int)$user->Mitglied === 1);
-        $kaution = self::parseKaution($loan->Kaution);
+        $kaution = self::parseAmount($loan->Kaution);
         $hasKaution = $kaution > 0.0;
+        $leihgebuehr = self::parseAmount($loan->Leihgebuehr);
+        $hasLeihgebuehr = $leihgebuehr > 0.0;
         $hasEnd = self::hasFixedEndDate($loan->EndDate);
         $orgName = isset($GLOBALS['optionsDB']['orgName'])
             ? trim((string)$GLOBALS['optionsDB']['orgName'])
@@ -235,7 +250,13 @@ class LoanForm
             $details[] = array('label' => 'Seriennummer', 'value' => trim((string)$inv->SerialNr));
         }
 
-        $borrowerLabel = $isMember ? 'Mitglied' : 'Entleiher';
+        $refId = $user->RefID;
+        $mitgliedsnummer = '';
+        if($isMember && $refId !== null && $refId !== '' && (int)$refId > 0) {
+            $mitgliedsnummer = (string)(int)$refId;
+        }
+
+        $borrowerLabel = 'Entleiher';
         $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
 
         $ctx = array(
@@ -250,17 +271,21 @@ class LoanForm
             'borrowerEmail' => trim((string)$user->Email),
             'borrowerLabel' => $borrowerLabel,
             'isMember' => $isMember,
+            'mitgliedsnummer' => $mitgliedsnummer,
+            'needAddressField' => !$isMember,
             'startDate' => (string)$loan->StartDate,
             'startDateDe' => germanDate($loan->StartDate, 0),
             'endDate' => $hasEnd ? (string)$loan->EndDate : '',
             'endDateDe' => $hasEnd ? germanDate($loan->EndDate, 0) : '',
             'hasFixedEnd' => $hasEnd,
             'kaution' => $kaution,
-            'kautionFormatted' => self::formatKaution($kaution),
+            'kautionFormatted' => self::formatAmount($kaution),
             'hasKaution' => $hasKaution,
+            'leihgebuehr' => $leihgebuehr,
+            'leihgebuehrFormatted' => self::formatAmount($leihgebuehr),
+            'hasLeihgebuehr' => $hasLeihgebuehr,
             'contractFile' => trim((string)$loan->ContractFile),
             'returnContractFile' => trim((string)$loan->ReturnContractFile),
-            'documentDateDe' => germanDate(date('Y-m-d'), 0),
         );
         $ctx['clauses'] = self::buildClauses($ctx);
         return $ctx;
@@ -278,8 +303,10 @@ class LoanForm
         $borrower = isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher';
         $isMember = !empty($ctx['isMember']);
         $hasKaution = !empty($ctx['hasKaution']);
+        $hasLeihgebuehr = !empty($ctx['hasLeihgebuehr']);
         $hasFixedEnd = !empty($ctx['hasFixedEnd']);
         $kautionFmt = isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : '';
+        $leihgebuehrFmt = isset($ctx['leihgebuehrFormatted']) ? (string)$ctx['leihgebuehrFormatted'] : '';
         $startDe = isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '';
         $endDe = isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '';
 
@@ -316,6 +343,11 @@ class LoanForm
             .' zu nutzen und es vor Verlust, Diebstahl und Beschädigung zu schützen.';
         $clauses[] = 'Weitergabe an Dritte, Verpfändung oder Verkauf sind untersagt.';
         $clauses[] = 'Verlust, Diebstahl oder wesentliche Schäden sind dem Verein unverzüglich anzuzeigen.';
+
+        if($hasLeihgebuehr) {
+            $clauses[] = 'Für die Überlassung erhebt der Verein eine Leihgebühr in Höhe von '.$leihgebuehrFmt
+                .'. Die Leihgebühr ist mit Vertragsschluss fällig und wird nicht erstattet.';
+        }
 
         if($hasKaution) {
             $clauses[] = 'Für die Dauer der Leihe hinterlegt der Entleiher eine Kaution in Höhe von '.$kautionFmt

@@ -543,6 +543,8 @@ class Inventories
             .'<input id="loan-end" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="EndDate"></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-kaution">Kaution</label>'
             .'<input id="loan-kaution" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value=""></div>';
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-leihgebuehr">Leihgebühr</label>'
+            .'<input id="loan-leihgebuehr" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value=""></div>';
         $str .= '<div class="profile-field"><button type="submit" name="newLoan" value="1" class="w3-btn profile-btn-primary '.$btn.' w3-border w3-mobile">Leihe eintragen</button></div>';
         $str .= $form->close();
         return $str;
@@ -555,7 +557,8 @@ class Inventories
         $btnDelete = $GLOBALS['optionsDB']['colorBtnDelete'];
         $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
         $loanId = (int)$L->Index;
-        $hasKaution = LoanForm::hasKaution($L->Kaution);
+        $hasKaution = LoanForm::hasAmount($L->Kaution);
+        $hasLeihgebuehr = LoanForm::hasAmount($L->Leihgebuehr);
         $hasLoanScan = trim((string)$L->ContractFile) !== '';
         $hasReturnScan = trim((string)$L->ReturnContractFile) !== '';
 
@@ -582,7 +585,10 @@ class Inventories
             : htmlspecialchars((string)germanDate($L->EndDate, 0), ENT_QUOTES, 'UTF-8');
         $meta = $from.' &ndash; '.$until;
         if($hasKaution) {
-            $meta .= ' · Kaution '.htmlspecialchars(LoanForm::formatKaution($L->Kaution), ENT_QUOTES, 'UTF-8');
+            $meta .= ' · Kaution '.htmlspecialchars(LoanForm::formatAmount($L->Kaution), ENT_QUOTES, 'UTF-8');
+        }
+        if($hasLeihgebuehr) {
+            $meta .= ' · Leihgebühr '.htmlspecialchars(LoanForm::formatAmount($L->Leihgebuehr), ENT_QUOTES, 'UTF-8');
         }
         $info->body = '<div><b>'.$name.'</b></div>'
             .'<div class="w3-small" style="margin-top:4px;">'.$meta.'</div>';
@@ -624,18 +630,25 @@ class Inventories
             $kForm->tag = "form";
             $kForm->method = "POST";
             $kForm->action = "";
-            $kForm->class = "w3-row w3-padding-small";
+            $kForm->class = "w3-row w3-padding-small inventar-loan-fees";
             $str .= $kForm->open();
             $str .= '<input type="hidden" name="LoanIndex" value="'.$loanId.'">';
             $kautionVal = $hasKaution
-                ? htmlspecialchars(number_format(LoanForm::parseKaution($L->Kaution), 2, ',', ''), ENT_QUOTES, 'UTF-8')
+                ? htmlspecialchars(number_format(LoanForm::parseAmount($L->Kaution), 2, ',', ''), ENT_QUOTES, 'UTF-8')
                 : '';
-            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-kaution-'.$loanId.'">Kaution</label></div>';
-            $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
+            $feeVal = $hasLeihgebuehr
+                ? htmlspecialchars(number_format(LoanForm::parseAmount($L->Leihgebuehr), 2, ',', ''), ENT_QUOTES, 'UTF-8')
+                : '';
+            $str .= '<div class="w3-col l2 m12 s12 w3-padding-small"><label class="profile-label" for="loan-kaution-'.$loanId.'">Kaution</label></div>';
+            $str .= '<div class="w3-col l2 m6 s12 w3-padding-small">'
                 .'<input id="loan-kaution-'.$loanId.'" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value="'.$kautionVal.'">'
                 .'</div>';
+            $str .= '<div class="w3-col l2 m12 s12 w3-padding-small"><label class="profile-label" for="loan-leihgebuehr-'.$loanId.'">Leihgebühr</label></div>';
+            $str .= '<div class="w3-col l2 m6 s12 w3-padding-small">'
+                .'<input id="loan-leihgebuehr-'.$loanId.'" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value="'.$feeVal.'">'
+                .'</div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
-                .'<button type="submit" name="updateLoanKaution" value="1" class="w3-button '.$btnSubmit.'">Setzen</button>'
+                .'<button type="submit" name="updateLoanFees" value="1" class="w3-button '.$btnSubmit.'">Setzen</button>'
                 .'</div>';
             $str .= $kForm->close();
         }
@@ -750,7 +763,7 @@ class Inventories
  */
 function handleInventoriesMutations() {
     $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['deleteLoan'])
-        || isset($_POST['updateLoanKaution'])
+        || isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])
         || isset($_POST['insert']) || isset($_POST['update']) || isset($_POST['delete']);
     if(!$mutating) {
         return false;
@@ -765,14 +778,20 @@ function handleInventoriesMutations() {
         if(!isset($_POST['Kaution']) || $_POST['Kaution'] === '') {
             $n->Kaution = '0.00';
         }
+        if(!isset($_POST['Leihgebuehr']) || $_POST['Leihgebuehr'] === '') {
+            $n->Leihgebuehr = '0.00';
+        }
         $n->save();
     }
-    if(isset($_POST['updateLoanKaution'])) {
+    if(isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])) {
         $n = new InventoriesLoan;
         $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
         $n->load_by_id($loanId);
         if($n->Index) {
             $n->Kaution = isset($_POST['Kaution']) ? $_POST['Kaution'] : '0.00';
+            if(isset($_POST['Leihgebuehr'])) {
+                $n->Leihgebuehr = $_POST['Leihgebuehr'];
+            }
             $n->save();
         }
     }

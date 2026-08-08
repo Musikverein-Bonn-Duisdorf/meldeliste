@@ -8,6 +8,7 @@ class InventoriesLoan
         'StartDate' => null,
         'EndDate' => null,
         'Kaution' => null,
+        'Leihgebuehr' => null,
         'ContractFile' => null,
         'ReturnContractFile' => null,
     );
@@ -20,6 +21,7 @@ class InventoriesLoan
 	    case 'StartDate':
 	    case 'EndDate':
 	    case 'Kaution':
+	    case 'Leihgebuehr':
 	    case 'ContractFile':
 	    case 'ReturnContractFile':
             return $this->_data[$key];
@@ -37,11 +39,12 @@ class InventoriesLoan
             $this->_data[$key] = $val;
             break;
 	    case 'Kaution':
+	    case 'Leihgebuehr':
             if($val === null || $val === '') {
                 $this->_data[$key] = '0.00';
             }
             else {
-                $this->_data[$key] = number_format(LoanForm::parseKaution($val), 2, '.', '');
+                $this->_data[$key] = number_format(LoanForm::parseAmount($val), 2, '.', '');
             }
             break;
 	    case 'Index':
@@ -78,6 +81,10 @@ class InventoriesLoan
         return mysqli_real_escape_string($GLOBALS['conn'], (string)$val);
     }
 
+    private function moneySql($raw) {
+        return $this->escapeDb(number_format(LoanForm::parseAmount($raw), 2, '.', ''));
+    }
+
     public function getChanges() {
         $old = new InventoriesLoan;
         $old->load_by_id($this->Index);
@@ -109,9 +116,13 @@ class InventoriesLoan
             $str .= ', EndDate: '.germanDate($old->EndDate, 0)
                 .' &rArr; <b>'.germanDate($this->EndDate, 0).'</b>';
         }
-        if(LoanForm::parseKaution($this->Kaution) !== LoanForm::parseKaution($old->Kaution)) {
-            $str .= ', Kaution: '.LoanForm::formatKaution($old->Kaution)
-                .' &rArr; <b>'.LoanForm::formatKaution($this->Kaution).'</b>';
+        if(LoanForm::parseAmount($this->Kaution) !== LoanForm::parseAmount($old->Kaution)) {
+            $str .= ', Kaution: '.LoanForm::formatAmount($old->Kaution)
+                .' &rArr; <b>'.LoanForm::formatAmount($this->Kaution).'</b>';
+        }
+        if(LoanForm::parseAmount($this->Leihgebuehr) !== LoanForm::parseAmount($old->Leihgebuehr)) {
+            $str .= ', Leihgebühr: '.LoanForm::formatAmount($old->Leihgebuehr)
+                .' &rArr; <b>'.LoanForm::formatAmount($this->Leihgebuehr).'</b>';
         }
         if($this->ContractFile != $old->ContractFile) {
             $str .= ', ContractFile: '.$old->ContractFile
@@ -137,8 +148,11 @@ class InventoriesLoan
         logAppendFilled($parts, 'StartDate', $start, (string)$start);
         $end = germanDate($this->EndDate, 0);
         logAppendFilled($parts, 'EndDate', $end, (string)$end);
-        if(LoanForm::hasKaution($this->Kaution)) {
-            $parts[] = logPart('Kaution', LoanForm::formatKaution($this->Kaution));
+        if(LoanForm::hasAmount($this->Kaution)) {
+            $parts[] = logPart('Kaution', LoanForm::formatAmount($this->Kaution));
+        }
+        if(LoanForm::hasAmount($this->Leihgebuehr)) {
+            $parts[] = logPart('Leihgebühr', LoanForm::formatAmount($this->Leihgebuehr));
         }
         logAppendFilled($parts, 'ContractFile', $this->ContractFile, (string)$this->ContractFile);
         logAppendFilled($parts, 'ReturnContractFile', $this->ReturnContractFile, (string)$this->ReturnContractFile);
@@ -149,6 +163,9 @@ class InventoriesLoan
         if(!$this->is_valid()) return false;
         if($this->Kaution === null || $this->Kaution === '') {
             $this->Kaution = '0.00';
+        }
+        if($this->Leihgebuehr === null || $this->Leihgebuehr === '') {
+            $this->Leihgebuehr = '0.00';
         }
         if($this->Index > 0) {
             $logentry = new Log;
@@ -164,13 +181,14 @@ class InventoriesLoan
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `Kaution`, `ContractFile`, `ReturnContractFile`) VALUES ("%d", "%d", %s, %s, "%s", "%s", "%s");',
+            'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `Kaution`, `Leihgebuehr`, `ContractFile`, `ReturnContractFile`) VALUES ("%d", "%d", %s, %s, "%s", "%s", "%s", "%s");',
             $GLOBALS['dbprefix'],
             $this->User,
             $this->Inventory,
             mkNULLstr($this->StartDate),
             mkNULLstr($this->EndDate),
-            $this->escapeDb(number_format(LoanForm::parseKaution($this->Kaution), 2, '.', '')),
+            $this->moneySql($this->Kaution),
+            $this->moneySql($this->Leihgebuehr),
             $this->escapeDb($this->ContractFile),
             $this->escapeDb($this->ReturnContractFile)
         );
@@ -183,13 +201,14 @@ class InventoriesLoan
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `Kaution` = "%s", `ContractFile` = "%s", `ReturnContractFile` = "%s" WHERE `Index` = "%d";',
+            'UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `Kaution` = "%s", `Leihgebuehr` = "%s", `ContractFile` = "%s", `ReturnContractFile` = "%s" WHERE `Index` = "%d";',
             $GLOBALS['dbprefix'],
             $this->User,
             $this->Inventory,
             mkNULLstr($this->StartDate),
             mkNULLstr($this->EndDate),
-            $this->escapeDb(number_format(LoanForm::parseKaution($this->Kaution), 2, '.', '')),
+            $this->moneySql($this->Kaution),
+            $this->moneySql($this->Leihgebuehr),
             $this->escapeDb($this->ContractFile),
             $this->escapeDb($this->ReturnContractFile),
             $this->Index
@@ -222,8 +241,8 @@ class InventoriesLoan
             if(!array_key_exists($key, $this->_data)) {
                 continue;
             }
-            if($key === 'Kaution') {
-                $this->Kaution = $val;
+            if($key === 'Kaution' || $key === 'Leihgebuehr') {
+                $this->$key = $val;
                 continue;
             }
             if($key === 'Index' || $key === 'Inventory' || $key === 'User') {

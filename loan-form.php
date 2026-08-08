@@ -64,7 +64,7 @@ if(isset($GLOBALS['optionsDB']['colorTitleBar'])) {
 }
 
 $backHref = 'inventories.php';
-$partyLabel = $ctx['isMember'] ? 'Mitglied' : 'Entleiher';
+$partyLabel = 'Entleiher';
 
 header('Content-Type: text/html; charset=utf-8');
 ?><!DOCTYPE html>
@@ -107,87 +107,123 @@ header('Content-Type: text/html; charset=utf-8');
           <h1><?php echo $h($ctx['title']); ?></h1>
         </div>
       </div>
-      <p class="loan-form-meta">
-        Leihe Nr. <?php echo (int)$ctx['loanId']; ?>
-        &middot; Dokument vom <?php echo $h($ctx['documentDateDe']); ?>
-      </p>
+      <p class="loan-form-meta">Leihe Nr. <?php echo (int)$ctx['loanId']; ?></p>
     </header>
 
     <section class="loan-form-section">
       <h2>Parteien</h2>
-      <dl class="loan-form-dl">
-        <div><dt>Verleiher</dt><dd><?php echo $h($ctx['orgName']); ?></dd></div>
+      <dl class="loan-form-dl loan-form-dl--parties">
+        <div>
+          <dt>Verleiher</dt>
+          <dd><strong class="loan-form-em"><?php echo $h($ctx['orgName']); ?></strong></dd>
+        </div>
         <div>
           <dt><?php echo $h($partyLabel); ?></dt>
           <dd>
-            <?php echo $h($ctx['borrowerName']); ?>
+            <strong class="loan-form-em"><?php echo $h($ctx['borrowerName']); ?></strong>
+<?php if($ctx['isMember']) { ?>
+            <div class="loan-form-sub">
+              Mitgliedsnummer:
+<?php   if($ctx['mitgliedsnummer'] !== '') { ?>
+              <strong class="loan-form-em"><?php echo $h($ctx['mitgliedsnummer']); ?></strong>
+<?php   } else { ?>
+              <span class="loan-form-blank loan-form-blank--short"></span>
+<?php   } ?>
+            </div>
+<?php } ?>
 <?php if($ctx['borrowerEmail'] !== '') { ?>
-            <br><span class="loan-form-muted"><?php echo $h($ctx['borrowerEmail']); ?></span>
+            <div class="loan-form-muted"><?php echo $h($ctx['borrowerEmail']); ?></div>
+<?php } ?>
+<?php if(!empty($ctx['needAddressField'])) { ?>
+            <div class="loan-form-address">
+              <span class="loan-form-address-label">Adresse</span>
+              <span class="loan-form-blank loan-form-blank--address"></span>
+            </div>
 <?php } ?>
           </dd>
         </div>
       </dl>
     </section>
 
-    <section class="loan-form-section">
+    <section class="loan-form-section loan-form-leihgut">
       <h2>Leihgut</h2>
-      <p class="loan-form-item-title"><?php echo $h($ctx['itemLabel']); ?></p>
-      <dl class="loan-form-dl">
+      <p class="loan-form-item-title">
+        Leihgegenstand:
+        <strong class="loan-form-em"><?php echo $h($ctx['itemLabel']); ?></strong>
+      </p>
+      <dl class="loan-form-dl loan-form-dl--2col">
 <?php foreach($ctx['itemDetails'] as $row) { ?>
         <div><dt><?php echo $h($row['label']); ?></dt><dd><?php echo $h($row['value']); ?></dd></div>
 <?php } ?>
-        <div><dt>Leihbeginn</dt><dd><?php echo $h($ctx['startDateDe']); ?></dd></div>
+        <div>
+          <dt>Leihbeginn</dt>
+          <dd><strong class="loan-form-em"><?php echo $h($ctx['startDateDe']); ?></strong></dd>
+        </div>
 <?php if($ctx['hasFixedEnd']) { ?>
-        <div><dt>Leihende</dt><dd><?php echo $h($ctx['endDateDe']); ?></dd></div>
+        <div>
+          <dt>Leihende</dt>
+          <dd><strong class="loan-form-em"><?php echo $h($ctx['endDateDe']); ?></strong></dd>
+        </div>
 <?php } else { ?>
         <div><dt>Dauer</dt><dd>unbefristet</dd></div>
 <?php } ?>
 <?php if($ctx['hasKaution']) { ?>
-        <div><dt>Kaution</dt><dd><?php echo $h($ctx['kautionFormatted']); ?></dd></div>
+        <div>
+          <dt><strong class="loan-form-em">Kaution</strong></dt>
+          <dd><strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong></dd>
+        </div>
+<?php } ?>
+<?php if(!empty($ctx['hasLeihgebuehr'])) { ?>
+        <div>
+          <dt><strong class="loan-form-em">Leihgebühr</strong></dt>
+          <dd><strong class="loan-form-em"><?php echo $h($ctx['leihgebuehrFormatted']); ?></strong></dd>
+        </div>
 <?php } ?>
       </dl>
     </section>
 
-    <section class="loan-form-section">
-      <h2><?php echo $kind === LoanForm::KIND_RETURN ? 'Protokoll' : 'Vertragsbedingungen'; ?></h2>
-      <ol class="loan-form-clauses">
+    <div class="loan-form-body">
+      <section class="loan-form-section loan-form-terms">
+        <h2><?php echo $kind === LoanForm::KIND_RETURN ? 'Protokoll' : 'Vertragsbedingungen'; ?></h2>
+        <ol class="loan-form-clauses">
 <?php foreach($ctx['clauses'] as $clause) { ?>
-        <li><?php echo $h($clause); ?></li>
+          <li><?php echo $h($clause); ?></li>
 <?php } ?>
-      </ol>
-    </section>
+        </ol>
+      </section>
 
 <?php if($kind === LoanForm::KIND_RETURN) { ?>
-    <section class="loan-form-section">
-      <h2>Checkliste</h2>
-      <ul class="loan-form-checks">
-        <li><span class="loan-form-box"></span> Leihgut zurückgegeben</li>
+      <section class="loan-form-section">
+        <h2>Checkliste</h2>
+        <ul class="loan-form-checks">
+          <li><span class="loan-form-box"></span> Leihgut zurückgegeben</li>
 <?php   if($ctx['hasKaution']) { ?>
-        <li><span class="loan-form-box"></span> Kaution zurückgezahlt (<?php echo $h($ctx['kautionFormatted']); ?>)</li>
-        <li><span class="loan-form-box"></span> Abzüge (Betrag / Grund): _______________________________</li>
+          <li><span class="loan-form-box"></span> <strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</li>
+          <li><span class="loan-form-box"></span> Abzüge (Betrag / Grund): _______________________________</li>
 <?php   } ?>
-        <li><span class="loan-form-box"></span> Mängel / Bemerkungen: _________________________________</li>
-      </ul>
-    </section>
+          <li><span class="loan-form-box"></span> Mängel / Bemerkungen: _________________________________</li>
+        </ul>
+      </section>
 <?php } ?>
 
-    <section class="loan-form-section loan-form-signatures">
-      <h2>Unterschriften</h2>
-      <div class="loan-form-sign-grid">
-        <div class="loan-form-sign">
-          <p class="loan-form-sign-line"></p>
-          <p class="loan-form-sign-label">Ort, Datum</p>
-          <p class="loan-form-sign-line"></p>
-          <p class="loan-form-sign-label"><?php echo $h($ctx['orgName']); ?> (Verleiher)</p>
+      <section class="loan-form-section loan-form-signatures">
+        <h2>Unterschriften</h2>
+        <div class="loan-form-sign-grid">
+          <div class="loan-form-sign">
+            <p class="loan-form-sign-line"></p>
+            <p class="loan-form-sign-label">Ort, Datum</p>
+            <p class="loan-form-sign-line"></p>
+            <p class="loan-form-sign-label"><strong class="loan-form-em"><?php echo $h($ctx['orgName']); ?></strong> (Verleiher)</p>
+          </div>
+          <div class="loan-form-sign">
+            <p class="loan-form-sign-line"></p>
+            <p class="loan-form-sign-label">Ort, Datum</p>
+            <p class="loan-form-sign-line"></p>
+            <p class="loan-form-sign-label"><strong class="loan-form-em"><?php echo $h($ctx['borrowerName']); ?></strong> (Entleiher)</p>
+          </div>
         </div>
-        <div class="loan-form-sign">
-          <p class="loan-form-sign-line"></p>
-          <p class="loan-form-sign-label">Ort, Datum</p>
-          <p class="loan-form-sign-line"></p>
-          <p class="loan-form-sign-label"><?php echo $h($ctx['borrowerName']); ?> (<?php echo $h($partyLabel); ?>)</p>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </article>
 </body>
 </html>
