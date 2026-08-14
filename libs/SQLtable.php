@@ -299,7 +299,7 @@ class SQLtable
             if($key === 'Type') {
                 $actual = isset($current['Type']) ? strtolower($current['Type']) : '';
                 $want = strtolower($expected);
-                if($actual !== $want) {
+                if(!$this->typesEquivalent($want, $actual)) {
                     $diffs[$key] = array($want, $actual);
                 }
                 continue;
@@ -341,6 +341,21 @@ class SQLtable
             }
         }
         return $diffs;
+    }
+
+    /**
+     * INFORMATION_SCHEMA.DATA_TYPE omits length/precision (decimal vs decimal(10,2), int vs int(11)).
+     * DBconfig may include precision for CREATE/MODIFY; treat matching base types as equal.
+     */
+    private function typesEquivalent($want, $actual) {
+        $want = strtolower(trim((string)$want));
+        $actual = strtolower(trim((string)$actual));
+        if($want === $actual) {
+            return true;
+        }
+        $wantBase = preg_replace('/\([^)]*\)$/', '', $want);
+        $actualBase = preg_replace('/\([^)]*\)$/', '', $actual);
+        return $wantBase === $actualBase;
     }
 
     private function normalizeDefault($value) {
