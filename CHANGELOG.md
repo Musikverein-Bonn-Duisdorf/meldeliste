@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-14-5a9d8 (2026-08-14)
+
+- gitignore: nested Uploads (Leih-PDFs) lokal halten
+
 ## 2026-08-14-47612 (2026-08-14)
 
 - MELD-185: Inventar-Sortierung Ausleihe ohne SQL-Fehler
