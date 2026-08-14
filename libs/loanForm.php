@@ -274,9 +274,9 @@ class LoanForm
             'borrowerLabel' => $borrowerLabel,
             'isMember' => $isMember,
             'mitgliedsnummer' => $mitgliedsnummer,
-            'needMitgliedsnummerField' => $isMember && $mitgliedsnummer === '',
-            'needAddressField' => !$isMember,
-            'needAddressEditField' => !$isMember && $borrowerAddress === '',
+            'needMitgliedsnummerField' => false,
+            'needAddressField' => $mitgliedsnummer === '',
+            'needAddressEditField' => $mitgliedsnummer === '' && $borrowerAddress === '',
             'borrowerAddress' => $borrowerAddress,
             'startDate' => (string)$loan->StartDate,
             'startDateDe' => germanDate($loan->StartDate, 0),
@@ -367,7 +367,7 @@ class LoanForm
 
     /**
      * Persist free fields from the online contract form.
-     * Mitgliedsnummer → User.RefID; Adresse → InventoriesLoans.BorrowerAddress;
+     * Adresse (wenn keine Mitgliedsnummer) → InventoriesLoans.BorrowerAddress;
      * return checklist → InventoriesLoans.ReturnChecklist (JSON).
      * @return bool
      */
@@ -381,23 +381,10 @@ class LoanForm
         if(!(int)$user->Index) {
             return false;
         }
-        $isMember = ((int)$user->Mitglied === 1);
         $loanDirty = false;
+        $hasMitgliedsnummer = $user->RefID !== null && $user->RefID !== '' && (int)$user->RefID > 0;
 
-        // Mitgliedsnummer only fillable when still empty (online free field).
-        if($isMember && array_key_exists('Mitgliedsnummer', $post)) {
-            $hasRef = $user->RefID !== null && $user->RefID !== '' && (int)$user->RefID > 0;
-            if(!$hasRef) {
-                $digits = preg_replace('/\D+/', '', trim((string)$post['Mitgliedsnummer']));
-                $num = (int)$digits;
-                if($num > 0) {
-                    $user->RefID = $num;
-                    $user->save();
-                }
-            }
-        }
-
-        if(!$isMember && array_key_exists('BorrowerAddress', $post)) {
+        if(!$hasMitgliedsnummer && array_key_exists('BorrowerAddress', $post)) {
             $addr = trim((string)$post['BorrowerAddress']);
             if((string)$loan->BorrowerAddress !== $addr) {
                 $loan->BorrowerAddress = $addr;

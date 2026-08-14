@@ -80,8 +80,8 @@ if(isset($GLOBALS['optionsDB']['colorTitleBar'])) {
 }
 
 $backHref = 'inventories.php';
-$showMemberNr = !empty($ctx['isMember']);
-$editMemberNr = $canEdit && !empty($ctx['needMitgliedsnummerField']);
+$showMemberNr = isset($ctx['mitgliedsnummer']) && (string)$ctx['mitgliedsnummer'] !== '';
+$editMemberNr = false;
 $showAddress = !empty($ctx['needAddressField']);
 $editAddress = $canEdit && !empty($ctx['needAddressEditField']);
 $editChecklist = $canEdit && $kind === LoanForm::KIND_RETURN;
