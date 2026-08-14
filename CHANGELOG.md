@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-14-47612 (2026-08-14)
+
+- MELD-185: Inventar-Sortierung Ausleihe ohne SQL-Fehler
+
 ## 2026-08-14-ed9b4 (2026-08-14)
 
 - MELD-181: Adresse statt Mitgliedsnummer-Freifeld
