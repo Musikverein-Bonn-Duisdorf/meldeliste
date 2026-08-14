@@ -2,9 +2,28 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-14-ed9b4 (2026-08-14)
+
+- MELD-181: Adresse statt Mitgliedsnummer-Freifeld
+- MELD-181: Leihe im Modal asynchron speichern
+- MELD-181: Scan-Buttons in Leihe und Formular gruppieren
+- MELD-181: Rückgabe-Checkliste online abhakbar und speicherbar
+- MELD-181: Kein Unterstrich bei online befüllten Feldern
+- MELD-181: Mehr Platz für Ort/Datum und Unterschrift
+- MELD-181: Zweispaltiges Leihgut auch im Druck
+- MELD-181: Druck = Vorschau, eine A4-Seite, ohne Tabellenrahmen
+- MELD-181: Horizontale Tabellenlinien im Leihgut entfernt
+- MELD-181: Leihgut-Tabelle, Blocksatz und Druck = Vorschau
+- MELD-181: Leihvertrag Optik, Fettdruck und editierbare Felder
+- MELD-181: Decimal-Typvergleich ohne Precision-Mismatch
+- MELD-181: Leihgebühr, Entleiher-UX und Formularlayout
+- MELD-181: Leihformular kompakter, ohne Titel- und Typ-Redundanz
+- MELD-181: Leih- und Rückgabeformular für jedes Inventar
+- MELD-181: Leih- und Rückgabeformular
+
 ## 2026-08-08-2e811 (2026-08-08)
 
-- Release 2026-08-08-2e811
+- (keine weiteren Notizen)
 
 ## 2026-08-08-9ee67 (2026-08-08)
 
