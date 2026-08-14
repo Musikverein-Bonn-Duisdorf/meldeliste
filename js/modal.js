@@ -744,3 +744,93 @@ function liftPageModalsOutOfAppMain() {
 }
 
 liftPageModalsOutOfAppMain();
+
+function inventarLoanFormAction(form) {
+    if(!form || !form.querySelector) return '';
+    if(form.querySelector('[name="newLoan"]')) return 'newLoan';
+    if(form.querySelector('[name="endLoan"]')) return 'endLoan';
+    if(form.querySelector('[name="deleteLoan"]')) return 'deleteLoan';
+    if(form.querySelector('[name="updateLoanFees"]') || form.querySelector('[name="updateLoanKaution"]')) {
+        return 'updateLoanFees';
+    }
+    return '';
+}
+
+function invalidateInventarModalCache(inventoryId) {
+    var prefix = 'inventar:' + inventoryId;
+    Object.keys(modalCache).forEach(function(key) {
+        if(key === prefix || key.indexOf(prefix + ':') === 0) {
+            delete modalCache[key];
+        }
+    });
+}
+
+function highlightInventarLoanRow(content, loanId) {
+    loanId = parseInt(loanId, 10) || 0;
+    if(!content || !loanId) return;
+    var row = content.querySelector('.inventory-loan-row[data-loan-id="' + loanId + '"]');
+    if(!row) return;
+    row.className = (row.className ? row.className + ' ' : '') + 'is-new';
+    if(row.scrollIntoView) {
+        row.scrollIntoView({ block: 'nearest' });
+    }
+    var link = row.querySelector('a.inventory-loan-btn[href*="kind=loan"]');
+    if(link && link.focus) {
+        try { link.focus(); } catch(e) {}
+    }
+}
+
+document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if(!form || !form.closest) return;
+    if(!form.closest('#ajaxModalContent .inventar-modal')) return;
+    if(!inventarLoanFormAction(form)) return;
+
+    e.preventDefault();
+    var modal = form.closest('.inventar-modal');
+    var inventoryId = modal ? parseInt(modal.getAttribute('data-inventar-id'), 10) : 0;
+    var fd = new FormData(form);
+    if(e.submitter && e.submitter.name) {
+        fd.append(e.submitter.name, e.submitter.value || '1');
+    }
+    fd.append('ajax', '1');
+
+    var xhr;
+    if(window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    }
+    else {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4) return;
+        var content = document.getElementById('ajaxModalContent');
+        var host = document.getElementById('ajaxModalHost');
+        if(!content) return;
+        var data = null;
+        try {
+            data = JSON.parse(xhr.responseText);
+        }
+        catch(err) {
+            data = null;
+        }
+        if(xhr.status < 200 || xhr.status >= 300 || !data || !data.ok || !data.html) {
+            if(data && data.error) {
+                content.innerHTML = '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Fehler</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value"></p></div>';
+                var p = content.querySelector('.profile-value');
+                if(p) p.textContent = data.error;
+            }
+            return;
+        }
+        var invId = parseInt(data.inventoryId, 10) || inventoryId;
+        invalidateInventarModalCache(invId);
+        modalCache['inventar:' + invId] = data.html;
+        content.innerHTML = data.html;
+        if(host) host.style.display = 'block';
+        highlightInventarLoanRow(content, data.loanId);
+    };
+    xhr.open('POST', 'inventories.php', true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.send(fd);
+});
+

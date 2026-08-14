@@ -9,7 +9,10 @@ include_once 'common/include.php';
 mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBALS['conn']));
 requireLoggedInOrRedirect();
 
-if(handleInventoriesMutations()) {
+if(($invMut = handleInventoriesMutations()) !== false) {
+    if(isInventoriesAjaxRequest()) {
+        respondInventoriesAjax($invMut);
+    }
     redirectAfterPost('myinventories.php');
 }
 

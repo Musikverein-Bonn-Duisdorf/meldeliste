@@ -568,6 +568,7 @@ class Inventories
         if($active) {
             $row->class = "w3-leftbar w3-border-teal";
         }
+        $row->extraAttrs = 'data-loan-id="'.$loanId.'"';
         $str = $row->open();
 
         $head = new div;
@@ -670,7 +671,7 @@ class Inventories
             $endForm->tag = "form";
             $endForm->method = "POST";
             $endForm->action = "";
-            $endForm->class = "w3-row w3-padding-16";
+            $endForm->class = "w3-row w3-padding-16 inventar-loan-end";
             $str .= $endForm->open();
             $str .= '<input type="hidden" name="LoanIndex" value="'.$loanId.'">';
             $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-end-'.$loanId.'">Rückgabe</label></div>';
@@ -769,8 +770,46 @@ class Inventories
 };
 
 /**
+ * AJAX loan save from the inventory modal (MELD-181).
+ */
+function isInventoriesAjaxRequest() {
+    if(isset($_POST['ajax']) && (string)$_POST['ajax'] === '1') {
+        return true;
+    }
+    $hdr = isset($_SERVER['HTTP_X_REQUESTED_WITH']) ? strtolower((string)$_SERVER['HTTP_X_REQUESTED_WITH']) : '';
+    return $hdr === 'xmlhttprequest';
+}
+
+/**
+ * @param array $result
+ */
+function respondInventoriesAjax($result) {
+    while(ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=UTF-8');
+    $invId = isset($result['inventoryId']) ? (int)$result['inventoryId'] : 0;
+    $html = '';
+    if($invId > 0) {
+        $inv = new Inventories;
+        $inv->load_by_id($invId);
+        if((int)$inv->Index) {
+            $html = $inv->getModalHtml(true);
+        }
+    }
+    echo json_encode(array(
+        'ok' => !empty($result['ok']),
+        'loanId' => isset($result['loanId']) ? (int)$result['loanId'] : 0,
+        'inventoryId' => $invId,
+        'action' => isset($result['action']) ? (string)$result['action'] : '',
+        'html' => $html,
+    ));
+    exit;
+}
+
+/**
  * Process inventar create/update/delete/loan POSTs.
- * @return bool true if a mutation was handled
+ * @return array|false result map when a mutation was handled
  */
 function handleInventoriesMutations() {
     $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['deleteLoan'])
@@ -780,8 +819,24 @@ function handleInventoriesMutations() {
         return false;
     }
     if(!requirePermission('perm_editInventories')) {
+        if(isInventoriesAjaxRequest()) {
+            while(ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            header('Content-Type: application/json; charset=UTF-8');
+            http_response_code(403);
+            echo json_encode(array('ok' => false, 'error' => 'Keine Berechtigung zum Ändern von Inventar.'));
+            exit;
+        }
         denyAccess('Keine Berechtigung zum Ändern von Inventar.');
     }
+
+    $result = array(
+        'ok' => true,
+        'loanId' => 0,
+        'inventoryId' => 0,
+        'action' => '',
+    );
 
     if(isset($_POST['newLoan'])) {
         $n = new InventoriesLoan;
@@ -793,6 +848,9 @@ function handleInventoriesMutations() {
             $n->Leihgebuehr = '0.00';
         }
         $n->save();
+        $result['action'] = 'newLoan';
+        $result['loanId'] = (int)$n->Index;
+        $result['inventoryId'] = (int)$n->Inventory;
     }
     if(isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])) {
         $n = new InventoriesLoan;
@@ -804,6 +862,9 @@ function handleInventoriesMutations() {
                 $n->Leihgebuehr = $_POST['Leihgebuehr'];
             }
             $n->save();
+            $result['action'] = 'updateLoanFees';
+            $result['loanId'] = (int)$n->Index;
+            $result['inventoryId'] = (int)$n->Inventory;
         }
     }
     if(isset($_POST['endLoan'])) {
@@ -812,12 +873,18 @@ function handleInventoriesMutations() {
         $n->load_by_id($loanId);
         $n->EndDate = $_POST['EndDate'];
         $n->save();
+        $result['action'] = 'endLoan';
+        $result['loanId'] = (int)$n->Index;
+        $result['inventoryId'] = (int)$n->Inventory;
     }
     if(isset($_POST['deleteLoan'])) {
         $n = new InventoriesLoan;
         $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
         $n->load_by_id($loanId);
         if($n->Index) {
+            $result['action'] = 'deleteLoan';
+            $result['loanId'] = (int)$n->Index;
+            $result['inventoryId'] = (int)$n->Inventory;
             $n->delete();
         }
     }
@@ -830,6 +897,8 @@ function handleInventoriesMutations() {
             $n->Instrument = 0;
         }
         $n->save();
+        $result['action'] = 'insert';
+        $result['inventoryId'] = (int)$n->Index;
     }
     if(isset($_POST['update'])) {
         $id = isset($_POST['InventoriesIndex']) ? (int)$_POST['InventoriesIndex'] : (int)$_POST['Index'];
@@ -857,14 +926,18 @@ function handleInventoriesMutations() {
                 $n->Instrument = 0;
             }
             $n->save();
+            $result['action'] = 'update';
+            $result['inventoryId'] = (int)$n->Index;
         }
     }
     if(isset($_POST['delete'])) {
         $id = isset($_POST['InventoriesIndex']) ? (int)$_POST['InventoriesIndex'] : (int)$_POST['Index'];
         $n = new Inventories;
         $n->load_by_id($id);
+        $result['action'] = 'delete';
+        $result['inventoryId'] = (int)$n->Index;
         $n->delete();
     }
-    return true;
+    return $result;
 }
 ?>

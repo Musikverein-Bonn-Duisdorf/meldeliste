@@ -2123,6 +2123,11 @@ a.app-titlebar-logo {
   margin-top: 4px;
 }
 
+.inventory-loans .inventory-loan-row.is-new {
+  outline: 2px solid #345A95;
+  outline-offset: -2px;
+}
+
 .inventory-loans .inventory-loan-row form {
   margin: 0;
 }
