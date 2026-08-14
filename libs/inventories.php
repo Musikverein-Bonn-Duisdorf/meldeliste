@@ -541,15 +541,26 @@ class Inventories
             .'<input id="loan-start" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="StartDate" required></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-end">Bis</label>'
             .'<input id="loan-end" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="EndDate"></div>';
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-kaution">Kaution</label>'
+            .'<input id="loan-kaution" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value=""></div>';
+        $str .= '<div class="profile-field"><label class="profile-label" for="loan-leihgebuehr">Leihgebühr</label>'
+            .'<input id="loan-leihgebuehr" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value=""></div>';
         $str .= '<div class="profile-field"><button type="submit" name="newLoan" value="1" class="w3-btn profile-btn-primary '.$btn.' w3-border w3-mobile">Leihe eintragen</button></div>';
         $str .= $form->close();
         return $str;
     }
 
     private function getLoanRowHtml($indent, InventoriesLoan $L, $canEdit) {
-        $active = ($L->EndDate === null || $L->EndDate === '');
+        $active = ($L->EndDate === null || $L->EndDate === '' || $L->EndDate === '0000-00-00');
+        $ended = !InventoriesLoan::isOpen($L->EndDate);
         $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
         $btnDelete = $GLOBALS['optionsDB']['colorBtnDelete'];
+        $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
+        $loanId = (int)$L->Index;
+        $hasKaution = LoanForm::hasAmount($L->Kaution);
+        $hasLeihgebuehr = LoanForm::hasAmount($L->Leihgebuehr);
+        $hasLoanScan = trim((string)$L->ContractFile) !== '';
+        $hasReturnScan = trim((string)$L->ReturnContractFile) !== '';
 
         $row = new div;
         $row->indent = $indent;
@@ -557,6 +568,7 @@ class Inventories
         if($active) {
             $row->class = "w3-leftbar w3-border-teal";
         }
+        $row->extraAttrs = 'data-loan-id="'.$loanId.'"';
         $str = $row->open();
 
         $head = new div;
@@ -572,25 +584,86 @@ class Inventories
         $until = $active
             ? '<span class="w3-tag w3-teal w3-round">offen</span>'
             : htmlspecialchars((string)germanDate($L->EndDate, 0), ENT_QUOTES, 'UTF-8');
+        $meta = $from.' &ndash; '.$until;
+        if($hasKaution) {
+            $meta .= ' · Kaution '.htmlspecialchars(LoanForm::formatAmount($L->Kaution), ENT_QUOTES, 'UTF-8');
+        }
+        if($hasLeihgebuehr) {
+            $meta .= ' · Leihgebühr '.htmlspecialchars(LoanForm::formatAmount($L->Leihgebuehr), ENT_QUOTES, 'UTF-8');
+        }
         $info->body = '<div><b>'.$name.'</b></div>'
-            .'<div class="w3-small" style="margin-top:4px;">'.$from.' &ndash; '.$until.'</div>';
+            .'<div class="w3-small" style="margin-top:4px;">'.$meta.'</div>';
         $str .= $info->print();
 
-        if($canEdit) {
-            $actions = new div;
-            $actions->indent = $indent + 2;
-            $actions->col(5, 12, 12);
-            $actions->class = "w3-right-align";
-            $str .= $actions->open();
-            $str .= '<form method="POST" action="" style="display:inline;" '
-                .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
-                .'<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">'
-                .'<button type="submit" name="deleteLoan" value="1" class="w3-button w3-small '.$btnDelete.'">Löschen</button>'
-                .'</form>';
-            $str .= $actions->close();
+        $actions = new div;
+        $actions->indent = $indent + 2;
+        $actions->col(5, 12, 12);
+        $actions->class = "w3-right-align inventory-loan-actions";
+        $str .= $actions->open();
+
+        $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
+        $str .= '<a class="inventory-loan-btn" target="_blank" rel="noopener" '
+            .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a>';
+        if(!$active || $ended) {
+            $str .= '<a class="inventory-loan-btn" target="_blank" rel="noopener" '
+                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
+        }
+        $str .= '</div>';
+
+        if($hasLoanScan || $hasReturnScan) {
+            $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--scans" role="group" aria-label="Scans">';
+            if($hasLoanScan) {
+                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
+                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">Scan Vertrag</a>';
+            }
+            if($hasReturnScan) {
+                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
+                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">Scan Rückgabe</a>';
+            }
+            $str .= '</div>';
         }
 
+        if($canEdit) {
+            $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--danger">';
+            $str .= '<form method="POST" action="" class="inventory-loan-delete" '
+                .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
+                .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
+                .'<button type="submit" name="deleteLoan" value="1" class="inventory-loan-btn inventory-loan-btn--danger '.$btnDelete.'">Löschen</button>'
+                .'</form>';
+            $str .= '</div>';
+        }
+        $str .= $actions->close();
+
         $str .= $head->close();
+
+        if($canEdit) {
+            $kForm = new div;
+            $kForm->indent = $indent + 1;
+            $kForm->tag = "form";
+            $kForm->method = "POST";
+            $kForm->action = "";
+            $kForm->class = "w3-row w3-padding-small inventar-loan-fees";
+            $str .= $kForm->open();
+            $str .= '<input type="hidden" name="LoanIndex" value="'.$loanId.'">';
+            $kautionVal = $hasKaution
+                ? htmlspecialchars(number_format(LoanForm::parseAmount($L->Kaution), 2, ',', ''), ENT_QUOTES, 'UTF-8')
+                : '';
+            $feeVal = $hasLeihgebuehr
+                ? htmlspecialchars(number_format(LoanForm::parseAmount($L->Leihgebuehr), 2, ',', ''), ENT_QUOTES, 'UTF-8')
+                : '';
+            $str .= '<div class="w3-col l2 m12 s12 w3-padding-small"><label class="profile-label" for="loan-kaution-'.$loanId.'">Kaution</label></div>';
+            $str .= '<div class="w3-col l2 m6 s12 w3-padding-small">'
+                .'<input id="loan-kaution-'.$loanId.'" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value="'.$kautionVal.'">'
+                .'</div>';
+            $str .= '<div class="w3-col l2 m12 s12 w3-padding-small"><label class="profile-label" for="loan-leihgebuehr-'.$loanId.'">Leihgebühr</label></div>';
+            $str .= '<div class="w3-col l2 m6 s12 w3-padding-small">'
+                .'<input id="loan-leihgebuehr-'.$loanId.'" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value="'.$feeVal.'">'
+                .'</div>';
+            $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
+                .'<button type="submit" name="updateLoanFees" value="1" class="w3-button '.$btnSubmit.'">Setzen</button>'
+                .'</div>';
+            $str .= $kForm->close();
+        }
 
         if($active && $canEdit) {
             $endForm = new div;
@@ -598,12 +671,12 @@ class Inventories
             $endForm->tag = "form";
             $endForm->method = "POST";
             $endForm->action = "";
-            $endForm->class = "w3-row w3-padding-16";
+            $endForm->class = "w3-row w3-padding-16 inventar-loan-end";
             $str .= $endForm->open();
-            $str .= '<input type="hidden" name="LoanIndex" value="'.(int)$L->Index.'">';
-            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-end-'.(int)$L->Index.'">Rückgabe</label></div>';
+            $str .= '<input type="hidden" name="LoanIndex" value="'.$loanId.'">';
+            $str .= '<div class="w3-col l4 m12 s12 w3-padding-small"><label class="profile-label" for="loan-end-'.$loanId.'">Rückgabe</label></div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
-                .'<input id="loan-end-'.(int)$L->Index.'" class="w3-input w3-border profile-control" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
+                .'<input id="loan-end-'.$loanId.'" class="w3-input w3-border profile-control" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
                 .'</div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
                 .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">Beenden</button>'
@@ -697,23 +770,102 @@ class Inventories
 };
 
 /**
+ * AJAX loan save from the inventory modal (MELD-181).
+ */
+function isInventoriesAjaxRequest() {
+    if(isset($_POST['ajax']) && (string)$_POST['ajax'] === '1') {
+        return true;
+    }
+    $hdr = isset($_SERVER['HTTP_X_REQUESTED_WITH']) ? strtolower((string)$_SERVER['HTTP_X_REQUESTED_WITH']) : '';
+    return $hdr === 'xmlhttprequest';
+}
+
+/**
+ * @param array $result
+ */
+function respondInventoriesAjax($result) {
+    while(ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=UTF-8');
+    $invId = isset($result['inventoryId']) ? (int)$result['inventoryId'] : 0;
+    $html = '';
+    if($invId > 0) {
+        $inv = new Inventories;
+        $inv->load_by_id($invId);
+        if((int)$inv->Index) {
+            $html = $inv->getModalHtml(true);
+        }
+    }
+    echo json_encode(array(
+        'ok' => !empty($result['ok']),
+        'loanId' => isset($result['loanId']) ? (int)$result['loanId'] : 0,
+        'inventoryId' => $invId,
+        'action' => isset($result['action']) ? (string)$result['action'] : '',
+        'html' => $html,
+    ));
+    exit;
+}
+
+/**
  * Process inventar create/update/delete/loan POSTs.
- * @return bool true if a mutation was handled
+ * @return array|false result map when a mutation was handled
  */
 function handleInventoriesMutations() {
     $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['deleteLoan'])
+        || isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])
         || isset($_POST['insert']) || isset($_POST['update']) || isset($_POST['delete']);
     if(!$mutating) {
         return false;
     }
     if(!requirePermission('perm_editInventories')) {
+        if(isInventoriesAjaxRequest()) {
+            while(ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            header('Content-Type: application/json; charset=UTF-8');
+            http_response_code(403);
+            echo json_encode(array('ok' => false, 'error' => 'Keine Berechtigung zum Ändern von Inventar.'));
+            exit;
+        }
         denyAccess('Keine Berechtigung zum Ändern von Inventar.');
     }
+
+    $result = array(
+        'ok' => true,
+        'loanId' => 0,
+        'inventoryId' => 0,
+        'action' => '',
+    );
 
     if(isset($_POST['newLoan'])) {
         $n = new InventoriesLoan;
         $n->fill_from_array($_POST);
+        if(!isset($_POST['Kaution']) || $_POST['Kaution'] === '') {
+            $n->Kaution = '0.00';
+        }
+        if(!isset($_POST['Leihgebuehr']) || $_POST['Leihgebuehr'] === '') {
+            $n->Leihgebuehr = '0.00';
+        }
         $n->save();
+        $result['action'] = 'newLoan';
+        $result['loanId'] = (int)$n->Index;
+        $result['inventoryId'] = (int)$n->Inventory;
+    }
+    if(isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])) {
+        $n = new InventoriesLoan;
+        $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
+        $n->load_by_id($loanId);
+        if($n->Index) {
+            $n->Kaution = isset($_POST['Kaution']) ? $_POST['Kaution'] : '0.00';
+            if(isset($_POST['Leihgebuehr'])) {
+                $n->Leihgebuehr = $_POST['Leihgebuehr'];
+            }
+            $n->save();
+            $result['action'] = 'updateLoanFees';
+            $result['loanId'] = (int)$n->Index;
+            $result['inventoryId'] = (int)$n->Inventory;
+        }
     }
     if(isset($_POST['endLoan'])) {
         $n = new InventoriesLoan;
@@ -721,12 +873,18 @@ function handleInventoriesMutations() {
         $n->load_by_id($loanId);
         $n->EndDate = $_POST['EndDate'];
         $n->save();
+        $result['action'] = 'endLoan';
+        $result['loanId'] = (int)$n->Index;
+        $result['inventoryId'] = (int)$n->Inventory;
     }
     if(isset($_POST['deleteLoan'])) {
         $n = new InventoriesLoan;
         $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
         $n->load_by_id($loanId);
         if($n->Index) {
+            $result['action'] = 'deleteLoan';
+            $result['loanId'] = (int)$n->Index;
+            $result['inventoryId'] = (int)$n->Inventory;
             $n->delete();
         }
     }
@@ -739,6 +897,8 @@ function handleInventoriesMutations() {
             $n->Instrument = 0;
         }
         $n->save();
+        $result['action'] = 'insert';
+        $result['inventoryId'] = (int)$n->Index;
     }
     if(isset($_POST['update'])) {
         $id = isset($_POST['InventoriesIndex']) ? (int)$_POST['InventoriesIndex'] : (int)$_POST['Index'];
@@ -766,14 +926,18 @@ function handleInventoriesMutations() {
                 $n->Instrument = 0;
             }
             $n->save();
+            $result['action'] = 'update';
+            $result['inventoryId'] = (int)$n->Index;
         }
     }
     if(isset($_POST['delete'])) {
         $id = isset($_POST['InventoriesIndex']) ? (int)$_POST['InventoriesIndex'] : (int)$_POST['Index'];
         $n = new Inventories;
         $n->load_by_id($id);
+        $result['action'] = 'delete';
+        $result['inventoryId'] = (int)$n->Index;
         $n->delete();
     }
-    return true;
+    return $result;
 }
 ?>

@@ -3,6 +3,8 @@ common/config.php
 uploads/*
 !uploads/README
 !uploads/.htaccess
+!uploads/loans/
+!uploads/loans/.htaccess
 php.ini
 error-log.php
 .cursor/

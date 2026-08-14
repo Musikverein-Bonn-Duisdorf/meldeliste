@@ -1,7 +1,20 @@
 <?php
 class InventoriesLoan
 {
-    private $_data = array('Index' => null, 'User' => null, 'Inventory' => null, 'StartDate' => null, 'EndDate' => null, 'ContractFile' => null);
+    private $_data = array(
+        'Index' => null,
+        'User' => null,
+        'Inventory' => null,
+        'StartDate' => null,
+        'EndDate' => null,
+        'Kaution' => null,
+        'Leihgebuehr' => null,
+        'BorrowerAddress' => null,
+        'ReturnChecklist' => null,
+        'ContractFile' => null,
+        'ReturnContractFile' => null,
+    );
+
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -9,9 +22,13 @@ class InventoriesLoan
 	    case 'Inventory':
 	    case 'StartDate':
 	    case 'EndDate':
+	    case 'Kaution':
+	    case 'Leihgebuehr':
+	    case 'BorrowerAddress':
+	    case 'ReturnChecklist':
 	    case 'ContractFile':
+	    case 'ReturnContractFile':
             return $this->_data[$key];
-            break;
         default:
             break;
         }
@@ -22,7 +39,21 @@ class InventoriesLoan
 	    case 'StartDate':
 	    case 'EndDate':
 	    case 'ContractFile':
+	    case 'ReturnContractFile':
             $this->_data[$key] = $val;
+            break;
+	    case 'BorrowerAddress':
+	    case 'ReturnChecklist':
+            $this->_data[$key] = trim((string)$val);
+            break;
+	    case 'Kaution':
+	    case 'Leihgebuehr':
+            if($val === null || $val === '') {
+                $this->_data[$key] = '0.00';
+            }
+            else {
+                $this->_data[$key] = number_format(LoanForm::parseAmount($val), 2, '.', '');
+            }
             break;
 	    case 'Index':
 	    case 'Inventory':
@@ -31,7 +62,7 @@ class InventoriesLoan
             break;
         default:
             break;
-        }	
+        }
     }
 
     public function is_valid() {
@@ -52,6 +83,14 @@ class InventoriesLoan
             $typeName,
             RegNumber::displayInventory($inv->Inventory, $inv->RegNumber)
         );
+    }
+
+    private function escapeDb($val) {
+        return mysqli_real_escape_string($GLOBALS['conn'], (string)$val);
+    }
+
+    private function moneySql($raw) {
+        return $this->escapeDb(number_format(LoanForm::parseAmount($raw), 2, '.', ''));
     }
 
     public function getChanges() {
@@ -85,9 +124,28 @@ class InventoriesLoan
             $str .= ', EndDate: '.germanDate($old->EndDate, 0)
                 .' &rArr; <b>'.germanDate($this->EndDate, 0).'</b>';
         }
+        if(LoanForm::parseAmount($this->Kaution) !== LoanForm::parseAmount($old->Kaution)) {
+            $str .= ', Kaution: '.LoanForm::formatAmount($old->Kaution)
+                .' &rArr; <b>'.LoanForm::formatAmount($this->Kaution).'</b>';
+        }
+        if(LoanForm::parseAmount($this->Leihgebuehr) !== LoanForm::parseAmount($old->Leihgebuehr)) {
+            $str .= ', Leihgebühr: '.LoanForm::formatAmount($old->Leihgebuehr)
+                .' &rArr; <b>'.LoanForm::formatAmount($this->Leihgebuehr).'</b>';
+        }
+        if($this->BorrowerAddress != $old->BorrowerAddress) {
+            $str .= ', Adresse: '.htmlspecialchars((string)$old->BorrowerAddress, ENT_QUOTES, 'UTF-8')
+                .' &rArr; <b>'.htmlspecialchars((string)$this->BorrowerAddress, ENT_QUOTES, 'UTF-8').'</b>';
+        }
+        if((string)$this->ReturnChecklist !== (string)$old->ReturnChecklist) {
+            $str .= ', Checkliste aktualisiert';
+        }
         if($this->ContractFile != $old->ContractFile) {
             $str .= ', ContractFile: '.$old->ContractFile
                 .' &rArr; <b>'.$this->ContractFile.'</b>';
+        }
+        if($this->ReturnContractFile != $old->ReturnContractFile) {
+            $str .= ', ReturnContractFile: '.$old->ReturnContractFile
+                .' &rArr; <b>'.$this->ReturnContractFile.'</b>';
         }
 
         return $str;
@@ -105,12 +163,35 @@ class InventoriesLoan
         logAppendFilled($parts, 'StartDate', $start, (string)$start);
         $end = germanDate($this->EndDate, 0);
         logAppendFilled($parts, 'EndDate', $end, (string)$end);
+        if(LoanForm::hasAmount($this->Kaution)) {
+            $parts[] = logPart('Kaution', LoanForm::formatAmount($this->Kaution));
+        }
+        if(LoanForm::hasAmount($this->Leihgebuehr)) {
+            $parts[] = logPart('Leihgebühr', LoanForm::formatAmount($this->Leihgebuehr));
+        }
+        logAppendFilled($parts, 'Adresse', $this->BorrowerAddress, (string)$this->BorrowerAddress);
+        if(trim((string)$this->ReturnChecklist) !== '') {
+            $parts[] = logPart('Checkliste', 'gesetzt');
+        }
         logAppendFilled($parts, 'ContractFile', $this->ContractFile, (string)$this->ContractFile);
+        logAppendFilled($parts, 'ReturnContractFile', $this->ReturnContractFile, (string)$this->ReturnContractFile);
         return implode(', ', $parts);
     }
 
     public function save() {
         if(!$this->is_valid()) return false;
+        if($this->Kaution === null || $this->Kaution === '') {
+            $this->Kaution = '0.00';
+        }
+        if($this->Leihgebuehr === null || $this->Leihgebuehr === '') {
+            $this->Leihgebuehr = '0.00';
+        }
+        if($this->BorrowerAddress === null) {
+            $this->BorrowerAddress = '';
+        }
+        if($this->ReturnChecklist === null) {
+            $this->ReturnChecklist = '';
+        }
         if($this->Index > 0) {
             $logentry = new Log;
             $logentry->DBupdate($this->getChanges());
@@ -124,13 +205,19 @@ class InventoriesLoan
     }
 
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `ContractFile`) VALUES ("%d", "%d", %s, %s, "%s");',
-        $GLOBALS['dbprefix'],
-        $this->User,
-        $this->Inventory,
-        mkNULLstr($this->StartDate),
-        mkNULLstr($this->EndDate),
-        $this->ContractFile
+        $sql = sprintf(
+            'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `Kaution`, `Leihgebuehr`, `BorrowerAddress`, `ReturnChecklist`, `ContractFile`, `ReturnContractFile`) VALUES ("%d", "%d", %s, %s, "%s", "%s", "%s", "%s", "%s", "%s");',
+            $GLOBALS['dbprefix'],
+            $this->User,
+            $this->Inventory,
+            mkNULLstr($this->StartDate),
+            mkNULLstr($this->EndDate),
+            $this->moneySql($this->Kaution),
+            $this->moneySql($this->Leihgebuehr),
+            $this->escapeDb($this->BorrowerAddress),
+            $this->escapeDb($this->ReturnChecklist),
+            $this->escapeDb($this->ContractFile),
+            $this->escapeDb($this->ReturnContractFile)
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -138,16 +225,22 @@ class InventoriesLoan
         $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
         return true;
     }
-    
+
     protected function update() {
-        $sql = sprintf('UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `ContractFile` = "%s" WHERE `Index` = "%d";',
-        $GLOBALS['dbprefix'],
-        $this->User,
-        $this->Inventory,
-        mkNULLstr($this->StartDate),
-        mkNULLstr($this->EndDate),
-        $this->ContractFile,
-        $this->Index
+        $sql = sprintf(
+            'UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `Kaution` = "%s", `Leihgebuehr` = "%s", `BorrowerAddress` = "%s", `ReturnChecklist` = "%s", `ContractFile` = "%s", `ReturnContractFile` = "%s" WHERE `Index` = "%d";',
+            $GLOBALS['dbprefix'],
+            $this->User,
+            $this->Inventory,
+            mkNULLstr($this->StartDate),
+            mkNULLstr($this->EndDate),
+            $this->moneySql($this->Kaution),
+            $this->moneySql($this->Leihgebuehr),
+            $this->escapeDb($this->BorrowerAddress),
+            $this->escapeDb($this->ReturnChecklist),
+            $this->escapeDb($this->ContractFile),
+            $this->escapeDb($this->ReturnContractFile),
+            $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -167,14 +260,25 @@ class InventoriesLoan
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) return false;
-        
+
         $this->_data['Index'] = null;
         return true;
     }
 
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
-                $this->_data[$key] = $val;
+            if(!array_key_exists($key, $this->_data)) {
+                continue;
+            }
+            if($key === 'Kaution' || $key === 'Leihgebuehr') {
+                $this->$key = $val;
+                continue;
+            }
+            if($key === 'Index' || $key === 'Inventory' || $key === 'User') {
+                $this->_data[$key] = (int)$val;
+                continue;
+            }
+            $this->_data[$key] = $val;
         }
     }
 

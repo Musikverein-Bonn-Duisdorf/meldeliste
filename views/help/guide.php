@@ -229,7 +229,8 @@ $sections[] = array(
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>
 <li><b>Inventar-Typen</b> – Prefix bestimmt den Nummernkreis (z.&nbsp;B. <code>MARSCH-001</code>, <code>INSTR-42</code>); die Beschriftung erscheint in Listen und Formularen</li>
-<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> neue Ausleihen eintragen, offene Leihen beenden oder einzelne Historie-Einträge löschen</li>
+<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> neue Ausleihen für jedes Inventarstück eintragen (optional <b>Kaution</b> und <b>Leihgebühr</b>) — das Modal bleibt offen, <b>Leihvertrag</b> folgt in der neuen Zeile; offene Leihen beenden oder einzelne Historie-Einträge löschen</li>
+<li><b>Leihvertrag / Rückgabe</b> – aus der Leihhistorie druckbare Formulare (alle Inventartypen); Kaution und Leihgebühr nur wenn &gt; 0 €; Entleiher immer so bezeichnet; Mitgliedsnummer wenn hinterlegt, sonst Adresse als Freifeld; Rückgabe-Checkliste online abhakbar und speicherbar; nach Unterschrift Scan ablegen und in der Historie öffnen. Bei Vereinsmitgliedern endet die Leihe mit dem Austritt, sonst neuer Vertrag als Nicht-Mitglied</li>
 ' : '').'
 </ul>
 '

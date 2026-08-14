@@ -55,7 +55,12 @@
 	"Inventory": {"Type": "int"},
 	"StartDate": {"Type": "date"},
 	"EndDate": {"Type": "date", "Null": "YES"},
-	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
+	"Kaution": {"Type": "decimal(10,2)", "Null": "YES", "Default": "0.00"},
+	"Leihgebuehr": {"Type": "decimal(10,2)", "Null": "YES", "Default": "0.00"},
+	"BorrowerAddress": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"ReturnChecklist": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"ReturnContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "Inventory": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

@@ -20,7 +20,7 @@ $regDisplay = RegNumber::displayInventory($inv->Inventory, $inv->RegNumber);
 $isInstr = $inv->isInstrType() || (int)$inv->Instrument > 0;
 $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
 ?>
-<div class="profile-shell modal-shell inventar-modal">
+<div class="profile-shell modal-shell inventar-modal" data-inventar-id="<?php echo (int)$inv->Index; ?>">
   <header class="profile-hero">
     <div class="profile-hero-text">
       <p class="profile-kicker">Inventar</p>
