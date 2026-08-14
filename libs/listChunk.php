@@ -434,16 +434,16 @@ function listChunkInventories($offset, $limit, $sort = '', $dir = 'asc') {
     $sort = strtolower(trim((string)$sort));
     $p = $GLOBALS['dbprefix'];
 
-    $activeLoanCond = "(`EndDate` IS NULL OR `EndDate` = '' OR `EndDate` = '0000-00-00' OR `EndDate` > CURDATE())";
+    $activeLoanCond = '(`EndDate` IS NULL OR `EndDate` > CURDATE())';
     $loanJoin = sprintf(
         'LEFT JOIN (
             SELECT l.`Inventory` AS `loanInvId`,
                    CONCAT(COALESCE(u.`Vorname`, \'\'), \' \', COALESCE(u.`Nachname`, \'\')) AS `loanName`
-            FROM `%sInventoriesLoan` l
+            FROM `%sInventoriesLoans` l
             INNER JOIN `%sUser` u ON u.`Index` = l.`User`
             INNER JOIN (
                 SELECT `Inventory`, MAX(`Index`) AS `maxLoan`
-                FROM `%sInventoriesLoan`
+                FROM `%sInventoriesLoans`
                 WHERE %s
                 GROUP BY `Inventory`
             ) latest ON latest.`maxLoan` = l.`Index`
