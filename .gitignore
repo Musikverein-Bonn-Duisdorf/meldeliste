@@ -1,6 +1,7 @@
 *~
 common/config.php
-uploads/*
+# Nested uploads (loan scans, …) stay local; only keep dir placeholders + htaccess.
+uploads/**
 !uploads/README
 !uploads/.htaccess
 !uploads/loans/
