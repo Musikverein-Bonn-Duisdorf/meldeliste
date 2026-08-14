@@ -2937,11 +2937,25 @@ body.loan-form-print {
 .loan-form-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.55rem 1rem;
   align-items: center;
+  justify-content: space-between;
   width: 210mm;
   max-width: 100%;
   margin: 0 auto 0.75rem;
+}
+
+.loan-form-toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.loan-form-toolbar-group--scan {
+  margin-left: auto;
+  padding-left: 0.65rem;
+  border-left: 1px solid #c5ccd4;
 }
 
 .loan-form-btn {
@@ -2972,6 +2986,11 @@ body.loan-form-print {
   filter: brightness(1.05);
 }
 
+.loan-form-btn--scan {
+  border-color: var(--loan-brand);
+  color: var(--loan-brand);
+}
+
 .loan-form-btn--file {
   position: relative;
   overflow: hidden;
@@ -2987,7 +3006,7 @@ body.loan-form-print {
 .loan-form-upload {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.4rem;
   align-items: center;
   margin: 0;
 }
@@ -3426,9 +3445,85 @@ body.loan-form-print {
 .inventory-loan-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.45rem 0.7rem;
   justify-content: flex-end;
   align-items: center;
+}
+
+.inventory-loan-action-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.inventory-loan-action-group--scans {
+  padding-left: 0.55rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.inventory-loan-action-group--danger {
+  padding-left: 0.55rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.inventory-loan-btn {
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.28rem 0.55rem;
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.28);
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inventory-loan-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.inventory-loan-btn--scan {
+  border-color: #345A95;
+  color: #345A95;
+}
+
+.inventory-loan-btn--scan:hover {
+  background: rgba(52, 90, 149, 0.06);
+}
+
+.inventory-loan-btn--danger {
+  border-color: transparent;
+}
+
+.inventory-loan-delete {
+  display: inline;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .inventory-loan-actions {
+    justify-content: flex-start;
+  }
+
+  .inventory-loan-action-group--scans,
+  .inventory-loan-action-group--danger {
+    padding-left: 0;
+    border-left: 0;
+    width: 100%;
+  }
+
+  .loan-form-toolbar-group--scan {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+    width: 100%;
+  }
 }
 
 /* Print: identical metrics; only strip screen chrome. */

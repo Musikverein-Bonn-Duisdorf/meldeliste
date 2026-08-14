@@ -94,6 +94,8 @@ $checkDeposit = !empty($checklist['depositReturned']);
 $checkDeductions = isset($checklist['deductions']) ? (string)$checklist['deductions'] : '';
 $checkNotes = isset($checklist['notes']) ? (string)$checklist['notes'] : '';
 
+$scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
+
 header('Content-Type: text/html; charset=utf-8');
 ?><!DOCTYPE html>
 <html lang="de">
@@ -105,25 +107,31 @@ header('Content-Type: text/html; charset=utf-8');
 </head>
 <body class="loan-form-print">
   <div class="loan-form-toolbar no-print">
-    <a class="loan-form-btn" href="<?php echo $h($backHref); ?>">Zurück</a>
-    <button type="button" class="loan-form-btn" onclick="window.print()">Drucken / als PDF speichern</button>
+    <div class="loan-form-toolbar-group">
+      <a class="loan-form-btn" href="<?php echo $h($backHref); ?>">Zurück</a>
+      <button type="button" class="loan-form-btn" onclick="window.print()">Drucken</button>
 <?php if($hasEditableFields) { ?>
-    <button type="submit" form="loan-form-fields" class="loan-form-btn loan-form-btn--primary">Speichern</button>
+      <button type="submit" form="loan-form-fields" class="loan-form-btn loan-form-btn--primary">Speichern</button>
 <?php } ?>
-<?php if($canEdit) { ?>
-    <form class="loan-form-upload" method="POST" action="loan-contract.php" enctype="multipart/form-data">
-      <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
-      <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
-      <input type="hidden" name="action" value="upload">
-      <label class="loan-form-btn loan-form-btn--file">
-        Scan hochladen
-        <input type="file" name="scan" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/*" required>
-      </label>
-      <button type="submit" class="loan-form-btn">Ablegen</button>
-    </form>
-<?php } ?>
-<?php if($hasScan) { ?>
-    <a class="loan-form-btn" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>">Scan öffnen</a>
+    </div>
+<?php if($canEdit || $hasScan) { ?>
+    <div class="loan-form-toolbar-group loan-form-toolbar-group--scan">
+<?php   if($hasScan) { ?>
+      <a class="loan-form-btn loan-form-btn--scan" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
+<?php   } ?>
+<?php   if($canEdit) { ?>
+      <form class="loan-form-upload" method="POST" action="loan-contract.php" enctype="multipart/form-data">
+        <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
+        <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
+        <input type="hidden" name="action" value="upload">
+        <label class="loan-form-btn loan-form-btn--file">
+          Datei
+          <input type="file" name="scan" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/*" required>
+        </label>
+        <button type="submit" class="loan-form-btn loan-form-btn--primary">Hochladen</button>
+      </form>
+<?php   } ?>
+    </div>
 <?php } ?>
   </div>
 

@@ -599,26 +599,37 @@ class Inventories
         $actions->col(5, 12, 12);
         $actions->class = "w3-right-align inventory-loan-actions";
         $str .= $actions->open();
-        $str .= '<a class="w3-button w3-small w3-border" target="_blank" rel="noopener" '
-            .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a> ';
+
+        $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
+        $str .= '<a class="inventory-loan-btn" target="_blank" rel="noopener" '
+            .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a>';
         if(!$active || $ended) {
-            $str .= '<a class="w3-button w3-small w3-border" target="_blank" rel="noopener" '
-                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a> ';
+            $str .= '<a class="inventory-loan-btn" target="_blank" rel="noopener" '
+                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
         }
-        if($hasLoanScan) {
-            $str .= '<a class="w3-button w3-small" target="_blank" rel="noopener" '
-                .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan" title="Scan Leihvertrag">Scan</a> ';
+        $str .= '</div>';
+
+        if($hasLoanScan || $hasReturnScan) {
+            $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--scans" role="group" aria-label="Scans">';
+            if($hasLoanScan) {
+                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
+                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">Scan Vertrag</a>';
+            }
+            if($hasReturnScan) {
+                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
+                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">Scan Rückgabe</a>';
+            }
+            $str .= '</div>';
         }
-        if($hasReturnScan) {
-            $str .= '<a class="w3-button w3-small" target="_blank" rel="noopener" '
-                .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return" title="Scan Rückgabe">Scan Rückgabe</a> ';
-        }
+
         if($canEdit) {
-            $str .= '<form method="POST" action="" style="display:inline;" '
+            $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--danger">';
+            $str .= '<form method="POST" action="" class="inventory-loan-delete" '
                 .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
                 .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
-                .'<button type="submit" name="deleteLoan" value="1" class="w3-button w3-small '.$btnDelete.'">Löschen</button>'
+                .'<button type="submit" name="deleteLoan" value="1" class="inventory-loan-btn inventory-loan-btn--danger '.$btnDelete.'">Löschen</button>'
                 .'</form>';
+            $str .= '</div>';
         }
         $str .= $actions->close();
 
