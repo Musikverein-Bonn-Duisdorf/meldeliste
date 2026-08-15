@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-9166d (2026-08-15)
+
+- MELD-184: Safe-Area unter Bottom-Nav ohne grauen colorNav-Streifen
+- MELD-184: grauen Safe-Area-Streifen unter Bottom-Nav entfernen
+
 ## 2026-08-15-e2d0a (2026-08-15)
 
 - MELD-184: grauen Abstand unter Titlebar/Nav auf Smartphone entfernen
