@@ -193,7 +193,7 @@ class DatabaseManager
         }
 
         $insert = sprintf(
-            'INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_editRegisters`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES (%d, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);',
+            'INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_editRegisters`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`, `perm_accessNotenarchiv`, `perm_accessMitgliederverwaltung`) VALUES (%d, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);',
             $GLOBALS['dbprefix'],
             $userId
         );

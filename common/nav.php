@@ -7,10 +7,10 @@ $mailUnreadLabel = $mailUnread > 99 ? '99+' : (string)$mailUnread;
 $navUser = new User;
 $navUser->load_by_id($_SESSION['userid']);
 $navHasInventories = $navUser->hasInventories();
-$ssoArchiv = !empty($optionsDB['urlNotenarchiv'])
+$ssoArchiv = (!empty($optionsDB['urlNotenarchiv']) && requirePermission('perm_accessNotenarchiv'))
     ? 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlNotenarchiv']))
     : '';
-$ssoMit = !empty($optionsDB['urlMitgliederverwaltung'])
+$ssoMit = (!empty($optionsDB['urlMitgliederverwaltung']) && requirePermission('perm_accessMitgliederverwaltung'))
     ? 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlMitgliederverwaltung']))
     : '';
 $isAdminNav = isAdmin();

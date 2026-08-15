@@ -48,6 +48,8 @@ $sections[] = array(
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir gehörendes oder an dich ausgeliehenes Inventar</li>' : '').'
 <li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen (Desktop in der Seitenleiste, Tablet/Smartphone unter <b>Mehr</b>)</li>
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
+'.((!empty($optionsDB['urlNotenarchiv']) && requirePermission('perm_accessNotenarchiv')) ? '<li><i class="fas fa-book"></i> <b>Notenarchiv</b> – SSO-Link zum Notenarchiv</li>' : '').'
+'.((!empty($optionsDB['urlMitgliederverwaltung']) && requirePermission('perm_accessMitgliederverwaltung')) ? '<li><i class="fas fa-id-card"></i> <b>Mitgliederverw.</b> – SSO-Link zur Mitgliederverwaltung</li>' : '').'
 <li>Logo oben rechts – öffnet die <b>Vereinshomepage</b> in einem neuen Tab</li>
 <li><i class="fas fa-circle-question"></i> <b>Hilfe</b> – diese Seite inkl. Changelog</li>
 '.(isAdmin() ? '<li><i class="fas fa-wrench"></i> <b>Admin</b> – Verwaltungsmenü in der Reihenfolge Personen → Termine → Meldungen → Kommunikation → Inventar → Register → System; Einträge sind in denselben Farben wie die Rechte-Chips eingefärbt (Desktop links unten, Tablet/Smartphone unter Mehr)</li>' : '').'
@@ -260,7 +262,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>
-<li><b>Plattform / SSO</b> – <code>ssoRedirectAllowlist</code>, <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> für einmalige SSO-Tickets zu Schwester-Modulen (Nav-Links erscheinen bei gesetzter URL)</li>
+<li><b>Plattform / SSO</b> – <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> setzen die Modul-Ziele (Hosts daraus sind für SSO automatisch erlaubt); <code>ssoRedirectAllowlist</code> nur für Extra-Hosts. Nav-Links erscheinen bei gesetzter URL und dem Recht <b>Notenarchiv</b> bzw. <b>Mitgliederverw.</b></li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Statistik</b> – Auswertungen; auf breiten Bildschirmen Diagramme und Listen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>). Ranking und Inaktive teilen sich denselben Chip-Filter wie die Personenliste (Aktive/Gäste/Mitglieder, Register, Gruppen) und nutzen denselben Zeilen-Stil inkl. Sortier-Chips</li>

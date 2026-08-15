@@ -597,19 +597,19 @@ function getConfigDefaults() {
             'Parameter' => 'ssoRedirectAllowlist',
             'Value' => '',
             'Type' => 'string',
-            'Description' => 'SSO-Weiterleitung: kommagetrennte Host-Suffixe oder Pfad-Pr&auml;fixe (leer = nur eigener Host)',
+            'Description' => 'SSO Extra-Hosts: kommagetrennte Host-Suffixe oder Pfad-Pr&auml;fixe (Modul-URLs sind automatisch erlaubt)',
         ),
         array(
             'Parameter' => 'urlNotenarchiv',
             'Value' => '',
             'Type' => 'string',
-            'Description' => 'Basis-URL Notenarchiv (Nav-Link via SSO; leer = ausgeblendet)',
+            'Description' => 'Basis-URL Notenarchiv (SSO + Nav bei Recht; leer = ausgeblendet)',
         ),
         array(
             'Parameter' => 'urlMitgliederverwaltung',
             'Value' => '',
             'Type' => 'string',
-            'Description' => 'Basis-URL Mitgliederverwaltung (Nav-Link via SSO; leer = ausgeblendet)',
+            'Description' => 'Basis-URL Mitgliederverwaltung (SSO + Nav bei Recht; leer = ausgeblendet)',
         ),
     );
 }

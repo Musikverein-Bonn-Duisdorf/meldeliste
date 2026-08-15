@@ -52,5 +52,6 @@ include "libs/backup.php";
 include "libs/calendarView.php";
 include "libs/icalFeed.php";
 include "libs/ssoTicket.php";
+include "libs/ssoRedirect.php";
 include "libs/userVoice.php";
 ?>

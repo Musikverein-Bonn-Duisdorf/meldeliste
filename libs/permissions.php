@@ -16,7 +16,9 @@ class Permissions
         'perm_showResponse' => null,
         'perm_editResponse' => null,
         'perm_editConfig' => null,
-        'perm_editPermissions' => null
+        'perm_editPermissions' => null,
+        'perm_accessNotenarchiv' => null,
+        'perm_accessMitgliederverwaltung' => null
     );
     public function __get($key) {
         switch($key) {
@@ -58,6 +60,8 @@ class Permissions
         if($this->perm_editResponse != $old->perm_editResponse) $str.=", perm_editResponse: ".$old->perm_editResponse." &rArr; <b>".$this->perm_editResponse."</b>";
         if($this->perm_editConfig != $old->perm_editConfig) $str.=", perm_editConfig: ".$old->perm_editConfig." &rArr; <b>".$this->perm_editConfig."</b>";
         if($this->perm_editPermissions != $old->perm_editPermissions) $str.=", perm_editPermissions: ".$old->perm_editPermissions." &rArr; <b>".$this->perm_editPermissions."</b>";
+        if($this->perm_accessNotenarchiv != $old->perm_accessNotenarchiv) $str.=", perm_accessNotenarchiv: ".$old->perm_accessNotenarchiv." &rArr; <b>".$this->perm_accessNotenarchiv."</b>";
+        if($this->perm_accessMitgliederverwaltung != $old->perm_accessMitgliederverwaltung) $str.=", perm_accessMitgliederverwaltung: ".$old->perm_accessMitgliederverwaltung." &rArr; <b>".$this->perm_accessMitgliederverwaltung."</b>";
 
         return $str;
     }
@@ -102,32 +106,7 @@ class Permissions
     }
     
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_editRegisters`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
-                       $GLOBALS['dbprefix'],
-                       $this->User,
-                       $this->perm_showHiddenAppmnts,
-                       $this->perm_showUsers,
-                       $this->perm_editUsers,
-                       $this->perm_editAppmnts,
-                       $this->perm_showLog,
-                       $this->perm_editRegisters,
-                       $this->perm_showInventories,
-                       $this->perm_editInventories,
-                       $this->perm_sendEmail,
-                       $this->perm_showResponse,
-                       $this->perm_editResponse,
-                       $this->perm_editConfig,
-                       $this->perm_editPermissions
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if(!$dbr) return false;
-        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
-        return true;
-    }
-    
-    protected function update() {
-        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_editRegisters` = "%d", `perm_showInventories` = "%d", `perm_editInventories` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('INSERT INTO `%sPermissions` (`User`, `perm_showHiddenAppmnts`, `perm_showUsers`, `perm_editUsers`, `perm_editAppmnts`, `perm_showLog`, `perm_editRegisters`, `perm_showInventories`, `perm_editInventories`, `perm_sendEmail`, `perm_showResponse`, `perm_editResponse`, `perm_editConfig`, `perm_editPermissions`, `perm_accessNotenarchiv`, `perm_accessMitgliederverwaltung`) VALUES ("%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
                        $GLOBALS['dbprefix'],
                        $this->User,
                        $this->perm_showHiddenAppmnts,
@@ -143,6 +122,35 @@ class Permissions
                        $this->perm_editResponse,
                        $this->perm_editConfig,
                        $this->perm_editPermissions,
+                       $this->perm_accessNotenarchiv,
+                       $this->perm_accessMitgliederverwaltung
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) return false;
+        $this->_data['Index'] = mysqli_insert_id($GLOBALS['conn']);
+        return true;
+    }
+    
+    protected function update() {
+        $sql = sprintf('UPDATE `%sPermissions` SET `User` = "%d", `perm_showHiddenAppmnts` = "%d", `perm_showUsers` = "%d", `perm_editUsers` = "%d", `perm_editAppmnts` = "%d", `perm_showLog` = "%d", `perm_editRegisters` = "%d", `perm_showInventories` = "%d", `perm_editInventories` = "%d", `perm_sendEmail` = "%d", `perm_showResponse` = "%d", `perm_editResponse` = "%d", `perm_editConfig` = "%d", `perm_editPermissions` = "%d", `perm_accessNotenarchiv` = "%d", `perm_accessMitgliederverwaltung` = "%d" WHERE `Index` = "%d";',
+                       $GLOBALS['dbprefix'],
+                       $this->User,
+                       $this->perm_showHiddenAppmnts,
+                       $this->perm_showUsers,
+                       $this->perm_editUsers,
+                       $this->perm_editAppmnts,
+                       $this->perm_showLog,
+                       $this->perm_editRegisters,
+                       $this->perm_showInventories,
+                       $this->perm_editInventories,
+                       $this->perm_sendEmail,
+                       $this->perm_showResponse,
+                       $this->perm_editResponse,
+                       $this->perm_editConfig,
+                       $this->perm_editPermissions,
+                       $this->perm_accessNotenarchiv,
+                       $this->perm_accessMitgliederverwaltung,
                        $this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -325,6 +333,8 @@ class Permissions
             'perm_editResponse',
             'perm_editConfig',
             'perm_editPermissions',
+            'perm_accessNotenarchiv',
+            'perm_accessMitgliederverwaltung',
         );
     }
 
@@ -346,6 +356,8 @@ class Permissions
             'perm_editResponse' => array('short' => 'Melden+', 'label' => 'Rückmeldungen bearbeiten'),
             'perm_editConfig' => array('short' => 'Config', 'label' => 'Konfiguration bearbeiten'),
             'perm_editPermissions' => array('short' => 'Rechte', 'label' => 'Berechtigungen bearbeiten'),
+            'perm_accessNotenarchiv' => array('short' => 'Notenarchiv', 'label' => 'Notenarchiv'),
+            'perm_accessMitgliederverwaltung' => array('short' => 'Mitgliederverw.', 'label' => 'Mitgliederverwaltung'),
         );
     }
 
@@ -396,6 +408,12 @@ class Permissions
                 'title' => 'System',
                 'color' => '#78909C',
                 'keys' => array('perm_showLog', 'perm_editConfig'),
+            ),
+            array(
+                'id' => 'plattform',
+                'title' => 'Plattform',
+                'color' => '#8D6E63',
+                'keys' => array('perm_accessNotenarchiv', 'perm_accessMitgliederverwaltung'),
             ),
         );
     }
