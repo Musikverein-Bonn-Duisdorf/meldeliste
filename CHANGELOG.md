@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-7007f (2026-08-15)
+
+- MELD-189 MELD-179: serverseitige Log-Suche und Mehrwort-UND
+
 ## 2026-08-15-b4b65 (2026-08-15)
 
 - MELD-187: native alert/confirm durch App-Modals ersetzen
