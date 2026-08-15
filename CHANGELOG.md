@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-e356e (2026-08-15)
+
+- docs: UI-SHELL Tabellen-Sortierung und Infinite-Scroll
+
 ## 2026-08-15-77de6 (2026-08-15)
 
 - docs: UI-SHELL-Vertrag als Master für Sibling-Module
