@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-2f653 (2026-08-15)
+
+- MELD-171: Notenarchiv-/MIT-Rechte und SSO-Allowlist über Modul-URLs
+- MELD-171: Notenarchiv-/MIT-Rechte und SSO-Allowlist
+
 ## 2026-08-15-34918 (2026-08-15)
 
 - MELD-184: aktive Nav-Tabs wieder farbig; CSS mit VERSION cache-busten
