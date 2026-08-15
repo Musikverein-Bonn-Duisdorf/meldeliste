@@ -23,7 +23,9 @@ function filterMusiker() {
         var txtValue = (typeof listRowSearchText === "function"
             ? listRowSearchText(row)
             : (row.textContent || row.innerText || ""));
-        var textOk = filter === "" || txtValue.toUpperCase().indexOf(filter) > -1;
+        var textOk = typeof listRowMatchesQuery === "function"
+            ? listRowMatchesQuery(txtValue, input ? input.value : "")
+            : (filter === "" || txtValue.toUpperCase().indexOf(filter) > -1);
         var insuredOk = !insuredOnly || row.getAttribute("data-insured") === "1";
         if (textOk && insuredOk) {
             row.style.display = "";

@@ -157,7 +157,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_showUsers'),
     'body' => '
 <ul class="help-list">
-<li><b>Personenliste</b> – alle Nutzer an einem Ort; die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig (Standard: Register-Prio), Suche und Filter-Chips (Aktive/Gäste, Mitglieder/Nicht-Mitglieder, Register) filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen). Klick öffnet Details im Modal. Zeilen in Registerfarbe; Instrument, Gruppen und Rechte als Chips (Rechte über Gruppe gestrichelt). Orchestergrafik ist aufklappbar (standardmäßig offen)</li>
+<li><b>Personenliste</b> – alle Nutzer an einem Ort; die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig (Standard: Register-Prio), Suche (mehrere Wörter = UND) und Filter-Chips (Aktive/Gäste, Mitglieder/Nicht-Mitglieder, Register) filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen). Klick öffnet Details im Modal. Zeilen in Registerfarbe; Instrument, Gruppen und Rechte als Chips (Rechte über Gruppe gestrichelt). Orchestergrafik ist aufklappbar (standardmäßig offen)</li>
 '.(requirePermission('perm_editUsers') ? '<li><b>Musiker anlegen</b> – Person anlegen inkl. Benachrichtigungen, Haken <b>aktiv</b> (aus = Gastmusiker), Mitglied-Status, Instrument, Gruppen-Chips und Rechte (persönlich editierbar; über Gruppen vererbte Rechte erscheinen mit gestricheltem Rahmen und sind hier nicht entfernbar); <b>Deaktivieren</b> setzt Gastmusiker; <b>Löschen</b> prüft zuerst Inventar (Eigentum/aktive Ausleihe blockiert das Löschen mit Hinweis), entfernt danach zukünftige Meldungen/Schichtmeldungen und soft-löscht die Person – zurückliegende Meldungen bleiben für Statistik/Archiv; <b>Automatisch</b> zeigt die abgeleitete Zugehörigkeit</li>' : '').'
 '.(requirePermission('perm_editUsers') && !empty($optionsDB['urlNotenarchiv']) ? '<li><b>Stimme / Fallbacks</b> – primäre Stimme und Fallback-Instrumente für das Notenarchiv (Stimmsatz); Priorität zuerst Primär, dann Fallbacks in Reihenfolge; im Profil verlinkt oder <code>user-voice.php</code></li>' : '').'
 </ul>
@@ -224,7 +224,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick öffnet Details im Modal; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
+<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche (mehrere Wörter = UND, z. B. <code>marsch Ralf</code>) und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick öffnet Details im Modal; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>
@@ -264,7 +264,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Statistik</b> – Auswertungen; auf breiten Bildschirmen Diagramme und Listen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>). Ranking und Inaktive teilen sich denselben Chip-Filter wie die Personenliste (Aktive/Gäste/Mitglieder, Register, Gruppen) und nutzen denselben Zeilen-Stil inkl. Sortier-Chips</li>
-<li><b>Log</b> – Anwendungsprotokoll (Filter, Live-Aktualisierung); Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
+<li><b>Log</b> – Anwendungsprotokoll (Suche serverseitig; mehrere Wörter = UND, z. B. <code>ERROR Meier</code>; Live-Aktualisierung); Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>

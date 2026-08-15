@@ -11,11 +11,16 @@
  * (sparse hits like „Adventskonzert“). Chain via timeout — not only IntersectionObserver —
  * because a collapsed filter list keeps the sentinel in view. Optional Stoppen;
  * no manual Weiter required. (MELD-162 hard pause after 2 empties removed.)
+ *
+ * MELD-189: Lists with data-server-q="1" (Log) send q to getList.php and reload from
+ * cursor 0 on search change — no client scan of the full table.
  */
 (function() {
     var loading = false;
     var observer = null;
     var pausedByUser = false;
+    var serverQReloadTimer = null;
+    var loadGeneration = 0;
     var MSG_LOADING = 'Weitere Einträge werden geladen…';
     var MSG_FILTER_SCAN = 'Suche…';
     var MSG_END = 'Keine weiteren Einträge';
@@ -30,9 +35,18 @@
         return document.getElementById('Liste');
     }
 
-    function filterActive() {
+    function usesServerQ() {
+        var sentinel = getSentinel();
+        return !!(sentinel && sentinel.getAttribute('data-server-q') === '1');
+    }
+
+    function filterQuery() {
         var input = document.getElementById('filterString');
-        if(input && String(input.value).trim() !== '') return true;
+        return input ? String(input.value).trim() : '';
+    }
+
+    function filterActive() {
+        if(filterQuery() !== '') return true;
         // Inventory "Versichert" chip (MELD-177) — keep scanning while sparse
         var insured = document.getElementById('filterInsured');
         if(insured && insured.classList.contains('is-active')) return true;
@@ -47,6 +61,12 @@
             if(document.querySelector('[data-register-filter].is-active')) return true;
         }
         return false;
+    }
+
+    /** Client-side sparse scan only — not for server-q lists (would dump all matches). */
+    function shouldAutoChainFilter() {
+        if(usesServerQ()) return false;
+        return filterActive();
     }
 
     function setBarVisible(visible) {
@@ -132,7 +152,7 @@
         pausedByUser = false;
         var sentinel = getSentinel();
         if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
-        if(filterActive()) {
+        if(shouldAutoChainFilter()) {
             chainFilterLoadSoon();
             return;
         }
@@ -149,7 +169,12 @@
     function onClientFilterChanged() {
         pausedByUser = false;
         var sentinel = getSentinel();
-        if(!sentinel || sentinel.getAttribute('data-has-more') !== '1') return;
+        if(!sentinel) return;
+        if(usesServerQ()) {
+            scheduleServerQReload();
+            return;
+        }
+        if(sentinel.getAttribute('data-has-more') !== '1') return;
         if(!filterActive()) {
             setStatus('', false);
             reobserveSoon();
@@ -160,6 +185,27 @@
             onClick: pauseByUser
         });
         chainFilterLoadSoon();
+    }
+
+    function scheduleServerQReload() {
+        if(serverQReloadTimer) {
+            clearTimeout(serverQReloadTimer);
+        }
+        var sentinel = getSentinel();
+        var list = getList();
+        if(list && sentinel) {
+            if(observer) observer.unobserve(sentinel);
+            loadGeneration++;
+            loading = false;
+            clearRows(list, sentinel);
+            sentinel.setAttribute('data-cursor', '0');
+            sentinel.setAttribute('data-has-more', '1');
+        }
+        setStatus(MSG_FILTER_SCAN, true);
+        serverQReloadTimer = setTimeout(function() {
+            serverQReloadTimer = null;
+            reloadFromStart();
+        }, 300);
     }
 
     window.listInfiniteFilterChanged = onClientFilterChanged;
@@ -227,6 +273,10 @@
         var dir = sentinel.getAttribute('data-dir');
         if(sort) url += '&sort=' + encodeURIComponent(sort);
         if(dir) url += '&dir=' + encodeURIComponent(dir);
+        if(sentinel.getAttribute('data-server-q') === '1') {
+            var q = filterQuery();
+            if(q !== '') url += '&q=' + encodeURIComponent(q);
+        }
         return url;
     }
 
@@ -256,6 +306,10 @@
                 reobserveSoon();
                 return;
             }
+            if(!shouldAutoChainFilter()) {
+                reobserveSoon();
+                return;
+            }
             loadMore();
         }, 0);
     }
@@ -271,16 +325,20 @@
         var cursor = sentinel.getAttribute('data-cursor') || '';
         if(!type || cursor === '') return;
 
-        var filtering = filterActive();
+        var filtering = shouldAutoChainFilter();
         var seekingFirstMatch = filtering && countVisibleInList(list, sentinel) === 0;
 
         loading = true;
+        var requestGen = loadGeneration;
         if(observer) observer.unobserve(sentinel);
         if(filtering) {
             setStatus(seekingFirstMatch ? MSG_FILTER_SCAN : MSG_LOADING, true, {
                 label: 'Stoppen',
                 onClick: pauseByUser
             });
+        }
+        else if(usesServerQ() && filterQuery() !== '') {
+            setStatus(MSG_LOADING, true);
         }
         else {
             setStatus(MSG_LOADING, true);
@@ -295,6 +353,9 @@
         }
         xhr.onreadystatechange = function() {
             if(xhr.readyState !== 4) return;
+            if(requestGen !== loadGeneration) {
+                return;
+            }
             loading = false;
             if(xhr.status < 200 || xhr.status >= 300) {
                 setStatus(MSG_ERROR, false);
@@ -331,7 +392,7 @@
                 return;
             }
 
-            if(filterActive()) {
+            if(shouldAutoChainFilter()) {
                 // Keep scanning automatically until end or Stoppen (no Weiter).
                 var visibleTotal = countVisibleInList(list, sentinel);
                 setStatus(visibleTotal === 0 ? MSG_FILTER_SCAN : MSG_LOADING, true, {
@@ -354,6 +415,7 @@
         var list = getList();
         if(!sentinel || !list) return;
         if(observer) observer.unobserve(sentinel);
+        loadGeneration++;
         loading = false;
         pausedByUser = false;
         if(sort) sentinel.setAttribute('data-sort', sort);

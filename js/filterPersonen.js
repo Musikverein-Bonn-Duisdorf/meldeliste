@@ -56,7 +56,10 @@
                 var txt = typeof listRowSearchText === 'function'
                     ? listRowSearchText(row)
                     : (row.getAttribute('data-search') || row.textContent || '');
-                if (String(txt).toUpperCase().indexOf(filter) === -1) {
+                var ok = typeof listRowMatchesQuery === 'function'
+                    ? listRowMatchesQuery(txt, input ? input.value : '')
+                    : String(txt).toUpperCase().indexOf(filter) !== -1;
+                if (!ok) {
                     visible = false;
                 }
             }

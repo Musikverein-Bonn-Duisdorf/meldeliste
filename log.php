@@ -19,11 +19,11 @@ if($leak !== false && $leak !== '') {
 ?>
 <?php
 adminListPageBegin('System', 'Log');
-adminListSearchField('Log durchsuchen…', array('onkeyup' => 'filterLog()'));
+adminListSearchField('Log durchsuchen…');
 ?>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>
-<?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog', ' data-limit="'.(int)$logChunkLimit.'"'); ?>
+<?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog', ' data-limit="'.(int)$logChunkLimit.'" data-server-q="1"'); ?>
 </div>
 <?php adminListPageEnd(); ?>
 <script>
