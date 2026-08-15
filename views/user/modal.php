@@ -2,11 +2,17 @@
 /**
  * User detail modal (profile-shell layout).
  * Expects: $user, $showUserDetails, $permissions, $registerLeadName,
+ *          $inventoryChips (owned/loaned chip HTML lists),
  *          $showEditButton, $returnTo, $returnToken
  */
 $name = trim((string)$user->Vorname.' '.(string)$user->Nachname);
 $membership = AudienceSpec::membershipForUser((int)$user->Index);
 $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
+$inventoryChips = (isset($inventoryChips) && is_array($inventoryChips)) ? $inventoryChips : array();
+$ownedChips = isset($inventoryChips['owned']) && is_array($inventoryChips['owned'])
+    ? $inventoryChips['owned'] : array();
+$loanedChips = isset($inventoryChips['loaned']) && is_array($inventoryChips['loaned'])
+    ? $inventoryChips['loaned'] : array();
 ?>
 <div class="profile-shell modal-shell user-modal">
   <header class="profile-hero">
@@ -63,6 +69,22 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
         echo '<span class="mail-recipient-chip mail-recipient-chip--'.$type.'">'.$label.'</span>';
     }
 ?>
+        </div>
+      </div>
+<?php } ?>
+<?php if(count($ownedChips)) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Eigentum</span>
+        <div class="mail-recipient-chips" aria-label="Inventar-Eigentum">
+<?php echo implode('', $ownedChips); ?>
+        </div>
+      </div>
+<?php } ?>
+<?php if(count($loanedChips)) { ?>
+      <div class="profile-field">
+        <span class="profile-label">Leihen</span>
+        <div class="mail-recipient-chips" aria-label="Aktive Leihen">
+<?php echo implode('', $loanedChips); ?>
         </div>
       </div>
 <?php } ?>

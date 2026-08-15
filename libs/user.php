@@ -832,9 +832,9 @@ class User
     }
 
     /**
-     * Short label for delete/inventory warnings (nr + type/vendor/model).
+     * Short label for delete/inventory warnings and user-modal chips (nr + type/vendor/model).
      */
-    private static function inventoryWarningLabel($inventoryId) {
+    public static function inventoryChipLabel($inventoryId) {
         $inv = new Inventories;
         $inv->load_by_id((int)$inventoryId);
         if(!(int)$inv->Index) {
@@ -862,6 +862,57 @@ class User
             return $p !== '';
         });
         return implode(' · ', $parts);
+    }
+
+    /** @deprecated Use inventoryChipLabel */
+    private static function inventoryWarningLabel($inventoryId) {
+        return self::inventoryChipLabel($inventoryId);
+    }
+
+    /**
+     * Whether the current session may see inventar chips on this user modal.
+     */
+    public function userMaySeeInventoryChips() {
+        if(requirePermission('perm_showInventories') || requirePermission('perm_editInventories')) {
+            return true;
+        }
+        $viewer = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        return $viewer > 0 && $viewer === (int)$this->Index;
+    }
+
+    /**
+     * Entity chips for Eigentum / aktive Leihen (MELD-190).
+     * @return array{owned:list<string>,loaned:list<string>}
+     */
+    public function getModalInventoryChips() {
+        $owned = array();
+        $loaned = array();
+        if(!(int)$this->Index || !$this->userMaySeeInventoryChips()) {
+            return array('owned' => $owned, 'loaned' => $loaned);
+        }
+        foreach($this->getInventories() as $invId) {
+            $invId = (int)$invId;
+            if($invId < 1) {
+                continue;
+            }
+            $chip = entityOpenHtml('inventar', $invId, self::inventoryChipLabel($invId));
+            if($chip !== '') {
+                $owned[] = $chip;
+            }
+        }
+        foreach($this->getInventoriesLoans() as $loanId) {
+            $loan = new InventoriesLoan;
+            $loan->load_by_id((int)$loanId);
+            $invId = (int)$loan->Inventory;
+            if($invId < 1) {
+                continue;
+            }
+            $chip = entityOpenHtml('inventar', $invId, self::inventoryChipLabel($invId), 'loaned');
+            if($chip !== '') {
+                $loaned[] = $chip;
+            }
+        }
+        return array('owned' => $owned, 'loaned' => $loaned);
     }
 
     /**
@@ -952,6 +1003,7 @@ class User
             'showUserDetails' => $showUserDetails,
             'permissions' => $permissions,
             'registerLeadName' => $registerLeadName,
+            'inventoryChips' => $this->getModalInventoryChips(),
             'showEditButton' => ($forceEditButton || requirePermission("perm_editUsers")),
             'returnTo' => pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker'),
             'returnToken' => issueReturnToken(pageToReturnUrl(isset($_SESSION['page']) ? $_SESSION['page'] : 'musiker')),
