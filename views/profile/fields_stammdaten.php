@@ -60,4 +60,5 @@ if($fill && (int)$n->Index > 0) {
 <?php
     }
 }
+include __DIR__.'/fields_inventory.php';
 ?>

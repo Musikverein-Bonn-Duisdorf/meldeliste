@@ -172,4 +172,5 @@ elseif($userId > 0) {
 <?php
     }
 }
+include __DIR__.'/fields_inventory.php';
 ?>
