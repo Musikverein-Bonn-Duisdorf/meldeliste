@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-17137 (2026-08-15)
+
+- Release 2026-08-15-17137
+
 ## 2026-08-15-9f92e (2026-08-15)
 
 - MELD-193: Use period-based sqlUserIsVereinMitglied in evaluateStats.
