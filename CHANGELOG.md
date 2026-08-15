@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-b4b65 (2026-08-15)
+
+- MELD-187: native alert/confirm durch App-Modals ersetzen
+
 ## 2026-08-14-5a9d8 (2026-08-14)
 
 - gitignore: nested Uploads (Leih-PDFs) lokal halten
