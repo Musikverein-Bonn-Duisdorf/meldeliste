@@ -53,9 +53,7 @@ $stored = $kind === LoanForm::KIND_RETURN
     : $ctx['contractFile'];
 $hasScan = $stored !== '';
 
-$assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
-$cssMtime = @filemtime(__DIR__.'/styles/custom.css');
-$cssUrl = 'styles/custom.css?'.$assetV.'-'.$cssMtime;
+$cssUrl = assetUrl('styles/custom.css');
 $logoPath = is_file(__DIR__.'/imgs/Logo.png') ? 'imgs/Logo.png' : '';
 
 $brandBar = '#345A95';
