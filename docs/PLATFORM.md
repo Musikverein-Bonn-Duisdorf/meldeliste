@@ -50,7 +50,7 @@ Sibling-Apps: Integration nur über **DB + SSO**. Kein Melde-Host für Archiv-/M
 | Schema / Update (`update.php`, SchemaManager) | Nur eigener Prefix (`archiv_*` / `mit_*`) |
 | Install / Log / Domain-Seiten | Modul-eigen |
 | Backup-UI (`backup.php` / `cron.php`) | Nur eigener Prefix; Identity/`meldeliste_*` nie anfassen. Dateien (`data/`) bleiben Hosting/rsync |
-| UI-Shell-Assets (`custom.css`, FA6, `app-nav.js`, Shell-Helfer) | Vorerst Copy; später Kit-Kandidat |
+| UI-Shell-Assets (`custom.css`, FA6, `app-nav.js`, Shell-Helfer) | Vorerst Copy; später Kit-Kandidat — **Vertrag:** [UI-SHELL.md](UI-SHELL.md) |
 | SSO **Redeem**, Session, Identity-Read | Copy bis Kit |
 
 **Hinweis:** Melde-`backup.php` deckt Melde-Artefakte ab; Archiv hat eine **eigene** Backup-UI nur für `archiv_*` (ARCHIV-2). Gemeinsames Hosting-Dump der ganzen DB bleibt optional parallel.
@@ -63,6 +63,8 @@ Extrahieren, wenn Melde+Archiv(+MIT) dieselben Dateien zum dritten Mal driftiere
 - `sessionBootstrap` / Cookie-Defaults
 - `SQLtable` / dünne DB-Basis
 - `assetUrl`, `adminList*`, Modal-Host-Kern, ggf. Shell-CSS-Slice
+
+**Vertragsdokument (Master):** [UI-SHELL.md](UI-SHELL.md) — Filter/Listen, Logs, Modals/Popups, Chips/Styles, Asset-Versionierung. Archiv/MIT verlinken nur (keine Kopie).
 
 **Nicht** ins Kit: Domain-Libs, Config-Inhalte, SchemaVersion, Backup-UI, SSO-**Issue**.
 
