@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-fc427 (2026-08-15)
+
+- MELD-188: Leihvertrag nachträglich editieren, Scan löschen
+- MELD-188: Leihvertrag anpassen
+
 ## 2026-08-15-db592 (2026-08-15)
 
 - MELD-182: Kalender/ICS zeigen Schichten statt Eltern-Termin
