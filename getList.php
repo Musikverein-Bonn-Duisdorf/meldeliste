@@ -30,7 +30,8 @@ case 'log':
     if(!isset($_GET['limit']) || (int)$_GET['limit'] < 1) {
         $limit = listChunkLogConfiguredLimit();
     }
-    $result = listChunkLog($cursor !== '' ? (int)$cursor : 0, $limit);
+    $q = isset($_GET['q']) ? (string)$_GET['q'] : '';
+    $result = listChunkLog($cursor !== '' ? (int)$cursor : 0, $limit, $q);
     break;
 
 case 'termine':

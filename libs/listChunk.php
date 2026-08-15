@@ -34,24 +34,167 @@ function listChunkLogLimit($requested = 0) {
     return $n;
 }
 
-function listChunkLog($beforeIndex, $limit) {
-    $limit = listChunkLogLimit($limit);
-    $beforeIndex = (int)$beforeIndex;
-    if($beforeIndex > 0) {
-        $sql = sprintf(
-            'SELECT `Index` FROM `%sLog` WHERE `Index` < %d ORDER BY `Index` DESC LIMIT %d;',
-            $GLOBALS['dbprefix'],
-            $beforeIndex,
-            $limit + 1
-        );
+/**
+ * Escape a single search token for SQL LIKE (MELD-189 / MELD-179).
+ * @return string Empty if no usable query; otherwise already mysqli-escaped needle (no %).
+ */
+function listChunkLogSearchNeedle($q) {
+    $q = trim((string)$q);
+    if($q === '') {
+        return '';
+    }
+    if(function_exists('mb_substr')) {
+        $q = mb_substr($q, 0, 64, 'UTF-8');
     }
     else {
+        $q = substr($q, 0, 64);
+    }
+    $q = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), $q);
+    return mysqli_real_escape_string($GLOBALS['conn'], $q);
+}
+
+/**
+ * Split query into whitespace tokens (AND semantics, MELD-179).
+ * @return list<array{raw:string,needle:string}>
+ */
+function listChunkLogSearchTokens($q) {
+    $q = trim((string)$q);
+    if($q === '') {
+        return array();
+    }
+    if(function_exists('mb_substr')) {
+        $q = mb_substr($q, 0, 120, 'UTF-8');
+    }
+    else {
+        $q = substr($q, 0, 120);
+    }
+    $parts = preg_split('/\s+/u', $q, -1, PREG_SPLIT_NO_EMPTY);
+    if(!is_array($parts)) {
+        $parts = preg_split('/\s+/', $q, -1, PREG_SPLIT_NO_EMPTY);
+    }
+    $out = array();
+    foreach($parts as $part) {
+        if(count($out) >= 8) {
+            break;
+        }
+        $needle = listChunkLogSearchNeedle($part);
+        if($needle === '') {
+            continue;
+        }
+        $out[] = array('raw' => (string)$part, 'needle' => $needle);
+    }
+    return $out;
+}
+
+/**
+ * Map free-text search to Log.Type ids when the query looks like a type chip label.
+ * @return int[]
+ */
+function listChunkLogTypeIdsForQuery($q) {
+    $q = trim((string)$q);
+    if($q === '') {
+        return array();
+    }
+    $u = function_exists('mb_strtoupper') ? mb_strtoupper($q, 'UTF-8') : strtoupper($q);
+    if(function_exists('mb_strlen')) {
+        if(mb_strlen($u, 'UTF-8') < 3) {
+            return array();
+        }
+    }
+    elseif(strlen($u) < 3) {
+        return array();
+    }
+    $labels = array(
+        0 => 'FATAL',
+        1 => 'ERROR',
+        2 => 'WARNING',
+        3 => 'DB DELETE',
+        4 => 'DB INSERT',
+        5 => 'DB UPDATE',
+        6 => 'EMAIL',
+        7 => 'INFO',
+    );
+    $ids = array();
+    foreach($labels as $id => $label) {
+        if($u === $label || strpos($label, $u) !== false) {
+            $ids[] = (int)$id;
+        }
+    }
+    return array_values(array_unique($ids));
+}
+
+/**
+ * One token must match Message, user name, SYSTEM, or type label.
+ * @param array{raw:string,needle:string} $token
+ */
+function listChunkLogTokenSqlCondition(array $token) {
+    $like = '\'%'.$token['needle'].'%\'';
+    $conds = array(
+        'l.`Message` LIKE '.$like.' ESCAPE \'\\\\\'',
+        'u.`Vorname` LIKE '.$like.' ESCAPE \'\\\\\'',
+        'u.`Nachname` LIKE '.$like.' ESCAPE \'\\\\\'',
+        'CONCAT(u.`Vorname`, \' \', u.`Nachname`) LIKE '.$like.' ESCAPE \'\\\\\'',
+    );
+    $raw = (string)$token['raw'];
+    if(stripos('SYSTEM', $raw) !== false) {
+        $conds[] = 'l.`User` = 0';
+    }
+    $typeIds = listChunkLogTypeIdsForQuery($raw);
+    if($typeIds) {
+        $conds[] = 'l.`Type` IN ('.implode(',', array_map('intval', $typeIds)).')';
+    }
+    return '('.implode(' OR ', $conds).')';
+}
+
+/**
+ * @param int $beforeIndex
+ * @param int $limit
+ * @param string $q Server-side search; whitespace tokens are AND (MELD-179)
+ * @return array{html:string,nextCursor:string,hasMore:bool}
+ */
+function listChunkLog($beforeIndex, $limit, $q = '') {
+    $limit = listChunkLogLimit($limit);
+    $beforeIndex = (int)$beforeIndex;
+    $tokens = listChunkLogSearchTokens($q);
+    $prefix = $GLOBALS['dbprefix'];
+
+    if(!$tokens) {
+        if($beforeIndex > 0) {
+            $sql = sprintf(
+                'SELECT `Index` FROM `%sLog` WHERE `Index` < %d ORDER BY `Index` DESC LIMIT %d;',
+                $prefix,
+                $beforeIndex,
+                $limit + 1
+            );
+        }
+        else {
+            $sql = sprintf(
+                'SELECT `Index` FROM `%sLog` ORDER BY `Index` DESC LIMIT %d;',
+                $prefix,
+                $limit + 1
+            );
+        }
+    }
+    else {
+        $tokenSql = array();
+        foreach($tokens as $token) {
+            $tokenSql[] = listChunkLogTokenSqlCondition($token);
+        }
+        $whereSearch = implode(' AND ', $tokenSql);
+        $whereIdx = $beforeIndex > 0 ? ('l.`Index` < '.(int)$beforeIndex.' AND ') : '';
         $sql = sprintf(
-            'SELECT `Index` FROM `%sLog` ORDER BY `Index` DESC LIMIT %d;',
-            $GLOBALS['dbprefix'],
+            'SELECT l.`Index` FROM `%sLog` l'
+            .' LEFT JOIN `%sUser` u ON u.`Index` = l.`User`'
+            .' WHERE %s%s'
+            .' ORDER BY l.`Index` DESC LIMIT %d;',
+            $prefix,
+            $prefix,
+            $whereIdx,
+            $whereSearch,
             $limit + 1
         );
     }
+
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();
     $ids = array();

@@ -13,7 +13,7 @@ function filterTermine() {
         txtValue = (typeof listRowSearchText === 'function'
             ? listRowSearchText(tr[i])
             : ((dataSearch = tr[i].getAttribute("data-search")) || tr[i].textContent || tr[i].innerText || ""));
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        if (typeof listRowMatchesQuery === 'function' ? listRowMatchesQuery(txtValue, input.value) : txtValue.toUpperCase().indexOf(filter) > -1) {
             tr[i].style.display = "";
             tr[i].classList.remove("list-filtered-out");
         } else {

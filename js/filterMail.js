@@ -12,7 +12,7 @@ function filterMail() {
 	if(tr[i].parentNode !== table) continue;
 	if(!tr[i].classList || !tr[i].classList.contains("mail-list-item")) continue;
 	txtValue = (typeof listRowSearchText === 'function' ? listRowSearchText(tr[i]) : (tr[i].textContent || tr[i].innerText));
-	if (txtValue.toUpperCase().indexOf(filter) > -1) {
+	if (typeof listRowMatchesQuery === 'function' ? listRowMatchesQuery(txtValue, input.value) : txtValue.toUpperCase().indexOf(filter) > -1) {
 	    tr[i].style.display = "";
 	    tr[i].classList.remove("list-filtered-out");
 	} else {
