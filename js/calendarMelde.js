@@ -63,10 +63,19 @@ function calendarFormatDeDate(iso) {
 function calendarOfferNewTermin(dateIso) {
     if(!dateIso) return;
     var label = calendarFormatDeDate(dateIso);
-    if(!window.confirm('Neuen Termin am ' + label + ' anlegen?')) {
+    var go = function() {
+        window.location.href = 'new-termin.php?Datum=' + encodeURIComponent(dateIso);
+    };
+    if(typeof window.appConfirm === 'function') {
+        window.appConfirm('Neuen Termin am ' + label + ' anlegen?', {
+            title: 'Termin',
+            okLabel: 'Anlegen'
+        }).then(function(ok) {
+            if(ok) go();
+        });
         return;
     }
-    window.location.href = 'new-termin.php?Datum=' + encodeURIComponent(dateIso);
+    go();
 }
 
 document.addEventListener('DOMContentLoaded', function() {

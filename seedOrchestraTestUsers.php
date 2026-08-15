@@ -78,7 +78,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php echo csrf_field(); ?>
     <button class="w3-button w3-green" type="submit" name="action" value="create">50 Test-User anlegen</button>
   </form>
-  <form method="post" class="w3-margin-bottom" style="display:inline-block;" onsubmit="return confirm('Alle OrchesterTest-User soft-löschen?');">
+  <form method="post" class="w3-margin-bottom" style="display:inline-block;" data-confirm="Alle OrchesterTest-User soft-löschen?" data-confirm-ok="Löschen">
     <?php echo csrf_field(); ?>
     <button class="w3-button w3-orange" type="submit" name="action" value="delete">Test-User löschen</button>
   </form>

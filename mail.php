@@ -468,7 +468,7 @@ window.syncDiscordDefault = function() {};
   })();
   </script>
 
-  <form method="post" action="mail.php?id=<?php echo (int)$job->Index; ?>" onsubmit="return confirm('Entwurf #<?php echo (int)$job->Index; ?> wirklich löschen?');">
+  <form method="post" action="mail.php?id=<?php echo (int)$job->Index; ?>" data-confirm="Entwurf #<?php echo (int)$job->Index; ?> wirklich löschen?" data-confirm-ok="Löschen">
     <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
     <div class="mail-compose-actions">
     <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?> w3-margin" name="delete_job" value="1">Entwurf löschen</button>
@@ -586,13 +586,13 @@ function delFile(hash) {
     <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail.php?copy=<?php echo (int)$job->Index; ?>">Als Entwurf kopieren</a>
       <?php if($job->canCancel()) { ?>
-      <form method="post" action="mail.php" onsubmit="return confirm('Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?');">
+      <form method="post" action="mail.php" data-confirm="Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?" data-confirm-ok="Abbrechen">
         <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
         <button type="submit" name="cancel_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Abbrechen</button>
       </form>
       <?php } ?>
       <?php if($job->canDelete()) { ?>
-      <form method="post" action="mail.php" onsubmit="return confirm('Email-ID <?php echo (int)$job->Index; ?> wirklich löschen?');">
+      <form method="post" action="mail.php" data-confirm="Email-ID <?php echo (int)$job->Index; ?> wirklich löschen?" data-confirm-ok="Löschen">
         <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
         <button type="submit" name="delete_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?>">Löschen</button>
       </form>

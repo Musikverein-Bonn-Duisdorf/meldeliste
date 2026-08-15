@@ -747,7 +747,7 @@ class MailJob
         }
         if($this->canCancel()) {
             $html .= '<span class="mail-cancel-wrap">';
-            $html .= '<form method="post" action="mail.php" onsubmit="return confirm(\'Versand von Email-ID '.$id.' wirklich abbrechen?\');">';
+            $html .= '<form method="post" action="mail.php" data-confirm="Versand von Email-ID '.$id.' wirklich abbrechen?" data-confirm-ok="Abbrechen">';
             $html .= '<input type="hidden" name="id" value="'.$id.'" />';
             $html .= '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
             $html .= '</form>';
@@ -758,7 +758,7 @@ class MailJob
                 ? 'Entwurf #'.$id.' wirklich löschen?'
                 : 'Email-ID '.$id.' wirklich löschen? (noch an niemanden per PHPMailer versendet)';
             $html .= '<span class="mail-delete-wrap">';
-            $html .= '<form method="post" action="mail.php" onsubmit="return confirm(\''.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'\');">';
+            $html .= '<form method="post" action="mail.php" data-confirm="'.htmlspecialchars($delConfirm, ENT_QUOTES, 'UTF-8').'" data-confirm-ok="Löschen">';
             $html .= '<input type="hidden" name="id" value="'.$id.'" />';
             $html .= '<button type="submit" name="delete_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Löschen</button>';
             $html .= '</form>';

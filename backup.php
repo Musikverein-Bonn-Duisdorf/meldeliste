@@ -104,7 +104,7 @@ adminListPageBegin('System', 'Backup & Restore', array('permKey' => 'perm_editCo
   <div class="w3-card w3-padding w3-margin-bottom w3-pale-red">
     <h3>Restore (destruktiv)</h3>
     <p><b>Achtung:</b> Überschreibt die Datenbanktabellen mit dem Prefix. Vorher ein aktuelles Backup ziehen.</p>
-    <form method="post" enctype="multipart/form-data" action="backup.php" onsubmit="return confirm('Wirklich Restore ausführen? Die aktuelle Datenbank wird überschrieben.');">
+    <form method="post" enctype="multipart/form-data" action="backup.php" data-confirm="Wirklich Restore ausführen? Die aktuelle Datenbank wird überschrieben." data-confirm-ok="Restore">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="restore_confirm" value="1">
       <label>Backup-ZIP</label>

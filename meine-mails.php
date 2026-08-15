@@ -73,7 +73,7 @@ adminListPageBegin('Kommunikation', 'Meine Nachrichten');
     <div class="w3-padding-16 mail-body-content"><?php echo $body; ?></div>
     <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="meine-mails.php">Zur Übersicht</a>
-      <form method="post" action="meine-mails.php" onsubmit="return confirm('Nachricht ausblenden?');">
+      <form method="post" action="meine-mails.php" data-confirm="Nachricht ausblenden?" data-confirm-ok="Ausblenden">
         <input type="hidden" name="id" value="<?php echo (int)$viewMail->Index; ?>" />
         <button type="submit" name="delete" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnNo']; ?>">Ausblenden</button>
       </form>
