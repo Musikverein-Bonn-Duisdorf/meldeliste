@@ -10,6 +10,7 @@ class InventoriesLoan
         'Kaution' => null,
         'Leihgebuehr' => null,
         'BorrowerAddress' => null,
+        'ContractNotes' => null,
         'ReturnChecklist' => null,
         'ContractFile' => null,
         'ReturnContractFile' => null,
@@ -25,6 +26,7 @@ class InventoriesLoan
 	    case 'Kaution':
 	    case 'Leihgebuehr':
 	    case 'BorrowerAddress':
+	    case 'ContractNotes':
 	    case 'ReturnChecklist':
 	    case 'ContractFile':
 	    case 'ReturnContractFile':
@@ -43,6 +45,7 @@ class InventoriesLoan
             $this->_data[$key] = $val;
             break;
 	    case 'BorrowerAddress':
+	    case 'ContractNotes':
 	    case 'ReturnChecklist':
             $this->_data[$key] = trim((string)$val);
             break;
@@ -136,6 +139,9 @@ class InventoriesLoan
             $str .= ', Adresse: '.htmlspecialchars((string)$old->BorrowerAddress, ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars((string)$this->BorrowerAddress, ENT_QUOTES, 'UTF-8').'</b>';
         }
+        if((string)$this->ContractNotes !== (string)$old->ContractNotes) {
+            $str .= ', Bemerkungen aktualisiert';
+        }
         if((string)$this->ReturnChecklist !== (string)$old->ReturnChecklist) {
             $str .= ', Checkliste aktualisiert';
         }
@@ -170,6 +176,9 @@ class InventoriesLoan
             $parts[] = logPart('Leihgebühr', LoanForm::formatAmount($this->Leihgebuehr));
         }
         logAppendFilled($parts, 'Adresse', $this->BorrowerAddress, (string)$this->BorrowerAddress);
+        if(trim((string)$this->ContractNotes) !== '') {
+            $parts[] = logPart('Bemerkungen', 'gesetzt');
+        }
         if(trim((string)$this->ReturnChecklist) !== '') {
             $parts[] = logPart('Checkliste', 'gesetzt');
         }
@@ -189,6 +198,9 @@ class InventoriesLoan
         if($this->BorrowerAddress === null) {
             $this->BorrowerAddress = '';
         }
+        if($this->ContractNotes === null) {
+            $this->ContractNotes = '';
+        }
         if($this->ReturnChecklist === null) {
             $this->ReturnChecklist = '';
         }
@@ -206,7 +218,7 @@ class InventoriesLoan
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `Kaution`, `Leihgebuehr`, `BorrowerAddress`, `ReturnChecklist`, `ContractFile`, `ReturnContractFile`) VALUES ("%d", "%d", %s, %s, "%s", "%s", "%s", "%s", "%s", "%s");',
+            'INSERT INTO `%sInventoriesLoans` (`User`, `Inventory`, `StartDate`, `EndDate`, `Kaution`, `Leihgebuehr`, `BorrowerAddress`, `ContractNotes`, `ReturnChecklist`, `ContractFile`, `ReturnContractFile`) VALUES ("%d", "%d", %s, %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s");',
             $GLOBALS['dbprefix'],
             $this->User,
             $this->Inventory,
@@ -215,6 +227,7 @@ class InventoriesLoan
             $this->moneySql($this->Kaution),
             $this->moneySql($this->Leihgebuehr),
             $this->escapeDb($this->BorrowerAddress),
+            $this->escapeDb($this->ContractNotes),
             $this->escapeDb($this->ReturnChecklist),
             $this->escapeDb($this->ContractFile),
             $this->escapeDb($this->ReturnContractFile)
@@ -228,7 +241,7 @@ class InventoriesLoan
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `Kaution` = "%s", `Leihgebuehr` = "%s", `BorrowerAddress` = "%s", `ReturnChecklist` = "%s", `ContractFile` = "%s", `ReturnContractFile` = "%s" WHERE `Index` = "%d";',
+            'UPDATE `%sInventoriesLoans` SET `User` = "%d", `Inventory` = "%d", `StartDate` = %s, `EndDate` = %s, `Kaution` = "%s", `Leihgebuehr` = "%s", `BorrowerAddress` = "%s", `ContractNotes` = "%s", `ReturnChecklist` = "%s", `ContractFile` = "%s", `ReturnContractFile` = "%s" WHERE `Index` = "%d";',
             $GLOBALS['dbprefix'],
             $this->User,
             $this->Inventory,
@@ -237,6 +250,7 @@ class InventoriesLoan
             $this->moneySql($this->Kaution),
             $this->moneySql($this->Leihgebuehr),
             $this->escapeDb($this->BorrowerAddress),
+            $this->escapeDb($this->ContractNotes),
             $this->escapeDb($this->ReturnChecklist),
             $this->escapeDb($this->ContractFile),
             $this->escapeDb($this->ReturnContractFile),

@@ -782,6 +782,7 @@ function inventarLoanFormAction(form) {
     if(!form || !form.querySelector) return '';
     if(form.querySelector('[name="newLoan"]')) return 'newLoan';
     if(form.querySelector('[name="endLoan"]')) return 'endLoan';
+    if(form.querySelector('[name="deleteLoanScan"]')) return 'deleteLoanScan';
     if(form.querySelector('[name="deleteLoan"]')) return 'deleteLoan';
     if(form.querySelector('[name="updateLoanFees"]') || form.querySelector('[name="updateLoanKaution"]')) {
         return 'updateLoanFees';

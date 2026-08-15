@@ -632,12 +632,32 @@ class Inventories
         if($hasLoanScan || $hasReturnScan) {
             $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--scans" role="group" aria-label="Scans">';
             if($hasLoanScan) {
+                $str .= '<div class="inventory-loan-scan-pair">';
                 $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
                     .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">Scan Vertrag</a>';
+                if($canEdit) {
+                    $str .= '<form method="POST" action="" class="inventory-loan-delete" '
+                        .'data-confirm="Scan Vertrag löschen? Die Leihe bleibt erhalten." data-confirm-ok="Scan löschen">'
+                        .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
+                        .'<input type="hidden" name="scanKind" value="loan">'
+                        .'<button type="submit" name="deleteLoanScan" value="1" class="inventory-loan-btn inventory-loan-btn--scan-del" title="Scan löschen" aria-label="Scan Vertrag löschen">Löschen</button>'
+                        .'</form>';
+                }
+                $str .= '</div>';
             }
             if($hasReturnScan) {
+                $str .= '<div class="inventory-loan-scan-pair">';
                 $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
                     .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">Scan Rückgabe</a>';
+                if($canEdit) {
+                    $str .= '<form method="POST" action="" class="inventory-loan-delete" '
+                        .'data-confirm="Scan Rückgabe löschen? Die Leihe bleibt erhalten." data-confirm-ok="Scan löschen">'
+                        .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
+                        .'<input type="hidden" name="scanKind" value="return">'
+                        .'<button type="submit" name="deleteLoanScan" value="1" class="inventory-loan-btn inventory-loan-btn--scan-del" title="Scan löschen" aria-label="Scan Rückgabe löschen">Löschen</button>'
+                        .'</form>';
+                }
+                $str .= '</div>';
             }
             $str .= '</div>';
         }
@@ -645,9 +665,9 @@ class Inventories
         if($canEdit) {
             $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--danger">';
             $str .= '<form method="POST" action="" class="inventory-loan-delete" '
-                .'data-confirm="Diese Leih-Information wirklich löschen?" data-confirm-ok="Löschen">'
+                .'data-confirm="Diesen Leiheintrag wirklich löschen?" data-confirm-ok="Eintrag löschen">'
                 .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
-                .'<button type="submit" name="deleteLoan" value="1" class="inventory-loan-btn inventory-loan-btn--danger '.$btnDelete.'">Löschen</button>'
+                .'<button type="submit" name="deleteLoan" value="1" class="inventory-loan-btn inventory-loan-btn--danger '.$btnDelete.'">Eintrag löschen</button>'
                 .'</form>';
             $str .= '</div>';
         }
@@ -832,6 +852,7 @@ function respondInventoriesAjax($result) {
  */
 function handleInventoriesMutations() {
     $mutating = isset($_POST['newLoan']) || isset($_POST['endLoan']) || isset($_POST['deleteLoan'])
+        || isset($_POST['deleteLoanScan'])
         || isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])
         || isset($_POST['insert']) || isset($_POST['update']) || isset($_POST['delete']);
     if(!$mutating) {
@@ -895,6 +916,18 @@ function handleInventoriesMutations() {
         $result['action'] = 'endLoan';
         $result['loanId'] = (int)$n->Index;
         $result['inventoryId'] = (int)$n->Inventory;
+    }
+    if(isset($_POST['deleteLoanScan'])) {
+        $n = new InventoriesLoan;
+        $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
+        $n->load_by_id($loanId);
+        if($n->Index) {
+            $kind = isset($_POST['scanKind']) ? (string)$_POST['scanKind'] : LoanForm::KIND_LOAN;
+            LoanForm::deleteScan($n, $kind);
+            $result['action'] = 'deleteLoanScan';
+            $result['loanId'] = (int)$n->Index;
+            $result['inventoryId'] = (int)$n->Inventory;
+        }
     }
     if(isset($_POST['deleteLoan'])) {
         $n = new InventoriesLoan;

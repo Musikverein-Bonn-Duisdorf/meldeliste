@@ -180,6 +180,45 @@ class LoanForm
     }
 
     /**
+     * Remove stored scan for loan|return; clears DB pointer and deletes the file.
+     * @return bool True if DB was cleared (file may already have been missing).
+     */
+    public static function deleteScan(InventoriesLoan $loan, $kind) {
+        if(!(int)$loan->Index) {
+            return false;
+        }
+        $kind = self::normalizeKind($kind);
+        $loanId = (int)$loan->Index;
+        $stored = $kind === self::KIND_RETURN
+            ? trim((string)$loan->ReturnContractFile)
+            : trim((string)$loan->ContractFile);
+        if($stored === '') {
+            return true;
+        }
+        $path = self::resolveStoredFile($loanId, $stored);
+        if($path !== null && is_file($path)) {
+            @unlink($path);
+        }
+        if($kind === self::KIND_RETURN) {
+            $loan->ReturnContractFile = '';
+        }
+        else {
+            $loan->ContractFile = '';
+        }
+        $loan->save();
+        return true;
+    }
+
+    /** Normalize free-text contract remarks (max 2000). */
+    public static function normalizeContractNotes($raw) {
+        $notes = trim((string)$raw);
+        if(strlen($notes) > 2000) {
+            $notes = substr($notes, 0, 2000);
+        }
+        return $notes;
+    }
+
+    /**
      * Build context for form rendering / tests.
      * @return array|null
      */
@@ -259,6 +298,7 @@ class LoanForm
         $borrowerLabel = 'Entleiher';
         $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
         $borrowerAddress = trim((string)$loan->BorrowerAddress);
+        $contractNotes = self::normalizeContractNotes($loan->ContractNotes);
 
         $ctx = array(
             'kind' => $kind,
@@ -275,9 +315,12 @@ class LoanForm
             'isMember' => $isMember,
             'mitgliedsnummer' => $mitgliedsnummer,
             'needMitgliedsnummerField' => false,
-            'needAddressField' => $mitgliedsnummer === '',
-            'needAddressEditField' => $mitgliedsnummer === '' && $borrowerAddress === '',
+            // Address always optional and re-editable (MELD-188).
+            'needAddressField' => true,
+            'needAddressEditField' => true,
             'borrowerAddress' => $borrowerAddress,
+            'contractNotes' => $contractNotes,
+            'needContractNotesField' => true,
             'startDate' => (string)$loan->StartDate,
             'startDateDe' => germanDate($loan->StartDate, 0),
             'endDate' => $hasEnd ? (string)$loan->EndDate : '',
@@ -367,7 +410,8 @@ class LoanForm
 
     /**
      * Persist free fields from the online contract form.
-     * Adresse (wenn keine Mitgliedsnummer) → InventoriesLoans.BorrowerAddress;
+     * Adresse (optional) → InventoriesLoans.BorrowerAddress;
+     * Bemerkungen → InventoriesLoans.ContractNotes;
      * return checklist → InventoriesLoans.ReturnChecklist (JSON).
      * @return bool
      */
@@ -382,12 +426,19 @@ class LoanForm
             return false;
         }
         $loanDirty = false;
-        $hasMitgliedsnummer = $user->RefID !== null && $user->RefID !== '' && (int)$user->RefID > 0;
 
-        if(!$hasMitgliedsnummer && array_key_exists('BorrowerAddress', $post)) {
+        if(array_key_exists('BorrowerAddress', $post)) {
             $addr = trim((string)$post['BorrowerAddress']);
             if((string)$loan->BorrowerAddress !== $addr) {
                 $loan->BorrowerAddress = $addr;
+                $loanDirty = true;
+            }
+        }
+
+        if(array_key_exists('ContractNotes', $post)) {
+            $notes = self::normalizeContractNotes($post['ContractNotes']);
+            if((string)$loan->ContractNotes !== $notes) {
+                $loan->ContractNotes = $notes;
                 $loanDirty = true;
             }
         }

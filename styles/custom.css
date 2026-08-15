@@ -2966,17 +2966,22 @@ body.loan-form-print {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  align-items: center;
+  align-items: stretch;
 }
 
 .loan-form-toolbar-group--scan {
   margin-left: auto;
   padding-left: 0.65rem;
   border-left: 1px solid #c5ccd4;
+  align-items: center;
 }
 
 .loan-form-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 2.15rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.88rem;
   line-height: 1.25;
@@ -2987,6 +2992,8 @@ body.loan-form-print {
   border-radius: 3px;
   padding: 0.38rem 0.7rem;
   cursor: pointer;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .loan-form-btn:hover {
@@ -3024,8 +3031,33 @@ body.loan-form-print {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  align-items: center;
+  align-items: stretch;
   margin: 0;
+}
+
+.loan-form-scan-pair {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  align-items: stretch;
+  border: 1px solid var(--loan-brand, #345A95);
+  border-radius: 3px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.loan-form-scan-pair .loan-form-btn {
+  border: 0;
+  border-radius: 0;
+  min-height: 2.15rem;
+}
+
+.loan-form-scan-pair .loan-form-btn--scan {
+  border-right: 1px solid rgba(52, 90, 149, 0.35);
+}
+
+.loan-form-scan-pair .loan-form-upload {
+  gap: 0;
 }
 
 /*
@@ -3459,35 +3491,80 @@ body.loan-form-print {
   font-weight: 400;
 }
 
+/* Loan row actions: stacked, always flush right (no left/right mix on wrap). */
 .inventory-loan-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 0.7rem;
-  justify-content: flex-end;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
 }
 
 .inventory-loan-action-group {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.35rem;
   align-items: center;
+  justify-content: flex-end;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.inventory-loan-action-group--scans {
-  padding-left: 0.55rem;
-  border-left: 1px solid rgba(0, 0, 0, 0.14);
-}
-
+.inventory-loan-action-group--scans,
 .inventory-loan-action-group--danger {
-  padding-left: 0.55rem;
-  border-left: 1px solid rgba(0, 0, 0, 0.14);
+  padding-left: 0;
+  margin-left: 0;
+  border-left: 0;
+}
+
+/* Scan + delete as one segmented control, right-aligned with the rest. */
+.inventory-loan-scan-pair {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  align-items: stretch;
+  border: 1px solid #345A95;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.inventory-loan-scan-pair .inventory-loan-btn {
+  border: 0;
+  border-radius: 0;
+  min-height: 2rem;
+}
+
+.inventory-loan-scan-pair .inventory-loan-btn--scan {
+  border-right: 1px solid rgba(52, 90, 149, 0.35);
+  color: #345A95;
+  background: #fff;
+}
+
+.inventory-loan-scan-pair .inventory-loan-btn--scan:hover {
+  background: rgba(52, 90, 149, 0.06);
+}
+
+.inventory-loan-scan-pair .inventory-loan-btn--scan-del {
+  color: #555;
+  background: rgba(52, 90, 149, 0.04);
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+}
+
+.inventory-loan-scan-pair .inventory-loan-btn--scan-del:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #111;
 }
 
 .inventory-loan-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   margin: 0;
+  min-height: 2rem;
   padding: 0.28rem 0.55rem;
   font: inherit;
   font-size: 0.85rem;
@@ -3499,6 +3576,7 @@ body.loan-form-print {
   border-radius: 2px;
   cursor: pointer;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 .inventory-loan-btn:hover {
@@ -3514,25 +3592,46 @@ body.loan-form-print {
   background: rgba(52, 90, 149, 0.06);
 }
 
+.inventory-loan-btn--scan-del {
+  border-color: rgba(0, 0, 0, 0.22);
+  color: #444;
+}
+
+.inventory-loan-btn--scan-del:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .inventory-loan-btn--danger {
   border-color: transparent;
 }
 
 .inventory-loan-delete {
-  display: inline;
+  display: inline-flex;
   margin: 0;
+  padding: 0;
+  border: 0;
+  align-items: stretch;
+}
+
+.inventory-loan-delete .inventory-loan-btn {
+  height: 100%;
 }
 
 @media (max-width: 600px) {
   .inventory-loan-actions {
+    align-items: stretch;
+  }
+
+  .inventory-loan-action-group {
     justify-content: flex-start;
   }
 
-  .inventory-loan-action-group--scans,
-  .inventory-loan-action-group--danger {
-    padding-left: 0;
-    border-left: 0;
+  .inventory-loan-scan-pair {
     width: 100%;
+  }
+
+  .inventory-loan-scan-pair .inventory-loan-btn--scan {
+    flex: 1 1 auto;
   }
 
   .loan-form-toolbar-group--scan {
