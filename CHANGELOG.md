@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-77de6 (2026-08-15)
+
+- docs: UI-SHELL-Vertrag als Master für Sibling-Module
+
 ## 2026-08-15-2f653 (2026-08-15)
 
 - MELD-171: Notenarchiv-/MIT-Rechte und SSO-Allowlist über Modul-URLs
