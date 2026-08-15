@@ -1285,14 +1285,18 @@ function loadPermissions($user) {
 }
 
 /**
- * Cache-busting URL for static assets (release hash + file mtime).
- * Needed so JS/CSS reload after_dev deploys without a new makeVersion HASH.
+ * Cache-busting URL for static assets (release version + hash + file mtime).
+ * Needed so JS/CSS reload after deploys (esp. Android WebView).
  */
 function assetUrl($rel) {
     $rel = ltrim(str_replace('\\', '/', (string)$rel), '/');
+    $ver = isset($GLOBALS['version']['String']) ? (string)$GLOBALS['version']['String'] : '0';
     $hash = isset($GLOBALS['version']['Hash']) ? (string)$GLOBALS['version']['Hash'] : '0';
     $mtime = @filemtime(dirname(__DIR__).'/'.$rel);
-    return htmlspecialchars($rel.'?'.$hash.'-'.$mtime, ENT_QUOTES, 'UTF-8');
+    if($mtime === false) {
+        $mtime = 0;
+    }
+    return htmlspecialchars($rel.'?v='.rawurlencode($ver).'&h='.$hash.'-'.$mtime, ENT_QUOTES, 'UTF-8');
 }
 
 function meldeRequest($key, $default = null) {

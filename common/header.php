@@ -10,20 +10,14 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
       <?php
           include_once 'include.php';
-          // Cache-Bust wie in footer.php: Release-Hash + filemtime erzwingen Reload nach Update
-          $assetV = isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0';
-          $cssUrl = function ($rel) use ($assetV) {
-              $mtime = @filemtime(__DIR__ . '/../' . $rel);
-              return htmlspecialchars($rel . '?' . $assetV . '-' . $mtime, ENT_QUOTES, 'UTF-8');
-          };
       ?>
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/w3.css'); ?>">
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/w3-colors-highway.css'); ?>">
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/w3-color-mvd.css'); ?>">
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/custom.css'); ?>">
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/fontawesome-free-6.4.2-web/css/fontawesome.css'); ?>">
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/fontawesome-free-6.4.2-web/css/brands.css'); ?>">
-      <link rel="stylesheet" href="<?php echo $cssUrl('styles/fontawesome-free-6.4.2-web/css/solid.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/w3.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/w3-colors-highway.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/w3-color-mvd.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/custom.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/fontawesome-free-6.4.2-web/css/fontawesome.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/fontawesome-free-6.4.2-web/css/brands.css'); ?>">
+      <link rel="stylesheet" href="<?php echo assetUrl('styles/fontawesome-free-6.4.2-web/css/solid.css'); ?>">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <?php echo renderConfigColorCss(); ?>
       <?php echo renderPermissionGroupColorCss(); ?>

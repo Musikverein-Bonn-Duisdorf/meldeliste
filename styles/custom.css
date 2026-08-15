@@ -223,7 +223,8 @@ a.app-titlebar-logo {
   box-sizing: border-box;
   padding: 0.65rem 0.9rem;
   border: 0;
-  background: transparent;
+  /* Kein background:transparent — sonst überschreibt custom.css die w3-/TitleBar-Farben
+     (aktive Tabs). Gruppenfarben nutzen !important und waren davon nicht betroffen. */
   color: inherit;
   text-align: left;
   text-decoration: none;
