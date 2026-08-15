@@ -681,9 +681,15 @@ a.app-titlebar-logo {
     display: none;
   }
 
+  /* MELD-184: kein sichtbarer Body-Streifen zwischen Titlebar / Bottom-Nav und Karte */
   .app-main {
-    margin: 0.5rem 0.5rem calc(4.5rem + env(safe-area-inset-bottom, 0));
+    margin: 0 0 var(--app-nav-bottom-h, 3.75rem);
     padding: 0 1rem 1rem;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    box-shadow: none;
   }
 
   .app-main:has(.admin-list-shell) {
@@ -735,6 +741,7 @@ a.app-titlebar-logo {
     --admin-hero-accent-w: 3px;
     margin-bottom: 0.5rem;
     padding: 0.65rem 1rem;
+    border-radius: 0;
   }
 
   .app-main:has(.admin-list-shell) .admin-list-shell .profile-hero.admin-list-hero {
@@ -745,6 +752,15 @@ a.app-titlebar-logo {
   .app-main:has(.admin-list-shell) .admin-list-shell:not(:has(.admin-list-body)) > .app-page-chrome > .profile-hero.admin-list-hero {
     margin-left: -1rem;
     margin-right: -1rem;
+  }
+
+  .app-main > div.profile-page:first-of-type > .profile-shell > .profile-hero.admin-list-hero:first-child,
+  .app-main > div.profile-page:first-of-type > .profile-shell > .app-page-chrome > .profile-hero.admin-list-hero:first-child,
+  .app-main > div.termin-page:first-of-type > .profile-shell > .profile-hero.admin-list-hero:first-child,
+  .app-main > div.termin-page:first-of-type > .profile-shell > .app-page-chrome > .profile-hero.admin-list-hero:first-child,
+  .app-main .profile-form > .profile-hero.admin-list-hero:first-child,
+  .app-main > div.w3-container.admin-list-hero:first-of-type {
+    border-radius: 0;
   }
 
   body.app-nav-more-open {
