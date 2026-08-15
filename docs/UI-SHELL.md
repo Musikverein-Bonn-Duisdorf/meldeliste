@@ -8,6 +8,7 @@ Sibling-Apps **implementieren** die Muster per Copy der Shell-Artefakte (kein PH
 |-------|---------------------------|
 | Listen-Chrome / Suche | `libs/helpers.php` (`adminList*`) |
 | Chunks / Sentinel | `libs/listChunk.php`, `getList.php`, `js/infiniteScroll.js` |
+| Sortierung | `js/sortList.js`, `#listHeader.inv-sort-bar`, `data-sort-*` an Zeilen |
 | Client-Suche | `js/listRowSearch.js` + listen-spezifische `filter*.js` |
 | Log | `log.php`, `getLog.php`, `libs/log.php` |
 | Modals / Entity-Chips | `js/modal.js`, `getModal.php`, `entityOpenHtml()` |
@@ -122,6 +123,42 @@ API: `window.listInfiniteReload(sort, dir)` setzt Cursor zurück und lädt neu.
 PHP-Chunk-Helfer (`libs/listChunk.php`): `listChunkLog`, `listChunkTermine`, `listChunkUsers`, `listChunkInventories`, `listChunkMailJobs`, … — Rückgabe `{ html, nextCursor, hasMore }`.
 
 Sibling-Apps: **eigene** `type`-Werte und Chunk-Funktionen für die eigene Domäne; Sentinel-/JS-Vertrag identisch halten.
+
+### 1.5 Tabellen-Sortierung
+
+Lange Katalog-/Admin-Listen sortieren über **Sortier-Chips** in `#listHeader.inv-sort-bar` (nicht über klassische Tabellenköpfe).
+
+**Markup:**
+
+```html
+<div id="listHeader" class="inv-sort-bar">
+  <!-- optional: .inv-sort-bar-filters mit Filter-Chips -->
+  <div class="inv-sort-bar-sorts" role="toolbar" aria-label="Sortierung">
+    <button type="button" class="inv-sort-chip list-sort"
+            data-sort="nr" data-type="number">Nr.</button>
+    <button type="button" class="inv-sort-chip list-sort"
+            data-sort="title" data-type="string">Titel</button>
+  </div>
+</div>
+<div id="Liste">…</div>
+```
+
+**Zeilen:** `.list-row` mit `data-sort-{key}` (gleicher Key wie `data-sort` am Chip). Zusätzlich `data-search` für die Client-Suche.
+
+**JS:** `js/sortList.js` → `bindListSort({ … })`
+
+| Modus | Wann | Verhalten |
+|-------|------|-----------|
+| **`mode: 'server'`** | Infinite-Scroll-Listen (Personen, Inventar, Archiv-Katalog, …) | Klick → `listInfiniteReload(sort, dir)`; Sentinel trägt `data-sort` / `data-dir`; `getList.php?sort=&dir=` + Chunk-`ORDER BY` |
+| **`mode: 'client'`** (Default) | Volle Liste ohne Chunks | Sortiert vorhandene `.list-row` im DOM (Sentinel bleibt am Ende) |
+
+**Defaults:** `defaultKey` / `defaultDir` / `defaultType` müssen zum **ersten** Server-Chunk und zu den Sentinel-`data-sort`/`data-dir` passen (sonst Drift bis zum ersten Chip-Klick).
+
+**Typ:** `data-type="string|number|date"` — erster Klick auf eine neue Spalte: `number` → `desc`, sonst `asc`; erneuter Klick toggelt die Richtung. Aktive Spalte zeigt `▲`/`▼`.
+
+**UX:** kurze Chip-Labels (1–2 Wörter); keine Anleitungsprosa neben der Sortierleiste. Hilfe nur in der Help-Guide.
+
+**Sibling-Apps:** `sortList.js` + Sort-Bar + `data-sort-*` kopieren; eigene Chunk-Sort-Whitelist in `listChunk*` / `getList.php`.
 
 ---
 
@@ -350,14 +387,15 @@ Beim Portieren oder Nachziehen:
 1. [ ] `adminListPageBegin` / `SearchField` / `PageEnd` + `#filterString`
 2. [ ] `#Liste` + `#listSentinel` mit denselben `data-*`-Attributen
 3. [ ] `infiniteScroll.js` + `listRowSearch.js` (Verhalten Client vs `data-server-q`)
-4. [ ] Log: Chunk + Server-`q` + Poll-Endpoint + Chip-Types
-5. [ ] `#ajaxModalHost` außerhalb `.app-main`; `deferPageModalHtml` für Seiten-Modals
-6. [ ] Neue Dialoge: `profile-shell modal-shell`
-7. [ ] Entity-Chips: `.entity-open` + `data-entity-type` / `data-entity-id`
-8. [ ] `appConfirm` / `appAlert` statt native Dialoge
-9. [ ] Chip-Modifier aus dem bestehenden Satz
-10. [ ] `assetUrl()` auf allen statischen Assets; `makeVersion` bei Release
-11. [ ] Keine Cross-App-PHP-Includes; Identity/SSO-Issue bleiben Melde ([PLATFORM.md](PLATFORM.md))
+4. [ ] Sortier-Chips: `#listHeader.inv-sort-bar` + `sortList.js` (`mode: 'server'` bei Chunks) + `data-sort-*` an Zeilen
+5. [ ] Log: Chunk + Server-`q` + Poll-Endpoint + Chip-Types
+6. [ ] `#ajaxModalHost` außerhalb `.app-main`; `deferPageModalHtml` für Seiten-Modals
+7. [ ] Neue Dialoge: `profile-shell modal-shell`
+8. [ ] Entity-Chips: `.entity-open` + `data-entity-type` / `data-entity-id`
+9. [ ] `appConfirm` / `appAlert` statt native Dialoge
+10. [ ] Chip-Modifier aus dem bestehenden Satz
+11. [ ] `assetUrl()` auf allen statischen Assets; `makeVersion` bei Release
+12. [ ] Keine Cross-App-PHP-Includes; Identity/SSO-Issue bleiben Melde ([PLATFORM.md](PLATFORM.md))
 
 ### Ownership (Kurz)
 
@@ -365,6 +403,7 @@ Beim Portieren oder Nachziehen:
 |--------|--------------------|-----------|
 | Listen-Chrome, `assetUrl`, Modal-Host, Chip-CSS-Slice, Nav-Shell, Session-Bootstrap | ja | — |
 | Infinite-Scroll-JS-Vertrag | ja (eigene `type`s) | — |
+| Sortier-Chips / `sortList.js` | ja (eigene Sort-Keys) | — |
 | Log-UI | eigene Prefix-Tabelle | Melde-Log-Inhalt |
 | Entity-Modals | eigene Entities | Melde-`getModal`-Typen |
 | User / Permissions / SSO-**Issue** | lesen / Redeem | Owner |
