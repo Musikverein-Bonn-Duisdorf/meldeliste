@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-db592 (2026-08-15)
+
+- MELD-182: Kalender/ICS zeigen Schichten statt Eltern-Termin
+- MELD-182: Kalender/ICS zeigen Schichten
+
 ## 2026-08-15-9913e (2026-08-15)
 
 - MELD-167: klickbare Entity-Chips für User, Termin, Inventar und Email
