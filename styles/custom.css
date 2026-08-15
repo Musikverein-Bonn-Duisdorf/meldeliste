@@ -517,9 +517,11 @@ a.app-titlebar-logo {
     align-items: stretch;
     width: 100%;
     max-width: none;
-    min-height: 3.75rem;
+    min-height: calc(3.75rem + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    /* Safe-Area über die Tab-Farben, nicht als colorNav-Streifen (MELD-184) */
+    padding-bottom: 0;
+    background: transparent !important;
   }
 
   /* Shared modal edge gap (z-index puts modals above titlebar/nav) */
@@ -576,12 +578,12 @@ a.app-titlebar-logo {
     justify-content: center;
     align-items: center;
     gap: 0;
-    padding: 0.45rem 0.2rem;
+    padding: 0.45rem 0.2rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
     margin: 0;
     min-width: 0;
     width: 100%;
     height: 100%;
-    min-height: 3.75rem;
+    min-height: calc(3.75rem + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
     text-align: center;
     font-size: 0.7rem;
