@@ -193,7 +193,7 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
 
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`,'
-        .' (EXISTS (SELECT 1 FROM `mit_Membership` mm WHERE mm.`User` = `u`.`Index` AND mm.`Type` = "aktiv" AND mm.`Status` = "active")) AS `Mitglied`,'
+        .' ('.sqlUserIsVereinMitglied('`u`.`Index`').') AS `Mitglied`,'
         .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' COALESCE(`i`.`Name`, \'\') AS `Instrument`,'
         .' COALESCE(`r`.`Name`, \'\') AS `RegisterName`,'
@@ -469,7 +469,7 @@ function evaluateInactiveUsers($thresholdDays) {
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`LastLogin`, `u`.`Joined`,'
         .' `u`.`Active`,'
-        .' (EXISTS (SELECT 1 FROM `mit_Membership` mm WHERE mm.`User` = `u`.`Index` AND mm.`Type` = "aktiv" AND mm.`Status` = "active")) AS `Mitglied`,'
+        .' ('.sqlUserIsVereinMitglied('`u`.`Index`').') AS `Mitglied`,'
         .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' COALESCE(`i`.`Name`, \'\') AS `Instrument`,'
         .' COALESCE(`r`.`Name`, \'\') AS `RegisterName`,'
