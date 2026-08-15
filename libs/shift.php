@@ -74,14 +74,18 @@ class Shift
         if(count($parts) < 1) {
             return '';
         }
-        return sprintf('Schicht/Aufgabe: %d, ', (int)$this->Index).implode(', ', $parts);
+        return sprintf('Schicht/Aufgabe: (%d) <b>%s</b>, ', (int)$this->Index, htmlspecialchars(trim((string)$this->Name) !== '' ? trim((string)$this->Name) : ('#'.(int)$this->Index), ENT_QUOTES, 'UTF-8')).implode(', ', $parts);
     }
 
     public function getVars() {
         $parts = array();
-        $parts[] = sprintf('Schicht/Aufgabe: %d', (int)$this->Index);
+        $name = trim((string)$this->Name);
+        $parts[] = sprintf(
+            'Schicht/Aufgabe: (%d) <b>%s</b>',
+            (int)$this->Index,
+            htmlspecialchars($name !== '' ? $name : ('#'.(int)$this->Index), ENT_QUOTES, 'UTF-8')
+        );
         $parts[] = logPart('Termin', (string)(int)$this->Termin);
-        logAppendFilled($parts, 'Name', $this->Name, (string)$this->Name);
         if(self::normalizedTime($this->Start) !== null) {
             $parts[] = logPart('Start', self::formatTimeLog($this->Start));
         }

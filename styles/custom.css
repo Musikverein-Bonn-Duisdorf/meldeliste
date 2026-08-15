@@ -3960,6 +3960,11 @@ body.loan-form-print {
   word-break: break-word;
 }
 
+/* Entity chips keep their light fill; never inherit white from solid status rows */
+.melde-response-person .mail-recipient-chip {
+  color: #1a1a1a;
+}
+
 .melde-response-person-instrument {
   margin-top: 0.1rem;
   font-size: 0.85rem;

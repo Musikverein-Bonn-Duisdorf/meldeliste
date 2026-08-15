@@ -1750,7 +1750,7 @@ class Termin
         $str .= '</div>';
 
         $str .= '<div class="melde-actions" data-melde-stop>';
-        if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+        if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton']) && !$this->Shifts) {
             // GET link so Android WebView can intercept/download (MELD-180); POST still accepted server-side
             $str .= '<a id="icalform'.$tid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'"'
                 .' title="In Kalender" aria-label="In Kalender eintragen" download>'
@@ -1833,6 +1833,12 @@ class Termin
                 }
                 $str .= '</div>';
                 $str .= '<div class="melde-actions">';
+                if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+                    $sid = (int)$s->Index;
+                    $str .= '<a id="icalform'.$tid.'_s'.$sid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'&amp;shiftID='.$sid.'"'
+                        .' title="In Kalender" aria-label="In Kalender eintragen" download>'
+                        .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
+                }
                 if($s->Bedarf) {
                     $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
                 }
@@ -2066,6 +2072,9 @@ class Termin
         if(!count($names)) {
             return '';
         }
+        // Soft tint like termin response register rows — solid cfg-hex would force
+        // white text onto light entity chips (MELD-167 / MELD-182).
+        $tintHex = $this->resolveMeldeColorHex($colorClass);
         $html = '';
         foreach($names as $item) {
             $name = '';
@@ -2077,16 +2086,22 @@ class Termin
             else {
                 $name = (string)$item;
             }
+            $entry = array(
+                'name' => $name,
+                'userId' => $userId,
+                'instrument' => '',
+                'children' => null,
+                'guests' => null,
+                'freeText' => null,
+            );
+            if($tintHex !== '') {
+                $entry['registerColor'] = $tintHex;
+            }
+            else {
+                $entry['colorClass'] = $colorClass;
+            }
             $html .= render('termin/response_line', array(
-                'entry' => array(
-                    'colorClass' => $colorClass,
-                    'name' => $name,
-                    'userId' => $userId,
-                    'instrument' => '',
-                    'children' => null,
-                    'guests' => null,
-                    'freeText' => null,
-                ),
+                'entry' => $entry,
             ));
         }
         return $html;

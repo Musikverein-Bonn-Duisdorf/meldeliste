@@ -29,7 +29,51 @@ if(!(int)$n->Index) {
     die('Error: Appointment not found.');
 }
 
-$rawName = preg_replace('/[^\w.\-]+/u', '_', (string)$n->Name);
+$shiftId = 0;
+if(isset($_GET['shiftID'])) {
+    $shiftId = (int)$_GET['shiftID'];
+} elseif(isset($_POST['shiftID'])) {
+    $shiftId = (int)$_POST['shiftID'];
+}
+
+$shift = null;
+if((int)$n->Shifts) {
+    if($shiftId <= 0) {
+        http_response_code(400);
+        die('Error: Shift required.');
+    }
+    $shift = new Shift;
+    $shift->load_by_id($shiftId);
+    if(!(int)$shift->Index || (int)$shift->Termin !== (int)$n->Index) {
+        http_response_code(404);
+        die('Error: Shift not found.');
+    }
+}
+
+$summary = (string)$n->Name;
+$startTime = trim((string)$n->Uhrzeit);
+$endTime = trim((string)$n->Uhrzeit2);
+$fileLabel = (string)$n->Name;
+if($shift) {
+    $shiftName = trim((string)$shift->Name);
+    $fileLabel = $shiftName !== '' ? $shiftName : $fileLabel;
+    if($summary !== '' && $shiftName !== '') {
+        $summary = $summary.': '.$shiftName;
+    }
+    elseif($shiftName !== '') {
+        $summary = $shiftName;
+    }
+    $startNorm = Shift::normalizedTime($shift->Start);
+    $endNorm = Shift::normalizedTime($shift->End);
+    if($startNorm !== null) {
+        $startTime = $startNorm;
+    }
+    if($endNorm !== null) {
+        $endTime = $endNorm;
+    }
+}
+
+$rawName = preg_replace('/[^\w.\-]+/u', '_', $fileLabel);
 if($rawName === null || $rawName === '') {
     $rawName = 'termin';
 }
@@ -41,27 +85,27 @@ header('X-Content-Type-Options: nosniff');
 
 date_default_timezone_set('Europe/Berlin');
 if($n->EndDatum) {
-    $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
-    if($n->Uhrzeit2) {
-        $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." ".$n->Uhrzeit2));
+    $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum.' 23:59:00'));
+    if($endTime !== '') {
+        $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum.' '.$endTime));
     }
-    $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
-    if($n->Uhrzeit == NULL) {
-        $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
-        $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum." 23:59:00"));
+    $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum.' '.$startTime));
+    if($startTime === '') {
+        $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum.' 00:00:00'));
+        $end = gmdate('Y-m-d H:i:s', strtotime($n->EndDatum.' 23:59:00'));
     }
 }
 else {
-    $end = gmdate('Y-m-d H:i:s', strtotime("+120 minutes", strtotime($n->Datum." ".$n->Uhrzeit)));
+    $end = gmdate('Y-m-d H:i:s', strtotime('+120 minutes', strtotime($n->Datum.' '.$startTime)));
 
-    if($n->Uhrzeit2) {
-        $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit2));
+    if($endTime !== '') {
+        $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum.' '.$endTime));
     }
 
-    $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." ".$n->Uhrzeit));
-    if($n->Uhrzeit == NULL) {
-        $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 00:00:00"));
-        $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum." 23:59:00"));
+    $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum.' '.$startTime));
+    if($startTime === '') {
+        $begin = gmdate('Y-m-d H:i:s', strtotime($n->Datum.' 00:00:00'));
+        $end = gmdate('Y-m-d H:i:s', strtotime($n->Datum.' 23:59:00'));
     }
 }
 
@@ -71,7 +115,7 @@ $ics = new ICS(array(
     'description' => $n->Beschreibung,
     'dtstart' => $begin,
     'dtend' => $end,
-    'summary' => $n->Name
+    'summary' => $summary,
 ));
 
 echo $ics->to_string();

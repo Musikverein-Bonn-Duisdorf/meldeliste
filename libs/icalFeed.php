@@ -65,13 +65,19 @@ function icalFeedUidHost($websiteUrl = null) {
  *
  * @param int $terminId
  * @param string|null $host
+ * @param int $shiftId 0 = plain termin event
  * @return string
  */
-function icalFeedUid($terminId, $host = null) {
+function icalFeedUid($terminId, $host = null, $shiftId = 0) {
     if($host === null || $host === '') {
         $host = icalFeedUidHost();
     }
-    return 'meld-'.(int)$terminId.'@'.$host;
+    $tid = (int)$terminId;
+    $sid = (int)$shiftId;
+    if($sid > 0) {
+        return 'meld-'.$tid.'-s'.$sid.'@'.$host;
+    }
+    return 'meld-'.$tid.'@'.$host;
 }
 
 /**
@@ -205,6 +211,7 @@ function icalFeedBuild(array $events, $websiteUrl = null) {
 
     foreach($events as $ev) {
         $id = (int)$ev['id'];
+        $shiftId = isset($ev['shiftId']) ? (int)$ev['shiftId'] : 0;
         $times = icalFeedEventTimes($ev);
         $wert = isset($ev['wert']) ? $ev['wert'] : null;
         $status = ($wert === null || $wert === '' || (int)$wert === 3) ? 'TENTATIVE' : 'CONFIRMED';
@@ -223,7 +230,7 @@ function icalFeedBuild(array $events, $websiteUrl = null) {
 
         $vevent = array(
             'BEGIN:VEVENT',
-            'UID:'.icalFeedUid($id, $host),
+            'UID:'.icalFeedUid($id, $host, $shiftId),
             'DTSTAMP:'.$dtstamp,
             'SUMMARY:'.icalFeedEscapeText((string)$ev['name']),
             'DESCRIPTION:'.icalFeedEscapeText($description),
@@ -258,7 +265,8 @@ function icalFeedEtag($userId, array $events, $from, $to) {
     $parts = array((int)$userId, (string)$from, (string)$to);
     foreach($events as $ev) {
         $w = isset($ev['wert']) && $ev['wert'] !== null && $ev['wert'] !== '' ? (int)$ev['wert'] : 0;
-        $parts[] = (int)$ev['id'].':'.$w.':'.(string)$ev['date'].':'.(string)$ev['endDate'].':'.(string)$ev['startTime'].':'.(string)$ev['endTime'];
+        $sid = isset($ev['shiftId']) ? (int)$ev['shiftId'] : 0;
+        $parts[] = (int)$ev['id'].':'.$sid.':'.$w.':'.(string)$ev['date'].':'.(string)$ev['endDate'].':'.(string)$ev['startTime'].':'.(string)$ev['endTime'];
     }
     return '"'.hash('sha256', implode('|', $parts)).'"';
 }
