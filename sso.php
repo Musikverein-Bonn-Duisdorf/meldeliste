@@ -12,51 +12,6 @@ function ssoAppendParam($url, $key, $value) {
     return $url.$sep.rawurlencode($key).'='.rawurlencode($value);
 }
 
-/**
- * True if absolute redirect URL is allowed by ssoRedirectAllowlist / same host.
- */
-function ssoRedirectAllowed($url) {
-    $url = trim((string)$url);
-    if($url === '') {
-        return false;
-    }
-    $parts = parse_url($url);
-    if(!$parts || empty($parts['scheme']) || empty($parts['host'])) {
-        return false;
-    }
-    if(!in_array(strtolower($parts['scheme']), array('http', 'https'), true)) {
-        return false;
-    }
-    $host = strtolower($parts['host']);
-    $path = isset($parts['path']) ? $parts['path'] : '/';
-
-    global $optionsDB;
-    $allowlist = isset($optionsDB['ssoRedirectAllowlist']) ? trim((string)$optionsDB['ssoRedirectAllowlist']) : '';
-    if($allowlist === '') {
-        $base = parse_url(isset($optionsDB['WebSiteURL']) ? $optionsDB['WebSiteURL'] : '');
-        $baseHost = ($base && !empty($base['host'])) ? strtolower($base['host']) : strtolower($_SERVER['HTTP_HOST'] ?? '');
-        return $host === $baseHost;
-    }
-
-    $entries = array_map('trim', explode(',', $allowlist));
-    foreach($entries as $entry) {
-        if($entry === '') {
-            continue;
-        }
-        if($entry[0] === '/') {
-            if(strpos($path, $entry) === 0) {
-                return true;
-            }
-            continue;
-        }
-        $suffix = strtolower($entry);
-        if($host === $suffix || substr($host, -strlen($suffix)) === $suffix) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function ssoLoginByUserId($userId) {
     $userId = (int)$userId;
     if($userId < 1) {
@@ -106,6 +61,12 @@ if(!loggedIn()) {
 if(!ssoRedirectAllowed($redirect)) {
     http_response_code(403);
     die('<div class="w3-panel w3-red w3-padding"><b>SSO-Weiterleitung nicht erlaubt.</b></div>');
+}
+
+$permKey = ssoPermissionForRedirect($redirect);
+if($permKey !== null && !requirePermission($permKey)) {
+    http_response_code(403);
+    die('<div class="w3-panel w3-red w3-padding"><b>Keine Berechtigung für dieses Modul.</b></div>');
 }
 
 $targetHint = '';
