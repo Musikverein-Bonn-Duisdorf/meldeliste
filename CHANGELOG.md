@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-9913e (2026-08-15)
+
+- MELD-167: klickbare Entity-Chips für User, Termin, Inventar und Email
+- MELD-167: klickbare Entity-Chips (User, Termin, Inventar, Email)
+
 ## 2026-08-15-7007f (2026-08-15)
 
 - MELD-189 MELD-179: serverseitige Log-Suche und Mehrwort-UND
