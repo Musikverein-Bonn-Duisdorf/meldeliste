@@ -470,6 +470,8 @@
 
   function readAttrs(form, catalog) {
     var instrumentEl = form.querySelector('#profile-instrument') || form.querySelector('[name="Instrument"]');
+    var mitgliedWrap = document.getElementById('profile-auto-membership-wrap');
+    var mitgliedFixed = mitgliedWrap && mitgliedWrap.getAttribute('data-mitglied') === '1';
     var mitgliedEl = form.querySelector('#pref-Mitglied')
       || form.querySelector('#pref-Mitglied-b')
       || form.querySelector('[name="Mitglied"][type="checkbox"]');
@@ -479,7 +481,7 @@
     var instrumentId = instrumentEl ? Number(instrumentEl.value || 0) : 0;
     var info = (catalog.instruments && catalog.instruments[String(instrumentId)]) || null;
     return {
-      mitglied: !!(mitgliedEl && mitgliedEl.checked),
+      mitglied: mitgliedEl ? !!mitgliedEl.checked : !!mitgliedFixed,
       active: !activeEl || !!activeEl.checked,
       registerId: info ? Number(info.registerId || 0) : 0,
       registerName: info ? String(info.registerName || '') : ''

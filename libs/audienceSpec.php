@@ -335,10 +335,18 @@ class AudienceSpec
      * @param bool $requireMail getMail/notifyInbox (message recipient channels)
      * @return string[]
      */
-    public static function userBaseWhere($requireMail = false) {
+    /**
+     * @param bool $requireMail
+     * @param bool $excludeFoerdernde hide MIT Type=foerdernd (default true for lists/audience)
+     * @return string[]
+     */
+    public static function userBaseWhere($requireMail = false, $excludeFoerdernde = true) {
         $where = array('`Deleted` != 1');
         if($requireMail) {
             $where[] = '(`getMail` = 1 OR `notifyInbox` = 1)';
+        }
+        if($excludeFoerdernde && function_exists('sqlExcludeFoerderndeUsers')) {
+            $where[] = sqlExcludeFoerderndeUsers();
         }
         return $where;
     }
@@ -364,10 +372,10 @@ class AudienceSpec
         foreach($groups as $audience) {
             $where = self::userBaseWhere($requireMail);
             if($audience === 'members') {
-                $where[] = '`Mitglied` = 1';
+                $where[] = sqlUserIsVereinMitglied('`Index`');
             }
             elseif($audience === 'nonmembers') {
-                $where[] = '`Mitglied` != 1';
+                $where[] = 'NOT ('.sqlUserIsVereinMitglied('`Index`').')';
             }
             elseif($audience === 'musicians') {
                 $where[] = '`Active` = 1';
@@ -405,11 +413,12 @@ class AudienceSpec
                 if($uid > 0) $uids[] = $uid;
             }
             if(count($uids)) {
+                // Explicit chips: Fördernde bleiben erlaubt (kein excludeFoerdernde).
                 $sql = sprintf(
                     'SELECT `Index` FROM `%sUser` WHERE `Index` IN (%s) AND %s;',
                     $GLOBALS['dbprefix'],
                     implode(',', $uids),
-                    implode(' AND ', self::userBaseWhere($requireMail))
+                    implode(' AND ', self::userBaseWhere($requireMail, false))
                 );
                 $dbr = mysqli_query($GLOBALS['conn'], $sql);
                 if($dbr) {

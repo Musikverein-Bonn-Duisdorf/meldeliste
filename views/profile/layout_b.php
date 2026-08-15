@@ -30,11 +30,9 @@ $step = isset($profileStep) ? $profileStep : 'notify';
             <input class="w3-check" type="checkbox" name="Active" value="1" id="pref-Active-b" <?php echo $checked('Active'); ?>>
             <label for="pref-Active-b">aktiv</label>
           </div>
-          <div class="profile-pref">
-            <input type="hidden" name="Mitglied" value="0">
-            <input class="w3-check" type="checkbox" name="Mitglied" value="1" id="pref-Mitglied-b" <?php echo $checked('Mitglied'); ?>>
-            <label for="pref-Mitglied-b">Mitglied</label>
-          </div>
+<?php   if($fill && (int)$n->Index > 0) { ?>
+          <p class="w3-small w3-text-grey">Mitgliedschaft: <?php echo bool2string($n->isVereinMitglied()); ?></p>
+<?php   } ?>
 <?php   if(!empty($GLOBALS['optionsDB']['showRegisterLead'])) { ?>
           <div class="profile-pref">
             <input type="hidden" name="RegisterLead" value="0">

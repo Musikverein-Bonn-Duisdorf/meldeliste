@@ -78,13 +78,11 @@ if(isset($GLOBALS['optionsDB']['colorTitleBar'])) {
 }
 
 $backHref = 'inventories.php';
-$showMemberNr = isset($ctx['mitgliedsnummer']) && (string)$ctx['mitgliedsnummer'] !== '';
-$editMemberNr = false;
 $showAddress = !empty($ctx['needAddressField']);
 $editAddress = $canEdit && !empty($ctx['needAddressEditField']);
 $editNotes = $canEdit && !empty($ctx['needContractNotesField']);
 $editChecklist = $canEdit && $kind === LoanForm::KIND_RETURN;
-$hasEditableFields = $editMemberNr || $editAddress || $editNotes || $editChecklist;
+$hasEditableFields = $editAddress || $editNotes || $editChecklist;
 $checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
     ? $ctx['checklist']
     : LoanForm::defaultChecklist();
@@ -179,19 +177,6 @@ header('Content-Type: text/html; charset=utf-8');
         <div class="loan-form-party">
           <p class="loan-form-party-role">Entleiher</p>
           <p class="loan-form-party-name"><strong class="loan-form-em"><?php echo $h($ctx['borrowerName']); ?></strong></p>
-<?php if($showMemberNr) { ?>
-          <div class="loan-form-field-row">
-            <span class="loan-form-field-label">Mitgliedsnummer</span>
-<?php   if($editMemberNr) { ?>
-            <input id="loan-mitgliedsnummer" class="loan-form-input loan-form-input--short no-print" type="text" name="Mitgliedsnummer" inputmode="numeric" value="" autocomplete="off" aria-label="Mitgliedsnummer">
-            <span class="loan-form-blank loan-form-blank--short loan-form-print-only" aria-hidden="true"></span>
-<?php   } elseif($ctx['mitgliedsnummer'] !== '') { ?>
-            <span class="loan-form-field-value"><?php echo $h($ctx['mitgliedsnummer']); ?></span>
-<?php   } else { ?>
-            <span class="loan-form-blank loan-form-blank--short"></span>
-<?php   } ?>
-          </div>
-<?php } ?>
 <?php if($ctx['borrowerEmail'] !== '') { ?>
           <p class="loan-form-muted"><?php echo $h($ctx['borrowerEmail']); ?></p>
 <?php } ?>

@@ -232,9 +232,9 @@ function seedOrchestraTestUsersCreate() {
 
             $sqlIns = sprintf(
                 'INSERT INTO `%sUser`
-                 (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`,
-                  `Email`, `Email2`, `Birthday`, `getMail`, `Admin`, `RegisterLead`, `Deleted`)
-                 VALUES ("%s", "%s", NULL, "%s", "%s", "%s", 1, %d, "%s", "", NULL, 0, 0, 0, 0);',
+                 (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Instrument`,
+                  `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`, `Deleted`)
+                 VALUES ("%s", "%s", "%s", "%s", "%s", %d, "%s", "", 0, 0, 0, 0);',
                 $GLOBALS['dbprefix'],
                 mysqli_real_escape_string($GLOBALS['conn'], $nachnameTag),
                 mysqli_real_escape_string($GLOBALS['conn'], $vorname),

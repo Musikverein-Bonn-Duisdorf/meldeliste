@@ -24,8 +24,9 @@ applyUserFormPostRedirect('musiker.php', array('allowNewUser' => true));
 include 'common/header.php';
 
 $sql = sprintf(
-    'SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Deleted` != 1;',
-    $GLOBALS['dbprefix']
+    'SELECT COUNT(`Index`) AS `Count` FROM `%sUser` WHERE `Deleted` != 1 AND %s;',
+    $GLOBALS['dbprefix'],
+    sqlExcludeFoerderndeUsers('`Index`')
 );
 $dbr = mysqli_query($conn, $sql);
 sqlerror();

@@ -15,12 +15,7 @@ if(!isset($adminUserEdit)) {
   <label class="profile-label" for="profile-nachname">Nachname</label>
   <input id="profile-nachname" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Nachname, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
 </div>
-<?php if($adminUserEdit) { ?>
-<div class="profile-field">
-  <label class="profile-label" for="profile-refid">Mitglieds-Nr.</label>
-  <input id="profile-refid" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="RefID" type="number" placeholder="optional" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->RefID, ENT_QUOTES, 'UTF-8').'"'; ?>>
-</div>
-<?php } elseif($fill) { ?>
+<?php if($fill && !$adminUserEdit) { ?>
 <input type="hidden" name="Nachname" value="<?php echo htmlspecialchars((string)$n->Nachname, ENT_QUOTES, 'UTF-8'); ?>">
 <input type="hidden" name="Vorname" value="<?php echo htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8'); ?>">
 <?php } ?>
@@ -46,11 +41,6 @@ else {
       <input class="w3-check" type="checkbox" name="Active" value="1" id="pref-Active" <?php echo $checked('Active'); ?>>
       <span>aktiv</span>
     </label>
-    <label class="profile-pref">
-      <input type="hidden" name="Mitglied" value="0">
-      <input class="w3-check" type="checkbox" name="Mitglied" value="1" id="pref-Mitglied" <?php echo $checked('Mitglied'); ?>>
-      <span>Mitglied</span>
-    </label>
 <?php   if(!empty($GLOBALS['optionsDB']['showRegisterLead'])) { ?>
     <label class="profile-pref">
       <input type="hidden" name="RegisterLead" value="0">
@@ -60,6 +50,12 @@ else {
 <?php   } ?>
   </div>
 </div>
+<?php if($fill && (int)$n->Index > 0) { ?>
+<div class="profile-field">
+  <span class="profile-label">Mitgliedschaft</span>
+  <div class="profile-value"><?php echo bool2string($n->isVereinMitglied()); ?></div>
+</div>
+<?php } ?>
 <?php } ?>
 <?php if($fill && (int)$n->Index > 0 && $adminUserEdit && !empty($GLOBALS['optionsDB']['urlNotenarchiv'])) { ?>
 <p class="profile-inline-link"><a href="user-voice.php?user=<?php echo (int)$n->Index; ?>">Stimme / Fallbacks</a></p>
@@ -112,7 +108,7 @@ if($adminUserEdit && count($namedGroups)) {
 
 if($adminUserEdit) {
     $previewCatalog = AudienceSpec::buildMembershipPreviewCatalog();
-    $initialMitglied = $fill ? (bool)$n->Mitglied : false;
+    $initialMitglied = $fill ? $n->isVereinMitglied() : false;
     $initialActive = $fill ? ((int)$n->Active !== 0) : true;
     $initialInstrument = $fill ? (int)$n->Instrument : 0;
     $initialRegisterId = 0;
@@ -134,6 +130,7 @@ if($adminUserEdit) {
     );
 ?>
 <div class="profile-field" id="profile-auto-membership-wrap"
+     data-mitglied="<?php echo $initialMitglied ? '1' : '0'; ?>"
      data-membership-catalog="<?php echo htmlspecialchars((string)$catalogJson, ENT_QUOTES, 'UTF-8'); ?>">
   <span class="profile-label">Automatisch</span>
   <div class="mail-recipient-chips" id="profile-auto-membership" aria-live="polite" aria-label="Automatische Zugehörigkeit">

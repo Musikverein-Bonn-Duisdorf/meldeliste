@@ -481,9 +481,10 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     case 'musiker':
         $orderBy = $orderLegacy($sort, $dirSql);
         $sql = sprintf(
-            'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` %s WHERE `rName` != "keins" AND `Deleted` != 1 AND `Active` = 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            'SELECT `%sUser`.`Index` FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex` %s WHERE `rName` != "keins" AND `Deleted` != 1 AND `Active` = 1 AND %s ORDER BY %s LIMIT %d OFFSET %d;',
             $p, $p, $p, $p, $p, $p,
             $needLastVisit ? $lastVisitJoinLegacy : '',
+            sqlExcludeFoerderndeUsers('`'.$p.'User`.`Index`'),
             $orderBy,
             $limit + 1,
             $offset
@@ -492,9 +493,11 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     case 'mitglied':
         $orderBy = $orderLegacy($sort === '' ? 'nachname' : $sort, $dirSql);
         $sql = sprintf(
-            'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Mitglied` = 1 AND `Instrument` > 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE %s AND `Instrument` > 0 AND `Deleted` != 1 AND %s ORDER BY %s LIMIT %d OFFSET %d;',
             $p, $p, $p, $p,
             $needLastVisit ? $lastVisitJoinLegacy : '',
+            sqlUserIsVereinMitglied('`'.$p.'User`.`Index`'),
+            sqlExcludeFoerderndeUsers('`'.$p.'User`.`Index`'),
             $orderBy,
             $limit + 1,
             $offset
@@ -503,9 +506,10 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
     case 'gastmusiker':
         $orderBy = $orderLegacy($sort === '' ? 'nachname' : $sort, $dirSql);
         $sql = sprintf(
-            'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Active` = 0 AND `Deleted` != 1 ORDER BY %s LIMIT %d OFFSET %d;',
+            'SELECT `%sUser`.`Index` FROM `%sUser` LEFT JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `Instrument` = `iIndex` %s WHERE `Active` = 0 AND `Deleted` != 1 AND %s ORDER BY %s LIMIT %d OFFSET %d;',
             $p, $p, $p, $p,
             $needLastVisit ? $lastVisitJoinLegacy : '',
+            sqlExcludeFoerderndeUsers('`'.$p.'User`.`Index`'),
             $orderBy,
             $limit + 1,
             $offset
@@ -519,12 +523,13 @@ function listChunkUsers($kind, $offset, $limit, $sort = '', $dir = 'asc') {
             'SELECT u.`Index` FROM `%sUser` u
              %s
              %s
-             WHERE u.`Deleted` != 1
+             WHERE u.`Deleted` != 1 AND %s
              ORDER BY %s
              LIMIT %d OFFSET %d;',
             $p,
             $instrJoin,
             $needLastVisit ? $lastVisitJoin : '',
+            sqlExcludeFoerderndeUsers('u.`Index`'),
             $orderBy,
             $limit + 1,
             $offset

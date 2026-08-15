@@ -192,7 +192,8 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
     $groupMap = evaluateUserGroupIdsByUser();
 
     $sql = sprintf(
-        'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`,'
+        'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`,'
+        .' (EXISTS (SELECT 1 FROM `mit_Membership` mm WHERE mm.`User` = `u`.`Index` AND mm.`Type` = "aktiv" AND mm.`Status` = "active")) AS `Mitglied`,'
         .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' COALESCE(`i`.`Name`, \'\') AS `Instrument`,'
         .' COALESCE(`r`.`Name`, \'\') AS `RegisterName`,'
@@ -206,7 +207,7 @@ function evaluateAttendanceRanking($days, $besetzungOnly = false) {
         .' LEFT JOIN `%sMeldungen` `m` ON `m`.`User` = `u`.`Index`'
         .' AND `m`.`Termin` IN (SELECT `Index` FROM `%sTermine` WHERE %s)'
         .' WHERE `u`.`Deleted` != 1'
-        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`, `u`.`Mitglied`,'
+        .' GROUP BY `u`.`Index`, `u`.`Vorname`, `u`.`Nachname`, `u`.`Active`,'
         .' `i`.`Register`, `i`.`Name`, `r`.`Name`, `r`.`Color`'
         .' ORDER BY `u`.`Nachname` ASC, `u`.`Vorname` ASC;',
         $prefix,
@@ -467,7 +468,9 @@ function evaluateInactiveUsers($thresholdDays) {
 
     $sql = sprintf(
         'SELECT `u`.`Index` AS `UserId`, `u`.`Vorname`, `u`.`Nachname`, `u`.`LastLogin`, `u`.`Joined`,'
-        .' `u`.`Active`, `u`.`Mitglied`, COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
+        .' `u`.`Active`,'
+        .' (EXISTS (SELECT 1 FROM `mit_Membership` mm WHERE mm.`User` = `u`.`Index` AND mm.`Type` = "aktiv" AND mm.`Status` = "active")) AS `Mitglied`,'
+        .' COALESCE(`i`.`Register`, 0) AS `RegisterId`,'
         .' COALESCE(`i`.`Name`, \'\') AS `Instrument`,'
         .' COALESCE(`r`.`Name`, \'\') AS `RegisterName`,'
         .' COALESCE(`r`.`Color`, \'\') AS `RegisterColor`,'

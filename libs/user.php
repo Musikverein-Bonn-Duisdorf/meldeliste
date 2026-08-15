@@ -1,23 +1,20 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'RefID' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Mitglied' => null, 'Active' => 1, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'Birthday' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Active' => 1, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
 	    case 'Nachname':
 	    case 'Vorname':
-        case 'RefID':
         case 'login':
 	    case 'Passhash':
 	    case 'activeLink':
-	    case 'Mitglied':
 	    case 'Active':
 	    case 'Instrument':
 	    case 'iName':
 	    case 'Email':
 	    case 'Email2':
-	    case 'Birthday':
 	    case 'getMail':
 	    case 'notifyInbox':
 	    case 'notifyAppMail':
@@ -46,8 +43,6 @@ class User
         switch($key) {
 	    case 'Index':
 	    case 'Instrument':
-        case 'RefID':
-	    case 'Mitglied':
 	    case 'Active':
 	    case 'getMail':
 	    case 'notifyInbox':
@@ -67,7 +62,6 @@ class User
 	    case 'Email2':
 	    case 'LastLogin':
 	    case 'DeletedOn':
-	    case 'Birthday':
             if($val !== '' && $val !== null) {
                 $this->_data[$key] = trim((string)$val);
             }
@@ -119,10 +113,6 @@ class User
             $parts[] = 'Nachname: '.htmlspecialchars((string)$old->Nachname, ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8').'</b>';
         }
-        if($this->RefID != $old->RefID) {
-            $parts[] = 'Mitglieds-Nr.: '.htmlspecialchars((string)$old->RefID, ENT_QUOTES, 'UTF-8')
-                .' &rArr; <b>'.htmlspecialchars((string)$this->RefID, ENT_QUOTES, 'UTF-8').'</b>';
-        }
         if($this->login != $old->login) {
             $parts[] = 'Login: '.htmlspecialchars((string)$old->login, ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars((string)$this->login, ENT_QUOTES, 'UTF-8').'</b>';
@@ -132,9 +122,6 @@ class User
         }
         if($this->activeLink != $old->activeLink) {
             $parts[] = 'activeLink geändert';
-        }
-        if(boolsDiffer($this->Mitglied, $old->Mitglied)) {
-            $parts[] = 'Mitglied: '.bool2string($old->Mitglied).' &rArr; <b>'.bool2string($this->Mitglied).'</b>';
         }
         if(boolsDiffer($this->Active, $old->Active)) {
             $parts[] = 'Aktiv: '.bool2string($old->Active).' &rArr; <b>'.bool2string($this->Active).'</b>';
@@ -146,10 +133,6 @@ class User
         if($this->Email2 != $old->Email2) {
             $parts[] = 'Email2: '.htmlspecialchars((string)$old->Email2, ENT_QUOTES, 'UTF-8')
                 .' &rArr; <b>'.htmlspecialchars((string)$this->Email2, ENT_QUOTES, 'UTF-8').'</b>';
-        }
-        if($this->Birthday != $old->Birthday) {
-            $parts[] = 'Geburtstag: '.germanDate($old->Birthday, true)
-                .' &rArr; <b>'.germanDate($this->Birthday, true).'</b>';
         }
         if(boolsDiffer($this->getMail, $old->getMail)) {
             $parts[] = 'Benachrichtigung E-Mail: '.bool2string($old->getMail).' &rArr; <b>'.bool2string($this->getMail).'</b>';
@@ -212,14 +195,10 @@ class User
         }
         logAppendFilled($parts, 'Vorname', $this->Vorname, (string)$this->Vorname);
         logAppendFilled($parts, 'Nachname', $this->Nachname, (string)$this->Nachname);
-        logAppendFilled($parts, 'RefID', $this->RefID, (string)$this->RefID);
         logAppendFilled($parts, 'Login', $this->login, (string)$this->login);
-        $parts[] = logPart('Mitglied', bool2string($this->Mitglied));
         logAppendFilled($parts, 'Instrument', $this->iName, (string)$this->iName);
         logAppendFilled($parts, 'Email', $this->Email, (string)$this->Email);
         logAppendFilled($parts, 'Email2', $this->Email2, (string)$this->Email2);
-        $bday = germanDate($this->Birthday, true);
-        logAppendFilled($parts, 'Geburtstag', $bday, (string)$bday);
         $parts[] = logPart('E-Mail', bool2string($this->getMail));
         $parts[] = logPart('Nachrichten', bool2string($this->notifyInbox));
         $parts[] = logPart('App: Nachrichten', bool2string($this->notifyAppMail));
@@ -263,7 +242,6 @@ class User
         if($this->Email2 === null) $this->Email2 = '';
         if($this->Admin === null) $this->Admin = 0;
         if($this->RegisterLead === null) $this->RegisterLead = 0;
-        if($this->Mitglied === null) $this->Mitglied = 0;
         if($this->getMail === null) $this->getMail = 0;
         if($this->notifyInbox === null) $this->notifyInbox = 1;
         if($this->notifyAppMail === null) $this->notifyAppMail = 1;
@@ -441,20 +419,17 @@ class User
         return (string)preg_replace('#^https?://#i', 'webcal://', $https);
     }
     protected function insert() {
-        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `RefID`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Active`, `Instrument`, `Email`, `Email2`, `Birthday`, `getMail`, `notifyInbox`, `notifyAppMail`, `notifyAppTerminNew`, `notifyAppTerminChange`, `notifyAppTerminSoon`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", %s, "%s", "%s", "%s", %d, %d, "%d", "%s", "%s", %s, "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
+        $sql = sprintf('INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Active`, `Instrument`, `Email`, `Email2`, `getMail`, `notifyInbox`, `notifyAppMail`, `notifyAppTerminNew`, `notifyAppTerminChange`, `notifyAppTerminSoon`, `Admin`, `RegisterLead`) VALUES ("%s", "%s", "%s", "%s", "%s", %d, "%d", "%s", "%s", "%d", "%d", "%d", "%d", "%d", "%d", "%d", "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
-        mkNULL($this->RefID),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->login),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
-        (int)$this->Mitglied,
         (int)$this->Active === 0 ? 0 : 1,
         (int)$this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
-        mkNULLstr($this->Birthday),
         (int)$this->getMail,
         (int)$this->notifyInbox,
         (int)$this->notifyAppMail,
@@ -471,20 +446,17 @@ class User
         return true;
     }
     protected function update() {
-        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `RefID` = %s, `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Mitglied` = "%d", `Active` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `Birthday` = %s, `getMail` = "%d", `notifyInbox` = "%d", `notifyAppMail` = "%d", `notifyAppTerminNew` = "%d", `notifyAppTerminChange` = "%d", `notifyAppTerminSoon` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sUser` SET `Nachname` = "%s", `Vorname` = "%s", `login` = "%s", `Passhash` = "%s", `activeLink` = "%s", `Active` = "%d", `Instrument` = "%d", `Email` = "%s", `Email2` = "%s", `getMail` = "%d", `notifyInbox` = "%d", `notifyAppMail` = "%d", `notifyAppTerminNew` = "%d", `notifyAppTerminChange` = "%d", `notifyAppTerminSoon` = "%d", `Admin` = "%d", `RegisterLead` = "%d" WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Nachname),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Vorname),
-        mkNULL($this->RefID),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->login),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Passhash),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->activeLink),
-        (int)$this->Mitglied,
         (int)$this->Active === 0 ? 0 : 1,
         (int)$this->Instrument,
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email),
         mysqli_real_escape_string($GLOBALS['conn'], (string)$this->Email2),
-        mkNULLstr($this->Birthday),
         (int)$this->getMail,
         (int)$this->notifyInbox,
         (int)$this->notifyAppMail,
@@ -738,6 +710,13 @@ class User
             'Vorname' => (string)$row['Vorname'],
             'Nachname' => (string)$row['Nachname'],
         );
+    }
+
+    /** Vereinsmitgliedschaft lives in mit_Membership (Type=aktiv, Status=active). */
+    public function isVereinMitglied() {
+        return function_exists('userIsVereinMitglied')
+            ? userIsVereinMitglied((int)$this->Index)
+            : false;
     }
 
     public function canLogin() {
@@ -1074,7 +1053,7 @@ class User
         $email = trim((string)$this->Email);
         $loginLabel = germanDate($this->LastLogin, 1);
         $visitLabel = germanDate($lastVisit, 1);
-        $isMember = ((int)$this->Mitglied === 1);
+        $isMember = $this->isVereinMitglied();
         $isActive = ((int)$this->Active === 1);
         $hasInstrument = (int)$this->Instrument > 0;
         $reg = $this->getRegisterMeta();

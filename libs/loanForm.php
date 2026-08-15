@@ -240,7 +240,7 @@ class LoanForm
             return null;
         }
 
-        $isMember = ((int)$user->Mitglied === 1);
+        $isMember = $user->isVereinMitglied();
         $kaution = self::parseAmount($loan->Kaution);
         $hasKaution = $kaution > 0.0;
         $leihgebuehr = self::parseAmount($loan->Leihgebuehr);
@@ -289,12 +289,6 @@ class LoanForm
             $details[] = array('label' => 'Seriennummer', 'value' => trim((string)$inv->SerialNr));
         }
 
-        $refId = $user->RefID;
-        $mitgliedsnummer = '';
-        if($isMember && $refId !== null && $refId !== '' && (int)$refId > 0) {
-            $mitgliedsnummer = (string)(int)$refId;
-        }
-
         $borrowerLabel = 'Entleiher';
         $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
         $borrowerAddress = trim((string)$loan->BorrowerAddress);
@@ -313,8 +307,6 @@ class LoanForm
             'borrowerEmail' => trim((string)$user->Email),
             'borrowerLabel' => $borrowerLabel,
             'isMember' => $isMember,
-            'mitgliedsnummer' => $mitgliedsnummer,
-            'needMitgliedsnummerField' => false,
             // Address always optional and re-editable (MELD-188).
             'needAddressField' => true,
             'needAddressEditField' => true,

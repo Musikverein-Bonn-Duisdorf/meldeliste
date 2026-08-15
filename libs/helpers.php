@@ -155,22 +155,247 @@ function germanDateCompact($string) {
     return germanDates($string, false, true);
 }
 
+/**
+ * SQL fragment: hide Fördernde (mit_Membership.Type=foerdernd, Status=active).
+ * No-op if mit_Membership is missing.
+ * $userColumnSql must be unambiguous (qualify with table/alias), e.g. 'u.`Index`'
+ * or '`meldeliste_User`.`Index`'. Bare '`Index`' is wrong inside NOT EXISTS.
+ */
+function sqlExcludeFoerderndeUsers($userColumnSql = null) {
+    if($userColumnSql === null || $userColumnSql === '' || $userColumnSql === '`Index`') {
+        $userColumnSql = sprintf('`%sUser`.`Index`', $GLOBALS['dbprefix']);
+    }
+    if(!mitMembershipPeriodsReady()) {
+        // Legacy flag-based Membership until periods exist
+        if(mitMembershipTableReady() && mitMembershipHasTypeStatusColumns()) {
+            return sprintf(
+                'NOT EXISTS (SELECT 1 FROM `mit_Membership` m WHERE m.`User` = %s AND m.`Type` = "foerdernd" AND m.`Status` = "active")',
+                $userColumnSql
+            );
+        }
+        return '1=1';
+    }
+    $today = date('Y-m-d');
+    $esc = mysqli_real_escape_string($GLOBALS['conn'], $today);
+    return sprintf(
+        'NOT EXISTS (
+            SELECT 1 FROM `mit_Membership` m
+            INNER JOIN `mit_MembershipTypePeriod` t ON t.`Membership` = m.`Index`
+            WHERE m.`User` = %s AND t.`Type` = "foerdernd"
+              AND t.`DateFrom` <= "%s"
+              AND (t.`DateTo` IS NULL OR t.`DateTo` >= "%s")
+        )',
+        $userColumnSql,
+        $esc,
+        $esc
+    );
+}
+
+/** Whether mit_Membership exists (cached; re-probes until found). */
+function mitMembershipTableReady() {
+    static $ready = null;
+    if($ready === true) {
+        return true;
+    }
+    $ready = false;
+    if(isset($GLOBALS['conn']) && $GLOBALS['conn']) {
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], "SHOW TABLES LIKE 'mit_Membership'");
+            if($dbr && mysqli_fetch_row($dbr)) {
+                $ready = true;
+            }
+        }
+        catch(Throwable $e) {
+            $ready = false;
+        }
+    }
+    return $ready === true;
+}
+
+/** Tenure + type period tables available (schema v6+). */
+function mitMembershipPeriodsReady() {
+    static $ready = null;
+    if($ready === true) {
+        return true;
+    }
+    $ready = false;
+    if(!isset($GLOBALS['conn']) || !$GLOBALS['conn'] || !mitMembershipTableReady()) {
+        return false;
+    }
+    try {
+        $dbr1 = mysqli_query($GLOBALS['conn'], "SHOW TABLES LIKE 'mit_MembershipPeriod'");
+        $dbr2 = mysqli_query($GLOBALS['conn'], "SHOW TABLES LIKE 'mit_MembershipTypePeriod'");
+        if($dbr1 && mysqli_fetch_row($dbr1) && $dbr2 && mysqli_fetch_row($dbr2)) {
+            $ready = true;
+        }
+    }
+    catch(Throwable $e) {
+        $ready = false;
+    }
+    return $ready === true;
+}
+
+/** Legacy Membership.Type / Status columns still present. */
+function mitMembershipHasTypeStatusColumns() {
+    static $has = null;
+    if($has !== null) {
+        return $has;
+    }
+    $has = false;
+    if(!mitMembershipTableReady()) {
+        return false;
+    }
+    try {
+        $dbr = mysqli_query($GLOBALS['conn'], 'SHOW COLUMNS FROM `mit_Membership` LIKE "Type"');
+        $has = ($dbr && mysqli_fetch_row($dbr)) ? true : false;
+    }
+    catch(Throwable $e) {
+        $has = false;
+    }
+    return $has;
+}
+
+/**
+ * True if User still has legacy Mitglied column (pre-drop).
+ */
+function meldeUserHasMitgliedColumn() {
+    static $has = null;
+    if($has !== null) {
+        return $has;
+    }
+    $has = false;
+    if(!isset($GLOBALS['conn']) || !$GLOBALS['conn']) {
+        return false;
+    }
+    try {
+        $dbr = mysqli_query($GLOBALS['conn'], sprintf(
+            'SHOW COLUMNS FROM `%sUser` LIKE "Mitglied";',
+            $GLOBALS['dbprefix']
+        ));
+        $has = ($dbr && mysqli_fetch_row($dbr)) ? true : false;
+    }
+    catch(Throwable $e) {
+        $has = false;
+    }
+    return $has;
+}
+
+/**
+ * SQL: user is Vereinsmitglied via open mit_MembershipPeriod (any type).
+ * Legacy: Type=aktiv Status=active, then User.Mitglied=1.
+ * Note: Melde User.Active (Orchesterbetrieb) is unrelated.
+ */
+function sqlUserIsVereinMitglied($userColumnSql = null) {
+    if($userColumnSql === null || $userColumnSql === '' || $userColumnSql === '`Index`') {
+        $userColumnSql = sprintf('`%sUser`.`Index`', $GLOBALS['dbprefix']);
+    }
+    if(mitMembershipPeriodsReady()) {
+        $today = date('Y-m-d');
+        $esc = mysqli_real_escape_string($GLOBALS['conn'], $today);
+        return sprintf(
+            'EXISTS (
+                SELECT 1 FROM `mit_Membership` m
+                INNER JOIN `mit_MembershipPeriod` p ON p.`Membership` = m.`Index`
+                WHERE m.`User` = %s AND p.`DateFrom` <= "%s"
+                  AND (p.`DateTo` IS NULL OR p.`DateTo` >= "%s")
+            )',
+            $userColumnSql,
+            $esc,
+            $esc
+        );
+    }
+    if(mitMembershipTableReady() && mitMembershipHasTypeStatusColumns()) {
+        return sprintf(
+            'EXISTS (SELECT 1 FROM `mit_Membership` m WHERE m.`User` = %s AND m.`Type` = "aktiv" AND m.`Status` = "active")',
+            $userColumnSql
+        );
+    }
+    if(meldeUserHasMitgliedColumn()) {
+        // Legacy transitional: unqualified Mitglied on User table in same FROM.
+        return '`Mitglied` = 1';
+    }
+    return '0=1';
+}
+
+/**
+ * @param int $userId
+ * @return bool
+ */
+function userIsVereinMitglied($userId) {
+    $userId = (int)$userId;
+    if($userId < 1) {
+        return false;
+    }
+    if(mitMembershipPeriodsReady()) {
+        $today = date('Y-m-d');
+        $sql = sprintf(
+            'SELECT 1 FROM `mit_Membership` m
+             INNER JOIN `mit_MembershipPeriod` p ON p.`Membership` = m.`Index`
+             WHERE m.`User` = %d AND p.`DateFrom` <= "%s"
+               AND (p.`DateTo` IS NULL OR p.`DateTo` >= "%s")
+             LIMIT 1;',
+            $userId,
+            mysqli_real_escape_string($GLOBALS['conn'], $today),
+            mysqli_real_escape_string($GLOBALS['conn'], $today)
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return false;
+        }
+        return ($dbr && mysqli_fetch_row($dbr)) ? true : false;
+    }
+    if(mitMembershipTableReady() && mitMembershipHasTypeStatusColumns()) {
+        $sql = sprintf(
+            'SELECT 1 FROM `mit_Membership` WHERE `User` = %d AND `Type` = "aktiv" AND `Status` = "active" LIMIT 1;',
+            $userId
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return false;
+        }
+        return ($dbr && mysqli_fetch_row($dbr)) ? true : false;
+    }
+    if(meldeUserHasMitgliedColumn()) {
+        $sql = sprintf(
+            'SELECT `Mitglied` FROM `%sUser` WHERE `Index` = %d LIMIT 1;',
+            $GLOBALS['dbprefix'],
+            $userId
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return false;
+        }
+        $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+        return $row && !empty($row['Mitglied']);
+    }
+    return false;
+}
+
 function getActiveUsers($date) {
     $users = array();
+    $excludeFoerdernd = sqlExcludeFoerderndeUsers('`Index`');
     if($date) {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `Active` = 1 AND `iName` != "Admin" ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Joined` >= "%s" AND (`DeletedOn` <= "%s" OR `DeletedOn` = NULL) AND `Active` = 1 AND `iName` != "Admin" AND %s ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
         $date,
-        $date
+        $date,
+        $excludeFoerdernd
         );
     }
     else {
-        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `Active` = 1 AND `iName` != "Admin" ORDER BY `Nachname`, `Vorname`;',
+        $sql = sprintf('SELECT * FROM `%sUser` INNER JOIN (SELECT `Index` AS `iIndex`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `iIndex` = `Instrument` WHERE `Deleted` = 0 AND `Active` = 1 AND `iName` != "Admin" AND %s ORDER BY `Nachname`, `Vorname`;',
         $GLOBALS['dbprefix'],
         $GLOBALS['dbprefix'],
-        $GLOBALS['dbprefix']
+        $GLOBALS['dbprefix'],
+        $excludeFoerdernd
         );
     }
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -1639,8 +1864,9 @@ function string2gDate($string) {
 function UserOptionAll($val) {
     $str='';
     $str=$str."<option value=\"0\">".$GLOBALS['optionsDB']['orgNameShort']."</option>\n";
-    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0 ORDER BY `Nachname`, `Vorname`;',
-    $GLOBALS['dbprefix']
+    $sql = sprintf('SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND %s ORDER BY `Nachname`, `Vorname`;',
+    $GLOBALS['dbprefix'],
+    sqlExcludeFoerderndeUsers('`Index`')
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
     sqlerror();

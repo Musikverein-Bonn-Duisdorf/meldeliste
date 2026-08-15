@@ -150,7 +150,7 @@ class DatabaseManager
         $link = uniqid('', true);
 
         $sql = sprintf(
-            'INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Mitglied`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`, `singleUsePW`, `Deleted`) VALUES ("%s", "%s", "%s", "%s", "%s", 1, 0, "", "", 0, 1, 0, 0, 0);',
+            'INSERT INTO `%sUser` (`Nachname`, `Vorname`, `login`, `Passhash`, `activeLink`, `Instrument`, `Email`, `Email2`, `getMail`, `Admin`, `RegisterLead`, `singleUsePW`, `Deleted`) VALUES ("%s", "%s", "%s", "%s", "%s", 0, "", "", 0, 1, 0, 0, 0);',
             $GLOBALS['dbprefix'],
             'Admin',
             'MVD',
@@ -171,6 +171,31 @@ class DatabaseManager
         }
 
         $userId = (int)mysqli_insert_id($GLOBALS['conn']);
+        // Best-effort: mark default admin as Vereinsmitglied in MIT periods if tables exist.
+        if(function_exists('mitMembershipPeriodsReady') && mitMembershipPeriodsReady()) {
+            @mysqli_query($GLOBALS['conn'], sprintf(
+                'INSERT INTO `mit_Membership` (`User`) VALUES (%d);',
+                $userId
+            ));
+            $mid = (int)mysqli_insert_id($GLOBALS['conn']);
+            if($mid > 0) {
+                @mysqli_query($GLOBALS['conn'], sprintf(
+                    'INSERT INTO `mit_MembershipPeriod` (`Membership`, `DateFrom`, `DateTo`) VALUES (%d, CURDATE(), NULL);',
+                    $mid
+                ));
+                @mysqli_query($GLOBALS['conn'], sprintf(
+                    'INSERT INTO `mit_MembershipTypePeriod` (`Membership`, `Type`, `DateFrom`, `DateTo`) VALUES (%d, "aktiv", CURDATE(), NULL);',
+                    $mid
+                ));
+            }
+        }
+        elseif(function_exists('mitMembershipTableReady') && mitMembershipTableReady()
+            && function_exists('mitMembershipHasTypeStatusColumns') && mitMembershipHasTypeStatusColumns()) {
+            @mysqli_query($GLOBALS['conn'], sprintf(
+                'INSERT INTO `mit_Membership` (`User`, `Type`, `Status`) VALUES (%d, "aktiv", "active");',
+                $userId
+            ));
+        }
         $this->ensureAdminPermissions($userId);
         $this->addReport('user', 'Admin', 'created', 'Default-Admin angelegt (Login: MVD)');
         return true;

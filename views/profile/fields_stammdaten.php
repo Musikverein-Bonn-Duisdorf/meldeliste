@@ -8,10 +8,7 @@
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="Vorname" type="text" placeholder="Vorname" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
 <label>Nachname</label>
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="Nachname" type="text" placeholder="Nachname" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Nachname, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
-<?php if($canEditUsers) { ?>
-<label>Mitglieds-Nr. (optional)</label>
-<input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="RefID" type="number" placeholder="Vereins-Nr." <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->RefID, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
-<?php } elseif($fill) { ?>
+<?php if(!$canEditUsers && $fill) { ?>
 <input type="hidden" name="Nachname" value="<?php echo htmlspecialchars((string)$n->Nachname, ENT_QUOTES, 'UTF-8'); ?>">
 <input type="hidden" name="Vorname" value="<?php echo htmlspecialchars((string)$n->Vorname, ENT_QUOTES, 'UTF-8'); ?>">
 <?php } ?>

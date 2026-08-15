@@ -50,7 +50,7 @@ $loanedChips = isset($inventoryChips['loaned']) && is_array($inventoryChips['loa
       </div>
       <div class="profile-field">
         <span class="profile-label">Mitglied</span>
-        <div class="profile-value"><?php echo bool2string($user->Mitglied); ?></div>
+        <div class="profile-value"><?php echo bool2string($user->isVereinMitglied()); ?></div>
       </div>
 <?php if($registerLeadName !== null) { ?>
       <div class="profile-field">
@@ -89,10 +89,6 @@ $loanedChips = isset($inventoryChips['loaned']) && is_array($inventoryChips['loa
       </div>
 <?php } ?>
 <?php if($showUserDetails) { ?>
-      <div class="profile-field">
-        <span class="profile-label">Mitglieds-Nr.</span>
-        <div class="profile-value"><?php echo htmlspecialchars((string)$user->RefID, ENT_QUOTES, 'UTF-8'); ?></div>
-      </div>
       <div class="profile-field">
         <span class="profile-label">User-ID</span>
         <div class="profile-value"><?php echo (int)$user->Index; ?></div>

@@ -6,27 +6,30 @@ Verkaufbare / installierbare Module (Sibling-Apps, **eine gemeinsame MySQL**):
 |-------|------|------------------|----------|
 | Meldeliste | meldeliste | `meldeliste_` (später `melde_`) | Owner von `User` + `Permissions` + SSO-Issuer |
 | Notenarchiv | notenarchiv | `archiv_` | liest Melde-`User` / Permissions; SSO-Redeem |
-| Mitgliederverwaltung | mitgliederverwaltung | `mit_` | später Mitgliedschafts-Hub; liest Melde-Login |
+| Mitgliederverwaltung | mitgliederverwaltung | `mit_` | Hub für Profil/Mitgliedschaft/SEPA; liest Melde-`User` |
 
 Dieses Dokument ist die **kanonische** Plattform-Quelle. Kopien in Archiv/MIT sollen hierher verweisen.
 
 ## Reihenfolge (MELD-156 / MELD-108)
 
 1. **Phase 1 — Notenarchiv andocken** (Epic ARCHIV-4: Identity → SSO → Permissions → Security, dann Domain ARCHIV-9).
-2. **Phase 2 — Mitgliederverwaltung-Hub** (Epic MIT-1: `mit_Person`, Fördernde ohne Melde-Konto, Anschrift/Bank).
+2. **Phase 2 — Mitgliederverwaltung-Hub** (Epic MIT-1 / MIT-15: `mit_MemberProfile` auf Melde-User, Fördernde als Melde-User ausgeblendet in Listen, Anschrift/Bank/SEPA).
 
-Archiv braucht **kein** `mit_Person` — nur `meldeliste_User` + SSO. MIT blockiert Archiv nicht.
+Archiv braucht **kein** zweites Personenmodell — nur `meldeliste_User` + SSO. MIT blockiert Archiv nicht.
 
-## Identity (MELD-110, Stand 2026-07-21)
+## Identity (MELD-110, Stand 2026-08-15)
 
 - **Gemeinsame MySQL-DB:** ja — Module teilen die Instanz, Tabellen über Prefix getrennt.
 - **Kanonische User-Tabelle:** `{identityPrefix}User` (Singular), Standard `meldeliste_User` (+ `Permissions`).
 - **Legacy:** `{prefix}Users` (Plural) ist abzuschaffen; Notenarchiv nutzt `$identityPrefix = "meldeliste_"` und liest `User`.
 - **Live-Check (aktuell erreichbare DB):** vorhanden `meldeliste_User`, `meldeliste_UserVoice` — **kein** `meldeliste_Users`.
-- **Personen-ID:** `User.Index` bleibt die gemeinsame Login-ID für Archiv/SSO; Mitgliedschaftsstamm kommt später in MIT (`mit_Person`, optionaler Melde-Link).
-- **DSGVO:** keine separate User-DB — logische Trennung, Modul-ACLs; IBAN/Anschrift erst in MIT (Phase 2).
+- **Personen-ID:** `User.Index` bleibt die gemeinsame Login-ID; heikle Zusatzdaten in MIT (`mit_MemberProfile`), keine `mit_Person`.
+- **Geburtstag:** nur in `mit_MemberProfile` (Melde-Spalte entfernt).
+- **Mitglied-Flag:** nur in `mit_Membership` (`Type=aktiv`, `Status=active`); Melde-Spalte `Mitglied` entfernt.
+- **Fördernde:** Melde-User-Zeile existiert; in Melde-Listen/Audience ausgeblendet außer explizite User-Chips.
+- **DSGVO:** keine separate User-DB — logische Trennung, Modul-ACLs; IBAN/Anschrift in MIT.
 
-Siehe auch Notenarchiv `docs/IDENTITY.md`. Ticket: MELD-110 / Epic MELD-108 / ARCHIV-4.
+Siehe auch Notenarchiv `docs/IDENTITY.md`. Ticket: MELD-110 / Epic MELD-108 / ARCHIV-4 / MIT-15 / MELD-192.
 
 ## Ownership-Matrix (MELD-157)
 
