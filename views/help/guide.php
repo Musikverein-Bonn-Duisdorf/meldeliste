@@ -42,7 +42,7 @@ $sections[] = array(
 <p>Auf dem Desktop steht die Navigation links (Icons mit Beschriftung). Auf Tablet und Smartphone unten; unter <b>Mehr</b> findest du weitere Einträge (u.&nbsp;a. Mein Profil), Admin und Ausloggen.</p>
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
-<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
+<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; bei Schichten erscheinen die einzelnen Schichten mit ihren Zeiten; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details; bei vielen Einträgen am selben Tag öffnet <b>+N</b> die Tagesauswahl); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers (auf Tablet/Smartphone dauerhaft in der unteren Leiste)</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir gehörendes oder an dich ausgeliehenes Inventar</li>' : '').'
@@ -63,14 +63,14 @@ $sections[] = array(
 <p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung (auch im Termin-Archiv).</li>
-<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Über dem Monat: Info öffnet das Abo-Fenster, Drucken listet alle kommenden Termine (nicht nur den aktuellen Monat).</li>
+<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; bei Schichten die einzelnen Schichten mit ihren Zeiten. Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Passt nicht alles in die Zelle, öffnet <b>+N</b> eine Liste aller Einträge dieses Tages. Über dem Monat: Info öffnet das Abo-Fenster, Drucken listet alle kommenden Termine (nicht nur den aktuellen Monat).</li>
 </ul>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
 <p><b>Tipp:</b> Auch „vielleicht“ oder „nein“ sind wertvoll – offene Einträge erschweren die Planung.</p>
 <p>Bei Terminen mit <b>Besetzung</b> kannst du im Termin-Detail ggf. das <b>Instrument für diesen Termin</b> anpassen (z.&nbsp;B. Dirigat übernehmen). Speichern mit dem Speicher-Button neben der Auswahl.</p>
 <p>Ein Klick auf Titel, Beschreibung oder Ort öffnet die Termin-Details (Uhrzeit, Orchesterübersicht, …).</p>
-<p>Über <i class="fa fa-calendar-plus"></i> kannst du einen Termin als ICS-Datei in deinen Kalender (Google, Outlook, …) importieren.</p>
+<p>Über <i class="fa fa-calendar-plus"></i> kannst du einen Termin als ICS-Datei in deinen Kalender (Google, Outlook, …) importieren. Bei Terminen mit Schichten steht der Button an jeder Schichtzeile und übernimmt Schichtname und -zeit.</p>
 '
 );
 
@@ -131,7 +131,7 @@ $sections[] = array(
     'title' => 'Persönlichen Kalender abonnieren',
     'body' => '
 <p>Du kannst deine sichtbaren Meldeliste-Termine in deinen privaten Kalender (Google, Apple, Outlook, …) <b>abonnieren</b>. Der Link steht unter <b>Mein Profil</b> und auf der Seite <b>Kalender</b> im Info-Dialog (runde Buttons über der Monatsauswahl).</p>
-<p><b>Einweg:</b> Termine und dein Melde-Status (zugesagt / vielleicht / ohne) werden in den Kalender übernommen. Zu- und Absagen änderst du weiterhin in der Meldeliste — nicht in der Kalender-App.</p>
+<p><b>Einweg:</b> Termine und dein Melde-Status (zugesagt / vielleicht / ohne) werden in den Kalender übernommen. Bei Schichten erscheinen die einzelnen Schichten (Name und Zeit), nicht der Eltern-Termin. Zu- und Absagen änderst du weiterhin in der Meldeliste — nicht in der Kalender-App.</p>
 <p><b>Aktualisierung:</b> Wie oft der Feed neu geladen wird, steuert dein Kalender-Anbieter (oft erst nach einigen Stunden). Darauf hat die Meldeliste keinen Einfluss.</p>
 <ul>
 <li><b>Google Kalender</b> (am PC): Weitere Kalender → <b>Über URL hinzufügen</b> → HTTPS-Link einfügen.</li>
@@ -264,7 +264,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Statistik</b> – Auswertungen; auf breiten Bildschirmen Diagramme und Listen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>). Ranking und Inaktive teilen sich denselben Chip-Filter wie die Personenliste (Aktive/Gäste/Mitglieder, Register, Gruppen) und nutzen denselben Zeilen-Stil inkl. Sortier-Chips</li>
-<li><b>Log</b> – Anwendungsprotokoll (Suche serverseitig; mehrere Wörter = UND, z. B. <code>ERROR Meier</code>; Live-Aktualisierung); Akteure und referenzierte User/Termine/Inventar/Emails in der Nachricht als Chip öffnen das jeweilige Modal; Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
+<li><b>Log</b> – Anwendungsprotokoll (Suche serverseitig; mehrere Wörter = UND, z. B. <code>ERROR Meier</code>; Live-Aktualisierung); Akteure und referenzierte User/Termine/Inventar/Emails/Schichten in der Nachricht als Chip öffnen das jeweilige Modal; Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Backup</b> – Datenbank-ZIP herunterladen (inkl. Versionsinfo) oder wieder einspielen; im Browser über <code>Backup</code>, per CLI mit <code>php cron.php CRONID backup</code>; automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>

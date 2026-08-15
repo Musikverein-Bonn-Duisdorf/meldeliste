@@ -105,11 +105,12 @@ function calendarColorClassForWert($wert) {
 
 /**
  * Load visible appointments overlapping [fromDate, toDate] for a user.
+ * Shift appointments expand to one event per Schicht (MELD-182).
  *
  * @param int $userId
  * @param string $fromDate Y-m-d
  * @param string $toDate Y-m-d
- * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string,description:string,location:string}>
+ * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string,description:string,location:string,shiftId?:int}>
  */
 function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
     $userId = (int)$userId;
@@ -153,29 +154,94 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
         if(!$t->isVisibleToUser($userId)) {
             continue;
         }
-        $wert = null;
-        if(isset($row['meldeWert']) && $row['meldeWert'] !== null && $row['meldeWert'] !== '') {
-            $wert = (int)$row['meldeWert'];
-        }
         $endDate = trim((string)$t->EndDatum);
         if($endDate === '') {
             $endDate = (string)$t->Datum;
         }
-        $startTime = trim((string)$t->Uhrzeit);
-        $endTime = trim((string)$t->Uhrzeit2);
+        $location = method_exists($t, 'getOrt') ? (string)$t->getOrt() : '';
+        $description = (string)$t->Beschreibung;
+        $terminStart = trim((string)$t->Uhrzeit);
+        $terminEnd = trim((string)$t->Uhrzeit2);
+
+        if((int)$t->Shifts) {
+            $shiftIds = $t->getShifts();
+            if(!count($shiftIds)) {
+                continue;
+            }
+            foreach($shiftIds as $sid) {
+                $s = new Shift();
+                $s->load_by_id((int)$sid);
+                if(!(int)$s->Index || (int)$s->Termin !== (int)$t->Index) {
+                    continue;
+                }
+                $sm = new Shiftmeldung();
+                $sm->load_by_user_event($userId, (int)$s->Index);
+                $wert = null;
+                if((int)$sm->Index > 0 && $sm->Wert !== null && $sm->Wert !== '') {
+                    $wert = (int)$sm->Wert;
+                }
+                $startNorm = Shift::normalizedTime($s->Start);
+                $endNorm = Shift::normalizedTime($s->End);
+                $startTime = $startNorm !== null ? $startNorm : $terminStart;
+                $endTime = $endNorm !== null ? $endNorm : $terminEnd;
+                $shiftName = trim((string)$s->Name);
+                $terminName = trim((string)$t->Name);
+                if($terminName !== '' && $shiftName !== '') {
+                    $name = $terminName.': '.$shiftName;
+                }
+                elseif($shiftName !== '') {
+                    $name = $shiftName;
+                }
+                else {
+                    $name = $terminName !== '' ? $terminName : 'Schicht';
+                }
+                $out[] = array(
+                    'id' => (int)$t->Index,
+                    'shiftId' => (int)$s->Index,
+                    'name' => $name,
+                    'date' => (string)$t->Datum,
+                    'endDate' => $endDate,
+                    'startTime' => $startTime,
+                    'endTime' => $endTime,
+                    'wert' => $wert,
+                    'colorClass' => calendarColorClassForWert($wert),
+                    'description' => $description,
+                    'location' => $location,
+                );
+            }
+            continue;
+        }
+
+        $wert = null;
+        if(isset($row['meldeWert']) && $row['meldeWert'] !== null && $row['meldeWert'] !== '') {
+            $wert = (int)$row['meldeWert'];
+        }
         $out[] = array(
             'id' => (int)$t->Index,
             'name' => (string)$t->Name,
             'date' => (string)$t->Datum,
             'endDate' => $endDate,
-            'startTime' => $startTime,
-            'endTime' => $endTime,
+            'startTime' => $terminStart,
+            'endTime' => $terminEnd,
             'wert' => $wert,
             'colorClass' => calendarColorClassForWert($wert),
-            'description' => (string)$t->Beschreibung,
-            'location' => method_exists($t, 'getOrt') ? (string)$t->getOrt() : '',
+            'description' => $description,
+            'location' => $location,
         );
     }
+
+    usort($out, static function ($a, $b) {
+        $c = strcmp((string)$a['date'], (string)$b['date']);
+        if($c !== 0) {
+            return $c;
+        }
+        $c = strcmp((string)$a['startTime'], (string)$b['startTime']);
+        if($c !== 0) {
+            return $c;
+        }
+        return strcmp((string)$a['name'], (string)$b['name']);
+    });
+
     return $out;
 }
 

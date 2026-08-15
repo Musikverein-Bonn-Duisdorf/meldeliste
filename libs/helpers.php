@@ -502,6 +502,7 @@ function entityOpenHtml($type, $id, $label, $chipMod = '') {
         'termin' => 'termin',
         'inventar' => 'instrument',
         'mail' => 'mailGroup',
+        'shift' => 'termin',
     );
     if($id < 1 || !isset($chipMods[$type])) {
         return $h($label);
@@ -737,6 +738,46 @@ function logMessageLinkEntities($html) {
     if($userCreateLinked) {
         $html = preg_replace('/,?\s*Vorname:\s*<b>.*?<\/b>/si', '', $html, 1);
         $html = preg_replace('/,?\s*Nachname:\s*<b>.*?<\/b>/si', '', $html, 1);
+    }
+
+    // Melde / canonical: Schicht/Aufgabe: (3) <b>Bierstand …</b> optional time
+    $html = preg_replace_callback(
+        '/\bSchicht\/Aufgabe:\s*\((\d+)\)\s*<b>(.*?)<\/b>(?:\s*([^,<]*?))?(?=,|$)/si',
+        function ($m) use ($chip, $plainLabel) {
+            $extra = isset($m[3]) ? $plainLabel($m[3]) : '';
+            $label = $plainLabel($m[2]);
+            if($extra !== '') {
+                $label = trim($label.' '.$extra);
+            }
+            if($label === '') {
+                $label = '#'.$m[1];
+            }
+            return 'Schicht/Aufgabe: '.$chip('shift', $m[1], $label);
+        },
+        $html
+    );
+
+    // Edit/create: Schicht/Aufgabe: 7, … Name: <b>…</b>
+    $shiftNameLinked = false;
+    $html = preg_replace_callback(
+        '/\bSchicht\/Aufgabe:\s*(\d+)(?=\s*,|\s*$)/si',
+        function ($m) use ($chip, $plainLabel, $source, &$shiftNameLinked) {
+            $label = '';
+            if(preg_match('/\bName:\s*<b>(.*?)<\/b>/si', $source, $n)) {
+                $label = $plainLabel($n[1]);
+            }
+            if($label === '') {
+                $label = '#'.$m[1];
+            }
+            else {
+                $shiftNameLinked = true;
+            }
+            return 'Schicht/Aufgabe: '.$chip('shift', $m[1], $label);
+        },
+        $html
+    );
+    if($shiftNameLinked) {
+        $html = preg_replace('/,?\s*Name:\s*<b>.*?<\/b>/si', '', $html, 1);
     }
 
     // Email: (23) <b>Betreff</b>

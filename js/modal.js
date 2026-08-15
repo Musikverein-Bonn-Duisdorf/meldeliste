@@ -68,7 +68,8 @@ function openEntityFromEl(el) {
     var id = parseInt(el.getAttribute('data-entity-id'), 10);
     if(!type || !(id > 0)) return false;
     if(type === 'inventory') type = 'inventar';
-    if(type !== 'user' && type !== 'termin' && type !== 'inventar' && type !== 'mail') return false;
+    if(type === 'shift') type = 'shiftResponse';
+    if(type !== 'user' && type !== 'termin' && type !== 'inventar' && type !== 'mail' && type !== 'shiftResponse') return false;
     openModal(type, id);
     return true;
 }

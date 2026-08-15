@@ -63,6 +63,7 @@ case 'terminResponse':
     echo $t->getResponseModalHtml($filter);
     break;
 
+case 'shift':
 case 'shiftResponse':
     // Same as terminResponse: view without perm_showResponse (MELD-68)
     $s = new Shift;

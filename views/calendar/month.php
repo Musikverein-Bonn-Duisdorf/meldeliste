@@ -29,13 +29,26 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
   border: 1px solid rgba(0,0,0,0.25); cursor: pointer; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; border-radius: 2px;
 }
-.meld-cal-more { font-size: 0.7em; color: #555; padding: 0 2px; }
+.meld-cal-more {
+  display: block; width: 100%; box-sizing: border-box; margin: 0;
+  padding: 2px 4px; font-size: 0.7em; line-height: 1.2; text-align: left;
+  border: 1px dashed rgba(0,0,0,0.3); border-radius: 2px;
+  background: transparent; color: #345A95; cursor: pointer;
+  font-family: inherit;
+}
+.meld-cal-more:hover { background: rgba(52, 90, 149, 0.08); }
 .meld-cal-events { max-height: 6.5rem; overflow-y: auto; }
+.meld-cal-day-pick-list { display: flex; flex-direction: column; gap: 6px; }
+.meld-cal-day-pick-item {
+  display: block; width: 100%; box-sizing: border-box; text-align: left;
+  padding: 8px 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 4px;
+  cursor: pointer; font-size: 0.95em;
+}
 .meld-cal-cell--create { cursor: pointer; }
-.meld-cal-cell--create:hover { filter-color: #345A95; }
+.meld-cal-cell--create:hover { border-color: #345A95; }
 @media (max-width: 900px) {
   .meld-cal-cell { min-height: 4.2rem; padding: 2px; }
-  .meld-cal-chip { font-size: 0.6em; padding: 1px 2px; }
+  .meld-cal-chip, .meld-cal-more { font-size: 0.6em; padding: 1px 2px; }
   .meld-cal-head { font-size: 0.75em; }
 }
 </style>
@@ -83,6 +96,17 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
       <div class="meld-cal-daynum"><?php echo (int)$cursor->format('j'); ?></div>
       <div class="meld-cal-events">
 <?php
+    $pickerEvents = array();
+    foreach($dayEvents as $ev) {
+        $timeLabel = calendarFormatTimeShort($ev['startTime']);
+        $label = ($timeLabel !== '' ? $timeLabel.' ' : '').$ev['name'];
+        $pickerEvents[] = array(
+            'id' => (int)$ev['id'],
+            'label' => $label,
+            'color' => (string)$ev['colorClass'],
+            'wert' => $ev['wert'] === null ? '' : (int)$ev['wert'],
+        );
+    }
     foreach($shown as $ev) {
         $timeLabel = calendarFormatTimeShort($ev['startTime']);
         $label = ($timeLabel !== '' ? $timeLabel.' ' : '').$ev['name'];
@@ -100,12 +124,18 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
 <?php
     }
     if($extra > 0) {
-        $moreTitle = array();
-        foreach(array_slice($dayEvents, $maxChips) as $ev) {
-            $moreTitle[] = $ev['name'];
-        }
+        $pickerJson = htmlspecialchars(
+            json_encode($pickerEvents, JSON_UNESCAPED_UNICODE),
+            ENT_QUOTES,
+            'UTF-8'
+        );
 ?>
-        <div class="meld-cal-more" title="<?php echo htmlspecialchars(implode(', ', $moreTitle), ENT_QUOTES, 'UTF-8'); ?>">+<?php echo (int)$extra; ?></div>
+        <button type="button"
+          class="meld-cal-more"
+          data-date="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"
+          data-cal-day-events="<?php echo $pickerJson; ?>"
+          title="Alle Termine an diesem Tag"
+          aria-label="+<?php echo (int)$extra; ?> weitere Termine anzeigen">+<?php echo (int)$extra; ?></button>
 <?php } ?>
       </div>
     </div>
