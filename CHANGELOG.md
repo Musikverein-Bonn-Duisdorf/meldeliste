@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-34918 (2026-08-15)
+
+- MELD-184: aktive Nav-Tabs wieder farbig; CSS mit VERSION cache-busten
+- MELD-184: aktive Nav-Tabs und CSS-Versionierung
+
 ## 2026-08-15-9166d (2026-08-15)
 
 - MELD-184: Safe-Area unter Bottom-Nav ohne grauen colorNav-Streifen
