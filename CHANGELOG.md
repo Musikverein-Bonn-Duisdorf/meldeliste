@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-9f92e (2026-08-15)
+
+- MELD-193: Use period-based sqlUserIsVereinMitglied in evaluateStats.
+- MELD-193: Membership from MIT periods; drop Melde Birthday/Mitglied/RefID.
+
 ## 2026-08-15-e356e (2026-08-15)
 
 - docs: UI-SHELL Tabellen-Sortierung und Infinite-Scroll
