@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-eca62 (2026-08-15)
+
+- MELD-190: Eigentum/Leihen als Inventar-Chips im User-Modal und Musiker-Formular
+- MELD-190: Inventar-Chips im User-Modal und Musiker-Formular
+
 ## 2026-08-15-fc427 (2026-08-15)
 
 - MELD-188: Leihvertrag nachträglich editieren, Scan löschen

@@ -1,8 +1,8 @@
 <?php
 $version = array(
-	 'String' => "2026-08-15-fc427",
+	 'String' => "2026-08-15-eca62",
 	 'Date' => "2026-08-15",
-	 'Hash' => "188fd99266d723f39ec47a99a8fb8b4f719fc427"
+	 'Hash' => "c96b67673a90d182e81d4ebd2f7ca8b1b81eca62"
 );
 
 global $version;
