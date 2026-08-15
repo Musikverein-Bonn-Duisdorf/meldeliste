@@ -2603,6 +2603,18 @@ a.app-titlebar-logo {
   color: #444;
 }
 
+/* MELD-167: clickable entity chips → async openModal (delegation on .entity-open) */
+.entity-open {
+  cursor: pointer;
+  text-decoration: none;
+}
+.entity-open:hover,
+.entity-open:focus-visible {
+  filter: brightness(0.97);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 90, 149, 0.35);
+}
+
 .mail-recipient-suggest {
   position: relative;
   z-index: 5;

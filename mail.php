@@ -551,7 +551,10 @@ function delFile(hash) {
     if($byId > 0) {
         $byUser = new User;
         $byUser->load_by_id($byId);
-        $byName = $byUser->Index ? htmlspecialchars($byUser->getName(), ENT_QUOTES, 'UTF-8') : ('User '.$byId);
+        $byLabel = $byUser->Index ? $byUser->getName() : ('User '.$byId);
+        $byName = function_exists('entityOpenHtml')
+            ? entityOpenHtml('user', $byId, $byLabel)
+            : htmlspecialchars($byLabel, ENT_QUOTES, 'UTF-8');
     }
     else {
         $byName = 'System';
@@ -609,8 +612,11 @@ function delFile(hash) {
         $tView = new Termin;
         $tView->load_by_id($jobTerminId);
         if($tView->Index) {
-            $verteilerHtml = 'Alle Teilnehmer von '
-                .htmlspecialchars($tView->Name.' ('.$tView->getGermanDate().')', ENT_QUOTES, 'UTF-8');
+            $tLabel = $tView->Name.' ('.$tView->getGermanDate().')';
+            $tChip = function_exists('entityOpenHtml')
+                ? entityOpenHtml('termin', $jobTerminId, $tLabel)
+                : htmlspecialchars($tLabel, ENT_QUOTES, 'UTF-8');
+            $verteilerHtml = 'Alle Teilnehmer von '.$tChip;
         }
         else {
             $verteilerHtml = 'Alle Teilnehmer von Termin #'.$jobTerminId;
@@ -643,9 +649,11 @@ else {
     foreach($outboxRows as $or) {
         $ou = new User;
         $ou->load_by_id((int)$or['User']);
-        $ouName = $ou->Index
-            ? htmlspecialchars($ou->getName(), ENT_QUOTES, 'UTF-8')
-            : ('User '.(int)$or['User']);
+        $ouId = (int)$or['User'];
+        $ouLabel = $ou->Index ? $ou->getName() : ('User '.$ouId);
+        $ouName = ($ouId > 0 && $ou->Index && function_exists('entityOpenHtml'))
+            ? entityOpenHtml('user', $ouId, $ouLabel)
+            : htmlspecialchars($ouLabel, ENT_QUOTES, 'UTF-8');
         $st = (string)$or['Status'];
         $stLabel = isset($outboxStatusLabel[$st]) ? $outboxStatusLabel[$st] : $st;
         $stCls = isset($outboxStatusClass[$st]) ? $outboxStatusClass[$st] : 'w3-light-grey';

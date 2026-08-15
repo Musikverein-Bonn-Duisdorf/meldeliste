@@ -475,6 +475,356 @@ function getOwner($index) {
     return $user->getName();
 }
 
+/**
+ * Clickable entity chip (MELD-167). Markup only — modal loads async via openModal.
+ *
+ * @param string $type user|termin|inventar
+ * @param int $id
+ * @param string $label
+ * @param string $chipMod Optional visual modifier (default from type map)
+ * @return string HTML (escaped label); plain escaped text if type/id invalid
+ */
+function entityOpenHtml($type, $id, $label, $chipMod = '') {
+    $type = strtolower(trim((string)$type));
+    if($type === 'inventory') {
+        $type = 'inventar';
+    }
+    $id = (int)$id;
+    $label = trim((string)$label);
+    $h = function ($s) {
+        return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+    };
+    if($label === '') {
+        return '';
+    }
+    $chipMods = array(
+        'user' => 'user',
+        'termin' => 'termin',
+        'inventar' => 'instrument',
+        'mail' => 'mailGroup',
+    );
+    if($id < 1 || !isset($chipMods[$type])) {
+        return $h($label);
+    }
+    $mod = trim((string)$chipMod);
+    if($mod === '' || !preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*$/', $mod)) {
+        $mod = $chipMods[$type];
+    }
+    return '<span class="mail-recipient-chip mail-recipient-chip--'.$mod.' entity-open"'
+        .' role="button" tabindex="0"'
+        .' data-entity-type="'.$h($type).'"'
+        .' data-entity-id="'.$id.'">'
+        .$h($label)
+        .'</span>';
+}
+
+/**
+ * Resolve user id for legacy log fragments "User: <b>Name</b>" (no id).
+ * Prefers Melde-ID in the same message (Meldung vs Schichtmeldung).
+ *
+ * @return int 0 if unknown
+ */
+function logResolveUserIdFromMessage($html, $nameHint = '') {
+    $html = (string)$html;
+    $nameHint = trim((string)$nameHint);
+    if(preg_match('/\bMelde-ID:\s*(\d+)/i', $html, $m)) {
+        $mid = (int)$m[1];
+        if($mid > 0) {
+            if(stripos($html, 'Schicht/Aufgabe:') !== false && class_exists('Shiftmeldung')) {
+                $sm = new Shiftmeldung;
+                $sm->load_by_id($mid);
+                if((int)$sm->Index === $mid && (int)$sm->User > 0) {
+                    return (int)$sm->User;
+                }
+            }
+            if(class_exists('Meldung')) {
+                $melde = new Meldung;
+                $melde->load_by_id($mid);
+                if((int)$melde->Index === $mid && (int)$melde->User > 0) {
+                    return (int)$melde->User;
+                }
+            }
+            if(class_exists('Shiftmeldung')) {
+                $sm = new Shiftmeldung;
+                $sm->load_by_id($mid);
+                if((int)$sm->Index === $mid && (int)$sm->User > 0) {
+                    return (int)$sm->User;
+                }
+            }
+        }
+    }
+    if($nameHint === '' || !isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+        return 0;
+    }
+    // Unique Vorname+Nachname match (legacy fallback)
+    $parts = preg_split('/\s+/u', $nameHint, 2);
+    if(!is_array($parts) || count($parts) < 2) {
+        return 0;
+    }
+    $sql = sprintf(
+        'SELECT `Index` FROM `%sUser` WHERE `Vorname` = "%s" AND `Nachname` = "%s" AND `Deleted` != 1 LIMIT 2;',
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($GLOBALS['conn'], $parts[0]),
+        mysqli_real_escape_string($GLOBALS['conn'], $parts[1])
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    if(!$dbr) {
+        return 0;
+    }
+    $ids = array();
+    while($row = mysqli_fetch_array($dbr)) {
+        $ids[] = (int)$row['Index'];
+    }
+    return count($ids) === 1 ? $ids[0] : 0;
+}
+
+/**
+ * Enrich stored log HTML with entity chips (MELD-167).
+ * Matches common "Label: (id) <b>name</b>" fragments; safe to run on each display.
+ *
+ * @param string $html Log.Message (may already contain <b> etc.)
+ * @return string
+ */
+function logMessageLinkEntities($html) {
+    $html = (string)$html;
+    if($html === '' || !function_exists('entityOpenHtml')) {
+        return $html;
+    }
+    // Skip if already enriched (avoid nested chips on re-process)
+    if(strpos($html, 'entity-open') !== false && strpos($html, 'data-entity-type') !== false) {
+        return $html;
+    }
+
+    $source = $html;
+    $plainLabel = function ($raw) {
+        $t = trim(html_entity_decode(strip_tags((string)$raw), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return preg_replace('/\s+/u', ' ', $t);
+    };
+    $chip = function ($type, $id, $labelRaw) use ($plainLabel) {
+        $label = $plainLabel($labelRaw);
+        if($label === '') {
+            $label = '#'.(int)$id;
+        }
+        return entityOpenHtml($type, (int)$id, $label);
+    };
+
+    // Termin: (12) <b>Probe</b>
+    $html = preg_replace_callback(
+        '/\bTermin:\s*\((\d+)\)\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'Termin: '.$chip('termin', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // Legacy termin edit: Termin-ID: 6, <b>Probe</b>
+    $html = preg_replace_callback(
+        '/\bTermin-ID:\s*(\d+)\s*,\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'Termin-ID: '.$chip('termin', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // Legacy insert-ish: Termin-ID: <b>6</b> (id only in bold)
+    $html = preg_replace_callback(
+        '/\bTermin-ID:\s*<b>(\d+)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'Termin-ID: '.$chip('termin', $m[1], 'Termin #'.$m[1]);
+        },
+        $html
+    );
+
+    // Inventory: (9) <b>Marsch</b> optional RegNumber… (loan / edit with both headers)
+    $html = preg_replace_callback(
+        '/\bInventory:\s*\((\d+)\)\s*<b>(.*?)<\/b>(?:\s*([^,<]*?))?(?=(?:\s*&rArr;|\s*,|\s*$))/si',
+        function ($m) use ($chip, $plainLabel) {
+            $extra = isset($m[3]) ? $plainLabel($m[3]) : '';
+            $label = $plainLabel($m[2]);
+            if($extra !== '') {
+                $label = trim($label.' '.$extra);
+            }
+            return 'Inventory: '.$chip('inventar', $m[1], $label);
+        },
+        $html
+    );
+
+    // Drop redundant Inventory-ID: N, when Inventory: chip already follows
+    $html = preg_replace('/\bInventory-ID:\s*\d+\s*,\s*(?=Inventory:)/i', '', $html);
+
+    // Legacy inventory edit header: Inventory-ID: 4, <b>Flöte</b> INSTR-001 → Inventory: chip
+    $html = preg_replace_callback(
+        '/\bInventory-ID:\s*(\d+)\s*,\s*<b>(.*?)<\/b>(?:\s*([^,<]*?))?(?=,|$)/si',
+        function ($m) use ($chip, $plainLabel) {
+            $extra = isset($m[3]) ? $plainLabel($m[3]) : '';
+            $label = $plainLabel($m[2]);
+            if($extra !== '') {
+                $label = trim($label.' '.$extra);
+            }
+            if($label === '') {
+                $label = '#'.$m[1];
+            }
+            return 'Inventory: '.$chip('inventar', $m[1], $label);
+        },
+        $html
+    );
+
+    // Legacy insert: Inventory-ID: N … Inventory: <b>name</b> (no id on Inventory:)
+    if(preg_match('/\bInventory-ID:\s*(\d+)/i', $source, $im)) {
+        $invId = (int)$im[1];
+        if($invId > 0) {
+            $html = preg_replace_callback(
+                '/\bInventory:\s*<b>(.*?)<\/b>/si',
+                function ($m) use ($chip, $invId) {
+                    return 'Inventory: '.$chip('inventar', $invId, $m[1]);
+                },
+                $html
+            );
+            $html = preg_replace('/\bInventory-ID:\s*'.$invId.'\s*,\s*(?=Inventory:)/i', '', $html);
+        }
+    }
+
+    // User: (5) <b>Name</b>
+    $html = preg_replace_callback(
+        '/\bUser:\s*\((\d+)\)\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'User: '.$chip('user', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // Drop redundant User-ID: N, when User: chip already follows
+    $html = preg_replace('/\bUser-ID:\s*\d+\s*,\s*(?=User:)/i', '', $html);
+
+    // User-ID: 9 <b>Name</b> → User: chip
+    $html = preg_replace_callback(
+        '/\bUser-ID:\s*(\d+)\s*,?\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'User: '.$chip('user', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // User-ID: <b>2</b> → User: #2
+    $html = preg_replace_callback(
+        '/\bUser-ID:\s*<b>(\d+)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'User: '.$chip('user', $m[1], '#'.$m[1]);
+        },
+        $html
+    );
+
+    // Create-style: User-ID: 34, Vorname/Nachname → User: chip; drop duplicate name fields
+    $userCreateLinked = false;
+    $html = preg_replace_callback(
+        '/\bUser-ID:\s*(\d+)(?=\s*,)/si',
+        function ($m) use ($chip, $plainLabel, $source, &$userCreateLinked) {
+            $label = '';
+            if(preg_match('/\bVorname:\s*<b>(.*?)<\/b>/si', $source, $v)
+                && preg_match('/\bNachname:\s*<b>(.*?)<\/b>/si', $source, $n)) {
+                $label = trim($plainLabel($v[1]).' '.$plainLabel($n[1]));
+            }
+            if($label === '') {
+                $label = '#'.$m[1];
+            }
+            else {
+                $userCreateLinked = true;
+            }
+            return 'User: '.$chip('user', $m[1], $label);
+        },
+        $html
+    );
+    if($userCreateLinked) {
+        $html = preg_replace('/,?\s*Vorname:\s*<b>.*?<\/b>/si', '', $html, 1);
+        $html = preg_replace('/,?\s*Nachname:\s*<b>.*?<\/b>/si', '', $html, 1);
+    }
+
+    // Email: (23) <b>Betreff</b>
+    $html = preg_replace_callback(
+        '/\bEmail:\s*\((\d+)\)\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'Email: '.$chip('mail', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // Email-ID: <b>23</b> → Email: chip (Betreff as label when present; drop duplicate Betreff field)
+    $emailBetreff = '';
+    if(preg_match('/\bBetreff:\s*<b>(.*?)<\/b>/si', $source, $eb)) {
+        $emailBetreff = $plainLabel($eb[1]);
+    }
+    $emailIdLinked = false;
+    $html = preg_replace_callback(
+        '/\bEmail-ID:\s*<b>(\d+)<\/b>/si',
+        function ($m) use ($chip, $emailBetreff, &$emailIdLinked) {
+            $emailIdLinked = true;
+            $label = $emailBetreff !== '' ? $emailBetreff : ('#'.$m[1]);
+            return 'Email: '.$chip('mail', $m[1], $label);
+        },
+        $html
+    );
+    if($emailIdLinked && $emailBetreff !== '') {
+        $html = preg_replace('/,?\s*Betreff:\s*<b>.*?<\/b>/si', '', $html, 1);
+    }
+
+    // Eigentümer: (5) <b>Name</b>
+    $html = preg_replace_callback(
+        '/\bEigentümer:\s*\((\d+)\)\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'Eigentümer: '.$chip('user', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // Eigentümer: (5) PlainName &rArr;
+    $html = preg_replace_callback(
+        '/\bEigentümer:\s*\((\d+)\)\s+(?!<)([^,<]+?)(?=\s*&rArr;|\s*,|\s*$)/si',
+        function ($m) use ($chip) {
+            return 'Eigentümer: '.$chip('user', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // User: (5) PlainName  (change-log without <b> on old value)
+    $html = preg_replace_callback(
+        '/\bUser:\s*\((\d+)\)\s+(?!<)([^,<]+?)(?=\s*&rArr;|\s*,|\s*$)/si',
+        function ($m) use ($chip) {
+            return 'User: '.$chip('user', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    // Legacy Melde-Logs: User: <b>Name</b> (no id) — resolve via Melde-ID / unique name
+    $html = preg_replace_callback(
+        '/\bUser:\s*<b>(.*?)<\/b>/si',
+        function ($m) use ($chip, $plainLabel, $source) {
+            $label = $plainLabel($m[1]);
+            // Bold may contain "(id) Name" from change arrows
+            if(preg_match('/^\((\d+)\)\s*(.*)$/s', $label, $im)) {
+                $rest = trim($im[2]);
+                return 'User: '.$chip('user', $im[1], $rest !== '' ? $rest : $label);
+            }
+            $uid = logResolveUserIdFromMessage($source, $label);
+            if($uid > 0) {
+                return 'User: '.$chip('user', $uid, $label);
+            }
+            return $m[0];
+        },
+        $html
+    );
+
+    // Eigentümer: <b>(id) Name</b> (arrow target)
+    $html = preg_replace_callback(
+        '/\bEigentümer:\s*<b>\((\d+)\)\s*(.*?)<\/b>/si',
+        function ($m) use ($chip) {
+            return 'Eigentümer: '.$chip('user', $m[1], $m[2]);
+        },
+        $html
+    );
+
+    return $html;
+}
+
 function getPage($string, $groupId = '') {
     if($string == $_SESSION['page']) {
         echo $GLOBALS['optionsDB']['colorTitleBar'];

@@ -7,6 +7,10 @@ $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 };
 $name = isset($entry['name']) ? (string)$entry['name'] : '';
+$userId = isset($entry['userId']) ? (int)$entry['userId'] : 0;
+$nameHtml = ($userId > 0 && function_exists('entityOpenHtml'))
+    ? entityOpenHtml('user', $userId, $name)
+    : $h($name);
 $instrument = isset($entry['instrument']) ? (string)$entry['instrument'] : '';
 $regHex = '';
 if(!empty($entry['registerColor']) && function_exists('normalizeHexColor')) {
@@ -39,7 +43,7 @@ elseif($statusClass !== '') {
 ?>
 <div class="<?php echo $h($cls); ?>"<?php echo $style; ?>>
   <div class="melde-response-person-main">
-    <div class="melde-response-person-name"><?php echo $h($name); ?></div>
+    <div class="melde-response-person-name"><?php echo $nameHtml; ?></div>
 <?php if($instrument !== '') { ?>
     <div class="melde-response-person-instrument"><?php echo $h($instrument); ?></div>
 <?php } ?>

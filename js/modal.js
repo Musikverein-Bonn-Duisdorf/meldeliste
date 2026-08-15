@@ -59,13 +59,45 @@ document.addEventListener('keydown', function(e) {
 });
 
 /**
+ * MELD-167: Entity chips (.entity-open) open detail modals asynchronously.
+ * Markup carries data-entity-type / data-entity-id only — no inline modal HTML.
+ */
+function openEntityFromEl(el) {
+    if(!el) return false;
+    var type = el.getAttribute('data-entity-type') || '';
+    var id = parseInt(el.getAttribute('data-entity-id'), 10);
+    if(!type || !(id > 0)) return false;
+    if(type === 'inventory') type = 'inventar';
+    if(type !== 'user' && type !== 'termin' && type !== 'inventar' && type !== 'mail') return false;
+    openModal(type, id);
+    return true;
+}
+
+document.addEventListener('click', function(e) {
+    var ent = e.target.closest ? e.target.closest('.entity-open') : null;
+    if(!ent) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openEntityFromEl(ent);
+}, true);
+
+document.addEventListener('keydown', function(e) {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    var ent = e.target.closest ? e.target.closest('.entity-open') : null;
+    if(!ent || e.target !== ent) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openEntityFromEl(ent);
+}, true);
+
+/**
  * Melde-Zeile (Hauptseite): Klick auf die Karte öffnet Termin-Modal.
  * Buttons/Formulare mit [data-melde-stop] bleiben ausgenommen.
  */
 document.addEventListener('click', function(e) {
     var row = e.target.closest ? e.target.closest('.melde-row[data-termin-id]') : null;
     if(!row) return;
-    if(e.target.closest && e.target.closest('[data-melde-stop], button, a, input, select, textarea, label, form')) {
+    if(e.target.closest && e.target.closest('[data-melde-stop], .entity-open, button, a, input, select, textarea, label, form')) {
         return;
     }
     var id = parseInt(row.getAttribute('data-termin-id'), 10);

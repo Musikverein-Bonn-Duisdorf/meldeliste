@@ -710,7 +710,9 @@ class MailJob
                 $u->load_by_id($byId);
                 $userNameCache[$byId] = $u->Index ? $u->getName() : ('User '.$byId);
             }
-            $byName = htmlspecialchars($userNameCache[$byId], ENT_QUOTES, 'UTF-8');
+            $byName = function_exists('entityOpenHtml')
+                ? entityOpenHtml('user', $byId, $userNameCache[$byId])
+                : htmlspecialchars($userNameCache[$byId], ENT_QUOTES, 'UTF-8');
         }
         else {
             $byName = 'System';
@@ -811,6 +813,24 @@ class MailJob
             $list[] = $j;
         }
         return $list;
+    }
+
+    /**
+     * Compact email detail for ajaxModalHost (MELD-167 / log chips).
+     */
+    public function getModalHtml() {
+        $byId = (int)$this->CreatedBy;
+        $byName = 'System';
+        if($byId > 0) {
+            $byUser = new User;
+            $byUser->load_by_id($byId);
+            $byName = $byUser->Index ? $byUser->getName() : ('User '.$byId);
+        }
+        return render('mail/modal', array(
+            'job' => $this,
+            'byId' => $byId,
+            'byName' => $byName,
+        ));
     }
 
     public function statusLabel() {

@@ -239,8 +239,13 @@ class Log
         echo '</div>';
         echo '<div class="log-rail" aria-hidden="true"></div>';
         echo '<div class="log-main">';
-        echo '<div class="log-user">'.htmlspecialchars($userLabel, ENT_QUOTES, 'UTF-8').'</div>';
-        echo '<div class="log-message">'.$this->Message.'</div>';
+        if((int)$this->User > 0 && function_exists('entityOpenHtml')) {
+            echo '<div class="log-user">'.entityOpenHtml('user', (int)$this->User, $userLabel).'</div>';
+        }
+        else {
+            echo '<div class="log-user">'.htmlspecialchars($userLabel, ENT_QUOTES, 'UTF-8').'</div>';
+        }
+        echo '<div class="log-message">'.logMessageLinkEntities((string)$this->Message).'</div>';
         echo '</div>';
         echo '</div>';
     }

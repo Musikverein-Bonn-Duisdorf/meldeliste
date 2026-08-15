@@ -791,18 +791,21 @@ class AudienceSpec
                 $label = $u->getName();
                 if((int)$u->Active === 0) {
                     $label = 'Gast: '.$label;
-                    $chips[] = array('type' => 'guestMusician', 'label' => $label);
+                    $chips[] = array('type' => 'guestMusician', 'label' => $label, 'entityType' => 'user', 'entityId' => (int)$u->Index);
                 }
                 else {
-                    $chips[] = array('type' => 'user', 'label' => $label);
+                    $chips[] = array('type' => 'user', 'label' => $label, 'entityType' => 'user', 'entityId' => (int)$u->Index);
                 }
             }
         }
         if($allowTermine) {
             foreach($norm['termine'] as $tid) {
+                $tid = (int)$tid;
                 $chips[] = array(
                     'type' => 'termin',
-                    'label' => self::terminParticipantLabel((int)$tid),
+                    'label' => self::terminParticipantLabel($tid),
+                    'entityType' => 'termin',
+                    'entityId' => $tid,
                 );
             }
         }
@@ -826,9 +829,18 @@ class AudienceSpec
         $aria = isset($opts['ariaLabel']) ? (string)$opts['ariaLabel'] : 'Auswahl';
         $html = '<div class="mail-recipient-chips" aria-label="'.htmlspecialchars($aria, ENT_QUOTES, 'UTF-8').'">';
         foreach($chips as $chip) {
-            $type = htmlspecialchars((string)$chip['type'], ENT_QUOTES, 'UTF-8');
-            $label = htmlspecialchars((string)$chip['label'], ENT_QUOTES, 'UTF-8');
-            $html .= '<span class="mail-recipient-chip mail-recipient-chip--'.$type.'">'.$label.'</span>';
+            $type = (string)$chip['type'];
+            $label = (string)$chip['label'];
+            $entityType = isset($chip['entityType']) ? (string)$chip['entityType'] : '';
+            $entityId = isset($chip['entityId']) ? (int)$chip['entityId'] : 0;
+            if($entityId > 0 && $entityType !== '' && function_exists('entityOpenHtml')) {
+                $html .= entityOpenHtml($entityType, $entityId, $label, $type);
+            }
+            else {
+                $html .= '<span class="mail-recipient-chip mail-recipient-chip--'
+                    .htmlspecialchars($type, ENT_QUOTES, 'UTF-8').'">'
+                    .htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</span>';
+            }
         }
         $html .= '</div>';
         return $html;

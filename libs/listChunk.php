@@ -732,8 +732,11 @@ function mailOutboxRenderListItemHtml(array $row, &$userNameCache = null) {
     $id = (int)$row['Index'];
     $unread = empty($row['ReadAt']);
     $when = htmlspecialchars(mailListFormatDate(isset($row['Created']) ? $row['Created'] : ''), ENT_QUOTES, 'UTF-8');
-    $senderName = mailListResolveUserName(isset($row['SenderId']) ? $row['SenderId'] : 0, $userNameCache);
-    $sender = htmlspecialchars($senderName, ENT_QUOTES, 'UTF-8');
+    $senderId = isset($row['SenderId']) ? (int)$row['SenderId'] : 0;
+    $senderName = mailListResolveUserName($senderId, $userNameCache);
+    $sender = ($senderId > 0 && function_exists('entityOpenHtml'))
+        ? entityOpenHtml('user', $senderId, $senderName)
+        : htmlspecialchars($senderName, ENT_QUOTES, 'UTF-8');
     $subject = (isset($row['Subject']) && $row['Subject'] !== '' && $row['Subject'] !== null)
         ? htmlspecialchars((string)$row['Subject'], ENT_QUOTES, 'UTF-8')
         : '<em>(ohne Betreff)</em>';

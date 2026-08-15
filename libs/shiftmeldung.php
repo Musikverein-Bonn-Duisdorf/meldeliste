@@ -41,7 +41,7 @@ class Shiftmeldung
         $s->load_by_id($this->Shift);
         $t = new Termin;
         $t->load_by_id($s->Termin);
-        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b>, Schicht/Aufgabe: (%d) <b>%s %s</b> %s, User: <b>%s</b>",
+        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b>, Schicht/Aufgabe: (%d) <b>%s %s</b> %s, User: (%d) <b>%s</b>",
         $this->Index,
         $t->Index,
         $t->Name,
@@ -49,6 +49,7 @@ class Shiftmeldung
         $s->Name,
                        medDate($t->Datum),
         Shift::formatTimeLog($s->Start),
+        (int)$this->User,
         $u->getName()
         );
 
@@ -63,7 +64,7 @@ class Shiftmeldung
         $s->load_by_id($this->Shift);
         $t = new Termin;
         $t->load_by_id($s->Termin);
-        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b>, Schicht/Aufgabe: (%d) <b>%s %s</b> %s, User: <b>%s</b>, Wert: <b>%s</b>",
+        $str = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b>, Schicht/Aufgabe: (%d) <b>%s %s</b> %s, User: (%d) <b>%s</b>, Wert: <b>%s</b>",
         $this->Index,
         $t->Index,
         $t->Name,
@@ -71,6 +72,7 @@ class Shiftmeldung
         $s->Name,
         medDate($t->Datum),
         Shift::formatTimeLog($s->Start),
+        (int)$this->User,
         $u->getName(),
         meldeSymbol($this->Wert)
         );
