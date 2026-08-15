@@ -1,8 +1,9 @@
 <?php
 /**
- * Upload / download scanned loan or return contracts (MELD-181).
+ * Upload / download / delete scanned loan or return contracts (MELD-181 / MELD-188).
  * GET: loan, kind — download stored scan
  * POST: loan, kind, action=upload, scan — store scan
+ * POST: loan, kind, action=deleteScan — clear scan
  */
 require_once __DIR__.'/libs/sessionBootstrap.php';
 meldeConfigureSession();
@@ -36,6 +37,13 @@ if($isPost) {
         denyAccess();
     }
     $action = isset($_POST['action']) ? (string)$_POST['action'] : '';
+    if($action === 'deleteScan') {
+        if(!LoanForm::deleteScan($loan, $kind)) {
+            denyAccess('Scan konnte nicht gelöscht werden.');
+        }
+        header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind));
+        exit;
+    }
     if($action !== 'upload' || !isset($_FILES['scan'])) {
         denyAccess('Upload fehlgeschlagen.');
     }

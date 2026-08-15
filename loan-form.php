@@ -84,8 +84,9 @@ $showMemberNr = isset($ctx['mitgliedsnummer']) && (string)$ctx['mitgliedsnummer'
 $editMemberNr = false;
 $showAddress = !empty($ctx['needAddressField']);
 $editAddress = $canEdit && !empty($ctx['needAddressEditField']);
+$editNotes = $canEdit && !empty($ctx['needContractNotesField']);
 $editChecklist = $canEdit && $kind === LoanForm::KIND_RETURN;
-$hasEditableFields = $editMemberNr || $editAddress || $editChecklist;
+$hasEditableFields = $editMemberNr || $editAddress || $editNotes || $editChecklist;
 $checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
     ? $ctx['checklist']
     : LoanForm::defaultChecklist();
@@ -93,6 +94,7 @@ $checkReturned = !empty($checklist['returned']);
 $checkDeposit = !empty($checklist['depositReturned']);
 $checkDeductions = isset($checklist['deductions']) ? (string)$checklist['deductions'] : '';
 $checkNotes = isset($checklist['notes']) ? (string)$checklist['notes'] : '';
+$contractNotes = isset($ctx['contractNotes']) ? (string)$ctx['contractNotes'] : '';
 
 $scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
 
@@ -117,7 +119,17 @@ header('Content-Type: text/html; charset=utf-8');
 <?php if($canEdit || $hasScan) { ?>
     <div class="loan-form-toolbar-group loan-form-toolbar-group--scan">
 <?php   if($hasScan) { ?>
+      <div class="loan-form-scan-pair">
       <a class="loan-form-btn loan-form-btn--scan" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
+<?php     if($canEdit) { ?>
+      <form class="loan-form-upload" method="POST" action="loan-contract.php" onsubmit="return confirm('Scan löschen? Die Leihe bleibt erhalten.');">
+        <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
+        <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
+        <input type="hidden" name="action" value="deleteScan">
+        <button type="submit" class="loan-form-btn" title="Scan löschen" aria-label="Scan löschen">Löschen</button>
+      </form>
+<?php     } ?>
+      </div>
 <?php   } ?>
 <?php   if($canEdit) { ?>
       <form class="loan-form-upload" method="POST" action="loan-contract.php" enctype="multipart/form-data">
@@ -189,8 +201,12 @@ header('Content-Type: text/html; charset=utf-8');
           <div class="loan-form-field-row loan-form-field-row--stack">
             <span class="loan-form-field-label">Adresse</span>
 <?php   if($editAddress) { ?>
-            <textarea id="loan-adresse" class="loan-form-input loan-form-input--address no-print" name="BorrowerAddress" rows="2" aria-label="Adresse"></textarea>
+            <textarea id="loan-adresse" class="loan-form-input loan-form-input--address no-print" name="BorrowerAddress" rows="2" aria-label="Adresse"><?php echo $h($ctx['borrowerAddress']); ?></textarea>
+<?php     if($ctx['borrowerAddress'] !== '') { ?>
+            <p class="loan-form-address-value loan-form-print-only"><?php echo nl2br($h($ctx['borrowerAddress'])); ?></p>
+<?php     } else { ?>
             <span class="loan-form-blank loan-form-blank--address loan-form-print-only" aria-hidden="true"></span>
+<?php     } ?>
 <?php   } elseif($ctx['borrowerAddress'] !== '') { ?>
             <p class="loan-form-address-value"><?php echo nl2br($h($ctx['borrowerAddress'])); ?></p>
 <?php   } else { ?>
@@ -247,6 +263,25 @@ header('Content-Type: text/html; charset=utf-8');
           <li><?php echo $clause; ?></li>
 <?php } ?>
         </ol>
+      </section>
+
+      <section class="loan-form-section loan-form-panel">
+        <h2>Zusätzliche Vereinbarungen</h2>
+        <div class="loan-form-field-row loan-form-field-row--stack">
+          <span class="loan-form-field-label">Bemerkungen</span>
+<?php if($editNotes) { ?>
+          <textarea id="loan-contract-notes" class="loan-form-input loan-form-input--address no-print" name="ContractNotes" rows="4" aria-label="Bemerkungen"><?php echo $h($contractNotes); ?></textarea>
+<?php   if($contractNotes !== '') { ?>
+          <p class="loan-form-address-value loan-form-print-only"><?php echo nl2br($h($contractNotes)); ?></p>
+<?php   } else { ?>
+          <span class="loan-form-blank loan-form-blank--address loan-form-print-only" aria-hidden="true"></span>
+<?php   } ?>
+<?php } elseif($contractNotes !== '') { ?>
+          <p class="loan-form-address-value"><?php echo nl2br($h($contractNotes)); ?></p>
+<?php } else { ?>
+          <span class="loan-form-blank loan-form-blank--address"></span>
+<?php } ?>
+        </div>
       </section>
 
 <?php if($kind === LoanForm::KIND_RETURN) { ?>
