@@ -46,12 +46,13 @@ class Meldung
         $t = new Termin;
         $t->load_by_id($this->Termin);
 		$str = "";
-        $strGeneral = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>",
+        $strGeneral = sprintf("Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: (%d) <b>%s</b>",
         $this->Index,
         $this->Termin,
         $t->Name,
         medDate($t->Datum),
         sql2timeRaw($t->Uhrzeit),
+        (int)$this->User,
         $u->getName()
         );
         if($this->Wert != $old->Wert) $str.=meldeSymbol($this->Wert)." (vorher:".meldeWert($old->Wert)."), ";
@@ -87,13 +88,14 @@ class Meldung
         if($instrument == 0) $instrument = $u->Instrument;
         $instr = new Instrument;
         $instr->load_by_id($instrument);
-        $str = sprintf("%s Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: <b>%s</b>, Instrument: <b>%s</b>",
+        $str = sprintf("%s Melde-ID: %d, Termin: (%d) <b>%s</b> %s %s, User: (%d) <b>%s</b>, Instrument: <b>%s</b>",
         meldeSymbol($this->Wert),
         $this->Index,
         $this->Termin,
         $t->Name,
         medDate($t->Datum),
         sql2timeRaw($t->Uhrzeit),
+        (int)$this->User,
         $u->getName(),
         $instr->Name
         );

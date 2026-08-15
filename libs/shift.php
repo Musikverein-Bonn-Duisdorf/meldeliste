@@ -168,7 +168,7 @@ class Shift
     public function getMeldungenUser($val) {
         $user = array();
         $sql = sprintf(
-            'SELECT u.`Vorname`, u.`Nachname`
+            'SELECT u.`Index`, u.`Vorname`, u.`Nachname`
              FROM `%sSchichtmeldung` m
              INNER JOIN `%sUser` u ON m.`User` = u.`Index`
              WHERE m.`Shift` = %d AND m.`Wert` = %d
@@ -182,7 +182,10 @@ class Shift
         sqlerror();
         if($dbr) {
             while($row = mysqli_fetch_array($dbr)) {
-                $user[] = trim($row['Vorname'].' '.$row['Nachname']);
+                $user[] = array(
+                    'userId' => (int)$row['Index'],
+                    'name' => trim($row['Vorname'].' '.$row['Nachname']),
+                );
             }
         }
         return $user;

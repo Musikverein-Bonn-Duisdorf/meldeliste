@@ -91,7 +91,8 @@ class Termin
         $old = new Termin;
         $old->load_by_id($this->Index);
         
-        $str = sprintf("Termin-ID: %d, <b>%s</b>",
+        $str = sprintf("Termin-ID: %d, Termin: (%d) <b>%s</b>",
+        $this->Index,
         $this->Index,
         $this->Name
         );
@@ -154,9 +155,9 @@ class Termin
             $this->vName = $row ? $row['Name'] : '';
         }
         $parts = array();
-        $parts[] = sprintf("Termin-ID: <b>%d</b>", $this->Index);
+        $parts[] = sprintf('Termin-ID: %d', (int)$this->Index);
         if($this->Name !== null && $this->Name !== '') {
-            $parts[] = sprintf("Name: <b>%s</b>", $this->Name);
+            $parts[] = sprintf('Termin: (%d) <b>%s</b>', (int)$this->Index, $this->Name);
         }
         $dateStr = $this->getDate();
         if($dateStr !== null && $dateStr !== '') {
@@ -2059,18 +2060,28 @@ class Termin
     }
 
     /**
-     * @param array<int, string> $names
+     * @param array<int, array{userId?:int,name:string}|string> $names
      */
     private function renderShiftResponseNames(array $names, $colorClass) {
         if(!count($names)) {
             return '';
         }
         $html = '';
-        foreach($names as $name) {
+        foreach($names as $item) {
+            $name = '';
+            $userId = 0;
+            if(is_array($item)) {
+                $name = isset($item['name']) ? (string)$item['name'] : '';
+                $userId = isset($item['userId']) ? (int)$item['userId'] : 0;
+            }
+            else {
+                $name = (string)$item;
+            }
             $html .= render('termin/response_line', array(
                 'entry' => array(
                     'colorClass' => $colorClass,
-                    'name' => (string)$name,
+                    'name' => $name,
+                    'userId' => $userId,
                     'instrument' => '',
                     'children' => null,
                     'guests' => null,
@@ -2340,6 +2351,7 @@ ORDER BY `Nachname`, `Vorname`;",
             'statusClass' => isset($statusColors[$wert]) ? $statusColors[$wert] : '',
             'registerColor' => $regHex,
             'name' => $name,
+            'userId' => (int)$userId > 0 ? (int)$userId : 0,
             'instrument' => $instrument,
             'children' => null,
             'guests' => null,

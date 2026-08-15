@@ -125,6 +125,23 @@ case 'inventory': // alias
     }
     break;
 
+case 'mail':
+    if(!requirePermission('perm_sendEmail')) {
+        http_response_code(403);
+        echo '<div class="w3-container w3-padding"><p>Keine Berechtigung.</p><button class="w3-button" onclick="closeModal()">Schließen</button></div>';
+        exit;
+    }
+    MailJob::ensureSchema();
+    $job = new MailJob;
+    $job->load_by_id($id);
+    if(!(int)$job->Index) {
+        http_response_code(404);
+        echo '<div class="w3-container w3-padding"><p>Email nicht gefunden.</p><button class="w3-button" onclick="closeModal()">Schließen</button></div>';
+        exit;
+    }
+    echo $job->getModalHtml();
+    break;
+
 default:
     http_response_code(400);
     echo '<div class="w3-container w3-padding"><p>Unbekannter Modal-Typ.</p></div>';

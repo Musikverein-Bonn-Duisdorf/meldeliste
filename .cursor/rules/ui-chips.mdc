@@ -1,0 +1,42 @@
+---
+description: Chip-Darstellung (mail-recipient-chip) und klickbare Entities
+alwaysApply: true
+---
+
+# UI-Chips
+
+## Basis (MELD-60)
+
+Wiederverwendetes Chip-System in `styles/custom.css`:
+
+- Container: `mail-recipient-chips` (flex, wrap, gap)
+- Chip: `mail-recipient-chip` (+ optional `profile-perm-tile` teilt Basisstil)
+- Typ-Modifier (Farben):
+  - `--user` — Person
+  - `--termin` — Termin
+  - `--namedGroup` / `--mailGroup` — Gruppe
+  - `--register` — Register
+  - `--instrument` — Instrument / Inventar-Bezug
+  - `--insured` / `--loaned` — Inventar-Status
+  - `--guestMusician` / `--member` / `--nomember` / `--audience` / `--group`
+
+Chips für Labels und Auswahl (Mail-Verteiler, Profil-Gruppen, Inventar-Status). Keine neuen Chip-Familien ohne Not — bestehende Modifier nutzen.
+
+## Klickbare Entities (MELD-167)
+
+Wo ein verwaltetes Objekt referenziert wird und ein Detail-Modal existiert:
+
+1. PHP: `entityOpenHtml($type, $id, $label)` (`libs/helpers.php`)
+2. Markup: `mail-recipient-chip mail-recipient-chip--{mod} entity-open` + `data-entity-type` / `data-entity-id`
+3. Mapping: `user`→`--user`, `termin`→`--termin`, `inventar`→`--instrument`, `mail`→`--mailGroup`
+4. Klick: Event-Delegation (capture) in `js/modal.js` auf `.entity-open` → `openModal` (async XHR + Cache)
+5. Optionaler 4. Parameter: Chip-Modifier-Override (z. B. `guestMusician` bei User-Modal)
+6. Kein Modal-HTML in Listen/Log-Chunks; kein Prefetch beim Rendern; kein Inline-`onclick` pro Zeile
+
+## Log-Payload
+
+Beim Anzeigen: `logMessageLinkEntities()` wandelt bekannte Fragmente (`Termin: (id) <b>…</b>`, `User: (id) …`, `User: <b>Name</b>` per Melde-ID/Namensauflösung, `Inventory: (id) <b>…</b>`, `Email-ID: <b>N</b>` / `Email: (id) <b>…</b>`) in Entity-Chips um — nur Anzeige, Speicherung unverändert. Neue Melde-Logs schreiben `User: (id) <b>…</b>`.
+
+- Unterstrichene Textlinks statt Chips für Entity-Referenzen
+- Modal-Inhalt in Listenzeilen einbetten
+- Neue Chip-Farbfamilien erfinden, wenn ein Modifier passt

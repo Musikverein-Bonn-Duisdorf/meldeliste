@@ -147,8 +147,14 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
         <label class="profile-label" for="inv-owner">Eigentümer</label>
 <?php if($canEdit) { ?>
         <select id="inv-owner" class="w3-select w3-border w3-input profile-control <?php echo $h($inputBg); ?>" name="Owner"><?php echo UserOptionAll((int)$inv->Owner); ?></select>
-<?php } else { ?>
-        <div class="profile-value"><?php echo $display(getOwner((int)$inv->Owner)); ?></div>
+<?php } else {
+        $ownerId = (int)$inv->Owner;
+        $ownerLabel = getOwner($ownerId);
+        $ownerHtml = ($ownerId > 0 && function_exists('entityOpenHtml'))
+            ? entityOpenHtml('user', $ownerId, $ownerLabel)
+            : $display($ownerLabel);
+?>
+        <div class="profile-value"><?php echo $ownerHtml; ?></div>
 <?php } ?>
       </div>
       <div class="profile-field">

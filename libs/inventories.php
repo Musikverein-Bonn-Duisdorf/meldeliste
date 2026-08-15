@@ -104,7 +104,8 @@ class Inventories
         $family = $this->getInstrumentName();
         if($family !== '') $typeName = $family;
 
-        $str = sprintf('Inventory-ID: %d, <b>%s</b> %s',
+        $str = sprintf('Inventory-ID: %d, Inventory: (%d) <b>%s</b> %s',
+            (int)$this->Index,
             (int)$this->Index,
             $typeName,
             RegNumber::displayInventory($this->Inventory, $this->RegNumber)
@@ -122,7 +123,10 @@ class Inventories
         if($this->SerialNr != $old->SerialNr) $str .= ', Seriennummer: '.$old->SerialNr.' &rArr; <b>'.$this->SerialNr.'</b>';
         if($this->PurchaseDate != $old->PurchaseDate) $str .= ', Kaufdatum: '.germanDate($old->PurchaseDate,0).' &rArr; <b>'.germanDate($this->PurchaseDate,0).'</b>';
         if($this->PurchasePrize != $old->PurchasePrize) $str .= ', Kaufpreis: '.mkPrize($old->PurchasePrize).' &rArr; <b>'.mkPrize($this->PurchasePrize).'</b>';
-        if($this->Owner != $old->Owner) $str .= ', Eigentümer: '.getOwner((int)$old->Owner).' &rArr; <b>'.getOwner((int)$this->Owner).'</b>';
+        if($this->Owner != $old->Owner) {
+            $str .= ', Eigentümer: ('.(int)$old->Owner.') '.getOwner((int)$old->Owner)
+                .' &rArr; <b>('.((int)$this->Owner).') '.getOwner((int)$this->Owner).'</b>';
+        }
         if(boolsDiffer($this->Insurance, $old->Insurance)) $str .= ', Versichert: '.bool2string($old->Insurance).' &rArr; <b>'.bool2string($this->Insurance).'</b>';
         if($this->Comment != $old->Comment) $str .= ', Kommentar: '.$old->Comment.' &rArr; <b>'.$this->Comment.'</b>';
         return $str;
@@ -142,7 +146,7 @@ class Inventories
 
         $parts = array();
         $parts[] = sprintf('Inventory-ID: %d', (int)$this->Index);
-        $parts[] = logPart('Inventory', $typeName);
+        $parts[] = sprintf('Inventory: (%d) <b>%s</b>', (int)$this->Index, $typeName);
         $parts[] = logPart('Inventarnummer', RegNumber::displayInventory($this->Inventory, $this->RegNumber));
         logAppendFilled($parts, 'Beschreibung', $this->Description, (string)$this->Description);
         logAppendFilled($parts, 'Hersteller', $this->Vendor, (string)$this->Vendor);
@@ -153,7 +157,7 @@ class Inventories
         $prize = mkPrize($this->PurchasePrize);
         logAppendFilled($parts, 'Kaufpreis', $prize, (string)$prize);
         if((int)$this->Owner > 0) {
-            $parts[] = logPart('Eigentümer', getOwner((int)$this->Owner));
+            $parts[] = sprintf('Eigentümer: (%d) <b>%s</b>', (int)$this->Owner, getOwner((int)$this->Owner));
         }
         logAppendTrue($parts, 'Versichert', $this->Insurance);
         logAppendFilled($parts, 'Kommentar', $this->Comment, (string)$this->Comment);
@@ -312,10 +316,18 @@ class Inventories
         $showAdminCols = requirePermission('perm_showInventories');
         $insured = !empty($row['Insurance']) || !empty($this->Insurance);
         $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
+        $ownerId = (int)$row['Owner'];
+        $ownerName = trim((string)getOwner($ownerId));
+        $loanUserId = 0;
         $loanShort = (string)($this->getActiveLoanNameShort() ?? '');
         $loanFull = (string)($this->getActiveLoanName() ?? '');
         $loanDate = (string)($this->getActiveLoanDate() ?? '');
-        $ownerName = trim((string)getOwner((int)$row['Owner']));
+        $activeLoanId = $this->getActiveLoan();
+        if($activeLoanId) {
+            $loanForUser = new InventoriesLoan;
+            $loanForUser->load_by_id($activeLoanId);
+            $loanUserId = (int)$loanForUser->User;
+        }
         $regDisplay = RegNumber::displayInventory($row['Inventory'], $row['RegNumber']);
         $desc = trim((string)$row['Description']);
         $comment = trim((string)$row['Comment']);
@@ -347,13 +359,8 @@ class Inventories
         }
         $viewerId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
         $loanedToViewer = false;
-        if($viewerId > 0 && (int)$this->Owner !== $viewerId) {
-            $activeLoanId = $this->getActiveLoan();
-            if($activeLoanId) {
-                $activeLoan = new InventoriesLoan;
-                $activeLoan->load_by_id($activeLoanId);
-                $loanedToViewer = ((int)$activeLoan->User === $viewerId);
-            }
+        if($viewerId > 0 && $ownerId !== $viewerId && $loanUserId === $viewerId) {
+            $loanedToViewer = true;
         }
         if($loanedToViewer) {
             $classes[] = 'inv-row--loaned';
@@ -411,7 +418,10 @@ class Inventories
         }
         $meta = array();
         if($ownerName !== '') {
-            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Eigentümer</span> '.$h($ownerName).'</span>';
+            $ownerHtml = ($ownerId > 0 && function_exists('entityOpenHtml'))
+                ? entityOpenHtml('user', $ownerId, $ownerName)
+                : $h($ownerName);
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Eigentümer</span> '.$ownerHtml.'</span>';
         }
         if($comment !== '') {
             $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Kommentar</span> '.$h($comment).'</span>';
@@ -420,15 +430,20 @@ class Inventories
             $loanLabel = $loanDate !== '' ? 'seit '.$h($loanDate) : 'aktiv';
             $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.$loanLabel.'</span>';
         }
-        elseif($loanShort !== '' || $loanDate !== '') {
+        elseif($loanShort !== '' || $loanDate !== '' || $loanFull !== '') {
             $loanBits = array();
-            if($loanShort !== '') {
-                $loanBits[] = $h($loanShort);
+            $loanName = $loanShort !== '' ? $loanShort : $loanFull;
+            if($loanName !== '') {
+                $loanBits[] = ($loanUserId > 0 && function_exists('entityOpenHtml'))
+                    ? entityOpenHtml('user', $loanUserId, $loanName)
+                    : $h($loanName);
             }
             if($loanDate !== '') {
                 $loanBits[] = $h($loanDate);
             }
-            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.implode(' · ', $loanBits).'</span>';
+            if($loanBits) {
+                $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.implode(' · ', $loanBits).'</span>';
+            }
         }
         if($showAdminCols) {
             if($purchaseDate !== '') {
@@ -579,7 +594,11 @@ class Inventories
         $info = new div;
         $info->indent = $indent + 2;
         $info->col(7, 12, 12);
-        $name = htmlspecialchars((string)$L->getName(), ENT_QUOTES, 'UTF-8');
+        $name = (string)$L->getName();
+        $loanUserId = (int)$L->User;
+        $nameHtml = ($loanUserId > 0 && function_exists('entityOpenHtml'))
+            ? entityOpenHtml('user', $loanUserId, $name)
+            : htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
         $from = htmlspecialchars((string)germanDate($L->StartDate, 0), ENT_QUOTES, 'UTF-8');
         $until = $active
             ? '<span class="w3-tag w3-teal w3-round">offen</span>'
@@ -591,7 +610,7 @@ class Inventories
         if($hasLeihgebuehr) {
             $meta .= ' · Leihgebühr '.htmlspecialchars(LoanForm::formatAmount($L->Leihgebuehr), ENT_QUOTES, 'UTF-8');
         }
-        $info->body = '<div><b>'.$name.'</b></div>'
+        $info->body = '<div><b>'.$nameHtml.'</b></div>'
             .'<div class="w3-small" style="margin-top:4px;">'.$meta.'</div>';
         $str .= $info->print();
 

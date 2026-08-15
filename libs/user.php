@@ -101,7 +101,8 @@ class User
         $old->load_by_id($this->Index);
 
         $header = sprintf(
-            'User-ID: %d <b>%s %s</b>',
+            'User-ID: %d, User: (%d) <b>%s %s</b>',
+            (int)$this->Index,
             (int)$this->Index,
             htmlspecialchars((string)$this->Vorname, ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string)$this->Nachname, ENT_QUOTES, 'UTF-8')
@@ -201,6 +202,14 @@ class User
         }
         $parts = array();
         $parts[] = sprintf('User-ID: %d', (int)$this->Index);
+        $fullName = trim((string)$this->Vorname.' '.(string)$this->Nachname);
+        if($fullName !== '') {
+            $parts[] = sprintf(
+                'User: (%d) <b>%s</b>',
+                (int)$this->Index,
+                htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8')
+            );
+        }
         logAppendFilled($parts, 'Vorname', $this->Vorname, (string)$this->Vorname);
         logAppendFilled($parts, 'Nachname', $this->Nachname, (string)$this->Nachname);
         logAppendFilled($parts, 'RefID', $this->RefID, (string)$this->RefID);
