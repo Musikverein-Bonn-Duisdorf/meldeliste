@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-15-e2d0a (2026-08-15)
+
+- MELD-184: grauen Abstand unter Titlebar/Nav auf Smartphone entfernen
+- MELD-184: dicker grauer Balken auf Smartphone
+
 ## 2026-08-15-eca62 (2026-08-15)
 
 - MELD-190: Eigentum/Leihen als Inventar-Chips im User-Modal und Musiker-Formular
