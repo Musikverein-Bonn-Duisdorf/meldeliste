@@ -626,7 +626,7 @@ class Inventories
         if($canEdit) {
             $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--danger">';
             $str .= '<form method="POST" action="" class="inventory-loan-delete" '
-                .'onsubmit="return confirm(\'Diese Leih-Information wirklich löschen?\');">'
+                .'data-confirm="Diese Leih-Information wirklich löschen?" data-confirm-ok="Löschen">'
                 .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
                 .'<button type="submit" name="deleteLoan" value="1" class="inventory-loan-btn inventory-loan-btn--danger '.$btnDelete.'">Löschen</button>'
                 .'</form>';

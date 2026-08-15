@@ -617,7 +617,7 @@ function mailOutboxRenderListItemHtml(array $row, &$userNameCache = null) {
     $html .= '<div class="mail-list-status">'.$neu.$mailFail.'</div>';
     $html .= '<div class="mail-list-actions">';
     $html .= '<a class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnEdit'].'" href="meine-mails.php?id='.$id.'">Anzeigen</a>';
-    $html .= '<form method="post" action="meine-mails.php" onsubmit="return confirm(\'Nachricht ausblenden?\');">';
+    $html .= '<form method="post" action="meine-mails.php" data-confirm="Nachricht ausblenden?" data-confirm-ok="Ausblenden">';
     $html .= '<input type="hidden" name="id" value="'.$id.'" />';
     $html .= '<button type="submit" name="delete" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorBtnNo'].'">Ausblenden</button>';
     $html .= '</form>';

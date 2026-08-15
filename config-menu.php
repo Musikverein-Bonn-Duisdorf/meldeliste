@@ -97,7 +97,9 @@ function savePara(Parameter, Value, reload) {
 	        if(xmlhttp.status >= 200 && xmlhttp.status < 300 && xmlhttp.responseText.indexOf('ok') !== -1) {
 	            window.location.reload();
 	        } else {
-	            alert('Farbschema konnte nicht übernommen werden: ' + xmlhttp.responseText);
+	            if(typeof window.appAlert === 'function') {
+	                window.appAlert('Farbschema konnte nicht übernommen werden: ' + xmlhttp.responseText, { title: 'Farbschema' });
+	            }
 	        }
 	    }
 	};
@@ -129,22 +131,33 @@ function renameColorScheme(name) {
 	xmlhttp.send(body);
 }
 function resetColorScheme() {
-    if(!confirm('Aktives Farbschema auf Werkseinstellung zurücksetzen?')) return;
-    if (window.XMLHttpRequest) {
-	    xmlhttp=new XMLHttpRequest();
-	}
-	else {
-	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	xmlhttp.onreadystatechange = function() {
-	    if(xmlhttp.readyState === 4) {
-	        window.location.reload();
-	    }
-	};
-	var body = "cmd=schemeReset";
-	xmlhttp.open("POST", "savePara.php", true);
-	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	xmlhttp.send(body);
+    var run = function() {
+        if (window.XMLHttpRequest) {
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState === 4) {
+                window.location.reload();
+            }
+        };
+        var body = "cmd=schemeReset";
+        xmlhttp.open("POST", "savePara.php", true);
+        xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xmlhttp.send(body);
+    };
+    if(typeof window.appConfirm === 'function') {
+        window.appConfirm('Aktives Farbschema auf Werkseinstellung zurücksetzen?', {
+            title: 'Farbschema',
+            okLabel: 'Zurücksetzen'
+        }).then(function(ok) {
+            if(ok) run();
+        });
+        return;
+    }
+    run();
 }
 </script>
 <?php adminListPageBegin('System', 'globale Einstellungen', array('permKey' => 'perm_editConfig')); ?>

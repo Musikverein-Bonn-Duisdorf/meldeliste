@@ -104,7 +104,7 @@ while($row = mysqli_fetch_array($dbr)) {
     <div class="w3-col l3 m3 s12">
       <button class="w3-button w3-blue" type="submit" name="update" value="1">Speichern</button>
       <?php if($t->canDelete()) { ?>
-      <button class="w3-button w3-red" type="submit" name="delete" value="1" onclick="return confirm('Typ wirklich löschen?');">Löschen</button>
+      <button class="w3-button w3-red" type="submit" name="delete" value="1" data-confirm="Typ wirklich löschen?" data-confirm-ok="Löschen">Löschen</button>
       <?php } ?>
     </div>
   </form>
