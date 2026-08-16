@@ -127,7 +127,7 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="loan-form-toolbar-group loan-form-toolbar-group--scan">
 <?php   if($hasScan) { ?>
       <div class="loan-form-scan-pair">
-      <a class="loan-form-btn loan-form-btn--scan" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
+      <a class="loan-form-btn loan-form-btn--scan" target="_blank" rel="noopener" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
 <?php     if($canEdit) { ?>
       <form class="loan-form-upload" method="POST" action="loan-contract.php" onsubmit="return confirm('Scan löschen? Die Leihe bleibt erhalten.');">
         <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
