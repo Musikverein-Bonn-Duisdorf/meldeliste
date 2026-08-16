@@ -728,6 +728,8 @@ function entityOpenHtml($type, $id, $label, $chipMod = '') {
         'inventar' => 'instrument',
         'mail' => 'mailGroup',
         'shift' => 'termin',
+        'sammlung' => 'instrument',
+        'programm' => 'programm',
     );
     if($id < 1 || !isset($chipMods[$type])) {
         return $h($label);

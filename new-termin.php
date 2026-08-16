@@ -103,6 +103,29 @@ if($fill && $n) {
         <label class="profile-label" for="termin-beschreibung">Beschreibung</label>
         <input id="termin-beschreibung" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Beschreibung" type="text" placeholder="Beschreibung" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Beschreibung, ENT_QUOTES, 'UTF-8').'"'; ?>>
       </div>
+<?php if(function_exists('archivFeatureEnabled') && archivFeatureEnabled()) {
+    $sammlungCatalog = array();
+    foreach(archivListCollectionsForSelect() as $opt) {
+        $sammlungCatalog[] = array(
+            'id' => (int)$opt['id'],
+            'label' => (string)$opt['name'],
+        );
+    }
+    $selectedSammlungen = ($fill && $n) ? $n->getSammlungenArray() : array();
+?>
+      <div class="profile-field termin-sammlungen">
+        <span class="profile-label">Programm</span>
+        <div class="termin-visibility-box w3-padding w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>">
+          <div id="terminSammlungChips" class="mail-recipient-chips" aria-live="polite"></div>
+          <input type="text" id="terminSammlungInput" class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Sammlung…" autocomplete="off">
+          <div id="terminSammlungSuggest" class="mail-recipient-suggest" hidden></div>
+          <input type="hidden" name="Sammlungen" id="terminSammlungen" value="<?php
+            echo htmlspecialchars(json_encode($selectedSammlungen), ENT_QUOTES, 'UTF-8');
+          ?>">
+        </div>
+      </div>
+<script type="application/json" id="terminSammlungCatalog"><?php echo json_encode($sammlungCatalog, JSON_UNESCAPED_UNICODE); ?></script>
+<?php } ?>
     </section>
 
     <section class="profile-col" aria-labelledby="termin-col-wann">
@@ -349,8 +372,18 @@ $terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
 ?>
 <script type="application/json" id="terminVisibilityCatalog"><?php echo json_encode($terminVisibilityCatalog, JSON_UNESCAPED_UNICODE); ?></script>
 <script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/sammlungChips.js'); ?>"></script>
 <script>
 (function() {
+  if(typeof SammlungChips !== 'undefined' && document.getElementById('terminSammlungChips')) {
+    SammlungChips.init({
+      catalogEl: document.getElementById('terminSammlungCatalog'),
+      chipsEl: document.getElementById('terminSammlungChips'),
+      inputEl: document.getElementById('terminSammlungInput'),
+      suggestEl: document.getElementById('terminSammlungSuggest'),
+      hiddenEl: document.getElementById('terminSammlungen')
+    });
+  }
   if(typeof MailRecipientChips === 'undefined') return;
   MailRecipientChips.init({
     catalogEl: document.getElementById('terminVisibilityCatalog'),

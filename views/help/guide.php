@@ -172,6 +172,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_editAppmnts'),
     'body' => '
 <p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
+<p>Ist ein <b>Notenarchiv</b> angeschlossen, kannst du dem Termin unter <b>Programm</b> eine oder mehrere Archiv-Sammlungen zuordnen (Chip-Eingabe). In der Terminübersicht erscheint der Chip <b>Programm</b>; Klick öffnet die Stückliste wie im Archiv (Cover, Komponist, Arrangeur, Verlag, …).</p>
 <p>Im <b>Kalender</b> kannst du auf eine freie Tagesfläche klicken: Nach Bestätigung öffnet sich das Anlege-Formular mit vorausgefülltem Datum.</p>
 <p>Nach Speichern/Löschen von Terminen oder Schichten &amp; Aufgaben erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden. Beginn- und Endzeit einer Schicht/Aufgabe sind optional.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
