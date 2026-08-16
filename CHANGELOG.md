@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-16-31846 (2026-08-16)
+
+- MELD-197: Programm-Cover auch als jpg/jpeg/gif laden
+- MELD-197: Programm-Cover jpg/jpeg/gif
+
 ## 2026-08-16-018fa (2026-08-16)
 
 - MELD-197: Termin-Programm aus Archiv-Sammlungen
