@@ -357,7 +357,7 @@ class Permissions
             'perm_editConfig' => array('short' => 'Config', 'label' => 'Konfiguration bearbeiten'),
             'perm_editPermissions' => array('short' => 'Rechte', 'label' => 'Berechtigungen bearbeiten'),
             'perm_accessNotenarchiv' => array('short' => 'Notenarchiv', 'label' => 'Notenarchiv'),
-            'perm_accessMitgliederverwaltung' => array('short' => 'Mitgliederverw.', 'label' => 'Mitgliederverwaltung'),
+            'perm_accessMitgliederverwaltung' => array('short' => 'Mitglieder', 'label' => 'Mitgliederverwaltung'),
         );
     }
 
