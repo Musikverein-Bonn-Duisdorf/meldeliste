@@ -224,8 +224,70 @@ function archivNormalizeWebsiteUrl($url) {
 }
 
 /**
- * Cover thumbnail HTML (Archiv list parity). Uses urlNotenarchiv + FilePath when set.
- * Fallback: initials placeholder (no complex inline JS — Melde cannot probe Archiv FS).
+ * Relative cover paths under Archiv web root (png/jpg/jpeg/gif), FilePath normalized.
+ * @param string $filePath
+ * @return list<string>
+ */
+function archivCompositionCoverRelCandidates($filePath) {
+    $rel = str_replace('\\', '/', trim((string)$filePath));
+    if($rel === '') {
+        return array();
+    }
+    if(substr($rel, -1) !== '/') {
+        $rel .= '/';
+    }
+    $rel = ltrim($rel, '/');
+    $out = array();
+    foreach(array('cover.png', 'cover.jpg', 'cover.jpeg', 'cover.gif') as $name) {
+        $out[] = $rel.$name;
+    }
+    return $out;
+}
+
+/**
+ * Local filesystem roots that may contain Archiv `data/` (optional config + sibling checkout).
+ * @return list<string> Absolute paths with trailing slash
+ */
+function archivCompositionDataRoots() {
+    $roots = array();
+    $cfg = isset($GLOBALS['optionsDB']['notenarchivDataDirectory'])
+        ? trim((string)$GLOBALS['optionsDB']['notenarchivDataDirectory'])
+        : '';
+    if($cfg !== '') {
+        $roots[] = rtrim($cfg, '/\\').'/';
+    }
+    // Sibling repo layout: …/MVD/meldeliste + …/MVD/notenarchiv
+    $sibling = dirname(__DIR__).'/../notenarchiv/';
+    $real = realpath($sibling);
+    if($real !== false && is_dir($real)) {
+        $roots[] = rtrim($real, '/\\').'/';
+    }
+    return array_values(array_unique($roots));
+}
+
+/**
+ * Prefer a cover relative path that exists on a local data root, else ''.
+ * @param string $filePath
+ * @return string
+ */
+function archivPreferLocalCoverRel($filePath) {
+    $cands = archivCompositionCoverRelCandidates($filePath);
+    if(!count($cands)) {
+        return '';
+    }
+    foreach(archivCompositionDataRoots() as $root) {
+        foreach($cands as $rel) {
+            if(is_file($root.$rel)) {
+                return $rel;
+            }
+        }
+    }
+    return '';
+}
+
+/**
+ * Cover thumbnail HTML (Archiv list parity). Uses urlNotenarchiv + FilePath.
+ * Tries png/jpg/jpeg/gif (local probe when possible, else onerror chain).
  * @param int $compositionId
  * @param string $title
  * @param string|null $filePath Relative path under Archiv web root (trailing slash typical)
@@ -244,30 +306,35 @@ function archivCompositionCoverHtml($compositionId, $title, $filePath) {
     $hue = (int)(sprintf('%u', crc32($seed)) % 360);
     $placeholderInner = '<span class="piece-cover-initials">'.$ini.'</span>';
     $base = archivNotenarchivBaseUrl();
-    $coverUrl = '';
-    if($base !== '' && $filePath !== '') {
-        $rel = str_replace('\\', '/', $filePath);
-        if(substr($rel, -1) !== '/') {
-            $rel .= '/';
-        }
-        $coverUrl = $base.ltrim($rel, '/').'cover.png';
-    }
-    if($coverUrl === '') {
+    $rels = archivCompositionCoverRelCandidates($filePath);
+    if($base === '' || !count($rels)) {
         return '<span class="'.$cls.' piece-cover--placeholder" style="background-color:hsl('.$hue.',42%,38%)" aria-hidden="true">'
             .$placeholderInner.'</span>';
     }
-    $src = htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8');
-    // Attribute-safe onerror (only single quotes in JS; reveal sibling fallback).
+    $preferred = archivPreferLocalCoverRel($filePath);
+    if($preferred !== '') {
+        $rels = array_values(array_unique(array_merge(array($preferred), $rels)));
+    }
+    $urls = array();
+    foreach($rels as $rel) {
+        $urls[] = $base.$rel;
+    }
+    $src = htmlspecialchars($urls[0], ENT_QUOTES, 'UTF-8');
+    $fallbacks = array_slice($urls, 1);
+    $fallbackAttr = htmlspecialchars(implode('|', $fallbacks), ENT_QUOTES, 'UTF-8');
+    // Try next extension on error, then initials placeholder (attribute-safe JS).
     $onerror = htmlspecialchars(
-        'this.onerror=null;var p=this.parentNode;if(!p)return;this.remove();'
+        'var i=this,f=(i.getAttribute(\'data-cover-fallbacks\')||\'\').split(\'|\').filter(Boolean);'
+        .'if(f.length){i.src=f.shift();i.setAttribute(\'data-cover-fallbacks\',f.join(\'|\'));return;}'
+        .'i.onerror=null;var p=i.parentNode;if(!p)return;i.remove();'
         ."p.classList.add('piece-cover--placeholder');"
         ."p.style.backgroundColor='hsl(".$hue.",42%,38%)';"
-        ."var f=p.querySelector('.piece-cover-fallback');if(f)f.hidden=false;",
+        ."var s=p.querySelector('.piece-cover-fallback');if(s)s.hidden=false;",
         ENT_QUOTES,
         'UTF-8'
     );
     return '<span class="'.$cls.'" aria-hidden="true">'
-        .'<img src="'.$src.'" alt="" onerror="'.$onerror.'">'
+        .'<img src="'.$src.'" alt="" data-cover-fallbacks="'.$fallbackAttr.'" onerror="'.$onerror.'">'
         .'<span class="piece-cover-fallback piece-cover-initials" hidden>'.$ini.'</span>'
         .'</span>';
 }
