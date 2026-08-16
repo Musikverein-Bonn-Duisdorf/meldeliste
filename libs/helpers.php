@@ -212,6 +212,104 @@ function mitMembershipTableReady() {
     return $ready === true;
 }
 
+/**
+ * Whether mit_MemberProfile exists (cached; re-probes until found).
+ * @return bool
+ */
+function mitMemberProfileTableReady() {
+    static $ready = null;
+    static $probedMissing = false;
+    if($ready === true) {
+        return true;
+    }
+    if($ready === false && $probedMissing) {
+        $probedMissing = false;
+    }
+    $ready = false;
+    if(!isset($GLOBALS['conn']) || !($GLOBALS['conn'] instanceof mysqli)) {
+        $probedMissing = true;
+        return false;
+    }
+    try {
+        $dbr = mysqli_query($GLOBALS['conn'], "SHOW TABLES LIKE 'mit_MemberProfile'");
+        if($dbr && mysqli_fetch_row($dbr)) {
+            $ready = true;
+            return true;
+        }
+    }
+    catch(Throwable $e) {
+        $ready = false;
+    }
+    $probedMissing = true;
+    return false;
+}
+
+/**
+ * MIT-Anschrift for a Melde user (Street, Zip City, Country), or '' if unavailable.
+ * Does not include PHP from Mitgliederverwaltung — shared DB read only (PLATFORM).
+ * @param int $userId
+ * @return string
+ */
+function mitBorrowerAddressForUser($userId) {
+    $userId = (int)$userId;
+    if($userId < 1 || !mitMemberProfileTableReady()) {
+        return '';
+    }
+    $sql = sprintf(
+        'SELECT `Street`, `Zip`, `City`, `Country` FROM `mit_MemberProfile` WHERE `User` = %d LIMIT 1;',
+        $userId
+    );
+    try {
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    }
+    catch(Throwable $e) {
+        return '';
+    }
+    if(!$dbr) {
+        return '';
+    }
+    $row = mysqli_fetch_assoc($dbr);
+    if(!$row) {
+        return '';
+    }
+    $street = trim((string)(isset($row['Street']) ? $row['Street'] : ''));
+    $zip = trim((string)(isset($row['Zip']) ? $row['Zip'] : ''));
+    $city = trim((string)(isset($row['City']) ? $row['City'] : ''));
+    $country = trim((string)(isset($row['Country']) ? $row['Country'] : ''));
+    $zipCity = trim($zip.' '.$city);
+    $parts = array();
+    if($street !== '') {
+        $parts[] = $street;
+    }
+    if($zipCity !== '') {
+        $parts[] = $zipCity;
+    }
+    if($country !== '') {
+        $parts[] = $country;
+    }
+    return trim(implode(', ', $parts));
+}
+
+/**
+ * Prefill loan BorrowerAddress from MIT when empty.
+ * @param InventoriesLoan $loan
+ * @return bool true if address was set on the loan object
+ */
+function mitPrefillLoanBorrowerAddress($loan) {
+    if(!($loan instanceof InventoriesLoan)) {
+        return false;
+    }
+    if(trim((string)$loan->BorrowerAddress) !== '') {
+        return false;
+    }
+    $addr = mitBorrowerAddressForUser((int)$loan->User);
+    if($addr === '') {
+        return false;
+    }
+    $loan->BorrowerAddress = $addr;
+    return true;
+}
+
 /** Tenure + type period tables available (schema v6+). */
 function mitMembershipPeriodsReady() {
     static $ready = null;
