@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-16-018fa (2026-08-16)
+
+- MELD-197: Termin-Programm aus Archiv-Sammlungen
+
 ## 2026-08-16-a8bf2 (2026-08-16)
 
 - MELD-196: Leihe über Formular starten, Felder editierbar
