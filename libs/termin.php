@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'GuestMusicians' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'GuestMusicians' => null, 'Sammlungen' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
     /** @var array<int,string>|null */
@@ -35,6 +35,7 @@ class Termin
         case 'defaultFreeText':
         case 'VisibilitySpec':
         case 'GuestMusicians':
+        case 'Sammlungen':
         case 'PostDiscord':
         case 'Created':
         case 'Updated':
@@ -63,6 +64,7 @@ class Termin
         case 'defaultFreeText':
         case 'VisibilitySpec':
         case 'GuestMusicians':
+        case 'Sammlungen':
         case 'Created':
         case 'Updated':
             $this->_data[$key] = trim((string)$val);
@@ -127,6 +129,13 @@ class Termin
         sort($newGuests);
         if($oldGuests !== $newGuests) {
             $str.=", Gastmusiker: ".count($oldGuests)." &rArr; <b>".count($newGuests)."</b>";
+        }
+        $oldSammlungen = $old->getSammlungenArray();
+        $newSammlungen = $this->getSammlungenArray();
+        sort($oldSammlungen);
+        sort($newSammlungen);
+        if($oldSammlungen !== $newSammlungen) {
+            $str.=", Sammlungen: ".count($oldSammlungen)." &rArr; <b>".count($newSammlungen)."</b>";
         }
         if(boolsDiffer($this->PostDiscord, $old->PostDiscord)) {
             $str.=", Discord: ".bool2string($old->PostDiscord)." &rArr; <b>".bool2string($this->PostDiscord)."</b>";
@@ -299,7 +308,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `GuestMusicians`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, %s, "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `GuestMusicians`, `Sammlungen`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, %s, %s, "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -320,6 +329,7 @@ class Termin
                        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
                        $this->sqlVisibilitySpec(),
                        $this->sqlGuestMusicians(),
+                       $this->sqlSammlungen(),
                        (int)$this->PostDiscord
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -503,7 +513,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `GuestMusicians` = %s, `PostDiscord` = "%d", `Updated` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `GuestMusicians` = %s, `Sammlungen` = %s, `PostDiscord` = "%d", `Updated` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -525,6 +535,7 @@ class Termin
                        mysqli_real_escape_string($GLOBALS['conn'], (string)$this->defaultFreeText),
                        $this->sqlVisibilitySpec(),
                        $this->sqlGuestMusicians(),
+                       $this->sqlSammlungen(),
                        (int)$this->PostDiscord,
         $this->Index
         );
@@ -575,7 +586,8 @@ class Termin
     public function fill_from_array($row) {
         foreach($row as $key => $val) {
             if($key === 'VisibilitySpec' || $key === 'visibilitySpec'
-                || $key === 'GuestMusicians' || $key === 'guestMusicians') {
+                || $key === 'GuestMusicians' || $key === 'guestMusicians'
+                || $key === 'Sammlungen' || $key === 'sammlungen') {
                 continue;
             }
             if(array_key_exists($key, $this->_data)) {
@@ -584,6 +596,7 @@ class Termin
         }
         $hadVisibility = isset($row['VisibilitySpec']) || isset($row['visibilitySpec']);
         $hadGuests = isset($row['GuestMusicians']) || isset($row['guestMusicians']);
+        $hadSammlungen = isset($row['Sammlungen']) || isset($row['sammlungen']);
         if($hadVisibility) {
             $raw = isset($row['VisibilitySpec']) ? $row['VisibilitySpec'] : $row['visibilitySpec'];
             if(is_array($raw)) {
@@ -596,6 +609,10 @@ class Termin
         if($hadGuests) {
             $raw = isset($row['GuestMusicians']) ? $row['GuestMusicians'] : $row['guestMusicians'];
             $this->setGuestMusiciansArray($raw);
+        }
+        if($hadSammlungen) {
+            $raw = isset($row['Sammlungen']) ? $row['Sammlungen'] : $row['sammlungen'];
+            $this->setSammlungenArray($raw);
         }
         if($hadVisibility || $hadGuests) {
             $this->mergeGuestMusiciansIntoVisibilityUsers();
@@ -772,6 +789,82 @@ class Termin
             return 'NULL';
         }
         return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode($ids)).'"';
+    }
+
+    /** Nullable JSON int[] of archiv_Collection ids for SQL INSERT/UPDATE. */
+    protected function sqlSammlungen() {
+        $ids = $this->getSammlungenArray();
+        if(!count($ids)) {
+            return 'NULL';
+        }
+        return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode($ids)).'"';
+    }
+
+    /** @return list<int> */
+    public function getSammlungenArray() {
+        $raw = $this->Sammlungen;
+        if(is_array($raw)) {
+            $list = $raw;
+        }
+        else {
+            $s = trim((string)$raw);
+            if($s === '') {
+                return array();
+            }
+            $decoded = json_decode($s, true);
+            $list = is_array($decoded) ? $decoded : array();
+        }
+        $ids = array();
+        foreach($list as $id) {
+            $id = (int)$id;
+            if($id > 0) {
+                $ids[$id] = $id;
+            }
+        }
+        return array_values($ids);
+    }
+
+    /** @param mixed $input JSON string, array, or null */
+    public function setSammlungenArray($input) {
+        if(is_array($input)) {
+            $list = $input;
+        }
+        else {
+            $s = trim((string)$input);
+            if($s === '') {
+                $this->Sammlungen = null;
+                return;
+            }
+            $decoded = json_decode($s, true);
+            $list = is_array($decoded) ? $decoded : array();
+        }
+        $ids = array();
+        foreach($list as $id) {
+            $id = (int)$id;
+            if($id > 0) {
+                $ids[$id] = $id;
+            }
+        }
+        $list = array_values($ids);
+        $this->Sammlungen = count($list) ? json_encode($list) : null;
+    }
+
+    /**
+     * Single "Programm" chip → modal with all linked Archiv-Sammlungen.
+     * @return string
+     */
+    public function renderProgrammChipHtml() {
+        if(!function_exists('archivFeatureEnabled') || !archivFeatureEnabled()) {
+            return '';
+        }
+        $tid = (int)$this->Index;
+        if($tid < 1 || !count($this->getSammlungenArray())) {
+            return '';
+        }
+        if(!function_exists('entityOpenHtml')) {
+            return '';
+        }
+        return entityOpenHtml('programm', $tid, 'Programm', 'programm');
     }
 
     /**
@@ -1746,6 +1839,10 @@ class Termin
         $ort = trim((string)$this->getOrt());
         if($ort !== '') {
             $str .= '<div class="melde-ort">'.$h($ort).'</div>';
+        }
+        $programmChip = $this->renderProgrammChipHtml();
+        if($programmChip !== '') {
+            $str .= '<div class="melde-programm mail-recipient-chips" data-melde-stop>'.$programmChip.'</div>';
         }
         $str .= '</div>';
 

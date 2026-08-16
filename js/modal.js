@@ -69,7 +69,7 @@ function openEntityFromEl(el) {
     if(!type || !(id > 0)) return false;
     if(type === 'inventory') type = 'inventar';
     if(type === 'shift') type = 'shiftResponse';
-    if(type !== 'user' && type !== 'termin' && type !== 'inventar' && type !== 'mail' && type !== 'shiftResponse') return false;
+    if(type !== 'user' && type !== 'termin' && type !== 'inventar' && type !== 'mail' && type !== 'shiftResponse' && type !== 'sammlung' && type !== 'programm') return false;
     openModal(type, id);
     return true;
 }

@@ -81,6 +81,15 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
         <span class="profile-label">Beschreibung</span>
         <div class="profile-value"><?php echo $val($t->Beschreibung); ?></div>
       </div>
+<?php
+$programmChip = $t->renderProgrammChipHtml();
+if($programmChip !== '') {
+?>
+      <div class="profile-field">
+        <span class="profile-label">Programm</span>
+        <div class="profile-value profile-value--chips"><?php echo $programmChip; ?></div>
+      </div>
+<?php } ?>
     </section>
 
     <section class="profile-col" aria-labelledby="termin-detail-wann">

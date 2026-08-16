@@ -143,6 +143,36 @@ case 'mail':
     echo $job->getModalHtml();
     break;
 
+case 'sammlung':
+    if(!function_exists('archivFeatureEnabled') || !archivFeatureEnabled()) {
+        http_response_code(404);
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Sammlung</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Notenarchiv ist nicht angeschlossen.</p></div>';
+        exit;
+    }
+    $html = archivCollectionModalHtml($id);
+    if($html === '') {
+        http_response_code(404);
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Sammlung</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Sammlung nicht gefunden.</p></div>';
+        exit;
+    }
+    echo $html;
+    break;
+
+case 'programm':
+    if(!function_exists('archivFeatureEnabled') || !archivFeatureEnabled()) {
+        http_response_code(404);
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Programm</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Notenarchiv ist nicht angeschlossen.</p></div>';
+        exit;
+    }
+    $html = archivTerminProgrammModalHtml($id);
+    if($html === '') {
+        http_response_code(404);
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Programm</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Termin nicht gefunden.</p></div>';
+        exit;
+    }
+    echo $html;
+    break;
+
 default:
     http_response_code(400);
     echo '<div class="w3-container w3-padding"><p>Unbekannter Modal-Typ.</p></div>';

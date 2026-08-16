@@ -201,6 +201,7 @@
 	"defaultFreeText": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"VisibilitySpec": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"GuestMusicians": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"Sammlungen": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"PostDiscord": {"Type": "tinyint", "Default": 0},
 	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
 	"Updated": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
