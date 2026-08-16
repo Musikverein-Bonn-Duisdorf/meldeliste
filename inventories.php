@@ -13,6 +13,12 @@ if(($invMut = handleInventoriesMutations()) !== false) {
     if(isInventoriesAjaxRequest()) {
         respondInventoriesAjax($invMut);
     }
+    if(isset($invMut['action']) && $invMut['action'] === 'newLoan' && !empty($invMut['loanId'])) {
+        redirectAfterPost('loan-form.php?loan='.(int)$invMut['loanId'].'&kind=loan');
+    }
+    if(isset($invMut['action']) && $invMut['action'] === 'endLoan' && !empty($invMut['loanId'])) {
+        redirectAfterPost('loan-form.php?loan='.(int)$invMut['loanId'].'&kind=return');
+    }
     redirectAfterPost('inventories.php');
 }
 

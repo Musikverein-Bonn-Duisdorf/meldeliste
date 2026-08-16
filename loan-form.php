@@ -81,8 +81,9 @@ $backHref = 'inventories.php';
 $showAddress = !empty($ctx['needAddressField']);
 $editAddress = $canEdit && !empty($ctx['needAddressEditField']);
 $editNotes = $canEdit && !empty($ctx['needContractNotesField']);
+$editLoanParams = $canEdit && !empty($ctx['needLoanParamsField']);
 $editChecklist = $canEdit && $kind === LoanForm::KIND_RETURN;
-$hasEditableFields = $editAddress || $editNotes || $editChecklist;
+$hasEditableFields = $editAddress || $editNotes || $editChecklist || $editLoanParams;
 $checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
     ? $ctx['checklist']
     : LoanForm::defaultChecklist();
@@ -91,6 +92,16 @@ $checkDeposit = !empty($checklist['depositReturned']);
 $checkDeductions = isset($checklist['deductions']) ? (string)$checklist['deductions'] : '';
 $checkNotes = isset($checklist['notes']) ? (string)$checklist['notes'] : '';
 $contractNotes = isset($ctx['contractNotes']) ? (string)$ctx['contractNotes'] : '';
+$startIso = LoanForm::normalizeDateYmd(isset($ctx['startDate']) ? $ctx['startDate'] : '');
+if($startIso === '' || $startIso === null) {
+    $startIso = date('Y-m-d');
+}
+$endIso = LoanForm::normalizeDateYmd(isset($ctx['endDate']) ? $ctx['endDate'] : '');
+if($endIso === null) {
+    $endIso = '';
+}
+$kautionInput = LoanForm::formatAmountInput(isset($ctx['kaution']) ? $ctx['kaution'] : 0);
+$leihgebuehrInput = LoanForm::formatAmountInput(isset($ctx['leihgebuehr']) ? $ctx['leihgebuehr'] : 0);
 
 $scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
 
@@ -100,17 +111,17 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?php echo $h($ctx['title']); ?> – <?php echo $h($ctx['orgName']); ?></title>
+  <title><?php echo $h(isset($ctx['printFileBase']) ? $ctx['printFileBase'] : $ctx['title']); ?></title>
   <link rel="stylesheet" href="<?php echo $h($cssUrl); ?>">
 </head>
 <body class="loan-form-print">
   <div class="loan-form-toolbar no-print">
     <div class="loan-form-toolbar-group">
       <a class="loan-form-btn" href="<?php echo $h($backHref); ?>">Zurück</a>
-      <button type="button" class="loan-form-btn" onclick="window.print()">Drucken</button>
 <?php if($hasEditableFields) { ?>
       <button type="submit" form="loan-form-fields" class="loan-form-btn loan-form-btn--primary">Speichern</button>
 <?php } ?>
+      <button type="button" class="loan-form-btn" onclick="window.print()">Drucken</button>
     </div>
 <?php if($canEdit || $hasScan) { ?>
     <div class="loan-form-toolbar-group loan-form-toolbar-group--scan">
@@ -132,9 +143,9 @@ header('Content-Type: text/html; charset=utf-8');
         <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
         <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
         <input type="hidden" name="action" value="upload">
-        <label class="loan-form-btn loan-form-btn--file">
+        <label class="loan-form-btn loan-form-btn--file" title="PDF, JPEG oder PNG">
           Datei
-          <input type="file" name="scan" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/*" required>
+          <input type="file" name="scan" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp,application/pdf,.pdf" required>
         </label>
         <button type="submit" class="loan-form-btn loan-form-btn--primary">Hochladen</button>
       </form>
@@ -213,26 +224,58 @@ header('Content-Type: text/html; charset=utf-8');
 <?php } ?>
         <div>
           <dt>Leihbeginn</dt>
-          <dd><?php echo $h($ctx['startDateDe']); ?></dd>
-        </div>
-<?php if($ctx['hasFixedEnd']) { ?>
-        <div>
-          <dt>Leihende</dt>
-          <dd><?php echo $h($ctx['endDateDe']); ?></dd>
-        </div>
+          <dd>
+<?php if($editLoanParams) { ?>
+            <input id="loan-start-date" class="loan-form-input loan-form-input--short no-print" type="date" name="StartDate" value="<?php echo $h($startIso); ?>" required aria-label="Leihbeginn">
+            <span class="loan-form-print-only"><?php echo $h($ctx['startDateDe']); ?></span>
 <?php } else { ?>
-        <div><dt>Dauer</dt><dd>unbefristet</dd></div>
+            <?php echo $h($ctx['startDateDe']); ?>
 <?php } ?>
-<?php if($ctx['hasKaution']) { ?>
+          </dd>
+        </div>
         <div>
+          <dt><?php echo $ctx['hasFixedEnd'] || $editLoanParams ? 'Leihende' : 'Dauer'; ?></dt>
+          <dd>
+<?php if($editLoanParams) { ?>
+            <input id="loan-end-date" class="loan-form-input loan-form-input--short no-print" type="date" name="EndDate" value="<?php echo $h($endIso); ?>" aria-label="Leihende">
+            <span class="loan-form-print-only"><?php echo $ctx['hasFixedEnd'] ? $h($ctx['endDateDe']) : 'unbefristet'; ?></span>
+<?php } elseif($ctx['hasFixedEnd']) { ?>
+            <?php echo $h($ctx['endDateDe']); ?>
+<?php } else { ?>
+            unbefristet
+<?php } ?>
+          </dd>
+        </div>
+<?php if($editLoanParams || $ctx['hasKaution']) { ?>
+        <div<?php echo ($editLoanParams && !$ctx['hasKaution']) ? ' class="no-print"' : ''; ?>>
           <dt>Kaution</dt>
-          <dd><?php echo $h($ctx['kautionFormatted']); ?></dd>
+          <dd>
+<?php   if($editLoanParams) { ?>
+            <input id="loan-kaution-form" class="loan-form-input loan-form-input--short no-print" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value="<?php echo $h($kautionInput); ?>" aria-label="Kaution">
+            <span class="loan-form-muted no-print">€</span>
+<?php     if($ctx['hasKaution']) { ?>
+            <span class="loan-form-print-only"><?php echo $h($ctx['kautionFormatted']); ?></span>
+<?php     } ?>
+<?php   } else { ?>
+            <?php echo $h($ctx['kautionFormatted']); ?>
+<?php   } ?>
+          </dd>
         </div>
 <?php } ?>
-<?php if(!empty($ctx['hasLeihgebuehr'])) { ?>
-        <div>
+<?php if($editLoanParams || !empty($ctx['hasLeihgebuehr'])) { ?>
+        <div<?php echo ($editLoanParams && empty($ctx['hasLeihgebuehr'])) ? ' class="no-print"' : ''; ?>>
           <dt>Leihgebühr</dt>
-          <dd><?php echo $h($ctx['leihgebuehrFormatted']); ?></dd>
+          <dd>
+<?php   if($editLoanParams) { ?>
+            <input id="loan-leihgebuehr-form" class="loan-form-input loan-form-input--short no-print" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value="<?php echo $h($leihgebuehrInput); ?>" aria-label="Leihgebühr">
+            <span class="loan-form-muted no-print">€</span>
+<?php     if(!empty($ctx['hasLeihgebuehr'])) { ?>
+            <span class="loan-form-print-only"><?php echo $h($ctx['leihgebuehrFormatted']); ?></span>
+<?php     } ?>
+<?php   } else { ?>
+            <?php echo $h($ctx['leihgebuehrFormatted']); ?>
+<?php   } ?>
+          </dd>
         </div>
 <?php } ?>
       </dl>

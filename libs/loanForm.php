@@ -79,6 +79,75 @@ class LoanForm
     }
 
     /**
+     * Normalize YYYY-MM-DD for form/DB; empty → ''; invalid → null.
+     * @return string|null
+     */
+    public static function normalizeDateYmd($raw) {
+        $s = trim((string)$raw);
+        if($s === '' || $s === '0000-00-00') {
+            return '';
+        }
+        if(!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $s, $m)) {
+            return null;
+        }
+        $y = (int)$m[1];
+        $mo = (int)$m[2];
+        $d = (int)$m[3];
+        if(!checkdate($mo, $d, $y)) {
+            return null;
+        }
+        return sprintf('%04d-%02d-%02d', $y, $mo, $d);
+    }
+
+    /** Amount for editable inputs (German decimal, empty when 0). */
+    public static function formatAmountInput($raw) {
+        $amount = self::parseAmount($raw);
+        if($amount <= 0.0) {
+            return '';
+        }
+        return number_format($amount, 2, ',', '');
+    }
+
+    /** Store amount as DECIMAL-friendly string. */
+    public static function amountSqlValue($raw) {
+        return number_format(self::parseAmount($raw), 2, '.', '');
+    }
+
+    /** Sanitize a single path segment for print/PDF filenames. */
+    public static function sanitizeFileNamePart($raw) {
+        $s = trim((string)$raw);
+        if($s === '') {
+            return '';
+        }
+        $s = strtr($s, array(
+            'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
+            'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss',
+        ));
+        $s = preg_replace('/[^A-Za-z0-9._-]+/', '-', $s);
+        $s = preg_replace('/-+/', '-', (string)$s);
+        return trim((string)$s, '-._');
+    }
+
+    /**
+     * Basename without extension for print-to-PDF (browser uses document.title).
+     * Loan: MVD-Leihvertrag-{Name}-{Instrument}
+     * Return: MVD-Rueckgabe-{Name}-{Instrument}
+     */
+    public static function printFileBasename($kind, $borrowerName, $itemLabel) {
+        $kind = self::normalizeKind($kind);
+        $prefix = $kind === self::KIND_RETURN ? 'MVD-Rueckgabe' : 'MVD-Leihvertrag';
+        $name = self::sanitizeFileNamePart($borrowerName);
+        if($name === '') {
+            $name = 'ohne-Namen';
+        }
+        $item = self::sanitizeFileNamePart($itemLabel);
+        if($item === '') {
+            $item = 'Inventar';
+        }
+        return $prefix.'-'.$name.'-'.$item;
+    }
+
+    /**
      * Who may view/print/store loan forms for this loan.
      * Edit right required for upload; show or edit for print/download.
      */
@@ -139,7 +208,56 @@ class LoanForm
     }
 
     /**
+     * Resolve upload extension from filename and/or file content (pdf/jpg/png/…).
+     * @param array $file One $_FILES entry
+     * @return string lowercase extension without dot, or '' if unsupported
+     */
+    public static function uploadExtension(array $file) {
+        $allowed = array('pdf', 'jpg', 'png', 'gif', 'webp');
+        $orig = isset($file['name']) ? basename((string)$file['name']) : '';
+        $orig = preg_replace('/[^A-Za-z0-9._-]+/', '_', (string)$orig);
+        $ext = strtolower(pathinfo((string)$orig, PATHINFO_EXTENSION));
+        if($ext === 'jpeg') {
+            $ext = 'jpg';
+        }
+        if($ext !== '' && in_array($ext, $allowed, true)) {
+            return $ext;
+        }
+
+        $tmp = isset($file['tmp_name']) ? (string)$file['tmp_name'] : '';
+        $mime = '';
+        if($tmp !== '' && is_file($tmp)) {
+            if(function_exists('finfo_open')) {
+                $fi = finfo_open(FILEINFO_MIME_TYPE);
+                if($fi) {
+                    $detected = finfo_file($fi, $tmp);
+                    finfo_close($fi);
+                    if(is_string($detected)) {
+                        $mime = strtolower(trim($detected));
+                    }
+                }
+            }
+            elseif(function_exists('mime_content_type')) {
+                $detected = mime_content_type($tmp);
+                if(is_string($detected)) {
+                    $mime = strtolower(trim($detected));
+                }
+            }
+        }
+        $mimeMap = array(
+            'application/pdf' => 'pdf',
+            'image/jpeg' => 'jpg',
+            'image/pjpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+        );
+        return isset($mimeMap[$mime]) ? $mimeMap[$mime] : '';
+    }
+
+    /**
      * Store an uploaded scan; returns basename for DB or false.
+     * Accepts PDF and images (JPEG/PNG/GIF/WebP).
      * @param array $file One $_FILES entry
      * @param string $kind loan|return
      */
@@ -158,11 +276,8 @@ class LoanForm
         if(!isset($file['size']) || (int)$file['size'] > 20e6 || (int)$file['size'] < 1) {
             return false;
         }
-        $orig = isset($file['name']) ? basename((string)$file['name']) : 'scan.bin';
-        $orig = preg_replace('/[^A-Za-z0-9._-]+/', '_', $orig);
-        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-        $allowed = array('pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp');
-        if($ext === '' || !in_array($ext, $allowed, true)) {
+        $ext = self::uploadExtension($file);
+        if($ext === '') {
             return false;
         }
         $dir = self::storageDir($loanId);
@@ -313,6 +428,8 @@ class LoanForm
             'borrowerAddress' => $borrowerAddress,
             'contractNotes' => $contractNotes,
             'needContractNotesField' => true,
+            // Dates/fees editable on the form itself (MELD-196), like MIT membership-form.
+            'needLoanParamsField' => true,
             'startDate' => (string)$loan->StartDate,
             'startDateDe' => germanDate($loan->StartDate, 0),
             'endDate' => $hasEnd ? (string)$loan->EndDate : '',
@@ -329,6 +446,11 @@ class LoanForm
             'checklist' => self::parseChecklist($loan->ReturnChecklist),
         );
         $ctx['clauses'] = self::buildClauses($ctx);
+        $ctx['printFileBase'] = self::printFileBasename(
+            $kind,
+            isset($ctx['borrowerName']) ? $ctx['borrowerName'] : '',
+            isset($ctx['itemLabel']) ? $ctx['itemLabel'] : ''
+        );
         return $ctx;
     }
 
@@ -402,6 +524,7 @@ class LoanForm
 
     /**
      * Persist free fields from the online contract form.
+     * Leihbeginn/ende, Kaution, Leihgebühr → InventoriesLoans.*;
      * Adresse (optional) → InventoriesLoans.BorrowerAddress;
      * Bemerkungen → InventoriesLoans.ContractNotes;
      * return checklist → InventoriesLoans.ReturnChecklist (JSON).
@@ -418,6 +541,45 @@ class LoanForm
             return false;
         }
         $loanDirty = false;
+
+        if(array_key_exists('StartDate', $post)) {
+            $start = self::normalizeDateYmd($post['StartDate']);
+            if($start === '') {
+                $start = date('Y-m-d');
+            }
+            if($start !== null && (string)$loan->StartDate !== $start) {
+                $loan->StartDate = $start;
+                $loanDirty = true;
+            }
+        }
+
+        if(array_key_exists('EndDate', $post)) {
+            $end = self::normalizeDateYmd($post['EndDate']);
+            if($end !== null) {
+                $newEnd = ($end === '') ? null : $end;
+                $oldEnd = self::hasFixedEndDate($loan->EndDate) ? (string)$loan->EndDate : null;
+                if($oldEnd !== $newEnd) {
+                    $loan->EndDate = $newEnd;
+                    $loanDirty = true;
+                }
+            }
+        }
+
+        if(array_key_exists('Kaution', $post)) {
+            $kaution = self::amountSqlValue($post['Kaution']);
+            if(self::amountSqlValue($loan->Kaution) !== $kaution) {
+                $loan->Kaution = $kaution;
+                $loanDirty = true;
+            }
+        }
+
+        if(array_key_exists('Leihgebuehr', $post)) {
+            $fee = self::amountSqlValue($post['Leihgebuehr']);
+            if(self::amountSqlValue($loan->Leihgebuehr) !== $fee) {
+                $loan->Leihgebuehr = $fee;
+                $loanDirty = true;
+            }
+        }
 
         if(array_key_exists('BorrowerAddress', $post)) {
             $addr = trim((string)$post['BorrowerAddress']);
