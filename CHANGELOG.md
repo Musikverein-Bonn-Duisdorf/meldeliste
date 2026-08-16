@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-16-54607 (2026-08-16)
+
+- MELD-200: Gescannte Verträge im neuen Tab öffnen
+
 ## 2026-08-16-e4e01 (2026-08-16)
 
 - MELD-198: Leihe-Adresse aus MIT vorausfüllen
