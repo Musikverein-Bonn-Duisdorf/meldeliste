@@ -2,9 +2,14 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-16-5db4e (2026-08-16)
+
+- MELD-194: Nav-Label Mitgliederverwaltung als „Mitglieder“
+- MELD-194: Nav-Label Mitglieder statt Mitgliederverw.
+
 ## 2026-08-15-17137 (2026-08-15)
 
-- Release 2026-08-15-17137
+- (keine weiteren Notizen)
 
 ## 2026-08-15-9f92e (2026-08-15)
 
