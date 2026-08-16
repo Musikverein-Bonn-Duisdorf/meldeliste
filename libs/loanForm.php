@@ -407,6 +407,11 @@ class LoanForm
         $borrowerLabel = 'Entleiher';
         $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
         $borrowerAddress = trim((string)$loan->BorrowerAddress);
+        if($borrowerAddress === '' && function_exists('mitPrefillLoanBorrowerAddress')) {
+            if(mitPrefillLoanBorrowerAddress($loan)) {
+                $borrowerAddress = trim((string)$loan->BorrowerAddress);
+            }
+        }
         $contractNotes = self::normalizeContractNotes($loan->ContractNotes);
 
         $ctx = array(

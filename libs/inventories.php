@@ -907,6 +907,9 @@ function handleInventoriesMutations() {
         if(!isset($_POST['Leihgebuehr']) || $_POST['Leihgebuehr'] === '') {
             $n->Leihgebuehr = '0.00';
         }
+        if(function_exists('mitPrefillLoanBorrowerAddress')) {
+            mitPrefillLoanBorrowerAddress($n);
+        }
         $n->save();
         $result['action'] = 'newLoan';
         $result['loanId'] = (int)$n->Index;
