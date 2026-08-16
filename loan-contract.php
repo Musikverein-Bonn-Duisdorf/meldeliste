@@ -49,7 +49,7 @@ if($isPost) {
     }
     $name = LoanForm::storeUpload($loanId, $_FILES['scan'], $kind);
     if($name === false) {
-        denyAccess('Datei konnte nicht gespeichert werden.');
+        denyAccess('Datei konnte nicht gespeichert werden (PDF, JPEG oder PNG).');
     }
     if($kind === LoanForm::KIND_RETURN) {
         $loan->ReturnContractFile = $name;

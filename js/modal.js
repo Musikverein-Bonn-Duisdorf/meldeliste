@@ -862,6 +862,14 @@ document.addEventListener('submit', function(e) {
         content.innerHTML = data.html;
         if(host) host.style.display = 'block';
         highlightInventarLoanRow(content, data.loanId);
+        if(data.action === 'newLoan' && data.loanId) {
+            window.location.href = 'loan-form.php?loan=' + encodeURIComponent(data.loanId) + '&kind=loan';
+            return;
+        }
+        if(data.action === 'endLoan' && data.loanId) {
+            window.location.href = 'loan-form.php?loan=' + encodeURIComponent(data.loanId) + '&kind=return';
+            return;
+        }
     };
     xhr.open('POST', 'inventories.php', true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');

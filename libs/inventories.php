@@ -553,14 +553,14 @@ class Inventories
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-user">Person</label>'
             .'<select id="loan-user" class="w3-select w3-border w3-input profile-control '.$inputBg.'" name="User">'.UserOptionAll(0).'</select></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-start">Von</label>'
-            .'<input id="loan-start" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="StartDate" required></div>';
+            .'<input id="loan-start" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="StartDate" value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'"></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-end">Bis</label>'
             .'<input id="loan-end" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="EndDate"></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-kaution">Kaution</label>'
             .'<input id="loan-kaution" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value=""></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-leihgebuehr">Leihgebühr</label>'
             .'<input id="loan-leihgebuehr" class="w3-input w3-border profile-control '.$inputBg.'" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value=""></div>';
-        $str .= '<div class="profile-field"><button type="submit" name="newLoan" value="1" class="w3-btn profile-btn-primary '.$btn.' w3-border w3-mobile">Leihe eintragen</button></div>';
+        $str .= '<div class="profile-field"><button type="submit" name="newLoan" value="1" class="w3-btn profile-btn-primary '.$btn.' w3-border w3-mobile">Leihvertrag</button></div>';
         $str .= $form->close();
         return $str;
     }
@@ -621,10 +621,10 @@ class Inventories
         $str .= $actions->open();
 
         $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
-        $str .= '<a class="inventory-loan-btn" target="_blank" rel="noopener" '
+        $str .= '<a class="inventory-loan-btn" '
             .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a>';
         if(!$active || $ended) {
-            $str .= '<a class="inventory-loan-btn" target="_blank" rel="noopener" '
+            $str .= '<a class="inventory-loan-btn" '
                 .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
         }
         $str .= '</div>';
@@ -718,7 +718,7 @@ class Inventories
                 .'<input id="loan-end-'.$loanId.'" class="w3-input w3-border profile-control" type="date" name="EndDate" required value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'">'
                 .'</div>';
             $str .= '<div class="w3-col l4 m6 s12 w3-padding-small">'
-                .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">Beenden</button>'
+                .'<button type="submit" name="endLoan" value="1" class="w3-button '.$btnSubmit.'">Rückgabe</button>'
                 .'</div>';
             $str .= $endForm->close();
         }
@@ -881,6 +881,13 @@ function handleInventoriesMutations() {
     if(isset($_POST['newLoan'])) {
         $n = new InventoriesLoan;
         $n->fill_from_array($_POST);
+        $start = LoanForm::normalizeDateYmd(isset($_POST['StartDate']) ? $_POST['StartDate'] : '');
+        if($start === null || $start === '') {
+            $n->StartDate = date('Y-m-d');
+        }
+        else {
+            $n->StartDate = $start;
+        }
         if(!isset($_POST['Kaution']) || $_POST['Kaution'] === '') {
             $n->Kaution = '0.00';
         }
