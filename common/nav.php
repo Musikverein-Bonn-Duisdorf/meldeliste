@@ -110,7 +110,7 @@ if(requirePermission('perm_editConfig')) {
 <?php } ?>
 <?php if($ssoMit !== '') { ?>
     <a class="app-nav-item app-nav-item--secondary <?php echo htmlspecialchars(navGroupClass('nutzer'), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($ssoMit, ENT_QUOTES, 'UTF-8'); ?>" title="Mitgliederverwaltung">
-      <i class="fas fa-id-card" aria-hidden="true"></i><span class="nav-label">Mitgliederverw.</span>
+      <i class="fas fa-id-card" aria-hidden="true"></i><span class="nav-label">Mitglieder</span>
     </a>
 <?php } ?>
     <a class="app-nav-item app-nav-item--secondary <?php getPage('help', 'system'); ?>" href="help.php" title="Hilfe">
@@ -152,7 +152,7 @@ if(requirePermission('perm_editConfig')) {
 <?php } ?>
 <?php if($ssoMit !== '') { ?>
         <a class="app-nav-item app-nav-more-only-mobile <?php echo htmlspecialchars(navGroupClass('nutzer'), ENT_QUOTES, 'UTF-8'); ?>" href="<?php echo htmlspecialchars($ssoMit, ENT_QUOTES, 'UTF-8'); ?>" title="Mitgliederverwaltung">
-          <i class="fas fa-id-card" aria-hidden="true"></i><span class="nav-label">Mitgliederverw.</span>
+          <i class="fas fa-id-card" aria-hidden="true"></i><span class="nav-label">Mitglieder</span>
         </a>
 <?php } ?>
         <a class="app-nav-item app-nav-more-only-mobile <?php getPage('help', 'system'); ?>" href="help.php" title="Hilfe">
