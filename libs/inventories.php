@@ -542,6 +542,11 @@ class Inventories
     private function getNewLoanFormHtml($indent) {
         $btn = $GLOBALS['optionsDB']['colorBtnSubmit'];
         $inputBg = $GLOBALS['optionsDB']['colorInputBackground'];
+        $catalog = function_exists('loanUserChipCatalog') ? loanUserChipCatalog() : array();
+        $catalogJson = json_encode($catalog, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+        if($catalogJson === false) {
+            $catalogJson = '[]';
+        }
         $form = new div;
         $form->indent = $indent;
         $form->tag = "form";
@@ -550,8 +555,16 @@ class Inventories
         $form->class = "inventar-loan-new";
         $str = $form->open();
         $str .= '<input type="hidden" name="Inventory" value="'.(int)$this->Index.'">';
-        $str .= '<div class="profile-field"><label class="profile-label" for="loan-user">Person</label>'
-            .'<select id="loan-user" class="w3-select w3-border w3-input profile-control '.$inputBg.'" name="User">'.UserOptionAll(0).'</select></div>';
+        $str .= '<div class="profile-field loan-user-chip-field">'
+            .'<span class="profile-label" id="loan-user-label">Person</span>'
+            .'<div class="termin-visibility-box w3-padding w3-border '.$inputBg.'">'
+            .'<div id="loanUserChips" class="mail-recipient-chips" aria-live="polite" aria-labelledby="loan-user-label"></div>'
+            .'<input type="text" id="loanUserInput" class="w3-input w3-border '.$inputBg.'" placeholder="Person…" autocomplete="off" aria-labelledby="loan-user-label">'
+            .'<div id="loanUserSuggest" class="mail-recipient-suggest" hidden></div>'
+            .'<input type="hidden" name="User" id="loanUserId" value="0">'
+            .'</div>'
+            .'<script type="application/json" id="loanUserCatalog">'.$catalogJson.'</script>'
+            .'</div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-start">Von</label>'
             .'<input id="loan-start" class="w3-input w3-border profile-control '.$inputBg.'" type="date" name="StartDate" value="'.htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8').'"></div>';
         $str .= '<div class="profile-field"><label class="profile-label" for="loan-end">Bis</label>'

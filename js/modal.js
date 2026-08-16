@@ -10,6 +10,12 @@ function closeModal() {
     if(typeof closeOrchestraSeatSheet === 'function') closeOrchestraSeatSheet();
 }
 
+function initLoanUserChipsInModal(root) {
+    if(typeof LoanUserChips !== 'undefined' && LoanUserChips && typeof LoanUserChips.initIn === 'function') {
+        LoanUserChips.initIn(root || document.getElementById('ajaxModalContent') || document);
+    }
+}
+
 function openModal(type, id, register) {
     var host = document.getElementById('ajaxModalHost');
     var content = document.getElementById('ajaxModalContent');
@@ -20,6 +26,7 @@ function openModal(type, id, register) {
     if(modalCache[key]) {
         content.innerHTML = modalCache[key];
         host.style.display = 'block';
+        initLoanUserChipsInModal(content);
         return;
     }
 
@@ -40,9 +47,11 @@ function openModal(type, id, register) {
         if(xhr.status >= 200 && xhr.status < 300 && xhr.responseText) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
+            initLoanUserChipsInModal(content);
         }
         else if(xhr.responseText) {
             content.innerHTML = xhr.responseText;
+            initLoanUserChipsInModal(content);
         }
         else {
             content.innerHTML = '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Modal konnte nicht geladen werden (HTTP '+xhr.status+').</p></div>';
@@ -861,6 +870,7 @@ document.addEventListener('submit', function(e) {
         modalCache['inventar:' + invId] = data.html;
         content.innerHTML = data.html;
         if(host) host.style.display = 'block';
+        initLoanUserChipsInModal(content);
         highlightInventarLoanRow(content, data.loanId);
         if(data.action === 'newLoan' && data.loanId) {
             window.location.href = 'loan-form.php?loan=' + encodeURIComponent(data.loanId) + '&kind=loan';
