@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-16-a8bf2 (2026-08-16)
+
+- MELD-196: Leihe über Formular starten, Felder editierbar
+
 ## 2026-08-16-5db4e (2026-08-16)
 
 - MELD-194: Nav-Label Mitgliederverwaltung als „Mitglieder“
