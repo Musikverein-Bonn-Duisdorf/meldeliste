@@ -1884,6 +1884,46 @@ function UserOptionAll($val) {
     return $str;
 }
 
+/**
+ * User catalog for loan person chip picker (same set as UserOptionAll).
+ * @return list<array{id:int,label:string,meta:string}>
+ */
+function loanUserChipCatalog() {
+    $org = isset($GLOBALS['optionsDB']['orgNameShort'])
+        ? trim((string)$GLOBALS['optionsDB']['orgNameShort'])
+        : '';
+    if($org === '') {
+        $org = 'Verein';
+    }
+    $catalog = array(
+        array('id' => 0, 'label' => $org, 'meta' => 'Verein'),
+    );
+    $sql = sprintf(
+        'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, COALESCE(r.`Name`, "") AS `RegisterName`
+         FROM `%sUser` u
+         LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
+         LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+         WHERE u.`Deleted` = 0 AND %s
+         ORDER BY u.`Nachname`, u.`Vorname`;',
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        $GLOBALS['dbprefix'],
+        sqlExcludeFoerderndeUsers('u.`Index`')
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    if(!$dbr) {
+        return $catalog;
+    }
+    while($row = mysqli_fetch_array($dbr)) {
+        $catalog[] = array(
+            'id' => (int)$row['Index'],
+            'label' => trim($row['Vorname'].' '.$row['Nachname']),
+            'meta' => html_entity_decode((string)$row['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+        );
+    }
+    return $catalog;
+}
+
 function validateLink($hash) {
     $_SESSION['userid'] = 0;
     $hash = function_exists('normalizeAlinkInput')
