@@ -306,24 +306,27 @@ class InventoriesDocument
 
     private function logHeader() {
         $invId = (int)$this->Inventory;
-        $label = '?';
         $inv = new Inventories();
-        if($inv->load_by_id($invId) && (int)$inv->Index) {
-            $family = $inv->getInstrumentName();
+        $inv->load_by_id($invId);
+        $typeName = '';
+        $reg = '';
+        if((int)$inv->Index) {
+            $typeName = (string)$inv->getInventoryType();
+            $family = trim((string)$inv->getInstrumentName());
             if($family !== '') {
-                $label = $family;
+                $typeName = $family;
             }
-            else {
-                $t = RegNumber::loadType($inv->Inventory);
-                if($t && !empty($t->Typ)) {
-                    $label = $t->Typ;
-                }
-            }
+            $reg = RegNumber::displayInventory($inv->Inventory, $inv->RegNumber);
         }
+        if($typeName === '') {
+            $typeName = '#'.$invId;
+        }
+        $extra = $reg !== '' ? ' '.$reg : '';
         return sprintf(
-            'Inventory: (%d) <b>%s</b>, Document-ID: %d',
+            'Inventory: (%d) <b>%s</b>%s, Document-ID: %d',
             $invId,
-            $label,
+            $typeName,
+            $extra,
             (int)$this->Index
         );
     }
