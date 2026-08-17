@@ -6193,23 +6193,25 @@ select.profile-control {
 .inv-meta-line {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  margin-top: 0.35rem;
+  align-items: flex-start;
+  gap: 0.55rem 1.15rem;
+  margin-top: 0.4rem;
   font-size: 0.9rem;
   line-height: 1.35;
 }
 
 .inv-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
   flex: 0 1 auto;
+  min-width: 0;
   word-break: break-word;
 }
 
 .inv-meta-item--loan {
   flex: 0 0 auto;
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.4rem;
   max-width: 100%;
 }
 
@@ -6219,8 +6221,22 @@ select.profile-control {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   opacity: 0.65;
-  margin-right: 0.25rem;
+  line-height: 1.2;
   white-space: nowrap;
+}
+
+.inv-meta-v {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.4rem;
+  line-height: 1.3;
+  min-height: 1.45rem;
+}
+
+.inv-meta-sep {
+  opacity: 0.45;
+  line-height: 1;
 }
 
 .inv-meta-line .mail-recipient-chip {
