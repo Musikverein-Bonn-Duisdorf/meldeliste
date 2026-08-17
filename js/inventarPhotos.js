@@ -210,6 +210,9 @@
       initLoanUserChipsInModal(content);
     }
     initGallery(content);
+    if (typeof refreshInventarListRow === 'function') {
+      refreshInventarListRow(invId, data.listRowHtml, data.action);
+    }
   }
 
   document.addEventListener('submit', function(e) {

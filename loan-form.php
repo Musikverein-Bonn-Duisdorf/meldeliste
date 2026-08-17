@@ -30,6 +30,10 @@ if(!LoanForm::userMayView($userId, $loan)) {
     denyAccess();
 }
 
+if($kind === LoanForm::KIND_RETURN && !LoanForm::userMayViewReturnForm($userId, $loan)) {
+    denyAccess('Rückgabe nur durch Inventar-Verwaltung.');
+}
+
 $canEdit = LoanForm::userMayEdit($userId);
 $locked = LoanForm::isDigitallyComplete($loan, $kind);
 $isBorrowerOnly = !$canEdit && (int)$loan->User === $userId;

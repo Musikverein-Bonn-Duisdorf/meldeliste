@@ -177,6 +177,31 @@ class LoanForm
         return requirePermission('perm_editInventories');
     }
 
+    /**
+     * Return form: admins always; borrowers only when lender signed and their signature is pending.
+     */
+    public static function userMayViewReturnForm($userId, InventoriesLoan $loan) {
+        if(self::userMayEdit($userId)) {
+            return true;
+        }
+        return self::borrowerHasPendingReturnSignature($userId, $loan);
+    }
+
+    /** Borrower may open return form only after the club started it (lender signed, borrower pending). */
+    public static function borrowerHasPendingReturnSignature($userId, InventoriesLoan $loan) {
+        $userId = (int)$userId;
+        if($userId < 1 || (int)$loan->Index < 1 || (int)$loan->User !== $userId) {
+            return false;
+        }
+        foreach(self::listPendingForBorrower($userId) as $row) {
+            if((int)$row['loan']->Index === (int)$loan->Index
+                && self::normalizeKind($row['kind']) === self::KIND_RETURN) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static function normalizeRole($role) {
         $role = strtolower(trim((string)$role));
         return ($role === self::ROLE_BORROWER) ? self::ROLE_BORROWER : self::ROLE_LENDER;

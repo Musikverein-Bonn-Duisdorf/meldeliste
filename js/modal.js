@@ -819,6 +819,29 @@ function invalidateInventarModalCache(inventoryId) {
     });
 }
 
+function refreshInventarListRow(inventoryId, listRowHtml, action) {
+    inventoryId = parseInt(inventoryId, 10) || 0;
+    if(!inventoryId) return;
+    var list = document.getElementById('Liste');
+    if(!list) return;
+    var row = list.querySelector('.inv-row[data-inventar-id="' + inventoryId + '"]');
+    if(action === 'delete') {
+        if(row && row.parentNode) {
+            row.parentNode.removeChild(row);
+        }
+        return;
+    }
+    if(!listRowHtml || !row) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = listRowHtml.trim();
+    var newRow = wrap.firstElementChild;
+    if(!newRow || !row.parentNode) return;
+    row.parentNode.replaceChild(newRow, row);
+    if(typeof filterMusiker === 'function') {
+        filterMusiker();
+    }
+}
+
 function highlightInventarLoanRow(content, loanId) {
     loanId = parseInt(loanId, 10) || 0;
     if(!content || !loanId) return;
@@ -886,6 +909,7 @@ document.addEventListener('submit', function(e) {
         initLoanUserChipsInModal(content);
         if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         highlightInventarLoanRow(content, data.loanId);
+        refreshInventarListRow(invId, data.listRowHtml, data.action);
         if(data.action === 'newLoan' && data.loanId) {
             window.location.href = 'loan-form.php?loan=' + encodeURIComponent(data.loanId) + '&kind=loan';
             return;
