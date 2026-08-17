@@ -371,7 +371,8 @@ class Inventories
             $classes[] = $hover;
         }
 
-        $attrs = 'data-insured="'.($insured ? '1' : '0').'"'
+        $attrs = 'data-inventar-id="'.(int)$this->Index.'"'
+            .' data-insured="'.($insured ? '1' : '0').'"'
             .' data-loaned="'.($isLoaned ? '1' : '0').'"'
             .' data-sort-regnumber="'.$h((string)(int)$row['RegNumber']).'"'
             .' data-sort-typ="'.$h($typLabel).'"'
@@ -667,8 +668,10 @@ class Inventories
         $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
         $str .= '<a class="inventory-loan-btn" '
             .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a>';
-        $str .= '<a class="inventory-loan-btn" '
-            .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
+        if($canEdit) {
+            $str .= '<a class="inventory-loan-btn" '
+                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
+        }
         $str .= '</div>';
 
         if($hasLoanScan || $hasReturnScan) {
@@ -872,6 +875,35 @@ function isInventoriesAjaxRequest() {
 }
 
 /**
+ * Build JSON payload for inventar AJAX mutations (modal + list row).
+ *
+ * @param array $result
+ * @return array<string, mixed>
+ */
+function inventoriesAjaxPayload($result) {
+    $invId = isset($result['inventoryId']) ? (int)$result['inventoryId'] : 0;
+    $action = isset($result['action']) ? (string)$result['action'] : '';
+    $html = '';
+    $listRowHtml = '';
+    if($invId > 0 && $action !== 'delete') {
+        $inv = new Inventories;
+        $inv->load_by_id($invId);
+        if((int)$inv->Index) {
+            $html = $inv->getModalHtml(true);
+            $listRowHtml = $inv->printTableLine(true);
+        }
+    }
+    return array(
+        'ok' => !empty($result['ok']),
+        'loanId' => isset($result['loanId']) ? (int)$result['loanId'] : 0,
+        'inventoryId' => $invId,
+        'action' => $action,
+        'html' => $html,
+        'listRowHtml' => $listRowHtml,
+    );
+}
+
+/**
  * @param array $result
  */
 function respondInventoriesAjax($result) {
@@ -879,22 +911,7 @@ function respondInventoriesAjax($result) {
         ob_end_clean();
     }
     header('Content-Type: application/json; charset=UTF-8');
-    $invId = isset($result['inventoryId']) ? (int)$result['inventoryId'] : 0;
-    $html = '';
-    if($invId > 0) {
-        $inv = new Inventories;
-        $inv->load_by_id($invId);
-        if((int)$inv->Index) {
-            $html = $inv->getModalHtml(true);
-        }
-    }
-    echo json_encode(array(
-        'ok' => !empty($result['ok']),
-        'loanId' => isset($result['loanId']) ? (int)$result['loanId'] : 0,
-        'inventoryId' => $invId,
-        'action' => isset($result['action']) ? (string)$result['action'] : '',
-        'html' => $html,
-    ));
+    echo json_encode(inventoriesAjaxPayload($result));
     exit;
 }
 

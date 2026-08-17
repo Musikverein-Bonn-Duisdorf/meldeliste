@@ -27,24 +27,24 @@ $respondAjax = function ($ok, $inventoryId, $error = '') use ($isAjax) {
         ob_end_clean();
     }
     header('Content-Type: application/json; charset=UTF-8');
-    $html = '';
     $invId = (int)$inventoryId;
-    if($ok && $invId > 0) {
-        $inv = new Inventories();
-        $inv->load_by_id($invId);
-        if((int)$inv->Index) {
-            $html = $inv->getModalHtml(true);
-        }
-    }
+    $payload = $ok
+        ? inventoriesAjaxPayload(array(
+            'ok' => true,
+            'inventoryId' => $invId,
+            'action' => '',
+        ))
+        : array(
+            'ok' => false,
+            'inventoryId' => $invId,
+            'html' => '',
+            'listRowHtml' => '',
+            'error' => $error,
+        );
     if(!$ok) {
         http_response_code(400);
     }
-    echo json_encode(array(
-        'ok' => $ok,
-        'inventoryId' => $invId,
-        'html' => $html,
-        'error' => $error,
-    ));
+    echo json_encode($payload);
     exit;
 };
 
