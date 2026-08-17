@@ -82,7 +82,8 @@
 	"Typ": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"Prefix": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"Protected": {"Type": "tinyint", "Default": 0},
-	"Sortierung": {"Type": "int", "Default": 1}
+	"Sortierung": {"Type": "int", "Default": 1},
+	"ThumbFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "Log": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

@@ -57,6 +57,17 @@ class InventoriesPhoto
         return $out;
     }
 
+    /**
+     * List thumbnail: item primary photo, else type default, else ''.
+     */
+    public static function listThumbUrl(Inventories $inv) {
+        $thumb = self::firstForInventory((int)$inv->Index);
+        if($thumb) {
+            return self::publicUrl((int)$thumb->Index);
+        }
+        return Inventory::typeThumbUrl((int)$inv->Inventory);
+    }
+
     /** @return InventoriesPhoto|null */
     public static function firstForInventory($inventoryId) {
         $list = self::listForInventory($inventoryId);
@@ -312,7 +323,15 @@ class InventoriesPhoto
         $inventoryId = (int)$inventoryId;
         $photos = self::listForInventory($inventoryId);
         $count = count($photos);
-        if(!$canEdit && $count === 0) {
+        $typeThumb = '';
+        if($count === 0) {
+            $inv = new Inventories();
+            $inv->load_by_id($inventoryId);
+            if((int)$inv->Index) {
+                $typeThumb = Inventory::typeThumbUrl((int)$inv->Inventory);
+            }
+        }
+        if(!$canEdit && $count === 0 && $typeThumb === '') {
             return '';
         }
         $h = function ($s) {
@@ -331,7 +350,9 @@ class InventoriesPhoto
             if($count > 1) {
                 $html .= '<button type="button" class="inv-photo-nav inv-photo-nav--prev" aria-label="Vorheriges Foto">&lsaquo;</button>';
             }
+            $html .= '<button type="button" class="inv-photo-zoom" aria-label="Foto vergrößern">';
             $html .= '<img class="inv-photo-img" src="'.$h(self::publicUrl($firstId)).'" alt="" data-photo-id="'.$firstId.'">';
+            $html .= '</button>';
             if($count > 1) {
                 $html .= '<button type="button" class="inv-photo-nav inv-photo-nav--next" aria-label="Nächstes Foto">&rsaquo;</button>';
             }
@@ -339,6 +360,15 @@ class InventoriesPhoto
             if($count > 1) {
                 $html .= '<p class="inv-photo-count"><span class="inv-photo-pos">1</span> / '.$count.'</p>';
             }
+            $html .= '</div>';
+        }
+        elseif($typeThumb !== '') {
+            $html .= '<div class="inv-photo-gallery inv-photo-gallery--default">';
+            $html .= '<div class="inv-photo-stage">';
+            $html .= '<button type="button" class="inv-photo-zoom" aria-label="Foto vergrößern">';
+            $html .= '<img class="inv-photo-img" src="'.$h($typeThumb).'" alt="">';
+            $html .= '</button>';
+            $html .= '</div>';
             $html .= '</div>';
         }
         if($canEdit) {
@@ -366,9 +396,6 @@ class InventoriesPhoto
                 $html .= '<button type="submit" class="w3-btn w3-border w3-mobile w3-small">Löschen</button>';
                 $html .= '</form>';
             }
-        }
-        elseif($count === 0) {
-            $html .= '<div class="profile-value">—</div>';
         }
         $html .= '</div>';
         return $html;
