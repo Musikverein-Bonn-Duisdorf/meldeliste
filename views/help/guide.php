@@ -104,7 +104,7 @@ if($helpUser->hasInventories()) {
         'title' => 'Mein Inventar',
         'body' => '
 <p>Wenn dir Inventar gehört <b>oder an dich ausgeliehen</b> ist (aktive Leihe), erscheint <b>Mein Inventar</b> in der Navigation.</p>
-<p>Dort siehst du zuerst geliehene Stücke (Chip „geliehen“), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Ein Tippen/Klick öffnet die Details im Modal. Unter <b>Dokumente</b> siehst du hinterlegte Rechnungen und Belege (öffnen im neuen Tab). Bearbeiten, Hochladen und Löschen nur mit den entsprechenden Rechten.</p>
+<p>Dort siehst du zuerst geliehene Stücke (Chip „geliehen“), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Sind Fotos hinterlegt, erscheint ein Thumbnail. Ein Tippen/Klick öffnet die Details im Modal; dort kannst du durch die Fotos blättern und unter <b>Dokumente</b> hinterlegte Dateien öffnen. Bearbeiten, Hochladen und Löschen nur mit den entsprechenden Rechten.</p>
 '
     );
 }
@@ -227,12 +227,12 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche (mehrere Wörter = UND, z. B. <code>marsch Ralf</code>) und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick auf die Zeile öffnet Details; Eigentümer-/Ausleihe-Chips öffnen die Person; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
+<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche (mehrere Wörter = UND, z. B. <code>marsch Ralf</code>) und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick auf die Zeile öffnet Details; hinterlegte Fotos erscheinen als Thumbnail, im Modal blätterbar; Eigentümer-/Ausleihe-Chips öffnen die Person; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>
 <li><b>Inventar-Typen</b> – Prefix bestimmt den Nummernkreis (z.&nbsp;B. <code>MARSCH-001</code>, <code>INSTR-42</code>); die Beschriftung erscheint in Listen und Formularen</li>
-<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Dokumente</b> Dateien (PDF oder Bild) mit Notiz ablegen, im neuen Tab öffnen oder löschen; unter <b>Leihen</b> Person per Chip-Suche wählen und <b>Leihvertrag</b> (übrige Angaben optional bzw. im Formular) — der Vertrag öffnet sich; offene Leihen mit Datum und <b>Rückgabe</b> beenden (öffnet das Rückgabeprotokoll); Scans einzeln löschen oder den ganzen Leiheintrag entfernen</li>
+<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal Fotos hinzufügen oder löschen, unter <b>Dokumente</b> Dateien (PDF oder Bild) mit Notiz ablegen, im neuen Tab öffnen oder löschen; unter <b>Leihen</b> Person per Chip-Suche wählen und <b>Leihvertrag</b> (übrige Angaben optional bzw. im Formular) — der Vertrag öffnet sich; offene Leihen mit Datum und <b>Rückgabe</b> beenden (öffnet das Rückgabeprotokoll); Scans einzeln löschen oder den ganzen Leiheintrag entfernen</li>
 <li><b>Leihvertrag / Rückgabe</b> – aus der Leihhistorie druckbare Formulare (alle Inventartypen); Leihbeginn, Leihende, Kaution und Leihgebühr im Formular änderbar und speicherbar; Kaution und Leihgebühr im Druck nur wenn &gt; 0 €; Entleiher immer so bezeichnet; Adresse und zusätzliche Vereinbarungen/Bemerkungen optional und jederzeit änderbar (bei angeschlossener Mitgliederverwaltung wird die MIT-Anschrift vorausgefüllt, sofern noch leer); Rückgabe-Checkliste online abhakbar und speicherbar; nach Unterschrift Scan (PDF, JPEG oder PNG) ablegen, im neuen Tab öffnen oder löschen und neu hochladen. Bei Vereinsmitgliedern endet die Leihe mit dem Austritt, sonst neuer Vertrag als Nicht-Mitglied</li>
 ' : '').'
 </ul>

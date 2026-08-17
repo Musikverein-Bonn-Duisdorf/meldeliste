@@ -6,6 +6,8 @@ uploads/**
 !uploads/.htaccess
 !uploads/loans/
 !uploads/loans/.htaccess
+!uploads/inventory/
+!uploads/inventory/.htaccess
 !uploads/inventory-docs/
 !uploads/inventory-docs/.htaccess
 php.ini

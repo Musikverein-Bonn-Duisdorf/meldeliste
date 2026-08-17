@@ -34,6 +34,7 @@ include "libs/instrument.php";
 include "libs/instruments.php";
 include "libs/inventory.php";
 include "libs/inventories.php";
+include "libs/inventoriesPhoto.php";
 include "libs/loan.php";
 include "libs/inventoriesLoan.php";
 include "libs/inventoriesDocument.php";

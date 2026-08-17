@@ -27,6 +27,7 @@ function openModal(type, id, register) {
         content.innerHTML = modalCache[key];
         host.style.display = 'block';
         initLoanUserChipsInModal(content);
+        if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         return;
     }
 
@@ -48,10 +49,12 @@ function openModal(type, id, register) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else if(xhr.responseText) {
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else {
             content.innerHTML = '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Modal konnte nicht geladen werden (HTTP '+xhr.status+').</p></div>';
@@ -880,6 +883,7 @@ document.addEventListener('submit', function(e) {
         content.innerHTML = data.html;
         if(host) host.style.display = 'block';
         initLoanUserChipsInModal(content);
+        if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         highlightInventarLoanRow(content, data.loanId);
         if(data.action === 'newLoan' && data.loanId) {
             window.location.href = 'loan-form.php?loan=' + encodeURIComponent(data.loanId) + '&kind=loan';
