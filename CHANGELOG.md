@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-18-4b110 (2026-08-18)
+
+- MELD-201: Digitale Unterschrift für Leihvertrag und Rückgabe
+
 ## 2026-08-17-c6c7f (2026-08-17)
 
 - MELD-211: Inventar-Meta mit Label über dem Wert
