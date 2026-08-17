@@ -7,6 +7,7 @@
  * v36: drop User.RefID (Mitgliedsnummer obsolete; canonical id is User.Index).
  * v37: Termine.Sammlungen (JSON int[] → archiv_Collection when Notenarchiv is attached).
  * v38: ensure Termine.Sammlungen (text JSON); drop obsolete Termine.Sammlung if present.
+ * v39: InventoriesPhotos (optional item photos).
  */
-return 38;
+return 39;
 ?>

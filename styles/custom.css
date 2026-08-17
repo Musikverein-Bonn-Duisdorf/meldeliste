@@ -6009,6 +6009,16 @@ select.profile-control {
   word-break: break-word;
 }
 
+.inv-thumb {
+  display: block;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
 .inv-id .mail-recipient-chip {
   margin-top: 0.05rem;
 }
@@ -6475,4 +6485,86 @@ select.profile-control {
     padding-right: 0.75rem;
   }
 }
+
+.inv-photo-block {
+  padding: 0 1rem 0.75rem;
+}
+
+.inv-photo-gallery {
+  max-width: 22rem;
+}
+
+.inv-photo-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.35rem;
+  overflow: hidden;
+  min-height: 10rem;
+}
+
+.inv-photo-img {
+  display: block;
+  max-width: 100%;
+  max-height: 16rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.inv-photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 2rem;
+  height: 2.4rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inv-photo-nav--prev { left: 0.25rem; }
+.inv-photo-nav--next { right: 0.25rem; }
+
+.inv-photo-count {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.inv-photo-upload,
+.inv-photo-delete {
+  display: inline-block;
+  margin: 0.5rem 0.5rem 0 0;
+}
+
+.inv-photo-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.inv-photo-add input[type="file"] {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.inv-photo-add span {
+  display: inline-block;
+  padding: 0.28rem 0.65rem;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
 

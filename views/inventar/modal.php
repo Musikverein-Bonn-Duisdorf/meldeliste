@@ -44,6 +44,8 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
     </div>
   </header>
 
+<?php if(!empty($photosHtml)) echo $photosHtml; ?>
+
 <?php echo $canEdit ? '<form id="inventar-edit-form" class="inventar-modal-form" action="" method="POST">' : '<div class="inventar-modal-form">'; ?>
 <?php if($canEdit) { ?>
   <input type="hidden" name="InventoriesIndex" value="<?php echo (int)$inv->Index; ?>">

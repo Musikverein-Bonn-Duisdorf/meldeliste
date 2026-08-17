@@ -49,6 +49,13 @@
 	"Insurance": {"Type": "tinyint", "Default": 0},
 	"Comment": {"Type": "text", "Collation": "utf8mb4_unicode_ci"}
     },
+    "InventoriesPhotos": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Inventory": {"Type": "int"},
+	"Sortierung": {"Type": "int", "Default": 1},
+	"File": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
+    },
     "InventoriesLoans": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"User": {"Type": "int"},

@@ -237,8 +237,10 @@ class Inventories
         while($dbr && ($row = mysqli_fetch_array($dbr))) {
             $loan = new InventoriesLoan;
             $loan->load_by_id($row['Index']);
-            if($loan->Index) $loan->delete();
+            if($loan->Index)             $loan->delete();
         }
+
+        InventoriesPhoto::deleteAllForInventory((int)$this->Index);
 
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
@@ -393,6 +395,10 @@ class Inventories
         $str .= '<div class="inv-id">';
         $str .= '<div class="inv-reg">'.$h($regDisplay).'</div>';
         $str .= '<div class="inv-typ">'.$h($typLabel).'</div>';
+        $thumb = InventoriesPhoto::firstForInventory((int)$this->Index);
+        if($thumb) {
+            $str .= '<img class="inv-thumb" src="'.$h(InventoriesPhoto::publicUrl((int)$thumb->Index)).'" alt="" width="56" height="56">';
+        }
         if($insured) {
             $str .= '<span class="mail-recipient-chip mail-recipient-chip--insured">versichert</span>';
         }
@@ -487,6 +493,7 @@ class Inventories
 
         $inv = $this;
         $loansHtml = $this->getLoansModalHtml($canEdit);
+        $photosHtml = InventoriesPhoto::galleryHtml((int)$this->Index, $canEdit);
         ob_start();
         require __DIR__.'/../views/inventar/modal.php';
         return ob_get_clean();
