@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-17-c6c7f (2026-08-17)
+
+- MELD-211: Inventar-Meta mit Label über dem Wert
+- MELD-212: VERSION-Sync nach Release ohne zweites PHPUnit
+
 ## 2026-08-17-de34f (2026-08-17)
 
 - MELD-208: Inventar-Dokument-Log mit Namen statt Fragezeichen
