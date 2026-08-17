@@ -397,9 +397,9 @@ class Inventories
         $str .= '<div class="inv-id">';
         $str .= '<div class="inv-reg">'.$h($regDisplay).'</div>';
         $str .= '<div class="inv-typ">'.$h($typLabel).'</div>';
-        $thumb = InventoriesPhoto::firstForInventory((int)$this->Index);
-        if($thumb) {
-            $str .= '<img class="inv-thumb" src="'.$h(InventoriesPhoto::publicUrl((int)$thumb->Index)).'" alt="" width="56" height="56">';
+        $thumbUrl = InventoriesPhoto::listThumbUrl($this);
+        if($thumbUrl !== '') {
+            $str .= '<img class="inv-thumb" src="'.$h($thumbUrl).'" alt="" width="56" height="56">';
         }
         if($insured) {
             $str .= '<span class="mail-recipient-chip mail-recipient-chip--insured">versichert</span>';

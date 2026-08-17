@@ -8,6 +8,7 @@
  * v37: Termine.Sammlungen (JSON int[] → archiv_Collection when Notenarchiv is attached).
  * v38: ensure Termine.Sammlungen (text JSON); drop obsolete Termine.Sammlung if present.
  * v39: InventoriesPhotos (MELD-191) and InventoriesDocuments (MELD-205).
+ * v40: Inventory.ThumbFile (MELD-206 type default thumbnail).
  */
-return 39;
+return 40;
 ?>

@@ -8,6 +8,7 @@ function closeModal() {
     var host = document.getElementById('ajaxModalHost');
     if(host) host.style.display = 'none';
     if(typeof closeOrchestraSeatSheet === 'function') closeOrchestraSeatSheet();
+    if(typeof closeInventarPhotoLightbox === 'function') closeInventarPhotoLightbox();
 }
 
 function initLoanUserChipsInModal(root) {

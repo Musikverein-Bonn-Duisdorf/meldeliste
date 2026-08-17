@@ -6130,6 +6130,19 @@ select.profile-control {
   pointer-events: none;
 }
 
+.inv-type-thumb-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.inv-type-thumb-file {
+  max-width: 100%;
+  font-size: 0.8rem;
+}
+
 .inv-id .mail-recipient-chip {
   margin-top: 0.05rem;
 }
@@ -6626,6 +6639,16 @@ select.profile-control {
   object-fit: contain;
 }
 
+.inv-photo-zoom {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-in;
+  max-width: 100%;
+}
+
 .inv-photo-nav {
   position: absolute;
   top: 50%;
@@ -6677,6 +6700,69 @@ select.profile-control {
   border: 1px solid rgba(0, 0, 0, 0.22);
   border-radius: 999px;
   font-size: 0.85rem;
+}
+
+/* Above .w3-modal (2000); inventory dialog stays open underneath. */
+.inv-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  box-sizing: border-box;
+  padding: 2.5rem 3.5rem;
+}
+
+.inv-photo-lightbox[hidden] {
+  display: none !important;
+}
+
+.inv-photo-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.inv-photo-lightbox-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  z-index: 1;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inv-photo-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 2.6rem;
+  height: 3rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inv-photo-lightbox-nav--prev { left: 0.4rem; }
+.inv-photo-lightbox-nav--next { right: 0.4rem; }
+
+.inv-photo-lightbox-nav[hidden] {
+  display: none !important;
 }
 
 
