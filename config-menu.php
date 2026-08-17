@@ -39,6 +39,32 @@ if(isset($_POST['save'])) {
                 logConfigChange($row['Parameter'], $row['Value'], $val, $row['Type']);
             }
             break;
+        case "audienceGroups":
+            if(isset($_POST[$row['Parameter']])) {
+                $spec = AudienceSpec::normalize($_POST[$row['Parameter']], array(
+                    'allowNamedGroups' => true,
+                    'defaultGroups' => null,
+                ));
+                $spec['users'] = array();
+                $spec['registers'] = array();
+                $spec['termine'] = array();
+                $newVal = AudienceSpec::canonicalJson($spec, array('allowNamedGroups' => true));
+                if($newVal === '') {
+                    $newVal = json_encode(AudienceSpec::emptySpec());
+                }
+                if($newVal == $row['Value']) break;
+                $sql = sprintf('UPDATE `%sconfig` SET `Value` = "%s" WHERE `Parameter` = "%s";',
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($conn, $newVal),
+                $row['Parameter']
+                );
+                $dbr2 = mysqli_query($conn, $sql);
+                sqlerror();
+                if($dbr2) {
+                    logConfigChange($row['Parameter'], $row['Value'], $newVal, $row['Type']);
+                }
+            }
+            break;
         case "bool":
         case "uint":
         case "int":
@@ -212,9 +238,10 @@ $activeSchemeName = isset($colorSchemes[$activeSchemeId]['name'])
     <div class="w3-col l4 w3-center"><b>Wert</b></div>
 </div>
 <?php
-    $sql = sprintf('SELECT * FROM `%sconfig` ORDER BY `Parameter`;',
+$audienceGroupParams = array();
+$sql = sprintf('SELECT * FROM `%sconfig` ORDER BY `Parameter`;',
     $GLOBALS['dbprefix']
-    );
+);
 $dbr = mysqli_query($conn, $sql);
 sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
@@ -267,6 +294,18 @@ while($row = mysqli_fetch_array($dbr)) {
     case 'string':
         echo "<input class=\"w3-col l4 m4 s12\" type=\"text\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
         break;
+    case 'audienceGroups':
+        $safePara = htmlspecialchars((string)$row['Parameter'], ENT_QUOTES, 'UTF-8');
+        $spec = AudienceSpec::normalize($row['Value'], array('allowNamedGroups' => true, 'defaultGroups' => null));
+        $specJson = htmlspecialchars(json_encode($spec), ENT_QUOTES, 'UTF-8');
+        $audienceGroupParams[] = (string)$row['Parameter'];
+        echo '<div class="w3-col l4 m4 s12">'."\n";
+        echo '<div id="cfgVisChips_'.$safePara.'" class="mail-recipient-chips"></div>'."\n";
+        echo '<input type="text" id="cfgVisInput_'.$safePara.'" class="w3-input w3-border" placeholder="Gruppe, Rolle…" autocomplete="off">'."\n";
+        echo '<div id="cfgVisSuggest_'.$safePara.'" class="mail-recipient-suggest" hidden></div>'."\n";
+        echo '<input type="hidden" name="'.$safePara.'" id="cfgVisSpec_'.$safePara.'" value="'.$specJson.'">'."\n";
+        echo "</div>\n";
+        break;
     case 'email':
         echo "<input class=\"w3-col l4 m4 s12\" type=\"email\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
         break;
@@ -296,6 +335,37 @@ while($row = mysqli_fetch_array($dbr)) {
 <button class="w3-btn w3-padding <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-border w3-margin w3-mobile" type="submit" name="save" value="speichern" >speichern</button>
     </form>
 <?php
+if(count($audienceGroupParams)) {
+    Group::ensureSchema();
+    $cfgVisCatalog = AudienceSpec::buildCatalog(array(
+        'forMail' => false,
+        'includeNamedGroups' => true,
+        'includeUsers' => false,
+        'includeRegisters' => false,
+    ));
+?>
+<script type="application/json" id="cfgVisibilityCatalog"><?php echo json_encode($cfgVisCatalog, JSON_UNESCAPED_UNICODE); ?></script>
+<script src="<?php echo assetUrl('js/mailRecipients.js'); ?>"></script>
+<script>
+(function() {
+  if(typeof MailRecipientChips === 'undefined') return;
+  var params = <?php echo json_encode(array_values($audienceGroupParams)); ?>;
+  params.forEach(function(param) {
+    MailRecipientChips.init({
+      catalogEl: document.getElementById('cfgVisibilityCatalog'),
+      chipsEl: document.getElementById('cfgVisChips_' + param),
+      inputEl: document.getElementById('cfgVisInput_' + param),
+      suggestEl: document.getElementById('cfgVisSuggest_' + param),
+      hiddenEl: document.getElementById('cfgVisSpec_' + param),
+      allowEmpty: true,
+      defaultGroups: [],
+      jobId: 0
+    });
+  });
+})();
+</script>
+<?php
+}
 adminListPageEnd();
 include "common/footer.php";
 ?>

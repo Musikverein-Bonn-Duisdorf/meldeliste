@@ -121,7 +121,15 @@ $sections[] = array(
 <li><b>Nachrichten</b> – Eintrag unter „Meine Nachrichten“ in der Meldeliste</li>
 <li><b>App: …</b> – lokale Hinweise in der Android-App (Poll, kein Push-Dienst). Pro Ereignisart: neue Nachricht, neuer Termin, Termin geändert, Termin bald (nächste Tage; standardmäßig aus)</li>
 </ul>
-<p>Unter <b>Gruppen</b> siehst du, welchen Rollen (z.&nbsp;B. Alle Musiker), welchem Register und welchen benannten Gruppen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit. Den <b>Mitglied</b>-Status setzt die Mitgliederverwaltung; benannte Gruppen ändert nur, wer <b>Benutzer bearbeiten</b> hat (unter Musiker anlegen/bearbeiten oder im eigenen Profil). <b>Automatisch</b> zeigt dem Admin live die daraus folgenden Rollen/Register/regelbasierten Gruppen. Änderungen an Benachrichtigungen und Profilfeldern werden im Anwendungsprotokoll festgehalten.</p>
+<p>Unter <b>Gruppen</b> siehst du, welchen Rollen du zugeordnet bist – relevant für Mail und Termin-Sichtbarkeit:</p>
+<ul>
+<li><b>Alle User</b> – Konto vorhanden</li>
+<li><b>Alle Musiker</b> – Haken <b>aktiv</b> und Instrument zugeordnet</li>
+<li><b>Alle Aktiven</b> / <b>Alle Fördernden</b> – offene Mitgliedschaft dieses Typs in der Mitgliederverwaltung</li>
+<li><b>Alle Mitglieder</b> – Aktive oder Fördernde</li>
+<li><b>Alle Nicht-Mitglieder</b> – keine offene Vereinsmitgliedschaft</li>
+</ul>
+<p>Den <b>Mitglied</b>-Status setzt die Mitgliederverwaltung; benannte Gruppen ändert nur, wer <b>Benutzer bearbeiten</b> hat (unter Musiker anlegen/bearbeiten oder im eigenen Profil). <b>Automatisch</b> zeigt dem Admin live die daraus folgenden Rollen/Register/regelbasierten Gruppen. Änderungen an Benachrichtigungen und Profilfeldern werden im Anwendungsprotokoll festgehalten.</p>
 <p>Falls du ein Einmal-Passwort erhalten hast, wirst du nach dem Login zum Ändern des Passworts aufgefordert.</p>
 <p>Die Android-App speichert nach dem Login ein Gerätetoken und meldet dich beim nächsten Öffnen automatisch an. Abmelden in der App widerruft dieses Token.</p>
 <p>Unter <b>Persönlichen Kalender abonnieren</b> findest du deinen persönlichen ICS-Link für Google, Apple oder Outlook (siehe auch <a href="#help-kalender-abo">Persönlichen Kalender abonnieren</a>).</p>
@@ -176,8 +184,8 @@ $sections[] = array(
 <p>Im <b>Kalender</b> kannst du auf eine freie Tagesfläche klicken: Nach Bestätigung öffnet sich das Anlege-Formular mit vorausgefülltem Datum.</p>
 <p>Nach Speichern/Löschen von Terminen oder Schichten &amp; Aufgaben erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden. Beginn- und Endzeit einer Schicht/Aufgabe sind optional.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
-<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis (Standard: <b>Alle User</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles. Personen ohne Haken <b>aktiv</b> (Gastmusiker) kannst du hier wie andere Personen auswählen – sie gehören dann zu Sichtbarkeit und Besetzung dieses Termins.</p>
-<p>Discord-Posts (bei konfiguriertem Webhook) erfolgen bei Sichtbarkeit <b>Alle User</b> automatisch, sonst nur mit der Checkbox <b>Auch auf Discord posten</b>.</p>
+<p>Mit dem Chip-Feld <b>sichtbar für</b> steuerst du den Kreis. Der Standard für neue Termine kommt aus der Konfiguration (<code>defaultTerminVisibility</code>, Auslieferung: <b>Alle Musiker</b>). Ohne Chips = versteckt – nur User mit Recht <b>Versteckte Termine anzeigen</b>. Mit Chips nur der gewählte Kreis (Rollen, Gruppen, Register, Personen); Admins mit dem genannten Recht sehen weiterhin alles. Personen ohne Haken <b>aktiv</b> (Gastmusiker) kannst du hier wie andere Personen auswählen – sie gehören dann zu Sichtbarkeit und Besetzung dieses Termins.</p>
+<p>Die Checkbox <b>Discord</b> ist vorausgewählt, wenn die Sichtbarkeit den Config-Default-Gruppen entspricht; sie lässt sich abwählen. Posts erfolgen nur bei gesetzter Checkbox und konfiguriertem Webhook.</p>
 <p>Im <b>Archiv: Termine</b> findest du vergangene Termine (ebenfalls durchsuchbar).</p>
 '
 );
@@ -262,7 +270,7 @@ $sections[] = array(
 <li><b>Berechtigungen</b> – Matrix aller User (Autosave); persönliche Rechte sind editierbar; Haken mit gestricheltem Rahmen kommen nur über eine Gruppe und lassen sich hier nicht entfernen; Klick auf den Namen öffnet das User-Modal; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
-<li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, …; Änderungen erscheinen im Log</li>
+<li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, Default-Sichtbarkeit neuer Termine (<code>defaultTerminVisibility</code>), …; Änderungen erscheinen im Log</li>
 <li><b>Plattform / SSO</b> – <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> setzen die Modul-Ziele (Hosts daraus sind für SSO automatisch erlaubt); <code>ssoRedirectAllowlist</code> nur für Extra-Hosts. Nav-Links erscheinen bei gesetzter URL und dem Recht <b>Notenarchiv</b> bzw. <b>Mitglieder</b></li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '

@@ -255,8 +255,8 @@ if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n
         </label>
 <?php if(Discord::isConfigured()) {
     $postDiscordChecked = $fill
-      ? ((int)$n->PostDiscord > 0 || AudienceSpec::isAlleUserSpec($visSpec))
-      : true;
+      ? ((int)$n->PostDiscord > 0)
+      : AudienceSpec::matchesDefaultVisibility($visSpec);
 ?>
         <label class="profile-pref">
           <input type="hidden" name="PostDiscord" value="0">
@@ -400,26 +400,51 @@ $terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
   });
   var discordCb = document.getElementById('terminPostDiscord');
   if(!discordCb) return;
-  function isAlleUserSpec(spec) {
-    return spec
-      && Array.isArray(spec.groups)
-      && spec.groups.length === 1
-      && spec.groups[0] === 'users'
-      && (!spec.registers || !spec.registers.length)
-      && (!spec.users || !spec.users.length)
-      && (!spec.namedGroups || !spec.namedGroups.length);
+  var defaultVis = <?php echo json_encode(AudienceSpec::defaultVisibilitySpec(), JSON_UNESCAPED_UNICODE); ?>;
+  var skipDiscordSync = <?php echo $fill ? 'true' : 'false'; ?>;
+  function visFingerprint(spec) {
+    function ids(list) {
+      return (Array.isArray(list) ? list : []).map(function(x) { return String(x); }).slice().sort();
+    }
+    spec = spec || {};
+    return JSON.stringify([
+      ids(spec.groups),
+      ids(spec.registers),
+      ids(spec.users),
+      ids(spec.namedGroups),
+      ids(spec.termine)
+    ]);
+  }
+  function defaultVisEmpty(spec) {
+    spec = spec || {};
+    return !(spec.groups && spec.groups.length)
+      && !(spec.namedGroups && spec.namedGroups.length)
+      && !(spec.registers && spec.registers.length)
+      && !(spec.users && spec.users.length)
+      && !(spec.termine && spec.termine.length);
+  }
+  function matchesDefaultVisibility(spec) {
+    if(defaultVisEmpty(defaultVis)) return false;
+    return visFingerprint(spec) === visFingerprint(defaultVis);
   }
   function syncTerminDiscordDefault() {
     try {
-      discordCb.checked = isAlleUserSpec(MailRecipientChips.spec);
+      discordCb.checked = matchesDefaultVisibility(MailRecipientChips.spec);
     } catch(e) {}
+  }
+  function maybeSyncTerminDiscord() {
+    if(skipDiscordSync) {
+      skipDiscordSync = false;
+      return;
+    }
+    syncTerminDiscordDefault();
   }
   var origRender = MailRecipientChips.render.bind(MailRecipientChips);
   MailRecipientChips.render = function() {
     origRender();
-    syncTerminDiscordDefault();
+    maybeSyncTerminDiscord();
   };
-  syncTerminDiscordDefault();
+  maybeSyncTerminDiscord();
 })();
 </script>
 
