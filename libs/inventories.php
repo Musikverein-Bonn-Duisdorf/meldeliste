@@ -524,7 +524,23 @@ class Inventories
         }
 
         $loans = $this->getLoans();
-        if(!$loans) {
+        $openLoans = array();
+        $endedLoans = array();
+        foreach($loans as $loanId) {
+            $L = new InventoriesLoan;
+            $L->load_by_id($loanId);
+            if(!(int)$L->Index) {
+                continue;
+            }
+            if($L->isActive()) {
+                $openLoans[] = $L;
+            }
+            else {
+                $endedLoans[] = $L;
+            }
+        }
+
+        if(!$openLoans && !$endedLoans) {
             $empty = new div;
             $empty->indent = $indent + 1;
             $empty->class = "profile-value";
@@ -532,16 +548,17 @@ class Inventories
             $str .= $empty->print();
         }
         else {
-            $listTitle = new div;
-            $listTitle->indent = $indent + 1;
-            $listTitle->class = "profile-label";
-            $listTitle->body = "Historie";
-            $str .= $listTitle->print();
-
-            foreach($loans as $loanId) {
-                $L = new InventoriesLoan;
-                $L->load_by_id($loanId);
+            foreach($openLoans as $L) {
                 $str .= $this->getLoanRowHtml($indent + 1, $L, $canEdit);
+            }
+            if($endedLoans) {
+                $n = count($endedLoans);
+                $str .= '<details class="inventory-loans-ended">';
+                $str .= '<summary>Beendete Leihen ('.$n.')</summary>';
+                foreach($endedLoans as $L) {
+                    $str .= $this->getLoanRowHtml($indent + 1, $L, $canEdit);
+                }
+                $str .= '</details>';
             }
         }
 

@@ -2142,6 +2142,33 @@ a.app-titlebar-logo {
   margin-top: 4px;
 }
 
+.inventory-loans-ended {
+  margin-top: 0.5rem;
+}
+
+.inventory-loans-ended > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.55rem 0;
+  font-weight: 600;
+  user-select: none;
+}
+
+.inventory-loans-ended > summary::-webkit-details-marker {
+  display: none;
+}
+
+.inventory-loans-ended > summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 1.1em;
+  opacity: 0.65;
+}
+
+.inventory-loans-ended[open] > summary::before {
+  content: "▾";
+}
+
 .inventory-loans .inventory-loan-row.is-new {
   outline: 2px solid #345A95;
   outline-offset: -2px;
