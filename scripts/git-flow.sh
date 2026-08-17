@@ -105,11 +105,11 @@ cmd_release_master() {
   git merge "${REMOTE}/${BRANCH_DEV}" -m "merge ${BRANCH_DEV} into ${BRANCH_MASTER}"
   ./makeVersion.sh
   git push "$REMOTE" "$BRANCH_MASTER"
-  # Keep BRANCH_DEV release files in sync.
+  # Keep BRANCH_DEV release files in sync (VERSION/HASH only — suite already ran on master).
   git checkout "$BRANCH_DEV"
   git pull --ff-only "$REMOTE" "$BRANCH_DEV"
   git merge "$BRANCH_MASTER" -m "sync release files from ${BRANCH_MASTER}"
-  git push "$REMOTE" "$BRANCH_DEV"
+  MELDELISTE_SKIP_PREPUSH=1 git push "$REMOTE" "$BRANCH_DEV"
   git checkout "$cur"
   echo "git-flow: released ${BRANCH_MASTER}; synced ${BRANCH_DEV}"
 }
