@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-18-c0577 (2026-08-18)
+
+- MELD-201: Inventar-Zeile nach Modal-Änderungen, Rückgabe-Rechte, Confirm-Overlay
+- MELD-201: Inventar-Reload, Rückgabe-Rechte, Confirm-Overlay
+
 ## 2026-08-18-4b110 (2026-08-18)
 
 - MELD-201: Digitale Unterschrift für Leihvertrag und Rückgabe
