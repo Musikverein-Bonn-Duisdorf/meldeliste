@@ -7,6 +7,8 @@
  * v36: drop User.RefID (Mitgliedsnummer obsolete; canonical id is User.Index).
  * v37: Termine.Sammlungen (JSON int[] → archiv_Collection when Notenarchiv is attached).
  * v38: ensure Termine.Sammlungen (text JSON); drop obsolete Termine.Sammlung if present.
+ * v39: InventoriesPhotos (MELD-191) and InventoriesDocuments (MELD-205).
+ * v40: Inventory.ThumbFile (MELD-206 type default thumbnail).
  */
-return 38;
+return 40;
 ?>

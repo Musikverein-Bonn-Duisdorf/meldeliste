@@ -83,7 +83,10 @@ function openCalendarDayEventsPicker(dateIso, events) {
         var color = esc(ev.color || '');
         var label = esc(ev.label || ('Termin #' + id));
         var wert = (ev.wert === null || ev.wert === undefined) ? '' : String(ev.wert);
-        items += '<button type="button" class="meld-cal-day-pick-item ' + color + '"'
+        var wrap = document.querySelector('.meld-cal-wrap');
+        var unpubCls = wrap ? (wrap.getAttribute('data-style-unpublished') || 'w3-opacity') : 'w3-opacity';
+        var unpub = ev.unpublished ? (' ' + esc(unpubCls)) : '';
+        items += '<button type="button" class="meld-cal-day-pick-item ' + color + unpub + '"'
             + ' data-termin-id="' + id + '"'
             + ' data-melde-wert="' + esc(wert) + '">'
             + label

@@ -6,6 +6,12 @@ uploads/**
 !uploads/.htaccess
 !uploads/loans/
 !uploads/loans/.htaccess
+!uploads/inventory/
+!uploads/inventory/.htaccess
+!uploads/inventory-docs/
+!uploads/inventory-docs/.htaccess
+!uploads/inventory-types/
+!uploads/inventory-types/.htaccess
 php.ini
 error-log.php
 .cursor/

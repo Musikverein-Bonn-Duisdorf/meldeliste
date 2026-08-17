@@ -1,7 +1,7 @@
 <?php
 /**
  * Inventar detail modal (profile-shell).
- * Expects: $inv (Inventories), $canEdit, $row (joined SQL), $loansHtml
+ * Expects: $inv (Inventories), $canEdit, $row (joined SQL), $photosHtml, $docsHtml, $loansHtml
  */
 $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
 $btnDelete = $GLOBALS['optionsDB']['colorBtnDelete'];
@@ -43,6 +43,8 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
       <button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button>
     </div>
   </header>
+
+<?php if(!empty($photosHtml)) echo $photosHtml; ?>
 
 <?php echo $canEdit ? '<form id="inventar-edit-form" class="inventar-modal-form" action="" method="POST">' : '<div class="inventar-modal-form">'; ?>
 <?php if($canEdit) { ?>
@@ -181,6 +183,10 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
     <button type="button" class="w3-btn w3-border w3-mobile" onclick="this.form.style.display='none'">Nein</button>
   </form>
 <?php } ?>
+
+  <div class="inventar-docs-block">
+<?php echo isset($docsHtml) ? $docsHtml : ''; ?>
+  </div>
 
   <div class="inventar-loans-block">
 <?php echo $loansHtml; ?>
