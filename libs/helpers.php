@@ -1089,6 +1089,15 @@ function logMessageLinkEntities($html) {
         function ($m) use ($chip, $plainLabel) {
             $extra = isset($m[3]) ? $plainLabel($m[3]) : '';
             $label = $plainLabel($m[2]);
+            if($label === '' || $label === '?') {
+                if(class_exists('User') && method_exists('User', 'inventoryChipLabel')) {
+                    $label = $plainLabel(User::inventoryChipLabel((int)$m[1]));
+                }
+                if($label === '' || $label === '?') {
+                    $label = '#'.$m[1];
+                }
+                $extra = '';
+            }
             if($extra !== '') {
                 $label = trim($label.' '.$extra);
             }
