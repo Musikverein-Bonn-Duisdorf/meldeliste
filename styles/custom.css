@@ -6198,7 +6198,7 @@ select.profile-control {
 }
 
 .inv-meta-item {
-  min-width: 0;
+  flex: 0 1 auto;
   word-break: break-word;
 }
 
@@ -6209,6 +6209,13 @@ select.profile-control {
   text-transform: uppercase;
   opacity: 0.65;
   margin-right: 0.25rem;
+  white-space: nowrap;
+}
+
+.inv-meta-line .mail-recipient-chip {
+  white-space: nowrap;
+  max-width: none;
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
