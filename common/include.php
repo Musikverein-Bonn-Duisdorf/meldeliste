@@ -36,6 +36,7 @@ include "libs/inventory.php";
 include "libs/inventories.php";
 include "libs/loan.php";
 include "libs/inventoriesLoan.php";
+include "libs/inventoriesDocument.php";
 include "libs/loanForm.php";
 include "libs/register.php";
 include "libs/usermail.php";

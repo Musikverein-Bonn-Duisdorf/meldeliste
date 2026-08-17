@@ -799,6 +799,13 @@ function inventarLoanFormAction(form) {
     return '';
 }
 
+function inventarDocFormAction(form) {
+    if(!form || !form.classList) return '';
+    if(form.classList.contains('inv-doc-upload')) return 'document_upload';
+    if(form.classList.contains('inv-doc-delete')) return 'document_delete';
+    return '';
+}
+
 function invalidateInventarModalCache(inventoryId) {
     var prefix = 'inventar:' + inventoryId;
     Object.keys(modalCache).forEach(function(key) {
@@ -827,7 +834,9 @@ document.addEventListener('submit', function(e) {
     var form = e.target;
     if(!form || !form.closest) return;
     if(!form.closest('#ajaxModalContent .inventar-modal')) return;
-    if(!inventarLoanFormAction(form)) return;
+    var loanAction = inventarLoanFormAction(form);
+    var docAction = inventarDocFormAction(form);
+    if(!loanAction && !docAction) return;
 
     e.preventDefault();
     var modal = form.closest('.inventar-modal');
@@ -881,7 +890,7 @@ document.addEventListener('submit', function(e) {
             return;
         }
     };
-    xhr.open('POST', 'inventories.php', true);
+    xhr.open('POST', docAction ? 'inventory-document.php' : 'inventories.php', true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.send(fd);
 });

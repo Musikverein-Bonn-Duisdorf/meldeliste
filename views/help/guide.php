@@ -104,7 +104,7 @@ if($helpUser->hasInventories()) {
         'title' => 'Mein Inventar',
         'body' => '
 <p>Wenn dir Inventar gehört <b>oder an dich ausgeliehen</b> ist (aktive Leihe), erscheint <b>Mein Inventar</b> in der Navigation.</p>
-<p>Dort siehst du zuerst geliehene Stücke (Chip „geliehen“), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Ein Tippen/Klick öffnet die Details im Modal. Bearbeiten ist nur möglich, wenn du die entsprechenden Rechte hast.</p>
+<p>Dort siehst du zuerst geliehene Stücke (Chip „geliehen“), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Ein Tippen/Klick öffnet die Details im Modal. Unter <b>Dokumente</b> siehst du hinterlegte Rechnungen und Belege (öffnen im neuen Tab). Bearbeiten, Hochladen und Löschen nur mit den entsprechenden Rechten.</p>
 '
     );
 }
@@ -232,7 +232,7 @@ $sections[] = array(
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>
 <li><b>Inventar-Typen</b> – Prefix bestimmt den Nummernkreis (z.&nbsp;B. <code>MARSCH-001</code>, <code>INSTR-42</code>); die Beschriftung erscheint in Listen und Formularen</li>
-<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Leihen</b> Person per Chip-Suche wählen und <b>Leihvertrag</b> (übrige Angaben optional bzw. im Formular) — der Vertrag öffnet sich; offene Leihen mit Datum und <b>Rückgabe</b> beenden (öffnet das Rückgabeprotokoll); Scans einzeln löschen oder den ganzen Leiheintrag entfernen</li>
+<li>Bearbeiten, Löschen und Ausleihen nur mit Schreibrechten; im Inventar-Modal unter <b>Dokumente</b> Rechnungen, Belege, Quittungen und Reparaturberichte (PDF oder Bild) ablegen, im neuen Tab öffnen oder löschen; unter <b>Leihen</b> Person per Chip-Suche wählen und <b>Leihvertrag</b> (übrige Angaben optional bzw. im Formular) — der Vertrag öffnet sich; offene Leihen mit Datum und <b>Rückgabe</b> beenden (öffnet das Rückgabeprotokoll); Scans einzeln löschen oder den ganzen Leiheintrag entfernen</li>
 <li><b>Leihvertrag / Rückgabe</b> – aus der Leihhistorie druckbare Formulare (alle Inventartypen); Leihbeginn, Leihende, Kaution und Leihgebühr im Formular änderbar und speicherbar; Kaution und Leihgebühr im Druck nur wenn &gt; 0 €; Entleiher immer so bezeichnet; Adresse und zusätzliche Vereinbarungen/Bemerkungen optional und jederzeit änderbar (bei angeschlossener Mitgliederverwaltung wird die MIT-Anschrift vorausgefüllt, sofern noch leer); Rückgabe-Checkliste online abhakbar und speicherbar; nach Unterschrift Scan (PDF, JPEG oder PNG) ablegen, im neuen Tab öffnen oder löschen und neu hochladen. Bei Vereinsmitgliedern endet die Leihe mit dem Austritt, sonst neuer Vertrag als Nicht-Mitglied</li>
 ' : '').'
 </ul>

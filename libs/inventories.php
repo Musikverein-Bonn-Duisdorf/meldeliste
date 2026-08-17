@@ -227,6 +227,8 @@ class Inventories
     public function delete() {
         if(!$this->Index) return false;
 
+        InventoriesDocument::deleteAllForInventory((int)$this->Index);
+
         // Log each loan before cascade-remove (MELD-129)
         $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `Inventory` = "%d";',
         $GLOBALS['dbprefix'],
@@ -486,6 +488,7 @@ class Inventories
         }
 
         $inv = $this;
+        $docsHtml = InventoriesDocument::sectionHtml((int)$this->Index, $canEdit);
         $loansHtml = $this->getLoansModalHtml($canEdit);
         ob_start();
         require __DIR__.'/../views/inventar/modal.php';

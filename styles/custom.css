@@ -3975,6 +3975,95 @@ body.loan-form-print {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+.inventar-docs-block {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.inv-doc-list {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  max-width: 40rem;
+}
+
+.inv-doc-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.inv-doc-item:last-child {
+  border-bottom: none;
+}
+
+.inv-doc-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.inv-doc-type {
+  font-weight: 650;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  min-width: 6.5rem;
+}
+
+.inv-doc-name {
+  word-break: break-word;
+}
+
+.inv-doc-date {
+  font-size: 0.85rem;
+  opacity: 0.65;
+}
+
+.inv-doc-delete {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.inv-doc-upload {
+  margin: 0.75rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  max-width: 40rem;
+}
+
+.inv-doc-upload-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem 0.75rem;
+  align-items: end;
+}
+
+@media (min-width: 720px) {
+  .inv-doc-upload-grid {
+    grid-template-columns: minmax(8rem, 10rem) minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+
+.inv-doc-upload .profile-control {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.inv-doc-upload .profile-actions {
+  margin-top: 0.65rem;
+}
+
 .inventar-loan-new {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
