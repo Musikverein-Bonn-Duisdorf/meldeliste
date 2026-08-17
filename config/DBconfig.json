@@ -49,6 +49,13 @@
 	"Insurance": {"Type": "tinyint", "Default": 0},
 	"Comment": {"Type": "text", "Collation": "utf8mb4_unicode_ci"}
     },
+    "InventoriesPhotos": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Inventory": {"Type": "int"},
+	"Sortierung": {"Type": "int", "Default": 1},
+	"File": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
+    },
     "InventoriesLoans": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"User": {"Type": "int"},
@@ -62,6 +69,13 @@
 	"ReturnChecklist": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"ReturnContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
+    },
+    "InventoriesDocuments": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Inventory": {"Type": "int"},
+	"StoredFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"UploadedAt": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
+	"Note": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "Inventory": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

@@ -227,6 +227,8 @@ class Inventories
     public function delete() {
         if(!$this->Index) return false;
 
+        InventoriesDocument::deleteAllForInventory((int)$this->Index);
+
         // Log each loan before cascade-remove (MELD-129)
         $sql = sprintf('SELECT `Index` FROM `%sInventoriesLoans` WHERE `Inventory` = "%d";',
         $GLOBALS['dbprefix'],
@@ -239,6 +241,8 @@ class Inventories
             $loan->load_by_id($row['Index']);
             if($loan->Index) $loan->delete();
         }
+
+        InventoriesPhoto::deleteAllForInventory((int)$this->Index);
 
         $logentry = new Log;
         $logentry->DBdelete($this->getVars());
@@ -393,6 +397,10 @@ class Inventories
         $str .= '<div class="inv-id">';
         $str .= '<div class="inv-reg">'.$h($regDisplay).'</div>';
         $str .= '<div class="inv-typ">'.$h($typLabel).'</div>';
+        $thumb = InventoriesPhoto::firstForInventory((int)$this->Index);
+        if($thumb) {
+            $str .= '<img class="inv-thumb" src="'.$h(InventoriesPhoto::publicUrl((int)$thumb->Index)).'" alt="" width="56" height="56">';
+        }
         if($insured) {
             $str .= '<span class="mail-recipient-chip mail-recipient-chip--insured">versichert</span>';
         }
@@ -486,7 +494,9 @@ class Inventories
         }
 
         $inv = $this;
+        $docsHtml = InventoriesDocument::sectionHtml((int)$this->Index, $canEdit);
         $loansHtml = $this->getLoansModalHtml($canEdit);
+        $photosHtml = InventoriesPhoto::galleryHtml((int)$this->Index, $canEdit);
         ob_start();
         require __DIR__.'/../views/inventar/modal.php';
         return ob_get_clean();
@@ -514,7 +524,23 @@ class Inventories
         }
 
         $loans = $this->getLoans();
-        if(!$loans) {
+        $openLoans = array();
+        $endedLoans = array();
+        foreach($loans as $loanId) {
+            $L = new InventoriesLoan;
+            $L->load_by_id($loanId);
+            if(!(int)$L->Index) {
+                continue;
+            }
+            if($L->isActive()) {
+                $openLoans[] = $L;
+            }
+            else {
+                $endedLoans[] = $L;
+            }
+        }
+
+        if(!$openLoans && !$endedLoans) {
             $empty = new div;
             $empty->indent = $indent + 1;
             $empty->class = "profile-value";
@@ -522,16 +548,17 @@ class Inventories
             $str .= $empty->print();
         }
         else {
-            $listTitle = new div;
-            $listTitle->indent = $indent + 1;
-            $listTitle->class = "profile-label";
-            $listTitle->body = "Historie";
-            $str .= $listTitle->print();
-
-            foreach($loans as $loanId) {
-                $L = new InventoriesLoan;
-                $L->load_by_id($loanId);
+            foreach($openLoans as $L) {
                 $str .= $this->getLoanRowHtml($indent + 1, $L, $canEdit);
+            }
+            if($endedLoans) {
+                $n = count($endedLoans);
+                $str .= '<details class="inventory-loans-ended">';
+                $str .= '<summary>Beendete Leihen ('.$n.')</summary>';
+                foreach($endedLoans as $L) {
+                    $str .= $this->getLoanRowHtml($indent + 1, $L, $canEdit);
+                }
+                $str .= '</details>';
             }
         }
 

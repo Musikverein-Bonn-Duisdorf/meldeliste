@@ -27,6 +27,7 @@ function openModal(type, id, register) {
         content.innerHTML = modalCache[key];
         host.style.display = 'block';
         initLoanUserChipsInModal(content);
+        if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         return;
     }
 
@@ -48,10 +49,12 @@ function openModal(type, id, register) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else if(xhr.responseText) {
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else {
             content.innerHTML = '<div class="w3-container w3-padding"><header class="w3-container"><span onclick="closeModal()" class="w3-button w3-display-topright">&times;</span><h2>Fehler</h2></header><p>Modal konnte nicht geladen werden (HTTP '+xhr.status+').</p></div>';
@@ -799,6 +802,13 @@ function inventarLoanFormAction(form) {
     return '';
 }
 
+function inventarDocFormAction(form) {
+    if(!form || !form.classList) return '';
+    if(form.classList.contains('inv-doc-upload')) return 'document_upload';
+    if(form.classList.contains('inv-doc-delete')) return 'document_delete';
+    return '';
+}
+
 function invalidateInventarModalCache(inventoryId) {
     var prefix = 'inventar:' + inventoryId;
     Object.keys(modalCache).forEach(function(key) {
@@ -827,7 +837,9 @@ document.addEventListener('submit', function(e) {
     var form = e.target;
     if(!form || !form.closest) return;
     if(!form.closest('#ajaxModalContent .inventar-modal')) return;
-    if(!inventarLoanFormAction(form)) return;
+    var loanAction = inventarLoanFormAction(form);
+    var docAction = inventarDocFormAction(form);
+    if(!loanAction && !docAction) return;
 
     e.preventDefault();
     var modal = form.closest('.inventar-modal');
@@ -871,6 +883,7 @@ document.addEventListener('submit', function(e) {
         content.innerHTML = data.html;
         if(host) host.style.display = 'block';
         initLoanUserChipsInModal(content);
+        if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         highlightInventarLoanRow(content, data.loanId);
         if(data.action === 'newLoan' && data.loanId) {
             window.location.href = 'loan-form.php?loan=' + encodeURIComponent(data.loanId) + '&kind=loan';
@@ -881,7 +894,7 @@ document.addEventListener('submit', function(e) {
             return;
         }
     };
-    xhr.open('POST', 'inventories.php', true);
+    xhr.open('POST', docAction ? 'inventory-document.php' : 'inventories.php', true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.send(fd);
 });
