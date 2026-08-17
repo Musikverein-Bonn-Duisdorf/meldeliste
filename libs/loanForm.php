@@ -147,16 +147,26 @@ class LoanForm
         return $prefix.'-'.$name.'-'.$item;
     }
 
+    const ROLE_LENDER = 'lender';
+    const ROLE_BORROWER = 'borrower';
+
     /**
-     * Who may view/print/store loan forms for this loan.
-     * Edit right required for upload; show or edit for print/download.
+     * Who may view/print this form.
+     * Inventory show/edit, or the borrower of $loan (own contract only).
+     * @param InventoriesLoan|null $loan
      */
-    public static function userMayView($userId) {
+    public static function userMayView($userId, $loan = null) {
         $userId = (int)$userId;
         if($userId < 1) {
             return false;
         }
-        return requirePermission('perm_showInventories') || requirePermission('perm_editInventories');
+        if(requirePermission('perm_showInventories') || requirePermission('perm_editInventories')) {
+            return true;
+        }
+        if($loan instanceof InventoriesLoan && (int)$loan->Index > 0 && (int)$loan->User === $userId) {
+            return true;
+        }
+        return false;
     }
 
     public static function userMayEdit($userId) {
@@ -165,6 +175,170 @@ class LoanForm
             return false;
         }
         return requirePermission('perm_editInventories');
+    }
+
+    public static function normalizeRole($role) {
+        $role = strtolower(trim((string)$role));
+        return ($role === self::ROLE_BORROWER) ? self::ROLE_BORROWER : self::ROLE_LENDER;
+    }
+
+    /** Admin may sign both fields; borrower only their own. */
+    public static function userMaySign($userId, InventoriesLoan $loan, $role) {
+        $userId = (int)$userId;
+        if($userId < 1 || !(int)$loan->Index) {
+            return false;
+        }
+        $role = self::normalizeRole($role);
+        if(self::userMayEdit($userId)) {
+            return true;
+        }
+        return $role === self::ROLE_BORROWER && (int)$loan->User === $userId;
+    }
+
+    /** Remove one stored signature before both parties have signed. */
+    public static function userMayClearSignature($userId, InventoriesLoan $loan, $role, $kind = self::KIND_LOAN) {
+        if(self::isDigitallyComplete($loan, $kind)) {
+            return false;
+        }
+        if(self::getSignature($loan, $kind, $role) === null) {
+            return false;
+        }
+        return self::userMaySign($userId, $loan, $role);
+    }
+
+    /** Place for signature forms: orgPlace, else last word of orgNameShort. */
+    public static function defaultSignPlace() {
+        $place = isset($GLOBALS['optionsDB']['orgPlace'])
+            ? trim((string)$GLOBALS['optionsDB']['orgPlace']) : '';
+        if($place !== '') {
+            return $place;
+        }
+        $short = isset($GLOBALS['optionsDB']['orgNameShort'])
+            ? trim((string)$GLOBALS['optionsDB']['orgNameShort']) : '';
+        if($short !== '' && preg_match('/\s+(\S+)\s*$/u', $short, $m)) {
+            return $m[1];
+        }
+        return '';
+    }
+
+    public static function normalizeSignPlace($raw) {
+        $s = trim(preg_replace('/\s+/u', ' ', (string)$raw));
+        if(function_exists('mb_substr')) {
+            if(mb_strlen($s, 'UTF-8') > 80) {
+                $s = mb_substr($s, 0, 80, 'UTF-8');
+            }
+        }
+        elseif(strlen($s) > 80) {
+            $s = substr($s, 0, 80);
+        }
+        return $s;
+    }
+
+    /** Multiline org address from config (Leihverträge). */
+    public static function normalizeOrgAddress($raw) {
+        $s = str_replace(array("\r\n", "\r"), "\n", (string)$raw);
+        return trim($s);
+    }
+
+    /** "Ort, Datum Uhrzeit" from a stored signature row. */
+    public static function formatSignPlaceDate(array $sig) {
+        $place = isset($sig['Place']) ? trim((string)$sig['Place']) : '';
+        $whenDe = '';
+        $signedAt = isset($sig['SignedAt']) ? trim((string)$sig['SignedAt']) : '';
+        if($signedAt !== '' && $signedAt !== '0000-00-00 00:00:00') {
+            $ts = strtotime($signedAt);
+            if($ts !== false) {
+                $whenDe = date('d.m.Y H:i', $ts);
+            }
+        }
+        if($whenDe === '') {
+            $dateRaw = isset($sig['SignDate']) ? trim((string)$sig['SignDate']) : '';
+            if($dateRaw !== '' && $dateRaw !== '0000-00-00') {
+                $whenDe = function_exists('germanDate') ? (string)germanDate($dateRaw, 0) : $dateRaw;
+            }
+        }
+        if($place !== '' && $whenDe !== '') {
+            return $place.', '.$whenDe;
+        }
+        if($place !== '') {
+            return $place;
+        }
+        return $whenDe;
+    }
+
+    public static function signerDisplayName($userId) {
+        $userId = (int)$userId;
+        if($userId < 1) {
+            return '';
+        }
+        $u = new User();
+        $u->load_by_id($userId);
+        if(!(int)$u->Index) {
+            return '';
+        }
+        return trim((string)$u->getName());
+    }
+
+    /** "vertreten durch Vorname Nachname" for the signing club representative. */
+    public static function lenderRepresentativeLabel($signedByUserId) {
+        $name = self::signerDisplayName($signedByUserId);
+        if($name === '') {
+            return '';
+        }
+        return 'vertreten durch '.$name;
+    }
+
+    public static function lenderRepresentativeFromSig($sig) {
+        if(!is_array($sig)) {
+            return '';
+        }
+        return self::lenderRepresentativeLabel(isset($sig['SignedBy']) ? (int)$sig['SignedBy'] : 0);
+    }
+
+    /** CSS for self-contained snapshot HTML (print layout). */
+    public static function embeddedDocumentCss() {
+        $path = dirname(__DIR__).'/styles/loan-form-document.css';
+        if(!is_file($path)) {
+            return '';
+        }
+        $css = file_get_contents($path);
+        return is_string($css) ? $css : '';
+    }
+
+    /** Logo as data-URI for offline snapshot HTML. */
+    public static function logoDataUri() {
+        $path = dirname(__DIR__).'/imgs/Logo.png';
+        if(!is_file($path)) {
+            return '';
+        }
+        $bin = file_get_contents($path);
+        if($bin === false || $bin === '') {
+            return '';
+        }
+        return 'data:image/png;base64,'.base64_encode($bin);
+    }
+
+    /** Set ContractFile / ReturnContractFile to the digital snapshot (like a scan). */
+    public static function attachSnapshotToLoan(InventoriesLoan $loan, $kind, $snapshotName) {
+        if(!(int)$loan->Index) {
+            return false;
+        }
+        $kind = self::normalizeKind($kind);
+        $snapshotName = basename(trim((string)$snapshotName));
+        if($snapshotName === '') {
+            return false;
+        }
+        $loanId = (int)$loan->Index;
+        $field = $kind === self::KIND_RETURN ? 'ReturnContractFile' : 'ContractFile';
+        $oldStored = trim((string)$loan->$field);
+        if($oldStored !== '' && $oldStored !== $snapshotName) {
+            $oldPath = self::resolveStoredFile($loanId, $oldStored);
+            if($oldPath !== null && is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+        $loan->$field = $snapshotName;
+        return (bool)$loan->save();
     }
 
     /** Absolute directory for scanned contracts of one loan. */
@@ -369,6 +543,9 @@ class LoanForm
                 ? trim((string)$GLOBALS['optionsDB']['orgNameShort'])
                 : 'Verein';
         }
+        $orgAddress = self::normalizeOrgAddress(
+            isset($GLOBALS['optionsDB']['orgAddress']) ? $GLOBALS['optionsDB']['orgAddress'] : ''
+        );
 
         $typeName = $inv->getInventoryType();
         $instrName = $inv->getInstrumentName();
@@ -418,6 +595,7 @@ class LoanForm
             'kind' => $kind,
             'title' => $title,
             'orgName' => $orgName,
+            'orgAddress' => $orgAddress,
             'loanId' => (int)$loan->Index,
             'inventoryId' => (int)$inv->Index,
             'borrowerUserId' => (int)$user->Index,
@@ -611,6 +789,9 @@ class LoanForm
         }
 
         if($loanDirty) {
+            if(self::hasAnySignature($loan, $kind)) {
+                self::clearSignatures($loan, $kind);
+            }
             $loan->save();
         }
 
@@ -701,6 +882,538 @@ class LoanForm
             .' Die Rückgabe wird gesondert protokolliert.';
 
         return $clauses;
+    }
+
+    /** @return array{File:string,SignedAt:string,SignedBy:int,Place:string,SignDate:string,SnapshotFile:string}|null */
+    public static function getSignature(InventoriesLoan $loan, $kind, $role) {
+        $loanId = (int)$loan->Index;
+        if($loanId < 1) {
+            return null;
+        }
+        $kind = self::normalizeKind($kind);
+        $role = self::normalizeRole($role);
+        $sql = sprintf(
+            'SELECT `File`, `SignedAt`, `SignedBy`, `Place`, `SignDate`, `SnapshotFile` FROM `%sInventoriesLoanSignatures` WHERE `Loan` = %d AND `Kind` = "%s" AND `Role` = "%s" LIMIT 1;',
+            $GLOBALS['dbprefix'],
+            $loanId,
+            mysqli_real_escape_string($GLOBALS['conn'], $kind),
+            mysqli_real_escape_string($GLOBALS['conn'], $role)
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+        if(!is_array($row) || trim((string)$row['File']) === '') {
+            return null;
+        }
+        return array(
+            'File' => trim((string)$row['File']),
+            'SignedAt' => isset($row['SignedAt']) ? (string)$row['SignedAt'] : '',
+            'SignedBy' => isset($row['SignedBy']) ? (int)$row['SignedBy'] : 0,
+            'Place' => isset($row['Place']) ? trim((string)$row['Place']) : '',
+            'SignDate' => isset($row['SignDate']) ? trim((string)$row['SignDate']) : '',
+            'SnapshotFile' => isset($row['SnapshotFile']) ? trim((string)$row['SnapshotFile']) : '',
+        );
+    }
+
+    public static function hasAnySignature(InventoriesLoan $loan, $kind) {
+        return self::getSignature($loan, $kind, self::ROLE_LENDER) !== null
+            || self::getSignature($loan, $kind, self::ROLE_BORROWER) !== null;
+    }
+
+    public static function isDigitallyComplete(InventoriesLoan $loan, $kind) {
+        $lender = self::getSignature($loan, $kind, self::ROLE_LENDER);
+        $borrower = self::getSignature($loan, $kind, self::ROLE_BORROWER);
+        if($lender === null || $borrower === null) {
+            return false;
+        }
+        return $lender['SnapshotFile'] !== '' || $borrower['SnapshotFile'] !== '';
+    }
+
+    /**
+     * Short status suffix for inventory loan rows (HTML-safe text, leading space).
+     */
+    public static function signatureStatusMetaSuffix(InventoriesLoan $loan, $kind) {
+        $kind = self::normalizeKind($kind);
+        if(self::isDigitallyComplete($loan, $kind)) {
+            return $kind === self::KIND_RETURN
+                ? ' · Rückgabe unterschrieben'
+                : ' · Vertrag unterschrieben';
+        }
+        if(self::getSignature($loan, $kind, self::ROLE_LENDER) !== null
+            && self::getSignature($loan, $kind, self::ROLE_BORROWER) === null) {
+            $label = $kind === self::KIND_RETURN ? 'Rückgabe' : 'Vertrag';
+            return ' · '.$label.': Unterschrift Entleiher offen';
+        }
+        return '';
+    }
+
+    /**
+     * Link label for stored loan/return contract file in lists.
+     */
+    public static function storedContractLinkLabel(InventoriesLoan $loan, $kind) {
+        $kind = self::normalizeKind($kind);
+        $stored = $kind === self::KIND_RETURN
+            ? trim((string)$loan->ReturnContractFile)
+            : trim((string)$loan->ContractFile);
+        if($stored === '') {
+            return '';
+        }
+        if(self::isDigitallyComplete($loan, $kind) || strpos($stored, 'snapshot-') === 0) {
+            return $kind === self::KIND_RETURN ? 'Rückgabe' : 'Leihvertrag';
+        }
+        return $kind === self::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
+    }
+
+    public static function signatureUrl(InventoriesLoan $loan, $kind, $role) {
+        return 'loan-contract.php?loan='.(int)$loan->Index
+            .'&kind='.rawurlencode(self::normalizeKind($kind))
+            .'&sig='.rawurlencode(self::normalizeRole($role));
+    }
+
+    public static function snapshotUrl(InventoriesLoan $loan, $kind) {
+        return 'loan-contract.php?loan='.(int)$loan->Index
+            .'&kind='.rawurlencode(self::normalizeKind($kind))
+            .'&file=snapshot';
+    }
+
+    /**
+     * Read the frozen document body from a completed digital snapshot HTML file.
+     * @return string|null article/body HTML or null when not available
+     */
+    public static function readFrozenSnapshotArticle(InventoriesLoan $loan, $kind) {
+        if(!self::isDigitallyComplete($loan, $kind)) {
+            return null;
+        }
+        $kind = self::normalizeKind($kind);
+        $stored = $kind === self::KIND_RETURN
+            ? trim((string)$loan->ReturnContractFile)
+            : trim((string)$loan->ContractFile);
+        if($stored === '' || strpos($stored, 'snapshot-') !== 0) {
+            return null;
+        }
+        $path = self::resolveStoredFile((int)$loan->Index, $stored);
+        if($path === null || !is_file($path)) {
+            return null;
+        }
+        $html = file_get_contents($path);
+        if(!is_string($html) || $html === '') {
+            return null;
+        }
+        if(preg_match('/<article class="loan-form-doc"[^>]*>.*<\/article>/is', $html, $m)) {
+            return $m[0];
+        }
+        if(preg_match('/<body[^>]*>(.*)<\/body>/is', $html, $m)) {
+            return trim($m[1]);
+        }
+        return null;
+    }
+
+    /**
+     * Decode a PNG from a data URL or raw binary. Returns binary or ''.
+     */
+    public static function decodePngPayload($raw) {
+        $raw = (string)$raw;
+        if($raw === '') {
+            return '';
+        }
+        if(preg_match('#^data:image/(?:png|jpe?g);base64,(.+)$#is', $raw, $m)) {
+            $bin = base64_decode(str_replace(' ', '+', $m[1]), true);
+            return is_string($bin) ? $bin : '';
+        }
+        return $raw;
+    }
+
+    public static function isPngBinary($bin) {
+        return is_string($bin) && strlen($bin) >= 8 && substr($bin, 0, 8) === "\x89PNG\r\n\x1a\n";
+    }
+
+    /**
+     * Store a signature PNG for one role. Completes (snapshot + mail) when both exist.
+     * @return array{ok:bool,complete:bool,mailed:bool,error:string}
+     */
+    public static function storeSignature(InventoriesLoan $loan, $kind, $role, $pngRaw, $signedBy, $place = '') {
+        $out = array('ok' => false, 'complete' => false, 'mailed' => false, 'error' => '');
+        if(!(int)$loan->Index) {
+            $out['error'] = 'Leihe fehlt.';
+            return $out;
+        }
+        $kind = self::normalizeKind($kind);
+        $role = self::normalizeRole($role);
+        $signedBy = (int)$signedBy;
+        $place = self::normalizeSignPlace($place);
+        if($place === '') {
+            $place = self::defaultSignPlace();
+        }
+        $ymd = date('Y-m-d');
+        $bin = self::decodePngPayload($pngRaw);
+        if(!self::isPngBinary($bin) || strlen($bin) > 800000) {
+            $out['error'] = 'Unterschrift ungültig.';
+            return $out;
+        }
+        $dir = self::storageDir((int)$loan->Index);
+        if(!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+            $out['error'] = 'Speicher fehlgeschlagen.';
+            return $out;
+        }
+        $old = self::getSignature($loan, $kind, $role);
+        if($old !== null) {
+            $oldPath = self::resolveStoredFile((int)$loan->Index, $old['File']);
+            if($oldPath !== null && is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+        $name = 'sig-'.$kind.'-'.$role.'-'.date('Ymd-His').'-'.bin2hex(random_bytes(3)).'.png';
+        $target = $dir.DIRECTORY_SEPARATOR.$name;
+        if(@file_put_contents($target, $bin) === false) {
+            $out['error'] = 'Speicher fehlgeschlagen.';
+            return $out;
+        }
+        @chmod($target, 0664);
+
+        $escKind = mysqli_real_escape_string($GLOBALS['conn'], $kind);
+        $escRole = mysqli_real_escape_string($GLOBALS['conn'], $role);
+        $escFile = mysqli_real_escape_string($GLOBALS['conn'], $name);
+        $escPlace = mysqli_real_escape_string($GLOBALS['conn'], $place);
+        $escDate = mysqli_real_escape_string($GLOBALS['conn'], $ymd);
+        mysqli_query($GLOBALS['conn'], sprintf(
+            'DELETE FROM `%sInventoriesLoanSignatures` WHERE `Loan` = %d AND `Kind` = "%s" AND `Role` = "%s";',
+            $GLOBALS['dbprefix'],
+            (int)$loan->Index,
+            $escKind,
+            $escRole
+        ));
+        $sql = sprintf(
+            'INSERT INTO `%sInventoriesLoanSignatures` (`Loan`, `Kind`, `Role`, `File`, `SignedBy`, `Place`, `SignDate`) VALUES (%d, "%s", "%s", "%s", %d, "%s", "%s");',
+            $GLOBALS['dbprefix'],
+            (int)$loan->Index,
+            $escKind,
+            $escRole,
+            $escFile,
+            $signedBy,
+            $escPlace,
+            $escDate
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) {
+            $out['error'] = 'Speicher fehlgeschlagen.';
+            return $out;
+        }
+
+        $logentry = new Log;
+        $logentry->DBupdate(sprintf(
+            'InventoriesLoan-ID: %d, digitale Unterschrift %s/%s',
+            (int)$loan->Index,
+            $kind,
+            $role
+        ));
+
+        $out['ok'] = true;
+        if(self::getSignature($loan, $kind, self::ROLE_LENDER) !== null
+            && self::getSignature($loan, $kind, self::ROLE_BORROWER) !== null) {
+            $complete = self::completeDigital($loan, $kind);
+            $out['complete'] = !empty($complete['ok']);
+            $out['mailed'] = !empty($complete['mailed']);
+            if(!$out['complete'] && !empty($complete['error'])) {
+                $out['error'] = $complete['error'];
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Delete one digital signature while the form is not yet complete.
+     * @return bool
+     */
+    public static function clearSignature(InventoriesLoan $loan, $kind, $role) {
+        $loanId = (int)$loan->Index;
+        $kind = self::normalizeKind($kind);
+        $role = self::normalizeRole($role);
+        if($loanId < 1 || self::isDigitallyComplete($loan, $kind)) {
+            return false;
+        }
+        $sig = self::getSignature($loan, $kind, $role);
+        if($sig === null) {
+            return false;
+        }
+        $path = self::resolveStoredFile($loanId, $sig['File']);
+        if($path !== null && is_file($path)) {
+            @unlink($path);
+        }
+        if($sig['SnapshotFile'] !== '') {
+            $snap = self::resolveStoredFile($loanId, $sig['SnapshotFile']);
+            if($snap !== null && is_file($snap)) {
+                @unlink($snap);
+            }
+        }
+        mysqli_query($GLOBALS['conn'], sprintf(
+            'DELETE FROM `%sInventoriesLoanSignatures` WHERE `Loan` = %d AND `Kind` = "%s" AND `Role` = "%s";',
+            $GLOBALS['dbprefix'],
+            $loanId,
+            mysqli_real_escape_string($GLOBALS['conn'], $kind),
+            mysqli_real_escape_string($GLOBALS['conn'], $role)
+        ));
+        sqlerror();
+
+        $logentry = new Log;
+        $logentry->DBupdate(sprintf(
+            'InventoriesLoan-ID: %d, digitale Unterschrift gelöscht %s/%s',
+            $loanId,
+            $kind,
+            $role
+        ));
+        return true;
+    }
+
+    public static function clearSignatures(InventoriesLoan $loan, $kind) {
+        $loanId = (int)$loan->Index;
+        $kind = self::normalizeKind($kind);
+        if($loanId < 1) {
+            return;
+        }
+        $snapNames = array();
+        foreach(array(self::ROLE_LENDER, self::ROLE_BORROWER) as $role) {
+            $sig = self::getSignature($loan, $kind, $role);
+            if($sig === null) {
+                continue;
+            }
+            $path = self::resolveStoredFile($loanId, $sig['File']);
+            if($path !== null && is_file($path)) {
+                @unlink($path);
+            }
+            if($sig['SnapshotFile'] !== '') {
+                $snapNames[] = $sig['SnapshotFile'];
+                $snap = self::resolveStoredFile($loanId, $sig['SnapshotFile']);
+                if($snap !== null && is_file($snap)) {
+                    @unlink($snap);
+                }
+            }
+        }
+        $field = $kind === self::KIND_RETURN ? 'ReturnContractFile' : 'ContractFile';
+        $stored = trim((string)$loan->$field);
+        if($stored !== '' && in_array($stored, $snapNames, true)) {
+            $loan->$field = '';
+            $loan->save();
+        }
+        mysqli_query($GLOBALS['conn'], sprintf(
+            'DELETE FROM `%sInventoriesLoanSignatures` WHERE `Loan` = %d AND `Kind` = "%s";',
+            $GLOBALS['dbprefix'],
+            $loanId,
+            mysqli_real_escape_string($GLOBALS['conn'], $kind)
+        ));
+        sqlerror();
+    }
+
+    /**
+     * Loans waiting for the borrower's signature (lender already signed).
+     * @return list<array{loan:InventoriesLoan,kind:string}>
+     */
+    public static function listPendingForBorrower($userId) {
+        $userId = (int)$userId;
+        $out = array();
+        if($userId < 1) {
+            return $out;
+        }
+        $sql = sprintf(
+            'SELECT DISTINCT s.`Loan`, s.`Kind` FROM `%sInventoriesLoanSignatures` s
+             INNER JOIN `%sInventoriesLoans` l ON l.`Index` = s.`Loan`
+             WHERE l.`User` = %d AND s.`Role` = "%s"
+               AND NOT EXISTS (
+                 SELECT 1 FROM `%sInventoriesLoanSignatures` b
+                 WHERE b.`Loan` = s.`Loan` AND b.`Kind` = s.`Kind` AND b.`Role` = "%s"
+               )
+             ORDER BY s.`Loan` DESC;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $userId,
+            self::ROLE_LENDER,
+            $GLOBALS['dbprefix'],
+            self::ROLE_BORROWER
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) {
+            return $out;
+        }
+        while($row = mysqli_fetch_assoc($dbr)) {
+            $loan = new InventoriesLoan;
+            $loan->load_by_id((int)$row['Loan']);
+            if(!(int)$loan->Index) {
+                continue;
+            }
+            $out[] = array(
+                'loan' => $loan,
+                'kind' => self::normalizeKind($row['Kind']),
+            );
+        }
+        return $out;
+    }
+
+    /**
+     * Write HTML snapshot and queue a copy to the borrower.
+     * @return array{ok:bool,mailed:bool,error:string,snapshot:string}
+     */
+    public static function completeDigital(InventoriesLoan $loan, $kind) {
+        $out = array('ok' => false, 'mailed' => false, 'error' => '', 'snapshot' => '');
+        $kind = self::normalizeKind($kind);
+        $ctx = self::buildContext($loan, $kind);
+        if(!$ctx) {
+            $out['error'] = 'Formular fehlt.';
+            return $out;
+        }
+        $html = self::buildSnapshotHtml($loan, $ctx);
+        $dir = self::storageDir((int)$loan->Index);
+        if(!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+            $out['error'] = 'Speicher fehlgeschlagen.';
+            return $out;
+        }
+        $name = ($kind === self::KIND_RETURN ? 'snapshot-rueckgabe' : 'snapshot-leihvertrag')
+            .'-'.date('Ymd-His').'.html';
+        $target = $dir.DIRECTORY_SEPARATOR.$name;
+        if(@file_put_contents($target, $html) === false) {
+            $out['error'] = 'Speicher fehlgeschlagen.';
+            return $out;
+        }
+        @chmod($target, 0664);
+
+        mysqli_query($GLOBALS['conn'], sprintf(
+            'UPDATE `%sInventoriesLoanSignatures` SET `SnapshotFile` = "%s" WHERE `Loan` = %d AND `Kind` = "%s";',
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], $name),
+            (int)$loan->Index,
+            mysqli_real_escape_string($GLOBALS['conn'], $kind)
+        ));
+        sqlerror();
+
+        self::attachSnapshotToLoan($loan, $kind, $name);
+
+        $mailed = self::queueSignedCopy($loan, $ctx, $target);
+        $out['snapshot'] = $name;
+        $out['ok'] = true;
+        $out['mailed'] = $mailed;
+        if(!$mailed) {
+            $out['error'] = 'Kopie konnte nicht in die Mailwarteschlange.';
+        }
+        return $out;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function queueSignedCopy(InventoriesLoan $loan, array $ctx, $snapshotPath) {
+        $uid = (int)$loan->User;
+        if($uid < 1 || !is_file($snapshotPath)) {
+            return false;
+        }
+        if(class_exists('MailJob') && method_exists('MailJob', 'ensureSchema')) {
+            MailJob::ensureSchema();
+        }
+        $title = isset($ctx['title']) ? (string)$ctx['title'] : 'Leihvertrag';
+        $item = isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'Inventar';
+        $subject = $title.': '.$item;
+        $body = '<p>anbei das fertige Formular <b>'
+            .htmlspecialchars($title, ENT_QUOTES, 'UTF-8')
+            .'</b> zu <b>'.htmlspecialchars($item, ENT_QUOTES, 'UTF-8')
+            .'</b> (Leihe Nr. '.(int)$loan->Index.') inkl. Unterschriften.</p>'
+            .'<p>Bitte bewahre diese Kopie auf.</p>';
+
+        $job = new MailJob;
+        $job->CreatedBy = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : $uid;
+        $job->Subject = $subject;
+        $job->BodyText = $body;
+        $job->Source = 'loan-sign';
+        $job->Status = 'queued';
+        $job->Total = 0;
+        $job->Sent = 0;
+        $job->Failed = 0;
+        $job->setRecipientSpecArray(array(
+            'groups' => array(),
+            'registers' => array(),
+            'users' => array($uid),
+            'namedGroups' => array(),
+        ));
+        if(!$job->save()) {
+            return false;
+        }
+        $job->ensureAttachmentDir();
+        $destDir = (string)$job->AttachmentPath;
+        if($destDir === '' || !is_dir($destDir)) {
+            return false;
+        }
+        $attachName = self::printFileBasename(
+            isset($ctx['kind']) ? $ctx['kind'] : self::KIND_LOAN,
+            isset($ctx['borrowerName']) ? $ctx['borrowerName'] : '',
+            $item
+        ).'.html';
+        @copy($snapshotPath, $destDir.DIRECTORY_SEPARATOR.$attachName);
+
+        $mail = new Usermail;
+        $mail->User = $uid;
+        $mail->subject = $subject;
+        $mail->source = 'loan-sign';
+        $mail->quiet = true;
+        $n = $mail->enqueue($body, $job);
+        return $n > 0;
+    }
+
+    /**
+     * Self-contained HTML snapshot matching the print form layout.
+     */
+    public static function buildSnapshotHtml(InventoriesLoan $loan, array $ctx) {
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $kind = isset($ctx['kind']) ? self::normalizeKind($ctx['kind']) : self::KIND_LOAN;
+        $lenderMeta = self::getSignature($loan, $kind, self::ROLE_LENDER);
+        $borrowerMeta = self::getSignature($loan, $kind, self::ROLE_BORROWER);
+        $lenderWhen = $lenderMeta ? self::formatSignPlaceDate($lenderMeta) : '';
+        $borrowerWhen = $borrowerMeta ? self::formatSignPlaceDate($borrowerMeta) : '';
+        $lenderRep = self::lenderRepresentativeFromSig($lenderMeta);
+        $lenderImg = self::signatureDataUri($loan, $kind, self::ROLE_LENDER);
+        $borrowerImg = self::signatureDataUri($loan, $kind, self::ROLE_BORROWER);
+        $checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
+            ? $ctx['checklist']
+            : self::defaultChecklist();
+
+        $brandBar = '#345A95';
+        if(isset($GLOBALS['optionsDB']['colorTitleBar'])) {
+            $raw = (string)$GLOBALS['optionsDB']['colorTitleBar'];
+            if(function_exists('normalizeHexColor')) {
+                $hex = normalizeHexColor($raw);
+                if($hex !== '') {
+                    $brandBar = $hex;
+                }
+            }
+        }
+
+        $logoSrc = self::logoDataUri();
+        ob_start();
+        include dirname(__DIR__).'/views/loan/form_document.php';
+        $body = ob_get_clean();
+
+        $title = $h(isset($ctx['printFileBase']) ? $ctx['printFileBase'] : $ctx['title']);
+        $css = self::embeddedDocumentCss();
+        return '<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">'
+            .'<meta name="viewport" content="width=device-width, initial-scale=1">'
+            .'<title>'.$title.'</title>'
+            .'<style>'.$css.'</style></head>'
+            .'<body class="loan-form-print loan-form-snapshot">'.$body.'</body></html>';
+    }
+
+    public static function signatureDataUri(InventoriesLoan $loan, $kind, $role) {
+        $sig = self::getSignature($loan, $kind, $role);
+        if($sig === null) {
+            return '';
+        }
+        $path = self::resolveStoredFile((int)$loan->Index, $sig['File']);
+        if($path === null || !is_file($path)) {
+            return '';
+        }
+        $bin = file_get_contents($path);
+        if($bin === false || $bin === '') {
+            return '';
+        }
+        return 'data:image/png;base64,'.base64_encode($bin);
     }
 }
 ?>

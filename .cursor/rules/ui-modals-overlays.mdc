@@ -28,6 +28,19 @@ alwaysApply: true
 - Kein `position:fixed`-Overlay als Kind von `.app-main` / `.admin-list-body` ohne Defer/Lift.
 - Keine doppelte Modal-Infrastruktur neben `#ajaxModalHost`, wenn AJAX reicht.
 
+## Keine Browser-Popups (MELD-187)
+
+Native Dialoge **`window.confirm`**, **`window.alert`**, **`window.prompt`** im App-Code nicht verwenden — in der Android-WebView unzuverlässig.
+
+- **Formular-Bestätigung:** `data-confirm="…"` am `<form>` oder Submit-Button; optional `data-confirm-ok`, `data-confirm-title`, `data-confirm-ok-class`. Abgefangen in `js/appDialog.js`; Markup `#appConfirmModal` in `common/footer.php`.
+- **JS ohne Form:** `window.appConfirm(message, opts)` / `window.appAlert(message, opts)` (Promise). Kein Fallback auf native Popups.
+- **Eigene Dialoge:** `profile-shell modal-shell` (s. o.) — nicht Browser-Popups.
+- **Vendor ausgenommen:** `js/tinymce/`, `PHPMailer/` — dort nicht anfassen.
+
+**Nicht:** `onsubmit="return confirm(…)"`, `onclick="if (confirm(…))"`, `alert(…)` / `prompt(…)` in `*.php` oder `js/*.js` (außer Vendor).
+
+Referenz-Test: `AppDialogConfirmTest` in `meldeliste-tests`.
+
 # Melde-Zeilen (Kapazität)
 
 - Melde-Buttons: feste Größe (`.melde-btn`), nicht `flex: 1` über die Aktionsbreite — 2 Buttons (Kapazität) müssen wie 3 Buttons wirken.

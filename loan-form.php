@@ -12,9 +12,6 @@ mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBAL
 requireLoggedInOrRedirect();
 
 $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
-if(!LoanForm::userMayView($userId)) {
-    denyAccess();
-}
 
 $loanId = isset($_GET['loan']) ? (int)$_GET['loan'] : (isset($_POST['loan']) ? (int)$_POST['loan'] : 0);
 $kind = LoanForm::normalizeKind(
@@ -29,13 +26,55 @@ if(!(int)$loan->Index) {
     denyAccess('Leihe nicht gefunden.');
 }
 
-$canEdit = LoanForm::userMayEdit($userId);
+if(!LoanForm::userMayView($userId, $loan)) {
+    denyAccess();
+}
 
-if($canEdit && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
+$canEdit = LoanForm::userMayEdit($userId);
+$locked = LoanForm::isDigitallyComplete($loan, $kind);
+$isBorrowerOnly = !$canEdit && (int)$loan->User === $userId;
+
+if($canEdit && !$locked && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
     && isset($_POST['action']) && (string)$_POST['action'] === 'saveFields') {
     LoanForm::saveContractFields($loan, $_POST, $kind);
     $loan->load_by_id($loanId);
     header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind));
+    exit;
+}
+
+if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
+    && isset($_POST['action']) && (string)$_POST['action'] === 'sign') {
+    $role = LoanForm::normalizeRole(isset($_POST['role']) ? $_POST['role'] : '');
+    if(!LoanForm::userMaySign($userId, $loan, $role)) {
+        denyAccess();
+    }
+    $png = isset($_POST['signature']) ? (string)$_POST['signature'] : '';
+    $place = isset($_POST['place']) ? (string)$_POST['place'] : '';
+    $result = LoanForm::storeSignature($loan, $kind, $role, $png, $userId, $place);
+    $qs = 'loan='.$loanId.'&kind='.rawurlencode($kind);
+    if(!empty($result['ok'])) {
+        if(!empty($result['complete'])) {
+            $qs .= '&complete=1';
+        }
+        if(!empty($result['mailed'])) {
+            $qs .= '&mailed=1';
+        }
+    }
+    else {
+        $qs .= '&signerr=1';
+    }
+    header('Location: loan-form.php?'.$qs);
+    exit;
+}
+
+if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
+    && isset($_POST['action']) && (string)$_POST['action'] === 'clearSign') {
+    $role = LoanForm::normalizeRole(isset($_POST['role']) ? $_POST['role'] : '');
+    if(!LoanForm::userMayClearSignature($userId, $loan, $role, $kind)) {
+        denyAccess();
+    }
+    $ok = LoanForm::clearSignature($loan, $kind, $role);
+    header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind).($ok ? '&signcleared=1' : '&signerr=1'));
     exit;
 }
 
@@ -54,6 +93,9 @@ $stored = $kind === LoanForm::KIND_RETURN
 $hasScan = $stored !== '';
 
 $cssUrl = assetUrl('styles/custom.css');
+$jsUrl = assetUrl('js/loanSign.js');
+$toastJsUrl = assetUrl('js/toast.js');
+$appDialogJsUrl = assetUrl('js/appDialog.js');
 $logoPath = is_file(__DIR__.'/imgs/Logo.png') ? 'imgs/Logo.png' : '';
 
 $brandBar = '#345A95';
@@ -77,12 +119,12 @@ if(isset($GLOBALS['optionsDB']['colorTitleBar'])) {
     }
 }
 
-$backHref = 'inventories.php';
+$backHref = $isBorrowerOnly ? 'myinventories.php' : 'inventories.php';
 $showAddress = !empty($ctx['needAddressField']);
-$editAddress = $canEdit && !empty($ctx['needAddressEditField']);
-$editNotes = $canEdit && !empty($ctx['needContractNotesField']);
-$editLoanParams = $canEdit && !empty($ctx['needLoanParamsField']);
-$editChecklist = $canEdit && $kind === LoanForm::KIND_RETURN;
+$editAddress = $canEdit && !$locked && !empty($ctx['needAddressEditField']);
+$editNotes = $canEdit && !$locked && !empty($ctx['needContractNotesField']);
+$editLoanParams = $canEdit && !$locked && !empty($ctx['needLoanParamsField']);
+$editChecklist = $canEdit && !$locked && $kind === LoanForm::KIND_RETURN;
 $hasEditableFields = $editAddress || $editNotes || $editChecklist || $editLoanParams;
 $checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
     ? $ctx['checklist']
@@ -103,8 +145,6 @@ if($endIso === null) {
 $kautionInput = LoanForm::formatAmountInput(isset($ctx['kaution']) ? $ctx['kaution'] : 0);
 $leihgebuehrInput = LoanForm::formatAmountInput(isset($ctx['leihgebuehr']) ? $ctx['leihgebuehr'] : 0);
 
-$scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
-
 header('Content-Type: text/html; charset=utf-8');
 ?><!DOCTYPE html>
 <html lang="de">
@@ -113,8 +153,62 @@ header('Content-Type: text/html; charset=utf-8');
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo $h(isset($ctx['printFileBase']) ? $ctx['printFileBase'] : $ctx['title']); ?></title>
   <link rel="stylesheet" href="<?php echo $h($cssUrl); ?>">
+  <script src="<?php echo $h($toastJsUrl); ?>" defer></script>
+  <script src="<?php echo $h($appDialogJsUrl); ?>" defer></script>
+  <script src="<?php echo $h($jsUrl); ?>" defer></script>
 </head>
 <body class="loan-form-print">
+<?php
+$flash = '';
+$completeNotice = null;
+if(!empty($_GET['complete'])) {
+    $completeNotice = array(
+        'title' => $kind === LoanForm::KIND_RETURN ? 'Protokoll abgeschlossen.' : 'Vertrag abgeschlossen.',
+        'sub' => !empty($_GET['mailed']) ? 'Kopie wird versendet.' : 'Kopie konnte nicht versendet werden.',
+        'error' => empty($_GET['mailed']),
+    );
+}
+elseif(!empty($_GET['signcleared'])) {
+    $flash = 'Unterschrift gelöscht.';
+}
+elseif(!empty($_GET['signerr'])) {
+    $flash = 'Unterschrift konnte nicht gespeichert werden.';
+}
+$digitallyComplete = LoanForm::isDigitallyComplete($loan, $kind);
+$lenderSig = LoanForm::getSignature($loan, $kind, LoanForm::ROLE_LENDER);
+$borrowerSig = LoanForm::getSignature($loan, $kind, LoanForm::ROLE_BORROWER);
+$canSignLender = !$digitallyComplete && LoanForm::userMaySign($userId, $loan, LoanForm::ROLE_LENDER) && $lenderSig === null;
+$canSignBorrower = !$digitallyComplete && LoanForm::userMaySign($userId, $loan, LoanForm::ROLE_BORROWER) && $borrowerSig === null;
+$canClearLender = LoanForm::userMayClearSignature($userId, $loan, LoanForm::ROLE_LENDER, $kind);
+$canClearBorrower = LoanForm::userMayClearSignature($userId, $loan, LoanForm::ROLE_BORROWER, $kind);
+$defaultSignPlace = LoanForm::defaultSignPlace();
+$lenderRep = $lenderSig
+    ? LoanForm::lenderRepresentativeFromSig($lenderSig)
+    : ($canSignLender ? LoanForm::lenderRepresentativeLabel($userId) : '');
+$scanLabel = LoanForm::storedContractLinkLabel($loan, $kind);
+if($scanLabel === '') {
+    $scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
+}
+$frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
+?>
+<?php if($completeNotice !== null) { ?>
+<div class="app-toast-host app-toast-host--complete no-print" data-loan-complete-notice>
+  <div class="app-toast<?php echo $completeNotice['error'] ? ' app-toast--error' : ' app-toast--success'; ?>" role="<?php echo $completeNotice['error'] ? 'alert' : 'status'; ?>"<?php
+    echo $completeNotice['error'] ? '' : ' data-autodismiss="3500"';
+?>>
+    <div class="app-toast-body">
+      <p class="loan-form-complete-title"><?php echo $h($completeNotice['title']); ?></p>
+      <p class="loan-form-complete-sub"><?php echo $h($completeNotice['sub']); ?></p>
+    </div>
+<?php   if($completeNotice['error']) { ?>
+    <button type="button" class="app-toast-close" aria-label="Hinweis schließen">&times;</button>
+<?php   } ?>
+  </div>
+</div>
+<?php } ?>
+<?php if($flash !== '') { ?>
+  <p class="loan-form-flash no-print"><?php echo $h($flash); ?></p>
+<?php } ?>
   <div class="loan-form-toolbar no-print">
     <div class="loan-form-toolbar-group">
       <a class="loan-form-btn" href="<?php echo $h($backHref); ?>">Zurück</a>
@@ -129,7 +223,7 @@ header('Content-Type: text/html; charset=utf-8');
       <div class="loan-form-scan-pair">
       <a class="loan-form-btn loan-form-btn--scan" target="_blank" rel="noopener" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
 <?php     if($canEdit) { ?>
-      <form class="loan-form-upload" method="POST" action="loan-contract.php" onsubmit="return confirm('Scan löschen? Die Leihe bleibt erhalten.');">
+      <form class="loan-form-upload" method="POST" action="loan-contract.php" data-confirm="Scan löschen? Die Leihe bleibt erhalten." data-confirm-ok="Löschen">
         <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
         <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
         <input type="hidden" name="action" value="deleteScan">
@@ -155,7 +249,11 @@ header('Content-Type: text/html; charset=utf-8');
   </div>
 
 <?php if($hasEditableFields) { ?>
-  <form id="loan-form-fields" method="POST" action="loan-form.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>">
+  <form id="loan-form-fields" method="POST" action="loan-form.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"<?php
+    echo LoanForm::hasAnySignature($loan, $kind)
+        ? ' data-confirm="Angaben ändern verwirft vorhandene Unterschriften." data-confirm-ok="Speichern"'
+        : '';
+?>>
     <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
     <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
     <input type="hidden" name="action" value="saveFields">
@@ -164,6 +262,9 @@ header('Content-Type: text/html; charset=utf-8');
 <?php   } ?>
 <?php } ?>
 
+<?php if($frozenSnapshotArticle !== null) { ?>
+  <?php echo $frozenSnapshotArticle; ?>
+<?php } else { ?>
   <article class="loan-form-doc" style="--loan-brand: <?php echo $h($brandBar); ?>;">
     <header class="loan-form-header">
       <div class="loan-form-brand">
@@ -184,6 +285,14 @@ header('Content-Type: text/html; charset=utf-8');
         <div class="loan-form-party">
           <p class="loan-form-party-role">Verleiher</p>
           <p class="loan-form-party-name"><strong class="loan-form-em"><?php echo $h($ctx['orgName']); ?></strong></p>
+          <div class="loan-form-field-row loan-form-field-row--stack">
+            <span class="loan-form-field-label">Adresse</span>
+<?php if($ctx['orgAddress'] !== '') { ?>
+            <p class="loan-form-address-value"><?php echo $h($ctx['orgAddress']); ?></p>
+<?php } else { ?>
+            <span class="loan-form-blank loan-form-blank--address"></span>
+<?php } ?>
+          </div>
         </div>
         <div class="loan-form-party">
           <p class="loan-form-party-role">Entleiher</p>
@@ -362,28 +471,142 @@ header('Content-Type: text/html; charset=utf-8');
       </section>
 <?php } ?>
 
+<?php if($hasEditableFields) { ?>
+    </form>
+<?php } ?>
+
       <section class="loan-form-section loan-form-signatures">
         <h2>Unterschriften</h2>
         <div class="loan-form-sign-grid">
+<?php
+$signSlots = array(
+    array(
+        'role' => LoanForm::ROLE_LENDER,
+        'label' => $ctx['orgName'],
+        'rep' => $lenderRep,
+        'roleLabel' => 'Verleiher',
+        'sig' => $lenderSig,
+        'can' => $canSignLender,
+        'canClear' => $canClearLender,
+    ),
+    array(
+        'role' => LoanForm::ROLE_BORROWER,
+        'label' => $ctx['borrowerName'],
+        'rep' => '',
+        'roleLabel' => 'Entleiher',
+        'sig' => $borrowerSig,
+        'can' => $canSignBorrower,
+        'canClear' => $canClearBorrower,
+    ),
+);
+foreach($signSlots as $slot) {
+    $when = $slot['sig'] ? LoanForm::formatSignPlaceDate($slot['sig']) : '';
+?>
           <div class="loan-form-sign">
-            <div class="loan-form-sign-space loan-form-sign-space--date"></div>
-            <p class="loan-form-sign-caption">Ort, Datum</p>
-            <div class="loan-form-sign-space loan-form-sign-space--sig"></div>
-            <p class="loan-form-sign-caption"><strong class="loan-form-em"><?php echo $h($ctx['orgName']); ?></strong><span class="loan-form-sign-role">Verleiher</span></p>
+<?php   if($slot['sig']) { ?>
+            <div class="loan-form-sign-digital">
+              <p class="loan-form-sign-caption"><?php echo $h($when); ?></p>
+              <img class="loan-form-sign-img" src="<?php echo $h(LoanForm::signatureUrl($loan, $kind, $slot['role'])); ?>" alt="Unterschrift <?php echo $h($slot['roleLabel']); ?>">
+<?php     if(!empty($slot['canClear'])) { ?>
+              <form class="loan-form-sign-clear no-print" method="POST" action="loan-form.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>" data-confirm="Unterschrift löschen?" data-confirm-ok="Löschen">
+                <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
+                <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
+                <input type="hidden" name="action" value="clearSign">
+                <input type="hidden" name="role" value="<?php echo $h($slot['role']); ?>">
+                <button type="submit" class="loan-form-btn">Löschen</button>
+              </form>
+<?php     } ?>
+            </div>
+<?php   } elseif($slot['can']) { ?>
+            <div class="loan-form-sign-open no-print">
+              <button type="button" class="loan-form-btn loan-form-btn--primary" data-loan-sign-open
+                data-loan="<?php echo (int)$ctx['loanId']; ?>"
+                data-kind="<?php echo $h($kind); ?>"
+                data-role="<?php echo $h($slot['role']); ?>"
+                data-role-label="<?php echo $h($slot['roleLabel']); ?>"
+                data-place="<?php echo $h($defaultSignPlace); ?>">Unterschreiben</button>
+            </div>
+<?php   } ?>
+<?php   if(!$slot['sig']) { ?>
+            <div class="loan-form-sign-manual<?php echo $slot['can'] ? ' loan-form-print-only' : ''; ?>">
+              <div class="loan-form-sign-space loan-form-sign-space--date"></div>
+              <p class="loan-form-sign-caption">Ort, Datum</p>
+              <div class="loan-form-sign-space loan-form-sign-space--sig"></div>
+            </div>
+<?php   } ?>
+            <p class="loan-form-sign-caption"><strong class="loan-form-em"><?php echo $h($slot['label']); ?></strong><?php
+    if(!empty($slot['rep'])) {
+        echo '<span class="loan-form-sign-iv">'.$h($slot['rep']).'</span>';
+    }
+?><span class="loan-form-sign-role"><?php echo $h($slot['roleLabel']); ?></span></p>
           </div>
-          <div class="loan-form-sign">
-            <div class="loan-form-sign-space loan-form-sign-space--date"></div>
-            <p class="loan-form-sign-caption">Ort, Datum</p>
-            <div class="loan-form-sign-space loan-form-sign-space--sig"></div>
-            <p class="loan-form-sign-caption"><strong class="loan-form-em"><?php echo $h($ctx['borrowerName']); ?></strong><span class="loan-form-sign-role">Entleiher</span></p>
-          </div>
+<?php } ?>
         </div>
       </section>
     </div>
   </article>
-
-<?php if($hasEditableFields) { ?>
-  </form>
 <?php } ?>
+
+<?php if($canSignLender || $canSignBorrower) { ?>
+<div id="loanSignModal" class="w3-modal loan-form-sign-modal no-print" hidden role="dialog" aria-modal="true" aria-labelledby="loanSignTitle">
+  <div class="w3-modal-content loan-form-sign-modal-panel">
+    <form class="profile-shell modal-shell" method="POST" action="loan-form.php" data-loan-sign>
+      <header class="profile-hero">
+        <div class="profile-hero-text">
+          <p class="profile-kicker">Unterschrift</p>
+          <h2 class="profile-title" id="loanSignTitle">Verleiher</h2>
+        </div>
+        <div class="profile-hero-actions">
+          <button type="button" class="modal-close" data-loan-sign-close aria-label="Schließen">&times;</button>
+        </div>
+      </header>
+      <div class="loan-form-sign-modal-body">
+        <input type="hidden" name="loan" value="">
+        <input type="hidden" name="kind" value="">
+        <input type="hidden" name="action" value="sign">
+        <input type="hidden" name="role" value="">
+        <input type="hidden" name="signature" value="">
+        <div class="loan-form-sign-meta">
+          <label class="loan-form-sign-meta-field">
+            <span class="loan-form-field-label">Ort</span>
+            <input class="loan-form-input" type="text" name="place" value="" maxlength="80" autocomplete="off">
+          </label>
+        </div>
+        <div class="loan-form-sign-canvas-wrap">
+          <canvas class="loan-form-canvas" width="720" height="280" aria-label="Unterschrift"></canvas>
+        </div>
+        <div class="loan-form-sign-pad-actions">
+          <button type="button" class="loan-form-btn" data-loan-sign-clear>Löschen</button>
+          <button type="submit" class="loan-form-btn loan-form-btn--primary">Unterschreiben</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<?php } ?>
+<div id="appConfirmModal" class="w3-modal" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle" style="display:none;">
+  <div class="w3-modal-content">
+    <div class="profile-shell modal-shell confirm-delete-modal">
+      <header class="profile-hero">
+        <div class="profile-hero-text">
+          <p class="profile-kicker" id="appConfirmKicker" style="display:none;"></p>
+          <h2 class="profile-title" id="appConfirmTitle">Bestätigen</h2>
+        </div>
+        <div class="profile-hero-actions">
+          <button type="button" class="modal-close w3-button" id="appConfirmClose" aria-label="Schließen">&times;</button>
+        </div>
+      </header>
+      <div class="confirm-delete-body">
+        <p class="profile-value" id="appConfirmMessage"></p>
+        <div class="profile-actions profile-actions--confirm">
+          <div class="profile-actions-primary">
+            <button type="button" class="w3-btn profile-btn-primary w3-border w3-mobile" id="appConfirmOk">OK</button>
+          </div>
+          <button type="button" class="w3-btn w3-border w3-mobile" id="appConfirmCancel">Abbrechen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
