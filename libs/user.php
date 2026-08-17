@@ -1067,9 +1067,11 @@ class User
         foreach(AudienceSpec::previewDerivedMembership(array(
             'mitglied' => $isMember,
             'active' => $isActive,
+            'instrumentId' => (int)$this->Instrument,
             'registerId' => $regId,
             'registerName' => $regName,
             'userId' => (int)$this->Index,
+            'mitTypes' => userOpenMitTypes((int)$this->Index),
         )) as $chip) {
             $type = isset($chip['type']) ? (string)$chip['type'] : '';
             if($type === 'group' || $type === 'register') {

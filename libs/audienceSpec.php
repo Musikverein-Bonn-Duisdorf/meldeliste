@@ -4,7 +4,7 @@
  *
  * Shape:
  * {
- *   "groups": ["musicians"|"members"|"nonmembers"|"users", ...],
+ *   "groups": ["musicians"|"aktive"|"foerdernde"|"members"|"nonmembers"|"users", ...],
  *   "registers": [id, ...],
  *   "users": [id, ...],
  *   "namedGroups": [id, ...],  // named Group rows; not nested inside MemberSpec
@@ -45,7 +45,7 @@ class AudienceSpec
         return true;
     }
     public static function allowedGroupIds() {
-        return array('musicians', 'members', 'nonmembers', 'users');
+        return array('musicians', 'aktive', 'foerdernde', 'members', 'nonmembers', 'users');
     }
 
     /**
@@ -56,7 +56,9 @@ class AudienceSpec
     public static function groupLabels() {
         return array(
             'musicians' => 'Alle Musiker',
-            'members' => 'Alle Vereinsmitglieder',
+            'aktive' => 'Alle Aktiven',
+            'foerdernde' => 'Alle Fördernden',
+            'members' => 'Alle Mitglieder',
             'nonmembers' => 'Alle Nicht-Mitglieder',
             'users' => 'Alle User',
         );
@@ -102,18 +104,70 @@ class AudienceSpec
     }
 
     /**
-     * Default termin visibility: chip „Alle User“.
+     * Factory default for new Termine when config is missing: Alle Musiker.
      *
      * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[],termine:int[]}
      */
-    public static function defaultVisibilitySpec() {
+    public static function factoryDefaultVisibilitySpec() {
         return array(
-            'groups' => array('users'),
+            'groups' => array('musicians'),
             'registers' => array(),
             'users' => array(),
             'namedGroups' => array(),
             'termine' => array(),
         );
+    }
+
+    /**
+     * Default termin visibility from config `defaultTerminVisibility`.
+     * Missing config → Alle Musiker. Empty chips → versteckt.
+     *
+     * @return array{groups:string[],registers:int[],users:int[],namedGroups:int[],termine:int[]}
+     */
+    public static function defaultVisibilitySpec() {
+        if(!isset($GLOBALS['optionsDB']['defaultTerminVisibility'])) {
+            return self::factoryDefaultVisibilitySpec();
+        }
+        return self::normalize($GLOBALS['optionsDB']['defaultTerminVisibility'], array(
+            'allowNamedGroups' => true,
+            'defaultGroups' => null,
+        ));
+    }
+
+    /**
+     * Sorted fingerprint for comparing visibility specs (order-independent).
+     *
+     * @param mixed $spec
+     * @return string
+     */
+    public static function visibilityFingerprint($spec) {
+        $norm = self::normalize($spec, array('allowNamedGroups' => true, 'defaultGroups' => null));
+        $groups = $norm['groups'];
+        sort($groups);
+        $registers = array_map('intval', $norm['registers']);
+        sort($registers, SORT_NUMERIC);
+        $users = array_map('intval', $norm['users']);
+        sort($users, SORT_NUMERIC);
+        $named = array_map('intval', $norm['namedGroups']);
+        sort($named, SORT_NUMERIC);
+        $termine = array_map('intval', $norm['termine']);
+        sort($termine, SORT_NUMERIC);
+        return json_encode(array($groups, $registers, $users, $named, $termine));
+    }
+
+    /**
+     * True when spec equals the configured default visibility (groups + named groups).
+     * Empty default (versteckt) never matches.
+     *
+     * @param mixed $spec
+     * @return bool
+     */
+    public static function matchesDefaultVisibility($spec) {
+        $default = self::defaultVisibilitySpec();
+        if(self::isEmpty($default)) {
+            return false;
+        }
+        return self::visibilityFingerprint($spec) === self::visibilityFingerprint($default);
     }
 
     /**
@@ -333,14 +387,10 @@ class AudienceSpec
      * Base WHERE fragments for User rows.
      *
      * @param bool $requireMail getMail/notifyInbox (message recipient channels)
+     * @param bool $excludeFoerdernde hide MIT Type=foerdernd (lists only; roles do not exclude)
      * @return string[]
      */
-    /**
-     * @param bool $requireMail
-     * @param bool $excludeFoerdernde hide MIT Type=foerdernd (default true for lists/audience)
-     * @return string[]
-     */
-    public static function userBaseWhere($requireMail = false, $excludeFoerdernde = true) {
+    public static function userBaseWhere($requireMail = false, $excludeFoerdernde = false) {
         $where = array('`Deleted` != 1');
         if($requireMail) {
             $where[] = '(`getMail` = 1 OR `notifyInbox` = 1)';
@@ -372,13 +422,20 @@ class AudienceSpec
         foreach($groups as $audience) {
             $where = self::userBaseWhere($requireMail);
             if($audience === 'members') {
-                $where[] = sqlUserIsVereinMitglied('`Index`');
+                $where[] = sqlUserHasOpenMitMitgliedschaft('`Index`');
+            }
+            elseif($audience === 'aktive') {
+                $where[] = sqlUserHasOpenMitType('`Index`', 'aktiv');
+            }
+            elseif($audience === 'foerdernde') {
+                $where[] = sqlUserHasOpenMitType('`Index`', 'foerdernd');
             }
             elseif($audience === 'nonmembers') {
-                $where[] = 'NOT ('.sqlUserIsVereinMitglied('`Index`').')';
+                $where[] = 'NOT ('.sqlUserHasOpenMitMitgliedschaft('`Index`').')';
             }
             elseif($audience === 'musicians') {
                 $where[] = '`Active` = 1';
+                $where[] = '`Instrument` > 0';
             }
             if(count($registerIds) > 0) {
                 $where[] = '`Active` = 1';
@@ -558,7 +615,21 @@ class AudienceSpec
         $mitglied = !empty($attrs['mitglied']);
         $active = !array_key_exists('active', $attrs) || !empty($attrs['active']);
         $registerId = isset($attrs['registerId']) ? (int)$attrs['registerId'] : 0;
+        $instrumentId = isset($attrs['instrumentId']) ? (int)$attrs['instrumentId'] : 0;
+        $hasInstrument = $instrumentId > 0 || $registerId > 0;
         $userId = isset($attrs['userId']) ? (int)$attrs['userId'] : 0;
+        $mitTypes = array();
+        if(isset($attrs['mitTypes']) && is_array($attrs['mitTypes'])) {
+            foreach($attrs['mitTypes'] as $t) {
+                $t = (string)$t;
+                if($t === 'aktiv' || $t === 'foerdernd') {
+                    $mitTypes[] = $t;
+                }
+            }
+        }
+        $isAktiv = in_array('aktiv', $mitTypes, true);
+        $isFoerdernd = in_array('foerdernd', $mitTypes, true);
+        $isMitgliedTyp = $isAktiv || $isFoerdernd || ($mitTypes === array() && $mitglied);
 
         $norm = self::normalize($spec, array(
             'allowNamedGroups' => false,
@@ -586,13 +657,19 @@ class AudienceSpec
                 $roleOk = true;
             }
             elseif($audience === 'musicians') {
-                $roleOk = $active;
+                $roleOk = $active && $hasInstrument;
+            }
+            elseif($audience === 'aktive') {
+                $roleOk = $isAktiv;
+            }
+            elseif($audience === 'foerdernde') {
+                $roleOk = $isFoerdernd;
             }
             elseif($audience === 'members') {
-                $roleOk = $mitglied;
+                $roleOk = $isMitgliedTyp;
             }
             elseif($audience === 'nonmembers') {
-                $roleOk = !$mitglied;
+                $roleOk = !$isMitgliedTyp;
             }
             if(!$roleOk) {
                 continue;
@@ -896,6 +973,8 @@ class AudienceSpec
      */
     public static function buildCatalog($opts = array()) {
         $forMail = !empty($opts['forMail']);
+        $includeUsers = !array_key_exists('includeUsers', $opts) || !empty($opts['includeUsers']);
+        $includeRegisters = !array_key_exists('includeRegisters', $opts) || !empty($opts['includeRegisters']);
         $includeNamedGroups = self::includeNamedGroupsOpt($opts);
         $includeTermine = !empty($opts['includeTermine']);
 
@@ -910,48 +989,52 @@ class AudienceSpec
             $catalog['groups'][] = array('id' => $id, 'label' => $label, 'meta' => 'Rolle');
         }
 
-        $sqlReg = sprintf(
-            'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
-            $GLOBALS['dbprefix']
-        );
-        $dbrReg = mysqli_query($GLOBALS['conn'], $sqlReg);
-        if($dbrReg) {
-            while($r = mysqli_fetch_array($dbrReg)) {
-                $catalog['registers'][] = array(
-                    'id' => (int)$r['Index'],
-                    'label' => html_entity_decode((string)$r['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-                );
+        if($includeRegisters) {
+            $sqlReg = sprintf(
+                'SELECT `Index`, `Name` FROM `%sRegister` WHERE LOWER(TRIM(`Name`)) != "keins" ORDER BY `Sortierung`, `Name`;',
+                $GLOBALS['dbprefix']
+            );
+            $dbrReg = mysqli_query($GLOBALS['conn'], $sqlReg);
+            if($dbrReg) {
+                while($r = mysqli_fetch_array($dbrReg)) {
+                    $catalog['registers'][] = array(
+                        'id' => (int)$r['Index'],
+                        'label' => html_entity_decode((string)$r['Name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                    );
+                }
             }
         }
 
-        $userWhere = 'u.`Deleted` != 1';
-        if($forMail) {
-            $userWhere .= ' AND (u.`getMail` = 1 OR u.`notifyInbox` = 1)';
-        }
-        $sqlUser = sprintf(
-            'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, u.`Active`, COALESCE(r.`Name`, "") AS `RegisterName`
-             FROM `%sUser` u
-             LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
-             LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
-             WHERE %s
-             ORDER BY u.`Nachname`, u.`Vorname`;',
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $userWhere
-        );
-        $dbrUser = mysqli_query($GLOBALS['conn'], $sqlUser);
-        if($dbrUser) {
-            while($u = mysqli_fetch_array($dbrUser)) {
-                $name = trim($u['Vorname'].' '.$u['Nachname']);
-                $regName = html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                $isGuest = array_key_exists('Active', $u) && (int)$u['Active'] === 0;
-                $catalog['users'][] = array(
-                    'id' => (int)$u['Index'],
-                    'label' => $name,
-                    'meta' => $regName,
-                    'guest' => $isGuest,
-                );
+        if($includeUsers) {
+            $userWhere = 'u.`Deleted` != 1';
+            if($forMail) {
+                $userWhere .= ' AND (u.`getMail` = 1 OR u.`notifyInbox` = 1)';
+            }
+            $sqlUser = sprintf(
+                'SELECT u.`Index`, u.`Vorname`, u.`Nachname`, u.`Active`, COALESCE(r.`Name`, "") AS `RegisterName`
+                 FROM `%sUser` u
+                 LEFT JOIN `%sInstrument` i ON i.`Index` = u.`Instrument`
+                 LEFT JOIN `%sRegister` r ON r.`Index` = i.`Register`
+                 WHERE %s
+                 ORDER BY u.`Nachname`, u.`Vorname`;',
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $GLOBALS['dbprefix'],
+                $userWhere
+            );
+            $dbrUser = mysqli_query($GLOBALS['conn'], $sqlUser);
+            if($dbrUser) {
+                while($u = mysqli_fetch_array($dbrUser)) {
+                    $name = trim($u['Vorname'].' '.$u['Nachname']);
+                    $regName = html_entity_decode((string)$u['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $isGuest = array_key_exists('Active', $u) && (int)$u['Active'] === 0;
+                    $catalog['users'][] = array(
+                        'id' => (int)$u['Index'],
+                        'label' => $name,
+                        'meta' => $regName,
+                        'guest' => $isGuest,
+                    );
+                }
             }
         }
 

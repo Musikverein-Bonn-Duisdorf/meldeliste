@@ -6,11 +6,13 @@
 
   var GROUP_LABELS = {
     musicians: 'Alle Musiker',
-    members: 'Alle Vereinsmitglieder',
+    aktive: 'Alle Aktiven',
+    foerdernde: 'Alle Fördernden',
+    members: 'Alle Mitglieder',
     nonmembers: 'Alle Nicht-Mitglieder',
     users: 'Alle User'
   };
-  var GROUP_IDS = ['musicians', 'members', 'nonmembers', 'users'];
+  var GROUP_IDS = ['musicians', 'aktive', 'foerdernde', 'members', 'nonmembers', 'users'];
 
   function parseCatalog(el) {
     if(!el) return {groups: [], registers: [], users: [], namedGroups: [], termine: [], guestMusicians: []};
@@ -437,6 +439,8 @@
         ? this.catalog.groups
         : [
             {id: 'musicians', label: GROUP_LABELS.musicians, meta: 'Rolle'},
+            {id: 'aktive', label: GROUP_LABELS.aktive, meta: 'Rolle'},
+            {id: 'foerdernde', label: GROUP_LABELS.foerdernde, meta: 'Rolle'},
             {id: 'members', label: GROUP_LABELS.members, meta: 'Rolle'},
             {id: 'nonmembers', label: GROUP_LABELS.nonmembers, meta: 'Rolle'},
             {id: 'users', label: GROUP_LABELS.users, meta: 'Rolle'}

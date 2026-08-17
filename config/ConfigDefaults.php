@@ -12,6 +12,12 @@ function getConfigDefaults() {
             'Description' => 'Stil f&uuml;r versteckte Termine (leere Sichtbarkeit / Admin-only)',
         ),
         array(
+            'Parameter' => 'defaultTerminVisibility',
+            'Value' => '{"groups":["musicians"],"registers":[],"users":[],"namedGroups":[]}',
+            'Type' => 'audienceGroups',
+            'Description' => 'Neue Termine: sichtbar f&uuml;r',
+        ),
+        array(
             'Parameter' => 'colorLogDefault',
             'Value' => '#FDFFFC',
             'Type' => 'color',

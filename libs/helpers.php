@@ -156,15 +156,139 @@ function germanDateCompact($string) {
 }
 
 /**
- * SQL fragment: hide Fördernde (mit_Membership.Type=foerdernd, Status=active).
+ * Qualify a User.Index column for EXISTS subqueries.
+ *
+ * @param string|null $userColumnSql
+ * @return string
+ */
+function sqlQualifyUserIndexColumn($userColumnSql = null) {
+    if($userColumnSql === null || $userColumnSql === '' || $userColumnSql === '`Index`') {
+        return sprintf('`%sUser`.`Index`', $GLOBALS['dbprefix']);
+    }
+    return $userColumnSql;
+}
+
+/**
+ * SQL fragment: open MIT type period (aktiv or foerdernd).
+ *
+ * @param string|null $userColumnSql
+ * @param string $type aktiv|foerdernd
+ * @return string
+ */
+function sqlUserHasOpenMitType($userColumnSql, $type) {
+    $userColumnSql = sqlQualifyUserIndexColumn($userColumnSql);
+    $type = ($type === 'foerdernd') ? 'foerdernd' : 'aktiv';
+    if(mitMembershipPeriodsReady()) {
+        $today = date('Y-m-d');
+        $esc = mysqli_real_escape_string($GLOBALS['conn'], $today);
+        return sprintf(
+            'EXISTS (
+                SELECT 1 FROM `mit_Membership` m
+                INNER JOIN `mit_MembershipTypePeriod` t ON t.`Membership` = m.`Index`
+                WHERE m.`User` = %s AND t.`Type` = "%s"
+                  AND t.`DateFrom` <= "%s"
+                  AND (t.`DateTo` IS NULL OR t.`DateTo` >= "%s")
+            )',
+            $userColumnSql,
+            $type,
+            $esc,
+            $esc
+        );
+    }
+    if(mitMembershipTableReady() && mitMembershipHasTypeStatusColumns()) {
+        return sprintf(
+            'EXISTS (SELECT 1 FROM `mit_Membership` m WHERE m.`User` = %s AND m.`Type` = "%s" AND m.`Status` = "active")',
+            $userColumnSql,
+            $type
+        );
+    }
+    if($type === 'aktiv' && function_exists('meldeUserHasMitgliedColumn') && meldeUserHasMitgliedColumn()) {
+        return '`Mitglied` = 1';
+    }
+    return '0=1';
+}
+
+/**
+ * SQL: open aktiv or foerdernd MIT type (Alle Mitglieder).
+ *
+ * @param string|null $userColumnSql
+ * @return string
+ */
+function sqlUserHasOpenMitMitgliedschaft($userColumnSql = null) {
+    $userColumnSql = sqlQualifyUserIndexColumn($userColumnSql);
+    return '('.sqlUserHasOpenMitType($userColumnSql, 'aktiv').' OR '.sqlUserHasOpenMitType($userColumnSql, 'foerdernd').')';
+}
+
+/**
+ * Open MIT type ids for a user (aktiv, foerdernd).
+ *
+ * @param int $userId
+ * @return list<string>
+ */
+function userOpenMitTypes($userId) {
+    $userId = (int)$userId;
+    if($userId < 1) {
+        return array();
+    }
+    $types = array();
+    if(function_exists('mitMembershipPeriodsReady') && mitMembershipPeriodsReady()) {
+        $today = date('Y-m-d');
+        $esc = mysqli_real_escape_string($GLOBALS['conn'], $today);
+        $sql = sprintf(
+            'SELECT DISTINCT t.`Type` FROM `mit_Membership` m
+             INNER JOIN `mit_MembershipTypePeriod` t ON t.`Membership` = m.`Index`
+             WHERE m.`User` = %d AND t.`DateFrom` <= "%s"
+               AND (t.`DateTo` IS NULL OR t.`DateTo` >= "%s");',
+            $userId,
+            $esc,
+            $esc
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return array();
+        }
+        if($dbr) {
+            while($row = mysqli_fetch_assoc($dbr)) {
+                $t = (string)$row['Type'];
+                if($t === 'aktiv' || $t === 'foerdernd') {
+                    $types[] = $t;
+                }
+            }
+        }
+        return array_values(array_unique($types));
+    }
+    if(function_exists('mitMembershipTableReady') && mitMembershipTableReady() && mitMembershipHasTypeStatusColumns()) {
+        $sql = sprintf(
+            'SELECT `Type` FROM `mit_Membership` WHERE `User` = %d AND `Status` = "active" LIMIT 1;',
+            $userId
+        );
+        try {
+            $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        }
+        catch(Throwable $e) {
+            return array();
+        }
+        $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+        if($row) {
+            $t = (string)$row['Type'];
+            if($t === 'aktiv' || $t === 'foerdernd') {
+                return array($t);
+            }
+        }
+    }
+    return array();
+}
+
+/**
+ * SQL fragment: hide Fördernde (open MIT Type=foerdernd).
  * No-op if mit_Membership is missing.
  * $userColumnSql must be unambiguous (qualify with table/alias), e.g. 'u.`Index`'
  * or '`meldeliste_User`.`Index`'. Bare '`Index`' is wrong inside NOT EXISTS.
  */
 function sqlExcludeFoerderndeUsers($userColumnSql = null) {
-    if($userColumnSql === null || $userColumnSql === '' || $userColumnSql === '`Index`') {
-        $userColumnSql = sprintf('`%sUser`.`Index`', $GLOBALS['dbprefix']);
-    }
+    $userColumnSql = sqlQualifyUserIndexColumn($userColumnSql);
     if(!mitMembershipPeriodsReady()) {
         // Legacy flag-based Membership until periods exist
         if(mitMembershipTableReady() && mitMembershipHasTypeStatusColumns()) {
@@ -384,9 +508,7 @@ function meldeUserHasMitgliedColumn() {
  * Note: Melde User.Active (Orchesterbetrieb) is unrelated.
  */
 function sqlUserIsVereinMitglied($userColumnSql = null) {
-    if($userColumnSql === null || $userColumnSql === '' || $userColumnSql === '`Index`') {
-        $userColumnSql = sprintf('`%sUser`.`Index`', $GLOBALS['dbprefix']);
-    }
+    $userColumnSql = sqlQualifyUserIndexColumn($userColumnSql);
     if(mitMembershipPeriodsReady()) {
         $today = date('Y-m-d');
         $esc = mysqli_real_escape_string($GLOBALS['conn'], $today);

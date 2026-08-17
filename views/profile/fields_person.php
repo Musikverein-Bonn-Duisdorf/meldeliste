@@ -120,9 +120,11 @@ if($adminUserEdit) {
     $initialChips = AudienceSpec::previewDerivedMembership(array(
         'mitglied' => $initialMitglied,
         'active' => $initialActive,
+        'instrumentId' => $initialInstrument,
         'registerId' => $initialRegisterId,
         'registerName' => $initialRegisterName,
         'userId' => $userId,
+        'mitTypes' => ($userId > 0) ? userOpenMitTypes($userId) : array(),
     ));
     $catalogJson = json_encode(
         $previewCatalog,
@@ -131,6 +133,7 @@ if($adminUserEdit) {
 ?>
 <div class="profile-field" id="profile-auto-membership-wrap"
      data-mitglied="<?php echo $initialMitglied ? '1' : '0'; ?>"
+     data-mit-types="<?php echo htmlspecialchars(json_encode(($userId > 0) ? userOpenMitTypes($userId) : array()), ENT_QUOTES, 'UTF-8'); ?>"
      data-membership-catalog="<?php echo htmlspecialchars((string)$catalogJson, ENT_QUOTES, 'UTF-8'); ?>">
   <span class="profile-label">Automatisch</span>
   <div class="mail-recipient-chips" id="profile-auto-membership" aria-live="polite" aria-label="Automatische Zugehörigkeit">

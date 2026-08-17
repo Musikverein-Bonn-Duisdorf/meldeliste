@@ -852,7 +852,12 @@ class DatabaseManager
             }
             else {
                 $hasPublished = $termine->columnExists('published');
-                $defaultJson = json_encode(AudienceSpec::defaultVisibilitySpec());
+                $defaultJson = json_encode(array(
+                    'groups' => array('users'),
+                    'registers' => array(),
+                    'users' => array(),
+                    'namedGroups' => array(),
+                ));
                 $sql = sprintf(
                     'SELECT `Index`, `VisibilitySpec`%s FROM `%sTermine`;',
                     $hasPublished ? ', `published`' : '',

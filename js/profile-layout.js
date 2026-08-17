@@ -418,11 +418,28 @@
     }
   }
 
+  function parseMitTypes(wrap) {
+    try {
+      var raw = wrap && wrap.getAttribute('data-mit-types');
+      var list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) return [];
+      return list.map(String).filter(function (t) { return t === 'aktiv' || t === 'foerdernd'; });
+    } catch (e) {
+      return [];
+    }
+  }
+
   function roleMatches(audience, attrs) {
+    var types = attrs.mitTypes || [];
+    var isAktiv = types.indexOf('aktiv') !== -1;
+    var isFoerdernd = types.indexOf('foerdernd') !== -1;
+    var isMitglied = isAktiv || isFoerdernd || (!types.length && !!attrs.mitglied);
     if (audience === 'users') return true;
-    if (audience === 'musicians') return !!attrs.active;
-    if (audience === 'members') return !!attrs.mitglied;
-    if (audience === 'nonmembers') return !attrs.mitglied;
+    if (audience === 'musicians') return !!attrs.active && Number(attrs.instrumentId) > 0;
+    if (audience === 'aktive') return isAktiv;
+    if (audience === 'foerdernde') return isFoerdernd;
+    if (audience === 'members') return isMitglied;
+    if (audience === 'nonmembers') return !isMitglied;
     return false;
   }
 
@@ -483,8 +500,10 @@
     return {
       mitglied: mitgliedEl ? !!mitgliedEl.checked : !!mitgliedFixed,
       active: !activeEl || !!activeEl.checked,
+      instrumentId: instrumentId,
       registerId: info ? Number(info.registerId || 0) : 0,
-      registerName: info ? String(info.registerName || '') : ''
+      registerName: info ? String(info.registerName || '') : '',
+      mitTypes: parseMitTypes(mitgliedWrap)
     };
   }
 

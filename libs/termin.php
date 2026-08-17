@@ -246,7 +246,7 @@ class Termin
     }
 
     /**
-     * Discord when listed and (Alle User visibility or PostDiscord checkbox).
+     * Discord when listed, webhook configured, and PostDiscord checkbox set.
      */
     public function shouldPublishToDiscord() {
         if(!$this->isListed()) {
@@ -254,9 +254,6 @@ class Termin
         }
         if(!class_exists('Discord') || !Discord::isConfigured()) {
             return false;
-        }
-        if(AudienceSpec::isAlleUserSpec($this->getVisibilitySpecArray())) {
-            return true;
         }
         return (int)$this->PostDiscord > 0;
     }
