@@ -2931,6 +2931,10 @@ body.meld-cal-print {
   background: #fafafa;
 }
 
+.meld-cal-print-table tbody tr.meld-cal-print-unpublished {
+  opacity: 0.6;
+}
+
 .meld-cal-print-time {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;

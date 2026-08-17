@@ -37,8 +37,9 @@
     $name = isset($ev['name']) ? (string)$ev['name'] : '';
     $location = isset($ev['location']) ? (string)$ev['location'] : '';
     $melde = calendarMeldeLabel(isset($ev['wert']) ? $ev['wert'] : null);
+    $unpub = !empty($ev['unpublished']) ? ' class="meld-cal-print-unpublished"' : '';
 ?>
-      <tr>
+      <tr<?php echo $unpub; ?>>
         <td><?php echo htmlspecialchars($dateLabel, ENT_QUOTES, 'UTF-8'); ?></td>
         <td class="meld-cal-print-time"><?php echo htmlspecialchars($timeLabel, ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></td>

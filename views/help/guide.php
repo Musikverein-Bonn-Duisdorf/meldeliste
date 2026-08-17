@@ -42,7 +42,7 @@ $sections[] = array(
 <p>Auf dem Desktop steht die Navigation links (Icons mit Beschriftung). Auf Tablet und Smartphone unten; unter <b>Mehr</b> findest du weitere Einträge (u.&nbsp;a. Mein Profil), Admin und Ausloggen.</p>
 <ul class="help-list">
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
-<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; bei Schichten erscheinen die einzelnen Schichten mit ihren Zeiten; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details; bei vielen Einträgen am selben Tag öffnet <b>+N</b> die Tagesauswahl); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
+<li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; ausgegraut wie in der Übersicht, wenn du nicht zur Zielgruppe gehörst; bei Schichten erscheinen die einzelnen Schichten mit ihren Zeiten; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details; bei vielen Einträgen am selben Tag öffnet <b>+N</b> die Tagesauswahl); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 <li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers (auf Tablet/Smartphone dauerhaft in der unteren Leiste)</li>
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir gehörendes oder an dich ausgeliehenes Inventar</li>' : '').'
@@ -65,7 +65,7 @@ $sections[] = array(
 <p>Unter <b>Termine</b> (Startseite) kannst du dich zu Terminen eintragen:</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung (auch im Termin-Archiv).</li>
-<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster; bei Schichten die einzelnen Schichten mit ihren Zeiten. Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Passt nicht alles in die Zelle, öffnet <b>+N</b> eine Liste aller Einträge dieses Tages. Über dem Monat: Info öffnet das Abo-Fenster, Drucken listet alle kommenden Termine (nicht nur den aktuellen Monat).</li>
+<li>Unter <b>Kalender</b> siehst du dieselben Termine als Monatsraster (ausgegraut wie in der Übersicht, wenn du nicht zur Zielgruppe gehörst); bei Schichten die einzelnen Schichten mit ihren Zeiten. Klick öffnet zuerst die Meldeabfrage (ja / nein / vielleicht). Über <b>Weitere Optionen</b> erreichst du die Termin-Details. Passt nicht alles in die Zelle, öffnet <b>+N</b> eine Liste aller Einträge dieses Tages. Über dem Monat: Info öffnet das Abo-Fenster, Drucken listet alle kommenden Termine (nicht nur den aktuellen Monat).</li>
 </ul>
 '.$meldeButtons.'
 <p>Tippe auf den gewünschten Status. Die Farbe am Termin zeigt deinen aktuellen Stand. Eine erneute Auswahl ändert die Meldung.</p>
@@ -140,7 +140,7 @@ $sections[] = array(
 <li><b>Apple</b> (iOS): Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → <b>Kalenderabonnement</b>; oder in der Kalender-App auf dem Mac: Ablage → Neues Kalenderabonnement.</li>
 <li><b>Outlook</b>: Kalender hinzufügen → Aus dem Internet / Abonnieren → HTTPS- oder webcal-Link.</li>
 </ul>
-<p>Abgesagte Termine (Nein) erscheinen nicht im Abo. Der Link ist persönlich — nicht weitergeben.</p>
+<p>Abgesagte Termine (Nein) erscheinen nicht im Abo. Ausgegraute Termine (außerhalb deiner Zielgruppe, aber für dich sichtbar) sind im Abo als frei hinterlegt. Der Link ist persönlich — nicht weitergeben.</p>
 '
 );
 
