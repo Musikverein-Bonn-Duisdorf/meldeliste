@@ -586,10 +586,11 @@ function delFile(hash) {
     </p>
     <h3 class="w3-margin-top"><?php echo $viewSubject !== '' ? $viewSubject : '<em>(ohne Betreff)</em>'; ?></h3>
     <div class="w3-padding-16 w3-border-top mail-body-content"><?php echo $viewBody !== '' ? $viewBody : '<em>(kein Text)</em>'; ?></div>
+<?php echo $job->renderAttachmentSectionHtml((int)$_SESSION['userid']); ?>
     <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="mail.php?copy=<?php echo (int)$job->Index; ?>">Als Entwurf kopieren</a>
       <?php if($job->canCancel()) { ?>
-      <form method="post" action="mail.php" data-confirm="Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?" data-confirm-ok="Abbrechen">
+      <form method="post" action="mail.php" data-confirm="Versand von Email-ID <?php echo (int)$job->Index; ?> wirklich abbrechen?" data-confirm-ok="Abbrechen" data-confirm-no-cancel="1">
         <input type="hidden" name="id" value="<?php echo (int)$job->Index; ?>" />
         <button type="submit" name="cancel_job" value="1" class="w3-button <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">Abbrechen</button>
       </form>

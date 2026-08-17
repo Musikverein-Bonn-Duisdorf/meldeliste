@@ -18,7 +18,8 @@ if(($invMut = handleInventoriesMutations()) !== false) {
 
 $u = new User;
 $u->load_by_id($_SESSION['userid']);
-if(!$u->hasInventories()) {
+$pending = LoanForm::listPendingForBorrower((int)$u->Index);
+if(!$u->hasInventories() && !$pending) {
     header('Location: '.$GLOBALS['optionsDB']['WebSiteURL']);
     exit;
 }
@@ -28,6 +29,22 @@ adminListPageBegin('Inventar', 'Mein Inventar');
 
 $shown = array();
 $html = '';
+
+if($pending) {
+    $html .= '<div class="loan-form-pending">';
+    $html .= '<h2 class="profile-kicker">Zur Unterschrift</h2>';
+    $html .= '<ul class="loan-form-pending-list">';
+    foreach($pending as $row) {
+        $pLoan = $row['loan'];
+        $pKind = $row['kind'];
+        $pCtx = LoanForm::buildContext($pLoan, $pKind);
+        $label = $pCtx ? $pCtx['title'].' · '.$pCtx['itemLabel'] : 'Formular';
+        $html .= '<li><a class="inventory-loan-btn" href="loan-form.php?loan='.(int)$pLoan->Index
+            .'&amp;kind='.htmlspecialchars($pKind, ENT_QUOTES, 'UTF-8').'">'
+            .htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</a></li>';
+    }
+    $html .= '</ul></div>';
+}
 
 // Zuerst aktive Leihen (typisch Vereinsinventar), dann Eigentum
 $loans = $u->getInventoriesLoans();

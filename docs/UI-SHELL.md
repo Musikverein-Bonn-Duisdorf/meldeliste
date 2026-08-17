@@ -294,7 +294,7 @@ Native `window.confirm` / `alert` in WebViews problematisch.
 
 - Markup: `#appConfirmModal` (Footer)
 - JS: `window.appConfirm(message, opts)`, `window.appAlert(message, opts)` → Promise
-- Forms: `data-app-confirm="…"` (siehe `appDialog.js`)
+- Forms: `data-confirm="…"` (siehe `appDialog.js`)
 
 ---
 

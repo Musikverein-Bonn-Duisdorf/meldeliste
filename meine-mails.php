@@ -71,6 +71,7 @@ adminListPageBegin('Kommunikation', 'Meine Nachrichten');
 <?php } ?>
     </p>
     <div class="w3-padding-16 mail-body-content"><?php echo $body; ?></div>
+<?php echo $job->renderAttachmentSectionHtml($userId, (int)$viewMail->Index); ?>
     <div class="w3-padding-16 mail-detail-actions">
       <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="meine-mails.php">Zur Übersicht</a>
       <form method="post" action="meine-mails.php" data-confirm="Nachricht ausblenden?" data-confirm-ok="Ausblenden">

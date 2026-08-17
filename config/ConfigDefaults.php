@@ -294,6 +294,18 @@ function getConfigDefaults() {
             'Description' => 'Vereinsname (kurz)',
         ),
         array(
+            'Parameter' => 'orgPlace',
+            'Value' => 'Duisdorf',
+            'Type' => 'string',
+            'Description' => 'Ort f&uuml;r Formulare (Unterschrift)',
+        ),
+        array(
+            'Parameter' => 'orgAddress',
+            'Value' => '',
+            'Type' => 'text',
+            'Description' => 'Vereinsanschrift (Leihvertr&auml;ge, mehrzeilig)',
+        ),
+        array(
             'Parameter' => 'numberOfDaysInHistory',
             'Value' => '7',
             'Type' => 'uint',

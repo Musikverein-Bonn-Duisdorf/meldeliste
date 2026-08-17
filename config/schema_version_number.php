@@ -10,6 +10,7 @@
  * v39: InventoriesPhotos (MELD-191) and InventoriesDocuments (MELD-205).
  * v40: Inventory.ThumbFile (MELD-206 type default thumbnail).
  * v41: config defaultTerminVisibility (MELD-202).
+ * v42: InventoriesLoanSignatures + orgPlace (MELD-201 digital signatures).
  */
-return 41;
+return 42;
 ?>

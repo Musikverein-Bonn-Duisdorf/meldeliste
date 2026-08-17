@@ -652,6 +652,8 @@ class Inventories
         if($hasLeihgebuehr) {
             $meta .= ' · Leihgebühr '.htmlspecialchars(LoanForm::formatAmount($L->Leihgebuehr), ENT_QUOTES, 'UTF-8');
         }
+        $meta .= LoanForm::signatureStatusMetaSuffix($L, LoanForm::KIND_LOAN);
+        $meta .= LoanForm::signatureStatusMetaSuffix($L, LoanForm::KIND_RETURN);
         $info->body = '<div><b>'.$nameHtml.'</b></div>'
             .'<div class="w3-small" style="margin-top:4px;">'.$meta.'</div>';
         $str .= $info->print();
@@ -665,18 +667,21 @@ class Inventories
         $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
         $str .= '<a class="inventory-loan-btn" '
             .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a>';
-        if(!$active || $ended) {
-            $str .= '<a class="inventory-loan-btn" '
-                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
-        }
+        $str .= '<a class="inventory-loan-btn" '
+            .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
         $str .= '</div>';
 
         if($hasLoanScan || $hasReturnScan) {
             $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--scans" role="group" aria-label="Scans">';
             if($hasLoanScan) {
+                $loanScanLabel = htmlspecialchars(
+                    LoanForm::storedContractLinkLabel($L, LoanForm::KIND_LOAN),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
                 $str .= '<div class="inventory-loan-scan-pair">';
                 $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
-                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">Scan Vertrag</a>';
+                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">'.$loanScanLabel.'</a>';
                 if($canEdit) {
                     $str .= '<form method="POST" action="" class="inventory-loan-delete" '
                         .'data-confirm="Scan Vertrag löschen? Die Leihe bleibt erhalten." data-confirm-ok="Scan löschen">'
@@ -688,9 +693,14 @@ class Inventories
                 $str .= '</div>';
             }
             if($hasReturnScan) {
+                $returnScanLabel = htmlspecialchars(
+                    LoanForm::storedContractLinkLabel($L, LoanForm::KIND_RETURN),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
                 $str .= '<div class="inventory-loan-scan-pair">';
                 $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
-                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">Scan Rückgabe</a>';
+                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">'.$returnScanLabel.'</a>';
                 if($canEdit) {
                     $str .= '<form method="POST" action="" class="inventory-loan-delete" '
                         .'data-confirm="Scan Rückgabe löschen? Die Leihe bleibt erhalten." data-confirm-ok="Scan löschen">'

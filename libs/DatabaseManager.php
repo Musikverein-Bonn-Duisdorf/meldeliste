@@ -1364,6 +1364,18 @@ class DatabaseManager
             $exists = $row && isset($row['Parameter']) && $row['Parameter'] === $param;
 
             if($exists) {
+                if($apply) {
+                    $upd = sprintf(
+                        "UPDATE `%sconfig` SET `Type` = '%s', `Description` = '%s' WHERE `Parameter` = '%s' AND (`Type` <> '%s' OR `Description` <> '%s');",
+                        $GLOBALS['dbprefix'],
+                        mysqli_real_escape_string($GLOBALS['conn'], (string)$item['Type']),
+                        mysqli_real_escape_string($GLOBALS['conn'], (string)$item['Description']),
+                        mysqli_real_escape_string($GLOBALS['conn'], $param),
+                        mysqli_real_escape_string($GLOBALS['conn'], (string)$item['Type']),
+                        mysqli_real_escape_string($GLOBALS['conn'], (string)$item['Description'])
+                    );
+                    mysqli_query($GLOBALS['conn'], $upd);
+                }
                 $this->addReport('config', $param, 'ok', 'Config-Parameter vorhanden');
                 continue;
             }

@@ -49,7 +49,7 @@
     }
     okBtn.textContent = opts.okLabel || 'OK';
     okBtn.className = opts.okClass || 'w3-btn profile-btn-primary w3-border w3-mobile';
-    setVisible(cancelBtn, mode === 'confirm');
+    setVisible(cancelBtn, mode === 'confirm' && !opts.hideCancel);
     if (cancelBtn) {
       cancelBtn.textContent = opts.cancelLabel || 'Abbrechen';
     }
@@ -119,6 +119,9 @@
     var ok = node.getAttribute('data-confirm-ok');
     var title = node.getAttribute('data-confirm-title');
     var okClass = node.getAttribute('data-confirm-ok-class');
+    if (node.getAttribute('data-confirm-no-cancel') === '1') {
+      opts.hideCancel = true;
+    }
     if (ok) opts.okLabel = ok;
     if (title) opts.title = title;
     if (okClass) opts.okClass = okClass;

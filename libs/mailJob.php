@@ -629,9 +629,169 @@ class MailJob
             $this->Status = 'done';
         }
         $this->update();
-        if($this->Status === 'done' || $this->Status === 'failed' || $this->Status === 'partial') {
-            $this->cleanupAttachments();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function listAttachmentFiles() {
+        $path = (string)$this->AttachmentPath;
+        if($path === '' || !is_dir($path)) {
+            return array();
         }
+        $files = scandir($path);
+        $list = array();
+        if(!is_array($files)) {
+            return $list;
+        }
+        foreach($files as $file) {
+            if($file === '.' || $file === '..' || $file === 'README') {
+                continue;
+            }
+            if(is_file($path.'/'.$file)) {
+                $list[] = $file;
+            }
+        }
+        sort($list, SORT_NATURAL | SORT_FLAG_CASE);
+        return $list;
+    }
+
+    /**
+     * Resolve attachment path within this job's upload dir (basename only).
+     * @return string|null absolute path
+     */
+    public function resolveAttachmentPath($basename) {
+        $basename = basename((string)$basename);
+        if($basename === '' || $basename === '.' || $basename === '..') {
+            return null;
+        }
+        $path = (string)$this->AttachmentPath;
+        if($path === '' || !is_dir($path)) {
+            return null;
+        }
+        $full = $path.'/'.$basename;
+        if(!is_file($full)) {
+            return null;
+        }
+        $realBase = realpath($path);
+        $realFull = realpath($full);
+        if($realBase === false || $realFull === false) {
+            return null;
+        }
+        if($realFull !== $realBase && strpos($realFull, $realBase.DIRECTORY_SEPARATOR) !== 0) {
+            return null;
+        }
+        return $realFull;
+    }
+
+    public function userMayDownloadAttachment($userId, $basename, $outboxId = 0) {
+        if(!$this->Index || !$this->resolveAttachmentPath($basename)) {
+            return false;
+        }
+        if(function_exists('requirePermission') && requirePermission('perm_sendEmail')) {
+            return true;
+        }
+        $userId = (int)$userId;
+        if($userId < 1) {
+            return false;
+        }
+        $outboxId = (int)$outboxId;
+        if($outboxId > 0) {
+            $out = new MailOutbox;
+            $out->load_by_id($outboxId);
+            return (int)$out->Index
+                && (int)$out->Job === (int)$this->Index
+                && (int)$out->User === $userId
+                && (int)$out->DeletedByUser === 0;
+        }
+        $sql = sprintf(
+            'SELECT 1 FROM `%sMailOutbox` WHERE `Job` = %d AND `User` = %d AND `DeletedByUser` = 0 LIMIT 1;',
+            $GLOBALS['dbprefix'],
+            (int)$this->Index,
+            $userId
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        return $dbr && mysqli_fetch_array($dbr);
+    }
+
+    public static function parseLoanIdFromBody($body) {
+        if(preg_match('/\(Leihe Nr\.?\s*(\d+)\)/u', (string)$body, $m)) {
+            return (int)$m[1];
+        }
+        return 0;
+    }
+
+    public function inferLoanKindFromSubject() {
+        $subj = (string)$this->Subject;
+        if(stripos($subj, 'Rückgabe') !== false || stripos($subj, 'Rueckgabe') !== false) {
+            return class_exists('LoanForm') ? LoanForm::KIND_RETURN : 'return';
+        }
+        return class_exists('LoanForm') ? LoanForm::KIND_LOAN : 'loan';
+    }
+
+    /**
+     * @return array<int, array{label:string,href:string,type:string}>
+     */
+    public function collectAttachmentLinks($userId, $outboxId = 0) {
+        $links = array();
+        foreach($this->listAttachmentFiles() as $file) {
+            if(!$this->userMayDownloadAttachment($userId, $file, $outboxId)) {
+                continue;
+            }
+            $href = 'mail-attachment.php?job='.(int)$this->Index
+                .'&file='.rawurlencode($file);
+            if((int)$outboxId > 0) {
+                $href .= '&outbox='.(int)$outboxId;
+            }
+            $links[] = array(
+                'label' => $file,
+                'href' => $href,
+                'type' => 'file',
+            );
+        }
+        if(count($links) === 0 && (string)$this->Source === 'loan-sign' && class_exists('LoanForm')) {
+            $loanId = self::parseLoanIdFromBody($this->BodyText);
+            if($loanId > 0) {
+                $loan = new InventoriesLoan;
+                $loan->load_by_id($loanId);
+                if((int)$loan->Index && LoanForm::userMayView((int)$userId, $loan)) {
+                    $kind = $this->inferLoanKindFromSubject();
+                    $label = trim((string)$this->Subject);
+                    if($label === '') {
+                        $label = $kind === LoanForm::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
+                    }
+                    $links[] = array(
+                        'label' => $label,
+                        'href' => 'loan-contract.php?loan='.$loanId
+                            .'&kind='.rawurlencode($kind)
+                            .'&file=snapshot',
+                        'type' => 'loan-snapshot',
+                    );
+                }
+            }
+        }
+        return $links;
+    }
+
+    public function renderAttachmentSectionHtml($userId, $outboxId = 0, $wrapSection = true) {
+        $links = $this->collectAttachmentLinks($userId, $outboxId);
+        if(!count($links)) {
+            return '';
+        }
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $chips = '<div class="mail-recipient-chips">';
+        foreach($links as $link) {
+            $chips .= '<a class="mail-recipient-chip w3-mobile" href="'.$h($link['href']).'" target="_blank" rel="noopener">'.$h($link['label']).'</a>';
+        }
+        $chips .= '</div>';
+        if(!$wrapSection) {
+            return $chips;
+        }
+        return '<div class="mail-attachments-section w3-padding-16 w3-border-top">'
+            .'<h4>Anhänge</h4>'.$chips.'</div>';
     }
 
     public function cleanupAttachments() {
@@ -749,7 +909,7 @@ class MailJob
         }
         if($this->canCancel()) {
             $html .= '<span class="mail-cancel-wrap">';
-            $html .= '<form method="post" action="mail.php" data-confirm="Versand von Email-ID '.$id.' wirklich abbrechen?" data-confirm-ok="Abbrechen">';
+            $html .= '<form method="post" action="mail.php" data-confirm="Versand von Email-ID '.$id.' wirklich abbrechen?" data-confirm-ok="Abbrechen" data-confirm-no-cancel="1">';
             $html .= '<input type="hidden" name="id" value="'.$id.'" />';
             $html .= '<button type="submit" name="cancel_job" value="1" class="w3-button w3-small '.$GLOBALS['optionsDB']['colorWarning'].'">Abbrechen</button>';
             $html .= '</form>';
@@ -826,10 +986,12 @@ class MailJob
             $byUser->load_by_id($byId);
             $byName = $byUser->Index ? $byUser->getName() : ('User '.$byId);
         }
+        $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
         return render('mail/modal', array(
             'job' => $this,
             'byId' => $byId,
             'byName' => $byName,
+            'userId' => $userId,
         ));
     }
 

@@ -20,6 +20,8 @@ $body = formatMailBodyForDisplay((string)$job->BodyText);
 $counts = ((string)$job->Status !== 'draft')
     ? MailJob::formatCounts($job->Sent, $job->Total, $job->Failed)
     : '—';
+$userId = isset($userId) ? (int)$userId : 0;
+$attachmentsHtml = $userId > 0 ? $job->renderAttachmentSectionHtml($userId, 0, false) : '';
 $btn = isset($GLOBALS['optionsDB']['colorBtnSubmit'])
     ? $GLOBALS['optionsDB']['colorBtnSubmit']
     : 'w3-blue';
@@ -70,6 +72,12 @@ $btn = isset($GLOBALS['optionsDB']['colorBtnSubmit'])
       <div class="profile-field">
         <div class="profile-value mail-body-content"><?php echo $body !== '' ? $body : '<em>(kein Text)</em>'; ?></div>
       </div>
+<?php if($attachmentsHtml !== '') { ?>
+      <div class="profile-field">
+        <span class="profile-label">Anhänge</span>
+        <div class="profile-value"><?php echo $attachmentsHtml; ?></div>
+      </div>
+<?php } ?>
     </section>
   </div>
 </div>

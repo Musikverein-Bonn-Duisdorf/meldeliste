@@ -70,6 +70,18 @@
 	"ContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"ReturnContractFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
+    "InventoriesLoanSignatures": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Loan": {"Type": "int"},
+	"Kind": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"Role": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"File": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"SignedAt": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
+	"SignedBy": {"Type": "int", "Default": 0},
+	"Place": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"SignDate": {"Type": "date", "Null": "YES"},
+	"SnapshotFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
+    },
     "InventoriesDocuments": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Inventory": {"Type": "int"},
