@@ -2,6 +2,19 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-17-1171b (2026-08-17)
+
+- MELD-207: Inventar-Thumbnails vollständig einpassen
+- MELD-204: Ausleihe-Chip in der Inventarliste lesbar halten
+- MELD-202: Schema v41 für defaultTerminVisibility
+- MELD-206: Default-Thumbnails für Inventar-Typen und Foto-Lightbox
+- MELD-195: Leihvertrag Bildschirm und Druck auf 10pt
+- MELD-202: Rollenmodell für Sichtbarkeit, Config-Default und Discord
+- MELD-204: Ausleihe-Chip in der Inventarliste lesbar
+- MELD-202: Rollenmodell Sichtbarkeit, Default und Discord
+- MELD-195: Leihvertrag Schriftgröße 10pt
+- MELD-206: Inventar-Typ-Thumbnails und Foto-Lightbox
+
 ## 2026-08-17-be158 (2026-08-17)
 
 - MELD-205: Inventar-Dokumente und Fotos
