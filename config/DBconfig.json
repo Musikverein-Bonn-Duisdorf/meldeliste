@@ -66,7 +66,6 @@
     "InventoriesDocuments": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Inventory": {"Type": "int"},
-	"DocType": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"StoredFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"UploadedAt": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
 	"Note": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}

@@ -5,16 +5,9 @@
  */
 class InventoriesDocument
 {
-    const TYPE_RECHNUNG = 'Rechnung';
-    const TYPE_BELEG = 'Beleg';
-    const TYPE_QUITTUNG = 'Quittung';
-    const TYPE_REPARATUR = 'Reparaturbericht';
-    const TYPE_SONSTIGES = 'Sonstiges';
-
     private $_data = array(
         'Index' => null,
         'Inventory' => null,
-        'DocType' => null,
         'StoredFile' => null,
         'UploadedAt' => null,
         'Note' => null,
@@ -36,30 +29,7 @@ class InventoriesDocument
             $this->_data[$key] = null;
             return;
         }
-        if($key === 'DocType') {
-            $this->_data[$key] = self::normalizeType($val);
-            return;
-        }
         $this->_data[$key] = trim((string)$val);
-    }
-
-    /** @return string[] */
-    public static function allowedTypes() {
-        return array(
-            self::TYPE_RECHNUNG,
-            self::TYPE_BELEG,
-            self::TYPE_QUITTUNG,
-            self::TYPE_REPARATUR,
-            self::TYPE_SONSTIGES,
-        );
-    }
-
-    public static function normalizeType($type) {
-        $t = trim((string)$type);
-        if(in_array($t, self::allowedTypes(), true)) {
-            return $t;
-        }
-        return self::TYPE_SONSTIGES;
     }
 
     public static function storageDir($inventoryId) {
@@ -202,13 +172,12 @@ class InventoriesDocument
     public function downloadName() {
         $path = $this->absolutePath();
         $ext = $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : 'bin';
-        $raw = $this->DocType.'-'.(int)$this->Index.'.'.$ext;
+        $raw = $this->displayName().'-'.(int)$this->Index.'.'.$ext;
         return preg_replace('/[^\w.\-]+/u', '_', $raw);
     }
 
     public function is_valid() {
         return (int)$this->Inventory > 0
-            && $this->DocType !== ''
             && $this->StoredFile !== null
             && $this->StoredFile !== '';
     }
@@ -301,29 +270,28 @@ class InventoriesDocument
      * @param array $file $_FILES entry
      * @return InventoriesDocument|null
      */
-    public static function createFromUpload($inventoryId, $docType, array $file, $note = null) {
+    public static function createFromUpload($inventoryId, array $file, $note = null) {
         $stored = self::storeUpload($inventoryId, $file);
         if($stored === false) {
             return null;
         }
-        return self::persistNew((int)$inventoryId, $docType, $stored, $note);
+        return self::persistNew((int)$inventoryId, $stored, $note);
     }
 
     /**
      * @return InventoriesDocument|null
      */
-    public static function createFromPath($inventoryId, $docType, $sourcePath, $note = null, $preferredExt = '') {
+    public static function createFromPath($inventoryId, $sourcePath, $note = null, $preferredExt = '') {
         $stored = self::storeCopyFromPath($inventoryId, $sourcePath, $preferredExt);
         if($stored === false) {
             return null;
         }
-        return self::persistNew((int)$inventoryId, $docType, $stored, $note);
+        return self::persistNew((int)$inventoryId, $stored, $note);
     }
 
-    private static function persistNew($inventoryId, $docType, $stored, $note) {
+    private static function persistNew($inventoryId, $stored, $note) {
         $doc = new self();
         $doc->Inventory = (int)$inventoryId;
-        $doc->DocType = $docType;
         $doc->StoredFile = $stored;
         $doc->Note = $note;
         if(!$doc->save()) {
@@ -362,7 +330,6 @@ class InventoriesDocument
 
     public function getVars() {
         $parts = array($this->logHeader());
-        $parts[] = 'Typ: '.(string)$this->DocType;
         $parts[] = 'Datei: '.(string)$this->StoredFile;
         logAppendFilled($parts, 'Notiz', $this->Note, (string)$this->Note);
         return implode(', ', $parts);
@@ -409,10 +376,9 @@ class InventoriesDocument
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sInventoriesDocuments` (`Inventory`, `DocType`, `StoredFile`, `Note`) VALUES (%d, "%s", "%s", %s);',
+            'INSERT INTO `%sInventoriesDocuments` (`Inventory`, `StoredFile`, `Note`) VALUES (%d, "%s", %s);',
             $GLOBALS['dbprefix'],
             (int)$this->Inventory,
-            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->DocType),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->StoredFile),
             ($this->Note === null || $this->Note === '')
                 ? 'NULL'
@@ -429,10 +395,9 @@ class InventoriesDocument
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sInventoriesDocuments` SET `Inventory` = %d, `DocType` = "%s", `StoredFile` = "%s", `Note` = %s WHERE `Index` = %d;',
+            'UPDATE `%sInventoriesDocuments` SET `Inventory` = %d, `StoredFile` = "%s", `Note` = %s WHERE `Index` = %d;',
             $GLOBALS['dbprefix'],
             (int)$this->Inventory,
-            mysqli_real_escape_string($GLOBALS['conn'], (string)$this->DocType),
             mysqli_real_escape_string($GLOBALS['conn'], (string)$this->StoredFile),
             ($this->Note === null || $this->Note === '')
                 ? 'NULL'

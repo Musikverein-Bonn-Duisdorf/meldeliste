@@ -1,6 +1,6 @@
 <?php
 /**
- * Inventar-Modal: Dokumente (MELD-205), analog MIT Personen-Dokumente.
+ * Inventar-Modal: Dokumente (MELD-205).
  * Expects: $inventoryId, $documents (InventoriesDocument[]), $canEdit
  */
 $h = function ($s) {
@@ -21,7 +21,6 @@ $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground']) ? $GLOBALS['opti
 ?>
     <li class="inv-doc-item">
       <div class="inv-doc-main">
-        <span class="inv-doc-type"><?php echo $h((string)$doc->DocType); ?></span>
 <?php if($hasFile) { ?>
         <a class="inv-doc-name" href="get-inventory-document.php?id=<?php echo $docId; ?>" target="_blank" rel="noopener noreferrer"><?php echo $h($doc->displayName()); ?></a>
 <?php } else { ?>
@@ -49,14 +48,6 @@ $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground']) ? $GLOBALS['opti
     <input type="hidden" name="inventory_id" value="<?php echo (int)$inventoryId; ?>">
     <input type="hidden" name="action" value="document_upload">
     <div class="inv-doc-upload-grid">
-      <div class="profile-field">
-        <label class="profile-label" for="inv-doc-type">Typ</label>
-        <select id="inv-doc-type" class="w3-select w3-border profile-control <?php echo $h($inputBg); ?>" name="doc_type" required>
-<?php foreach(InventoriesDocument::allowedTypes() as $t) { ?>
-          <option value="<?php echo $h($t); ?>"<?php echo $t === InventoriesDocument::TYPE_RECHNUNG ? ' selected' : ''; ?>><?php echo $h($t); ?></option>
-<?php } ?>
-        </select>
-      </div>
       <div class="profile-field inv-doc-upload-file">
         <label class="profile-label" for="inv-doc-file">Datei</label>
         <input id="inv-doc-file" class="w3-input w3-border profile-control <?php echo $h($inputBg); ?>" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>

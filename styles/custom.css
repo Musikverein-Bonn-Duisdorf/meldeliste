@@ -4011,15 +4011,6 @@ body.loan-form-print {
   flex: 1 1 12rem;
 }
 
-.inv-doc-type {
-  font-weight: 650;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.65;
-  min-width: 6.5rem;
-}
-
 .inv-doc-name {
   word-break: break-word;
 }
@@ -4050,7 +4041,7 @@ body.loan-form-print {
 
 @media (min-width: 720px) {
   .inv-doc-upload-grid {
-    grid-template-columns: minmax(8rem, 10rem) minmax(0, 1.4fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   }
 }
 

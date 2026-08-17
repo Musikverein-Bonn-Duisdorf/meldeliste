@@ -61,8 +61,7 @@ elseif($action === 'document_upload') {
         $fail('Datei fehlt.');
     }
     $note = isset($_POST['doc_note']) ? $_POST['doc_note'] : null;
-    $type = isset($_POST['doc_type']) ? $_POST['doc_type'] : InventoriesDocument::TYPE_RECHNUNG;
-    $doc = InventoriesDocument::createFromUpload((int)$inv->Index, $type, $_FILES['document'], $note);
+    $doc = InventoriesDocument::createFromUpload((int)$inv->Index, $_FILES['document'], $note);
     if($doc === null) {
         $fail('Datei konnte nicht gespeichert werden (PDF, JPEG oder PNG).');
     }
