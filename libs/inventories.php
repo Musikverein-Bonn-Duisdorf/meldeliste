@@ -440,11 +440,17 @@ class Inventories
         }
         elseif($loanShort !== '' || $loanDate !== '' || $loanFull !== '') {
             $loanBits = array();
-            $loanName = $loanShort !== '' ? $loanShort : $loanFull;
+            $loanName = trim($loanShort !== '' ? $loanShort : $loanFull);
+            if($loanName === '') {
+                $loanName = trim($loanFull);
+            }
             if($loanName !== '') {
-                $loanBits[] = ($loanUserId > 0 && function_exists('entityOpenHtml'))
+                $chip = ($loanUserId > 0 && function_exists('entityOpenHtml'))
                     ? entityOpenHtml('user', $loanUserId, $loanName)
                     : $h($loanName);
+                if($chip !== '') {
+                    $loanBits[] = $chip;
+                }
             }
             if($loanDate !== '') {
                 $loanBits[] = $h($loanDate);

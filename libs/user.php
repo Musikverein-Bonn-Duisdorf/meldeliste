@@ -211,28 +211,7 @@ class User
         return implode(', ', $parts);
     }
     public function getShort() {
-        if(strlen($this->Vorname) >=2) {
-            $end=2;
-            if(substr($this->Vorname,1,1)=="&") {
-                $end = strpos($this->Vorname, ";");
-            }
-            $short1 = substr($this->Vorname,0,$end);
-        }
-        else {
-            $short1 = $this->Vorname;
-        }
-        if(strlen($this->Nachname) >=2) {
-            $narray = explode(" ", $this->Nachname);
-            $end=2;
-            if(substr($narray[sizeof($narray)-1],1,1)=="&") {
-                $end = strpos($narray[sizeof($narray)-1], ";");
-            }
-            $short2 = substr($narray[sizeof($narray)-1],0,$end);
-        }
-        else {
-            $short2 = $this->Nachname;
-        }
-        return $short1.$short2;
+        return getShort((string)$this->Vorname, (string)$this->Nachname);
     }
     public function save() {
         if($this->activeLink == '' || $this->activeLink === null) $this->generateLink();
