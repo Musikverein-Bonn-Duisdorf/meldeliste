@@ -83,6 +83,19 @@ if($isPost) {
         $log->DBdelete('Inventar-Foto: Inventory '.(int)$inv->Index);
         $respondAjax(true, (int)$inv->Index);
     }
+    if($action === 'primary') {
+        $photo = new InventoriesPhoto();
+        $photo->load_by_id(isset($_POST['id']) ? (int)$_POST['id'] : 0);
+        if(!(int)$photo->Index || (int)$photo->Inventory !== (int)$inv->Index) {
+            $respondAjax(false, (int)$inv->Index, 'Foto nicht gefunden.');
+        }
+        if(!$photo->makePrimary()) {
+            $respondAjax(false, (int)$inv->Index, 'Vorschau konnte nicht gesetzt werden.');
+        }
+        $log = new Log();
+        $log->DBinsert('Inventar-Foto Vorschau: Inventory '.(int)$inv->Index.', Foto '.(int)$photo->Index);
+        $respondAjax(true, (int)$inv->Index);
+    }
     if($action !== 'upload' || !isset($_FILES['photo'])) {
         $respondAjax(false, (int)$inv->Index, 'Upload fehlgeschlagen.');
     }

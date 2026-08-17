@@ -27,6 +27,13 @@
     if (pos) pos.textContent = String(idx + 1);
     var delId = gallery.parentNode && gallery.parentNode.querySelector('.inv-photo-delete-id');
     if (delId) delId.value = String(ids[idx]);
+    var primaryId = gallery.parentNode && gallery.parentNode.querySelector('.inv-photo-primary-id');
+    if (primaryId) primaryId.value = String(ids[idx]);
+    var primaryForm = gallery.parentNode && gallery.parentNode.querySelector('.inv-photo-primary');
+    if (primaryForm) {
+      if (idx === 0) primaryForm.setAttribute('hidden', 'hidden');
+      else primaryForm.removeAttribute('hidden');
+    }
   }
 
   function currentIndex(gallery) {
@@ -99,7 +106,7 @@
   document.addEventListener('submit', function(e) {
     var form = e.target;
     if (!form || !form.closest) return;
-    if (!form.classList.contains('inv-photo-upload') && !form.classList.contains('inv-photo-delete')) return;
+    if (!form.classList.contains('inv-photo-upload') && !form.classList.contains('inv-photo-delete') && !form.classList.contains('inv-photo-primary')) return;
     if (!form.closest('#ajaxModalContent .inventar-modal')) return;
     e.preventDefault();
     postForm(form, function(xhr, data) {

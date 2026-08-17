@@ -6650,7 +6650,8 @@ select.profile-control {
 }
 
 .inv-photo-upload,
-.inv-photo-delete {
+.inv-photo-delete,
+.inv-photo-primary {
   display: inline-block;
   margin: 0.5rem 0.5rem 0 0;
 }

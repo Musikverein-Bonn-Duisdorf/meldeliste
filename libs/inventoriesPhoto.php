@@ -260,6 +260,36 @@ class InventoriesPhoto
         return true;
     }
 
+    /**
+     * Make this photo the list preview (Sortierung 1); remaining photos keep relative order.
+     */
+    public function makePrimary() {
+        if((int)$this->Index < 1 || (int)$this->Inventory < 1) {
+            return false;
+        }
+        $list = self::listForInventory((int)$this->Inventory);
+        $rest = array();
+        foreach($list as $p) {
+            if((int)$p->Index === (int)$this->Index) {
+                continue;
+            }
+            $rest[] = $p;
+        }
+        $this->Sortierung = 1;
+        if(!$this->save()) {
+            return false;
+        }
+        $n = 2;
+        foreach($rest as $p) {
+            $p->Sortierung = $n;
+            if(!$p->save()) {
+                return false;
+            }
+            $n++;
+        }
+        return true;
+    }
+
     public static function deleteAllForInventory($inventoryId) {
         $inventoryId = (int)$inventoryId;
         foreach(self::listForInventory($inventoryId) as $photo) {
@@ -321,6 +351,14 @@ class InventoriesPhoto
             $html .= '</label>';
             $html .= '</form>';
             if($count > 0) {
+                if($count > 1) {
+                    $html .= '<form class="inv-photo-primary" action="inventory-photo.php" method="POST" hidden>';
+                    $html .= '<input type="hidden" name="inventory" value="'.$inventoryId.'">';
+                    $html .= '<input type="hidden" name="action" value="primary">';
+                    $html .= '<input type="hidden" name="id" class="inv-photo-primary-id" value="'.$ids[0].'">';
+                    $html .= '<button type="submit" class="w3-btn w3-border w3-mobile w3-small">Vorschau</button>';
+                    $html .= '</form>';
+                }
                 $html .= '<form class="inv-photo-delete" action="inventory-photo.php" method="POST">';
                 $html .= '<input type="hidden" name="inventory" value="'.$inventoryId.'">';
                 $html .= '<input type="hidden" name="action" value="delete">';
