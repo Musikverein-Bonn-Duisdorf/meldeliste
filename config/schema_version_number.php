@@ -9,6 +9,7 @@
  * v38: ensure Termine.Sammlungen (text JSON); drop obsolete Termine.Sammlung if present.
  * v39: InventoriesPhotos (MELD-191) and InventoriesDocuments (MELD-205).
  * v40: Inventory.ThumbFile (MELD-206 type default thumbnail).
+ * v41: config defaultTerminVisibility (MELD-202).
  */
-return 40;
+return 41;
 ?>
