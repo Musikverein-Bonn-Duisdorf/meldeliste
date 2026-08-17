@@ -425,10 +425,10 @@ class Inventories
             $ownerHtml = ($ownerId > 0 && function_exists('entityOpenHtml'))
                 ? entityOpenHtml('user', $ownerId, $ownerName)
                 : $h($ownerName);
-            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Eigentümer</span> '.$ownerHtml.'</span>';
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Eigentümer</span><span class="inv-meta-v">'.$ownerHtml.'</span></span>';
         }
         if($comment !== '') {
-            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Kommentar</span> '.$h($comment).'</span>';
+            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Kommentar</span><span class="inv-meta-v">'.$h($comment).'</span></span>';
         }
         if($isLoaned) {
             $loanBits = array();
@@ -448,18 +448,19 @@ class Inventories
                 }
             }
             if($loanDate !== '') {
-                $loanBits[] = $h($loanDate);
+                $loanBits[] = '<span>'.$h($loanDate).'</span>';
             }
             if($loanBits) {
-                $meta[] = '<span class="inv-meta-item inv-meta-item--loan"><span class="inv-meta-k">Ausleihe</span> '.implode(' · ', $loanBits).'</span>';
+                $sep = '<span class="inv-meta-sep" aria-hidden="true">·</span>';
+                $meta[] = '<span class="inv-meta-item inv-meta-item--loan"><span class="inv-meta-k">Ausleihe</span><span class="inv-meta-v">'.implode($sep, $loanBits).'</span></span>';
             }
         }
         if($showAdminCols) {
             if($purchaseDate !== '') {
-                $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufdatum</span> '.$h($purchaseDate).'</span>';
+                $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufdatum</span><span class="inv-meta-v">'.$h($purchaseDate).'</span></span>';
             }
             if($purchasePrize) {
-                $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufpreis</span> '.$purchasePrize.'</span>';
+                $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufpreis</span><span class="inv-meta-v">'.$purchasePrize.'</span></span>';
             }
         }
         if($meta) {
