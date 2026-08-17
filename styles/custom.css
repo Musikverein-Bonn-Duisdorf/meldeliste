@@ -2971,7 +2971,7 @@ body.loan-form-print {
   margin: 0;
   padding: 1rem 1.25rem 1.5rem;
   font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 9.25pt;
+  font-size: 10pt;
   line-height: 1.28;
   color: var(--loan-ink);
   background: #eceff3;
@@ -3103,7 +3103,7 @@ body.loan-form-print {
   box-shadow: 0 1px 2px rgba(28, 36, 48, 0.04), 0 8px 24px rgba(28, 36, 48, 0.06);
   padding: var(--loan-page-pad-y) var(--loan-page-pad-x);
   color: var(--loan-ink);
-  font-size: 9.25pt;
+  font-size: 10pt;
   line-height: 1.28;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -3685,7 +3685,7 @@ body.loan-form-print {
   body.loan-form-print {
     padding: 0;
     margin: 0;
-    font-size: 9.25pt;
+    font-size: 10pt;
     line-height: 1.28;
   }
 
