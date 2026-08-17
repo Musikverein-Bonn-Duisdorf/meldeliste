@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-17-de34f (2026-08-17)
+
+- MELD-208: Inventar-Dokument-Log mit Namen statt Fragezeichen
+
 ## 2026-08-17-592b7 (2026-08-17)
 
 - MELD-209: Ausleihe in der Liste mit Person und Chip verliehen
