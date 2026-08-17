@@ -361,14 +361,10 @@ class Inventories
         if($insured) {
             $classes[] = 'inv-row--insured';
         }
-        $viewerId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
-        $loanedToViewer = false;
-        if($viewerId > 0 && $ownerId !== $viewerId && $loanUserId === $viewerId) {
-            $loanedToViewer = true;
-        }
-        if($loanedToViewer) {
+        $isLoaned = $loanUserId > 0 || $loanDate !== '' || $loanFull !== '' || $loanShort !== '';
+        if($isLoaned) {
             $classes[] = 'inv-row--loaned';
-            $searchParts[] = 'geliehen ausleihe';
+            $searchParts[] = 'verliehen geliehen ausleihe';
         }
         $hover = $GLOBALS['optionsDB']['HoverEffect'];
         if($hover) {
@@ -376,7 +372,7 @@ class Inventories
         }
 
         $attrs = 'data-insured="'.($insured ? '1' : '0').'"'
-            .' data-loaned="'.($loanedToViewer ? '1' : '0').'"'
+            .' data-loaned="'.($isLoaned ? '1' : '0').'"'
             .' data-sort-regnumber="'.$h((string)(int)$row['RegNumber']).'"'
             .' data-sort-typ="'.$h($typLabel).'"'
             .' data-sort-description="'.$h($desc).'"'
@@ -404,8 +400,8 @@ class Inventories
         if($insured) {
             $str .= '<span class="mail-recipient-chip mail-recipient-chip--insured">versichert</span>';
         }
-        if($loanedToViewer) {
-            $str .= '<span class="mail-recipient-chip mail-recipient-chip--loaned">geliehen</span>';
+        if($isLoaned) {
+            $str .= '<span class="mail-recipient-chip mail-recipient-chip--loaned">verliehen</span>';
         }
         $str .= '</div>';
         $str .= '<div class="inv-rail" aria-hidden="true"></div>';
@@ -434,15 +430,14 @@ class Inventories
         if($comment !== '') {
             $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Kommentar</span> '.$h($comment).'</span>';
         }
-        if($loanedToViewer) {
-            $loanLabel = $loanDate !== '' ? 'seit '.$h($loanDate) : 'aktiv';
-            $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.$loanLabel.'</span>';
-        }
-        elseif($loanShort !== '' || $loanDate !== '' || $loanFull !== '') {
+        if($isLoaned) {
             $loanBits = array();
-            $loanName = trim($loanShort !== '' ? $loanShort : $loanFull);
+            $loanName = trim($loanFull);
             if($loanName === '') {
-                $loanName = trim($loanFull);
+                $loanName = trim($loanShort);
+            }
+            if($loanName === '' && $loanUserId > 0) {
+                $loanName = '#'.$loanUserId;
             }
             if($loanName !== '') {
                 $chip = ($loanUserId > 0 && function_exists('entityOpenHtml'))
@@ -456,7 +451,7 @@ class Inventories
                 $loanBits[] = $h($loanDate);
             }
             if($loanBits) {
-                $meta[] = '<span class="inv-meta-item"><span class="inv-meta-k">Ausleihe</span> '.implode(' · ', $loanBits).'</span>';
+                $meta[] = '<span class="inv-meta-item inv-meta-item--loan"><span class="inv-meta-k">Ausleihe</span> '.implode(' · ', $loanBits).'</span>';
             }
         }
         if($showAdminCols) {

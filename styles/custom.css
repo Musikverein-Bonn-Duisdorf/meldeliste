@@ -6204,6 +6204,15 @@ select.profile-control {
   word-break: break-word;
 }
 
+.inv-meta-item--loan {
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.4rem;
+  max-width: 100%;
+}
+
 .inv-meta-k {
   font-size: 0.72rem;
   font-weight: 600;
@@ -6217,7 +6226,7 @@ select.profile-control {
 .inv-meta-line .mail-recipient-chip {
   white-space: nowrap;
   max-width: none;
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 @media (max-width: 900px) {

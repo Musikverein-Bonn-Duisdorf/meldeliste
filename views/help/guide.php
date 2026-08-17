@@ -104,7 +104,7 @@ if($helpUser->hasInventories()) {
         'title' => 'Mein Inventar',
         'body' => '
 <p>Wenn dir Inventar gehört <b>oder an dich ausgeliehen</b> ist (aktive Leihe), erscheint <b>Mein Inventar</b> in der Navigation.</p>
-<p>Dort siehst du zuerst geliehene Stücke (Chip „geliehen“), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Sind Fotos hinterlegt, erscheint ein Thumbnail; ohne Stückfoto das Default-Bild des Inventar-Typs, falls hinterlegt. Ein Tippen/Klick öffnet die Details im Modal; dort kannst du durch die Fotos blättern, Klick aufs Bild vergrößert, und unter <b>Dokumente</b> hinterlegte Dateien öffnen. Bearbeiten, Hochladen und Löschen nur mit den entsprechenden Rechten.</p>
+<p>Dort siehst du zuerst verliehene Stücke (Chip „verliehen“ und unter Ausleihe die Person), danach eigenes Eigentum – als Liste bzw. auf dem Handy als Karten mit Nr., Typ, Hersteller und Modell. Sind Fotos hinterlegt, erscheint ein Thumbnail; ohne Stückfoto das Default-Bild des Inventar-Typs, falls hinterlegt. Ein Tippen/Klick öffnet die Details im Modal; dort kannst du durch die Fotos blättern, Klick aufs Bild vergrößert, und unter <b>Dokumente</b> hinterlegte Dateien öffnen. Bearbeiten, Hochladen und Löschen nur mit den entsprechenden Rechten.</p>
 '
     );
 }
@@ -235,7 +235,7 @@ $sections[] = array(
     'body' => '
 <ul class="help-list">
 '.(requirePermission('perm_showInventories') ? '
-<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche (mehrere Wörter = UND, z. B. <code>marsch Ralf</code>) und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick auf die Zeile öffnet Details; hinterlegte Fotos erscheinen als Thumbnail, sonst das Default-Bild des Typs; im Modal blätterbar, Klick vergrößert; Eigentümer-/Ausleihe-Chips öffnen die Person; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
+<li><b>Inventar</b> – Vereinsbesitz (Bestände, Details und Ausleihen); die Liste lädt beim Scrollen nach, Sortier-Chips sortieren serverseitig, Suche (mehrere Wörter = UND, z. B. <code>marsch Ralf</code>) und Chip <b>Versichert</b> filtern die bereits geladenen Einträge (bei aktiver Filterung wird weiter nachgeladen); Klick auf die Zeile öffnet Details; hinterlegte Fotos erscheinen als Thumbnail, sonst das Default-Bild des Typs; im Modal blätterbar, Klick vergrößert; aktive Ausleihe: Chip „verliehen“ plus Person und Datum; Eigentümer-/Ausleihe-Chips öffnen die Person; „Übersicht für Versicherung“ öffnet eine druck-/PDF-fähige Tabelle (Spalten per Checkbox wählen, dann kopieren oder als PDF speichern)</li>
 ' : '').'
 '.(requirePermission('perm_editInventories') ? '
 <li><b>Inventar anlegen</b> – neue Stücke über die eigene Seite (Plus in der Inventarliste oder Admin → Inventar anlegen)</li>
