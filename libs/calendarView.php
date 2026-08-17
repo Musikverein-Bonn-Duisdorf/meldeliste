@@ -104,13 +104,25 @@ function calendarColorClassForWert($wert) {
 }
 
 /**
- * Load visible appointments overlapping [fromDate, toDate] for a user.
+ * Overview unpublished style (grayed). Same config as list cards.
+ *
+ * @return string
+ */
+function calendarUnpublishedClass() {
+    $opts = isset($GLOBALS['optionsDB']) ? $GLOBALS['optionsDB'] : array();
+    $cls = isset($opts['styleAppmntUnpublished']) ? trim((string)$opts['styleAppmntUnpublished']) : '';
+    return $cls !== '' ? $cls : 'w3-opacity';
+}
+
+/**
+ * Load appointments overlapping [fromDate, toDate] for a user.
+ * Same visibility as the overview (including grayed / unpublished).
  * Shift appointments expand to one event per Schicht (MELD-182).
  *
  * @param int $userId
  * @param string $fromDate Y-m-d
  * @param string $toDate Y-m-d
- * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string,description:string,location:string,shiftId?:int}>
+ * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string,description:string,location:string,unpublished:bool,shiftId?:int}>
  */
 function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
     $userId = (int)$userId;
@@ -127,17 +139,16 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
 
     // Overlap: start <= to AND (end OR start) >= from
     // CAST/NULLIF avoids "Incorrect DATE value: ''" when EndDatum is empty string
+    // No sqlIsListed: overview also shows grayed (versteckt / outside audience) events.
     $sql = sprintf(
         'SELECT `t`.*, `m`.`Wert` AS `meldeWert` FROM `%sTermine` `t`
         LEFT JOIN `%sMeldungen` `m` ON `m`.`Termin` = `t`.`Index` AND `m`.`User` = %d
-        WHERE %s
-          AND `t`.`Datum` <= \'%s\'
+        WHERE `t`.`Datum` <= \'%s\'
           AND COALESCE(NULLIF(CAST(`t`.`EndDatum` AS CHAR), \'\'), `t`.`Datum`) >= \'%s\'
         ORDER BY `t`.`Datum`, `t`.`Uhrzeit`, `t`.`Name`;',
         $prefix,
         $prefix,
         $userId,
-        Termin::sqlIsListed('`t`.'),
         $toEsc,
         $fromEsc
     );
@@ -162,6 +173,7 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
         $description = (string)$t->Beschreibung;
         $terminStart = trim((string)$t->Uhrzeit);
         $terminEnd = trim((string)$t->Uhrzeit2);
+        $unpublished = $t->shouldStyleAsUnpublished($userId);
 
         if((int)$t->Shifts) {
             $shiftIds = $t->getShifts();
@@ -207,6 +219,7 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
                     'colorClass' => calendarColorClassForWert($wert),
                     'description' => $description,
                     'location' => $location,
+                    'unpublished' => $unpublished,
                 );
             }
             continue;
@@ -227,6 +240,7 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
             'colorClass' => calendarColorClassForWert($wert),
             'description' => $description,
             'location' => $location,
+            'unpublished' => $unpublished,
         );
     }
 

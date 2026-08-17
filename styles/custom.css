@@ -2142,6 +2142,33 @@ a.app-titlebar-logo {
   margin-top: 4px;
 }
 
+.inventory-loans-ended {
+  margin-top: 0.5rem;
+}
+
+.inventory-loans-ended > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.55rem 0;
+  font-weight: 600;
+  user-select: none;
+}
+
+.inventory-loans-ended > summary::-webkit-details-marker {
+  display: none;
+}
+
+.inventory-loans-ended > summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 1.1em;
+  opacity: 0.65;
+}
+
+.inventory-loans-ended[open] > summary::before {
+  content: "▾";
+}
+
 .inventory-loans .inventory-loan-row.is-new {
   outline: 2px solid #345A95;
   outline-offset: -2px;
@@ -2929,6 +2956,10 @@ body.meld-cal-print {
 
 .meld-cal-print-table tbody tr:nth-child(even) {
   background: #fafafa;
+}
+
+.meld-cal-print-table tbody tr.meld-cal-print-unpublished {
+  opacity: 0.6;
 }
 
 .meld-cal-print-time {
@@ -3969,6 +4000,86 @@ body.loan-form-print {
   margin-top: 1rem;
   padding-top: 0.75rem;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.inventar-docs-block {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.inv-doc-list {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  max-width: 40rem;
+}
+
+.inv-doc-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.inv-doc-item:last-child {
+  border-bottom: none;
+}
+
+.inv-doc-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.inv-doc-name {
+  word-break: break-word;
+}
+
+.inv-doc-date {
+  font-size: 0.85rem;
+  opacity: 0.65;
+}
+
+.inv-doc-delete {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.inv-doc-upload {
+  margin: 0.75rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  max-width: 40rem;
+}
+
+.inv-doc-upload-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem 0.75rem;
+  align-items: end;
+}
+
+@media (min-width: 720px) {
+  .inv-doc-upload-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+
+.inv-doc-upload .profile-control {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.inv-doc-upload .profile-actions {
+  margin-top: 0.65rem;
 }
 
 .inventar-loan-new {
@@ -6009,6 +6120,29 @@ select.profile-control {
   word-break: break-word;
 }
 
+.inv-thumb {
+  display: block;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
+.inv-type-thumb-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.inv-type-thumb-file {
+  max-width: 100%;
+  font-size: 0.8rem;
+}
+
 .inv-id .mail-recipient-chip {
   margin-top: 0.05rem;
 }
@@ -6475,4 +6609,160 @@ select.profile-control {
     padding-right: 0.75rem;
   }
 }
+
+.inv-photo-block {
+  padding: 0 1rem 0.75rem;
+}
+
+.inv-photo-gallery {
+  max-width: 22rem;
+}
+
+.inv-photo-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.35rem;
+  overflow: hidden;
+  min-height: 10rem;
+}
+
+.inv-photo-img {
+  display: block;
+  max-width: 100%;
+  max-height: 16rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.inv-photo-zoom {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-in;
+  max-width: 100%;
+}
+
+.inv-photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 2rem;
+  height: 2.4rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inv-photo-nav--prev { left: 0.25rem; }
+.inv-photo-nav--next { right: 0.25rem; }
+
+.inv-photo-count {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.inv-photo-upload,
+.inv-photo-delete,
+.inv-photo-primary {
+  display: inline-block;
+  margin: 0.5rem 0.5rem 0 0;
+}
+
+.inv-photo-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.inv-photo-add input[type="file"] {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.inv-photo-add span {
+  display: inline-block;
+  padding: 0.28rem 0.65rem;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+/* Above .w3-modal (2000); inventory dialog stays open underneath. */
+.inv-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  box-sizing: border-box;
+  padding: 2.5rem 3.5rem;
+}
+
+.inv-photo-lightbox[hidden] {
+  display: none !important;
+}
+
+.inv-photo-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.inv-photo-lightbox-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  z-index: 1;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inv-photo-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 2.6rem;
+  height: 3rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inv-photo-lightbox-nav--prev { left: 0.4rem; }
+.inv-photo-lightbox-nav--next { right: 0.4rem; }
+
+.inv-photo-lightbox-nav[hidden] {
+  display: none !important;
+}
+
 

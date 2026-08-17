@@ -1003,15 +1003,16 @@ class Termin
         $asViewer = !array_key_exists('asViewer', $opts) || !empty($opts['asViewer']);
         $spec = $this->getVisibilitySpecArray();
         $isHiddenAudience = AudienceSpec::isEmpty($spec);
+        $canShowHidden = $this->userCanShowHiddenAppointments($userId);
 
         if($isHiddenAudience) {
-            return $asViewer && requirePermission('perm_showHiddenAppmnts');
+            return $asViewer && $canShowHidden;
         }
         if($userId > 0 && AudienceSpec::userMatches($userId, $spec)) {
             return true;
         }
         if($asViewer) {
-            if(requirePermission('perm_showHiddenAppmnts')) {
+            if($canShowHidden) {
                 return true;
             }
             if($userId > 0 && $this->getMeldungenByUser($userId)) {
@@ -1019,6 +1020,17 @@ class Termin
             }
         }
         return false;
+    }
+
+    /**
+     * Show-hidden right for this user (ICS has no session). Session as fallback.
+     */
+    private function userCanShowHiddenAppointments($userId) {
+        $userId = (int)$userId;
+        if($userId > 0 && Permissions::loadEffectiveByUser($userId)->getPermission('perm_showHiddenAppmnts')) {
+            return true;
+        }
+        return requirePermission('perm_showHiddenAppmnts');
     }
 
     /**

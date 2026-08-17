@@ -2,6 +2,17 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-17-be158 (2026-08-17)
+
+- MELD-205: Inventar-Dokumente und Fotos
+- MELD-205: Primärfoto für die Listen-Vorschau wählen
+- MELD-205: Beendete Leihen im Modal zugeklappt
+- MELD-205: Inventar-Fotos aus MELD-191 übernehmen
+- MELD-205: Dokumente nur mit Notiz, ohne Typ-Auswahl
+- MELD-205: Dokumente an Inventar anhängen (PDF und Bild)
+- MELD-203: Ausgegraute Termine auch in Kalender und webcal zeigen
+- MELD-191: optionale Inventar-Fotos mit Thumbnail und Blättern
+
 ## 2026-08-16-54607 (2026-08-16)
 
 - MELD-200: Gescannte Verträge im neuen Tab öffnen

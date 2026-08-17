@@ -215,6 +215,8 @@ function icalFeedBuild(array $events, $websiteUrl = null) {
         $times = icalFeedEventTimes($ev);
         $wert = isset($ev['wert']) ? $ev['wert'] : null;
         $status = ($wert === null || $wert === '' || (int)$wert === 3) ? 'TENTATIVE' : 'CONFIRMED';
+        $unpublished = !empty($ev['unpublished']);
+        $transp = $unpublished ? 'TRANSPARENT' : 'OPAQUE';
 
         $descParts = array();
         $descParts[] = 'Rückmeldung: '.icalFeedMeldeLabel($wert);
@@ -235,6 +237,7 @@ function icalFeedBuild(array $events, $websiteUrl = null) {
             'SUMMARY:'.icalFeedEscapeText((string)$ev['name']),
             'DESCRIPTION:'.icalFeedEscapeText($description),
             'STATUS:'.$status,
+            'TRANSP:'.$transp,
             'DTSTART;TZID=Europe/Berlin:'.$times['begin'],
             'DTEND;TZID=Europe/Berlin:'.$times['end'],
         );
@@ -266,7 +269,8 @@ function icalFeedEtag($userId, array $events, $from, $to) {
     foreach($events as $ev) {
         $w = isset($ev['wert']) && $ev['wert'] !== null && $ev['wert'] !== '' ? (int)$ev['wert'] : 0;
         $sid = isset($ev['shiftId']) ? (int)$ev['shiftId'] : 0;
-        $parts[] = (int)$ev['id'].':'.$sid.':'.$w.':'.(string)$ev['date'].':'.(string)$ev['endDate'].':'.(string)$ev['startTime'].':'.(string)$ev['endTime'];
+        $unpub = !empty($ev['unpublished']) ? '1' : '0';
+        $parts[] = (int)$ev['id'].':'.$sid.':'.$w.':'.$unpub.':'.(string)$ev['date'].':'.(string)$ev['endDate'].':'.(string)$ev['startTime'].':'.(string)$ev['endTime'];
     }
     return '"'.hash('sha256', implode('|', $parts)).'"';
 }

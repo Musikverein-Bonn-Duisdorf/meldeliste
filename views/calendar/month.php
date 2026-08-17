@@ -58,6 +58,7 @@ $gridEnd = DateTimeImmutable::createFromFormat('Y-m-d', $bounds['gridEnd']);
      data-color-no="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnNo'], ENT_QUOTES, 'UTF-8'); ?>"
      data-color-maybe="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnMaybe'], ENT_QUOTES, 'UTF-8'); ?>"
      data-color-none="<?php echo htmlspecialchars($GLOBALS['optionsDB']['colorBtnEdit'], ENT_QUOTES, 'UTF-8'); ?>"
+     data-style-unpublished="<?php echo htmlspecialchars(calendarUnpublishedClass(), ENT_QUOTES, 'UTF-8'); ?>"
      data-can-create="<?php echo (isAdmin() && requirePermission('perm_editAppmnts')) ? '1' : '0'; ?>">
   <div class="meld-cal-grid" role="grid" aria-label="Monatskalender">
 <?php foreach($weekdays as $wd) { ?>
@@ -105,6 +106,7 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
             'label' => $label,
             'color' => (string)$ev['colorClass'],
             'wert' => $ev['wert'] === null ? '' : (int)$ev['wert'],
+            'unpublished' => !empty($ev['unpublished']),
         );
     }
     foreach($shown as $ev) {
@@ -112,11 +114,13 @@ while($cursor && $gridEnd && $cursor <= $gridEnd) {
         $label = ($timeLabel !== '' ? $timeLabel.' ' : '').$ev['name'];
         $title = $ev['name'].($timeLabel !== '' ? ' ('.$timeLabel.')' : '');
         $color = htmlspecialchars($ev['colorClass'], ENT_QUOTES, 'UTF-8');
+        $unpub = !empty($ev['unpublished']) ? ' '.htmlspecialchars(calendarUnpublishedClass(), ENT_QUOTES, 'UTF-8') : '';
 ?>
         <button type="button"
-          class="meld-cal-chip <?php echo $color; ?>"
+          class="meld-cal-chip <?php echo $color.$unpub; ?>"
           data-termin-id="<?php echo (int)$ev['id']; ?>"
           data-melde-wert="<?php echo $ev['wert'] === null ? '' : (int)$ev['wert']; ?>"
+          data-unpublished="<?php echo !empty($ev['unpublished']) ? '1' : '0'; ?>"
           title="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>"
           onclick="openModal('calendarMelde', <?php echo (int)$ev['id']; ?>)">
           <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
