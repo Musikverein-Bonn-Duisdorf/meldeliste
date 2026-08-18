@@ -1,8 +1,10 @@
 <?php
 /**
  * Default Leih-/Rückgabe-Vertragstexte (config table, Type text).
- * Placeholders: {org} {start} {end} {borrower} {item} {amount} {kaution} {fee} {rep} {repPhrase} {invNr} {invNrPhrase}
- * Lines starting with "- " become a nested list.
+ * Leerzeile = neuer nummerierter Absatz. Zeilen mit "- " werden zur Unterliste.
+ * Platzhalter: {org} {start} {duration} {end} {borrower} {item} {fee} {kaution}
+ * {rep} {repPhrase} {invNr} {invNrPhrase}
+ * Absätze mit {fee} bzw. {kaution} nur wenn Betrag &gt; 0 €.
  */
 function getLoanClauseDefaults() {
     $d = function ($param, $value, $description) {
@@ -14,68 +16,62 @@ function getLoanClauseDefaults() {
         );
     };
     return array(
-        $d('loanClauseDurationOpen',
-            'Die Leihe beginnt am {start} und ist unbefristet.',
-            'Leihvertrag: Dauer ohne Enddatum. {start}'),
-        $d('loanClauseDurationFixed',
-            'Die Leihe beginnt am {start} und ist bis zum {end} befristet.',
-            'Leihvertrag: Dauer mit Enddatum. {start} {end}'),
-        $d('loanClauseOwnership',
-            'Das Eigentum an der Leihsache verbleibt bei {org}. Der Entleiher erwirbt kein Eigentum und kein Pfandrecht an der Leihsache.',
-            'Leihvertrag: Eigentum. {org}'),
-        $d('loanClauseCare',
-            'Der Entleiher verpflichtet sich, die Leihsache sorgfältig zu behandeln, nur bestimmungsgemäß zu nutzen und sie vor Verlust, Diebstahl und Beschädigung zu schützen. Verlust, Diebstahl oder wesentliche Schäden sind {org} unverzüglich anzuzeigen; der Entleiher haftet hierfür nach den allgemeinen gesetzlichen Regeln.',
-            'Leihvertrag: Sorgfalt. {org}'),
-        $d('loanClauseCareExtern',
-            'Der aktuelle Zustand der Leihsache bei Ausgabe wird im Anhang „Zusätzliche Vereinbarungen“ zu diesem Vertrag protokolliert.',
-            'Leihvertrag Extern: Zusatz nach Sorgfalt'),
-        $d('loanClauseMaintenance',
-            "Der Entleiher trägt gemäß § 601 Abs. 1 BGB die gewöhnlichen Kosten der Erhaltung der Sache. Dies umfasst insbesondere, aber nicht ausschließlich:\n- die Reinigung und Wartung der Leihsache\n- Verbrauchsmaterial, etwa Öle, Fette, Blätter, Reinigungsmittel\n- kleinere Reparaturen gewöhnlicher Verschleißschäden, die jährliche Kosten von insgesamt 100 Euro nicht überschreiten",
-            'Leihvertrag: Wartung (§ 601). Zeilen mit „- “ werden zur Liste'),
-        $d('loanClauseTransfer',
-            'Die Verpfändung oder der Verkauf der Leihsache ist untersagt. Die vorübergehende Übergabe an andere Mitglieder von {org} zu Proben, Auftritten und vergleichbaren Vereinszwecken ist zulässig. Eine sonstige Weitergabe an Dritte bedarf der Zustimmung des Vorstandes.',
-            'Leihvertrag: Weitergabe. {org}'),
-        $d('loanClauseRecall',
-            'Der Verleiher kann die Leihsache jederzeit, insbesondere aus wichtigem Grund, zurückfordern. Ein wichtiger Grund liegt insbesondere im Fall der Beendigung der Vereinsmitgliedschaft des Entleihers gemäß den Bestimmungen der Satzung von {org} vor. Das gesetzliche Kündigungsrecht gemäß § 605 BGB und § 604 Abs. 3 BGB bleibt unberührt.',
-            'Leihvertrag: Rückforderung. {org}'),
-        $d('loanClauseReturn',
-            'Die Leihsache ist bei Beendigung der Leihe vollständig und in einem dem Alter und der üblichen Abnutzung entsprechenden Zustand an den Vorstand von {org} zurückzugeben. Die Rückgabe wird gesondert protokolliert.',
-            'Leihvertrag: Rückgabe. {org}'),
-        $d('loanClauseReturnExtern',
-            'Der Entleiher hat die Leihsache bei Beendigung der Leihe unverzüglich herauszugeben.',
-            'Leihvertrag Extern: Zusatz vor Rückgabe'),
-        $d('loanClauseLimitation',
-            'Abweichend von § 606 BGB verjähren Ansprüche des Verleihers wegen Veränderung oder Verschlechterung der Leihsache in sechs Monaten ab dem Zeitpunkt, in dem der Verleiher von den anspruchsbegründenden Umständen Kenntnis erlangt oder ohne grobe Fahrlässigkeit erlangen müsste, spätestens jedoch mit Ablauf von drei Jahren nach Rückgabe der Leihsache.',
-            'Leihvertrag: Verjährung (§ 606)'),
-        $d('loanClauseForm',
-            'Änderungen und Ergänzungen dieses Vertrages bedürfen zu ihrer Wirksamkeit der Textform. Dies gilt auch für eine Änderung oder Aufhebung dieses Textformerfordernisses selbst.',
-            'Leihvertrag: Textform'),
-        $d('loanClauseSeverability',
-            'Sollte eine Bestimmung dieses Vertrages unwirksam oder undurchführbar sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen hiervon unberührt. An ihre Stelle tritt die jeweilige gesetzliche Regelung, die dem von den Parteien wirtschaftlich Gewollten am nächsten kommt.',
-            'Leihvertrag: salvatorische Klausel'),
-        $d('loanClauseFee',
-            'Für die Überlassung erhebt {org} eine {fee} in Höhe von {amount}. Die Leihgebühr ist mit Vertragsschluss fällig und wird nicht erstattet.',
-            'Leihvertrag: Leihgebühr wenn &gt; 0 €. {org} {fee} {amount}'),
-        $d('loanClauseDeposit',
-            'Für die Dauer der Leihe hinterlegt der Entleiher eine {kaution} in Höhe von {amount}. Die Kaution wird bei ordnungsgemäßer Rückgabe zurückgezahlt; berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile sind zulässig.',
-            'Leihvertrag: Kaution wenn &gt; 0 €. {kaution} {amount}'),
-        $d('loanReturnHead',
-            'Mit Unterzeichnung bestätigen {org}{repPhrase}, und {borrower}, dass die nachstehend bezeichnete Leihsache ({item}{invNrPhrase}, entliehen am {start}) zurückgegeben wurde.',
-            'Rückgabe: Kopf. {org} {repPhrase} {borrower} {item} {invNrPhrase} {start}'),
-        $d('loanReturnRepPhrase',
-            ', vertreten durch {rep}',
-            'Rückgabe: Einschub vertreten durch. {rep}'),
-        $d('loanReturnInvNrPhrase',
-            ', Inventarnummer {invNr}',
-            'Rückgabe: Einschub Inventarnummer. {invNr}'),
-        $d('loanReturnInspect',
-            'Die Leihsache wurde auf Vollständigkeit und offensichtlich erkennbare Schäden und Mängel geprüft. Offensichtliche Schäden und Mängel werden im Anhang „Zusätzliche Vereinbarungen“ vermerkt; andernfalls gilt der Zustand der Leihsache als dem vertragsgemäßen Verbrauch entsprechend.',
-            'Rückgabe: Prüfung'),
-        $d('loanReturnEnd',
-            'Für den Fall, dass das Leihverhältnis noch nicht aus einem anderen Grund erloschen ist, endet es mit der Rückgabe dieses Inventarstücks.',
-            'Rückgabe: Ende des Leihverhältnisses'),
-        $d('loanReturnDeposit',
-            'Die hinterlegte {kaution} in Höhe von {amount} wird mit dieser Rückgabe an {borrower} ausgezahlt. Berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile werden in diesem Protokoll vermerkt.',
-            'Rückgabe: Kaution ausgezahlt wenn &gt; 0 €. {kaution} {amount} {borrower}'),
+        $d(
+            'loanText',
+            <<<'TXT'
+Die Leihe beginnt am {start} und ist {duration}.
+
+Das Eigentum an der Leihsache verbleibt bei {org}. Der Entleiher erwirbt kein Eigentum und kein Pfandrecht an der Leihsache.
+
+Der Entleiher verpflichtet sich, die Leihsache sorgfältig zu behandeln, nur bestimmungsgemäß zu nutzen und sie vor Verlust, Diebstahl und Beschädigung zu schützen. Verlust, Diebstahl oder wesentliche Schäden sind {org} unverzüglich anzuzeigen; der Entleiher haftet hierfür nach den allgemeinen gesetzlichen Regeln.
+
+Der Entleiher trägt gemäß § 601 Abs. 1 BGB die gewöhnlichen Kosten der Erhaltung der Sache. Dies umfasst insbesondere, aber nicht ausschließlich:
+- die Reinigung und Wartung der Leihsache
+- Verbrauchsmaterial, etwa Öle, Fette, Blätter, Reinigungsmittel
+- kleinere Reparaturen gewöhnlicher Verschleißschäden, die jährliche Kosten von insgesamt 100 Euro nicht überschreiten
+
+Die Verpfändung oder der Verkauf der Leihsache ist untersagt. Die vorübergehende Übergabe an andere Mitglieder von {org} zu Proben, Auftritten und vergleichbaren Vereinszwecken ist zulässig. Eine sonstige Weitergabe an Dritte bedarf der Zustimmung des Vorstandes.
+
+Der Verleiher kann die Leihsache jederzeit, insbesondere aus wichtigem Grund, zurückfordern. Ein wichtiger Grund liegt insbesondere im Fall der Beendigung der Vereinsmitgliedschaft des Entleihers gemäß den Bestimmungen der Satzung von {org} vor. Das gesetzliche Kündigungsrecht gemäß § 605 BGB und § 604 Abs. 3 BGB bleibt unberührt.
+
+Die Leihsache ist bei Beendigung der Leihe vollständig und in einem dem Alter und der üblichen Abnutzung entsprechenden Zustand an den Vorstand von {org} zurückzugeben. Die Rückgabe wird gesondert protokolliert.
+
+Abweichend von § 606 BGB verjähren Ansprüche des Verleihers wegen Veränderung oder Verschlechterung der Leihsache in sechs Monaten ab dem Zeitpunkt, in dem der Verleiher von den anspruchsbegründenden Umständen Kenntnis erlangt oder ohne grobe Fahrlässigkeit erlangen müsste, spätestens jedoch mit Ablauf von drei Jahren nach Rückgabe der Leihsache.
+
+Änderungen und Ergänzungen dieses Vertrages bedürfen zu ihrer Wirksamkeit der Textform. Dies gilt auch für eine Änderung oder Aufhebung dieses Textformerfordernisses selbst.
+
+Sollte eine Bestimmung dieses Vertrages unwirksam oder undurchführbar sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen hiervon unberührt. An ihre Stelle tritt die jeweilige gesetzliche Regelung, die dem von den Parteien wirtschaftlich Gewollten am nächsten kommt.
+
+Für die Überlassung erhebt {org} eine Leihgebühr in Höhe von {fee}. Die Leihgebühr ist mit Vertragsschluss fällig und wird nicht erstattet.
+
+Für die Dauer der Leihe hinterlegt der Entleiher eine Kaution in Höhe von {kaution}. Die Kaution wird bei ordnungsgemäßer Rückgabe zurückgezahlt; berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile sind zulässig.
+TXT
+            ,
+            'Leihvertrag. Leerzeile = Absatz. {org} {start} {duration} {fee} {kaution}'
+        ),
+        $d(
+            'loanTextExtern',
+            <<<'TXT'
+Der aktuelle Zustand der Leihsache bei Ausgabe wird im Anhang „Zusätzliche Vereinbarungen“ zu diesem Vertrag protokolliert.
+
+Der Entleiher hat die Leihsache bei Beendigung der Leihe unverzüglich herauszugeben.
+TXT
+            ,
+            'Leihvertrag: Zusatzabsätze für Nicht-Mitglieder'
+        ),
+        $d(
+            'loanReturnText',
+            <<<'TXT'
+Mit Unterzeichnung bestätigen {org}{repPhrase}, und {borrower}, dass die nachstehend bezeichnete Leihsache ({item}{invNrPhrase}, entliehen am {start}) zurückgegeben wurde.
+
+Die Leihsache wurde auf Vollständigkeit und offensichtlich erkennbare Schäden und Mängel geprüft. Offensichtliche Schäden und Mängel werden im Anhang „Zusätzliche Vereinbarungen“ vermerkt; andernfalls gilt der Zustand der Leihsache als dem vertragsgemäßen Verbrauch entsprechend.
+
+Für den Fall, dass das Leihverhältnis noch nicht aus einem anderen Grund erloschen ist, endet es mit der Rückgabe dieses Inventarstücks.
+
+Die hinterlegte Kaution in Höhe von {kaution} wird mit dieser Rückgabe an {borrower} ausgezahlt. Berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile werden in diesem Protokoll vermerkt.
+TXT
+            ,
+            'Rückgabeprotokoll. Leerzeile = Absatz. {org} {borrower} {item} {start} {kaution} {repPhrase} {invNrPhrase}'
+        ),
     );
 }

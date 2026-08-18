@@ -1,11 +1,10 @@
 (function () {
     function setupDurationClause() {
-        var clause = document.getElementById('loan-duration-clause');
         var startInput = document.getElementById('loan-start-date');
         var endInput = document.getElementById('loan-end-date');
         var tplOpen = document.getElementById('loan-duration-tpl-open');
         var tplFixed = document.getElementById('loan-duration-tpl-fixed');
-        if (!clause || !startInput || !endInput || !tplOpen || !tplFixed) {
+        if (!startInput || !endInput) {
             return;
         }
 
@@ -19,10 +18,14 @@
         function apply() {
             var startDe = isoToDe(startInput.value);
             var endDe = isoToDe(endInput.value);
-            var html = (endDe ? tplFixed : tplOpen).innerHTML
-                .split('__START__').join(startDe)
-                .split('__END__').join(endDe);
-            clause.innerHTML = html;
+            document.querySelectorAll('[data-loan-fill="start"]').forEach(function (el) {
+                el.textContent = startDe;
+            });
+            var durationFill = document.querySelector('[data-loan-fill="duration"]');
+            if (durationFill && tplOpen && tplFixed) {
+                durationFill.innerHTML = (endDe ? tplFixed : tplOpen).innerHTML
+                    .split('__END__').join(endDe);
+            }
             var startPrint = document.querySelector('[data-loan-start-print]');
             var endPrint = document.querySelector('[data-loan-end-print]');
             if (startPrint && startDe) {
@@ -62,15 +65,27 @@
         return intPart + ',' + parts[1] + ' €';
     }
 
-    function bindMoneyClause(input, li, tpl, printEl, row) {
-        if (!input || !li || !tpl) {
+    function bindMoneyClause(input, fillKey, printEl, row) {
+        if (!input) {
             return;
         }
         function apply() {
             var amount = parseAmountInput(input.value);
+            var fills = document.querySelectorAll('[data-loan-fill="' + fillKey + '"]');
+            var lis = [];
+            fills.forEach(function (el) {
+                var li = el.closest('li');
+                if (li && lis.indexOf(li) === -1) {
+                    lis.push(li);
+                }
+            });
             if (amount <= 0) {
-                li.innerHTML = '';
-                li.hidden = true;
+                fills.forEach(function (el) {
+                    el.textContent = '';
+                });
+                lis.forEach(function (li) {
+                    li.hidden = true;
+                });
                 if (printEl) {
                     printEl.textContent = '';
                 }
@@ -80,8 +95,12 @@
                 return;
             }
             var formatted = formatAmountDe(amount);
-            li.innerHTML = tpl.innerHTML.split('__AMOUNT__').join(formatted);
-            li.hidden = false;
+            fills.forEach(function (el) {
+                el.textContent = formatted;
+            });
+            lis.forEach(function (li) {
+                li.hidden = false;
+            });
             if (printEl) {
                 printEl.textContent = formatted;
             }
@@ -97,22 +116,13 @@
     function setupMoneyClauses() {
         bindMoneyClause(
             document.getElementById('loan-leihgebuehr-form'),
-            document.getElementById('loan-fee-clause'),
-            document.getElementById('loan-fee-tpl'),
+            'fee',
             document.querySelector('[data-loan-leihgebuehr-print]'),
             document.getElementById('loan-leihgebuehr-row')
         );
         bindMoneyClause(
             document.getElementById('loan-kaution-form'),
-            document.getElementById('loan-deposit-clause'),
-            document.getElementById('loan-deposit-tpl'),
-            document.querySelector('[data-loan-kaution-print]'),
-            document.getElementById('loan-kaution-row')
-        );
-        bindMoneyClause(
-            document.getElementById('loan-kaution-form'),
-            document.getElementById('loan-return-deposit-clause'),
-            document.getElementById('loan-return-deposit-tpl'),
+            'kaution',
             document.querySelector('[data-loan-kaution-print]'),
             document.getElementById('loan-kaution-row')
         );

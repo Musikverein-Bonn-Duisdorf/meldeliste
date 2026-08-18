@@ -294,8 +294,8 @@ while($row = mysqli_fetch_array($dbr)) {
         if($paramName === 'orgAddress') {
             $rows = 4;
         }
-        elseif(strpos($paramName, 'loanClause') === 0 || strpos($paramName, 'loanReturn') === 0) {
-            $rows = 6;
+        elseif(strpos($paramName, 'loanText') === 0 || $paramName === 'loanReturnText') {
+            $rows = 14;
         }
         echo "<textarea class=\"w3-col l4 m4 s12\" rows=\"".$rows."\" cols=\"30\" name=\""
             .htmlspecialchars($paramName, ENT_QUOTES, 'UTF-8')."\">"

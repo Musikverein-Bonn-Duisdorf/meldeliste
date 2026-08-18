@@ -139,6 +139,10 @@ $showAddress = !empty($ctx['needAddressField']);
 $editAddress = $canEdit && !$locked && !empty($ctx['needAddressEditField']);
 $editNotes = $canEdit && !$locked && !empty($ctx['needContractNotesField']);
 $editLoanParams = $canEdit && !$locked && !empty($ctx['needLoanParamsField']);
+if($editLoanParams) {
+    $ctx['keepOptionalMoney'] = true;
+    $ctx['clauses'] = LoanForm::buildClauses($ctx);
+}
 $editChecklist = $canEdit && !$locked && $kind === LoanForm::KIND_RETURN;
 $hasEditableFields = $editAddress || $editNotes || $editChecklist || $editLoanParams;
 $checklist = isset($ctx['checklist']) && is_array($ctx['checklist'])
@@ -416,53 +420,34 @@ $canSendBorrower = $canEdit && !$digitallyComplete && $lenderSig !== null && $bo
         <h2><?php echo $kind === LoanForm::KIND_RETURN ? 'Protokoll' : 'Vertragsbedingungen'; ?></h2>
         <ol class="loan-form-clauses">
 <?php
-$skipClauses = array();
-if($kind === LoanForm::KIND_LOAN && $editLoanParams) {
-    if(!empty($ctx['hasLeihgebuehr'])) {
-        $skipClauses[] = LoanForm::feeClauseHtml($ctx['orgName'], $ctx['leihgebuehrFormatted']);
+foreach($ctx['clauses'] as $clause) {
+    $liId = '';
+    $liHidden = false;
+    if($kind === LoanForm::KIND_LOAN && strpos($clause, 'data-loan-fill="start"') !== false) {
+        $liId = 'loan-duration-clause';
     }
-    if(!empty($ctx['hasKaution'])) {
-        $skipClauses[] = LoanForm::depositClauseHtml($ctx['kautionFormatted']);
+    if(strpos($clause, 'data-loan-fill="fee"') !== false) {
+        $liId = 'loan-fee-clause';
+        $liHidden = empty($ctx['hasLeihgebuehr']);
     }
-}
-if($kind === LoanForm::KIND_RETURN && $editLoanParams && !empty($ctx['hasKaution'])) {
-    $skipClauses[] = LoanForm::returnDepositClauseHtml($ctx['borrowerName'], $ctx['kautionFormatted']);
-}
-foreach($ctx['clauses'] as $i => $clause) {
-    if(in_array($clause, $skipClauses, true)) {
-        continue;
+    if(strpos($clause, 'data-loan-fill="kaution"') !== false) {
+        $liId = ($kind === LoanForm::KIND_RETURN) ? 'loan-return-deposit-clause' : 'loan-deposit-clause';
+        $liHidden = empty($ctx['hasKaution']);
+    }
+    $attr = '';
+    if($liId !== '') {
+        $attr .= ' id="'.$liId.'"';
+    }
+    if($liHidden) {
+        $attr .= ' hidden';
     }
 ?>
-          <li<?php echo ($kind === LoanForm::KIND_LOAN && (int)$i === 0) ? ' id="loan-duration-clause"' : ''; ?>><?php echo $clause; ?></li>
-<?php } ?>
-<?php if($kind === LoanForm::KIND_LOAN && $editLoanParams) { ?>
-          <li id="loan-fee-clause"<?php echo empty($ctx['hasLeihgebuehr']) ? ' hidden' : ''; ?>><?php
-    echo !empty($ctx['hasLeihgebuehr'])
-        ? LoanForm::feeClauseHtml($ctx['orgName'], $ctx['leihgebuehrFormatted'])
-        : '';
-?></li>
-          <li id="loan-deposit-clause"<?php echo empty($ctx['hasKaution']) ? ' hidden' : ''; ?>><?php
-    echo !empty($ctx['hasKaution'])
-        ? LoanForm::depositClauseHtml($ctx['kautionFormatted'])
-        : '';
-?></li>
-<?php } ?>
-<?php if($kind === LoanForm::KIND_RETURN && $editLoanParams) { ?>
-          <li id="loan-return-deposit-clause"<?php echo empty($ctx['hasKaution']) ? ' hidden' : ''; ?>><?php
-    echo !empty($ctx['hasKaution'])
-        ? LoanForm::returnDepositClauseHtml($ctx['borrowerName'], $ctx['kautionFormatted'])
-        : '';
-?></li>
+          <li<?php echo $attr; ?>><?php echo $clause; ?></li>
 <?php } ?>
         </ol>
 <?php if($kind === LoanForm::KIND_LOAN && $editLoanParams) { ?>
-        <template id="loan-duration-tpl-open"><?php echo LoanForm::durationClauseHtml('__START__', '', false); ?></template>
-        <template id="loan-duration-tpl-fixed"><?php echo LoanForm::durationClauseHtml('__START__', '__END__', true); ?></template>
-        <template id="loan-fee-tpl"><?php echo LoanForm::feeClauseHtml($ctx['orgName'], '__AMOUNT__'); ?></template>
-        <template id="loan-deposit-tpl"><?php echo LoanForm::depositClauseHtml('__AMOUNT__'); ?></template>
-<?php } ?>
-<?php if($kind === LoanForm::KIND_RETURN && $editLoanParams) { ?>
-        <template id="loan-return-deposit-tpl"><?php echo LoanForm::returnDepositClauseHtml($ctx['borrowerName'], '__AMOUNT__'); ?></template>
+        <template id="loan-duration-tpl-open"><?php echo LoanForm::durationPhraseHtml('', false); ?></template>
+        <template id="loan-duration-tpl-fixed"><?php echo LoanForm::durationPhraseHtml('__END__', true); ?></template>
 <?php } ?>
       </section>
 
