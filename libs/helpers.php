@@ -2072,6 +2072,7 @@ function sql2timeRaw($time) {
     return substr((string)$time, 0, 5);
 }
 
+if(!function_exists('sqlerror')) {
 function sqlerror() {
     if(!isset($GLOBALS['conn']) || !mysqli_errno($GLOBALS['conn'])) {
         return;
@@ -2083,6 +2084,7 @@ function sqlerror() {
         $logentry = new Log;
         $logentry->error($msg);
     }
+}
 }
 
 function string2gDate($string) {
