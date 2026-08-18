@@ -2,6 +2,15 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-18-828fc (2026-08-18)
+
+- MELD-215: Mein Inventar blendet Preise und fremde Leihen für Entleiher aus
+- MELD-214: HTML-Mails im Meldeliste-Layout
+- MELD-213: Ein Vertragstext, Rückgabefrist und Workflow-Neustart
+- MELD-213: Signatur-Popup darf das Formularlayout nicht verbiegen
+- MELD-213: Leih- und Rückgabetexte auf drei Konfig-Felder
+- MELD-213: Leihvertrag-Texte als Konfig und Unterschrift an Entleiher
+
 ## 2026-08-18-c0577 (2026-08-18)
 
 - MELD-201: Inventar-Zeile nach Modal-Änderungen, Rückgabe-Rechte, Confirm-Overlay
