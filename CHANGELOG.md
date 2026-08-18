@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-18-d9c78 (2026-08-18)
+
+- MELD-216: Leihformular und fertigen Vertrag im Inventar-Modal trennen
+
 ## 2026-08-18-828fc (2026-08-18)
 
 - MELD-215: Mein Inventar blendet Preise und fremde Leihen für Entleiher aus
