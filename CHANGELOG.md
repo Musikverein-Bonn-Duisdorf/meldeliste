@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-18-6a308 (2026-08-18)
+
+- MELD-210: CLI-Restore bricht bei PHP-CGI/alt mit klarer Meldung ab
+
 ## 2026-08-18-e5ae6 (2026-08-18)
 
 - MELD-210: CLI-Restore nicht an sqlerror-Doppeldefinition scheitern
