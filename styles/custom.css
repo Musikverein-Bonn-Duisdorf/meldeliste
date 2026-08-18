@@ -3617,12 +3617,6 @@ body.loan-form-print {
   margin: 0;
 }
 
-.loan-form-sign-sent {
-  font-size: 0.85rem;
-  line-height: 1.3;
-  opacity: 0.8;
-}
-
 .loan-form-sign-clear {
   margin: 0.35rem 0 0;
 }
@@ -4877,6 +4871,10 @@ body.loan-form-sign-open {
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.4);
   box-sizing: border-box;
+}
+
+#appConfirmModal {
+  z-index: 4000;
 }
 
 .w3-modal-content {

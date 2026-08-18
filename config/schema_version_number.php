@@ -15,6 +15,7 @@
  * v42: InventoriesLoanSignatures + orgPlace (MELD-201 digital signatures).
  * v43: loan/return clause texts as config (MELD-213)
  * v44: three loan/return contract texts (MELD-213)
+ * v45: one loan contract text for all borrowers (MELD-213)
  */
-return 44;
+return 45;
 ?>

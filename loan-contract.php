@@ -33,16 +33,19 @@ if(!(int)$loan->Index) {
 
 $isPost = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 if($isPost) {
-    if(!LoanForm::userMayEdit($userId)) {
-        denyAccess();
-    }
     $action = isset($_POST['action']) ? (string)$_POST['action'] : '';
     if($action === 'deleteScan') {
+        if(!LoanForm::userMayDeleteScan($userId)) {
+            denyAccess();
+        }
         if(!LoanForm::deleteScan($loan, $kind)) {
             denyAccess('Scan konnte nicht gelöscht werden.');
         }
         header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind));
         exit;
+    }
+    if(!LoanForm::userMayEdit($userId)) {
+        denyAccess();
     }
     if($action !== 'upload' || !isset($_FILES['scan'])) {
         denyAccess('Upload fehlgeschlagen.');

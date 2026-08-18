@@ -864,6 +864,7 @@ document.addEventListener('submit', function(e) {
     var loanAction = inventarLoanFormAction(form);
     var docAction = inventarDocFormAction(form);
     if(!loanAction && !docAction) return;
+    if(e.defaultPrevented) return;
 
     e.preventDefault();
     var modal = form.closest('.inventar-modal');

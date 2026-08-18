@@ -1267,6 +1267,8 @@ class DatabaseManager
             return;
         }
 
+        $this->migrateLoanTextForAllBorrowers($apply);
+
         $defaultParams = array();
         foreach($defaults as $item) {
             if(isset($item['Parameter'])) {
@@ -1406,6 +1408,88 @@ class DatabaseManager
                     mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
                 );
             }
+        }
+    }
+
+    /**
+     * MELD-213: former Extern extras belong in the shared loanText.
+     * Repair does not overwrite existing config Values; this fills the two
+     * sentences once, then prune removes loanTextExtern.
+     */
+    private function migrateLoanTextForAllBorrowers($apply) {
+        if(!isset($GLOBALS['conn']) || !isset($GLOBALS['dbprefix'])) {
+            return;
+        }
+        $sql = sprintf(
+            "SELECT `Value` FROM `%sconfig` WHERE `Parameter` = 'loanText' LIMIT 1;",
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        $row = $dbr ? mysqli_fetch_array($dbr) : null;
+        if(!$row || !isset($row['Value'])) {
+            return;
+        }
+        $loan = (string)$row['Value'];
+        $newLoan = $loan;
+
+        $conditionMarker = 'Zustand der Leihsache bei Ausgabe';
+        if(strpos($newLoan, $conditionMarker) === false) {
+            $insert = "\n\nDer aktuelle Zustand der Leihsache bei Ausgabe wird im Anhang „Zusätzliche Vereinbarungen“ zu diesem Vertrag protokolliert.";
+            $after = 'allgemeinen gesetzlichen Regeln.';
+            $pos = strpos($newLoan, $after);
+            if($pos !== false) {
+                $at = $pos + strlen($after);
+                $newLoan = substr($newLoan, 0, $at).$insert.substr($newLoan, $at);
+            }
+            else {
+                $newLoan = rtrim($newLoan).$insert;
+            }
+        }
+
+        $oldReturns = array(
+            'Die Leihsache ist bei Beendigung der Leihe unverzüglich vollständig und in einem dem Alter',
+            'Die Leihsache ist bei Beendigung der Leihe vollständig und in einem dem Alter',
+        );
+        $newReturn = 'Die Leihsache ist {returnDue} vollständig und in einem dem Alter';
+        foreach($oldReturns as $oldReturn) {
+            if(strpos($newLoan, $oldReturn) !== false) {
+                $newLoan = str_replace($oldReturn, $newReturn, $newLoan);
+            }
+        }
+
+        if($newLoan === $loan) {
+            return;
+        }
+        if(!$apply) {
+            $this->addReport(
+                'config',
+                'loanText',
+                'missing',
+                'Ausgabezustand und unverzügliche Rückgabe fehlen im Leihvertrag'
+            );
+            return;
+        }
+        $upd = sprintf(
+            "UPDATE `%sconfig` SET `Value` = '%s' WHERE `Parameter` = 'loanText' LIMIT 1;",
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], $newLoan)
+        );
+        if(mysqli_query($GLOBALS['conn'], $upd)) {
+            $this->addReport(
+                'config',
+                'loanText',
+                'fixed',
+                'Ausgabezustand und unverzügliche Rückgabe für alle Entleiher'
+            );
+        }
+        else {
+            $this->addReport(
+                'config',
+                'loanText',
+                'error',
+                'loanText konnte nicht aktualisiert werden',
+                mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+            );
         }
     }
 

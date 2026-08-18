@@ -609,6 +609,8 @@ class Inventories
     }
 
     private function getLoanRowHtml($indent, InventoriesLoan $L, $canEdit) {
+        $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        $canDeleteScan = LoanForm::userMayDeleteScan($uid);
         $active = ($L->EndDate === null || $L->EndDate === '' || $L->EndDate === '0000-00-00');
         $ended = !InventoriesLoan::isOpen($L->EndDate);
         $btnSubmit = $GLOBALS['optionsDB']['colorBtnSubmit'];
@@ -685,9 +687,14 @@ class Inventories
                 $str .= '<div class="inventory-loan-scan-pair">';
                 $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
                     .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">'.$loanScanLabel.'</a>';
-                if($canEdit) {
+                if($canDeleteScan) {
+                    $loanDelMsg = htmlspecialchars(
+                        LoanForm::deleteStoredFileConfirmMessage($L, LoanForm::KIND_LOAN),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
                     $str .= '<form method="POST" action="" class="inventory-loan-delete" '
-                        .'data-confirm="Scan Vertrag löschen? Die Leihe bleibt erhalten." data-confirm-ok="Scan löschen">'
+                        .'data-confirm="'.$loanDelMsg.'" data-confirm-ok="Löschen">'
                         .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
                         .'<input type="hidden" name="scanKind" value="loan">'
                         .'<button type="submit" name="deleteLoanScan" value="1" class="inventory-loan-btn inventory-loan-btn--scan-del" title="Scan löschen" aria-label="Scan Vertrag löschen">Löschen</button>'
@@ -704,9 +711,14 @@ class Inventories
                 $str .= '<div class="inventory-loan-scan-pair">';
                 $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
                     .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">'.$returnScanLabel.'</a>';
-                if($canEdit) {
+                if($canDeleteScan) {
+                    $returnDelMsg = htmlspecialchars(
+                        LoanForm::deleteStoredFileConfirmMessage($L, LoanForm::KIND_RETURN),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
                     $str .= '<form method="POST" action="" class="inventory-loan-delete" '
-                        .'data-confirm="Scan Rückgabe löschen? Die Leihe bleibt erhalten." data-confirm-ok="Scan löschen">'
+                        .'data-confirm="'.$returnDelMsg.'" data-confirm-ok="Löschen">'
                         .'<input type="hidden" name="LoanIndex" value="'.$loanId.'">'
                         .'<input type="hidden" name="scanKind" value="return">'
                         .'<button type="submit" name="deleteLoanScan" value="1" class="inventory-loan-btn inventory-loan-btn--scan-del" title="Scan löschen" aria-label="Scan Rückgabe löschen">Löschen</button>'
@@ -717,7 +729,7 @@ class Inventories
             $str .= '</div>';
         }
 
-        if($canEdit) {
+        if($canDeleteScan) {
             $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--danger">';
             $str .= '<form method="POST" action="" class="inventory-loan-delete" '
                 .'data-confirm="Diesen Leiheintrag wirklich löschen?" data-confirm-ok="Eintrag löschen">'
@@ -997,6 +1009,19 @@ function handleInventoriesMutations() {
         $result['inventoryId'] = (int)$n->Inventory;
     }
     if(isset($_POST['deleteLoanScan'])) {
+        $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        if(!LoanForm::userMayDeleteScan($uid)) {
+            if(isInventoriesAjaxRequest()) {
+                while(ob_get_level() > 0) {
+                    ob_end_clean();
+                }
+                header('Content-Type: application/json; charset=UTF-8');
+                http_response_code(403);
+                echo json_encode(array('ok' => false, 'error' => 'Keine Berechtigung zum Löschen von Formularen.'));
+                exit;
+            }
+            denyAccess('Keine Berechtigung zum Löschen von Formularen.');
+        }
         $n = new InventoriesLoan;
         $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
         $n->load_by_id($loanId);
@@ -1009,6 +1034,19 @@ function handleInventoriesMutations() {
         }
     }
     if(isset($_POST['deleteLoan'])) {
+        $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        if(!LoanForm::userMayDeleteScan($uid)) {
+            if(isInventoriesAjaxRequest()) {
+                while(ob_get_level() > 0) {
+                    ob_end_clean();
+                }
+                header('Content-Type: application/json; charset=UTF-8');
+                http_response_code(403);
+                echo json_encode(array('ok' => false, 'error' => 'Keine Berechtigung zum Löschen von Formularen.'));
+                exit;
+            }
+            denyAccess('Keine Berechtigung zum Löschen von Formularen.');
+        }
         $n = new InventoriesLoan;
         $loanId = isset($_POST['LoanIndex']) ? (int)$_POST['LoanIndex'] : (int)$_POST['Index'];
         $n->load_by_id($loanId);
