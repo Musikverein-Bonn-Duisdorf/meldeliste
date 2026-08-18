@@ -129,6 +129,7 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
 
     <section class="profile-col" aria-labelledby="inv-col-ownership">
       <h3 id="inv-col-ownership" class="profile-col-title">Besitz</h3>
+<?php if(!empty($showSensitive)) { ?>
       <div class="profile-field">
         <label class="profile-label" for="inv-purchase-date">Kaufdatum</label>
 <?php if($canEdit) { ?>
@@ -145,6 +146,7 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
         <div class="profile-value"><?php echo $display(mkPrize($inv->PurchasePrize)); ?></div>
 <?php } ?>
       </div>
+<?php } ?>
       <div class="profile-field">
         <label class="profile-label" for="inv-owner">Eigentümer</label>
 <?php if($canEdit) { ?>
