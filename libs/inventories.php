@@ -667,14 +667,24 @@ class Inventories
         $actions->class = "w3-right-align inventory-loan-actions";
         $str .= $actions->open();
 
-        $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
-        $str .= '<a class="inventory-loan-btn" '
-            .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihvertrag</a>';
-        if($canEdit) {
-            $str .= '<a class="inventory-loan-btn" '
-                .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabe</a>';
+        $mayManageForms = requirePermission('perm_showInventories')
+            || requirePermission('perm_editInventories');
+        $showLoanForm = $mayManageForms
+            || !LoanForm::isDigitallyComplete($L, LoanForm::KIND_LOAN);
+        $showReturnForm = $canEdit;
+
+        if($showLoanForm || $showReturnForm) {
+            $str .= '<div class="inventory-loan-action-group" role="group" aria-label="Formulare">';
+            if($showLoanForm) {
+                $str .= '<a class="inventory-loan-btn" '
+                    .'href="loan-form.php?loan='.$loanId.'&amp;kind=loan">Leihformular</a>';
+            }
+            if($showReturnForm) {
+                $str .= '<a class="inventory-loan-btn" '
+                    .'href="loan-form.php?loan='.$loanId.'&amp;kind=return">Rückgabeformular</a>';
+            }
+            $str .= '</div>';
         }
-        $str .= '</div>';
 
         if($hasLoanScan || $hasReturnScan) {
             $str .= '<div class="inventory-loan-action-group inventory-loan-action-group--scans" role="group" aria-label="Scans">';
