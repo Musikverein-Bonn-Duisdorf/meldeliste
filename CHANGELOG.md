@@ -2,6 +2,12 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-18-e5ae6 (2026-08-18)
+
+- MELD-210: CLI-Restore nicht an sqlerror-Doppeldefinition scheitern
+- MELD-210: Restore nicht über uploads-Symlink, Prefix im ZIP-Namen
+- MELD-210: Backup-ZIP um hochgeladene Dateien unter uploads/ erweitern
+
 ## 2026-08-18-d9c78 (2026-08-18)
 
 - MELD-216: Leihformular und fertigen Vertrag im Inventar-Modal trennen
