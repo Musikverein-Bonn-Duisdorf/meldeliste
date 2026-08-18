@@ -80,6 +80,7 @@ if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
     $queued = LoanForm::queueBorrowerSignReminder($loan, $kind);
     header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind)
         .($queued ? '&notified=1' : '&notifyerr=1'));
+    Usermail::finishResponseThenProcessQueue();
     exit;
 }
 
