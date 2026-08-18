@@ -23,6 +23,10 @@ meldeConfigureSession();
       <h1><?php echo $optionsDB['WebSiteName']; ?></h1>
     </div>
     <?php
+$loginNext = 'index.php';
+if(isset($_GET['next']) && function_exists('safeReturnUrl')) {
+    $loginNext = safeReturnUrl($_GET['next'], 'index.php');
+}
 if(isset($_GET['alink'])) {
     validateLink($_GET['alink']);
 }
@@ -50,7 +54,7 @@ if(loggedIn()) {
         die("<div class=\"w3-panel ".$GLOBALS['optionsDB']['colorSuccess']."\"><h2>Login erfolgreich.</h2></div>");
     }
       ?>
-    <meta http-equiv="refresh" content="0; URL='index.php'" />
+    <meta http-equiv="refresh" content="0; URL='<?php echo htmlspecialchars($loginNext, ENT_QUOTES, 'UTF-8'); ?>'" />
     <?php
     die("<div class=\"w3-panel ".$GLOBALS['optionsDB']['colorSuccess']."\"><h2>Login erfolgreich.</h2></div>");
 }

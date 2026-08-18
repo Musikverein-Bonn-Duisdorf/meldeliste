@@ -3,8 +3,10 @@
  * Default configuration parameters for new installations / updates.
  * Used by DatabaseManager and update.php — do not duplicate elsewhere.
  */
+require_once __DIR__.'/LoanClauseDefaults.php';
+
 function getConfigDefaults() {
-    return array(
+    $items = array(
         array(
             'Parameter' => 'styleAppmntUnpublished',
             'Value' => 'w3-opacity',
@@ -630,5 +632,6 @@ function getConfigDefaults() {
             'Description' => 'Basis-URL Mitgliederverwaltung (SSO + Nav bei Recht; leer = ausgeblendet)',
         ),
     );
+    return array_merge($items, getLoanClauseDefaults());
 }
 ?>

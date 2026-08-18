@@ -7,6 +7,8 @@ class LoanForm
 {
     const KIND_LOAN = 'loan';
     const KIND_RETURN = 'return';
+    const MAIL_SOURCE_SIGNED = 'loan-sign';
+    const MAIL_SOURCE_SIGN_REQUEST = 'loan-sign-request';
 
     /** @return list<string> */
     public static function kinds() {
@@ -607,7 +609,10 @@ class LoanForm
         }
 
         $borrowerLabel = 'Entleiher';
-        $title = $kind === self::KIND_RETURN ? 'Rückgabeprotokoll' : 'Leihvertrag';
+        $title = 'Leihvertrag';
+        if($kind === self::KIND_RETURN) {
+            $title = 'Rückgabeprotokoll';
+        }
         $borrowerAddress = trim((string)$loan->BorrowerAddress);
         if($borrowerAddress === '' && function_exists('mitPrefillLoanBorrowerAddress')) {
             if(mitPrefillLoanBorrowerAddress($loan)) {
@@ -823,6 +828,134 @@ class LoanForm
         return true;
     }
 
+    /** @return string */
+    public static function ctxDetailValue(array $ctx, $label) {
+        if(empty($ctx['itemDetails']) || !is_array($ctx['itemDetails'])) {
+            return '';
+        }
+        foreach($ctx['itemDetails'] as $row) {
+            if(is_array($row) && isset($row['label']) && (string)$row['label'] === (string)$label) {
+                return trim((string)$row['value']);
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Contract clause template from config (optionsDB), else ConfigDefaults.
+     */
+    public static function clauseTemplate($param) {
+        $param = (string)$param;
+        $opts = isset($GLOBALS['optionsDB']) && is_array($GLOBALS['optionsDB'])
+            ? $GLOBALS['optionsDB']
+            : array();
+        if(isset($opts[$param]) && trim((string)$opts[$param]) !== '') {
+            return (string)$opts[$param];
+        }
+        $map = self::clauseDefaultsMap();
+        return isset($map[$param]) ? (string)$map[$param] : '';
+    }
+
+    /** @return array<string,string> */
+    private static function clauseDefaultsMap() {
+        static $map = null;
+        if($map !== null) {
+            return $map;
+        }
+        $map = array();
+        if(function_exists('getConfigDefaults')) {
+            foreach(getConfigDefaults() as $item) {
+                if(isset($item['Parameter'])) {
+                    $map[(string)$item['Parameter']] = isset($item['Value']) ? (string)$item['Value'] : '';
+                }
+            }
+        }
+        return $map;
+    }
+
+    /**
+     * Fill a config template: escape static text, insert already-safe {placeholders},
+     * turn lines starting with "- " into a nested list.
+     * @param array<string,string> $vars
+     */
+    public static function applyClauseTemplate($param, array $vars) {
+        $tpl = self::clauseTemplate($param);
+        if($tpl === '') {
+            return '';
+        }
+        $escaped = htmlspecialchars($tpl, ENT_QUOTES, 'UTF-8');
+        $filled = preg_replace_callback('/\{([a-zA-Z0-9_]+)\}/', function ($m) use ($vars) {
+            $key = $m[1];
+            return isset($vars[$key]) ? (string)$vars[$key] : '';
+        }, $escaped);
+        return self::clauseDashListHtml($filled);
+    }
+
+    private static function clauseDashListHtml($html) {
+        $lines = explode("\n", str_replace(array("\r\n", "\r"), "\n", (string)$html));
+        $out = array();
+        $items = array();
+        $flush = function () use (&$out, &$items) {
+            if(!$items) {
+                return;
+            }
+            $lis = '';
+            foreach($items as $it) {
+                $lis .= '<li>'.$it.'</li>';
+            }
+            $out[] = '<ul class="loan-form-clause-sub">'.$lis.'</ul>';
+            $items = array();
+        };
+        foreach($lines as $line) {
+            if(preg_match('/^-\s+(.*)$/', $line, $m)) {
+                $items[] = $m[1];
+                continue;
+            }
+            $flush();
+            $out[] = $line;
+        }
+        $flush();
+        return trim(implode("\n", $out));
+    }
+
+    /** @param array<string,string> $extra */
+    public static function clauseVars(array $ctx, array $extra = array()) {
+        $org = isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein';
+        $vars = array(
+            'org' => self::em($org),
+            'start' => self::em(isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : ''),
+            'end' => self::em(isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : ''),
+            'borrower' => self::em(isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher'),
+            'item' => self::em(isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'die Leihsache'),
+            'amount' => self::em(isset($ctx['amountFormatted']) ? (string)$ctx['amountFormatted'] : ''),
+            'kaution' => self::em('Kaution'),
+            'fee' => self::em('Leihgebühr'),
+            'rep' => '',
+            'repPhrase' => '',
+            'invNr' => '',
+            'invNrPhrase' => '',
+        );
+        return array_merge($vars, $extra);
+    }
+
+    /**
+     * First contract clause (loan start / optional end). Dates already escaped via em().
+     * @return string
+     */
+    public static function durationClauseHtml($startDe, $endDe, $hasFixedEnd) {
+        $vars = self::clauseVars(array(), array(
+            'start' => self::em((string)$startDe),
+            'end' => self::em((string)$endDe),
+        ));
+        $param = !empty($hasFixedEnd) ? 'loanClauseDurationFixed' : 'loanClauseDurationOpen';
+        return self::applyClauseTemplate($param, $vars);
+    }
+
+    /** @return string */
+    public static function maintenanceClauseHtml() {
+        return self::applyClauseTemplate('loanClauseMaintenance', self::clauseVars(array()));
+    }
+
     /**
      * Legal clauses as HTML list items (values escaped; emphasis via self::em).
      * @param array $ctx from buildContext
@@ -830,83 +963,137 @@ class LoanForm
      */
     public static function buildClauses(array $ctx) {
         $kind = isset($ctx['kind']) ? self::normalizeKind($ctx['kind']) : self::KIND_LOAN;
-        $org = self::em(isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein');
-        $item = self::em(isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'das Leihgut');
-        $borrower = self::em(isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher');
-        $isMember = !empty($ctx['isMember']);
-        $hasKaution = !empty($ctx['hasKaution']);
-        $hasLeihgebuehr = !empty($ctx['hasLeihgebuehr']);
-        $hasFixedEnd = !empty($ctx['hasFixedEnd']);
-        $kautionFmt = self::em(isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : '');
-        $leihgebuehrFmt = self::em(isset($ctx['leihgebuehrFormatted']) ? (string)$ctx['leihgebuehrFormatted'] : '');
-        $startDe = self::em(isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '');
-        $endDe = self::em(isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '');
-        $kautionWord = self::em('Kaution');
-        $feeWord = self::em('Leihgebühr');
-
         if($kind === self::KIND_RETURN) {
-            $clauses = array();
-            $clauses[] = 'Mit Unterzeichnung bestätigen '.$org.' und '.$borrower
-                .', dass das nachstehend bezeichnete Leihgut („'.$item.'“) zurückgegeben wurde.';
-            $clauses[] = 'Das Leihgut wurde auf Vollständigkeit und äußerlich erkennbare Schäden geprüft.'
-                .' Offensichtliche Mängel sind auf diesem Protokoll zu vermerken;'
-                .' andernfalls gilt die Rückgabe als äußerlich ordnungsgemäß.';
-            if($hasKaution) {
-                $clauses[] = 'Die bei Überlassung hinterlegte '.$kautionWord.' in Höhe von '.$kautionFmt
-                    .' wird mit der Rückgabe – soweit keine berechtigten Abzüge wegen Beschädigung,'
-                    .' Verlust oder fehlender Bestandteile bestehen – an '.$borrower.' zurückgezahlt.';
-            }
-            $clauses[] = 'Mit der Rückgabe endet das Leihverhältnis über dieses Inventarstück.';
-            return $clauses;
+            return self::buildReturnClauses($ctx);
         }
+        return self::buildLoanClauses($ctx);
+    }
+
+    /** @return list<string> */
+    public static function buildReturnClauses(array $ctx) {
+        $hasKaution = !empty($ctx['hasKaution']);
+        $invNr = self::ctxDetailValue($ctx, 'Inventarnummer');
+        $repName = '';
+        if(!empty($ctx['loanId'])) {
+            $loan = new InventoriesLoan;
+            $loan->load_by_id((int)$ctx['loanId']);
+            if((int)$loan->Index) {
+                $sig = self::getSignature($loan, self::KIND_RETURN, self::ROLE_LENDER);
+                $repName = self::signerDisplayName(isset($sig['SignedBy']) ? (int)$sig['SignedBy'] : 0);
+            }
+        }
+
+        $extra = array();
+        if($repName !== '') {
+            $extra['rep'] = self::em($repName);
+            $extra['repPhrase'] = self::applyClauseTemplate(
+                'loanReturnRepPhrase',
+                self::clauseVars($ctx, array('rep' => self::em($repName)))
+            );
+        }
+        if($invNr !== '') {
+            $extra['invNr'] = self::em($invNr);
+            $extra['invNrPhrase'] = self::applyClauseTemplate(
+                'loanReturnInvNrPhrase',
+                self::clauseVars($ctx, array('invNr' => self::em($invNr)))
+            );
+        }
+        $vars = self::clauseVars($ctx, $extra);
 
         $clauses = array();
-        $clauses[] = $org.' überlässt '.$borrower.' das nachstehend bezeichnete Vereinsinventar'
-            .' („'.$item.'“, nachfolgend „Leihgut“) zur Nutzung.';
-        $clauses[] = 'Das Eigentum am Leihgut verbleibt beim Verein. Der Entleiher erhält kein Eigentum'
-            .' und kein Pfandrecht.';
-
-        if($hasFixedEnd) {
-            $clauses[] = 'Die Leihe beginnt am '.$startDe.' und ist bis zum '.$endDe.' befristet.';
-        }
-        else {
-            $clauses[] = 'Die Leihe beginnt am '.$startDe.' und ist unbefristet.';
-        }
-
-        $clauses[] = 'Der Entleiher verpflichtet sich, das Leihgut sorgfältig zu behandeln, nur bestimmungsgemäß'
-            .' zu nutzen und es vor Verlust, Diebstahl und Beschädigung zu schützen.';
-        $clauses[] = 'Weitergabe an Dritte, Verpfändung oder Verkauf sind untersagt.';
-        $clauses[] = 'Verlust, Diebstahl oder wesentliche Schäden sind dem Verein unverzüglich anzuzeigen.';
-
-        if($hasLeihgebuehr) {
-            $clauses[] = 'Für die Überlassung erhebt der Verein eine '.$feeWord.' in Höhe von '.$leihgebuehrFmt
-                .'. Die Leihgebühr ist mit Vertragsschluss fällig und wird nicht erstattet.';
-        }
-
+        $clauses[] = self::applyClauseTemplate('loanReturnHead', $vars);
+        $clauses[] = self::applyClauseTemplate('loanReturnInspect', $vars);
+        $clauses[] = self::applyClauseTemplate('loanReturnEnd', $vars);
         if($hasKaution) {
-            $clauses[] = 'Für die Dauer der Leihe hinterlegt der Entleiher eine '.$kautionWord.' in Höhe von '.$kautionFmt
-                .'. Die Kaution wird bei ordnungsgemäßer Rückgabe zurückgezahlt;'
-                .' berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile sind zulässig.';
+            $clauses[] = self::returnDepositClauseHtml(
+                isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher',
+                isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : ''
+            );
         }
-
-        $clauses[] = 'Der Verein behält sich vor, die Leihe aus wichtigem Grund oder nach billigem Ermessen'
-            .' vorzeitig zu beenden und das Leihgut zurückzufordern. Der Entleiher hat das Leihgut'
-            .' dann unverzüglich herauszugeben.';
-
-        if($isMember) {
-            $clauses[] = 'Endet die Mitgliedschaft des Entleihers im Verein, endet auch dieses Leihverhältnis,'
-                .' sofern nicht unverzüglich ein neuer Leihvertrag als Nicht-Mitglied geschlossen wird.';
-        }
-        else {
-            $clauses[] = 'Dieser Vertrag gilt als eigenständiger Leihvertrag für Nicht-Mitglieder'
-                .' und ist nicht an eine Vereinsmitgliedschaft gebunden.';
-        }
-
-        $clauses[] = 'Bei Beendigung der Leihe ist das Leihgut vollständig und in einem dem Alter'
-            .' und der üblichen Abnutzung entsprechenden Zustand zurückzugeben.'
-            .' Die Rückgabe wird gesondert protokolliert.';
-
         return $clauses;
+    }
+
+    /** @return list<string> */
+    public static function buildLoanClauses(array $ctx) {
+        $hasFixedEnd = !empty($ctx['hasFixedEnd']);
+        $isMember = !empty($ctx['isMember']);
+        $vars = self::clauseVars($ctx);
+
+        $clauses = array();
+        $clauses[] = self::durationClauseHtml(
+            isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '',
+            isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '',
+            $hasFixedEnd
+        );
+        $clauses[] = self::applyClauseTemplate('loanClauseOwnership', $vars);
+        $sorgfalt = self::applyClauseTemplate('loanClauseCare', $vars);
+        if(!$isMember) {
+            $extra = self::applyClauseTemplate('loanClauseCareExtern', $vars);
+            if($extra !== '') {
+                $sorgfalt = trim($sorgfalt.' '.$extra);
+            }
+        }
+        $clauses[] = $sorgfalt;
+        $clauses[] = self::maintenanceClauseHtml();
+        $clauses[] = self::applyClauseTemplate('loanClauseTransfer', $vars);
+        $clauses[] = self::applyClauseTemplate('loanClauseRecall', $vars);
+        $rueckgabe = self::applyClauseTemplate('loanClauseReturn', $vars);
+        if(!$isMember) {
+            $extra = self::applyClauseTemplate('loanClauseReturnExtern', $vars);
+            if($extra !== '') {
+                $rueckgabe = trim($extra.' '.$rueckgabe);
+            }
+        }
+        $clauses[] = $rueckgabe;
+        self::appendStandardLegalClauses($clauses);
+        self::appendFeeAndDepositClauses($clauses, $ctx);
+        return $clauses;
+    }
+
+    /** @param list<string> $clauses */
+    public static function appendStandardLegalClauses(array &$clauses) {
+        $vars = self::clauseVars(array());
+        $clauses[] = self::applyClauseTemplate('loanClauseLimitation', $vars);
+        $clauses[] = self::applyClauseTemplate('loanClauseForm', $vars);
+        $clauses[] = self::applyClauseTemplate('loanClauseSeverability', $vars);
+    }
+
+    /** @return string */
+    public static function feeClauseHtml($orgName, $amountFormatted) {
+        return self::applyClauseTemplate('loanClauseFee', self::clauseVars(array(
+            'orgName' => isset($orgName) ? (string)$orgName : 'der Verein',
+            'amountFormatted' => (string)$amountFormatted,
+        )));
+    }
+
+    /** @return string */
+    public static function depositClauseHtml($amountFormatted) {
+        return self::applyClauseTemplate('loanClauseDeposit', self::clauseVars(array(
+            'amountFormatted' => (string)$amountFormatted,
+        )));
+    }
+
+    /** @return string */
+    public static function returnDepositClauseHtml($borrowerName, $amountFormatted) {
+        return self::applyClauseTemplate('loanReturnDeposit', self::clauseVars(array(
+            'borrowerName' => isset($borrowerName) ? (string)$borrowerName : 'der Entleiher',
+            'amountFormatted' => (string)$amountFormatted,
+        )));
+    }
+
+    /** @param list<string> $clauses */
+    public static function appendFeeAndDepositClauses(array &$clauses, array $ctx) {
+        if(!empty($ctx['hasLeihgebuehr'])) {
+            $clauses[] = self::feeClauseHtml(
+                isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein',
+                isset($ctx['leihgebuehrFormatted']) ? (string)$ctx['leihgebuehrFormatted'] : ''
+            );
+        }
+        if(!empty($ctx['hasKaution'])) {
+            $clauses[] = self::depositClauseHtml(
+                isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : ''
+            );
+        }
     }
 
     /** @return array{File:string,SignedAt:string,SignedBy:int,Place:string,SignDate:string,SnapshotFile:string}|null */
@@ -987,6 +1174,10 @@ class LoanForm
             return $kind === self::KIND_RETURN ? 'Rückgabe' : 'Leihvertrag';
         }
         return $kind === self::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
+    }
+
+    public static function formHref($loanId, $kind) {
+        return 'loan-form.php?loan='.(int)$loanId.'&kind='.rawurlencode(self::normalizeKind($kind));
     }
 
     public static function signatureUrl(InventoriesLoan $loan, $kind, $role) {
@@ -1346,7 +1537,7 @@ class LoanForm
         $job->CreatedBy = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : $uid;
         $job->Subject = $subject;
         $job->BodyText = $body;
-        $job->Source = 'loan-sign';
+        $job->Source = self::MAIL_SOURCE_SIGNED;
         $job->Status = 'queued';
         $job->Total = 0;
         $job->Sent = 0;
@@ -1375,7 +1566,110 @@ class LoanForm
         $mail = new Usermail;
         $mail->User = $uid;
         $mail->subject = $subject;
-        $mail->source = 'loan-sign';
+        $mail->source = self::MAIL_SOURCE_SIGNED;
+        $mail->quiet = true;
+        $n = $mail->enqueue($body, $job);
+        return $n > 0;
+    }
+
+    public static function borrowerReminderAlreadyQueued(InventoriesLoan $loan, $kind) {
+        $loanId = (int)$loan->Index;
+        $kind = self::normalizeKind($kind);
+        if($loanId < 1) {
+            return false;
+        }
+        if(class_exists('MailJob') && method_exists('MailJob', 'ensureSchema')) {
+            MailJob::ensureSchema();
+        }
+        $needle = '(Leihe Nr. '.$loanId.')';
+        $sql = sprintf(
+            'SELECT `Index`, `Subject`, `BodyText` FROM `%sMailJob` WHERE `Source` = "%s" AND `BodyText` LIKE "%%%s%%";',
+            $GLOBALS['dbprefix'],
+            mysqli_real_escape_string($GLOBALS['conn'], self::MAIL_SOURCE_SIGN_REQUEST),
+            mysqli_real_escape_string($GLOBALS['conn'], $needle)
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        if(!$dbr) {
+            return false;
+        }
+        while($row = mysqli_fetch_assoc($dbr)) {
+            if(class_exists('MailJob') && MailJob::parseLoanIdFromBody($row['BodyText']) !== $loanId) {
+                continue;
+            }
+            $rowKind = (stripos((string)$row['Subject'], 'Rückgabe') !== false
+                || stripos((string)$row['Subject'], 'Rueckgabe') !== false)
+                ? self::KIND_RETURN
+                : self::KIND_LOAN;
+            if($rowKind === $kind) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Queue inbox + e-mail asking the borrower to sign (no snapshot).
+     * Idempotent per loan/kind. No-op if lender missing or borrower already signed.
+     * @return bool true if a reminder exists or was queued
+     */
+    public static function queueBorrowerSignReminder(InventoriesLoan $loan, $kind) {
+        $kind = self::normalizeKind($kind);
+        $uid = (int)$loan->User;
+        if($uid < 1 || !(int)$loan->Index) {
+            return false;
+        }
+        if(self::getSignature($loan, $kind, self::ROLE_LENDER) === null) {
+            return false;
+        }
+        if(self::getSignature($loan, $kind, self::ROLE_BORROWER) !== null
+            || self::isDigitallyComplete($loan, $kind)) {
+            return false;
+        }
+        if(self::borrowerReminderAlreadyQueued($loan, $kind)) {
+            return true;
+        }
+
+        $ctx = self::buildContext($loan, $kind);
+        $title = $ctx && isset($ctx['title']) ? (string)$ctx['title'] : 'Leihvertrag';
+        $item = $ctx && isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'Inventar';
+        $subject = $kind === self::KIND_RETURN
+            ? 'Rückgabe zur Unterschrift'
+            : 'Leihvertrag zur Unterschrift';
+        $href = self::formHref((int)$loan->Index, $kind);
+        $body = '<p>Bitte unterschreibe das Formular <b>'
+            .htmlspecialchars($title, ENT_QUOTES, 'UTF-8')
+            .'</b> zu <b>'.htmlspecialchars($item, ENT_QUOTES, 'UTF-8')
+            .'</b> (Leihe Nr. '.(int)$loan->Index.').</p>'
+            .'<p><a href="'.htmlspecialchars($href, ENT_QUOTES, 'UTF-8').'">Zum Formular</a></p>'
+            .'<p>Du findest es auch unter Mein Inventar → Zur Unterschrift.</p>';
+
+        if(class_exists('MailJob') && method_exists('MailJob', 'ensureSchema')) {
+            MailJob::ensureSchema();
+        }
+        $job = new MailJob;
+        $job->CreatedBy = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : $uid;
+        $job->Subject = $subject;
+        $job->BodyText = $body;
+        $job->Source = self::MAIL_SOURCE_SIGN_REQUEST;
+        $job->Status = 'queued';
+        $job->Total = 0;
+        $job->Sent = 0;
+        $job->Failed = 0;
+        $job->setRecipientSpecArray(array(
+            'groups' => array(),
+            'registers' => array(),
+            'users' => array($uid),
+            'namedGroups' => array(),
+        ));
+        if(!$job->save()) {
+            return false;
+        }
+
+        $mail = new Usermail;
+        $mail->User = $uid;
+        $mail->subject = $subject;
+        $mail->source = self::MAIL_SOURCE_SIGN_REQUEST;
         $mail->quiet = true;
         $n = $mail->enqueue($body, $job);
         return $n > 0;

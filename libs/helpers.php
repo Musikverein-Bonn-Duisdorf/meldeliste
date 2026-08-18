@@ -2516,6 +2516,7 @@ function allowedReturnUrls() {
         'meine-mails.php',
         'edit-shifts.php',
         'new-termin.php',
+        'loan-form.php',
     );
 }
 
@@ -2603,6 +2604,33 @@ function safeReturnUrl($url, $default = 'index.php') {
         return $base;
     }
     return $base.'?'.$m[2];
+}
+
+/**
+ * Login URL with optional post-login target (whitelisted via safeReturnUrl).
+ */
+function appLoginUrl($activeLink, $next = 'index.php') {
+    $url = (isset($GLOBALS['optionsDB']['WebSiteURL']) ? (string)$GLOBALS['optionsDB']['WebSiteURL'] : '')
+        .'/login.php?alink='.trim((string)$activeLink);
+    $next = safeReturnUrl($next, 'index.php');
+    if($next !== 'index.php') {
+        $url .= '&next='.rawurlencode($next);
+    }
+    return $url;
+}
+
+/**
+ * Turn relative app hrefs in a stored mail body into login.php?alink=&next= links.
+ */
+function rewriteMailBodyHrefsToLogin($html, $activeLink) {
+    return preg_replace_callback(
+        '/href="((?:[a-zA-Z0-9_-]+\.php)(?:\?[a-zA-Z0-9_&=%;.-]*)?)"/',
+        function ($m) use ($activeLink) {
+            $next = html_entity_decode($m[1], ENT_QUOTES, 'UTF-8');
+            return 'href="'.htmlspecialchars(appLoginUrl($activeLink, $next), ENT_QUOTES, 'UTF-8').'"';
+        },
+        (string)$html
+    );
 }
 
 /**

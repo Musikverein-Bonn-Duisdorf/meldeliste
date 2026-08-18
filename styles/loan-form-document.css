@@ -415,21 +415,66 @@ body.loan-form-print {
 
 .loan-form-clauses {
   margin: 0;
-  padding-left: 1.1rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: loan-clause;
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
+  font-size: 7.5pt;
+  line-height: 1.28;
+  column-count: 2;
+  column-gap: 1.35rem;
 }
 
-.loan-form-clauses li {
-  margin: 0 0 0.22rem;
-  padding-left: 0.1rem;
+.loan-form-clauses > li {
+  counter-increment: loan-clause;
+  position: relative;
+  margin: 0 0 0.32em;
+  padding-left: 1.7em;
+  list-style: none;
   orphans: 2;
   widows: 2;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.loan-form-clauses > li[hidden] {
+  display: none;
+}
+
+.loan-form-clauses > li::before {
+  content: counter(loan-clause) ".";
+  position: absolute;
+  left: 0;
+  width: 1.4em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .loan-form-clauses .loan-form-em {
   font-weight: 700;
+}
+
+.loan-form-clause-sub {
+  list-style: none;
+  margin: 0.22em 0 0.04em;
+  padding: 0;
+  text-align: left;
+  hyphens: none;
+}
+
+.loan-form-clause-sub li {
+  position: relative;
+  margin: 0 0 0.12em;
+  padding-left: 0.95em;
+}
+
+.loan-form-clause-sub li::before {
+  content: "–";
+  position: absolute;
+  left: 0;
+  width: 0.75em;
 }
 
 .loan-form-checks {
@@ -676,6 +721,12 @@ body.loan-form-print {
     grid-template-columns: 1fr 1fr;
   }
 
+  .loan-form-clauses {
+    column-count: 2;
+    font-size: 7.5pt;
+    line-height: 1.28;
+  }
+
   .loan-form-dl--2col > div {
     grid-template-columns: 6.5rem 1fr;
   }
@@ -702,4 +753,13 @@ body.loan-form-snapshot .loan-form-doc {
   margin: 0 auto;
   border: 0;
   box-shadow: none;
+}
+
+@media screen and (max-width: 720px) {
+  .loan-form-clauses {
+    column-count: 1;
+    column-rule: none;
+    font-size: 9.5pt;
+    line-height: 1.28;
+  }
 }

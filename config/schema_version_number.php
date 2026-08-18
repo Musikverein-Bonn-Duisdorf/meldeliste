@@ -1,7 +1,9 @@
 <?php
 /**
  * Expected DB schema version number (MELD-51).
- * Bump when DBconfig.json, DatabaseManager migrations, or ConfigDefaults.php change.
+ * Bump when DBconfig.json, DatabaseManager migrations, ConfigDefaults.php, or
+ * LoanClauseDefaults.php change
+ * (./scripts/bump-schema-version.sh). Without a higher number, updater skips Repair.
  * v34: drop User.Birthday (owned by mit_MemberProfile); Fördernde filter via mit_Membership.
  * v35: drop User.Mitglied (owned by MIT MembershipPeriod tenure; Melde Active stays Betriebsflag).
  * v36: drop User.RefID (Mitgliedsnummer obsolete; canonical id is User.Index).
@@ -11,6 +13,7 @@
  * v40: Inventory.ThumbFile (MELD-206 type default thumbnail).
  * v41: config defaultTerminVisibility (MELD-202).
  * v42: InventoriesLoanSignatures + orgPlace (MELD-201 digital signatures).
+ * v43: loan/return clause texts as config (MELD-213)
  */
-return 42;
+return 43;
 ?>

@@ -289,9 +289,16 @@ while($row = mysqli_fetch_array($dbr)) {
         echo "<input class=\"w3-col l4 m4 s12 w3-center\" type=\"number\" min=\"0\" name=\"".$row['Parameter']."\" value=\"".$row['Value']."\" />\n";
         break;
     case 'text':
-        $rows = ((string)$row['Parameter'] === 'orgAddress') ? 4 : 10;
+        $paramName = (string)$row['Parameter'];
+        $rows = 10;
+        if($paramName === 'orgAddress') {
+            $rows = 4;
+        }
+        elseif(strpos($paramName, 'loanClause') === 0 || strpos($paramName, 'loanReturn') === 0) {
+            $rows = 6;
+        }
         echo "<textarea class=\"w3-col l4 m4 s12\" rows=\"".$rows."\" cols=\"30\" name=\""
-            .htmlspecialchars((string)$row['Parameter'], ENT_QUOTES, 'UTF-8')."\">"
+            .htmlspecialchars($paramName, ENT_QUOTES, 'UTF-8')."\">"
             .htmlspecialchars((string)$row['Value'], ENT_QUOTES, 'UTF-8')."</textarea>\n";
         break;
     case 'string':

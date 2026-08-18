@@ -72,6 +72,17 @@ if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
 }
 
 if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
+    && isset($_POST['action']) && (string)$_POST['action'] === 'notifyBorrower') {
+    if(!LoanForm::userMayEdit($userId)) {
+        denyAccess();
+    }
+    $queued = LoanForm::queueBorrowerSignReminder($loan, $kind);
+    header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind)
+        .($queued ? '&notified=1' : '&notifyerr=1'));
+    exit;
+}
+
+if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
     && isset($_POST['action']) && (string)$_POST['action'] === 'clearSign') {
     $role = LoanForm::normalizeRole(isset($_POST['role']) ? $_POST['role'] : '');
     if(!LoanForm::userMayClearSignature($userId, $loan, $role, $kind)) {
@@ -178,6 +189,12 @@ elseif(!empty($_GET['signcleared'])) {
 elseif(!empty($_GET['signerr'])) {
     $flash = 'Unterschrift konnte nicht gespeichert werden.';
 }
+elseif(!empty($_GET['notified'])) {
+    $flash = 'Zur Unterschrift gesendet.';
+}
+elseif(!empty($_GET['notifyerr'])) {
+    $flash = 'Senden nicht möglich.';
+}
 $digitallyComplete = LoanForm::isDigitallyComplete($loan, $kind);
 $lenderSig = LoanForm::getSignature($loan, $kind, LoanForm::ROLE_LENDER);
 $borrowerSig = LoanForm::getSignature($loan, $kind, LoanForm::ROLE_BORROWER);
@@ -194,6 +211,10 @@ if($scanLabel === '') {
     $scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
 }
 $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
+$borrowerSendQueued = $canEdit && !$digitallyComplete && $lenderSig !== null && $borrowerSig === null
+    && LoanForm::borrowerReminderAlreadyQueued($loan, $kind);
+$canSendBorrower = $canEdit && !$digitallyComplete && $lenderSig !== null && $borrowerSig === null
+    && !$borrowerSendQueued;
 ?>
 <?php if($completeNotice !== null) { ?>
 <div class="app-toast-host app-toast-host--complete no-print" data-loan-complete-notice>
@@ -340,7 +361,7 @@ $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
           <dd>
 <?php if($editLoanParams) { ?>
             <input id="loan-start-date" class="loan-form-input loan-form-input--short no-print" type="date" name="StartDate" value="<?php echo $h($startIso); ?>" required aria-label="Leihbeginn">
-            <span class="loan-form-print-only"><?php echo $h($ctx['startDateDe']); ?></span>
+            <span class="loan-form-print-only" data-loan-start-print><?php echo $h($ctx['startDateDe']); ?></span>
 <?php } else { ?>
             <?php echo $h($ctx['startDateDe']); ?>
 <?php } ?>
@@ -351,7 +372,7 @@ $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
           <dd>
 <?php if($editLoanParams) { ?>
             <input id="loan-end-date" class="loan-form-input loan-form-input--short no-print" type="date" name="EndDate" value="<?php echo $h($endIso); ?>" aria-label="Leihende">
-            <span class="loan-form-print-only"><?php echo $ctx['hasFixedEnd'] ? $h($ctx['endDateDe']) : 'unbefristet'; ?></span>
+            <span class="loan-form-print-only" data-loan-end-print><?php echo $ctx['hasFixedEnd'] ? $h($ctx['endDateDe']) : 'unbefristet'; ?></span>
 <?php } elseif($ctx['hasFixedEnd']) { ?>
             <?php echo $h($ctx['endDateDe']); ?>
 <?php } else { ?>
@@ -360,15 +381,13 @@ $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
           </dd>
         </div>
 <?php if($editLoanParams || $ctx['hasKaution']) { ?>
-        <div<?php echo ($editLoanParams && !$ctx['hasKaution']) ? ' class="no-print"' : ''; ?>>
+        <div id="loan-kaution-row"<?php echo ($editLoanParams && !$ctx['hasKaution']) ? ' class="no-print"' : ''; ?>>
           <dt>Kaution</dt>
           <dd>
 <?php   if($editLoanParams) { ?>
             <input id="loan-kaution-form" class="loan-form-input loan-form-input--short no-print" type="text" name="Kaution" inputmode="decimal" placeholder="0,00" value="<?php echo $h($kautionInput); ?>" aria-label="Kaution">
             <span class="loan-form-muted no-print">€</span>
-<?php     if($ctx['hasKaution']) { ?>
-            <span class="loan-form-print-only"><?php echo $h($ctx['kautionFormatted']); ?></span>
-<?php     } ?>
+            <span class="loan-form-print-only" data-loan-kaution-print><?php echo $ctx['hasKaution'] ? $h($ctx['kautionFormatted']) : ''; ?></span>
 <?php   } else { ?>
             <?php echo $h($ctx['kautionFormatted']); ?>
 <?php   } ?>
@@ -376,15 +395,13 @@ $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
         </div>
 <?php } ?>
 <?php if($editLoanParams || !empty($ctx['hasLeihgebuehr'])) { ?>
-        <div<?php echo ($editLoanParams && empty($ctx['hasLeihgebuehr'])) ? ' class="no-print"' : ''; ?>>
+        <div id="loan-leihgebuehr-row"<?php echo ($editLoanParams && empty($ctx['hasLeihgebuehr'])) ? ' class="no-print"' : ''; ?>>
           <dt>Leihgebühr</dt>
           <dd>
 <?php   if($editLoanParams) { ?>
             <input id="loan-leihgebuehr-form" class="loan-form-input loan-form-input--short no-print" type="text" name="Leihgebuehr" inputmode="decimal" placeholder="0,00" value="<?php echo $h($leihgebuehrInput); ?>" aria-label="Leihgebühr">
             <span class="loan-form-muted no-print">€</span>
-<?php     if(!empty($ctx['hasLeihgebuehr'])) { ?>
-            <span class="loan-form-print-only"><?php echo $h($ctx['leihgebuehrFormatted']); ?></span>
-<?php     } ?>
+            <span class="loan-form-print-only" data-loan-leihgebuehr-print><?php echo !empty($ctx['hasLeihgebuehr']) ? $h($ctx['leihgebuehrFormatted']) : ''; ?></span>
 <?php   } else { ?>
             <?php echo $h($ctx['leihgebuehrFormatted']); ?>
 <?php   } ?>
@@ -398,10 +415,55 @@ $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
       <section class="loan-form-section loan-form-panel loan-form-terms">
         <h2><?php echo $kind === LoanForm::KIND_RETURN ? 'Protokoll' : 'Vertragsbedingungen'; ?></h2>
         <ol class="loan-form-clauses">
-<?php foreach($ctx['clauses'] as $clause) { ?>
-          <li><?php echo $clause; ?></li>
+<?php
+$skipClauses = array();
+if($kind === LoanForm::KIND_LOAN && $editLoanParams) {
+    if(!empty($ctx['hasLeihgebuehr'])) {
+        $skipClauses[] = LoanForm::feeClauseHtml($ctx['orgName'], $ctx['leihgebuehrFormatted']);
+    }
+    if(!empty($ctx['hasKaution'])) {
+        $skipClauses[] = LoanForm::depositClauseHtml($ctx['kautionFormatted']);
+    }
+}
+if($kind === LoanForm::KIND_RETURN && $editLoanParams && !empty($ctx['hasKaution'])) {
+    $skipClauses[] = LoanForm::returnDepositClauseHtml($ctx['borrowerName'], $ctx['kautionFormatted']);
+}
+foreach($ctx['clauses'] as $i => $clause) {
+    if(in_array($clause, $skipClauses, true)) {
+        continue;
+    }
+?>
+          <li<?php echo ($kind === LoanForm::KIND_LOAN && (int)$i === 0) ? ' id="loan-duration-clause"' : ''; ?>><?php echo $clause; ?></li>
+<?php } ?>
+<?php if($kind === LoanForm::KIND_LOAN && $editLoanParams) { ?>
+          <li id="loan-fee-clause"<?php echo empty($ctx['hasLeihgebuehr']) ? ' hidden' : ''; ?>><?php
+    echo !empty($ctx['hasLeihgebuehr'])
+        ? LoanForm::feeClauseHtml($ctx['orgName'], $ctx['leihgebuehrFormatted'])
+        : '';
+?></li>
+          <li id="loan-deposit-clause"<?php echo empty($ctx['hasKaution']) ? ' hidden' : ''; ?>><?php
+    echo !empty($ctx['hasKaution'])
+        ? LoanForm::depositClauseHtml($ctx['kautionFormatted'])
+        : '';
+?></li>
+<?php } ?>
+<?php if($kind === LoanForm::KIND_RETURN && $editLoanParams) { ?>
+          <li id="loan-return-deposit-clause"<?php echo empty($ctx['hasKaution']) ? ' hidden' : ''; ?>><?php
+    echo !empty($ctx['hasKaution'])
+        ? LoanForm::returnDepositClauseHtml($ctx['borrowerName'], $ctx['kautionFormatted'])
+        : '';
+?></li>
 <?php } ?>
         </ol>
+<?php if($kind === LoanForm::KIND_LOAN && $editLoanParams) { ?>
+        <template id="loan-duration-tpl-open"><?php echo LoanForm::durationClauseHtml('__START__', '', false); ?></template>
+        <template id="loan-duration-tpl-fixed"><?php echo LoanForm::durationClauseHtml('__START__', '__END__', true); ?></template>
+        <template id="loan-fee-tpl"><?php echo LoanForm::feeClauseHtml($ctx['orgName'], '__AMOUNT__'); ?></template>
+        <template id="loan-deposit-tpl"><?php echo LoanForm::depositClauseHtml('__AMOUNT__'); ?></template>
+<?php } ?>
+<?php if($kind === LoanForm::KIND_RETURN && $editLoanParams) { ?>
+        <template id="loan-return-deposit-tpl"><?php echo LoanForm::returnDepositClauseHtml($ctx['borrowerName'], '__AMOUNT__'); ?></template>
+<?php } ?>
       </section>
 
       <section class="loan-form-section loan-form-panel">
@@ -443,11 +505,11 @@ $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
 <?php     if($editChecklist) { ?>
             <label class="loan-form-check">
               <input type="checkbox" name="checklist_depositReturned" value="1"<?php echo $checkDeposit ? ' checked' : ''; ?>>
-              <span><strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
+              <span><strong class="loan-form-em">Kaution</strong> ausgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
             </label>
 <?php     } else { ?>
             <span class="loan-form-box<?php echo $checkDeposit ? ' loan-form-box--on' : ''; ?>" aria-hidden="true"></span>
-            <span><strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
+            <span><strong class="loan-form-em">Kaution</strong> ausgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
 <?php     } ?>
           </li>
           <li class="loan-form-check-note-row">
@@ -500,6 +562,8 @@ $signSlots = array(
         'roleLabel' => 'Entleiher',
         'sig' => $borrowerSig,
         'can' => $canSignBorrower,
+        'canSend' => $canSendBorrower,
+        'sent' => $borrowerSendQueued,
         'canClear' => $canClearBorrower,
     ),
 );
@@ -521,15 +585,33 @@ foreach($signSlots as $slot) {
               </form>
 <?php     } ?>
             </div>
-<?php   } elseif($slot['can']) { ?>
+<?php   } else {
+        $showSign = !empty($slot['can']);
+        $showSend = !empty($slot['canSend']);
+        $showSent = !empty($slot['sent']);
+        if($showSign || $showSend || $showSent) {
+?>
             <div class="loan-form-sign-open no-print">
+<?php       if($showSign) { ?>
               <button type="button" class="loan-form-btn loan-form-btn--primary" data-loan-sign-open
                 data-loan="<?php echo (int)$ctx['loanId']; ?>"
                 data-kind="<?php echo $h($kind); ?>"
                 data-role="<?php echo $h($slot['role']); ?>"
                 data-role-label="<?php echo $h($slot['roleLabel']); ?>"
                 data-place="<?php echo $h($defaultSignPlace); ?>">Unterschreiben</button>
+<?php       } ?>
+<?php       if($showSend) { ?>
+              <form class="loan-form-sign-send" method="POST" action="loan-form.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>">
+                <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
+                <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
+                <input type="hidden" name="action" value="notifyBorrower">
+                <button type="submit" class="loan-form-btn">Zur Unterschrift senden</button>
+              </form>
+<?php       } elseif($showSent) { ?>
+              <span class="loan-form-sign-sent">Gesendet</span>
+<?php       } ?>
             </div>
+<?php   } ?>
 <?php   } ?>
 <?php   if(!$slot['sig']) { ?>
             <div class="loan-form-sign-manual<?php echo $slot['can'] ? ' loan-form-print-only' : ''; ?>">

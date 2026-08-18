@@ -416,7 +416,12 @@ class Usermail {
         $nachname = $user->Index ? (string)$user->Nachname : '';
         $activeLink = $user->Index ? (string)$user->activeLink : '';
         $anrede = $vorname !== '' ? "Hallo ".$vorname."," : "Hallo,";
-        $link = $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$activeLink;
+        $link = method_exists($job, 'emailLoginUrl')
+            ? $job->emailLoginUrl($activeLink)
+            : $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$activeLink;
+        $ctaLabel = method_exists($job, 'emailCtaLabel')
+            ? $job->emailCtaLabel($vorname)
+            : ('zu '.genitiv($vorname !== '' ? $vorname : 'deiner').' Meldeliste');
 
         // BodyText already contains greeting; strip duplicate greeting for HTML if present
         $bodyInner = function_exists('stripMailBodyGreeting')
@@ -425,12 +430,19 @@ class Usermail {
         $bodyHtml = function_exists('formatMailBodyForEmail')
             ? formatMailBodyForEmail($bodyInner)
             : nl2br($bodyInner);
+        $signRequest = class_exists('LoanForm')
+            ? LoanForm::MAIL_SOURCE_SIGN_REQUEST
+            : 'loan-sign-request';
+        if((string)$job->Source === $signRequest && function_exists('rewriteMailBodyHrefsToLogin')) {
+            $bodyHtml = rewriteMailBodyHrefsToLogin($bodyHtml, $activeLink);
+        }
         $mail->AltBody = trim(html_entity_decode(strip_tags(str_replace(array('<br>', '<br/>', '<br />', '</p>'), array("\n", "\n", "\n", "\n\n"), $anrede."\n\n".$bodyInner)), ENT_QUOTES, 'UTF-8'));
 
         $mail->Body = "<html><head><style>".$style."</style></head><body>"
             ."<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div>"
             ."<div class=\"w3-container\"><p>".htmlspecialchars($anrede, ENT_QUOTES, 'UTF-8')."</p>".$bodyHtml."</div>"
-            ."<a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">zu ".genitiv($vorname !== '' ? $vorname : 'deiner')." Meldeliste</a>"
+            ."<a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">"
+            .htmlspecialchars($ctaLabel, ENT_QUOTES, 'UTF-8')."</a>"
             ."</body></html>";
 
         $addrs = array_map('trim', explode(',', (string)$outbox->ToEmail));
