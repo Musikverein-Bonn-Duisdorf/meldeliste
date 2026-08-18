@@ -35,6 +35,7 @@ if($kind === LoanForm::KIND_RETURN && !LoanForm::userMayViewReturnForm($userId, 
 }
 
 $canEdit = LoanForm::userMayEdit($userId);
+$canDeleteScan = LoanForm::userMayDeleteScan($userId);
 $locked = LoanForm::isDigitallyComplete($loan, $kind);
 $isBorrowerOnly = !$canEdit && (int)$loan->User === $userId;
 
@@ -42,7 +43,7 @@ if($canEdit && !$locked && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
     && isset($_POST['action']) && (string)$_POST['action'] === 'saveFields') {
     LoanForm::saveContractFields($loan, $_POST, $kind);
     $loan->load_by_id($loanId);
-    header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind));
+    header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind).'&saved=1');
     exit;
 }
 
@@ -90,6 +91,17 @@ if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
     }
     $ok = LoanForm::clearSignature($loan, $kind, $role);
     header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind).($ok ? '&signcleared=1' : '&signerr=1'));
+    exit;
+}
+
+if(($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
+    && isset($_POST['action']) && (string)$_POST['action'] === 'restartWorkflow') {
+    if(!LoanForm::userMayRestartWorkflow($userId, $loan, $kind)) {
+        denyAccess();
+    }
+    $ok = LoanForm::restartWorkflow($loan, $kind);
+    header('Location: loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind)
+        .($ok ? '&restarted=1' : '&restarterr=1'));
     exit;
 }
 
@@ -178,7 +190,6 @@ header('Content-Type: text/html; charset=utf-8');
 </head>
 <body class="loan-form-print">
 <?php
-$flash = '';
 $completeNotice = null;
 if(!empty($_GET['complete'])) {
     $completeNotice = array(
@@ -187,17 +198,26 @@ if(!empty($_GET['complete'])) {
         'error' => empty($_GET['mailed']),
     );
 }
+elseif(!empty($_GET['saved'])) {
+    $completeNotice = array('title' => 'Gespeichert.', 'sub' => '', 'error' => false);
+}
 elseif(!empty($_GET['signcleared'])) {
-    $flash = 'Unterschrift gelöscht.';
+    $completeNotice = array('title' => 'Unterschrift gelöscht.', 'sub' => '', 'error' => false);
+}
+elseif(!empty($_GET['restarted'])) {
+    $completeNotice = array('title' => 'Workflow neu gestartet.', 'sub' => '', 'error' => false);
+}
+elseif(!empty($_GET['restarterr'])) {
+    $completeNotice = array('title' => 'Workflow konnte nicht neu gestartet werden.', 'sub' => '', 'error' => true);
 }
 elseif(!empty($_GET['signerr'])) {
-    $flash = 'Unterschrift konnte nicht gespeichert werden.';
+    $completeNotice = array('title' => 'Unterschrift konnte nicht gespeichert werden.', 'sub' => '', 'error' => true);
 }
 elseif(!empty($_GET['notified'])) {
-    $flash = 'Zur Unterschrift gesendet.';
+    $completeNotice = array('title' => 'Zur Unterschrift gesendet.', 'sub' => '', 'error' => false);
 }
 elseif(!empty($_GET['notifyerr'])) {
-    $flash = 'Senden nicht möglich.';
+    $completeNotice = array('title' => 'Senden nicht möglich.', 'sub' => '', 'error' => true);
 }
 $digitallyComplete = LoanForm::isDigitallyComplete($loan, $kind);
 $lenderSig = LoanForm::getSignature($loan, $kind, LoanForm::ROLE_LENDER);
@@ -215,10 +235,8 @@ if($scanLabel === '') {
     $scanLabel = $kind === LoanForm::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
 }
 $frozenSnapshotArticle = LoanForm::readFrozenSnapshotArticle($loan, $kind);
-$borrowerSendQueued = $canEdit && !$digitallyComplete && $lenderSig !== null && $borrowerSig === null
-    && LoanForm::borrowerReminderAlreadyQueued($loan, $kind);
-$canSendBorrower = $canEdit && !$digitallyComplete && $lenderSig !== null && $borrowerSig === null
-    && !$borrowerSendQueued;
+$canSendBorrower = $canEdit && !$digitallyComplete && $lenderSig !== null && $borrowerSig === null;
+$canRestartWorkflow = LoanForm::userMayRestartWorkflow($userId, $loan, $kind);
 ?>
 <?php if($completeNotice !== null) { ?>
 <div class="app-toast-host app-toast-host--complete no-print" data-loan-complete-notice>
@@ -227,16 +245,15 @@ $canSendBorrower = $canEdit && !$digitallyComplete && $lenderSig !== null && $bo
 ?>>
     <div class="app-toast-body">
       <p class="loan-form-complete-title"><?php echo $h($completeNotice['title']); ?></p>
+<?php   if($completeNotice['sub'] !== '') { ?>
       <p class="loan-form-complete-sub"><?php echo $h($completeNotice['sub']); ?></p>
+<?php   } ?>
     </div>
 <?php   if($completeNotice['error']) { ?>
     <button type="button" class="app-toast-close" aria-label="Hinweis schließen">&times;</button>
 <?php   } ?>
   </div>
 </div>
-<?php } ?>
-<?php if($flash !== '') { ?>
-  <p class="loan-form-flash no-print"><?php echo $h($flash); ?></p>
 <?php } ?>
   <div class="loan-form-toolbar no-print">
     <div class="loan-form-toolbar-group">
@@ -245,14 +262,22 @@ $canSendBorrower = $canEdit && !$digitallyComplete && $lenderSig !== null && $bo
       <button type="submit" form="loan-form-fields" class="loan-form-btn loan-form-btn--primary">Speichern</button>
 <?php } ?>
       <button type="button" class="loan-form-btn" onclick="window.print()">Drucken</button>
+<?php if($canRestartWorkflow) { ?>
+      <form class="loan-form-upload" method="POST" action="loan-form.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>" data-confirm="<?php echo $h(LoanForm::restartWorkflowConfirmMessage()); ?>" data-confirm-title="Workflow neustarten" data-confirm-ok="Neustarten">
+        <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
+        <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
+        <input type="hidden" name="action" value="restartWorkflow">
+        <button type="submit" class="loan-form-btn">Workflow neustarten</button>
+      </form>
+<?php } ?>
     </div>
 <?php if($canEdit || $hasScan) { ?>
     <div class="loan-form-toolbar-group loan-form-toolbar-group--scan">
 <?php   if($hasScan) { ?>
       <div class="loan-form-scan-pair">
       <a class="loan-form-btn loan-form-btn--scan" target="_blank" rel="noopener" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
-<?php     if($canEdit) { ?>
-      <form class="loan-form-upload" method="POST" action="loan-contract.php" data-confirm="Scan löschen? Die Leihe bleibt erhalten." data-confirm-ok="Löschen">
+<?php     if($canDeleteScan) { ?>
+      <form class="loan-form-upload" method="POST" action="loan-contract.php" data-confirm="<?php echo $h(LoanForm::deleteStoredFileConfirmMessage($loan, $kind)); ?>" data-confirm-ok="Löschen">
         <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">
         <input type="hidden" name="kind" value="<?php echo $h($kind); ?>">
         <input type="hidden" name="action" value="deleteScan">
@@ -448,6 +473,8 @@ foreach($ctx['clauses'] as $clause) {
 <?php if($kind === LoanForm::KIND_LOAN && $editLoanParams) { ?>
         <template id="loan-duration-tpl-open"><?php echo LoanForm::durationPhraseHtml('', false); ?></template>
         <template id="loan-duration-tpl-fixed"><?php echo LoanForm::durationPhraseHtml('__END__', true); ?></template>
+        <template id="loan-returndue-tpl-open"><?php echo LoanForm::returnDuePhraseHtml('', false); ?></template>
+        <template id="loan-returndue-tpl-fixed"><?php echo LoanForm::returnDuePhraseHtml('__END__', true); ?></template>
 <?php } ?>
       </section>
 
@@ -548,7 +575,6 @@ $signSlots = array(
         'sig' => $borrowerSig,
         'can' => $canSignBorrower,
         'canSend' => $canSendBorrower,
-        'sent' => $borrowerSendQueued,
         'canClear' => $canClearBorrower,
     ),
 );
@@ -573,8 +599,7 @@ foreach($signSlots as $slot) {
 <?php   } else {
         $showSign = !empty($slot['can']);
         $showSend = !empty($slot['canSend']);
-        $showSent = !empty($slot['sent']);
-        if($showSign || $showSend || $showSent) {
+        if($showSign || $showSend) {
 ?>
             <div class="loan-form-sign-actions no-print">
 <?php       if($showSign) { ?>
@@ -592,8 +617,6 @@ foreach($signSlots as $slot) {
                 <input type="hidden" name="action" value="notifyBorrower">
                 <button type="submit" class="loan-form-btn">Zur Unterschrift senden</button>
               </form>
-<?php       } elseif($showSent) { ?>
-              <span class="loan-form-sign-sent">Gesendet</span>
 <?php       } ?>
             </div>
 <?php   } ?>

@@ -26,6 +26,13 @@
                 durationFill.innerHTML = (endDe ? tplFixed : tplOpen).innerHTML
                     .split('__END__').join(endDe);
             }
+            var returnDueFill = document.querySelector('[data-loan-fill="returnDue"]');
+            var tplReturnOpen = document.getElementById('loan-returndue-tpl-open');
+            var tplReturnFixed = document.getElementById('loan-returndue-tpl-fixed');
+            if (returnDueFill && tplReturnOpen && tplReturnFixed) {
+                returnDueFill.innerHTML = (endDe ? tplReturnFixed : tplReturnOpen).innerHTML
+                    .split('__END__').join(endDe);
+            }
             var startPrint = document.querySelector('[data-loan-start-print]');
             var endPrint = document.querySelector('[data-loan-end-print]');
             if (startPrint && startDe) {
@@ -312,7 +319,7 @@
     if (completeHost && window.history && window.history.replaceState) {
         var u = new URL(window.location.href);
         var strip = false;
-        ['complete', 'mailed'].forEach(function (key) {
+        ['complete', 'mailed', 'saved', 'notified', 'notifyerr', 'signcleared', 'signerr', 'restarted', 'restarterr'].forEach(function (key) {
             if (u.searchParams.has(key)) {
                 u.searchParams.delete(key);
                 strip = true;

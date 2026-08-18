@@ -179,6 +179,11 @@ class LoanForm
         return requirePermission('perm_editInventories');
     }
 
+    /** Stored loan/return form or scan: Inventar-Schreibrecht (Admin). */
+    public static function userMayDeleteScan($userId) {
+        return self::userMayEdit($userId);
+    }
+
     /**
      * Return form: admins always; borrowers only when lender signed and their signature is pending.
      */
@@ -231,6 +236,18 @@ class LoanForm
             return false;
         }
         return self::userMaySign($userId, $loan, $role);
+    }
+
+    /** Reopen a completed digital form: Inventar-Schreibrecht only. */
+    public static function userMayRestartWorkflow($userId, InventoriesLoan $loan, $kind) {
+        return self::userMayEdit($userId) && self::isDigitallyComplete($loan, $kind);
+    }
+
+    /** Confirm text for restarting a completed loan/return form. */
+    public static function restartWorkflowConfirmMessage() {
+        return 'Unterschriften und das gespeicherte Formular werden unwiderruflich gelöscht. '
+            .'Danach kann das Formular wieder bearbeitet und neu unterschrieben werden. '
+            .'Die Leihe bleibt erhalten.';
     }
 
     /** Place for signature forms: orgPlace, else last word of orgNameShort. */
@@ -887,6 +904,14 @@ class LoanForm
         return 'unbefristet';
     }
 
+    /** Return deadline: open-ended vs fixed end date (HTML). */
+    public static function returnDuePhraseHtml($endDe, $hasFixedEnd) {
+        if(!empty($hasFixedEnd)) {
+            return 'spätestens am '.self::fillEm((string)$endDe, 'end');
+        }
+        return 'bei Beendigung der Leihe unverzüglich';
+    }
+
     /**
      * Fill a config template: escape static text, insert already-safe {placeholders},
      * turn lines starting with "- " into a nested list.
@@ -1023,6 +1048,7 @@ class LoanForm
             'start' => self::fillEm($startDe, 'start'),
             'end' => self::fillEm($endDe, 'end'),
             'duration' => '<span data-loan-fill="duration">'.self::durationPhraseHtml($endDe, $hasFixedEnd).'</span>',
+            'returnDue' => '<span data-loan-fill="returnDue">'.self::returnDuePhraseHtml($endDe, $hasFixedEnd).'</span>',
             'borrower' => self::em(isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher'),
             'item' => self::em(isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'die Leihsache'),
             'fee' => self::fillEm($feeAmt, 'fee'),
@@ -1099,9 +1125,6 @@ class LoanForm
             'hasKaution' => !empty($ctx['hasKaution']),
         );
         $clauses = self::clausesFromTemplate('loanText', $vars, $opts);
-        if(empty($ctx['isMember'])) {
-            $clauses = array_merge($clauses, self::clausesFromTemplate('loanTextExtern', $vars, $opts));
-        }
         return $clauses;
     }
 
@@ -1209,6 +1232,21 @@ class LoanForm
             return $kind === self::KIND_RETURN ? 'Rückgabe' : 'Leihvertrag';
         }
         return $kind === self::KIND_RETURN ? 'Scan Rückgabe' : 'Scan Vertrag';
+    }
+
+    /** Confirm text for deleting a stored scan or digital form. */
+    public static function deleteStoredFileConfirmMessage(InventoriesLoan $loan, $kind) {
+        $label = self::storedContractLinkLabel($loan, $kind);
+        if($label === 'Leihvertrag') {
+            return 'Leihvertrag löschen? Die Leihe bleibt erhalten.';
+        }
+        if($label === 'Rückgabe') {
+            return 'Rückgabeprotokoll löschen? Die Leihe bleibt erhalten.';
+        }
+        if(self::normalizeKind($kind) === self::KIND_RETURN) {
+            return 'Scan Rückgabe löschen? Die Leihe bleibt erhalten.';
+        }
+        return 'Scan Vertrag löschen? Die Leihe bleibt erhalten.';
     }
 
     public static function formHref($loanId, $kind) {
@@ -1453,6 +1491,38 @@ class LoanForm
             mysqli_real_escape_string($GLOBALS['conn'], $kind)
         ));
         sqlerror();
+    }
+
+    /**
+     * Admin: drop signatures and frozen snapshot so the form can be edited again.
+     * @return bool
+     */
+    public static function restartWorkflow(InventoriesLoan $loan, $kind) {
+        $loanId = (int)$loan->Index;
+        $kind = self::normalizeKind($kind);
+        if($loanId < 1 || !self::isDigitallyComplete($loan, $kind)) {
+            return false;
+        }
+        self::clearSignatures($loan, $kind);
+        $loan->load_by_id($loanId);
+        $field = $kind === self::KIND_RETURN ? 'ReturnContractFile' : 'ContractFile';
+        $stored = trim((string)$loan->$field);
+        if($stored !== '' && strpos($stored, 'snapshot-') === 0) {
+            $path = self::resolveStoredFile($loanId, $stored);
+            if($path !== null && is_file($path)) {
+                @unlink($path);
+            }
+            $loan->$field = '';
+            $loan->save();
+        }
+        $logentry = new Log;
+        $logentry->DBupdate(sprintf(
+            'InventoriesLoan-ID: %d, digitaler Workflow neu gestartet (%s)',
+            $loanId,
+            $kind
+        ));
+        return !self::hasAnySignature($loan, $kind)
+            && !self::isDigitallyComplete($loan, $kind);
     }
 
     /**

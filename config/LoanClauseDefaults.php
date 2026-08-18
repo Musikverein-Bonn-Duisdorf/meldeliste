@@ -2,7 +2,7 @@
 /**
  * Default Leih-/Rückgabe-Vertragstexte (config table, Type text).
  * Leerzeile = neuer nummerierter Absatz. Zeilen mit "- " werden zur Unterliste.
- * Platzhalter: {org} {start} {duration} {end} {borrower} {item} {fee} {kaution}
+ * Platzhalter: {org} {start} {duration} {end} {returnDue} {borrower} {item} {fee} {kaution}
  * {rep} {repPhrase} {invNr} {invNrPhrase}
  * Absätze mit {fee} bzw. {kaution} nur wenn Betrag &gt; 0 €.
  */
@@ -25,6 +25,8 @@ Das Eigentum an der Leihsache verbleibt bei {org}. Der Entleiher erwirbt kein Ei
 
 Der Entleiher verpflichtet sich, die Leihsache sorgfältig zu behandeln, nur bestimmungsgemäß zu nutzen und sie vor Verlust, Diebstahl und Beschädigung zu schützen. Verlust, Diebstahl oder wesentliche Schäden sind {org} unverzüglich anzuzeigen; der Entleiher haftet hierfür nach den allgemeinen gesetzlichen Regeln.
 
+Der aktuelle Zustand der Leihsache bei Ausgabe wird im Anhang „Zusätzliche Vereinbarungen“ zu diesem Vertrag protokolliert.
+
 Der Entleiher trägt gemäß § 601 Abs. 1 BGB die gewöhnlichen Kosten der Erhaltung der Sache. Dies umfasst insbesondere, aber nicht ausschließlich:
 - die Reinigung und Wartung der Leihsache
 - Verbrauchsmaterial, etwa Öle, Fette, Blätter, Reinigungsmittel
@@ -34,7 +36,7 @@ Die Verpfändung oder der Verkauf der Leihsache ist untersagt. Die vorübergehen
 
 Der Verleiher kann die Leihsache jederzeit, insbesondere aus wichtigem Grund, zurückfordern. Ein wichtiger Grund liegt insbesondere im Fall der Beendigung der Vereinsmitgliedschaft des Entleihers gemäß den Bestimmungen der Satzung von {org} vor. Das gesetzliche Kündigungsrecht gemäß § 605 BGB und § 604 Abs. 3 BGB bleibt unberührt.
 
-Die Leihsache ist bei Beendigung der Leihe vollständig und in einem dem Alter und der üblichen Abnutzung entsprechenden Zustand an den Vorstand von {org} zurückzugeben. Die Rückgabe wird gesondert protokolliert.
+Die Leihsache ist {returnDue} vollständig und in einem dem Alter und der üblichen Abnutzung entsprechenden Zustand an den Vorstand von {org} zurückzugeben. Die Rückgabe wird gesondert protokolliert.
 
 Abweichend von § 606 BGB verjähren Ansprüche des Verleihers wegen Veränderung oder Verschlechterung der Leihsache in sechs Monaten ab dem Zeitpunkt, in dem der Verleiher von den anspruchsbegründenden Umständen Kenntnis erlangt oder ohne grobe Fahrlässigkeit erlangen müsste, spätestens jedoch mit Ablauf von drei Jahren nach Rückgabe der Leihsache.
 
@@ -47,17 +49,7 @@ Für die Überlassung erhebt {org} eine Leihgebühr in Höhe von {fee}. Die Leih
 Für die Dauer der Leihe hinterlegt der Entleiher eine Kaution in Höhe von {kaution}. Die Kaution wird bei ordnungsgemäßer Rückgabe zurückgezahlt; berechtigte Abzüge wegen Beschädigung, Verlust oder fehlender Bestandteile sind zulässig.
 TXT
             ,
-            'Leihvertrag. Leerzeile = Absatz. {org} {start} {duration} {fee} {kaution}'
-        ),
-        $d(
-            'loanTextExtern',
-            <<<'TXT'
-Der aktuelle Zustand der Leihsache bei Ausgabe wird im Anhang „Zusätzliche Vereinbarungen“ zu diesem Vertrag protokolliert.
-
-Der Entleiher hat die Leihsache bei Beendigung der Leihe unverzüglich herauszugeben.
-TXT
-            ,
-            'Leihvertrag: Zusatzabsätze für Nicht-Mitglieder'
+            'Leihvertrag. Leerzeile = Absatz. {org} {start} {duration} {returnDue} {fee} {kaution}'
         ),
         $d(
             'loanReturnText',
