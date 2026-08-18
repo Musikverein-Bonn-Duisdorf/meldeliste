@@ -42,8 +42,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_confirm'])) {
     elseif(empty($_POST['confirm_text']) || trim((string)$_POST['confirm_text']) !== 'RESTORE') {
         $flash = array('type' => 'error', 'message' => 'Bitte zur Bestätigung RESTORE eintippen.');
     }
-    elseif(empty($_FILES['backup_zip']) || !is_uploaded_file($_FILES['backup_zip']['tmp_name'])) {
-        $flash = array('type' => 'error', 'message' => 'Keine ZIP-Datei hochgeladen.');
+    elseif(($uploadErr = backupRestoreUploadError(isset($_FILES['backup_zip']) ? $_FILES['backup_zip'] : null)) !== '') {
+        $flash = array('type' => 'error', 'message' => $uploadErr);
     }
     else {
         try {

@@ -108,6 +108,22 @@ function backupUploadsRoot() {
 }
 
 /**
+ * Real path of uploads/ (follows a directory symlink). Used to pack and replace
+ * the persistent tree instead of renaming the symlink itself.
+ */
+function backupUploadsLivePath() {
+    $root = backupUploadsRoot();
+    if($root === '') {
+        return $root;
+    }
+    $real = realpath($root);
+    if($real !== false && is_dir($real)) {
+        return $real;
+    }
+    return $root;
+}
+
+/**
  * PHP/session settings for long-running backup or restore.
  */
 function backupPrepareLongRun() {
@@ -164,13 +180,16 @@ function backupIsSafeUploadZipPath($name) {
  * @return array<int,array{path:string,zip:string}>
  */
 function backupListUploadFiles() {
-    $root = backupUploadsRoot();
+    $root = backupUploadsLivePath();
     $out = array();
     if(!is_dir($root)) {
         return $out;
     }
+    $flags = FilesystemIterator::SKIP_DOTS
+        | FilesystemIterator::CURRENT_AS_FILEINFO
+        | FilesystemIterator::UNIX_PATHS;
     $iter = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
+        new RecursiveDirectoryIterator($root, $flags)
     );
     foreach($iter as $file) {
         if(!$file->isFile() || $file->isLink()) {
@@ -258,36 +277,38 @@ function backupMoveDir($src, $dest) {
  */
 function backupReplaceUploadsDir($newUploadsDir) {
     $target = backupUploadsRoot();
-    $parent = dirname($target);
-    if(!is_dir($parent) && !@mkdir($parent, 0775, true)) {
-        throw new RuntimeException('Could not create uploads parent directory.');
-    }
-    $bak = $parent.'/'.basename($target).'.bak-'.bin2hex(random_bytes(4));
-    $hadTarget = is_dir($target) || is_link($target);
-    if($hadTarget) {
-        try {
-            backupMoveDir($target, $bak);
+    $live = backupUploadsLivePath();
+    $hadLive = is_dir($live);
+    if(!$hadLive) {
+        $parent = dirname($target);
+        if(!is_dir($parent) && !@mkdir($parent, 0775, true)) {
+            throw new RuntimeException('Could not create uploads parent directory.');
         }
-        catch(Throwable $e) {
-            throw new RuntimeException('Could not move current uploads aside.');
-        }
-    }
-    try {
         backupMoveDir($newUploadsDir, $target);
+        return;
+    }
+    $parent = dirname($live);
+    $bak = $parent.'/'.basename($live).'.bak-'.bin2hex(random_bytes(4));
+    try {
+        backupMoveDir($live, $bak);
     }
     catch(Throwable $e) {
-        if($hadTarget && is_dir($bak)) {
+        throw new RuntimeException('Could not move current uploads aside.');
+    }
+    try {
+        backupMoveDir($newUploadsDir, $live);
+    }
+    catch(Throwable $e) {
+        if(is_dir($bak)) {
             try {
-                backupMoveDir($bak, $target);
+                backupMoveDir($bak, $live);
             }
             catch(Throwable $ignored) {
             }
         }
         throw new RuntimeException('Could not install restored uploads.');
     }
-    if($hadTarget) {
-        backupRemovePath($bak);
-    }
+    backupRemovePath($bak);
 }
 
 /**
@@ -433,7 +454,7 @@ function createBackupZipFile() {
 
     $sql = exportDatabaseSql();
     $stamp = gmdate('Y-m-d-His');
-    $filename = 'meldeliste-backup-'.$stamp.'.zip';
+    $filename = backupZipDownloadName($stamp);
     $path = tempnam(sys_get_temp_dir(), 'meldbackup_');
     if($path === false) {
         throw new RuntimeException('Could not create temporary file for backup.');
@@ -447,15 +468,49 @@ function createBackupZipFile() {
     }
     $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n");
     $zip->addFromString('database.sql', $sql);
-    $zip->addEmptyDir('uploads');
+    $addedSinceOpen = 0;
     foreach($uploadFiles as $file) {
+        if(!is_readable($file['path'])) {
+            $zip->close();
+            @unlink($zipPath);
+            throw new RuntimeException('Cannot read file for backup: '.$file['zip']);
+        }
         if(!$zip->addFile($file['path'], $file['zip'])) {
             $zip->close();
             @unlink($zipPath);
             throw new RuntimeException('Could not add file to backup ZIP: '.$file['zip']);
         }
+        $addedSinceOpen++;
+        if($addedSinceOpen >= 40) {
+            if($zip->close() !== true) {
+                @unlink($zipPath);
+                throw new RuntimeException('Could not write backup ZIP.');
+            }
+            if($zip->open($zipPath) !== true) {
+                @unlink($zipPath);
+                throw new RuntimeException('Could not reopen backup ZIP.');
+            }
+            $addedSinceOpen = 0;
+        }
     }
-    $zip->close();
+    if($zip->close() !== true) {
+        @unlink($zipPath);
+        throw new RuntimeException('Could not write backup ZIP.');
+    }
+
+    $verify = new ZipArchive();
+    if($verify->open($zipPath) !== true) {
+        @unlink($zipPath);
+        throw new RuntimeException('Backup ZIP unreadable after write.');
+    }
+    $packed = backupCollectUploadZipEntries($verify);
+    $verify->close();
+    if(count($packed['files']) !== count($uploadFiles)) {
+        @unlink($zipPath);
+        throw new RuntimeException(
+            'Backup ZIP missing upload files (packed '.count($packed['files']).' of '.count($uploadFiles).').'
+        );
+    }
 
     return array(
         'path' => $zipPath,
@@ -503,6 +558,59 @@ function backupFormatBytes($bytes) {
         return ((int)round($rounded)).' '.$units[$unit];
     }
     return number_format($rounded, 1, '.', '').' '.$units[$unit];
+}
+
+/**
+ * Filename-safe instance label from DB prefix (trailing _ stripped).
+ */
+function backupZipFilenamePrefix() {
+    $p = isset($GLOBALS['dbprefix']) ? (string)$GLOBALS['dbprefix'] : '';
+    $p = rtrim($p, '_');
+    $p = preg_replace('/[^A-Za-z0-9._-]+/', '-', $p);
+    $p = trim((string)$p, '.-');
+    if($p === '') {
+        $p = 'meldeliste';
+    }
+    return $p;
+}
+
+/**
+ * @param string $stamp UTC stamp Y-m-d-His
+ */
+function backupZipDownloadName($stamp) {
+    return backupZipFilenamePrefix().'-backup-'.$stamp.'.zip';
+}
+
+/**
+ * Human-readable error for $_FILES['backup_zip'], or empty if the upload is usable.
+ *
+ * @param array|null $file
+ */
+function backupRestoreUploadError($file) {
+    if(!is_array($file) || !isset($file['error'])) {
+        return 'Keine ZIP-Datei hochgeladen.';
+    }
+    $err = (int)$file['error'];
+    if($err === UPLOAD_ERR_OK) {
+        if(empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            return 'Keine ZIP-Datei hochgeladen.';
+        }
+        return '';
+    }
+    if($err === UPLOAD_ERR_INI_SIZE || $err === UPLOAD_ERR_FORM_SIZE) {
+        $lim = trim((string)ini_get('upload_max_filesize'));
+        if($lim === '') {
+            $lim = '?';
+        }
+        return 'ZIP größer als upload_max_filesize ('.$lim.').';
+    }
+    if($err === UPLOAD_ERR_PARTIAL) {
+        return 'ZIP-Upload unvollständig.';
+    }
+    if($err === UPLOAD_ERR_NO_FILE) {
+        return 'Keine ZIP-Datei hochgeladen.';
+    }
+    return 'ZIP-Upload fehlgeschlagen (Code '.$err.').';
 }
 
 /**
@@ -666,7 +774,6 @@ function backupCollectUploadZipEntries($zip) {
         if(!backupIsSafeUploadZipPath($name)) {
             throw new RuntimeException('Unsafe path in backup ZIP: '.$name);
         }
-        $hasUploads = true;
         if(substr($name, -1) === '/' || $name === 'uploads') {
             continue;
         }
@@ -678,6 +785,7 @@ function backupCollectUploadZipEntries($zip) {
             continue;
         }
         $files[] = $stat['name'];
+        $hasUploads = true;
     }
     return array('files' => $files, 'hasUploads' => $hasUploads);
 }
@@ -770,11 +878,10 @@ function restoreBackupZip($zipPath, $runRepair = true) {
     }
     $sql = $zip->getFromName('database.sql');
     $manifestRaw = $zip->getFromName('manifest.json');
-
     $uploadScan = backupCollectUploadZipEntries($zip);
+    $zip->close();
 
     if($sql === false || $sql === '') {
-        $zip->close();
         throw new RuntimeException('ZIP does not contain database.sql');
     }
 
@@ -786,9 +893,6 @@ function restoreBackupZip($zipPath, $runRepair = true) {
         }
     }
 
-    $includesUploads = $uploadScan['hasUploads']
-        || ($manifest !== null && !empty($manifest['includesUploads']));
-
     $result = restoreDatabaseSql($sql);
     $repaired = false;
     $filesRestored = 0;
@@ -798,24 +902,30 @@ function restoreBackupZip($zipPath, $runRepair = true) {
             $mgr->repair();
             $repaired = true;
         }
-        if($includesUploads) {
-            try {
-                $filesRestored = backupRestoreUploadsFromZip($zip, $uploadScan['files']);
+        if(count($uploadScan['files']) > 0) {
+            $fileZip = new ZipArchive();
+            if($fileZip->open($zipPath) !== true) {
+                $result['errors'][] = 'Could not reopen backup ZIP for files.';
             }
-            catch(Throwable $e) {
-                $zip->close();
-                $result['errors'][] = $e->getMessage();
-                return array(
-                    'manifest' => $manifest,
-                    'statements' => $result['statements'],
-                    'errors' => $result['errors'],
-                    'repaired' => $repaired,
-                    'filesRestored' => 0,
-                );
+            else {
+                try {
+                    $filesRestored = backupRestoreUploadsFromZip($fileZip, $uploadScan['files']);
+                }
+                catch(Throwable $e) {
+                    $fileZip->close();
+                    $result['errors'][] = $e->getMessage();
+                    return array(
+                        'manifest' => $manifest,
+                        'statements' => $result['statements'],
+                        'errors' => $result['errors'],
+                        'repaired' => $repaired,
+                        'filesRestored' => 0,
+                    );
+                }
+                $fileZip->close();
             }
         }
     }
-    $zip->close();
 
     return array(
         'manifest' => $manifest,
