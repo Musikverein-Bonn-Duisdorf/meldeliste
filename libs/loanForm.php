@@ -1452,6 +1452,9 @@ class LoanForm
             $kind,
             $role
         ));
+        if($role === self::ROLE_LENDER) {
+            self::invalidateBorrowerSignReminders($loan, $kind);
+        }
         return true;
     }
 
@@ -1461,6 +1464,7 @@ class LoanForm
         if($loanId < 1) {
             return;
         }
+        self::invalidateBorrowerSignReminders($loan, $kind);
         $snapNames = array();
         foreach(array(self::ROLE_LENDER, self::ROLE_BORROWER) as $role) {
             $sig = self::getSignature($loan, $kind, $role);
@@ -1504,7 +1508,6 @@ class LoanForm
         if($loanId < 1 || !self::isDigitallyComplete($loan, $kind)) {
             return false;
         }
-        self::invalidateBorrowerSignReminders($loan, $kind);
         self::clearSignatures($loan, $kind);
         $loan->load_by_id($loanId);
         $field = $kind === self::KIND_RETURN ? 'ReturnContractFile' : 'ContractFile';
@@ -1680,30 +1683,38 @@ class LoanForm
     }
 
     /**
-     * Drop old "Zur Unterschrift senden" jobs for this loan/kind so a restarted
-     * workflow can queue a new reminder (MailJob rows stay for history).
+     * Active "Zur Unterschrift senden" jobs for this loan/kind.
+     * @return list<array{Index:int,Subject:string,BodyText:string,Created:string}>
      */
-    public static function invalidateBorrowerSignReminders(InventoriesLoan $loan, $kind) {
+    private static function borrowerSignReminderJobRows(InventoriesLoan $loan, $kind) {
         $loanId = (int)$loan->Index;
         $kind = self::normalizeKind($kind);
+        $out = array();
         if($loanId < 1 || !class_exists('MailJob')) {
-            return;
+            return $out;
         }
         MailJob::ensureSchema();
-        $needle = '(Leihe Nr. '.$loanId.')';
+        $hrefNeedle = 'loan='.$loanId.'&';
+        $nrNeedle = '(Leihe Nr. '.$loanId.')';
         $sql = sprintf(
-            'SELECT `Index`, `Subject`, `BodyText` FROM `%sMailJob` WHERE `Source` = "%s" AND `BodyText` LIKE "%%%s%%";',
+            'SELECT `Index`, `Subject`, `BodyText`, `Created` FROM `%sMailJob` WHERE `Source` = "%s";',
             $GLOBALS['dbprefix'],
-            mysqli_real_escape_string($GLOBALS['conn'], self::MAIL_SOURCE_SIGN_REQUEST),
-            mysqli_real_escape_string($GLOBALS['conn'], $needle)
+            mysqli_real_escape_string($GLOBALS['conn'], self::MAIL_SOURCE_SIGN_REQUEST)
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
         if(!$dbr) {
-            return;
+            return $out;
         }
         while($row = mysqli_fetch_assoc($dbr)) {
-            if(MailJob::parseLoanIdFromBody($row['BodyText']) !== $loanId) {
+            $body = (string)$row['BodyText'];
+            $parsed = MailJob::parseLoanIdFromBody($body);
+            if($parsed !== $loanId
+                && strpos($body, $hrefNeedle) === false
+                && strpos($body, $nrNeedle) === false) {
+                continue;
+            }
+            if($parsed > 0 && $parsed !== $loanId) {
                 continue;
             }
             $probe = new MailJob;
@@ -1711,6 +1722,17 @@ class LoanForm
             if($probe->inferLoanKindFromSubject() !== $kind) {
                 continue;
             }
+            $out[] = $row;
+        }
+        return $out;
+    }
+
+    /**
+     * Drop old "Zur Unterschrift senden" jobs for this loan/kind so a restarted
+     * workflow can queue a new reminder (MailJob rows stay for history).
+     */
+    public static function invalidateBorrowerSignReminders(InventoriesLoan $loan, $kind) {
+        foreach(self::borrowerSignReminderJobRows($loan, $kind) as $row) {
             $job = new MailJob;
             $job->load_by_id((int)$row['Index']);
             if(!(int)$job->Index) {
@@ -1725,11 +1747,7 @@ class LoanForm
     }
 
     public static function borrowerReminderAlreadyQueued(InventoriesLoan $loan, $kind) {
-        $loanId = (int)$loan->Index;
         $kind = self::normalizeKind($kind);
-        if($loanId < 1) {
-            return false;
-        }
         $lender = self::getSignature($loan, $kind, self::ROLE_LENDER);
         if($lender === null) {
             return false;
@@ -1738,30 +1756,7 @@ class LoanForm
         if($sinceRaw === '0000-00-00 00:00:00') {
             $sinceRaw = '';
         }
-        if(class_exists('MailJob') && method_exists('MailJob', 'ensureSchema')) {
-            MailJob::ensureSchema();
-        }
-        $needle = '(Leihe Nr. '.$loanId.')';
-        $sql = sprintf(
-            'SELECT `Index`, `Subject`, `BodyText`, `Created` FROM `%sMailJob` WHERE `Source` = "%s" AND `BodyText` LIKE "%%%s%%";',
-            $GLOBALS['dbprefix'],
-            mysqli_real_escape_string($GLOBALS['conn'], self::MAIL_SOURCE_SIGN_REQUEST),
-            mysqli_real_escape_string($GLOBALS['conn'], $needle)
-        );
-        $dbr = mysqli_query($GLOBALS['conn'], $sql);
-        sqlerror();
-        if(!$dbr) {
-            return false;
-        }
-        while($row = mysqli_fetch_assoc($dbr)) {
-            if(class_exists('MailJob') && MailJob::parseLoanIdFromBody($row['BodyText']) !== $loanId) {
-                continue;
-            }
-            $probe = new MailJob;
-            $probe->Subject = (string)$row['Subject'];
-            if($probe->inferLoanKindFromSubject() !== $kind) {
-                continue;
-            }
+        foreach(self::borrowerSignReminderJobRows($loan, $kind) as $row) {
             if($sinceRaw !== '') {
                 $createdRaw = isset($row['Created']) ? trim((string)$row['Created']) : '';
                 if($createdRaw === '' || $createdRaw < $sinceRaw) {
