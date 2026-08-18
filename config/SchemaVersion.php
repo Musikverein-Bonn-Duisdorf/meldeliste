@@ -2,7 +2,9 @@
 /**
  * Expected database schema version (MELD-51).
  * The integer lives in schema_version_number.php so it can be re-read after git pull.
- * Bump that integer when DBconfig.json, DatabaseManager migrations, or ConfigDefaults.php change.
+ * Bump with ./scripts/bump-schema-version.sh when DBconfig.json, ConfigDefaults.php,
+ * LoanClauseDefaults.php, or DatabaseManager migrations change — otherwise existing
+ * installs skip Repair.
  */
 function getExpectedSchemaVersion($forceReload = false) {
     static $cached = null;

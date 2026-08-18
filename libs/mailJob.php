@@ -730,6 +730,40 @@ class MailJob
         return class_exists('LoanForm') ? LoanForm::KIND_LOAN : 'loan';
     }
 
+    /** Login URL for the outgoing e-mail CTA (sign-request goes to the form). */
+    public function emailLoginUrl($activeLink) {
+        $next = 'index.php';
+        $source = (string)$this->Source;
+        $signRequest = class_exists('LoanForm')
+            ? LoanForm::MAIL_SOURCE_SIGN_REQUEST
+            : 'loan-sign-request';
+        if($source === $signRequest) {
+            $loanId = self::parseLoanIdFromBody($this->BodyText);
+            if($loanId > 0) {
+                $kind = $this->inferLoanKindFromSubject();
+                $next = class_exists('LoanForm')
+                    ? LoanForm::formHref($loanId, $kind)
+                    : 'loan-form.php?loan='.$loanId.'&kind='.rawurlencode($kind);
+            }
+        }
+        return function_exists('appLoginUrl')
+            ? appLoginUrl($activeLink, $next)
+            : ((isset($GLOBALS['optionsDB']['WebSiteURL']) ? (string)$GLOBALS['optionsDB']['WebSiteURL'] : '')
+                .'/login.php?alink='.trim((string)$activeLink));
+    }
+
+    public function emailCtaLabel($vorname) {
+        $source = (string)$this->Source;
+        $signRequest = class_exists('LoanForm')
+            ? LoanForm::MAIL_SOURCE_SIGN_REQUEST
+            : 'loan-sign-request';
+        if($source === $signRequest && self::parseLoanIdFromBody($this->BodyText) > 0) {
+            return 'Zum Formular';
+        }
+        $name = trim((string)$vorname);
+        return 'zu '.genitiv($name !== '' ? $name : 'deiner').' Meldeliste';
+    }
+
     /**
      * @return array<int, array{label:string,href:string,type:string}>
      */
@@ -767,6 +801,26 @@ class MailJob
                             .'&kind='.rawurlencode($kind)
                             .'&file=snapshot',
                         'type' => 'loan-snapshot',
+                    );
+                }
+            }
+        }
+        if(count($links) === 0 && (string)$this->Source === 'loan-sign-request' && class_exists('LoanForm')) {
+            $loanId = self::parseLoanIdFromBody($this->BodyText);
+            if($loanId > 0) {
+                $loan = new InventoriesLoan;
+                $loan->load_by_id($loanId);
+                if((int)$loan->Index && LoanForm::userMayView((int)$userId, $loan)) {
+                    $kind = $this->inferLoanKindFromSubject();
+                    $label = trim((string)$this->Subject);
+                    if($label === '') {
+                        $label = $kind === LoanForm::KIND_RETURN ? 'Rückgabe zur Unterschrift' : 'Leihvertrag zur Unterschrift';
+                    }
+                    $links[] = array(
+                        'label' => $label,
+                        'href' => 'loan-form.php?loan='.$loanId
+                            .'&kind='.rawurlencode($kind),
+                        'type' => 'loan-form',
                     );
                 }
             }

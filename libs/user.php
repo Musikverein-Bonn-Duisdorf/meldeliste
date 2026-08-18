@@ -385,8 +385,13 @@ class User
     protected function generateLink() {
         $this->activeLink = bin2hex(random_bytes(16));
     }
-    public function getLink() {
-        return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
+    public function getLink($next = '') {
+        if($next === '' || $next === null) {
+            return $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
+        }
+        return function_exists('appLoginUrl')
+            ? appLoginUrl($this->activeLink, $next)
+            : $GLOBALS['optionsDB']['WebSiteURL']."/login.php?alink=".$this->activeLink;
     }
     public function getCalendarLink() {
         return $GLOBALS['optionsDB']['WebSiteURL']."/ical.php?t=".$this->activeLink;

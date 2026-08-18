@@ -126,7 +126,7 @@ $checkNotes = isset($checklist['notes']) ? (string)$checklist['notes'] : '';
 <?php   if($ctx['hasKaution']) { ?>
         <li>
           <span class="loan-form-box<?php echo $checkDeposit ? ' loan-form-box--on' : ''; ?>" aria-hidden="true"></span>
-          <span><strong class="loan-form-em">Kaution</strong> zurückgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
+            <span><strong class="loan-form-em">Kaution</strong> ausgezahlt (<strong class="loan-form-em"><?php echo $h($ctx['kautionFormatted']); ?></strong>)</span>
         </li>
         <li class="loan-form-check-note-row">
           <span class="loan-form-field-label">Abzüge</span>

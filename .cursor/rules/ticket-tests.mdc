@@ -16,6 +16,7 @@ Bei jedem Feature-/Bug-Ticket **sinnvolle Regressionstests** mitliefern — nich
 ## Was testen
 
 - Domain-Logik / Helpers / Auth / Logging / Schema-relevante Verhalten — **ja**.
+- Schema-/Config-Änderungen: immer `config/schema_version_number.php` erhöhen (`./scripts/bump-schema-version.sh`, Regel `db-schema-version`).
 - Reine Docs, CSS/Layout, triviale Label-Änderungen — nur wenn leicht regressierbar (z. B. Log-Wording „Eigentümer“).
 - JS-UI: PHPUnit nur für serverseitig erzeugte Attribute/HTML; reines JS separat oder manuell.
 
