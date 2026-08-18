@@ -3605,7 +3605,7 @@ body.loan-form-print {
   opacity: 0.88;
 }
 
-.loan-form-sign-open {
+.loan-form-sign-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
