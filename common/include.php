@@ -40,6 +40,7 @@ include "libs/inventoriesLoan.php";
 include "libs/inventoriesDocument.php";
 include "libs/loanForm.php";
 include "libs/register.php";
+include "libs/mailTemplate.php";
 include "libs/usermail.php";
 include "libs/audienceSpec.php";
 include "libs/mailJob.php";

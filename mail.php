@@ -408,7 +408,17 @@ window.syncDiscordDefault = function() {};
 
     <?php if($preview) { ?>
                          <div class="w3-container w3-mobile w3-border w3-border-black w3-left-align w3-margin-bottom"><b>Betreff:</b> <?php echo htmlspecialchars($betreff, ENT_QUOTES, 'UTF-8'); ?></div>
-                         <div class="w3-row w3-mobile w3-border w3-border-black w3-left-align"><?php echo "<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1 class=\"mail-preview-title\">".$GLOBALS['optionsDB']['WebSiteName']."</h1></div><div class=\"w3-container mail-body-content\"><p>".$anrede."</p>".formatMailBodyForDisplay($textPreview)."</div>"; ?></div>
+                         <div class="mail-compose-preview"><?php
+        $previewInner = function_exists('stripMailBodyGreeting')
+            ? stripMailBodyGreeting($textPreview, isset($_SESSION['Vorname']) ? (string)$_SESSION['Vorname'] : '')
+            : $textPreview;
+        echo class_exists('MailTemplate')
+            ? MailTemplate::wrap(
+                formatMailBodyForDisplay($previewInner),
+                array('greeting' => $anrede)
+            )
+            : '<div class="mail-body-content"><p>'.$anrede.'</p>'.formatMailBodyForDisplay($textPreview).'</div>';
+?></div>
         <div class="mail-compose-actions">
         <button class="w3-btn <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?> w3-margin-top w3-mobile" name="send" value="1">In Warteschlange stellen</button>
         </div>
