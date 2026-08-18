@@ -576,7 +576,7 @@ foreach($signSlots as $slot) {
         $showSent = !empty($slot['sent']);
         if($showSign || $showSend || $showSent) {
 ?>
-            <div class="loan-form-sign-open no-print">
+            <div class="loan-form-sign-actions no-print">
 <?php       if($showSign) { ?>
               <button type="button" class="loan-form-btn loan-form-btn--primary" data-loan-sign-open
                 data-loan="<?php echo (int)$ctx['loanId']; ?>"
