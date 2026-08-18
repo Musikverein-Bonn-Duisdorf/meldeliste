@@ -842,7 +842,7 @@ class LoanForm
     }
 
     /**
-     * Contract clause template from config (optionsDB), else ConfigDefaults.
+     * Contract text from config (optionsDB), else ConfigDefaults.
      */
     public static function clauseTemplate($param) {
         $param = (string)$param;
@@ -873,14 +873,36 @@ class LoanForm
         return $map;
     }
 
+    public static function fillEm($text, $key) {
+        $key = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$key);
+        return '<strong class="loan-form-em" data-loan-fill="'.$key.'">'
+            .htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8').'</strong>';
+    }
+
+    /** Open vs fixed duration phrase (HTML). */
+    public static function durationPhraseHtml($endDe, $hasFixedEnd) {
+        if(!empty($hasFixedEnd)) {
+            return 'bis zum '.self::fillEm((string)$endDe, 'end').' befristet';
+        }
+        return 'unbefristet';
+    }
+
     /**
      * Fill a config template: escape static text, insert already-safe {placeholders},
      * turn lines starting with "- " into a nested list.
      * @param array<string,string> $vars
      */
     public static function applyClauseTemplate($param, array $vars) {
-        $tpl = self::clauseTemplate($param);
-        if($tpl === '') {
+        return self::fillTemplateString(self::clauseTemplate($param), $vars);
+    }
+
+    /**
+     * @param array<string,string> $vars
+     * @return string
+     */
+    public static function fillTemplateString($tpl, array $vars) {
+        $tpl = (string)$tpl;
+        if(trim($tpl) === '') {
             return '';
         }
         $escaped = htmlspecialchars($tpl, ENT_QUOTES, 'UTF-8');
@@ -889,6 +911,64 @@ class LoanForm
             return isset($vars[$key]) ? (string)$vars[$key] : '';
         }, $escaped);
         return self::clauseDashListHtml($filled);
+    }
+
+    /** @return list<string> */
+    public static function splitParagraphs($tpl) {
+        $tpl = str_replace(array("\r\n", "\r"), "\n", (string)$tpl);
+        $parts = preg_split("/\n[ \t]*\n/", $tpl);
+        $out = array();
+        if(!is_array($parts)) {
+            return $out;
+        }
+        foreach($parts as $p) {
+            $p = trim((string)$p);
+            if($p !== '') {
+                $out[] = $p;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * @param array<string,string> $vars
+     * @param array{keepOptional?:bool,hasFee?:bool,hasKaution?:bool} $opts
+     * @return list<string>
+     */
+    public static function clausesFromTemplate($param, array $vars, array $opts = array()) {
+        $keepOptional = !empty($opts['keepOptional']);
+        $hasFee = !empty($opts['hasFee']);
+        $hasKaution = !empty($opts['hasKaution']);
+        $clauses = array();
+        foreach(self::splitParagraphs(self::clauseTemplate($param)) as $p) {
+            $isFee = strpos($p, '{fee}') !== false;
+            $isKaution = strpos($p, '{kaution}') !== false;
+            if($isFee && !$hasFee && !$keepOptional) {
+                continue;
+            }
+            if($isKaution && !$hasKaution && !$keepOptional) {
+                continue;
+            }
+            $html = self::fillTemplateString($p, $vars);
+            if($html !== '') {
+                $clauses[] = $html;
+            }
+        }
+        return $clauses;
+    }
+
+    /**
+     * @param array<string,string> $vars
+     * @return string
+     */
+    public static function paragraphWithPlaceholder($param, $placeholder, array $vars) {
+        $needle = '{'.(string)$placeholder.'}';
+        foreach(self::splitParagraphs(self::clauseTemplate($param)) as $p) {
+            if(strpos($p, $needle) !== false) {
+                return self::fillTemplateString($p, $vars);
+            }
+        }
+        return '';
     }
 
     private static function clauseDashListHtml($html) {
@@ -921,15 +1001,32 @@ class LoanForm
     /** @param array<string,string> $extra */
     public static function clauseVars(array $ctx, array $extra = array()) {
         $org = isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein';
+        $startDe = isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '';
+        $endDe = isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '';
+        $hasFixedEnd = !empty($ctx['hasFixedEnd']);
+        $feeAmt = '';
+        if(isset($ctx['leihgebuehrFormatted'])) {
+            $feeAmt = (string)$ctx['leihgebuehrFormatted'];
+        }
+        elseif(isset($ctx['amountFormatted'])) {
+            $feeAmt = (string)$ctx['amountFormatted'];
+        }
+        $kautionAmt = '';
+        if(isset($ctx['kautionFormatted'])) {
+            $kautionAmt = (string)$ctx['kautionFormatted'];
+        }
+        elseif(isset($ctx['amountFormatted'])) {
+            $kautionAmt = (string)$ctx['amountFormatted'];
+        }
         $vars = array(
             'org' => self::em($org),
-            'start' => self::em(isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : ''),
-            'end' => self::em(isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : ''),
+            'start' => self::fillEm($startDe, 'start'),
+            'end' => self::fillEm($endDe, 'end'),
+            'duration' => '<span data-loan-fill="duration">'.self::durationPhraseHtml($endDe, $hasFixedEnd).'</span>',
             'borrower' => self::em(isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher'),
             'item' => self::em(isset($ctx['itemLabel']) ? (string)$ctx['itemLabel'] : 'die Leihsache'),
-            'amount' => self::em(isset($ctx['amountFormatted']) ? (string)$ctx['amountFormatted'] : ''),
-            'kaution' => self::em('Kaution'),
-            'fee' => self::em('Leihgebühr'),
+            'fee' => self::fillEm($feeAmt, 'fee'),
+            'kaution' => self::fillEm($kautionAmt, 'kaution'),
             'rep' => '',
             'repPhrase' => '',
             'invNr' => '',
@@ -939,21 +1036,16 @@ class LoanForm
     }
 
     /**
-     * First contract clause (loan start / optional end). Dates already escaped via em().
+     * First contract clause (loan start / optional end).
      * @return string
      */
     public static function durationClauseHtml($startDe, $endDe, $hasFixedEnd) {
-        $vars = self::clauseVars(array(), array(
-            'start' => self::em((string)$startDe),
-            'end' => self::em((string)$endDe),
-        ));
-        $param = !empty($hasFixedEnd) ? 'loanClauseDurationFixed' : 'loanClauseDurationOpen';
-        return self::applyClauseTemplate($param, $vars);
-    }
-
-    /** @return string */
-    public static function maintenanceClauseHtml() {
-        return self::applyClauseTemplate('loanClauseMaintenance', self::clauseVars(array()));
+        $clauses = self::clausesFromTemplate('loanText', self::clauseVars(array(
+            'startDateDe' => (string)$startDe,
+            'endDateDe' => (string)$endDe,
+            'hasFixedEnd' => !empty($hasFixedEnd),
+        )), array('keepOptional' => true));
+        return isset($clauses[0]) ? $clauses[0] : '';
     }
 
     /**
@@ -971,7 +1063,6 @@ class LoanForm
 
     /** @return list<string> */
     public static function buildReturnClauses(array $ctx) {
-        $hasKaution = !empty($ctx['hasKaution']);
         $invNr = self::ctxDetailValue($ctx, 'Inventarnummer');
         $repName = '';
         if(!empty($ctx['loanId'])) {
@@ -986,114 +1077,58 @@ class LoanForm
         $extra = array();
         if($repName !== '') {
             $extra['rep'] = self::em($repName);
-            $extra['repPhrase'] = self::applyClauseTemplate(
-                'loanReturnRepPhrase',
-                self::clauseVars($ctx, array('rep' => self::em($repName)))
-            );
+            $extra['repPhrase'] = ', vertreten durch '.self::em($repName);
         }
         if($invNr !== '') {
             $extra['invNr'] = self::em($invNr);
-            $extra['invNrPhrase'] = self::applyClauseTemplate(
-                'loanReturnInvNrPhrase',
-                self::clauseVars($ctx, array('invNr' => self::em($invNr)))
-            );
+            $extra['invNrPhrase'] = ', Inventarnummer '.self::em($invNr);
         }
         $vars = self::clauseVars($ctx, $extra);
-
-        $clauses = array();
-        $clauses[] = self::applyClauseTemplate('loanReturnHead', $vars);
-        $clauses[] = self::applyClauseTemplate('loanReturnInspect', $vars);
-        $clauses[] = self::applyClauseTemplate('loanReturnEnd', $vars);
-        if($hasKaution) {
-            $clauses[] = self::returnDepositClauseHtml(
-                isset($ctx['borrowerName']) ? (string)$ctx['borrowerName'] : 'der Entleiher',
-                isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : ''
-            );
-        }
-        return $clauses;
+        return self::clausesFromTemplate('loanReturnText', $vars, array(
+            'keepOptional' => !empty($ctx['keepOptionalMoney']),
+            'hasKaution' => !empty($ctx['hasKaution']),
+        ));
     }
 
     /** @return list<string> */
     public static function buildLoanClauses(array $ctx) {
-        $hasFixedEnd = !empty($ctx['hasFixedEnd']);
-        $isMember = !empty($ctx['isMember']);
         $vars = self::clauseVars($ctx);
-
-        $clauses = array();
-        $clauses[] = self::durationClauseHtml(
-            isset($ctx['startDateDe']) ? (string)$ctx['startDateDe'] : '',
-            isset($ctx['endDateDe']) ? (string)$ctx['endDateDe'] : '',
-            $hasFixedEnd
+        $opts = array(
+            'keepOptional' => !empty($ctx['keepOptionalMoney']),
+            'hasFee' => !empty($ctx['hasLeihgebuehr']),
+            'hasKaution' => !empty($ctx['hasKaution']),
         );
-        $clauses[] = self::applyClauseTemplate('loanClauseOwnership', $vars);
-        $sorgfalt = self::applyClauseTemplate('loanClauseCare', $vars);
-        if(!$isMember) {
-            $extra = self::applyClauseTemplate('loanClauseCareExtern', $vars);
-            if($extra !== '') {
-                $sorgfalt = trim($sorgfalt.' '.$extra);
-            }
+        $clauses = self::clausesFromTemplate('loanText', $vars, $opts);
+        if(empty($ctx['isMember'])) {
+            $clauses = array_merge($clauses, self::clausesFromTemplate('loanTextExtern', $vars, $opts));
         }
-        $clauses[] = $sorgfalt;
-        $clauses[] = self::maintenanceClauseHtml();
-        $clauses[] = self::applyClauseTemplate('loanClauseTransfer', $vars);
-        $clauses[] = self::applyClauseTemplate('loanClauseRecall', $vars);
-        $rueckgabe = self::applyClauseTemplate('loanClauseReturn', $vars);
-        if(!$isMember) {
-            $extra = self::applyClauseTemplate('loanClauseReturnExtern', $vars);
-            if($extra !== '') {
-                $rueckgabe = trim($extra.' '.$rueckgabe);
-            }
-        }
-        $clauses[] = $rueckgabe;
-        self::appendStandardLegalClauses($clauses);
-        self::appendFeeAndDepositClauses($clauses, $ctx);
         return $clauses;
-    }
-
-    /** @param list<string> $clauses */
-    public static function appendStandardLegalClauses(array &$clauses) {
-        $vars = self::clauseVars(array());
-        $clauses[] = self::applyClauseTemplate('loanClauseLimitation', $vars);
-        $clauses[] = self::applyClauseTemplate('loanClauseForm', $vars);
-        $clauses[] = self::applyClauseTemplate('loanClauseSeverability', $vars);
     }
 
     /** @return string */
     public static function feeClauseHtml($orgName, $amountFormatted) {
-        return self::applyClauseTemplate('loanClauseFee', self::clauseVars(array(
+        return self::paragraphWithPlaceholder('loanText', 'fee', self::clauseVars(array(
             'orgName' => isset($orgName) ? (string)$orgName : 'der Verein',
-            'amountFormatted' => (string)$amountFormatted,
+            'leihgebuehrFormatted' => (string)$amountFormatted,
+            'hasLeihgebuehr' => true,
         )));
     }
 
     /** @return string */
     public static function depositClauseHtml($amountFormatted) {
-        return self::applyClauseTemplate('loanClauseDeposit', self::clauseVars(array(
-            'amountFormatted' => (string)$amountFormatted,
+        return self::paragraphWithPlaceholder('loanText', 'kaution', self::clauseVars(array(
+            'kautionFormatted' => (string)$amountFormatted,
+            'hasKaution' => true,
         )));
     }
 
     /** @return string */
     public static function returnDepositClauseHtml($borrowerName, $amountFormatted) {
-        return self::applyClauseTemplate('loanReturnDeposit', self::clauseVars(array(
+        return self::paragraphWithPlaceholder('loanReturnText', 'kaution', self::clauseVars(array(
             'borrowerName' => isset($borrowerName) ? (string)$borrowerName : 'der Entleiher',
-            'amountFormatted' => (string)$amountFormatted,
+            'kautionFormatted' => (string)$amountFormatted,
+            'hasKaution' => true,
         )));
-    }
-
-    /** @param list<string> $clauses */
-    public static function appendFeeAndDepositClauses(array &$clauses, array $ctx) {
-        if(!empty($ctx['hasLeihgebuehr'])) {
-            $clauses[] = self::feeClauseHtml(
-                isset($ctx['orgName']) ? (string)$ctx['orgName'] : 'der Verein',
-                isset($ctx['leihgebuehrFormatted']) ? (string)$ctx['leihgebuehrFormatted'] : ''
-            );
-        }
-        if(!empty($ctx['hasKaution'])) {
-            $clauses[] = self::depositClauseHtml(
-                isset($ctx['kautionFormatted']) ? (string)$ctx['kautionFormatted'] : ''
-            );
-        }
     }
 
     /** @return array{File:string,SignedAt:string,SignedBy:int,Place:string,SignDate:string,SnapshotFile:string}|null */

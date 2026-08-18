@@ -14,6 +14,7 @@
  * v41: config defaultTerminVisibility (MELD-202).
  * v42: InventoriesLoanSignatures + orgPlace (MELD-201 digital signatures).
  * v43: loan/return clause texts as config (MELD-213)
+ * v44: three loan/return contract texts (MELD-213)
  */
-return 43;
+return 44;
 ?>
