@@ -402,16 +402,6 @@ class Usermail {
         $mail->IsHTML(true);
         $mail->Subject = $outbox->Subject;
 
-        $style = '';
-        foreach(array('styles/w3.css', 'styles/w3-colors-highway.css', 'styles/w3-color-mvd.css', 'styles/w3-colors-mvd.css') as $cssFile) {
-            if(is_readable($cssFile)) {
-                $style .= file_get_contents($cssFile);
-            }
-        }
-        if(function_exists('renderConfigColorCss')) {
-            $style .= renderConfigColorCss(false);
-        }
-
         $vorname = $user->Index ? (string)$user->Vorname : '';
         $nachname = $user->Index ? (string)$user->Nachname : '';
         $activeLink = $user->Index ? (string)$user->activeLink : '';
@@ -438,12 +428,15 @@ class Usermail {
         }
         $mail->AltBody = trim(html_entity_decode(strip_tags(str_replace(array('<br>', '<br/>', '<br />', '</p>'), array("\n", "\n", "\n", "\n\n"), $anrede."\n\n".$bodyInner)), ENT_QUOTES, 'UTF-8'));
 
-        $mail->Body = "<html><head><style>".$style."</style></head><body>"
-            ."<div class=\"w3-container ".$GLOBALS['optionsDB']['colorTitle']." w3-mobile\"><h1>".$GLOBALS['optionsDB']['WebSiteName']."</h1></div>"
-            ."<div class=\"w3-container\"><p>".htmlspecialchars($anrede, ENT_QUOTES, 'UTF-8')."</p>".$bodyHtml."</div>"
-            ."<a class=\"w3-btn w3-mobile ".$GLOBALS['optionsDB']['colorBtnSubmit']." w3-content\" href=\"".$link."\">"
-            .htmlspecialchars($ctaLabel, ENT_QUOTES, 'UTF-8')."</a>"
-            ."</body></html>";
+        $mail->Body = class_exists('MailTemplate')
+            ? MailTemplate::wrap($bodyHtml, array(
+                'greeting' => $anrede,
+                'ctaUrl' => $link,
+                'ctaLabel' => $ctaLabel,
+            ))
+            : '<html><body><p>'.htmlspecialchars($anrede, ENT_QUOTES, 'UTF-8').'</p>'.$bodyHtml
+                .'<p><a href="'.htmlspecialchars($link, ENT_QUOTES, 'UTF-8').'">'
+                .htmlspecialchars($ctaLabel, ENT_QUOTES, 'UTF-8').'</a></p></body></html>';
 
         $addrs = array_map('trim', explode(',', (string)$outbox->ToEmail));
         $addrs = array_values(array_filter($addrs));

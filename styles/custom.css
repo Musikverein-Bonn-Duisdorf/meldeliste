@@ -1504,6 +1504,15 @@ a.app-titlebar-logo {
   margin-right: 0.35rem;
 }
 
+.mail-compose-preview {
+  overflow: auto;
+  max-width: 100%;
+}
+
+.mail-compose-preview table {
+  max-width: 100%;
+}
+
 .mail-detail-actions {
   display: flex;
   flex-wrap: wrap;
