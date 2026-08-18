@@ -3,9 +3,18 @@
  * CLI restore from a meldeliste backup ZIP (MELD-90).
  *
  * Usage: php scripts/restoreBackup.php /path/to/backup.zip --yes
+ * On hosts where `php` is cgi/4.x: php8.3 scripts/restoreBackup.php … --yes
  */
-if(php_sapi_name() !== 'cli') {
-    fwrite(STDERR, "CLI only.\n");
+$meldPhp = function_exists('phpversion') ? phpversion() : '?';
+$meldSapi = function_exists('php_sapi_name') ? php_sapi_name() : '?';
+$meldBadSapi = ($meldSapi != 'cli' && $meldSapi != 'phpdbg');
+$meldBadVer = (!function_exists('version_compare') || version_compare($meldPhp, '8.0.0') < 0);
+if($meldBadSapi || $meldBadVer) {
+    $meldMsg = 'Need PHP 8 CLI. This binary is PHP '.$meldPhp.' SAPI='.$meldSapi.'. Try php8.3 or php8.2, not php-cgi.'."\n";
+    if(defined('STDERR')) {
+        @fwrite(STDERR, $meldMsg);
+    }
+    echo $meldMsg;
     exit(1);
 }
 
