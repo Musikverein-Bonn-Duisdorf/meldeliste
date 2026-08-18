@@ -60,6 +60,7 @@ try {
         echo "Manifest createdAt: ".(isset($result['manifest']['createdAt']) ? $result['manifest']['createdAt'] : '?')."\n";
     }
     echo "Statements OK: ".$result['statements']."\n";
+    echo "Files restored: ".(isset($result['filesRestored']) ? (int)$result['filesRestored'] : 0)."\n";
     echo "Schema repair: ".($result['repaired'] ? 'yes' : 'no')."\n";
     if(!empty($result['errors'])) {
         fwrite(STDERR, "Errors:\n");
