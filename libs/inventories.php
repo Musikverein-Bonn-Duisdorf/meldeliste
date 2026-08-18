@@ -317,7 +317,7 @@ class Inventories
             return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
         };
 
-        $showAdminCols = requirePermission('perm_showInventories');
+        $showSensitive = $this->userMaySeeSensitiveDetails();
         $insured = !empty($row['Insurance']) || !empty($this->Insurance);
         $typLabel = !empty($row['instName']) ? $row['instName'] : $row['iTyp'];
         $ownerId = (int)$row['Owner'];
@@ -349,13 +349,15 @@ class Inventories
             $vendor,
             $model,
             (string)$row['SerialNr'],
-            (string)$row['PurchaseDate'],
-            (string)$row['PurchasePrize'],
             $ownerName,
             $loanFull,
             $loanShort,
             $insured ? 'versichert' : '',
         );
+        if($showSensitive) {
+            $searchParts[] = (string)$row['PurchaseDate'];
+            $searchParts[] = (string)$row['PurchasePrize'];
+        }
 
         $classes = array('inv-row', 'list-row');
         if($insured) {
@@ -382,10 +384,12 @@ class Inventories
             .' data-sort-model="'.$h($model).'"'
             .' data-sort-serial="'.$h($row['SerialNr']).'"'
             .' data-sort-owner="'.$h($ownerName).'"'
-            .' data-sort-purchasedate="'.$h($row['PurchaseDate']).'"'
-            .' data-sort-purchaseprize="'.$h($row['PurchasePrize']).'"'
-            .' data-sort-loan="'.$h($loanFull !== '' ? $loanFull : $loanShort).'"'
-            .' data-search="'.$h(trim(implode(' ', $searchParts))).'"'
+            .' data-sort-loan="'.$h($loanFull !== '' ? $loanFull : $loanShort).'"';
+        if($showSensitive) {
+            $attrs .= ' data-sort-purchasedate="'.$h($row['PurchaseDate']).'"'
+                .' data-sort-purchaseprize="'.$h($row['PurchasePrize']).'"';
+        }
+        $attrs .= ' data-search="'.$h(trim(implode(' ', $searchParts))).'"'
             .' onclick="openModal(\'inventar\', '.(int)$this->Index.')"'
             .' role="button" tabindex="0"'
             .' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openModal(\'inventar\', '.(int)$this->Index.');}"';
@@ -456,7 +460,7 @@ class Inventories
                 $meta[] = '<span class="inv-meta-item inv-meta-item--loan"><span class="inv-meta-k">Ausleihe</span><span class="inv-meta-v">'.implode($sep, $loanBits).'</span></span>';
             }
         }
-        if($showAdminCols) {
+        if($showSensitive) {
             if($purchaseDate !== '') {
                 $meta[] = '<span class="inv-meta-item inv-meta-admin"><span class="inv-meta-k">Kaufdatum</span><span class="inv-meta-v">'.$h($purchaseDate).'</span></span>';
             }
@@ -497,6 +501,7 @@ class Inventories
         }
 
         $inv = $this;
+        $showSensitive = $this->userMaySeeSensitiveDetails();
         $docsHtml = InventoriesDocument::sectionHtml((int)$this->Index, $canEdit);
         $loansHtml = $this->getLoansModalHtml($canEdit);
         $photosHtml = InventoriesPhoto::galleryHtml((int)$this->Index, $canEdit);
@@ -533,6 +538,9 @@ class Inventories
             $L = new InventoriesLoan;
             $L->load_by_id($loanId);
             if(!(int)$L->Index) {
+                continue;
+            }
+            if(!$this->userMaySeeLoan($L)) {
                 continue;
             }
             if($L->isActive()) {
@@ -649,14 +657,6 @@ class Inventories
             ? '<span class="w3-tag w3-teal w3-round">offen</span>'
             : htmlspecialchars((string)germanDate($L->EndDate, 0), ENT_QUOTES, 'UTF-8');
         $meta = $from.' &ndash; '.$until;
-        if($hasKaution) {
-            $meta .= ' · Kaution '.htmlspecialchars(LoanForm::formatAmount($L->Kaution), ENT_QUOTES, 'UTF-8');
-        }
-        if($hasLeihgebuehr) {
-            $meta .= ' · Leihgebühr '.htmlspecialchars(LoanForm::formatAmount($L->Leihgebuehr), ENT_QUOTES, 'UTF-8');
-        }
-        $meta .= LoanForm::signatureStatusMetaSuffix($L, LoanForm::KIND_LOAN);
-        $meta .= LoanForm::signatureStatusMetaSuffix($L, LoanForm::KIND_RETURN);
         $info->body = '<div><b>'.$nameHtml.'</b></div>'
             .'<div class="w3-small" style="margin-top:4px;">'.$meta.'</div>';
         $str .= $info->print();
@@ -840,6 +840,33 @@ class Inventories
         $loan = new InventoriesLoan;
         $loan->load_by_id($loanId);
         return (int)$loan->User === $userId;
+    }
+
+    /**
+     * Kaufdatum, Kaufpreis, Kaution/Leihgebühr und volle Leihhistorie:
+     * Inventar-Recht oder Eigentümer dieses Stücks.
+     */
+    public function userMaySeeSensitiveDetails($userId = null) {
+        if(requirePermission('perm_showInventories') || requirePermission('perm_editInventories')) {
+            return true;
+        }
+        if($userId === null) {
+            $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        }
+        $userId = (int)$userId;
+        return $userId > 0 && (int)$this->Owner === $userId;
+    }
+
+    /** Entleiher ohne Inventar-Recht sehen nur eigene Leihen. */
+    public function userMaySeeLoan(InventoriesLoan $loan, $userId = null) {
+        if($this->userMaySeeSensitiveDetails($userId)) {
+            return true;
+        }
+        if($userId === null) {
+            $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        }
+        $userId = (int)$userId;
+        return $userId > 0 && (int)$loan->User === $userId;
     }
 
     public function getActiveLoanName() {
