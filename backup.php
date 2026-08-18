@@ -55,14 +55,15 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_confirm'])) {
                 );
             }
             else {
+                $filesRestored = isset($restoreResult['filesRestored']) ? (int)$restoreResult['filesRestored'] : 0;
                 $flash = array(
                     'type' => 'ok',
                     'message' => 'Restore erfolgreich ('.$restoreResult['statements'].' Statements'
                         .($restoreResult['repaired'] ? ', Schema repariert' : '')
-                        .').',
+                        .', '.$filesRestored.' Dateien).',
                 );
                 $logentry = new Log;
-                $logentry->info('<b>Database restore</b> from uploaded backup ZIP');
+                $logentry->info('<b>Backup restore</b> from uploaded backup ZIP ('.$filesRestored.' files)');
             }
         }
         catch(Throwable $e) {
@@ -92,19 +93,18 @@ adminListPageBegin('System', 'Backup & Restore', array('permKey' => 'perm_editCo
 
   <div class="w3-card w3-padding w3-margin-bottom">
     <h3>Backup herunterladen</h3>
-    <p>ZIP mit <code>manifest.json</code> (Versionsinfo) und <code>database.sql</code> (alle Tabellen mit DB-Prefix).</p>
-    <p>CLI-Backup (Cron auf dem App-Server):</p>
+    <p>ZIP mit <code>manifest.json</code>, <code>database.sql</code> (Tabellen mit DB-Prefix) und <code>uploads/</code> (Fotos, Dokumente, Verträge, Mail-Anhänge).</p>
+    <p>CLI-Backup:</p>
     <pre class="w3-code w3-border w3-padding" style="white-space:pre-wrap;">php cron.php CRONID backup &gt; backup-$(date +%F).zip</pre>
     <p>Remote-HTTP (nur mit eigenem <code>$backupToken</code> in <code>config.php</code>, mind. 32 Zeichen; nicht der allgemeine Cron-<code>$cronID</code>):</p>
     <pre class="w3-code w3-border w3-padding" style="white-space:pre-wrap;">curl -fsS "https://HOST/cron.php?id=BACKUPTOKEN&amp;cmd=backup" -o backup.zip</pre>
-    <p>Im Browser: Backup über die Schaltfläche unten (Benötigt Berechtigung „Konfiguration bearbeiten“).</p>
     <p><a class="w3-button w3-border <?php echo $GLOBALS['optionsDB']['colorBtnSubmit']; ?>" href="backup.php?download=1"><i class="fas fa-download"></i> Backup jetzt laden</a></p>
   </div>
 
   <div class="w3-card w3-padding w3-margin-bottom w3-pale-red">
     <h3>Restore (destruktiv)</h3>
-    <p><b>Achtung:</b> Überschreibt die Datenbanktabellen mit dem Prefix. Vorher ein aktuelles Backup ziehen.</p>
-    <form method="post" enctype="multipart/form-data" action="backup.php" data-confirm="Wirklich Restore ausführen? Die aktuelle Datenbank wird überschrieben." data-confirm-ok="Restore">
+    <p><b>Achtung:</b> Überschreibt die Tabellen mit dem Prefix. Neue ZIPs ersetzen auch <code>uploads/</code>; ältere ZIPs ohne Dateien lassen <code>uploads/</code> unverändert. CLI: <code>php scripts/restoreBackup.php backup.zip --yes</code></p>
+    <form method="post" enctype="multipart/form-data" action="backup.php" data-confirm="Wirklich Restore ausführen? Datenbank und ggf. uploads/ werden überschrieben." data-confirm-ok="Restore">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="restore_confirm" value="1">
       <label>Backup-ZIP</label>
