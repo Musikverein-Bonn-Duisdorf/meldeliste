@@ -1876,8 +1876,7 @@ class Termin
                     .' title="In Kalender" aria-label="In Kalender eintragen" download>'
                     .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
             }
-            $regFilter = $this->Auftritt ? $this->getUserRegisterFilter($user) : 0;
-            $str .= $this->renderMeldeResponseBtn($tid, $regFilter);
+            $str .= $this->renderMeldeResponseBtn($tid, $this->terminListResponseRegisterFilter($user));
         }
         $str .= '</div>'; // melde-actions
         $str .= '</div>'; // melde-row-main
@@ -2015,6 +2014,17 @@ class Termin
                 .htmlspecialchars($counts['yes'].' / '.$this->Capacity, ENT_QUOTES, 'UTF-8').'</div>';
         }
         return '';
+    }
+
+    /**
+     * Register filter for Meldungen-Button in Terminübersicht (MELD-68 / MELD-170).
+     * Mit perm_showResponse: alle Register (wie Meldungen-Admin); sonst nur eigenes bei Auftritt.
+     */
+    protected function terminListResponseRegisterFilter($userId) {
+        if(!$this->Auftritt || requirePermission('perm_showResponse')) {
+            return 0;
+        }
+        return $this->getUserRegisterFilter($userId);
     }
 
     /**
