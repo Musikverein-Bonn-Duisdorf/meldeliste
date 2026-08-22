@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-22-d7478 (2026-08-22)
+
+- MELD-175: Pfeiltasten-Navigation in allen Chip-Vorschlagslisten.
+- MELD-175: Pfeiltasten-Navigation in Chip-Vorschlagslisten
+
 ## 2026-08-22-a3a7d (2026-08-22)
 
 - MELD-170: Terminliste – Melde-Modal ohne Register-Filter bei perm_showResponse.
