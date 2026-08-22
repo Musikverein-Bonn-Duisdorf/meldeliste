@@ -35,6 +35,9 @@ function filterMusiker() {
             row.classList.add("list-filtered-out");
         }
     }
+    if (typeof updateAdminListTitleCount === 'function') {
+        updateAdminListTitleCount();
+    }
 }
 
 function setInsuredFilter(on, updateUrl) {
