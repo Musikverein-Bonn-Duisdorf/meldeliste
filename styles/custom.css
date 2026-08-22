@@ -7156,4 +7156,15 @@ select.profile-control {
   background: #fff;
 }
 
+.doc-view-img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 11rem);
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  background: #fff;
+}
+
 

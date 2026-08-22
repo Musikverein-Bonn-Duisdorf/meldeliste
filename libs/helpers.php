@@ -2793,12 +2793,45 @@ function redirectAfterPost($url) {
     exit;
 }
 
+/**
+ * Append alink of the current session user (MELD-219 Android: external PDF/viewer).
+ *
+ * @param string $url relative app URL with optional query
+ * @return string
+ */
+function withSessionAlink($url) {
+    $url = (string)$url;
+    if($url === '' || empty($_SESSION['userid']) || !class_exists('User')) {
+        return $url;
+    }
+    $u = new User;
+    $u->load_by_id((int)$_SESSION['userid']);
+    $alink = trim((string)$u->activeLink);
+    if($alink === '') {
+        return $url;
+    }
+    $sep = (strpos($url, '?') === false) ? '?' : '&';
+    return $url.$sep.'alink='.rawurlencode($alink);
+}
+
 function requireLoggedInOrRedirect() {
+    // Stream/viewer URLs opened outside the WebView (PDF intent) have no cookie —
+    // accept the same alink used for App Links / mail deep links.
+    if(!loggedIn() && !empty($_GET['alink']) && function_exists('validateLink')) {
+        validateLink($_GET['alink']);
+    }
     if(!loggedIn()) {
         $next = currentRequestReturnUrl('index.php');
-        $loc = 'login.php';
+        $params = array();
+        if(!empty($_GET['alink'])) {
+            $params['alink'] = trim((string)$_GET['alink']);
+        }
         if($next !== 'index.php') {
-            $loc .= '?next='.rawurlencode($next);
+            $params['next'] = $next;
+        }
+        $loc = 'login.php';
+        if(count($params)) {
+            $loc .= '?'.http_build_query($params);
         }
         header('Location: '.$loc);
         exit;
