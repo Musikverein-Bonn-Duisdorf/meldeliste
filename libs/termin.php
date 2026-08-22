@@ -2000,6 +2000,50 @@ class Termin
     }
 
     /**
+     * Effective register filter: without perm_showResponse only the user's register (MELD-68).
+     */
+    protected function resolveResponseRegisterFilter($filterregister) {
+        $filterregister = (int)$filterregister;
+        if(requirePermission('perm_showResponse')) {
+            return $filterregister;
+        }
+        $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+        if($uid < 1) {
+            return 0;
+        }
+        $u = new User;
+        $u->load_by_id($uid);
+        $reg = $u->getRegister();
+        return $reg ? (int)$reg : 0;
+    }
+
+    /**
+     * @return array{filterRegister:int,registerIds:list<int>,includeUnassigned:bool}
+     */
+    private function responseRegisterScope($filterregister) {
+        $filterRegister = $this->resolveResponseRegisterFilter($filterregister);
+        if($filterRegister > 0) {
+            return array(
+                'filterRegister' => $filterRegister,
+                'registerIds' => array($filterRegister),
+                'includeUnassigned' => false,
+            );
+        }
+        if(requirePermission('perm_showResponse')) {
+            return array(
+                'filterRegister' => 0,
+                'registerIds' => $this->getRegisterIdsExcludingKeins(),
+                'includeUnassigned' => true,
+            );
+        }
+        return array(
+            'filterRegister' => 0,
+            'registerIds' => array(),
+            'includeUnassigned' => false,
+        );
+    }
+
+    /**
      * MELD-170: open termin response modal from Terminübersicht (iCal-style icon button).
      */
     protected function renderMeldeResponseBtn($terminId, $register = 0) {
@@ -2191,9 +2235,10 @@ class Termin
             foreach($shifts as $shiftId) {
                 $s = new Shift;
                 $s->load_by_id($shiftId);
-                $ja = (int)$s->getMeldungenVal(1);
-                $nein = (int)$s->getMeldungenVal(2);
-                $vielleicht = (int)$s->getMeldungenVal(3);
+                $lists = $this->buildShiftResponseLists($s);
+                $ja = count($lists['whoYes']);
+                $nein = count($lists['whoNo']);
+                $vielleicht = count($lists['whoMaybe']);
                 $bedarf = (int)$s->Bedarf;
                 $allLabel = $bedarf > 0 ? ($ja.' / '.$bedarf) : '';
                 $time = (string)$s->getTime();
@@ -2209,7 +2254,7 @@ class Termin
                 $body .= '<div class="melde-actions">';
                 $body .= $this->renderResponseStatusChips($ja, $nein, $vielleicht, $allLabel);
                 $body .= '</div>';
-                $chipPreview = $this->renderRegisterResponseChipBodyHtml($this->buildShiftResponseLists($s));
+                $chipPreview = $this->renderRegisterResponseChipBodyHtml($lists);
                 if($chipPreview !== '') {
                     $body .= $chipPreview;
                 }
@@ -2265,9 +2310,14 @@ class Termin
      * @return array{whoYes:array,whoNo:array,whoMaybe:array}
      */
     private function buildShiftResponseLists($s) {
+        $scope = $this->responseRegisterScope(0);
         $aMeldungen = $s->fetchResponseMeldungenRows();
-        $registerIds = $this->getRegisterIdsExcludingKeins();
-        return $this->buildResponseListsFromMeldungen($aMeldungen, false, $registerIds);
+        return $this->buildResponseListsFromMeldungen(
+            $aMeldungen,
+            false,
+            $scope['registerIds'],
+            $scope['includeUnassigned']
+        );
     }
 
     /**
@@ -2348,7 +2398,15 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     public function getResponseLine($filterregister) {
-        $filterregister = (int)$filterregister;
+        $scope = $this->responseRegisterScope($filterregister);
+        $filterregister = $scope['filterRegister'];
+
+        if(!requirePermission('perm_showResponse') && $filterregister < 1) {
+            $modalOpen = "openModal('terminResponse', ".$this->Index.')';
+            $actions = $this->renderResponseStatusChips(0, 0, 0);
+            return $this->renderMeldeResponseCard(0, $modalOpen, $actions);
+        }
+
         $bus = ($this->vName == 'Bus');
         $modalOpen = "openModal('terminResponse', ".$this->Index.($filterregister ? ', '.$filterregister : '').')';
 
@@ -2608,7 +2666,7 @@ ORDER BY `Nachname`, `Vorname`;",
      * @param list<int> $registerIds
      * @return array{whoYes:array,whoNo:array,whoMaybe:array}
      */
-    private function buildResponseListsFromMeldungen($aMeldungen, $bus, array $registerIds) {
+    private function buildResponseListsFromMeldungen($aMeldungen, $bus, array $registerIds, $includeUnassigned = true) {
         $whoYes = array();
         $whoNo = array();
         $whoMaybe = array();
@@ -2627,13 +2685,15 @@ ORDER BY `Nachname`, `Vorname`;",
                 $this->appendResponseEntryFromRow($row2, $bus, $whoYes, $whoNo, $whoMaybe);
             }
         }
-        foreach($aMeldungen as $row2) {
-            $uid = (int)$row2['User'];
-            if(isset($seen[$uid])) {
-                continue;
+        if($includeUnassigned) {
+            foreach($aMeldungen as $row2) {
+                $uid = (int)$row2['User'];
+                if(isset($seen[$uid])) {
+                    continue;
+                }
+                $seen[$uid] = true;
+                $this->appendResponseEntryFromRow($row2, $bus, $whoYes, $whoNo, $whoMaybe);
             }
-            $seen[$uid] = true;
-            $this->appendResponseEntryFromRow($row2, $bus, $whoYes, $whoNo, $whoMaybe);
         }
         return array(
             'whoYes' => $whoYes,
@@ -2870,6 +2930,7 @@ ORDER BY `Nachname`, `Vorname`;",
 
     private function buildResponseLists($filterregister) {
         $aMeldungen = $this->fetchResponseMeldungenRows();
+        $scope = $this->responseRegisterScope($filterregister);
 
         if($this->vName == "Bus") {
             $cols = (int)$GLOBALS['optionsDB']['showChildOption']+(int)$GLOBALS['optionsDB']['showGuestOption']+2;
@@ -2900,14 +2961,12 @@ ORDER BY `Nachname`, `Vorname`;",
         $whoNo = array();
         $whoMaybe = array();
 
-        $filterregister = (int)$filterregister;
-        if($filterregister) {
-            $registerIds = array($filterregister);
-        }
-        else {
-            $registerIds = $this->getRegisterIdsExcludingKeins();
-        }
-        $listsByRegister = $this->buildResponseListsFromMeldungen($aMeldungen, $bus, $registerIds);
+        $listsByRegister = $this->buildResponseListsFromMeldungen(
+            $aMeldungen,
+            $bus,
+            $scope['registerIds'],
+            $scope['includeUnassigned']
+        );
         $whoYes = $listsByRegister['whoYes'];
         $whoNo = $listsByRegister['whoNo'];
         $whoMaybe = $listsByRegister['whoMaybe'];
@@ -2922,12 +2981,15 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     public function getResponseModalHtml($filterregister = 0) {
+        $scope = $this->responseRegisterScope($filterregister);
+        $filterregister = $scope['filterRegister'];
         $lists = $this->buildResponseLists($filterregister);
         $bus = $lists['bus'];
 
         $orchestraFull = '';
         $orchestraActive = '';
-        $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt;
+        $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt
+            && requirePermission('perm_showResponse');
         if($showOrchestra) {
             $orchestraData = loadOrchestraData($this->Index);
             $orchestraFull = printOrchestra($this->Index, 1, false, $orchestraData);
