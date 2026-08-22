@@ -1254,6 +1254,17 @@ class LoanForm
         return 'loan-form.php?loan='.(int)$loanId.'&kind='.rawurlencode(self::normalizeKind($kind));
     }
 
+    /** Stream endpoint for loan/return scans (download/print). */
+    public static function contractStreamHref($loanId, $kind) {
+        return 'loan-contract.php?loan='.(int)$loanId
+            .'&kind='.rawurlencode(self::normalizeKind($kind));
+    }
+
+    /** In-app viewer with Meldeliste chrome (MELD-219). */
+    public static function scanViewHref($loanId, $kind) {
+        return documentViewLoanHref((int)$loanId, $kind);
+    }
+
     public static function signatureUrl(InventoriesLoan $loan, $kind, $role) {
         return 'loan-contract.php?loan='.(int)$loan->Index
             .'&kind='.rawurlencode(self::normalizeKind($kind))
@@ -1264,6 +1275,11 @@ class LoanForm
         return 'loan-contract.php?loan='.(int)$loan->Index
             .'&kind='.rawurlencode(self::normalizeKind($kind))
             .'&file=snapshot';
+    }
+
+    /** In-app viewer for a frozen digital snapshot (MELD-219). */
+    public static function snapshotViewHref($loanId, $kind) {
+        return documentViewLoanHref((int)$loanId, $kind, array('file' => 'snapshot'));
     }
 
     /**

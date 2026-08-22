@@ -7130,4 +7130,30 @@ select.profile-control {
   display: none !important;
 }
 
+/* MELD-219: in-app document / scan viewer */
+.doc-view-shell .admin-list-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.doc-view-frame-wrap {
+  flex: 1 1 auto;
+  min-height: 60vh;
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.doc-view-frame {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 60vh;
+  height: calc(100dvh - 11rem);
+  border: 0;
+  background: #fff;
+}
+
 

@@ -22,7 +22,7 @@ $inputBg = isset($GLOBALS['optionsDB']['colorInputBackground']) ? $GLOBALS['opti
     <li class="inv-doc-item">
       <div class="inv-doc-main">
 <?php if($hasFile) { ?>
-        <a class="inv-doc-name" href="get-inventory-document.php?id=<?php echo $docId; ?>" target="_blank" rel="noopener noreferrer"><?php echo $h($doc->displayName()); ?></a>
+        <a class="inv-doc-name" href="<?php echo $h(documentViewInventoryHref($docId)); ?>"><?php echo $h($doc->displayName()); ?></a>
 <?php } else { ?>
         <span class="inv-doc-name"><?php echo $h($doc->displayName()); ?></span>
 <?php } ?>
