@@ -81,6 +81,7 @@ $sections[] = array(
     'title' => 'Mein Register',
     'body' => '
 <p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben. Pro Termin: Status-Chips und Namensliste als farbige Personen-Chips (Registerfarbe) nach Zusage, Unsicher und Absage. Klick auf die Zeile öffnet das Detail-Modal.</p>
+<p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons dasselbe Register-Modal; bei Schicht-Terminen pro Schichtzeile das Schicht-Modal.</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung.</li>
 <li>Personen hinzufügen oder entfernen nur mit Recht <b>Rückmeldungen bearbeiten</b> — im Modal.</li>
@@ -214,7 +215,6 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
 <p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung).</p>
-<p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons das Rückmeldungs-Modal; bei Schicht-Terminen pro Schichtzeile.</p>
 <p>In Termin- und Register-Ansichten (sowie Schicht-Modals bei Schicht-Terminen) kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert als Register-Chips; Namen als Chip öffnen das Personen-Modal nur mit Recht <b>Benutzer anzeigen</b> (oder beim eigenen Profil). Die Orchestergrafik ist im Modal aufklappbar (in der Gesamtansicht standardmäßig offen, in <b>Mein Register</b> zugeklappt), skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
 '.(requirePermission('perm_editResponse') ? '<p>Das Chip-Feld zum Hinzufügen und Entfernen von Personen in Zusagen, Absagen und Unsicher (Termin- und Schicht-Modals) setzt das Recht <b>Rückmeldungen bearbeiten</b> voraus (nicht nur Meldungen anzeigen). Bei Zusage/Unsicher für einen sonst unsichtbaren Termin wird die Person automatisch in die Sichtbarkeit aufgenommen. Im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
 '

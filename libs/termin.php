@@ -1876,7 +1876,7 @@ class Termin
                     .' title="In Kalender" aria-label="In Kalender eintragen" download>'
                     .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
             }
-            $str .= $this->renderMeldeResponseBtn($tid, 0);
+            $str .= $this->renderMeldeResponseBtn($tid, $this->getUserRegisterFilter($user));
         }
         $str .= '</div>'; // melde-actions
         $str .= '</div>'; // melde-row-main
@@ -1986,12 +1986,23 @@ class Termin
     }
 
     /**
+     * Register filter for response modal (own register in Terminübersicht; MELD-68).
+     */
+    protected function getUserRegisterFilter($userId) {
+        $userId = (int)$userId;
+        if($userId < 1) {
+            return 0;
+        }
+        $u = new User;
+        $u->load_by_id($userId);
+        $reg = $u->getRegister();
+        return $reg ? (int)$reg : 0;
+    }
+
+    /**
      * MELD-170: open termin response modal from Terminübersicht (iCal-style icon button).
      */
     protected function renderMeldeResponseBtn($terminId, $register = 0) {
-        if(!requirePermission('perm_showResponse')) {
-            return '';
-        }
         $terminId = (int)$terminId;
         $register = (int)$register;
         $onclick = "event.stopPropagation();openModal('terminResponse', ".$terminId;
@@ -2008,9 +2019,6 @@ class Termin
      * MELD-170: open shift response modal from Terminübersicht.
      */
     protected function renderShiftResponseBtn($shiftId) {
-        if(!requirePermission('perm_showResponse')) {
-            return '';
-        }
         $shiftId = (int)$shiftId;
         if($shiftId < 1) {
             return '';
