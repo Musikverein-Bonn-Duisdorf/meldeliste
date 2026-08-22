@@ -2101,6 +2101,11 @@ a.app-titlebar-logo {
   margin: 1rem 1.25rem 0;
 }
 
+.orchestra-panel-body .orchestra-panel-toggle {
+  margin-bottom: 0.5rem;
+  text-align: right;
+}
+
 .orchestra-panel-header {
   display: flex;
   flex-wrap: wrap;
@@ -5862,16 +5867,112 @@ select.profile-control {
   color: inherit;
 }
 
+.melde-response-list:has(> .melde-response-editable-section),
+.melde-response-list:has(> .melde-response-readonly-section) {
+  display: block;
+}
+
+.melde-response-readonly-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.melde-response-readonly-chips {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  min-height: 0;
+}
+
+.melde-response-readonly-section .melde-response-readonly-chip,
+.melde-response-body--chips .melde-response-readonly-chip {
+  flex: 0 0 auto;
+  max-width: 100%;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.melde-response-body--chips {
+  padding: 0 1rem 0.85rem;
+}
+
+.melde-response-inline-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.melde-response-inline-section:first-child {
+  margin-top: 0.35rem;
+}
+
+.melde-response-inline-label {
+  flex: 0 0 auto;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.melde-response-editable-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
 .melde-response-editable-chips {
-  margin-bottom: 0.35rem;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  min-height: 0;
+}
+
+.melde-response-editable-section .melde-response-editable-chip {
+  flex: 0 0 auto;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.melde-response-editable-chip--register {
+  --melde-chip-reg: transparent;
+  background-color: var(--melde-chip-reg);
+  border-color: var(--melde-chip-reg);
+  color: #111;
+}
+
+@supports (background: color-mix(in srgb, red 50%, white)) {
+  .melde-response-editable-chip--register {
+    background-color: color-mix(in srgb, var(--melde-chip-reg) 42%, white);
+    border-color: color-mix(in srgb, var(--melde-chip-reg) 55%, #ccc);
+  }
+}
+
+.melde-response-editable-chip--register .mail-recipient-chip-remove {
+  color: inherit;
+  opacity: 0.75;
+}
+
+.melde-response-editable-chip--register .mail-recipient-chip-remove:hover {
+  opacity: 1;
 }
 
 .melde-response-add {
-  margin-top: 0.25rem;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0.1rem;
 }
 
 .melde-response-add-input {
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 .melde-response-add-suggest {
@@ -6063,6 +6164,11 @@ select.profile-control {
 
 .melde-response-shift {
   cursor: pointer;
+}
+
+.melde-response-shift .melde-response-body--chips {
+  flex: 1 1 100%;
+  margin-top: 0.1rem;
 }
 
 .melde-response-shift:hover .melde-shift-name {

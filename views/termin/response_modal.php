@@ -14,6 +14,7 @@ $countMaybe = isset($countMaybe) ? (int)$countMaybe : 0;
 $countNo = isset($countNo) ? (int)$countNo : 0;
 $canEditResponse = !empty($canEditResponse);
 $userCatalogJson = isset($userCatalogJson) ? (string)$userCatalogJson : '[]';
+$filterRegister = isset($filterRegister) ? (int)$filterRegister : 0;
 $yesColor = $GLOBALS['optionsDB']['colorBtnYes'];
 $maybeColor = $GLOBALS['optionsDB']['colorBtnMaybe'];
 $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
@@ -33,31 +34,31 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
   </header>
 
 <?php if($showOrchestra) { ?>
-  <div class="orchestra-panel"
-       data-color-yes="<?php echo $h($yesColor); ?>"
-       data-color-no="<?php echo $h($noColor); ?>"
-       data-color-maybe="<?php echo $h($maybeColor); ?>"
-       data-color-disabled="<?php echo $h(isset($GLOBALS['optionsDB']['colorDisabled']) ? $GLOBALS['optionsDB']['colorDisabled'] : ''); ?>">
-    <div class="orchestra-panel-header">
-      <div class="orchestra-panel-title"><b>Besetzung</b></div>
+  <details class="orchestra-fold orchestra-panel"<?php echo $filterRegister ? '' : ' open'; ?>
+           data-color-yes="<?php echo $h($yesColor); ?>"
+           data-color-no="<?php echo $h($noColor); ?>"
+           data-color-maybe="<?php echo $h($maybeColor); ?>"
+           data-color-disabled="<?php echo $h(isset($GLOBALS['optionsDB']['colorDisabled']) ? $GLOBALS['optionsDB']['colorDisabled'] : ''); ?>">
+    <summary class="orchestra-fold-summary">Besetzung</summary>
+    <div class="orchestra-panel-body">
       <div class="orchestra-panel-toggle">
         <label class="w3-small">
           <input type="checkbox" class="w3-check" onchange="toggleActiveOrchestra(this)">
           Nur aktive Besetzung
         </label>
       </div>
-    </div>
-    <div class="orchestra-layout orchestra-layout--full">
-      <div class="orchestra-svg-wrap">
+      <div class="orchestra-layout orchestra-layout--full">
+        <div class="orchestra-svg-wrap">
 <?php echo $orchestraFull; ?>
+        </div>
       </div>
-    </div>
-    <div class="orchestra-layout orchestra-layout--active" hidden>
-      <div class="orchestra-svg-wrap">
+      <div class="orchestra-layout orchestra-layout--active" hidden>
+        <div class="orchestra-svg-wrap">
 <?php echo $orchestraActive; ?>
+        </div>
       </div>
     </div>
-  </div>
+  </details>
 <?php } ?>
 
   <div class="melde-response-modal-lists">

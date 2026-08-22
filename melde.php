@@ -7,7 +7,12 @@ mysqli_select_db($GLOBALS['conn'], $sql['database']) or die(mysqli_error($GLOBAL
 $cmd = (string)meldeRequest('cmd', '');
 switch($cmd) {
 case "save":
-    requireEditResponseAuth(meldeRequest('user', 0));
+    if(meldeRequest('ajax') === '1' || meldeRequest('ajax') === 1) {
+        requireMeldeChipEditAuth();
+    }
+    else {
+        requireEditResponseAuth(meldeRequest('user', 0));
+    }
     $m = new Meldung;
     $m->load_by_user_event(meldeRequest('user'), meldeRequest('termin'));
     if($m->User < 1) {
@@ -37,7 +42,12 @@ case "save":
     echo $t->printBasicTableLine($uid);
     break;
 case "delete":
-    requireEditResponseAuth(meldeRequest('user', 0));
+    if(meldeRequest('ajax') === '1' || meldeRequest('ajax') === 1) {
+        requireMeldeChipEditAuth();
+    }
+    else {
+        requireEditResponseAuth(meldeRequest('user', 0));
+    }
     if(!meldeRequest('termin') || (int)meldeRequest('termin') < 1) {
         http_response_code(400);
         die('invalid termin');

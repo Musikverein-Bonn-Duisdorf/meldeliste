@@ -80,9 +80,10 @@ $sections[] = array(
     'id' => 'mein-register',
     'title' => 'Mein Register',
     'body' => '
-<p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben. Die Übersicht nutzt dieselbe Zeilenoptik wie die Startseite (Datum, Titel, Status-Chips); Tippen/Klick öffnet die Namensliste im Detail – Personenzeilen in Registerfarbe, gruppiert nach Zusage / Unsicher / Absage.</p>
+<p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben. Pro Termin: Status-Chips und Namensliste als farbige Personen-Chips (Registerfarbe) nach Zusage, Unsicher und Absage. Klick auf die Zeile öffnet das Detail-Modal.</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung.</li>
+<li>Personen hinzufügen oder entfernen nur mit Recht <b>Rückmeldungen bearbeiten</b> — im Modal.</li>
 </ul>
 '.$registerLegend.'
 <p>So erkennst du schnell Lücken in der Besetzung deines Registers.</p>
@@ -212,10 +213,10 @@ $sections[] = array(
     'title' => 'Admin: Meldungen',
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
-<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung). Die Register-Aufschlüsselung bei Auftritten ist standardmäßig zugeklappt.</p>
+<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung).</p>
 <p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons das Rückmeldungs-Modal; bei Schicht-Terminen pro Schichtzeile.</p>
-<p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert, Personenzeilen in Registerfarbe; Namen als Chip öffnen das Personen-Modal. Die Orchesterübersicht skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
-'.(requirePermission('perm_editResponse') ? '<p>Mit Recht <b>Rückmeldungen bearbeiten</b> kannst du im Modal Personen in Zusagen, Absagen und Unsicher per Chip hinzufügen oder entfernen; bei Zusage/Unsicher für einen sonst unsichtbaren Termin wird die Person automatisch in die Sichtbarkeit aufgenommen. Im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
+<p>In Termin- und Register-Ansichten (sowie Schicht-Modals bei Schicht-Terminen) kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert als Register-Chips; Namen als Chip öffnen das Personen-Modal nur mit Recht <b>Benutzer anzeigen</b> (oder beim eigenen Profil). Die Orchestergrafik ist im Modal aufklappbar (in der Gesamtansicht standardmäßig offen, in <b>Mein Register</b> zugeklappt), skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
+'.(requirePermission('perm_editResponse') ? '<p>Das Chip-Feld zum Hinzufügen und Entfernen von Personen in Zusagen, Absagen und Unsicher (Termin- und Schicht-Modals) setzt das Recht <b>Rückmeldungen bearbeiten</b> voraus (nicht nur Meldungen anzeigen). Bei Zusage/Unsicher für einen sonst unsichtbaren Termin wird die Person automatisch in die Sichtbarkeit aufgenommen. Im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
 '
 );
 
@@ -278,7 +279,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_showLog') ? '
 <li><b>Statistik</b> – Auswertungen; auf breiten Bildschirmen Diagramme und Listen zweispaltig. Zeitraum in Tagen frei wählen, Teilnahme-/Log-Charts, Ranking und Inaktive (ohne Login/Teilnahme im Schwellwert <code>inactiveUsersDays</code>). Ranking und Inaktive teilen sich denselben Chip-Filter wie die Personenliste (Aktive/Gäste/Mitglieder, Register, Gruppen) und nutzen denselben Zeilen-Stil inkl. Sortier-Chips</li>
-<li><b>Log</b> – Anwendungsprotokoll (Suche serverseitig; mehrere Wörter = UND, z. B. <code>ERROR Meier</code>; Live-Aktualisierung); Akteure und referenzierte User/Termine/Inventar/Emails/Schichten in der Nachricht als Chip öffnen das jeweilige Modal; Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
+<li><b>Log</b> – Anwendungsprotokoll (Suche serverseitig; mehrere Wörter = UND, z. B. <code>ERROR Meier</code>; Live-Aktualisierung); Akteure und referenzierte User/Termine/Inventar/Emails/Schichten in der Nachricht als Chip öffnen das jeweilige Modal, sofern berechtigt; Chunk-Größe für Scroll und Live-Nachladen über <code>logListChunkSize</code></li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Backup</b> – ZIP mit Datenbank (Versionsinfo) und hochgeladenen Dateien unter <code>uploads/</code> (Fotos, Dokumente, Verträge, Mail-Anhänge) herunterladen oder wieder einspielen; Dateiname enthält den DB-Prefix (z. B. <code>meldeliste-dev-backup-…zip</code>). Im Browser über <code>Backup</code> (Recht <b>Konfiguration bearbeiten</b>), per CLI mit <code>php cron.php CRONID backup</code>. Browser-Restore ist durch PHP <code>upload_max_filesize</code> / <code>post_max_size</code> begrenzt (oft 2 M); größere ZIPs: <code>php scripts/restoreBackup.php backup.zip --yes</code> (PHP 8 CLI, nicht <code>php-cgi</code>; auf manchen Hostern <code>php8.3</code>). Neue ZIPs stellen <code>uploads/</code> als Snapshot wieder her, wenn Dateien enthalten sind; ältere ZIPs ohne Dateien ändern <code>uploads/</code> nicht. Automatisiert remote nur mit eigenem <code>$backupToken</code> in <code>config.php</code> (mind. 32 Zeichen) über <code>cron.php?id=…&amp;cmd=backup</code> — nicht mit dem allgemeinen Cron-ID. PHP-Laufzeit wird für Backup/Restore unbegrenzt; der Webserver kann lange Requests trotzdem beenden. Erfolgreiche Downloads erscheinen im <b>Log</b> als Info, fehlgeschlagene als Fehler</li>

@@ -1,8 +1,38 @@
 /**
- * MELD-175: chip add/remove for termin response modal (Ja / Nein / Unsicher).
+ * MELD-175: chip add/remove for termin + shift response modals (Ja / Nein / Unsicher).
  */
 (function(global) {
     'use strict';
+
+    var focusWertAfterRefresh = 0;
+
+    function requestFocusAfterRefresh(wert) {
+        focusWertAfterRefresh = parseInt(wert, 10) || 0;
+    }
+
+    function restoreFocusIfRequested(root) {
+        var wert = focusWertAfterRefresh;
+        if(!wert) {
+            return;
+        }
+        focusWertAfterRefresh = 0;
+        root = root || document;
+        if(!root.querySelector) {
+            return;
+        }
+        var section = root.querySelector('.melde-response-editable-section[data-melde-wert="' + wert + '"]');
+        var input = section && section.querySelector('.melde-response-add-input');
+        if(!input) {
+            return;
+        }
+        setTimeout(function() {
+            try {
+                input.focus({ preventScroll: true });
+            } catch(e) {
+                input.focus();
+            }
+        }, 0);
+    }
 
     function parseCatalog(root) {
         var el = root.querySelector('#meldeResponseUserCatalog');
@@ -24,22 +54,37 @@
         }
     }
 
-    function getTerminId(root) {
+    function getMeldeModalContext(root) {
         var modal = root.querySelector('.termin-response-modal');
-        if(!modal) return 0;
-        return parseInt(modal.getAttribute('data-termin-id'), 10) || 0;
+        if(!modal) {
+            return { terminId: 0, shiftId: 0 };
+        }
+        return {
+            terminId: parseInt(modal.getAttribute('data-termin-id'), 10) || 0,
+            shiftId: parseInt(modal.getAttribute('data-shift-id'), 10) || 0
+        };
     }
 
-    function assignedUserIds(root) {
+    function assignedUserIdsInSection(sectionEl, wert) {
         var ids = {};
-        root.querySelectorAll('.melde-response-editable-chip[data-user-id]').forEach(function(chip) {
+        if(!sectionEl) {
+            return ids;
+        }
+        wert = parseInt(wert, 10) || 0;
+        sectionEl.querySelectorAll('.melde-response-editable-chip[data-user-id]').forEach(function(chip) {
+            var chipWert = parseInt(chip.getAttribute('data-melde-wert'), 10) || 0;
+            if(wert > 0 && chipWert !== wert) {
+                return;
+            }
             var id = parseInt(chip.getAttribute('data-user-id'), 10) || 0;
-            if(id > 0) ids[id] = true;
+            if(id > 0) {
+                ids[id] = true;
+            }
         });
         return ids;
     }
 
-    function postMelde(body, onOk, onFail) {
+    function postMelde(url, body, onOk, onFail) {
         var xhr;
         if(global.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -54,24 +99,31 @@
                 onFail();
             }
         };
-        xhr.open('POST', 'melde.php', true);
+        xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send(body);
     }
 
-    function afterMutation(terminId) {
-        if(typeof global.scheduleRefreshOpenTerminResponseModal === 'function') {
-            global.scheduleRefreshOpenTerminResponseModal(terminId);
+    function afterMutation(ctx) {
+        ctx = ctx || {};
+        if(ctx.shiftId && typeof global.scheduleRefreshOpenShiftResponseModal === 'function') {
+            global.scheduleRefreshOpenShiftResponseModal(ctx.shiftId);
         }
-        if(typeof global.scheduleRefreshMainPageTerminEntries === 'function') {
-            global.scheduleRefreshMainPageTerminEntries(terminId);
+        if(ctx.terminId && typeof global.scheduleRefreshOpenTerminResponseModal === 'function') {
+            global.scheduleRefreshOpenTerminResponseModal(ctx.terminId);
         }
-        if(typeof global.invalidateTerminResponseModalCache === 'function') {
-            global.invalidateTerminResponseModalCache(terminId);
+        if(ctx.terminId && typeof global.scheduleRefreshMainPageTerminEntries === 'function') {
+            global.scheduleRefreshMainPageTerminEntries(ctx.terminId);
+        }
+        if(ctx.shiftId && typeof global.invalidateShiftResponseModalCache === 'function') {
+            global.invalidateShiftResponseModalCache(ctx.shiftId);
+        }
+        if(ctx.terminId && typeof global.invalidateTerminResponseModalCache === 'function') {
+            global.invalidateTerminResponseModalCache(ctx.terminId);
         }
     }
 
-    function bindSection(root, sectionEl, catalog, terminId) {
+    function bindSection(root, sectionEl, catalog, ctx) {
         var wert = parseInt(sectionEl.getAttribute('data-melde-wert'), 10) || 0;
         if(wert < 1 || wert > 3) return;
 
@@ -80,6 +132,8 @@
         if(!input || !suggest) return;
 
         var activeIndex = -1;
+        var isShift = ctx.shiftId > 0;
+        var postUrl = isShift ? 'meldeshift.php' : 'melde.php';
 
         function hideSuggest() {
             suggest.hidden = true;
@@ -116,7 +170,7 @@
 
         function filterCatalog(q) {
             q = String(q || '').toLowerCase().trim();
-            var taken = assignedUserIds(root);
+            var taken = assignedUserIdsInSection(sectionEl, wert);
             var out = [];
             catalog.forEach(function(item) {
                 if(taken[item.id]) return;
@@ -131,15 +185,25 @@
 
         function pickUser(userId) {
             userId = parseInt(userId, 10) || 0;
-            if(!(userId > 0) || !terminId) return;
+            if(!(userId > 0)) return;
+            if(isShift && !ctx.shiftId) return;
+            if(!isShift && !ctx.terminId) return;
             input.value = '';
             hideSuggest();
             var body = 'cmd=save&ajax=1&user=' + encodeURIComponent(String(userId))
-                + '&termin=' + encodeURIComponent(String(terminId))
-                + '&wert=' + encodeURIComponent(String(wert))
-                + '&Children=0&Guests=0';
-            postMelde(body, function() {
-                afterMutation(terminId);
+                + '&wert=' + encodeURIComponent(String(wert));
+            if(isShift) {
+                body += '&shift=' + encodeURIComponent(String(ctx.shiftId));
+                if(ctx.terminId) {
+                    body += '&termin=' + encodeURIComponent(String(ctx.terminId));
+                }
+            } else {
+                body += '&termin=' + encodeURIComponent(String(ctx.terminId))
+                    + '&Children=0&Guests=0';
+            }
+            postMelde(postUrl, body, function() {
+                requestFocusAfterRefresh(wert);
+                afterMutation(ctx);
             });
         }
 
@@ -188,11 +252,17 @@
                 var chip = btn.closest('.melde-response-editable-chip');
                 if(!chip) return;
                 var userId = parseInt(chip.getAttribute('data-user-id'), 10) || 0;
-                if(!(userId > 0) || !terminId) return;
-                var body = 'cmd=delete&ajax=1&user=' + encodeURIComponent(String(userId))
-                    + '&termin=' + encodeURIComponent(String(terminId));
-                postMelde(body, function() {
-                    afterMutation(terminId);
+                if(!(userId > 0)) return;
+                if(isShift && !ctx.shiftId) return;
+                if(!isShift && !ctx.terminId) return;
+                var body = 'cmd=delete&ajax=1&user=' + encodeURIComponent(String(userId));
+                if(isShift) {
+                    body += '&shift=' + encodeURIComponent(String(ctx.shiftId));
+                } else {
+                    body += '&termin=' + encodeURIComponent(String(ctx.terminId));
+                }
+                postMelde(postUrl, body, function() {
+                    afterMutation(ctx);
                 });
             });
         });
@@ -204,13 +274,14 @@
         if(!modal || modal.getAttribute('data-melde-chips-init') === '1') return;
         modal.setAttribute('data-melde-chips-init', '1');
 
-        var terminId = getTerminId(root);
-        if(!terminId) return;
+        var ctx = getMeldeModalContext(root);
+        if(!ctx.terminId && !ctx.shiftId) return;
         var catalog = parseCatalog(root);
         root.querySelectorAll('.melde-response-editable-section[data-melde-wert]').forEach(function(sectionEl) {
-            bindSection(root, sectionEl, catalog, terminId);
+            bindSection(root, sectionEl, catalog, ctx);
         });
+        restoreFocusIfRequested(root);
     }
 
-    global.MeldeResponseChips = { initIn: initIn };
+    global.MeldeResponseChips = { initIn: initIn, restoreFocusIfRequested: restoreFocusIfRequested };
 })(window);

@@ -313,5 +313,38 @@ class Shift
             $this->fill_from_array($row);
         }
     }
+
+    /**
+     * Schichtmeldungen with user instrument/register (chip lists, MELD-175).
+     * @return array<int, array>
+     */
+    public function fetchResponseMeldungenRows() {
+        $sql = sprintf(
+            'SELECT m.`Index`, m.`Timestamp`, m.`User`, m.`Shift`, m.`Wert`,'
+            .' 0 AS `Children`, 0 AS `Guests`,'
+            .' u.`Nachname`, u.`Vorname`, i.`Name` AS `iName`,'
+            .' r.`Index` AS `rIndex`, r.`Name` AS `rName`, r.`Sortierung` AS `rSort`, r.`Color` AS `rColor`'
+            .' FROM `%sSchichtmeldung` m'
+            .' INNER JOIN `%sUser` u ON m.`User` = u.`Index`'
+            .' INNER JOIN `%sInstrument` i ON u.`Instrument` = i.`Index`'
+            .' INNER JOIN `%sRegister` r ON i.`Register` = r.`Index`'
+            .' WHERE m.`Shift` = %d'
+            .' ORDER BY u.`Nachname`, u.`Vorname`;',
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            $GLOBALS['dbprefix'],
+            (int)$this->Index
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $rows = array();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $rows[] = $row;
+            }
+        }
+        return $rows;
+    }
 };
 ?>

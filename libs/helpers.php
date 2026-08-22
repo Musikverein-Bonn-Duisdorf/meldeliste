@@ -930,6 +930,70 @@ function getOwner($index) {
 }
 
 /**
+ * Whether the current session may open the entity detail modal (mirrors getModal.php gates).
+ *
+ * @param string $type user|termin|inventar|mail|shift|sammlung|programm
+ * @param int $id
+ * @return bool
+ */
+function entityMayOpen($type, $id) {
+    $type = strtolower(trim((string)$type));
+    if($type === 'inventory') {
+        $type = 'inventar';
+    }
+    $id = (int)$id;
+    if($id < 1) {
+        return false;
+    }
+    $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    if($uid < 1) {
+        return false;
+    }
+
+    switch($type) {
+    case 'user':
+        return requirePermission('perm_showUsers')
+            || requirePermission('perm_editPermissions')
+            || $uid === $id;
+
+    case 'termin':
+        if(!class_exists('Termin')) {
+            return true;
+        }
+        $t = new Termin();
+        $t->load_by_id($id);
+        return (int)$t->Index > 0;
+
+    case 'inventar':
+        if(requirePermission('perm_showInventories')) {
+            return true;
+        }
+        if(!class_exists('Inventories')) {
+            return false;
+        }
+        $inv = new Inventories();
+        $inv->load_by_id($id);
+        if(!(int)$inv->Index) {
+            return false;
+        }
+        return $inv->userMayView($uid);
+
+    case 'mail':
+        return requirePermission('perm_sendEmail');
+
+    case 'shift':
+        return true;
+
+    case 'sammlung':
+    case 'programm':
+        return function_exists('archivFeatureEnabled') && archivFeatureEnabled();
+
+    default:
+        return false;
+    }
+}
+
+/**
  * Clickable entity chip (MELD-167). Markup only — modal loads async via openModal.
  *
  * @param string $type user|termin|inventar
@@ -967,10 +1031,15 @@ function entityOpenHtml($type, $id, $label, $chipMod = '') {
     if($mod === '' || !preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*$/', $mod)) {
         $mod = $chipMods[$type];
     }
-    return '<span class="mail-recipient-chip mail-recipient-chip--'.$mod.' entity-open"'
-        .' role="button" tabindex="0"'
-        .' data-entity-type="'.$h($type).'"'
-        .' data-entity-id="'.$id.'">'
+    $clickable = entityMayOpen($type, $id);
+    $class = 'mail-recipient-chip mail-recipient-chip--'.$mod.($clickable ? ' entity-open' : '');
+    $attrs = '';
+    if($clickable) {
+        $attrs = ' role="button" tabindex="0"'
+            .' data-entity-type="'.$h($type).'"'
+            .' data-entity-id="'.$id.'"';
+    }
+    return '<span class="'.$class.'"'.$attrs.'>'
         .$h($label)
         .'</span>';
 }
@@ -1783,6 +1852,18 @@ function requireEditResponseAuth($targetUser) {
     $sessionUser = (int)$_SESSION['userid'];
     $proxyUser = (isset($_SESSION['proxy']) && (int)$_SESSION['proxy'] > 0) ? (int)$_SESSION['proxy'] : 0;
     if($targetUser !== $sessionUser && $targetUser !== $proxyUser && !requirePermission('perm_editResponse')) {
+        http_response_code(403);
+        die('forbidden');
+    }
+}
+
+/** MELD-175: chip add/remove in termin response modal — perm_editResponse only. */
+function requireMeldeChipEditAuth() {
+    if(!loggedIn()) {
+        http_response_code(403);
+        die('forbidden');
+    }
+    if(!requirePermission('perm_editResponse')) {
         http_response_code(403);
         die('forbidden');
     }
