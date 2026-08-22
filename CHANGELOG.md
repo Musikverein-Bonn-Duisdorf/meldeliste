@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-22-c55b5 (2026-08-22)
+
+- MELD-219: alink an Dokument-Streams für externes PDF-Öffnen
+- MELD-219: alink für Dokument-Streams (Android PDF)
+
 ## 2026-08-22-988ce (2026-08-22)
 
 - MELD-219: Dokumente und Scans in App-Viewer mit Chrome öffnen
