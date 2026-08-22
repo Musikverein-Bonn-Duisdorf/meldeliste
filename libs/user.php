@@ -703,13 +703,7 @@ class User
     }
 
     public function canLogin() {
-        if ((int)$this->Deleted === 1) {
-            return false;
-        }
-        if ($this->isGuestMusician() && trim((string)$this->Passhash) === '') {
-            return false;
-        }
-        return true;
+        return (int)$this->Deleted !== 1;
     }
 
     public function load_by_id($Index) {
