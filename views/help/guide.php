@@ -81,7 +81,7 @@ $sections[] = array(
     'title' => 'Mein Register',
     'body' => '
 <p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben. Pro Termin: Status-Chips und Namensliste als farbige Personen-Chips (Registerfarbe) nach Zusage, Unsicher und Absage. Klick auf die Zeile öffnet das Detail-Modal.</p>
-<p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons dasselbe Register-Modal; bei Schicht-Terminen pro Schichtzeile das Schicht-Modal. Ohne Admin-Recht <b>Rückmeldungen anzeigen</b> siehst du nur Musiker deines Registers (Zahlen und Namens-Chips).</p>
+<p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons dasselbe Register-Modal; bei Schicht-Terminen pro Schichtzeile das Schicht-Modal. Ohne Admin-Recht <b>Rückmeldungen anzeigen</b> siehst du bei <b>Besetzungs</b>-Terminen und -Schichten (mit Bedarf) nur Musiker deines Registers; bei anderen Terminen und Schichten alle Gemeldeten.</p>
 <ul>
 <li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung.</li>
 <li>Personen hinzufügen oder entfernen nur mit Recht <b>Rückmeldungen bearbeiten</b> — im Modal.</li>

@@ -1876,7 +1876,8 @@ class Termin
                     .' title="In Kalender" aria-label="In Kalender eintragen" download>'
                     .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
             }
-            $str .= $this->renderMeldeResponseBtn($tid, $this->getUserRegisterFilter($user));
+            $regFilter = $this->Auftritt ? $this->getUserRegisterFilter($user) : 0;
+            $str .= $this->renderMeldeResponseBtn($tid, $regFilter);
         }
         $str .= '</div>'; // melde-actions
         $str .= '</div>'; // melde-row-main
@@ -2018,22 +2019,41 @@ class Termin
     }
 
     /**
+     * @param bool|null $restrictToOwnRegister null = follow Besetzung (Auftritt) on this termin
      * @return array{filterRegister:int,registerIds:list<int>,includeUnassigned:bool}
      */
-    private function responseRegisterScope($filterregister) {
+    private function responseRegisterScope($filterregister, $restrictToOwnRegister = null) {
+        if($restrictToOwnRegister === null) {
+            $restrictToOwnRegister = (bool)$this->Auftritt;
+        }
+        if(requirePermission('perm_showResponse')) {
+            $filterRegister = (int)$filterregister;
+            if($filterRegister > 0) {
+                return array(
+                    'filterRegister' => $filterRegister,
+                    'registerIds' => array($filterRegister),
+                    'includeUnassigned' => false,
+                );
+            }
+            return array(
+                'filterRegister' => 0,
+                'registerIds' => $this->getRegisterIdsExcludingKeins(),
+                'includeUnassigned' => true,
+            );
+        }
+        if(!$restrictToOwnRegister) {
+            return array(
+                'filterRegister' => 0,
+                'registerIds' => $this->getRegisterIdsExcludingKeins(),
+                'includeUnassigned' => true,
+            );
+        }
         $filterRegister = $this->resolveResponseRegisterFilter($filterregister);
         if($filterRegister > 0) {
             return array(
                 'filterRegister' => $filterRegister,
                 'registerIds' => array($filterRegister),
                 'includeUnassigned' => false,
-            );
-        }
-        if(requirePermission('perm_showResponse')) {
-            return array(
-                'filterRegister' => 0,
-                'registerIds' => $this->getRegisterIdsExcludingKeins(),
-                'includeUnassigned' => true,
             );
         }
         return array(
@@ -2152,7 +2172,8 @@ class Termin
         if($this->Shifts) return $this->printShiftResponseLine();
         $u = new User;
         $u->load_by_id($_SESSION['userid']);
-        return $this->getResponseLine($u->getRegister());
+        $reg = $this->Auftritt ? $u->getRegister() : 0;
+        return $this->getResponseLine($reg);
     }
     public function printResponseLine() {
         if($this->Shifts) return $this->printShiftResponseLine();
@@ -2310,7 +2331,7 @@ class Termin
      * @return array{whoYes:array,whoNo:array,whoMaybe:array}
      */
     private function buildShiftResponseLists($s) {
-        $scope = $this->responseRegisterScope(0);
+        $scope = $this->responseRegisterScope(0, (int)$s->Bedarf > 0);
         $aMeldungen = $s->fetchResponseMeldungenRows();
         return $this->buildResponseListsFromMeldungen(
             $aMeldungen,
@@ -2401,7 +2422,7 @@ ORDER BY `Nachname`, `Vorname`;",
         $scope = $this->responseRegisterScope($filterregister);
         $filterregister = $scope['filterRegister'];
 
-        if(!requirePermission('perm_showResponse') && $filterregister < 1) {
+        if(!requirePermission('perm_showResponse') && $this->Auftritt && $filterregister < 1) {
             $modalOpen = "openModal('terminResponse', ".$this->Index.')';
             $actions = $this->renderResponseStatusChips(0, 0, 0);
             return $this->renderMeldeResponseCard(0, $modalOpen, $actions);
