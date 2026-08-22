@@ -132,25 +132,31 @@
         if(!input || !suggest) return;
 
         var activeIndex = -1;
+        var visibleItems = [];
         var isShift = ctx.shiftId > 0;
         var postUrl = isShift ? 'meldeshift.php' : 'melde.php';
+        var chipSuggest = global.ChipSuggest;
 
         function hideSuggest() {
             suggest.hidden = true;
             suggest.innerHTML = '';
             activeIndex = -1;
+            visibleItems = [];
         }
 
         function showSuggestions(items) {
+            visibleItems = items || [];
             suggest.innerHTML = '';
-            if(!items.length) {
+            if(!visibleItems.length) {
                 hideSuggest();
                 return;
             }
-            items.forEach(function(item, idx) {
+            visibleItems.forEach(function(item, idx) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'mail-recipient-suggest-item';
+                btn.className = chipSuggest
+                    ? chipSuggest.itemClassName(idx, activeIndex)
+                    : 'mail-recipient-suggest-item';
                 btn.setAttribute('data-index', String(idx));
                 btn.textContent = item.meta ? item.label + ' · ' + item.meta : item.label;
                 btn.addEventListener('mousedown', function(ev) {
@@ -163,9 +169,9 @@
                 suggest.appendChild(btn);
             });
             suggest.hidden = false;
-            activeIndex = 0;
-            var first = suggest.querySelector('.mail-recipient-suggest-item');
-            if(first) first.classList.add('is-active');
+            if(chipSuggest && activeIndex >= 0) {
+                chipSuggest.highlight(suggest, activeIndex, false);
+            }
         }
 
         function filterCatalog(q) {
@@ -208,37 +214,42 @@
         }
 
         input.addEventListener('input', function() {
+            activeIndex = -1;
             showSuggestions(filterCatalog(input.value));
         });
         input.addEventListener('keydown', function(ev) {
-            var items = suggest.querySelectorAll('.mail-recipient-suggest-item');
+            var items = visibleItems.length ? visibleItems : filterCatalog(input.value);
             if(ev.key === 'Escape') {
                 hideSuggest();
                 return;
             }
-            if(ev.key === 'ArrowDown' && items.length) {
+            if((ev.key === 'ArrowDown' || ev.key === 'ArrowUp') && items.length) {
                 ev.preventDefault();
-                activeIndex = Math.min(activeIndex + 1, items.length - 1);
-                items.forEach(function(el, i) {
-                    el.classList.toggle('is-active', i === activeIndex);
-                });
-                return;
-            }
-            if(ev.key === 'ArrowUp' && items.length) {
-                ev.preventDefault();
-                activeIndex = Math.max(activeIndex - 1, 0);
-                items.forEach(function(el, i) {
-                    el.classList.toggle('is-active', i === activeIndex);
-                });
+                if(!visibleItems.length) {
+                    showSuggestions(items);
+                }
+                var next = chipSuggest
+                    ? chipSuggest.stepIndex(ev.key, activeIndex, items.length, true)
+                    : activeIndex;
+                if(next === null) {
+                    return;
+                }
+                activeIndex = next;
+                showSuggestions(items);
+                if(chipSuggest) {
+                    chipSuggest.highlight(suggest, activeIndex, true);
+                }
                 return;
             }
             if(ev.key === 'Enter') {
-                if(!items.length) return;
+                if(!items.length) {
+                    return;
+                }
                 ev.preventDefault();
-                var pick = items[activeIndex] || items[0];
-                var idx = parseInt(pick.getAttribute('data-index'), 10) || 0;
-                var list = filterCatalog(input.value);
-                if(list[idx]) pickUser(list[idx].id);
+                var idx = activeIndex >= 0 ? activeIndex : 0;
+                if(items[idx]) {
+                    pickUser(items[idx].id);
+                }
             }
         });
         input.addEventListener('blur', function() {

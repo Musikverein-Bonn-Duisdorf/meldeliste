@@ -372,6 +372,7 @@ $terminVisibilityCatalog = AudienceSpec::buildCatalog(array(
 ?>
 <script type="application/json" id="terminVisibilityCatalog"><?php echo json_encode($terminVisibilityCatalog, JSON_UNESCAPED_UNICODE); ?></script>
 <script src="js/mailRecipients.js?<?php echo isset($GLOBALS['version']['Hash']) ? $GLOBALS['version']['Hash'] : '0'; ?>-<?php echo @filemtime(__DIR__.'/js/mailRecipients.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/chipSuggest.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/sammlungChips.js'); ?>"></script>
 <script>
 (function() {

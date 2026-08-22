@@ -50,6 +50,7 @@
     selected = selected.map(Number).filter(function (id) { return id > 0; });
     var activeIndex = -1;
     var readonly = !!inputEl.disabled;
+    var chipSuggest = window.ChipSuggest;
 
     function labelFor(id) {
       for (var i = 0; i < namedGroups.length; i++) {
@@ -125,7 +126,9 @@
       items.forEach(function (g, idx) {
         var row = document.createElement('button');
         row.type = 'button';
-        row.className = 'mail-recipient-suggest-item' + (idx === activeIndex ? ' mail-recipient-suggest-item--active' : '');
+        row.className = chipSuggest
+          ? chipSuggest.itemClassName(idx, activeIndex)
+          : 'mail-recipient-suggest-item' + (idx === activeIndex ? ' mail-recipient-suggest-item--active' : '');
         row.setAttribute('data-index', String(idx));
         var label = document.createElement('span');
         label.textContent = g.label || '';
@@ -141,6 +144,9 @@
         suggestEl.appendChild(row);
       });
       suggestEl.hidden = false;
+      if (chipSuggest && activeIndex >= 0) {
+        chipSuggest.highlight(suggestEl, activeIndex, false);
+      }
     }
 
     function addGroup(id) {
@@ -164,16 +170,18 @@
       });
       inputEl.addEventListener('keydown', function (e) {
         var items = filteredSuggestions();
-        if (e.key === 'ArrowDown') {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
           if (!items.length) return;
-          activeIndex = (activeIndex + 1) % items.length;
+          var next = chipSuggest
+            ? chipSuggest.stepIndex(e.key, activeIndex, items.length, true)
+            : activeIndex;
+          if (next === null) return;
+          activeIndex = next;
           showSuggest();
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          if (!items.length) return;
-          activeIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
-          showSuggest();
+          if (chipSuggest) {
+            chipSuggest.highlight(suggestEl, activeIndex, true);
+          }
         } else if (e.key === 'Enter') {
           if (activeIndex >= 0 && items[activeIndex]) {
             e.preventDefault();
@@ -220,6 +228,7 @@
       inputName = inputName + '[]';
     }
     var activeIndex = -1;
+    var chipSuggest = window.ChipSuggest;
 
     function metaFor(key) {
       for (var i = 0; i < permissions.length; i++) {
@@ -343,7 +352,9 @@
       items.forEach(function (p, idx) {
         var row = document.createElement('button');
         row.type = 'button';
-        row.className = 'mail-recipient-suggest-item' + (idx === activeIndex ? ' mail-recipient-suggest-item--active' : '');
+        row.className = chipSuggest
+          ? chipSuggest.itemClassName(idx, activeIndex)
+          : 'mail-recipient-suggest-item' + (idx === activeIndex ? ' mail-recipient-suggest-item--active' : '');
         row.setAttribute('data-index', String(idx));
         var label = document.createElement('span');
         label.textContent = p.label || '';
@@ -359,6 +370,9 @@
         suggestEl.appendChild(row);
       });
       suggestEl.hidden = false;
+      if (chipSuggest && activeIndex >= 0) {
+        chipSuggest.highlight(suggestEl, activeIndex, false);
+      }
     }
 
     function addPerm(key) {
@@ -381,16 +395,18 @@
     });
     inputEl.addEventListener('keydown', function (e) {
       var items = filteredSuggestions();
-      if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         if (!items.length) return;
-        activeIndex = (activeIndex + 1) % items.length;
+        var next = chipSuggest
+          ? chipSuggest.stepIndex(e.key, activeIndex, items.length, true)
+          : activeIndex;
+        if (next === null) return;
+        activeIndex = next;
         showSuggest();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (!items.length) return;
-        activeIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
-        showSuggest();
+        if (chipSuggest) {
+          chipSuggest.highlight(suggestEl, activeIndex, true);
+        }
       } else if (e.key === 'Enter') {
         if (activeIndex >= 0 && items[activeIndex]) {
           e.preventDefault();
