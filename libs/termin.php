@@ -1856,13 +1856,6 @@ class Termin
         $str .= '</div>';
 
         $str .= '<div class="melde-actions" data-melde-stop>';
-        if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton']) && !$this->Shifts) {
-            // GET link so Android WebView can intercept/download (MELD-180); POST still accepted server-side
-            $str .= '<a id="icalform'.$tid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'"'
-                .' title="In Kalender" aria-label="In Kalender eintragen" download>'
-                .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
-        }
-
         $str .= $this->makeListMetaHtml($user);
         if(!$this->Shifts) {
             $str .= '<div class="melde-btns">';
@@ -1878,6 +1871,12 @@ class Termin
                 $str .= $this->makeButtonsUser(3, 0, $this->Wert, $user, true);
             }
             $str .= '</div>';
+            if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+                $str .= '<a id="icalform'.$tid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'"'
+                    .' title="In Kalender" aria-label="In Kalender eintragen" download>'
+                    .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
+            }
+            $str .= $this->renderMeldeResponseBtn($tid, 0);
         }
         $str .= '</div>'; // melde-actions
         $str .= '</div>'; // melde-row-main
@@ -1939,12 +1938,6 @@ class Termin
                 }
                 $str .= '</div>';
                 $str .= '<div class="melde-actions">';
-                if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
-                    $sid = (int)$s->Index;
-                    $str .= '<a id="icalform'.$tid.'_s'.$sid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'&amp;shiftID='.$sid.'"'
-                        .' title="In Kalender" aria-label="In Kalender eintragen" download>'
-                        .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
-                }
                 if($s->Bedarf) {
                     $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
                 }
@@ -1961,6 +1954,13 @@ class Termin
                     $str .= $this->makeShiftButtonsUser(3, 0, $s->Index, $m->Wert, $user, true);
                 }
                 $str .= '</div>';
+                if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+                    $sid = (int)$s->Index;
+                    $str .= '<a id="icalform'.$tid.'_s'.$sid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'&amp;shiftID='.$sid.'"'
+                        .' title="In Kalender" aria-label="In Kalender eintragen" download>'
+                        .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
+                }
+                $str .= $this->renderShiftResponseBtn((int)$s->Index);
                 $str .= '</div>';
                 $str .= '</div>';
             }
@@ -1983,6 +1983,65 @@ class Termin
                 .htmlspecialchars($this->getResponseString(), ENT_QUOTES, 'UTF-8').'</div>';
         }
         return '';
+    }
+
+    /**
+     * MELD-170: open termin response modal from Terminübersicht (iCal-style icon button).
+     */
+    protected function renderMeldeResponseBtn($terminId, $register = 0) {
+        if(!requirePermission('perm_showResponse')) {
+            return '';
+        }
+        $terminId = (int)$terminId;
+        $register = (int)$register;
+        $onclick = "event.stopPropagation();openModal('terminResponse', ".$terminId;
+        if($register > 0) {
+            $onclick .= ', '.$register;
+        }
+        $onclick .= ')';
+        return '<button type="button" class="melde-ical melde-ical-btn melde-response-btn"'
+            .' onclick="'.$onclick.'" title="Meldungen" aria-label="Meldungen">'
+            .'<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+    }
+
+    /**
+     * MELD-170: open shift response modal from Terminübersicht.
+     */
+    protected function renderShiftResponseBtn($shiftId) {
+        if(!requirePermission('perm_showResponse')) {
+            return '';
+        }
+        $shiftId = (int)$shiftId;
+        if($shiftId < 1) {
+            return '';
+        }
+        return '<button type="button" class="melde-ical melde-ical-btn melde-response-btn"'
+            .' onclick="event.stopPropagation();openModal(\'shiftResponse\', '.$shiftId.')"'
+            .' title="Meldungen" aria-label="Meldungen Schicht">'
+            .'<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+    }
+
+    /**
+     * MELD-175: Person mit Zusage/Unsicher in Sichtbarkeit aufnehmen, wenn Termin sonst unsichtbar.
+     */
+    public function ensureUserVisibleForMeldedResponse($userId, $wert) {
+        $userId = (int)$userId;
+        $wert = (int)$wert;
+        if($userId < 1 || ($wert !== 1 && $wert !== 3)) {
+            return false;
+        }
+        if($this->isVisibleToUser($userId, array('asViewer' => false))) {
+            return false;
+        }
+        $vis = $this->getVisibilitySpecArray();
+        $have = array_fill_keys($vis['users'], true);
+        if(!empty($have[$userId])) {
+            return false;
+        }
+        $vis['users'][] = $userId;
+        $this->setVisibilitySpecArray($vis, false);
+        $this->save();
+        return true;
     }
 
     /**
@@ -2142,6 +2201,10 @@ class Termin
                 $body .= '<div class="melde-actions">';
                 $body .= $this->renderResponseStatusChips($ja, $nein, $vielleicht, $allLabel);
                 $body .= '</div>';
+                $chipPreview = $this->renderRegisterResponseChipBodyHtml($this->buildShiftResponseLists($s));
+                if($chipPreview !== '') {
+                    $body .= $chipPreview;
+                }
                 $body .= '</div>';
             }
         }
@@ -2150,67 +2213,53 @@ class Termin
     }
 
     public function getShiftResponseModalHtml($s) {
-        $colorYes = $GLOBALS['optionsDB']['colorBtnYes'];
-        $colorMaybe = $GLOBALS['optionsDB']['colorBtnMaybe'];
-        $colorNo = $GLOBALS['optionsDB']['colorBtnNo'];
+        $lists = $this->buildShiftResponseLists($s);
 
-        $yesNames = $s->getMeldungenUser(1);
-        $maybeNames = $s->getMeldungenUser(3);
-        $noNames = $s->getMeldungenUser(2);
+        $canEditResponse = requirePermission('perm_editResponse');
+        $userCatalogJson = '[]';
+        if($canEditResponse && function_exists('loanUserChipCatalog')) {
+            $userCatalogJson = json_encode(loanUserChipCatalog(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+            if($userCatalogJson === false) {
+                $userCatalogJson = '[]';
+            }
+        }
+
+        if($canEditResponse) {
+            $yesHtml = $this->renderEditableResponseSectionHtml($lists['whoYes'], 1);
+            $maybeHtml = $this->renderEditableResponseSectionHtml($lists['whoMaybe'], 3);
+            $noHtml = $this->renderEditableResponseSectionHtml($lists['whoNo'], 2);
+        }
+        else {
+            $yesHtml = $this->renderReadOnlyResponseSectionHtml($lists['whoYes'], 1);
+            $maybeHtml = $this->renderReadOnlyResponseSectionHtml($lists['whoMaybe'], 3);
+            $noHtml = $this->renderReadOnlyResponseSectionHtml($lists['whoNo'], 2);
+        }
 
         return render('termin/shift_response_modal', array(
+            'terminId' => (int)$this->Index,
+            'shiftId' => (int)$s->Index,
             'terminName' => (string)$this->Name,
             'shiftName' => (string)$s->Name,
             'shiftTime' => (string)$s->getTime(),
-            'yesHtml' => $this->renderShiftResponseNames($yesNames, $colorYes),
-            'maybeHtml' => $this->renderShiftResponseNames($maybeNames, $colorMaybe),
-            'noHtml' => $this->renderShiftResponseNames($noNames, $colorNo),
-            'countYes' => count($yesNames),
-            'countMaybe' => count($maybeNames),
-            'countNo' => count($noNames),
+            'yesHtml' => $yesHtml,
+            'maybeHtml' => $maybeHtml,
+            'noHtml' => $noHtml,
+            'countYes' => count($lists['whoYes']),
+            'countMaybe' => count($lists['whoMaybe']),
+            'countNo' => count($lists['whoNo']),
+            'canEditResponse' => $canEditResponse,
+            'userCatalogJson' => $userCatalogJson,
         ));
     }
 
     /**
-     * @param array<int, array{userId?:int,name:string}|string> $names
+     * @param Shift $s
+     * @return array{whoYes:array,whoNo:array,whoMaybe:array}
      */
-    private function renderShiftResponseNames(array $names, $colorClass) {
-        if(!count($names)) {
-            return '';
-        }
-        // Soft tint like termin response register rows — solid cfg-hex would force
-        // white text onto light entity chips (MELD-167 / MELD-182).
-        $tintHex = $this->resolveMeldeColorHex($colorClass);
-        $html = '';
-        foreach($names as $item) {
-            $name = '';
-            $userId = 0;
-            if(is_array($item)) {
-                $name = isset($item['name']) ? (string)$item['name'] : '';
-                $userId = isset($item['userId']) ? (int)$item['userId'] : 0;
-            }
-            else {
-                $name = (string)$item;
-            }
-            $entry = array(
-                'name' => $name,
-                'userId' => $userId,
-                'instrument' => '',
-                'children' => null,
-                'guests' => null,
-                'freeText' => null,
-            );
-            if($tintHex !== '') {
-                $entry['registerColor'] = $tintHex;
-            }
-            else {
-                $entry['colorClass'] = $colorClass;
-            }
-            $html .= render('termin/response_line', array(
-                'entry' => $entry,
-            ));
-        }
-        return $html;
+    private function buildShiftResponseLists($s) {
+        $aMeldungen = $s->fetchResponseMeldungenRows();
+        $registerIds = $this->getRegisterIdsExcludingKeins();
+        return $this->buildResponseListsFromMeldungen($aMeldungen, false, $registerIds);
     }
 
     /**
@@ -2243,18 +2292,18 @@ class Termin
      * @return array
      */
     protected function fetchResponseMeldungenRows() {
-        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName`, `rColor` FROM `%sMeldungen`
+        $sql = sprintf("(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `mInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName`, `rColor`, `rSort` FROM `%sMeldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `iInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sUser`.`iInstrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung`, `Color` AS `rColor` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort`, `Color` AS `rColor` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
 WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` = '0')
 
 UNION
 
-(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName`, `rColor` FROM `%sMeldungen`
+(SELECT `Index`, `Timestamp`, `User`, `Termin`, `Wert`, `Instrument` AS `iInstrument`, `Guests`, `Nachname`, `Vorname`, `iName`, `Children`, `Register`, `rIndex`, `rName`, `rColor`, `rSort` FROM `%sMeldungen`
 INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname`, `Instrument` AS `mInstrument` FROM `%sUser`) `%sUser` ON `User` = `uIndex`
 INNER JOIN (SELECT `Index` AS `iIndex`, `Register`, `Name` AS `iName` FROM `%sInstrument`) `%sInstrument` ON `%sMeldungen`.`Instrument` = `iIndex`
-INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung`, `Color` AS `rColor` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
+INNER JOIN (SELECT `Index` AS `rIndex`, `Name` AS `rName`, `Sortierung` AS `rSort`, `Color` AS `rColor` FROM `%sRegister`) `%sRegister` ON `Register` = `rIndex`
 WHERE `Termin` = '%d' AND `%sMeldungen`.`Instrument` != '0')
 
 ORDER BY `Nachname`, `Vorname`;",
@@ -2295,107 +2344,73 @@ ORDER BY `Nachname`, `Vorname`;",
         $bus = ($this->vName == 'Bus');
         $modalOpen = "openModal('terminResponse', ".$this->Index.($filterregister ? ', '.$filterregister : '').')';
 
-        if($this->Auftritt && $filterregister) {
+        if($filterregister) {
             $lists = $this->buildResponseLists($filterregister);
             $ja = count($lists['whoYes']);
             $nein = count($lists['whoNo']);
             $vielleicht = count($lists['whoMaybe']);
             $actions = $this->renderResponseStatusChips($ja, $nein, $vielleicht);
-            return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions);
+            $body = $this->renderRegisterResponseChipBodyHtml($lists);
+            return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions, $body);
         }
 
-        if($this->Auftritt) {
+        if($this->Auftritt && !$filterregister) {
             $aMeldungen = $this->fetchResponseMeldungenRows();
-            // Include all registers except 'keins' (Dirigent included; parity with orchestra SVG).
+            $memberCounts = $this->getRegisterMemberCounts();
+            $snReg = 0;
             $sql = sprintf(
-                "SELECT `Index`, `Name` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+                "SELECT `Index` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
                 $GLOBALS['dbprefix']
             );
             $dbr = mysqli_query($GLOBALS['conn'], $sql);
             sqlerror();
-            $memberCounts = $this->getRegisterMemberCounts();
-            $sja = 0;
-            $sall = 0;
-            $snReg = 0;
-            $snein = 0;
-            $svielleicht = 0;
+            while($row = mysqli_fetch_array($dbr)) {
+                $regId = (int)$row['Index'];
+                $snReg += isset($memberCounts[$regId]) ? (int)$memberCounts[$regId] : 0;
+            }
+            $ja = 0;
+            $nein = 0;
+            $vielleicht = 0;
             $childrenYes = 0;
             $guestsYes = 0;
             $childrenMaybe = 0;
             $guestsMaybe = 0;
-            $regRows = '';
-            while($row = mysqli_fetch_array($dbr)) {
-                $regId = (int)$row['Index'];
-                $nReg = isset($memberCounts[$regId]) ? (int)$memberCounts[$regId] : 0;
-                $snReg += $nReg;
-                $ja = 0;
-                $nein = 0;
-                $vielleicht = 0;
-                foreach($aMeldungen as $row2) {
-                    if((int)$row2['rIndex'] != $regId) continue;
-                    switch($row2['Wert']) {
-                    case 1:
-                        $ja++;
-                        $sja++;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                            $childrenYes += (int)$row2['Children'];
-                        }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $guestsYes += (int)$row2['Guests'];
-                        }
-                        break;
-                    case 2:
-                        $nein++;
-                        $snein++;
-                        break;
-                    case 3:
-                        $vielleicht++;
-                        $svielleicht++;
-                        if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
-                            $childrenMaybe += (int)$row2['Children'];
-                        }
-                        if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
-                            $guestsMaybe += (int)$row2['Guests'];
-                        }
-                        break;
-                    default:
-                        break;
+            foreach($aMeldungen as $row2) {
+                switch((int)$row2['Wert']) {
+                case 1:
+                    $ja++;
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                        $childrenYes += (int)$row2['Children'];
                     }
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                        $guestsYes += (int)$row2['Guests'];
+                    }
+                    break;
+                case 2:
+                    $nein++;
+                    break;
+                case 3:
+                    $vielleicht++;
+                    if($GLOBALS['optionsDB']['showChildOption'] && $bus) {
+                        $childrenMaybe += (int)$row2['Children'];
+                    }
+                    if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
+                        $guestsMaybe += (int)$row2['Guests'];
+                    }
+                    break;
+                default:
+                    break;
                 }
-                $all = $ja + $nein + $vielleicht;
-                $sall += $all;
-                $regRows .= '<div class="melde-response-reg">';
-                $regRows .= '<div class="melde-response-reg-name">'.htmlspecialchars((string)$row['Name'], ENT_QUOTES, 'UTF-8').'</div>';
-                $regRows .= $this->renderResponseStatusChips(
-                    $ja,
-                    $nein,
-                    $vielleicht,
-                    $all.' / '.sprintf('%02d', $nReg)
-                );
-                $regRows .= '</div>';
             }
-            if($bus && $GLOBALS['optionsDB']['showChildOption']) {
-                $regRows .= '<div class="melde-response-reg melde-response-reg--meta">';
-                $regRows .= '<div class="melde-response-reg-name">Kinder</div>';
-                $regRows .= $this->renderResponseStatusChips($childrenYes, 0, $childrenMaybe);
-                $regRows .= '</div>';
-            }
-            if($bus && $GLOBALS['optionsDB']['showGuestOption']) {
-                $regRows .= '<div class="melde-response-reg melde-response-reg--meta">';
-                $regRows .= '<div class="melde-response-reg-name">Gäste</div>';
-                $regRows .= $this->renderResponseStatusChips($guestsYes, 0, $guestsMaybe);
-                $regRows .= '</div>';
-            }
-            $sumYes = $sja + $childrenYes + $guestsYes;
-            $sumMaybe = $svielleicht + $childrenMaybe + $guestsMaybe;
-            $sumAll = (string)$sall;
+            $sumYes = $ja + $childrenYes + $guestsYes;
+            $sumMaybe = $vielleicht + $childrenMaybe + $guestsMaybe;
+            $sumAll = (string)($ja + $nein + $vielleicht);
             if($bus && ($GLOBALS['optionsDB']['showChildOption'] || $GLOBALS['optionsDB']['showGuestOption'])) {
                 $sumAll .= '+'.($childrenYes + $childrenMaybe + $guestsYes + $guestsMaybe);
             }
             $sumAll .= ' / '.sprintf('%02d', $snReg);
-            $actions = $this->renderResponseStatusChips($sumYes, $snein, $sumMaybe, $sumAll);
-            $body = '<div class="melde-response-body">'.$regRows.'</div>';
-            return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions, $body);
+            $actions = $this->renderResponseStatusChips($sumYes, $nein, $sumMaybe, $sumAll);
+            return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions);
         }
 
         // Non-Auftritt: aggregate only
@@ -2460,17 +2475,26 @@ ORDER BY `Nachname`, `Vorname`;",
         return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions, $body);
     }
 
-    private function makeResponseEntry($wert, $name, $instrument, $children, $guests, $userId, $bus, $registerColor = '') {
+    private function makeResponseEntry($wert, $name, $instrument, $children, $guests, $userId, $bus, $registerColor = '', $registerId = 0, $registerName = '', $registerSort = 0) {
         $statusColors = array(
             1 => $GLOBALS['optionsDB']['colorBtnYes'],
             2 => $GLOBALS['optionsDB']['colorBtnNo'],
             3 => $GLOBALS['optionsDB']['colorBtnMaybe'],
         );
         $regHex = function_exists('normalizeHexColor') ? normalizeHexColor($registerColor) : '';
+        $registerId = (int)$registerId;
+        $registerName = (string)$registerName;
+        if($registerName === 'keins') {
+            $registerId = 0;
+            $registerName = '';
+        }
         $entry = array(
             'colorClass' => '',
             'statusClass' => isset($statusColors[$wert]) ? $statusColors[$wert] : '',
             'registerColor' => $regHex,
+            'registerId' => $registerId,
+            'registerName' => $registerName,
+            'registerSort' => (int)$registerSort,
             'name' => $name,
             'userId' => (int)$userId > 0 ? (int)$userId : 0,
             'instrument' => $instrument,
@@ -2530,6 +2554,312 @@ ORDER BY `Nachname`, `Vorname`;",
         return $html;
     }
 
+    /**
+     * @return list<int>
+     */
+    private function getRegisterIdsExcludingKeins() {
+        $sql = sprintf(
+            "SELECT `Index` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        sqlerror();
+        $registerIds = array();
+        if($dbr) {
+            while($row = mysqli_fetch_array($dbr)) {
+                $registerIds[] = (int)$row['Index'];
+            }
+        }
+        return $registerIds;
+    }
+
+    private function appendResponseEntryFromRow(array $row2, $bus, &$whoYes, &$whoNo, &$whoMaybe) {
+        $name = $row2['Vorname'].' '.$row2['Nachname'];
+        $instrument = isset($row2['iName']) ? (string)$row2['iName'] : '';
+        $regColor = isset($row2['rColor']) ? $row2['rColor'] : '';
+        $regId = isset($row2['rIndex']) ? (int)$row2['rIndex'] : 0;
+        $regName = isset($row2['rName']) ? (string)$row2['rName'] : '';
+        $regSort = isset($row2['rSort']) ? (int)$row2['rSort'] : 0;
+        switch((int)$row2['Wert']) {
+        case 1:
+            $whoYes[] = $this->makeResponseEntry(1, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor, $regId, $regName, $regSort);
+            break;
+        case 2:
+            $whoNo[] = $this->makeResponseEntry(2, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor, $regId, $regName, $regSort);
+            break;
+        case 3:
+            $whoMaybe[] = $this->makeResponseEntry(3, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor, $regId, $regName, $regSort);
+            break;
+        default:
+            break;
+        }
+    }
+
+    /**
+     * @param array $aMeldungen
+     * @param list<int> $registerIds
+     * @return array{whoYes:array,whoNo:array,whoMaybe:array}
+     */
+    private function buildResponseListsFromMeldungen($aMeldungen, $bus, array $registerIds) {
+        $whoYes = array();
+        $whoNo = array();
+        $whoMaybe = array();
+        $seen = array();
+        foreach($registerIds as $registerId) {
+            $registerId = (int)$registerId;
+            foreach($aMeldungen as $row2) {
+                if((int)$row2['rIndex'] !== $registerId) {
+                    continue;
+                }
+                $uid = (int)$row2['User'];
+                if(isset($seen[$uid])) {
+                    continue;
+                }
+                $seen[$uid] = true;
+                $this->appendResponseEntryFromRow($row2, $bus, $whoYes, $whoNo, $whoMaybe);
+            }
+        }
+        foreach($aMeldungen as $row2) {
+            $uid = (int)$row2['User'];
+            if(isset($seen[$uid])) {
+                continue;
+            }
+            $seen[$uid] = true;
+            $this->appendResponseEntryFromRow($row2, $bus, $whoYes, $whoNo, $whoMaybe);
+        }
+        return array(
+            'whoYes' => $whoYes,
+            'whoNo' => $whoNo,
+            'whoMaybe' => $whoMaybe,
+        );
+    }
+
+    /**
+     * @param array $entries
+     * @return list<array{registerId:int,registerName:string,registerSort:int,registerColor:string,entries:array}>
+     */
+    /**
+     * @param array $entries
+     * @return array
+     */
+    private function sortResponseEntriesByRegister(array $entries) {
+        $groups = array();
+        foreach($entries as $entry) {
+            $userId = isset($entry['userId']) ? (int)$entry['userId'] : 0;
+            if($userId < 1) {
+                continue;
+            }
+            $registerId = isset($entry['registerId']) ? (int)$entry['registerId'] : 0;
+            $key = $registerId > 0 ? 'r'.$registerId : 'r0';
+            if(!isset($groups[$key])) {
+                $groups[$key] = array(
+                    'registerId' => $registerId,
+                    'registerName' => isset($entry['registerName']) ? (string)$entry['registerName'] : '',
+                    'registerSort' => isset($entry['registerSort']) ? (int)$entry['registerSort'] : 9999,
+                    'entries' => array(),
+                );
+            }
+            $groups[$key]['entries'][] = $entry;
+        }
+        $groupList = array_values($groups);
+        usort($groupList, function ($a, $b) {
+            if($a['registerId'] === 0 && $b['registerId'] !== 0) {
+                return 1;
+            }
+            if($b['registerId'] === 0 && $a['registerId'] !== 0) {
+                return -1;
+            }
+            if($a['registerSort'] !== $b['registerSort']) {
+                return $a['registerSort'] <=> $b['registerSort'];
+            }
+            return strcasecmp($a['registerName'], $b['registerName']);
+        });
+        $sorted = array();
+        foreach($groupList as $group) {
+            $items = $group['entries'];
+            usort($items, function ($a, $b) {
+                return strcasecmp((string)$a['name'], (string)$b['name']);
+            });
+            foreach($items as $entry) {
+                $sorted[] = $entry;
+            }
+        }
+        return $sorted;
+    }
+
+    private function responseChipTitleFromEntry(array $entry, $name) {
+        $meta = array();
+        if(!empty($entry['instrument'])) {
+            $meta[] = (string)$entry['instrument'];
+        }
+        if(isset($entry['children']) && $entry['children'] !== null && $entry['children'] !== false && (int)$entry['children'] > 0) {
+            $meta[] = '+'.(int)$entry['children'].' Kinder';
+        }
+        if(isset($entry['guests']) && $entry['guests'] !== null && $entry['guests'] !== false && (int)$entry['guests'] > 0) {
+            $meta[] = '+'.(int)$entry['guests'].' Gäste';
+        }
+        if(isset($entry['freeText']) && $entry['freeText'] !== null && (string)$entry['freeText'] !== '') {
+            $meta[] = (string)$entry['freeText'];
+        }
+        $title = (string)$name;
+        if(count($meta)) {
+            $title .= ' · '.implode(' · ', $meta);
+        }
+        return $title;
+    }
+
+    private function responseChipAttrsFromEntry(array $entry, callable $h) {
+        $regHex = '';
+        if(!empty($entry['registerColor']) && function_exists('normalizeHexColor')) {
+            $regHex = normalizeHexColor($entry['registerColor']);
+        }
+        $chipCls = 'mail-recipient-chip';
+        $chipStyle = '';
+        if($regHex !== '') {
+            $chipCls .= ' melde-response-editable-chip--register';
+            $chipStyle = ' style="--melde-chip-reg:'.$h($regHex).'"';
+        }
+        else {
+            $chipCls .= ' mail-recipient-chip--user';
+        }
+        return array($chipCls, $chipStyle);
+    }
+
+    private function renderReadOnlyResponseChipHtml(array $entry, callable $h) {
+        $userId = isset($entry['userId']) ? (int)$entry['userId'] : 0;
+        if($userId < 1) {
+            return '';
+        }
+        $name = isset($entry['name']) ? (string)$entry['name'] : '';
+        $title = $this->responseChipTitleFromEntry($entry, $name);
+        list($chipCls, $chipStyle) = $this->responseChipAttrsFromEntry($entry, $h);
+        $chipCls .= ' melde-response-readonly-chip';
+        $mayOpen = function_exists('entityMayOpen') && entityMayOpen('user', $userId);
+        if($mayOpen) {
+            $chipCls .= ' entity-open';
+        }
+        $titleAttr = $title !== $name ? ' title="'.$h($title).'"' : '';
+        $html = '<span class="'.$chipCls.'" role="listitem"';
+        if($mayOpen) {
+            $html .= ' tabindex="0" data-entity-type="user" data-entity-id="'.$userId.'"';
+        }
+        $html .= $chipStyle.$titleAttr.'>';
+        $html .= '<span>'.$h($name).'</span>';
+        $html .= '</span>';
+        return $html;
+    }
+
+    private function renderReadOnlyResponseChipRowHtml(array $entries, callable $h) {
+        $sorted = $this->sortResponseEntriesByRegister($entries);
+        if(!count($sorted)) {
+            return '';
+        }
+        $html = '<div class="mail-recipient-chips melde-response-readonly-chips" role="list">';
+        foreach($sorted as $entry) {
+            $html .= $this->renderReadOnlyResponseChipHtml($entry, $h);
+        }
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Read-only chip section (Ja / Nein / Unsicher) for modal and Mein Register.
+     * @param array $entries
+     * @param int $wert 1|2|3
+     */
+    private function renderReadOnlyResponseSectionHtml($entries, $wert) {
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $row = $this->renderReadOnlyResponseChipRowHtml($entries, $h);
+        if($row === '') {
+            return '';
+        }
+        return '<div class="melde-response-readonly-section" data-melde-wert="'.(int)$wert.'">'.$row.'</div>';
+    }
+
+    /**
+     * Inline chip preview on Mein Register list rows (register-filtered).
+     * @param array{whoYes:array,whoNo:array,whoMaybe:array} $lists
+     */
+    private function renderRegisterResponseChipBodyHtml(array $lists) {
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $sections = array(
+            array('wert' => 1, 'label' => 'Zusagen', 'entries' => $lists['whoYes'], 'chipClass' => $GLOBALS['optionsDB']['colorBtnYes']),
+            array('wert' => 3, 'label' => 'Unsicher', 'entries' => $lists['whoMaybe'], 'chipClass' => $GLOBALS['optionsDB']['colorBtnMaybe']),
+            array('wert' => 2, 'label' => 'Absagen', 'entries' => $lists['whoNo'], 'chipClass' => $GLOBALS['optionsDB']['colorBtnNo']),
+        );
+        $html = '';
+        foreach($sections as $section) {
+            if(!count($section['entries'])) {
+                continue;
+            }
+            $row = $this->renderReadOnlyResponseChipRowHtml($section['entries'], $h);
+            if($row === '') {
+                continue;
+            }
+            $html .= '<div class="melde-response-inline-section" data-melde-wert="'.(int)$section['wert'].'">';
+            $html .= '<span class="melde-response-inline-label melde-response-chip '.$h($section['chipClass']).'">'.$h($section['label']).'</span>';
+            $html .= $row;
+            $html .= '</div>';
+        }
+        if($html === '') {
+            return '';
+        }
+        return '<div class="melde-response-body melde-response-body--chips" data-melde-stop onclick="event.stopPropagation()">'.$html.'</div>';
+    }
+
+    private function renderEditableResponseChipHtml(array $entry, $wert, callable $h) {
+        $userId = isset($entry['userId']) ? (int)$entry['userId'] : 0;
+        if($userId < 1) {
+            return '';
+        }
+        $name = isset($entry['name']) ? (string)$entry['name'] : '';
+        $title = $this->responseChipTitleFromEntry($entry, $name);
+        list($chipCls, $chipStyle) = $this->responseChipAttrsFromEntry($entry, $h);
+        $chipCls .= ' melde-response-editable-chip';
+        $titleAttr = $title !== $name ? ' title="'.$h($title).'"' : '';
+        $html = '<span class="'.$chipCls.'" role="listitem"'
+            .' data-user-id="'.$userId.'" data-melde-wert="'.(int)$wert.'"'.$chipStyle.$titleAttr.'>';
+        $html .= '<span>'.$h($name).'</span>';
+        $html .= '<button type="button" class="mail-recipient-chip-remove" aria-label="Entfernen">&times;</button>';
+        $html .= '</span>';
+        return $html;
+    }
+
+    /**
+     * MELD-175: editable chip row for one response section (Ja/Nein/Unsicher).
+     * @param array $entries
+     * @param int $wert 1|2|3
+     */
+    private function renderEditableResponseSectionHtml($entries, $wert) {
+        if(!requirePermission('perm_editResponse')) {
+            return '';
+        }
+        $wert = (int)$wert;
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $html = '<div class="melde-response-editable-section" data-melde-wert="'.$wert.'">';
+        $sorted = $this->sortResponseEntriesByRegister($entries);
+        if(count($sorted)) {
+            $html .= '<div class="mail-recipient-chips melde-response-editable-chips" role="list">';
+            foreach($sorted as $entry) {
+                $html .= $this->renderEditableResponseChipHtml($entry, $wert, $h);
+            }
+            $html .= '</div>';
+        }
+        $html .= '<div class="melde-response-add profile-field">';
+        $html .= '<input type="text" class="w3-input w3-border profile-control melde-response-add-input '.$GLOBALS['optionsDB']['colorInputBackground'].'"'
+            .' placeholder="Person…" autocomplete="off" aria-label="Person hinzufügen" data-melde-wert="'.$wert.'">';
+        $html .= '<div class="mail-recipient-suggest melde-response-add-suggest" hidden></div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        return $html;
+    }
+
     private function buildResponseLists($filterregister) {
         $aMeldungen = $this->fetchResponseMeldungenRows();
 
@@ -2562,72 +2892,17 @@ ORDER BY `Nachname`, `Vorname`;",
         $whoNo = array();
         $whoMaybe = array();
 
-        if($this->Auftritt) {
-            $filterregister = (int)$filterregister;
-            if($filterregister) {
-                $registerIds = array($filterregister);
-            }
-            else {
-                $sql = sprintf(
-                    "SELECT `Index` FROM `%sRegister` WHERE `Name` != 'keins' ORDER BY `Sortierung`;",
-                    $GLOBALS['dbprefix']
-                );
-                $dbr = mysqli_query($GLOBALS['conn'], $sql);
-                sqlerror();
-                $registerIds = array();
-                while($row = mysqli_fetch_array($dbr)) {
-                    $registerIds[] = $row['Index'];
-                }
-            }
-            foreach($registerIds as $registerId) {
-                $registerId = (int)$registerId;
-                foreach($aMeldungen as $row2) {
-                    if((int)$row2['rIndex'] != $registerId) continue;
-                    $name = $row2['Vorname']." ".$row2['Nachname'];
-                    $instrument = $row2['iName'];
-                    $regColor = isset($row2['rColor']) ? $row2['rColor'] : '';
-                    switch($row2['Wert']) {
-                    case 1:
-                        $whoYes[] = $this->makeResponseEntry(1, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor);
-                        break;
-                    case 2:
-                        $whoNo[] = $this->makeResponseEntry(2, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor);
-                        break;
-                    case 3:
-                        $whoMaybe[] = $this->makeResponseEntry(3, $name, $instrument, $row2['Children'], $row2['Guests'], $row2['User'], $bus, $regColor);
-                        break;
-                    default:
-                        break;
-                    }
-                }
-            }
+        $filterregister = (int)$filterregister;
+        if($filterregister) {
+            $registerIds = array($filterregister);
         }
         else {
-            $sql = sprintf("SELECT * FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `Nachname` FROM `%sUser`) `%sUser` ON `User` = `uIndex` WHERE `Termin` = '%d' ORDER BY `Nachname`, `Vorname`;",
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $GLOBALS['dbprefix'],
-            $this->Index
-            );
-            $dbr = mysqli_query($GLOBALS['conn'], $sql);
-            sqlerror();
-            while($row = mysqli_fetch_array($dbr)) {
-                $name = $row['Vorname']." ".$row['Nachname'];
-                switch($row['Wert']) {
-                case 1:
-                    $whoYes[] = $this->makeResponseEntry(1, $name, '', $row['Children'], $row['Guests'], $row['User'], $bus);
-                    break;
-                case 2:
-                    $whoNo[] = $this->makeResponseEntry(2, $name, '', $row['Children'], $row['Guests'], $row['User'], $bus);
-                    break;
-                case 3:
-                    $whoMaybe[] = $this->makeResponseEntry(3, $name, '', $row['Children'], $row['Guests'], $row['User'], $bus);
-                    break;
-                default:
-                    break;
-                }
-            }
+            $registerIds = $this->getRegisterIdsExcludingKeins();
         }
+        $listsByRegister = $this->buildResponseListsFromMeldungen($aMeldungen, $bus, $registerIds);
+        $whoYes = $listsByRegister['whoYes'];
+        $whoNo = $listsByRegister['whoNo'];
+        $whoMaybe = $listsByRegister['whoMaybe'];
 
         return array(
             'whoYes' => $whoYes,
@@ -2664,6 +2939,26 @@ ORDER BY `Nachname`, `Vorname`;",
         }
         $terminTitle = implode(' — ', array_filter($titleParts));
 
+        $canEditResponse = requirePermission('perm_editResponse');
+        $userCatalogJson = '[]';
+        if($canEditResponse && function_exists('loanUserChipCatalog')) {
+            $userCatalogJson = json_encode(loanUserChipCatalog(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+            if($userCatalogJson === false) {
+                $userCatalogJson = '[]';
+            }
+        }
+
+        if($canEditResponse) {
+            $whoYesHtml = $this->renderEditableResponseSectionHtml($lists['whoYes'], 1);
+            $whoMaybeHtml = $this->renderEditableResponseSectionHtml($lists['whoMaybe'], 3);
+            $whoNoHtml = $this->renderEditableResponseSectionHtml($lists['whoNo'], 2);
+        }
+        else {
+            $whoYesHtml = $this->renderReadOnlyResponseSectionHtml($lists['whoYes'], 1);
+            $whoMaybeHtml = $this->renderReadOnlyResponseSectionHtml($lists['whoMaybe'], 3);
+            $whoNoHtml = $this->renderReadOnlyResponseSectionHtml($lists['whoNo'], 2);
+        }
+
         return render('termin/response_modal', array(
             'terminId' => (int)$this->Index,
             'filterRegister' => (int)$filterregister,
@@ -2673,12 +2968,14 @@ ORDER BY `Nachname`, `Vorname`;",
             'orchestraActive' => $orchestraActive,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
-            'whoYesHtml' => $this->renderResponseEntries($lists['whoYes']),
-            'whoMaybeHtml' => $this->renderResponseEntries($lists['whoMaybe']),
-            'whoNoHtml' => $this->renderResponseEntries($lists['whoNo']),
+            'whoYesHtml' => $whoYesHtml,
+            'whoMaybeHtml' => $whoMaybeHtml,
+            'whoNoHtml' => $whoNoHtml,
             'countYes' => count($lists['whoYes']),
             'countMaybe' => count($lists['whoMaybe']),
             'countNo' => count($lists['whoNo']),
+            'canEditResponse' => $canEditResponse,
+            'userCatalogJson' => $userCatalogJson,
         ));
     }
 

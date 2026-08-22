@@ -43,6 +43,7 @@ if(!empty($GLOBALS['mlDeferredToasts'])) {
 <script src="<?php echo assetUrl('js/listRowSearch.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/adminListCount.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/loanUserChips.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/meldeResponseChips.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/inventarPhotos.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/modal.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/appDialog.js'); ?>"></script>

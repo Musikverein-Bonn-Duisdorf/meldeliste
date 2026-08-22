@@ -17,6 +17,42 @@ function initLoanUserChipsInModal(root) {
     }
 }
 
+function initMeldeResponseChipsInModal(root) {
+    if(typeof MeldeResponseChips !== 'undefined' && MeldeResponseChips && typeof MeldeResponseChips.initIn === 'function') {
+        MeldeResponseChips.initIn(root || document.getElementById('ajaxModalContent') || document);
+    }
+}
+
+function orchestraFoldStorageKey(root) {
+    root = root || document;
+    var modal = root.querySelector ? root.querySelector('.termin-response-modal') : null;
+    var register = modal ? (parseInt(modal.getAttribute('data-register'), 10) || 0) : 0;
+    return register > 0 ? 'meldeResponseOrchestraFoldRegister' : 'meldeResponseOrchestraFold';
+}
+
+function initOrchestraFoldInModal(root) {
+    root = root || document.getElementById('ajaxModalContent') || document;
+    var fold = root.querySelector('.termin-response-modal .orchestra-fold');
+    if(!fold) return;
+    var storageKey = orchestraFoldStorageKey(root);
+    try {
+        var stored = localStorage.getItem(storageKey);
+        if(stored === '0') {
+            fold.removeAttribute('open');
+        }
+        else if(stored === '1') {
+            fold.setAttribute('open', '');
+        }
+    } catch (e) {}
+    if(fold._orchestraFoldBound) return;
+    fold._orchestraFoldBound = true;
+    fold.addEventListener('toggle', function () {
+        try {
+            localStorage.setItem(storageKey, fold.open ? '1' : '0');
+        } catch (e2) {}
+    });
+}
+
 function openModal(type, id, register) {
     var host = document.getElementById('ajaxModalHost');
     var content = document.getElementById('ajaxModalContent');
@@ -28,6 +64,8 @@ function openModal(type, id, register) {
         content.innerHTML = modalCache[key];
         host.style.display = 'block';
         initLoanUserChipsInModal(content);
+        initMeldeResponseChipsInModal(content);
+        initOrchestraFoldInModal(content);
         if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         return;
     }
@@ -50,11 +88,15 @@ function openModal(type, id, register) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            initMeldeResponseChipsInModal(content);
+            initOrchestraFoldInModal(content);
             if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else if(xhr.responseText) {
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            initMeldeResponseChipsInModal(content);
+            initOrchestraFoldInModal(content);
             if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else {
@@ -331,20 +373,32 @@ function invalidateTerminResponseModalCache(terminId) {
     });
 }
 
+function invalidateShiftResponseModalCache(shiftId) {
+    shiftId = parseInt(shiftId, 10) || 0;
+    if(!shiftId) return;
+    var key = 'shiftResponse:' + shiftId;
+    if(modalCache[key]) {
+        delete modalCache[key];
+    }
+}
+
 function getOpenTerminResponseContext() {
     var host = document.getElementById('ajaxModalHost');
     var content = document.getElementById('ajaxModalContent');
     if(!host || !content || host.style.display === 'none') return null;
     var root = content.querySelector('.termin-response-modal');
     if(!root) return null;
+    if(parseInt(root.getAttribute('data-shift-id'), 10) > 0) return null;
     var terminId = parseInt(root.getAttribute('data-termin-id'), 10) || 0;
     if(!terminId) return null;
     var register = parseInt(root.getAttribute('data-register'), 10) || 0;
     var activeCb = content.querySelector('.orchestra-panel-toggle input[type="checkbox"]');
+    var fold = content.querySelector('.termin-response-modal .orchestra-fold');
     return {
         terminId: terminId,
         register: register,
-        activeOnly: !!(activeCb && activeCb.checked)
+        activeOnly: !!(activeCb && activeCb.checked),
+        orchestraFoldOpen: fold ? fold.open : (register > 0 ? false : true)
     };
 }
 
@@ -377,6 +431,7 @@ function refreshOpenTerminResponseModal(terminId) {
 
     var scrollTop = host.scrollTop || 0;
     var activeOnly = ctx.activeOnly;
+    var orchestraFoldOpen = ctx.orchestraFoldOpen;
     var register = ctx.register;
     var key = 'terminResponse:' + ctx.terminId;
     if(register) key += ':' + register;
@@ -409,6 +464,17 @@ function refreshOpenTerminResponseModal(terminId) {
 
         modalCache[key] = xhr.responseText;
         content.innerHTML = xhr.responseText;
+        initMeldeResponseChipsInModal(content);
+        initOrchestraFoldInModal(content);
+        var fold = content.querySelector('.termin-response-modal .orchestra-fold');
+        if(fold) {
+            if(orchestraFoldOpen) {
+                fold.setAttribute('open', '');
+            }
+            else {
+                fold.removeAttribute('open');
+            }
+        }
         if(activeOnly) {
             var cb = content.querySelector('.orchestra-panel-toggle input[type="checkbox"]');
             if(cb) {
@@ -420,6 +486,81 @@ function refreshOpenTerminResponseModal(terminId) {
     };
     var url = 'getModal.php?type=terminResponse&id=' + encodeURIComponent(ctx.terminId);
     if(register) url += '&register=' + encodeURIComponent(register);
+    xhr.open('GET', url, true);
+    xhr.send();
+}
+
+var shiftResponseRefreshTimer = null;
+var shiftResponseRefreshSeq = 0;
+var shiftResponseRefreshXhr = null;
+
+function getOpenShiftResponseContext() {
+    var host = document.getElementById('ajaxModalHost');
+    var content = document.getElementById('ajaxModalContent');
+    if(!host || !content || host.style.display === 'none') return null;
+    var root = content.querySelector('.shift-response-modal');
+    if(!root) return null;
+    var shiftId = parseInt(root.getAttribute('data-shift-id'), 10) || 0;
+    if(!shiftId) return null;
+    return {
+        shiftId: shiftId,
+        terminId: parseInt(root.getAttribute('data-termin-id'), 10) || 0
+    };
+}
+
+function scheduleRefreshOpenShiftResponseModal(shiftId) {
+    shiftId = parseInt(shiftId, 10) || 0;
+    if(!shiftId) return;
+    invalidateShiftResponseModalCache(shiftId);
+    if(shiftResponseRefreshTimer) {
+        clearTimeout(shiftResponseRefreshTimer);
+    }
+    shiftResponseRefreshTimer = setTimeout(function() {
+        shiftResponseRefreshTimer = null;
+        refreshOpenShiftResponseModal(shiftId);
+    }, 280);
+}
+
+function refreshOpenShiftResponseModal(shiftId) {
+    shiftId = parseInt(shiftId, 10) || 0;
+    var ctx = getOpenShiftResponseContext();
+    if(!ctx) return;
+    if(shiftId && ctx.shiftId !== shiftId) return;
+
+    var host = document.getElementById('ajaxModalHost');
+    var content = document.getElementById('ajaxModalContent');
+    if(!host || !content) return;
+
+    var scrollTop = host.scrollTop || 0;
+    var key = 'shiftResponse:' + ctx.shiftId;
+
+    if(shiftResponseRefreshXhr && shiftResponseRefreshXhr.abort) {
+        try { shiftResponseRefreshXhr.abort(); } catch(e) {}
+    }
+    var seq = ++shiftResponseRefreshSeq;
+    var xhr;
+    if(window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    }
+    else {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    shiftResponseRefreshXhr = xhr;
+    xhr.onreadystatechange = function() {
+        if(xhr.readyState !== 4) return;
+        if(seq !== shiftResponseRefreshSeq) return;
+        shiftResponseRefreshXhr = null;
+        if(xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return;
+
+        var still = getOpenShiftResponseContext();
+        if(!still || still.shiftId !== ctx.shiftId) return;
+
+        modalCache[key] = xhr.responseText;
+        content.innerHTML = xhr.responseText;
+        initMeldeResponseChipsInModal(content);
+        host.scrollTop = scrollTop;
+    };
+    var url = 'getModal.php?type=shiftResponse&id=' + encodeURIComponent(ctx.shiftId);
     xhr.open('GET', url, true);
     xhr.send();
 }
