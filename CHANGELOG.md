@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-22-a3a7d (2026-08-22)
+
+- MELD-170: Terminliste – Melde-Modal ohne Register-Filter bei perm_showResponse.
+- MELD-170: Hotfix – Melde-Modal Terminliste ohne Register-Filter für Admins
+
 ## 2026-08-22-3c38e (2026-08-22)
 
 - MELD-170: Terminliste und Schichten – Register-Filter nur bei Besetzung.
