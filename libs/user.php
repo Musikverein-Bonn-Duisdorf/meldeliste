@@ -639,10 +639,9 @@ class User
         }
     }
 
-    /** Gastmusiker-Defaults: keine Mail/App-Benachrichtigungen. */
+    /** Gastmusiker-Defaults: Active aus, keine App-Hinweise; getMail/notifyInbox bleiben wählbar (gezielter Verteiler). */
     public function applyGuestMusicianDefaults() {
         $this->Active = 0;
-        $this->getMail = 0;
         $this->notifyAppMail = 0;
         $this->notifyAppTerminNew = 0;
         $this->notifyAppTerminChange = 0;
