@@ -1939,8 +1939,13 @@ class Termin
                 }
                 $str .= '</div>';
                 $str .= '<div class="melde-actions">';
+                $shiftCounts = $this->getScopedShiftResponseCounts($s);
                 if($s->Bedarf) {
-                    $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
+                    $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '
+                        .$h($shiftCounts['yes'].' / '.(int)$s->Bedarf).'</div>';
+                }
+                else {
+                    $str .= $this->renderResponseStatusChips($shiftCounts['yes'], $shiftCounts['no'], $shiftCounts['maybe']);
                 }
                 $str .= '<div class="melde-btns">';
                 if($s->Bedarf) {
@@ -1972,6 +1977,31 @@ class Termin
     }
 
     /**
+     * @return array{yes:int,no:int,maybe:int}
+     */
+    protected function getScopedResponseCounts($filterregister = 0) {
+        $lists = $this->buildResponseLists($filterregister);
+        return array(
+            'yes' => count($lists['whoYes']),
+            'no' => count($lists['whoNo']),
+            'maybe' => count($lists['whoMaybe']),
+        );
+    }
+
+    /**
+     * @param Shift $s
+     * @return array{yes:int,no:int,maybe:int}
+     */
+    protected function getScopedShiftResponseCounts($s) {
+        $lists = $this->buildShiftResponseLists($s);
+        return array(
+            'yes' => count($lists['whoYes']),
+            'no' => count($lists['whoNo']),
+            'maybe' => count($lists['whoMaybe']),
+        );
+    }
+
+    /**
      * Status-Mail button or capacity count for list rows (MELD-141).
      */
     protected function makeListMetaHtml($user) {
@@ -1980,8 +2010,9 @@ class Termin
                 .' onclick="getStatus('.(int)$user.', '.(int)$this->Index.')">Status per Mail</button>';
         }
         if($this->Capacity) {
+            $counts = $this->getScopedResponseCounts(0);
             return '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '
-                .htmlspecialchars($this->getResponseString(), ENT_QUOTES, 'UTF-8').'</div>';
+                .htmlspecialchars($counts['yes'].' / '.$this->Capacity, ENT_QUOTES, 'UTF-8').'</div>';
         }
         return '';
     }
@@ -2327,11 +2358,18 @@ class Termin
     }
 
     /**
+     * Schicht mit Register-Filter nur bei Besetzungstermin und Bedarf > 0.
+     */
+    protected function shiftUsesRegisterFilter($s) {
+        return (bool)$this->Auftritt && (int)$s->Bedarf > 0;
+    }
+
+    /**
      * @param Shift $s
      * @return array{whoYes:array,whoNo:array,whoMaybe:array}
      */
     private function buildShiftResponseLists($s) {
-        $scope = $this->responseRegisterScope(0, (int)$s->Bedarf > 0);
+        $scope = $this->responseRegisterScope(0, $this->shiftUsesRegisterFilter($s));
         $aMeldungen = $s->fetchResponseMeldungenRows();
         return $this->buildResponseListsFromMeldungen(
             $aMeldungen,
