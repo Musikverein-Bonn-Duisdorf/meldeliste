@@ -54,7 +54,7 @@ if($regDbr) {
 }
 ?>
 <?php echo renderFlashHtml(); ?>
-<?php adminListPageBegin('Personen', 'Personen ('.$nPersonen.')'); ?>
+<?php adminListPageBegin('Personen', 'Personen', array('listCount' => $nPersonen)); ?>
 <?php adminListSearchField('Nach Person suchen…', array('onkeyup' => 'filterPersonen()')); ?>
 <?php if(!empty($GLOBALS['optionsDB']['showOrchestraView'])) { ?>
 <details class="orchestra-fold" id="orchestraFold" open>

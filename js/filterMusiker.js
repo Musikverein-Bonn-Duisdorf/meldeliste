@@ -17,4 +17,7 @@ function filterMusiker() {
 	    tr[i].classList.add("list-filtered-out");
 	}
     }
+    if (typeof updateAdminListTitleCount === 'function') {
+        updateAdminListTitleCount();
+    }
 }

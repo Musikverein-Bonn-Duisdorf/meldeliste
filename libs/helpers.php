@@ -799,7 +799,16 @@ function adminListPageBegin($kicker, $title, $options = array()) {
     echo '    <header class="'.htmlspecialchars($heroCls, ENT_QUOTES, 'UTF-8').'">'."\n";
     echo '      <div class="profile-hero-text">'."\n";
     echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
-    echo '        <h2 class="profile-title">'.htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8').'</h2>'."\n";
+    $titleBase = (string)$title;
+    $titleAttrs = '';
+    if(isset($options['listCount'])) {
+        $listCount = (int)$options['listCount'];
+        $titleBase = preg_replace('/\s*\(\d+\)\s*$/', '', $titleBase);
+        $titleAttrs = ' data-list-title-base="'.htmlspecialchars($titleBase, ENT_QUOTES, 'UTF-8').'"'
+            .' data-list-total="'.(int)$listCount.'"';
+        $title = $titleBase.' ('.$listCount.')';
+    }
+    echo '        <h2 class="profile-title"'.$titleAttrs.'>'.htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8').'</h2>'."\n";
     echo '      </div>'."\n";
     if($actionsHtml !== '') {
         echo '      <div class="profile-hero-actions">'.$actionsHtml.'</div>'."\n";

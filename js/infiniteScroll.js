@@ -46,6 +46,9 @@
     }
 
     function filterActive() {
+        if(typeof window.adminListFilterActive === 'function') {
+            return window.adminListFilterActive();
+        }
         if(filterQuery() !== '') return true;
         // Inventory "Versichert" chip (MELD-177) — keep scanning while sparse
         var insured = document.getElementById('filterInsured');
@@ -380,6 +383,9 @@
 
             appendHtml(list, sentinel, xhr.responseText);
             applyFilter(sentinel);
+            if(typeof window.updateAdminListTitleCount === 'function') {
+                window.updateAdminListTitleCount();
+            }
 
             if(!hasMore) {
                 showEnd();

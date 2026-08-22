@@ -18,4 +18,7 @@ function filterLog() {
 	    row.classList.add("list-filtered-out");
 	}
     }
+    if (typeof updateAdminListTitleCount === 'function') {
+        updateAdminListTitleCount();
+    }
 }

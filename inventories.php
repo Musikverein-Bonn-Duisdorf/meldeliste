@@ -42,7 +42,7 @@ $plusBtn = requirePermission('perm_editInventories')
     ? '<a class="w3-button w3-border '.$GLOBALS['optionsDB']['colorInputBackground'].'" href="new-inventory.php" title="neues Inventar"><i class="fas fa-plus"></i></a>'
     : '';
 $extraBtns = trim($exportBtn.' '.$plusBtn);
-adminListPageBegin('Inventar', 'Inventar ('.$nInventories.')');
+adminListPageBegin('Inventar', 'Inventar', array('listCount' => (int)$nInventories));
 adminListSearchField('Nach Inventar suchen…', array(
     'onkeyup' => 'filterMusiker()',
     'extraHtml' => $extraBtns,
