@@ -2,6 +2,19 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-22-3c38e (2026-08-22)
+
+- MELD-170: Terminliste und Schichten – Register-Filter nur bei Besetzung.
+- MELD-170: Register-Filter nur bei Besetzungs-Terminen und -Schichten.
+- MELD-170: Rückmeldungen ohne Admin-Recht auf eigenes Register beschränken.
+- MELD-170: Rückmeldungs-Button in Terminliste für alle Nutzer.
+- MELD-170/175: Chip-Rückmeldungen für Schichten, Register und Rechte.
+- MELD-170: Meldungen in Terminübersicht und Chip-Bearbeitung (MELD-175)
+- MELD-170: Terminliste – Register-Filter nur bei Besetzung
+- MELD-170: Register-Filter nur bei Besetzungs-Terminen und -Schichten
+- MELD-170: Rückmeldungen ohne Admin-Recht nur eigenes Register
+- MELD-170: Rückmeldungs-Button in Terminliste für alle Nutzer
+
 ## 2026-08-22-c55b5 (2026-08-22)
 
 - MELD-219: alink an Dokument-Streams für externes PDF-Öffnen
