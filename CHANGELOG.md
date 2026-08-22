@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-22-988ce (2026-08-22)
+
+- MELD-219: Dokumente und Scans in App-Viewer mit Chrome öffnen
+- MELD-219: Dokument-Viewer und Login-next (217/218)
+
 ## 2026-08-18-b9760 (2026-08-18)
 
 - MELD-213: Erinnerung auch nach Speichern/gelöschter Vereinsunterschrift neu senden
