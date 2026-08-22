@@ -49,6 +49,7 @@
       this.hiddenEl = opts.hiddenEl;
       this.ids = parseIds(this.hiddenEl);
       this._active = -1;
+      this._chipSuggest = global.ChipSuggest;
       if(this.inputEl) {
         this.inputEl.addEventListener('input', this.onInput.bind(this));
         this.inputEl.addEventListener('keydown', this.onKeydown.bind(this));
@@ -144,18 +145,20 @@
       items.forEach(function(row, idx) {
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'mail-recipient-suggest-item';
+        btn.className = self._chipSuggest
+          ? self._chipSuggest.itemClassName(idx, self._active)
+          : 'mail-recipient-suggest-item';
         btn.textContent = row.label;
         btn.addEventListener('mousedown', function(e) {
           e.preventDefault();
           self.addId(row.id);
         });
-        if(idx === self._active) {
-          btn.className += ' mail-recipient-suggest-item--active';
-        }
         self.suggestEl.appendChild(btn);
       });
       this.suggestEl.hidden = false;
+      if(this._chipSuggest && this._active >= 0) {
+        this._chipSuggest.highlight(this.suggestEl, this._active, false);
+      }
     },
 
     onInput: function() {
@@ -170,21 +173,21 @@
     },
 
     onKeydown: function(e) {
-      var items = this.suggestEl && !this.suggestEl.hidden
-        ? this.suggestEl.querySelectorAll('.mail-recipient-suggest-item')
-        : [];
-      if(e.key === 'ArrowDown' && items.length) {
+      var list = this.matches(this.inputEl ? this.inputEl.value : '');
+      if(e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if(!list.length) return;
         e.preventDefault();
-        this._active = Math.min(this._active + 1, items.length - 1);
-        this.showSuggest(this.matches(this.inputEl.value));
-      }
-      else if(e.key === 'ArrowUp' && items.length) {
-        e.preventDefault();
-        this._active = Math.max(this._active - 1, 0);
-        this.showSuggest(this.matches(this.inputEl.value));
+        var next = this._chipSuggest
+          ? this._chipSuggest.stepIndex(e.key, this._active, list.length, true)
+          : this._active;
+        if(next === null) return;
+        this._active = next;
+        this.showSuggest(list);
+        if(this._chipSuggest) {
+          this._chipSuggest.highlight(this.suggestEl, this._active, true);
+        }
       }
       else if(e.key === 'Enter') {
-        var list = this.matches(this.inputEl ? this.inputEl.value : '');
         if(list.length) {
           e.preventDefault();
           var idx = this._active >= 0 ? this._active : 0;

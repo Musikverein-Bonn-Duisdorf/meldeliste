@@ -44,6 +44,7 @@
       var selectedId = parseInt(hiddenEl.value, 10);
       if(isNaN(selectedId)) selectedId = 0;
       var activeIndex = -1;
+      var chipSuggest = global.ChipSuggest;
 
       function labelFor(id) {
         id = Number(id);
@@ -114,8 +115,9 @@
         items.forEach(function(row, idx) {
           var btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'mail-recipient-suggest-item'
-            + (idx === activeIndex ? ' mail-recipient-suggest-item--active' : '');
+          btn.className = chipSuggest
+            ? chipSuggest.itemClassName(idx, activeIndex)
+            : 'mail-recipient-suggest-item';
           var label = document.createElement('span');
           label.textContent = row.label;
           btn.appendChild(label);
@@ -132,6 +134,9 @@
           suggestEl.appendChild(btn);
         });
         suggestEl.hidden = false;
+        if(chipSuggest && activeIndex >= 0) {
+          chipSuggest.highlight(suggestEl, activeIndex, false);
+        }
       }
 
       function selectUser(id) {
@@ -153,16 +158,18 @@
       });
       inputEl.addEventListener('keydown', function(e) {
         var items = matches(inputEl.value);
-        if(e.key === 'ArrowDown') {
+        if(e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
           if(!items.length) return;
-          activeIndex = (activeIndex + 1) % items.length;
+          var next = chipSuggest
+            ? chipSuggest.stepIndex(e.key, activeIndex, items.length, true)
+            : activeIndex;
+          if(next === null) return;
+          activeIndex = next;
           showSuggest();
-        } else if(e.key === 'ArrowUp') {
-          e.preventDefault();
-          if(!items.length) return;
-          activeIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
-          showSuggest();
+          if(chipSuggest) {
+            chipSuggest.highlight(suggestEl, activeIndex, true);
+          }
         } else if(e.key === 'Enter') {
           if(activeIndex >= 0 && items[activeIndex]) {
             e.preventDefault();
