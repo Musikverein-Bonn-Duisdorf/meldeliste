@@ -2,6 +2,13 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-22-46a9f (2026-08-22)
+
+- MELD-134: Login ohne Unterscheidung nach Active-Status.
+- MELD-134: E-Mail-Kanal für Gastmusiker beibehalten.
+- MELD-134: Login ohne Unterscheidung nach Active-Status
+- MELD-134: E-Mail-Kanal für Gastmusiker beibehalten
+
 ## 2026-08-22-d7478 (2026-08-22)
 
 - MELD-175: Pfeiltasten-Navigation in allen Chip-Vorschlagslisten.
