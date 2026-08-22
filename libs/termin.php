@@ -1856,13 +1856,6 @@ class Termin
         $str .= '</div>';
 
         $str .= '<div class="melde-actions" data-melde-stop>';
-        if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton']) && !$this->Shifts) {
-            // GET link so Android WebView can intercept/download (MELD-180); POST still accepted server-side
-            $str .= '<a id="icalform'.$tid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'"'
-                .' title="In Kalender" aria-label="In Kalender eintragen" download>'
-                .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
-        }
-
         $str .= $this->makeListMetaHtml($user);
         if(!$this->Shifts) {
             $str .= '<div class="melde-btns">';
@@ -1878,6 +1871,12 @@ class Termin
                 $str .= $this->makeButtonsUser(3, 0, $this->Wert, $user, true);
             }
             $str .= '</div>';
+            if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+                $str .= '<a id="icalform'.$tid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'"'
+                    .' title="In Kalender" aria-label="In Kalender eintragen" download>'
+                    .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
+            }
+            $str .= $this->renderMeldeResponseBtn($tid, 0);
         }
         $str .= '</div>'; // melde-actions
         $str .= '</div>'; // melde-row-main
@@ -1939,12 +1938,6 @@ class Termin
                 }
                 $str .= '</div>';
                 $str .= '<div class="melde-actions">';
-                if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
-                    $sid = (int)$s->Index;
-                    $str .= '<a id="icalform'.$tid.'_s'.$sid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'&amp;shiftID='.$sid.'"'
-                        .' title="In Kalender" aria-label="In Kalender eintragen" download>'
-                        .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
-                }
                 if($s->Bedarf) {
                     $str .= '<div class="melde-meta"><i class="fas fa-user-friends" aria-hidden="true"></i> '.$h($s->getResponseString()).'</div>';
                 }
@@ -1961,6 +1954,13 @@ class Termin
                     $str .= $this->makeShiftButtonsUser(3, 0, $s->Index, $m->Wert, $user, true);
                 }
                 $str .= '</div>';
+                if(!empty($GLOBALS['optionsDB']['showAddToCalendarButton'])) {
+                    $sid = (int)$s->Index;
+                    $str .= '<a id="icalform'.$tid.'_s'.$sid.'" class="melde-ical melde-ical-btn" href="download-ics.php?appID='.$tid.'&amp;shiftID='.$sid.'"'
+                        .' title="In Kalender" aria-label="In Kalender eintragen" download>'
+                        .'<i class="fa fa-calendar-plus" aria-hidden="true"></i></a>';
+                }
+                $str .= $this->renderShiftResponseBtn((int)$s->Index);
                 $str .= '</div>';
                 $str .= '</div>';
             }
@@ -1983,6 +1983,65 @@ class Termin
                 .htmlspecialchars($this->getResponseString(), ENT_QUOTES, 'UTF-8').'</div>';
         }
         return '';
+    }
+
+    /**
+     * MELD-170: open termin response modal from Terminübersicht (iCal-style icon button).
+     */
+    protected function renderMeldeResponseBtn($terminId, $register = 0) {
+        if(!requirePermission('perm_showResponse')) {
+            return '';
+        }
+        $terminId = (int)$terminId;
+        $register = (int)$register;
+        $onclick = "event.stopPropagation();openModal('terminResponse', ".$terminId;
+        if($register > 0) {
+            $onclick .= ', '.$register;
+        }
+        $onclick .= ')';
+        return '<button type="button" class="melde-ical melde-ical-btn melde-response-btn"'
+            .' onclick="'.$onclick.'" title="Meldungen" aria-label="Meldungen">'
+            .'<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+    }
+
+    /**
+     * MELD-170: open shift response modal from Terminübersicht.
+     */
+    protected function renderShiftResponseBtn($shiftId) {
+        if(!requirePermission('perm_showResponse')) {
+            return '';
+        }
+        $shiftId = (int)$shiftId;
+        if($shiftId < 1) {
+            return '';
+        }
+        return '<button type="button" class="melde-ical melde-ical-btn melde-response-btn"'
+            .' onclick="event.stopPropagation();openModal(\'shiftResponse\', '.$shiftId.')"'
+            .' title="Meldungen" aria-label="Meldungen Schicht">'
+            .'<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+    }
+
+    /**
+     * MELD-175: Person mit Zusage/Unsicher in Sichtbarkeit aufnehmen, wenn Termin sonst unsichtbar.
+     */
+    public function ensureUserVisibleForMeldedResponse($userId, $wert) {
+        $userId = (int)$userId;
+        $wert = (int)$wert;
+        if($userId < 1 || ($wert !== 1 && $wert !== 3)) {
+            return false;
+        }
+        if($this->isVisibleToUser($userId, array('asViewer' => false))) {
+            return false;
+        }
+        $vis = $this->getVisibilitySpecArray();
+        $have = array_fill_keys($vis['users'], true);
+        if(!empty($have[$userId])) {
+            return false;
+        }
+        $vis['users'][] = $userId;
+        $this->setVisibilitySpecArray($vis, false);
+        $this->save();
+        return true;
     }
 
     /**
@@ -2394,7 +2453,10 @@ ORDER BY `Nachname`, `Vorname`;",
             }
             $sumAll .= ' / '.sprintf('%02d', $snReg);
             $actions = $this->renderResponseStatusChips($sumYes, $snein, $sumMaybe, $sumAll);
-            $body = '<div class="melde-response-body">'.$regRows.'</div>';
+            $body = '<details class="melde-response-regs-fold" onclick="event.stopPropagation()">'
+                .'<summary class="melde-response-regs-fold-summary">Register</summary>'
+                .'<div class="melde-response-body">'.$regRows.'</div>'
+                .'</details>';
             return $this->renderMeldeResponseCard($filterregister, $modalOpen, $actions, $body);
         }
 
@@ -2527,6 +2589,57 @@ ORDER BY `Nachname`, `Vorname`;",
                 'entry' => $entry,
             ));
         }
+        return $html;
+    }
+
+    /**
+     * MELD-175: editable chip row for one response section (Ja/Nein/Unsicher).
+     * @param array $entries
+     * @param int $wert 1|2|3
+     */
+    private function renderEditableResponseSectionHtml($entries, $wert) {
+        $wert = (int)$wert;
+        $h = function ($s) {
+            return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+        };
+        $html = '<div class="melde-response-editable-section" data-melde-wert="'.$wert.'">';
+        $html .= '<div class="mail-recipient-chips melde-response-editable-chips" role="list">';
+        foreach($entries as $entry) {
+            $userId = isset($entry['userId']) ? (int)$entry['userId'] : 0;
+            if($userId < 1) {
+                continue;
+            }
+            $name = isset($entry['name']) ? (string)$entry['name'] : '';
+            $meta = array();
+            if(!empty($entry['instrument'])) {
+                $meta[] = (string)$entry['instrument'];
+            }
+            if(isset($entry['children']) && $entry['children'] !== null && $entry['children'] !== false && (int)$entry['children'] > 0) {
+                $meta[] = '+'.(int)$entry['children'].' Kinder';
+            }
+            if(isset($entry['guests']) && $entry['guests'] !== null && $entry['guests'] !== false && (int)$entry['guests'] > 0) {
+                $meta[] = '+'.(int)$entry['guests'].' Gäste';
+            }
+            if(isset($entry['freeText']) && $entry['freeText'] !== null && (string)$entry['freeText'] !== '') {
+                $meta[] = (string)$entry['freeText'];
+            }
+            $label = $name;
+            if(count($meta)) {
+                $label .= ' · '.implode(' · ', $meta);
+            }
+            $html .= '<span class="mail-recipient-chip mail-recipient-chip--user melde-response-editable-chip" role="listitem"'
+                .' data-user-id="'.$userId.'" data-melde-wert="'.$wert.'">';
+            $html .= '<span>'.$h($label).'</span>';
+            $html .= '<button type="button" class="mail-recipient-chip-remove" aria-label="Entfernen">&times;</button>';
+            $html .= '</span>';
+        }
+        $html .= '</div>';
+        $html .= '<div class="melde-response-add profile-field">';
+        $html .= '<input type="text" class="w3-input w3-border profile-control melde-response-add-input '.$GLOBALS['optionsDB']['colorInputBackground'].'"'
+            .' placeholder="Person…" autocomplete="off" aria-label="Person hinzufügen" data-melde-wert="'.$wert.'">';
+        $html .= '<div class="mail-recipient-suggest melde-response-add-suggest" hidden></div>';
+        $html .= '</div>';
+        $html .= '</div>';
         return $html;
     }
 
@@ -2664,6 +2777,21 @@ ORDER BY `Nachname`, `Vorname`;",
         }
         $terminTitle = implode(' — ', array_filter($titleParts));
 
+        $canEditResponse = requirePermission('perm_editResponse');
+        $userCatalogJson = '[]';
+        if($canEditResponse && function_exists('loanUserChipCatalog')) {
+            $userCatalogJson = json_encode(loanUserChipCatalog(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+            if($userCatalogJson === false) {
+                $userCatalogJson = '[]';
+            }
+        }
+
+        if($canEditResponse) {
+            $whoYesHtml = $this->renderEditableResponseSectionHtml($lists['whoYes'], 1);
+            $whoMaybeHtml = $this->renderEditableResponseSectionHtml($lists['whoMaybe'], 3);
+            $whoNoHtml = $this->renderEditableResponseSectionHtml($lists['whoNo'], 2);
+        }
+
         return render('termin/response_modal', array(
             'terminId' => (int)$this->Index,
             'filterRegister' => (int)$filterregister,
@@ -2673,12 +2801,14 @@ ORDER BY `Nachname`, `Vorname`;",
             'orchestraActive' => $orchestraActive,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
-            'whoYesHtml' => $this->renderResponseEntries($lists['whoYes']),
-            'whoMaybeHtml' => $this->renderResponseEntries($lists['whoMaybe']),
-            'whoNoHtml' => $this->renderResponseEntries($lists['whoNo']),
+            'whoYesHtml' => $canEditResponse ? $whoYesHtml : $this->renderResponseEntries($lists['whoYes']),
+            'whoMaybeHtml' => $canEditResponse ? $whoMaybeHtml : $this->renderResponseEntries($lists['whoMaybe']),
+            'whoNoHtml' => $canEditResponse ? $whoNoHtml : $this->renderResponseEntries($lists['whoNo']),
             'countYes' => count($lists['whoYes']),
             'countMaybe' => count($lists['whoMaybe']),
             'countNo' => count($lists['whoNo']),
+            'canEditResponse' => $canEditResponse,
+            'userCatalogJson' => $userCatalogJson,
         ));
     }
 

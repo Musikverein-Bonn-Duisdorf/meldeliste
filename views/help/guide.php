@@ -212,9 +212,10 @@ $sections[] = array(
     'title' => 'Admin: Meldungen',
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
-<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung).</p>
+<p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung). Die Register-Aufschlüsselung bei Auftritten ist standardmäßig zugeklappt.</p>
+<p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons das Rückmeldungs-Modal; bei Schicht-Terminen pro Schichtzeile.</p>
 <p>In Termin- und Register-Ansichten kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert, Personenzeilen in Registerfarbe; Namen als Chip öffnen das Personen-Modal. Die Orchesterübersicht skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
-'.(requirePermission('perm_editResponse') ? '<p>Mit Recht <b>Rückmeldungen bearbeiten</b> kannst du im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
+'.(requirePermission('perm_editResponse') ? '<p>Mit Recht <b>Rückmeldungen bearbeiten</b> kannst du im Modal Personen in Zusagen, Absagen und Unsicher per Chip hinzufügen oder entfernen; bei Zusage/Unsicher für einen sonst unsichtbaren Termin wird die Person automatisch in die Sichtbarkeit aufgenommen. Im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
 '
 );
 

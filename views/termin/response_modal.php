@@ -3,7 +3,8 @@
  * Termin response detail modal (MELD-149).
  * Expects: $terminId, $filterRegister, $terminName, $showOrchestra,
  * $orchestraFull, $orchestraActive, $showChildrenHeader, $showGuestsHeader,
- * $whoYesHtml, $whoMaybeHtml, $whoNoHtml, $countYes, $countMaybe, $countNo
+ * $whoYesHtml, $whoMaybeHtml, $whoNoHtml, $countYes, $countMaybe, $countNo,
+ * $canEditResponse (optional), $userCatalogJson (optional)
  */
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -11,13 +12,16 @@ $h = function ($s) {
 $countYes = isset($countYes) ? (int)$countYes : 0;
 $countMaybe = isset($countMaybe) ? (int)$countMaybe : 0;
 $countNo = isset($countNo) ? (int)$countNo : 0;
+$canEditResponse = !empty($canEditResponse);
+$userCatalogJson = isset($userCatalogJson) ? (string)$userCatalogJson : '[]';
 $yesColor = $GLOBALS['optionsDB']['colorBtnYes'];
 $maybeColor = $GLOBALS['optionsDB']['colorBtnMaybe'];
 $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
 ?>
 <div class="profile-shell modal-shell termin-response-modal"
      data-termin-id="<?php echo (int)$terminId; ?>"
-     data-register="<?php echo (int)$filterRegister; ?>">
+     data-register="<?php echo (int)$filterRegister; ?>"
+     data-melde-editable="<?php echo $canEditResponse ? '1' : '0'; ?>">
   <header class="profile-hero">
     <div class="profile-hero-text">
       <p class="profile-kicker">Meldungen</p>
@@ -73,7 +77,7 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
       </p>
 <?php } ?>
       <div class="melde-response-list">
-<?php echo $whoYesHtml !== '' ? $whoYesHtml : '<div class="melde-response-empty">—</div>'; ?>
+<?php echo $whoYesHtml !== '' ? $whoYesHtml : ($canEditResponse ? '' : '<div class="melde-response-empty">—</div>'); ?>
       </div>
     </section>
 
@@ -83,7 +87,7 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
         <span class="melde-response-chip <?php echo $h($maybeColor); ?>">? <?php echo $countMaybe; ?></span>
       </h3>
       <div class="melde-response-list">
-<?php echo $whoMaybeHtml !== '' ? $whoMaybeHtml : '<div class="melde-response-empty">—</div>'; ?>
+<?php echo $whoMaybeHtml !== '' ? $whoMaybeHtml : ($canEditResponse ? '' : '<div class="melde-response-empty">—</div>'); ?>
       </div>
     </section>
 
@@ -93,8 +97,11 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
         <span class="melde-response-chip <?php echo $h($noColor); ?>">&#10008; <?php echo $countNo; ?></span>
       </h3>
       <div class="melde-response-list">
-<?php echo $whoNoHtml !== '' ? $whoNoHtml : '<div class="melde-response-empty">—</div>'; ?>
+<?php echo $whoNoHtml !== '' ? $whoNoHtml : ($canEditResponse ? '' : '<div class="melde-response-empty">—</div>'); ?>
       </div>
     </section>
   </div>
+<?php if($canEditResponse) { ?>
+<script type="application/json" id="meldeResponseUserCatalog"><?php echo $userCatalogJson; ?></script>
+<?php } ?>
 </div>

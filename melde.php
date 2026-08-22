@@ -27,6 +27,38 @@ case "save":
     $uid = (int)meldeRequest('user');
     $t = new Termin;
     $t->load_by_id(meldeRequest('termin'));
+    $t->ensureUserVisibleForMeldedResponse($uid, (int)$m->Wert);
+
+    if(meldeRequest('ajax') === '1' || meldeRequest('ajax') === 1) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(array('ok' => true, 'termin' => (int)$t->Index, 'user' => $uid));
+        break;
+    }
+    echo $t->printBasicTableLine($uid);
+    break;
+case "delete":
+    requireEditResponseAuth(meldeRequest('user', 0));
+    if(!meldeRequest('termin') || (int)meldeRequest('termin') < 1) {
+        http_response_code(400);
+        die('invalid termin');
+    }
+    $uid = (int)meldeRequest('user');
+    if($uid < 1) {
+        http_response_code(400);
+        die('invalid user');
+    }
+    $m = new Meldung;
+    $m->load_by_user_event($uid, meldeRequest('termin'));
+    if((int)$m->Index > 0) {
+        $m->delete();
+    }
+    if(meldeRequest('ajax') === '1' || meldeRequest('ajax') === 1) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(array('ok' => true, 'termin' => (int)meldeRequest('termin'), 'user' => $uid));
+        break;
+    }
+    $t = new Termin;
+    $t->load_by_id(meldeRequest('termin'));
     echo $t->printBasicTableLine($uid);
     break;
 case "reload":

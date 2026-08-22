@@ -17,6 +17,12 @@ function initLoanUserChipsInModal(root) {
     }
 }
 
+function initMeldeResponseChipsInModal(root) {
+    if(typeof MeldeResponseChips !== 'undefined' && MeldeResponseChips && typeof MeldeResponseChips.initIn === 'function') {
+        MeldeResponseChips.initIn(root || document.getElementById('ajaxModalContent') || document);
+    }
+}
+
 function openModal(type, id, register) {
     var host = document.getElementById('ajaxModalHost');
     var content = document.getElementById('ajaxModalContent');
@@ -28,6 +34,7 @@ function openModal(type, id, register) {
         content.innerHTML = modalCache[key];
         host.style.display = 'block';
         initLoanUserChipsInModal(content);
+        initMeldeResponseChipsInModal(content);
         if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         return;
     }
@@ -50,11 +57,13 @@ function openModal(type, id, register) {
             modalCache[key] = xhr.responseText;
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            initMeldeResponseChipsInModal(content);
             if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else if(xhr.responseText) {
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
+            initMeldeResponseChipsInModal(content);
             if(typeof initInventarPhotosInModal === 'function') initInventarPhotosInModal(content);
         }
         else {
@@ -409,6 +418,7 @@ function refreshOpenTerminResponseModal(terminId) {
 
         modalCache[key] = xhr.responseText;
         content.innerHTML = xhr.responseText;
+        initMeldeResponseChipsInModal(content);
         if(activeOnly) {
             var cb = content.querySelector('.orchestra-panel-toggle input[type="checkbox"]');
             if(cb) {
