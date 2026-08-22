@@ -2519,7 +2519,67 @@ function allowedReturnUrls() {
         'edit-shifts.php',
         'new-termin.php',
         'loan-form.php',
+        'document-view.php',
     );
+}
+
+/**
+ * In-app viewer URL for a loan/return scan or digital snapshot (MELD-219).
+ *
+ * @param int $loanId
+ * @param string $kind loan|return
+ * @param array $extra optional keys: file=snapshot, sig=lender|borrower
+ * @return string
+ */
+function documentViewLoanHref($loanId, $kind = 'loan', $extra = array()) {
+    $kind = class_exists('LoanForm')
+        ? LoanForm::normalizeKind($kind)
+        : (string)$kind;
+    $q = 'type=loan-scan&loan='.(int)$loanId.'&kind='.rawurlencode($kind);
+    if(!empty($extra['file'])) {
+        $q .= '&file='.rawurlencode((string)$extra['file']);
+    }
+    if(!empty($extra['sig'])) {
+        $q .= '&sig='.rawurlencode((string)$extra['sig']);
+    }
+    return 'document-view.php?'.$q;
+}
+
+/**
+ * In-app viewer URL for an inventory document (MELD-219).
+ *
+ * @param int $docId
+ * @return string
+ */
+function documentViewInventoryHref($docId) {
+    return 'document-view.php?type=inventory-doc&id='.(int)$docId;
+}
+
+/**
+ * Current request as a safeReturnUrl target (MELD-217 / MELD-218).
+ *
+ * @param string $default
+ * @return string
+ */
+function currentRequestReturnUrl($default = 'index.php') {
+    $script = isset($_SERVER['SCRIPT_NAME']) ? basename((string)$_SERVER['SCRIPT_NAME']) : '';
+    if($script === '' || $script === 'login.php') {
+        return $default;
+    }
+    $query = isset($_SERVER['QUERY_STRING']) ? (string)$_SERVER['QUERY_STRING'] : '';
+    // Drop next/alink so we do not nest login targets.
+    if($query !== '') {
+        parse_str($query, $params);
+        if(is_array($params)) {
+            unset($params['next'], $params['alink']);
+            $query = http_build_query($params);
+        }
+    }
+    $url = $script;
+    if($query !== '') {
+        $url .= '?'.$query;
+    }
+    return safeReturnUrl($url, $default);
 }
 
 /**
@@ -2735,7 +2795,12 @@ function redirectAfterPost($url) {
 
 function requireLoggedInOrRedirect() {
     if(!loggedIn()) {
-        header('Location: login.php');
+        $next = currentRequestReturnUrl('index.php');
+        $loc = 'login.php';
+        if($next !== 'index.php') {
+            $loc .= '?next='.rawurlencode($next);
+        }
+        header('Location: '.$loc);
         exit;
     }
     if(!empty($_SESSION['singleUsePW'])) {

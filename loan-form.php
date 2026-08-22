@@ -276,7 +276,7 @@ $canRestartWorkflow = LoanForm::userMayRestartWorkflow($userId, $loan, $kind);
     <div class="loan-form-toolbar-group loan-form-toolbar-group--scan">
 <?php   if($hasScan) { ?>
       <div class="loan-form-scan-pair">
-      <a class="loan-form-btn loan-form-btn--scan" target="_blank" rel="noopener" href="loan-contract.php?loan=<?php echo (int)$ctx['loanId']; ?>&amp;kind=<?php echo $h($kind); ?>"><?php echo $h($scanLabel); ?></a>
+      <a class="loan-form-btn loan-form-btn--scan" href="<?php echo $h(LoanForm::scanViewHref($ctx['loanId'], $kind)); ?>"><?php echo $h($scanLabel); ?></a>
 <?php     if($canDeleteScan) { ?>
       <form class="loan-form-upload" method="POST" action="loan-contract.php" data-confirm="<?php echo $h(LoanForm::deleteStoredFileConfirmMessage($loan, $kind)); ?>" data-confirm-ok="Löschen">
         <input type="hidden" name="loan" value="<?php echo (int)$ctx['loanId']; ?>">

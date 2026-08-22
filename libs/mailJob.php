@@ -797,9 +797,7 @@ class MailJob
                     }
                     $links[] = array(
                         'label' => $label,
-                        'href' => 'loan-contract.php?loan='.$loanId
-                            .'&kind='.rawurlencode($kind)
-                            .'&file=snapshot',
+                        'href' => LoanForm::snapshotViewHref($loanId, $kind),
                         'type' => 'loan-snapshot',
                     );
                 }
@@ -838,7 +836,13 @@ class MailJob
         };
         $chips = '<div class="mail-recipient-chips">';
         foreach($links as $link) {
-            $chips .= '<a class="mail-recipient-chip w3-mobile" href="'.$h($link['href']).'" target="_blank" rel="noopener">'.$h($link['label']).'</a>';
+            $href = (string)$link['href'];
+            // In-app pages keep Meldeliste chrome (MELD-219); raw downloads may open externally.
+            $inApp = (strpos($href, 'document-view.php') === 0)
+                || (strpos($href, 'loan-form.php') === 0);
+            $chips .= '<a class="mail-recipient-chip w3-mobile" href="'.$h($href).'"'
+                .($inApp ? '' : ' target="_blank" rel="noopener"').'>'
+                .$h($link['label']).'</a>';
         }
         $chips .= '</div>';
         if(!$wrapSection) {

@@ -695,8 +695,8 @@ class Inventories
                     'UTF-8'
                 );
                 $str .= '<div class="inventory-loan-scan-pair">';
-                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
-                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=loan">'.$loanScanLabel.'</a>';
+                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" '
+                    .'href="'.htmlspecialchars(LoanForm::scanViewHref($loanId, LoanForm::KIND_LOAN), ENT_QUOTES, 'UTF-8').'">'.$loanScanLabel.'</a>';
                 if($canDeleteScan) {
                     $loanDelMsg = htmlspecialchars(
                         LoanForm::deleteStoredFileConfirmMessage($L, LoanForm::KIND_LOAN),
@@ -719,8 +719,8 @@ class Inventories
                     'UTF-8'
                 );
                 $str .= '<div class="inventory-loan-scan-pair">';
-                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" target="_blank" rel="noopener" '
-                    .'href="loan-contract.php?loan='.$loanId.'&amp;kind=return">'.$returnScanLabel.'</a>';
+                $str .= '<a class="inventory-loan-btn inventory-loan-btn--scan" '
+                    .'href="'.htmlspecialchars(LoanForm::scanViewHref($loanId, LoanForm::KIND_RETURN), ENT_QUOTES, 'UTF-8').'">'.$returnScanLabel.'</a>';
                 if($canDeleteScan) {
                     $returnDelMsg = htmlspecialchars(
                         LoanForm::deleteStoredFileConfirmMessage($L, LoanForm::KIND_RETURN),
