@@ -2,6 +2,19 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-29-9e55b (2026-08-29)
+
+- MELD-229: Play-Overlay für Archiv-Aufnahme in Programm-Modals
+- MELD-224: Safari-Chrome nur per ios-webkit-nav-Klasse
+- MELD-224: Safari-Chrome-Kompensation nur auf iOS WebKit
+- MELD-224: Admin im Mehr-Panel auf Safari wieder erreichbar
+- MELD-224: Safari-URL-Leiste über Bottom-Nav zuverlässig ausgleichen
+- MELD-186: Admin-Kalender unter Admin → Termine
+- MELD-228: Inventar-Löschen per Confirm-Modal und AJAX
+- MELD-224: Weißer Streifen unter Nav in Chrome beheben
+- MELD-224: Safari-Chrome-Fix nur auf iOS
+- MELD-224: Safari-URL-Leiste verdeckt Bottom-Nav nicht mehr
+
 ## 2026-08-22-46a9f (2026-08-22)
 
 - MELD-134: Login ohne Unterscheidung nach Active-Status.
