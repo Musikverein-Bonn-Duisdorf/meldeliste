@@ -529,19 +529,17 @@ a.app-titlebar-logo {
   /* Shared modal edge gap (z-index puts modals above titlebar/nav) */
   :root {
     --app-nav-tab-h: calc(3.75rem + env(safe-area-inset-bottom, 0px));
-    --app-nav-browser-chrome: var(--browser-ui-bottom, 0px);
+    --app-nav-browser-chrome: 0px;
     --app-nav-bottom-h: calc(var(--app-nav-tab-h) + var(--app-nav-browser-chrome));
     --app-modal-edge-gap: 0.5rem;
   }
 
-  /* MELD-224: 100vh-100dvh only on iOS WebKit (Safari); other browsers keep bottom:0. */
-  @supports (-webkit-touch-callout: none) {
-    :root {
-      --app-nav-browser-chrome: min(
-        30dvh,
-        max(var(--browser-ui-bottom, 0px), calc(100vh - 100dvh))
-      );
-    }
+  /* MELD-224: Safari URL bar — class set in app-nav.js (not @supports: Chrome matches too). */
+  html.ios-webkit-nav {
+    --app-nav-browser-chrome: min(
+      30dvh,
+      max(var(--browser-ui-bottom, 0px), calc(100vh - 100dvh))
+    );
   }
 
   .app-nav-primary {
