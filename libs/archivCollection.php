@@ -286,6 +286,52 @@ function archivPreferLocalCoverRel($filePath) {
 }
 
 /**
+ * Whether archiv_Composition.Recording exists (Archiv schema ≥ 17).
+ * @return bool
+ */
+function archivCompositionRecordingColumnReady() {
+    if(!archivCollectionsReady()) {
+        return false;
+    }
+    $table = archivDbPrefix().'Composition';
+    $dbr = mysqli_query($GLOBALS['conn'], "SHOW COLUMNS FROM `".$table."` LIKE 'Recording'");
+    sqlerror();
+    return (bool)($dbr && mysqli_fetch_array($dbr));
+}
+
+/**
+ * Play-icon link for a recording URL, or '' when unset.
+ * @param string $recordingUrl Normalized http(s) URL
+ * @return string
+ */
+function archivCompositionRecordingLinkHtml($recordingUrl) {
+    $href = archivNormalizeWebsiteUrl($recordingUrl);
+    if($href === '') {
+        return '';
+    }
+    return '<a class="piece-recording-link" href="'.htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
+        .'" target="_blank" rel="noopener noreferrer" title="Aufnahme" aria-label="Aufnahme">'
+        .'<i class="fa-solid fa-circle-play" aria-hidden="true"></i></a>';
+}
+
+/**
+ * Cover thumbnail with optional recording play overlay (Archiv parity).
+ * @param int $compositionId
+ * @param string $title
+ * @param string|null $filePath
+ * @param string $recording Raw Recording value from archiv_Composition
+ * @return string
+ */
+function archivCompositionCoverFrameHtml($compositionId, $title, $filePath, $recording = '') {
+    $cover = archivCompositionCoverHtml($compositionId, $title, $filePath);
+    $link = archivCompositionRecordingLinkHtml($recording);
+    if($link === '') {
+        return $cover;
+    }
+    return '<span class="piece-cover-frame">'.$cover.$link.'</span>';
+}
+
+/**
  * Cover thumbnail HTML (Archiv list parity). Uses urlNotenarchiv + FilePath.
  * Tries png/jpg/jpeg/gif (local probe when possible, else onerror chain).
  * @param int $compositionId
@@ -387,9 +433,11 @@ function archivLoadCollectionModalData($id) {
         $name = 'Sammlung #'.$id;
     }
     $items = array();
+    $recordingReady = archivCompositionRecordingColumnReady();
+    $recordingSelect = $recordingReady ? ', c.`Recording`' : '';
     $sqlItems = sprintf(
         'SELECT i.`CollectionNumber`, i.`Composition`,
-                c.`Title`, c.`Year`, c.`Grade`, c.`FilePath`, c.`Website`,
+                c.`Title`, c.`Year`, c.`Grade`, c.`FilePath`, c.`Website`%s,
                 cf.`FirstName` AS `ComposerFirst`, cf.`LastName` AS `ComposerLast`,
                 ar.`FirstName` AS `ArrangerFirst`, ar.`LastName` AS `ArrangerLast`,
                 p.`Name` AS `PublisherName`, p.`Website` AS `PublisherWebsite`
@@ -400,6 +448,7 @@ function archivLoadCollectionModalData($id) {
          LEFT JOIN `%sPublisher` p ON p.`Index` = c.`Publisher`
          WHERE i.`Collections` = "%d"
          ORDER BY i.`CollectionNumber` ASC, i.`Index` ASC;',
+        $recordingSelect,
         $prefix,
         $prefix,
         $prefix,
@@ -443,6 +492,9 @@ function archivLoadCollectionModalData($id) {
             );
             $publisherHref = $productUrl !== '' ? $productUrl : $publisherUrl;
             $filePath = isset($item['FilePath']) ? trim((string)$item['FilePath']) : '';
+            $recording = ($recordingReady && isset($item['Recording']))
+                ? trim((string)$item['Recording'])
+                : '';
             $items[] = array(
                 'compositionId' => $compId,
                 'number' => ($num !== null && $num !== '') ? (string)(int)$num : '',
@@ -454,7 +506,7 @@ function archivLoadCollectionModalData($id) {
                 'publisherLabel' => archivPublisherLabel($publisher, $publisherHref),
                 'year' => $year,
                 'grade' => $grade,
-                'coverHtml' => archivCompositionCoverHtml($compId, $title, $filePath),
+                'coverHtml' => archivCompositionCoverFrameHtml($compId, $title, $filePath, $recording),
             );
         }
     }
