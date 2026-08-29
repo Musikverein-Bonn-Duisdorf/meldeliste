@@ -300,8 +300,8 @@ function archivCompositionRecordingColumnReady() {
 }
 
 /**
- * Play-icon link for a recording URL, or '' when unset.
- * @param string $recordingUrl Normalized http(s) URL
+ * Volume-icon link for a recording URL, or '' when unset.
+ * @param string $recordingUrl Raw or absolute URL
  * @return string
  */
 function archivCompositionRecordingLinkHtml($recordingUrl) {
@@ -310,25 +310,22 @@ function archivCompositionRecordingLinkHtml($recordingUrl) {
         return '';
     }
     return '<a class="piece-recording-link" href="'.htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
-        .'" target="_blank" rel="noopener noreferrer" title="Aufnahme" aria-label="Aufnahme">'
-        .'<i class="fa-solid fa-circle-play" aria-hidden="true"></i></a>';
+        .'" target="_blank" rel="noopener noreferrer" title="Aufnahme" aria-label="Aufnahme"'
+        .' onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">'
+        .'<i class="fa-solid fa-volume" aria-hidden="true"></i></a>';
 }
 
 /**
- * Cover thumbnail with optional recording play overlay (Archiv parity).
- * @param int $compositionId
- * @param string $title
- * @param string|null $filePath
+ * Standalone recording control for the right of a piece row, or '' when unset.
  * @param string $recording Raw Recording value from archiv_Composition
  * @return string
  */
-function archivCompositionCoverFrameHtml($compositionId, $title, $filePath, $recording = '') {
-    $cover = archivCompositionCoverHtml($compositionId, $title, $filePath);
+function archivCompositionRecordingCellHtml($recording) {
     $link = archivCompositionRecordingLinkHtml($recording);
     if($link === '') {
-        return $cover;
+        return '';
     }
-    return '<span class="piece-cover-frame">'.$cover.$link.'</span>';
+    return '<div class="piece-recording">'.$link.'</div>';
 }
 
 /**
@@ -506,7 +503,8 @@ function archivLoadCollectionModalData($id) {
                 'publisherLabel' => archivPublisherLabel($publisher, $publisherHref),
                 'year' => $year,
                 'grade' => $grade,
-                'coverHtml' => archivCompositionCoverFrameHtml($compId, $title, $filePath, $recording),
+                'coverHtml' => archivCompositionCoverHtml($compId, $title, $filePath),
+                'recordingHtml' => archivCompositionRecordingCellHtml($recording),
             );
         }
     }

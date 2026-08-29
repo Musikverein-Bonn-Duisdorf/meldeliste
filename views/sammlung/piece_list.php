@@ -23,6 +23,7 @@ foreach($items as $item) {
     }
     $year = isset($item['year']) ? trim((string)$item['year']) : '';
     $coverHtml = isset($item['coverHtml']) ? (string)$item['coverHtml'] : '';
+    $recordingHtml = isset($item['recordingHtml']) ? (string)$item['recordingHtml'] : '';
 ?>
       <div class="piece-row list-row">
         <div class="piece-rail" aria-hidden="true"></div>
@@ -55,6 +56,9 @@ foreach($items as $item) {
             </div>
           </div>
         </div>
+<?php if($recordingHtml !== '') {
+    echo $recordingHtml;
+} ?>
       </div>
 <?php
 }
