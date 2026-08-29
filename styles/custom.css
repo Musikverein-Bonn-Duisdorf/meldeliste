@@ -5789,29 +5789,42 @@ select.profile-control {
   display: none !important;
 }
 
-.archiv-piece-modal .piece-cover-frame {
-  position: relative;
-  display: inline-flex;
+/* FA 6.4.2 Free has no .fa-volume; same glyph as volume-high (ARCHIV-54 / MELD-229). */
+.archiv-piece-modal .fa-solid.fa-volume::before {
+  content: "\f028";
+}
+
+.archiv-piece-modal .piece-row:has(> .piece-recording) {
+  grid-template-columns: var(--archiv-rail-w) minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.archiv-piece-modal .piece-recording {
+  align-self: center;
   flex: 0 0 auto;
-  line-height: 0;
 }
 
 .archiv-piece-modal .piece-recording-link {
-  position: absolute;
-  top: 0.12rem;
-  right: 0.12rem;
-  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  box-sizing: border-box;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.35rem;
+  color: inherit;
   text-decoration: none;
   line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+  border-radius: 0.35rem;
 }
 
-.archiv-piece-modal .piece-recording-link .fa-circle-play {
-  font-size: 1.05rem;
+.archiv-piece-modal .piece-recording-link .fa-volume {
+  font-size: 1.65rem;
+}
+
+.archiv-piece-modal .piece-recording-link:hover,
+.archiv-piece-modal .piece-recording-link:focus-visible {
+  color: var(--page-title-accent, #345A95);
 }
 
 .archiv-piece-modal .piece-title {
