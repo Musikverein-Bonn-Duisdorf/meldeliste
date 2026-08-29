@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-29-5a6ec (2026-08-29)
+
+- MELD-231: Nur aktive Besetzung in Summary mit Aufklapp aligned
+- MELD-231: Nur aktive Besetzung aligned mit Aufklapp-Button
+
 ## 2026-08-29-694b5 (2026-08-29)
 
 - MELD-230: Log-Level DEBUG und Config-Schalter logDebug
