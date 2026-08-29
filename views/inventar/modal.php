@@ -35,7 +35,10 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
         <details class="profile-actions-more">
           <summary>Weitere Aktionen</summary>
           <div class="profile-actions-secondary">
-            <button type="button" class="w3-btn <?php echo $h($btnDelete); ?> w3-border w3-mobile" onclick="document.getElementById('del<?php echo (int)$inv->Index; ?>').style.display='block'">Löschen</button>
+            <form class="inventar-delete-form" action="" method="POST" data-confirm="Diesen Eintrag wirklich löschen?" data-confirm-ok="Löschen">
+              <input type="hidden" name="InventoriesIndex" value="<?php echo (int)$inv->Index; ?>">
+              <button type="submit" class="w3-btn <?php echo $h($btnDelete); ?> w3-border w3-mobile" name="delete" value="delete">Löschen</button>
+            </form>
           </div>
         </details>
       </div>
@@ -176,15 +179,6 @@ $insured = !empty($row['Insurance']) || !empty($inv->Insurance);
     </section>
   </div>
 <?php echo $canEdit ? '</form>' : '</div>'; ?>
-
-<?php if($canEdit) { ?>
-  <form id="del<?php echo (int)$inv->Index; ?>" class="inventar-delete-confirm w3-padding w3-margin-top <?php echo $h($GLOBALS['optionsDB']['colorWarning']); ?>" action="" method="POST" style="display:none;">
-    <p class="profile-value">Diesen Eintrag wirklich löschen?</p>
-    <input type="hidden" name="InventoriesIndex" value="<?php echo (int)$inv->Index; ?>">
-    <button class="w3-btn <?php echo $h($btnSubmit); ?> w3-border w3-mobile" type="submit" name="delete" value="delete">Ja</button>
-    <button type="button" class="w3-btn w3-border w3-mobile" onclick="this.form.style.display='none'">Nein</button>
-  </form>
-<?php } ?>
 
   <div class="inventar-docs-block">
 <?php echo isset($docsHtml) ? $docsHtml : ''; ?>

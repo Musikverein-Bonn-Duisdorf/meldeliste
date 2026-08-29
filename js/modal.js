@@ -951,6 +951,11 @@ function inventarDocFormAction(form) {
     return '';
 }
 
+function inventarDeleteFormAction(form) {
+    if(!form || !form.classList) return false;
+    return form.classList.contains('inventar-delete-form');
+}
+
 function invalidateInventarModalCache(inventoryId) {
     var prefix = 'inventar:' + inventoryId;
     Object.keys(modalCache).forEach(function(key) {
@@ -1004,7 +1009,8 @@ document.addEventListener('submit', function(e) {
     if(!form.closest('#ajaxModalContent .inventar-modal')) return;
     var loanAction = inventarLoanFormAction(form);
     var docAction = inventarDocFormAction(form);
-    if(!loanAction && !docAction) return;
+    var deleteAction = inventarDeleteFormAction(form);
+    if(!loanAction && !docAction && !deleteAction) return;
     if(e.defaultPrevented) return;
 
     e.preventDefault();
@@ -1035,7 +1041,7 @@ document.addEventListener('submit', function(e) {
         catch(err) {
             data = null;
         }
-        if(xhr.status < 200 || xhr.status >= 300 || !data || !data.ok || !data.html) {
+        if(xhr.status < 200 || xhr.status >= 300 || !data || !data.ok) {
             if(data && data.error) {
                 content.innerHTML = '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Fehler</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value"></p></div>';
                 var p = content.querySelector('.profile-value');
@@ -1044,6 +1050,20 @@ document.addEventListener('submit', function(e) {
             return;
         }
         var invId = parseInt(data.inventoryId, 10) || inventoryId;
+        if(data.action === 'delete') {
+            invalidateInventarModalCache(invId);
+            refreshInventarListRow(invId, '', data.action);
+            closeModal();
+            return;
+        }
+        if(!data.html) {
+            if(data.error) {
+                content.innerHTML = '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Fehler</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value"></p></div>';
+                var errP = content.querySelector('.profile-value');
+                if(errP) errP.textContent = data.error;
+            }
+            return;
+        }
         invalidateInventarModalCache(invId);
         modalCache['inventar:' + invId] = data.html;
         content.innerHTML = data.html;

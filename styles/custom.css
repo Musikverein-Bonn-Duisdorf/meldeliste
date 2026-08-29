@@ -513,7 +513,7 @@ a.app-titlebar-logo {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: var(--browser-ui-bottom, 0px);
     flex-direction: row;
     align-items: stretch;
     width: 100%;
@@ -527,7 +527,7 @@ a.app-titlebar-logo {
 
   /* Shared modal edge gap (z-index puts modals above titlebar/nav) */
   :root {
-    --app-nav-bottom-h: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    --app-nav-bottom-h: calc(3.75rem + env(safe-area-inset-bottom, 0px) + var(--browser-ui-bottom, 0px));
     --app-modal-edge-gap: 0.5rem;
   }
 
@@ -632,7 +632,7 @@ a.app-titlebar-logo {
     overflow: auto;
     z-index: 50;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0));
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0) + var(--browser-ui-bottom, 0px));
     border-radius: 0.75rem 0.75rem 0 0;
   }
 
@@ -3959,6 +3959,15 @@ body.loan-form-sign-open {
 
 .inventory-loan-btn--scan-del:hover {
   background: rgba(0, 0, 0, 0.05);
+}
+
+.inventory-loan-btn--pending {
+  border-color: transparent;
+  color: #fff;
+}
+
+.inventory-loan-btn--pending:hover {
+  filter: brightness(0.95);
 }
 
 .inventory-loan-btn--danger {

@@ -183,10 +183,11 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showMeldungen) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('meldungen', 'archiv', 'public-entry')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('meldungen', 'admincalendar', 'archiv', 'public-entry')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showResponse'); ?>">Meldungen <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('meldungen', 'perm_showResponse'); ?>"><i class="fas fa-comment-dots"></i> Meldungen</a>
+                <a title="Admin-Kalender" href="admin-calendar.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('admincalendar', 'perm_showHiddenAppmnts'); ?>"><i class="fas fa-calendar-week"></i> Admin-Kalender</a>
                 <a title="Archiv: Meldungen" href="archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('archiv', 'perm_showResponse'); ?>"><i class="fas fa-history"></i> Archiv: Meldungen</a>
 <?php if(requirePermission('perm_editResponse')) { ?>
                 <a title="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('public-entry', 'perm_editResponse'); ?>"><i class="fas fa-comments"></i> im Auftrag melden</a>

@@ -106,4 +106,21 @@
   } else {
     initMore();
   }
+
+  function updateBrowserUiBottom() {
+    if (!isNarrow() || !window.visualViewport) {
+      document.documentElement.style.removeProperty('--browser-ui-bottom');
+      return;
+    }
+    var vv = window.visualViewport;
+    var offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    document.documentElement.style.setProperty('--browser-ui-bottom', offset.toFixed(1) + 'px');
+  }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateBrowserUiBottom);
+    window.visualViewport.addEventListener('scroll', updateBrowserUiBottom);
+    window.addEventListener('resize', updateBrowserUiBottom);
+    updateBrowserUiBottom();
+  }
 })();

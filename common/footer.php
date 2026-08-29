@@ -48,6 +48,7 @@ if(!empty($GLOBALS['mlDeferredToasts'])) {
 <script src="<?php echo assetUrl('js/inventarPhotos.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/modal.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/appDialog.js'); ?>"></script>
+<script src="<?php echo assetUrl('js/uploadWarn.js'); ?>"></script>
 <script src="<?php echo assetUrl('js/toast.js'); ?>"></script>
   </body>
 </html>

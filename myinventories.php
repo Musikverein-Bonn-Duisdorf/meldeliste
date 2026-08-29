@@ -39,7 +39,7 @@ if($pending) {
         $pKind = $row['kind'];
         $pCtx = LoanForm::buildContext($pLoan, $pKind);
         $label = $pCtx ? $pCtx['title'].' · '.$pCtx['itemLabel'] : 'Formular';
-        $html .= '<li><a class="inventory-loan-btn" href="loan-form.php?loan='.(int)$pLoan->Index
+        $html .= '<li><a class="inventory-loan-btn inventory-loan-btn--pending '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" href="loan-form.php?loan='.(int)$pLoan->Index
             .'&amp;kind='.htmlspecialchars($pKind, ENT_QUOTES, 'UTF-8').'">'
             .htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</a></li>';
     }
