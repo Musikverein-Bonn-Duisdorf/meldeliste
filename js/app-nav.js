@@ -37,6 +37,9 @@
     }
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     document.body.classList.toggle('app-nav-more-open', !!open);
+    if (open && panel) {
+      panel.scrollTop = 0;
+    }
     if (!open) {
       resetAdminNavGroups();
       ensureCurrentAdminNavOpen();
@@ -131,6 +134,7 @@
       updateBrowserUiBottom._peakInner = innerH;
     }
     bottom = Math.max(bottom, updateBrowserUiBottom._peakInner - innerH, 0);
+    bottom = Math.min(bottom, Math.round(innerH * 0.3));
 
     document.documentElement.style.setProperty('--browser-ui-bottom', bottom.toFixed(1) + 'px');
   }
