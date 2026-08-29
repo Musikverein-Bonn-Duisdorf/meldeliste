@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-29-6cd47 (2026-08-29)
+
+- MELD-232: Safari-URL-Bar-Kompensation nicht in Chrome iOS
+- MELD-232: Chrome iPhone weiße Fläche unter App-Nav
+
 ## 2026-08-29-e4cd6 (2026-08-29)
 
 - MELD-229: Aufnahme als Volume rechts in der Programm-Stückzeile
