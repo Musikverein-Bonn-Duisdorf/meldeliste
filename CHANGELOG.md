@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-29-694b5 (2026-08-29)
+
+- MELD-230: Log-Level DEBUG und Config-Schalter logDebug
+- MELD-230: Log-Level DEBUG und Config logDebug
+
 ## 2026-08-29-9e55b (2026-08-29)
 
 - MELD-229: Play-Overlay für Archiv-Aufnahme in Programm-Modals
