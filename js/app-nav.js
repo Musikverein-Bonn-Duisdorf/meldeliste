@@ -108,19 +108,56 @@
   }
 
   function updateBrowserUiBottom() {
-    if (!isNarrow() || !window.visualViewport) {
+    if (!isNarrow()) {
       document.documentElement.style.removeProperty('--browser-ui-bottom');
       return;
     }
-    var vv = window.visualViewport;
-    var offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-    document.documentElement.style.setProperty('--browser-ui-bottom', offset.toFixed(1) + 'px');
+
+    var bottom = 0;
+    var innerH = window.innerHeight || 0;
+
+    if (window.visualViewport) {
+      var vv = window.visualViewport;
+      var fromVv = innerH - vv.height - vv.offsetTop;
+      var fromPage = innerH - vv.height - (vv.pageTop || 0);
+      bottom = Math.max(bottom, fromVv, fromPage, 0);
+    }
+
+    // Safari tab bar: innerHeight shrinks while toolbar visible; track peak height.
+    if (!updateBrowserUiBottom._peakInner) {
+      updateBrowserUiBottom._peakInner = innerH;
+    }
+    if (innerH > updateBrowserUiBottom._peakInner) {
+      updateBrowserUiBottom._peakInner = innerH;
+    }
+    bottom = Math.max(bottom, updateBrowserUiBottom._peakInner - innerH, 0);
+
+    document.documentElement.style.setProperty('--browser-ui-bottom', bottom.toFixed(1) + 'px');
+  }
+
+  function scheduleBrowserUiBottomUpdate() {
+    if (updateBrowserUiBottom._raf) return;
+    updateBrowserUiBottom._raf = window.requestAnimationFrame(function () {
+      updateBrowserUiBottom._raf = 0;
+      updateBrowserUiBottom();
+    });
   }
 
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', updateBrowserUiBottom);
-    window.visualViewport.addEventListener('scroll', updateBrowserUiBottom);
-    window.addEventListener('resize', updateBrowserUiBottom);
-    updateBrowserUiBottom();
+    window.visualViewport.addEventListener('resize', scheduleBrowserUiBottomUpdate);
+    window.visualViewport.addEventListener('scroll', scheduleBrowserUiBottomUpdate);
   }
+  window.addEventListener('resize', scheduleBrowserUiBottomUpdate);
+  window.addEventListener('scroll', scheduleBrowserUiBottomUpdate, { passive: true });
+  window.addEventListener('orientationchange', function () {
+    updateBrowserUiBottom._peakInner = 0;
+    scheduleBrowserUiBottomUpdate();
+  });
+  window.addEventListener('pageshow', scheduleBrowserUiBottomUpdate);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleBrowserUiBottomUpdate);
+  }
+  scheduleBrowserUiBottomUpdate();
+  window.setTimeout(scheduleBrowserUiBottomUpdate, 100);
+  window.setTimeout(scheduleBrowserUiBottomUpdate, 500);
 })();
