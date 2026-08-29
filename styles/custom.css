@@ -513,7 +513,7 @@ a.app-titlebar-logo {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: var(--browser-ui-bottom, 0px);
+    bottom: max(var(--browser-ui-bottom, 0px), calc(100vh - 100dvh));
     flex-direction: row;
     align-items: stretch;
     width: 100%;
@@ -527,7 +527,9 @@ a.app-titlebar-logo {
 
   /* Shared modal edge gap (z-index puts modals above titlebar/nav) */
   :root {
-    --app-nav-bottom-h: calc(3.75rem + env(safe-area-inset-bottom, 0px) + var(--browser-ui-bottom, 0px));
+    --app-nav-tab-h: 3.75rem;
+    --app-nav-browser-chrome: max(var(--browser-ui-bottom, 0px), calc(100vh - 100dvh));
+    --app-nav-bottom-h: calc(var(--app-nav-tab-h) + env(safe-area-inset-bottom, 0px) + var(--app-nav-browser-chrome));
     --app-modal-edge-gap: 0.5rem;
   }
 
@@ -627,12 +629,12 @@ a.app-titlebar-logo {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: calc(var(--app-nav-browser-chrome) + var(--app-nav-tab-h) + env(safe-area-inset-bottom, 0px));
     max-height: min(75vh, 32rem);
     overflow: auto;
     z-index: 50;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0) + var(--browser-ui-bottom, 0px));
+    padding-bottom: 0.5rem;
     border-radius: 0.75rem 0.75rem 0 0;
   }
 
