@@ -6960,6 +6960,10 @@ select.profile-control {
   background: #0284c7;
 }
 
+.log-type-chip--debug {
+  background: #64748b;
+}
+
 .log-type-chip--default {
   background: #6b7280;
 }

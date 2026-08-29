@@ -63,6 +63,12 @@ class Log
     public function info($Message) {
         $this->generate(7, $Message);
     }
+    public function debug($Message) {
+        if(empty($GLOBALS['optionsDB']['logDebug'])) {
+            return;
+        }
+        $this->generate(8, $Message);
+    }
 
     public function generate($Type, $Message) {
        $this->Type = $Type;
@@ -175,6 +181,10 @@ class Log
         $User = new User;
         $User->load_by_id($this->User);
         switch($this->Type) {
+        case 8:
+            $type  = "DEBUG";
+            $chipMod = 'debug';
+            break;
         case 7:
             $type  = "INFO";
             $chipMod = 'info';

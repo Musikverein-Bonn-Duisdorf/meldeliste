@@ -16,6 +16,7 @@
  * v43: loan/return clause texts as config (MELD-213)
  * v44: three loan/return contract texts (MELD-213)
  * v45: one loan contract text for all borrowers (MELD-213)
+ * v46: logDebug Config (MELD-230)
  */
-return 45;
+return 46;
 ?>
