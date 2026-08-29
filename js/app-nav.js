@@ -1,4 +1,16 @@
 (function () {
+  function isIosWebKit() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return true;
+    }
+    return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  }
+
+  if (isIosWebKit()) {
+    document.documentElement.classList.add('ios-webkit-nav');
+  }
+
   function isNarrow() {
     return window.matchMedia && window.matchMedia('(max-width: 992px)').matches;
   }
@@ -108,14 +120,6 @@
     document.addEventListener('DOMContentLoaded', initMore);
   } else {
     initMore();
-  }
-
-  function isIosWebKit() {
-    var ua = navigator.userAgent || '';
-    if (/iPhone|iPad|iPod/i.test(ua)) {
-      return true;
-    }
-    return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
   }
 
   function updateBrowserUiBottom() {
