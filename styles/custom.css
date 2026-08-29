@@ -2135,7 +2135,8 @@ a.app-titlebar-logo {
   text-align: right;
 }
 
-.orchestra-panel-toggle label {
+.orchestra-panel-toggle label,
+.orchestra-fold-summary > .orchestra-panel-toggle {
   cursor: pointer;
 }
 
@@ -2234,6 +2235,9 @@ a.app-titlebar-logo {
 }
 
 .orchestra-fold-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
@@ -2248,12 +2252,39 @@ a.app-titlebar-logo {
 .orchestra-fold-summary::before {
   content: '▸';
   display: inline-block;
+  flex: 0 0 auto;
   width: 1.1rem;
   color: rgba(0, 0, 0, 0.55);
 }
 
 .orchestra-fold[open] > .orchestra-fold-summary::before {
   content: '▾';
+}
+
+.orchestra-fold-label {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.orchestra-fold-summary > .orchestra-panel-toggle {
+  display: none;
+  margin: 0 0 0 auto;
+  text-align: right;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.orchestra-fold[open] > .orchestra-fold-summary > .orchestra-panel-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.orchestra-fold-summary > .orchestra-panel-toggle .w3-check {
+  position: static;
+  top: auto;
+  margin: 0;
+  flex: 0 0 auto;
 }
 
 .w3-modal-content .orchestra-svg-wrap {
@@ -2367,9 +2398,8 @@ a.app-titlebar-logo {
 }
 
 @media (max-width: 600px) {
-  .orchestra-panel-toggle {
-    text-align: left;
-    margin-top: 0.35rem;
+  .orchestra-fold-summary > .orchestra-panel-toggle {
+    font-size: 0.85rem;
   }
 
   .w3-modal-content:has(.orchestra-panel) {
@@ -4580,10 +4610,6 @@ body.loan-form-sign-open {
   .orchestra-panel {
     margin-left: 0.85rem;
     margin-right: 0.85rem;
-  }
-
-  .orchestra-panel-toggle {
-    text-align: left;
   }
 }
 
