@@ -110,8 +110,16 @@
     initMore();
   }
 
+  function isIosWebKit() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return true;
+    }
+    return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  }
+
   function updateBrowserUiBottom() {
-    if (!isNarrow()) {
+    if (!isNarrow() || !isIosWebKit()) {
       document.documentElement.style.removeProperty('--browser-ui-bottom');
       return;
     }
@@ -147,21 +155,23 @@
     });
   }
 
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', scheduleBrowserUiBottomUpdate);
-    window.visualViewport.addEventListener('scroll', scheduleBrowserUiBottomUpdate);
-  }
-  window.addEventListener('resize', scheduleBrowserUiBottomUpdate);
-  window.addEventListener('scroll', scheduleBrowserUiBottomUpdate, { passive: true });
-  window.addEventListener('orientationchange', function () {
-    updateBrowserUiBottom._peakInner = 0;
+  if (isIosWebKit()) {
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scheduleBrowserUiBottomUpdate);
+      window.visualViewport.addEventListener('scroll', scheduleBrowserUiBottomUpdate);
+    }
+    window.addEventListener('resize', scheduleBrowserUiBottomUpdate);
+    window.addEventListener('scroll', scheduleBrowserUiBottomUpdate, { passive: true });
+    window.addEventListener('orientationchange', function () {
+      updateBrowserUiBottom._peakInner = 0;
+      scheduleBrowserUiBottomUpdate();
+    });
+    window.addEventListener('pageshow', scheduleBrowserUiBottomUpdate);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', scheduleBrowserUiBottomUpdate);
+    }
     scheduleBrowserUiBottomUpdate();
-  });
-  window.addEventListener('pageshow', scheduleBrowserUiBottomUpdate);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', scheduleBrowserUiBottomUpdate);
+    window.setTimeout(scheduleBrowserUiBottomUpdate, 100);
+    window.setTimeout(scheduleBrowserUiBottomUpdate, 500);
   }
-  scheduleBrowserUiBottomUpdate();
-  window.setTimeout(scheduleBrowserUiBottomUpdate, 100);
-  window.setTimeout(scheduleBrowserUiBottomUpdate, 500);
 })();
