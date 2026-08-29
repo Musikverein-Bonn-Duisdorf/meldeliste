@@ -39,14 +39,14 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
            data-color-no="<?php echo $h($noColor); ?>"
            data-color-maybe="<?php echo $h($maybeColor); ?>"
            data-color-disabled="<?php echo $h(isset($GLOBALS['optionsDB']['colorDisabled']) ? $GLOBALS['optionsDB']['colorDisabled'] : ''); ?>">
-    <summary class="orchestra-fold-summary">Besetzung</summary>
+    <summary class="orchestra-fold-summary">
+      <span class="orchestra-fold-label">Besetzung</span>
+      <label class="orchestra-panel-toggle w3-small" onclick="event.preventDefault(); event.stopPropagation();">
+        <input type="checkbox" class="w3-check" onclick="event.stopPropagation();" onchange="toggleActiveOrchestra(this)">
+        Nur aktive Besetzung
+      </label>
+    </summary>
     <div class="orchestra-panel-body">
-      <div class="orchestra-panel-toggle">
-        <label class="w3-small">
-          <input type="checkbox" class="w3-check" onchange="toggleActiveOrchestra(this)">
-          Nur aktive Besetzung
-        </label>
-      </div>
       <div class="orchestra-layout orchestra-layout--full">
         <div class="orchestra-svg-wrap">
 <?php echo $orchestraFull; ?>
