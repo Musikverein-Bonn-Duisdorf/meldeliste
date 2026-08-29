@@ -33,6 +33,16 @@ $userId = (int)$row['Index'];
 $loaded = icalFeedLoadForUser($userId);
 $etag = icalFeedEtag($userId, $loaded['events'], $loaded['from'], $loaded['to']);
 
+$logUser = new User;
+$logUser->load_by_id($userId);
+$log = new Log;
+$log->info(sprintf(
+    'Webcal-Abruf: User: (%d) <b>%s</b>, Termine: %d',
+    $userId,
+    htmlspecialchars($logUser->getName(), ENT_QUOTES, 'UTF-8'),
+    count($loaded['events'])
+));
+
 $inm = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim((string)$_SERVER['HTTP_IF_NONE_MATCH']) : '';
 if($inm !== '' && $inm === $etag) {
     http_response_code(304);

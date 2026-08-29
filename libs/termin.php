@@ -402,11 +402,15 @@ class Termin
         if($this->Shifts) return;
         $users = explode(",", $GLOBALS['optionsDB']['alwaysYesNewAppmnts']);
         foreach($users as $user) {
+            $userId = intval($user);
+            if($userId < 1 || !$this->isVisibleToUser($userId, array('asViewer' => false))) {
+                continue;
+            }
             $m = new Meldung;
-            $m->load_by_user_event(intval($user), $this->Index);
+            $m->load_by_user_event($userId, $this->Index);
             if($m->User < 1) {
                 $m = new Meldung;
-                $m->User = intval($user);
+                $m->User = $userId;
                 $m->Termin = $this->Index;
                 $m->Wert = 1;
                 $m->save();
@@ -417,11 +421,15 @@ class Termin
         if($this->Shifts) return;
         $users = explode(",", $GLOBALS['optionsDB']['alwaysMaybeNewAppmnts']);
         foreach($users as $user) {
+            $userId = intval($user);
+            if($userId < 1 || !$this->isVisibleToUser($userId, array('asViewer' => false))) {
+                continue;
+            }
             $m = new Meldung;
-            $m->load_by_user_event(intval($user), $this->Index);
+            $m->load_by_user_event($userId, $this->Index);
             if($m->User < 1) {
                 $m = new Meldung;
-                $m->User = intval($user);
+                $m->User = $userId;
                 $m->Termin = $this->Index;
                 $m->Wert = 3;
                 $m->save();
@@ -3057,8 +3065,7 @@ ORDER BY `Nachname`, `Vorname`;",
 
         $orchestraFull = '';
         $orchestraActive = '';
-        $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt
-            && requirePermission('perm_showResponse');
+        $showOrchestra = !empty($GLOBALS['optionsDB']['showOrchestraView']) && (bool)$this->Auftritt;
         if($showOrchestra) {
             $orchestraData = loadOrchestraData($this->Index);
             $orchestraFull = printOrchestra($this->Index, 1, false, $orchestraData);

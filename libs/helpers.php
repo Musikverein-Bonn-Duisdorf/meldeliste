@@ -2236,10 +2236,11 @@ function loanUserChipCatalog() {
         return $catalog;
     }
     while($row = mysqli_fetch_array($dbr)) {
+        $registerName = html_entity_decode((string)$row['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $catalog[] = array(
             'id' => (int)$row['Index'],
             'label' => trim($row['Vorname'].' '.$row['Nachname']),
-            'meta' => html_entity_decode((string)$row['RegisterName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'meta' => $registerName !== '' ? $registerName : 'Kein Instrument',
         );
     }
     return $catalog;

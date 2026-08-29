@@ -997,8 +997,15 @@ function handleInventoriesMutations() {
     );
 
     if(isset($_POST['newLoan'])) {
+        $borrowerId = isset($_POST['User']) ? (int)$_POST['User'] : 0;
+        if($borrowerId < 1) {
+            $result['ok'] = false;
+            $result['error'] = 'Bitte eine Person auswählen.';
+        }
+        else {
         $n = new InventoriesLoan;
         $n->fill_from_array($_POST);
+        $n->User = $borrowerId;
         $start = LoanForm::normalizeDateYmd(isset($_POST['StartDate']) ? $_POST['StartDate'] : '');
         if($start === null || $start === '') {
             $n->StartDate = date('Y-m-d');
@@ -1016,9 +1023,16 @@ function handleInventoriesMutations() {
             mitPrefillLoanBorrowerAddress($n);
         }
         $n->save();
+        if((int)$n->Index < 1) {
+            $result['ok'] = false;
+            $result['error'] = 'Leihe konnte nicht angelegt werden.';
+        }
+        else {
         $result['action'] = 'newLoan';
         $result['loanId'] = (int)$n->Index;
         $result['inventoryId'] = (int)$n->Inventory;
+        }
+        }
     }
     if(isset($_POST['updateLoanFees']) || isset($_POST['updateLoanKaution'])) {
         $n = new InventoriesLoan;

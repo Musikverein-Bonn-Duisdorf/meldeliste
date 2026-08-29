@@ -122,12 +122,14 @@ function calendarUnpublishedClass() {
  * @param int $userId
  * @param string $fromDate Y-m-d
  * @param string $toDate Y-m-d
+ * @param array{admin?:bool} $opts admin: all termins incl. hidden (perm_showHiddenAppmnts calendar)
  * @return list<array{id:int,name:string,date:string,endDate:string,startTime:string,endTime:string,wert:int|null,colorClass:string,description:string,location:string,unpublished:bool,shiftId?:int}>
  */
-function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
+function calendarLoadEventsForUser($userId, $fromDate, $toDate, $opts = array()) {
     $userId = (int)$userId;
     $fromDate = (string)$fromDate;
     $toDate = (string)$toDate;
+    $adminMode = !empty($opts['admin']);
     if($userId <= 0 || $fromDate === '' || $toDate === '') {
         return array();
     }
@@ -162,7 +164,7 @@ function calendarLoadEventsForUser($userId, $fromDate, $toDate) {
     while($row = mysqli_fetch_assoc($dbr)) {
         $t = new Termin();
         $t->fill_from_array($row);
-        if(!$t->isVisibleToUser($userId)) {
+        if(!$adminMode && !$t->isVisibleToUser($userId)) {
             continue;
         }
         $endDate = trim((string)$t->EndDatum);

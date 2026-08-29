@@ -105,7 +105,9 @@ class Log
         );
         $last = new Log;
         $last->getLast();
-        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message) && $this->User == $last->User) {
+        if($last->Message == mysqli_real_escape_string($GLOBALS['conn'], $this->Message)
+            && $this->User == $last->User
+            && (int)$this->Type === (int)$last->Type) {
             $last->now();
             return true;
         }
@@ -255,7 +257,7 @@ class Log
  * Live-Poll HTML for the log page (MELD-160 / MELD-165).
  * Returns newer rows (Index > $maxIndex) in batches of up to logListChunkSize
  * (newest first), or the same top row when its Timestamp was bumped by Log
- * dedupe (identical Message+User → UPDATE Timestamp only).
+ * dedupe (identical Type+Message+User → UPDATE Timestamp only).
  *
  * @param int $limit 0 = configured logListChunkSize (clamped via listChunkLogLimit)
  * @return string HTML of one or more log rows, or empty string

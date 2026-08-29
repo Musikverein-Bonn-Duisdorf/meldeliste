@@ -7,7 +7,7 @@
           }
       ?>
       <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
       <?php
           include_once 'include.php';
       ?>
