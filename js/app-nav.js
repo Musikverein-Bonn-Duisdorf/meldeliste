@@ -1,14 +1,20 @@
 (function () {
-  function isIosWebKit() {
+  /** Safari on iOS only — Chrome/Firefox/Edge (CriOS etc.) must not get URL-bar lift (MELD-232). */
+  function isIosSafari() {
     var ua = navigator.userAgent || '';
-    if (/iPhone|iPad|iPod/i.test(ua)) {
-      return true;
+    var ios = /iPhone|iPad|iPod/i.test(ua)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!ios) {
+      return false;
     }
-    return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    if (/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Android/i.test(ua)) {
+      return false;
+    }
+    return true;
   }
 
-  if (isIosWebKit()) {
-    document.documentElement.classList.add('ios-webkit-nav');
+  if (isIosSafari()) {
+    document.documentElement.classList.add('ios-safari-nav');
   }
 
   function isNarrow() {
@@ -123,7 +129,7 @@
   }
 
   function updateBrowserUiBottom() {
-    if (!isNarrow() || !isIosWebKit()) {
+    if (!isNarrow() || !isIosSafari()) {
       document.documentElement.style.removeProperty('--browser-ui-bottom');
       return;
     }
@@ -159,7 +165,7 @@
     });
   }
 
-  if (isIosWebKit()) {
+  if (isIosSafari()) {
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', scheduleBrowserUiBottomUpdate);
       window.visualViewport.addEventListener('scroll', scheduleBrowserUiBottomUpdate);

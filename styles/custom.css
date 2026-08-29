@@ -534,8 +534,8 @@ a.app-titlebar-logo {
     --app-modal-edge-gap: 0.5rem;
   }
 
-  /* MELD-224: Safari URL bar — class set in app-nav.js (not @supports: Chrome matches too). */
-  html.ios-webkit-nav {
+  /* MELD-224/232: Safari URL bar only — class set in app-nav.js (exclude CriOS etc.). */
+  html.ios-safari-nav {
     --app-nav-browser-chrome: min(
       30dvh,
       max(var(--browser-ui-bottom, 0px), calc(100vh - 100dvh))
