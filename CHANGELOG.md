@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-08-29-e4cd6 (2026-08-29)
+
+- MELD-229: Aufnahme als Volume rechts in der Programm-Stückzeile
+- MELD-229: Aufnahme als Volume rechts in der Stückzeile
+
 ## 2026-08-29-5a6ec (2026-08-29)
 
 - MELD-231: Nur aktive Besetzung in Summary mit Aufklapp aligned
