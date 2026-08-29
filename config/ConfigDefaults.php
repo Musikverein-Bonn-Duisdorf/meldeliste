@@ -608,6 +608,12 @@ function getConfigDefaults() {
             'Description' => 'Log-Liste / Live-Poll: Einträge pro Nachladen (1–500)',
         ),
         array(
+            'Parameter' => 'logDebug',
+            'Value' => '0',
+            'Type' => 'bool',
+            'Description' => 'DEBUG-Logeinträge in die Datenbank schreiben (z. B. Webcal-Abrufe)',
+        ),
+        array(
             'Parameter' => 'SchemaVersion',
             'Value' => '0',
             'Type' => 'int',

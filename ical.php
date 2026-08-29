@@ -36,7 +36,7 @@ $etag = icalFeedEtag($userId, $loaded['events'], $loaded['from'], $loaded['to'])
 $logUser = new User;
 $logUser->load_by_id($userId);
 $log = new Log;
-$log->info(sprintf(
+$log->debug(sprintf(
     'Webcal-Abruf: User: (%d) <b>%s</b>, Termine: %d',
     $userId,
     htmlspecialchars($logUser->getName(), ENT_QUOTES, 'UTF-8'),
