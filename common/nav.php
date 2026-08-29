@@ -16,7 +16,7 @@ $ssoMit = (!empty($optionsDB['urlMitgliederverwaltung']) && requirePermission('p
 $isAdminNav = isAdmin();
 if($isAdminNav) {
     $showPersonen = requirePermission('perm_showUsers');
-    $showTermine = requirePermission('perm_editAppmnts');
+    $showTermine = requirePermission('perm_editAppmnts') || requirePermission('perm_showHiddenAppmnts');
     $showMeldungen = requirePermission('perm_showResponse');
     $showKommunikation = requirePermission('perm_sendEmail');
     $showInventar = requirePermission('perm_showInventories') || requirePermission('perm_editInventories');
@@ -174,20 +174,20 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showTermine) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'shifts')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'admincalendar', 'shifts')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editAppmnts'); ?>">Termine <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newtermin', 'perm_editAppmnts'); ?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
+                <a title="Admin-Kalender" href="admin-calendar.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('admincalendar', 'perm_showHiddenAppmnts'); ?>"><i class="fas fa-calendar-week"></i> Admin-Kalender</a>
                 <a title="Archiv: Termine" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('termine-archiv', 'perm_editAppmnts'); ?>"><i class="fas fa-history"></i> Archiv: Termine</a>
               </div>
             </div>
 <?php } ?>
 <?php if($showMeldungen) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('meldungen', 'admincalendar', 'archiv', 'public-entry')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('meldungen', 'archiv', 'public-entry')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_showResponse'); ?>">Meldungen <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Meldungen" href="meldungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('meldungen', 'perm_showResponse'); ?>"><i class="fas fa-comment-dots"></i> Meldungen</a>
-                <a title="Admin-Kalender" href="admin-calendar.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('admincalendar', 'perm_showHiddenAppmnts'); ?>"><i class="fas fa-calendar-week"></i> Admin-Kalender</a>
                 <a title="Archiv: Meldungen" href="archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('archiv', 'perm_showResponse'); ?>"><i class="fas fa-history"></i> Archiv: Meldungen</a>
 <?php if(requirePermission('perm_editResponse')) { ?>
                 <a title="im Auftrag melden" href="public-entry.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('public-entry', 'perm_editResponse'); ?>"><i class="fas fa-comments"></i> im Auftrag melden</a>
