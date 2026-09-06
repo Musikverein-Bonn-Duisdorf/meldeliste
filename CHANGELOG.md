@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-06-654a9 (2026-09-06)
+
+- MELD-235: Mobile Titel über Buttons, Ort ausblenden
+- MELD-235: Mobile Titel über Melde-Buttons
+
 ## 2026-09-06-542ae (2026-09-06)
 
 - MELD-235: Listen-Thumb größer, Rahmen/Ausrichtung, Buttons oben halten
