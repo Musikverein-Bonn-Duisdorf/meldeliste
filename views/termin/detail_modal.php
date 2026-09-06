@@ -82,6 +82,19 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
         <div class="profile-value"><?php echo $val($t->Beschreibung); ?></div>
       </div>
 <?php
+$uniformName = $t->getUniformName();
+$uniformThumb = $t->renderUniformThumbHtml();
+if($uniformName !== '' || $uniformThumb !== '') {
+?>
+      <div class="profile-field">
+        <span class="profile-label">Kleidung</span>
+        <div class="profile-value termin-uniform-detail">
+<?php if($uniformThumb !== '') { echo $uniformThumb; } ?>
+<?php if($uniformName !== '') { echo '<span>'.$h($uniformName).'</span>'; } ?>
+        </div>
+      </div>
+<?php } ?>
+<?php
 $programmChip = $t->renderProgrammChipHtml();
 if($programmChip !== '') {
 ?>

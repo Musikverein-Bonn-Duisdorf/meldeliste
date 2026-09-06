@@ -233,9 +233,17 @@ if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n
           <input id="termin-capacity" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Capacity" type="number" min="0" step="1" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->Capacity, ENT_QUOTES, 'UTF-8').'"'; ?>>
         </div>
         <div class="profile-field">
+          <label class="profile-label" for="termin-uniform">Kleidung</label>
+          <select id="termin-uniform" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="Uniform">
+<?php
+    UniformOption($fill ? (int)$n->Uniform : 0);
+?>
+          </select>
+        </div>
+      </div>
+      <div class="profile-field">
           <label class="profile-label" for="termin-freetext">Freitext</label>
           <input id="termin-freetext" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="defaultFreeText" type="text" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->defaultFreeText, ENT_QUOTES, 'UTF-8').'"'; ?>>
-        </div>
       </div>
       <div class="profile-prefs profile-prefs--grid termin-opts">
         <label class="profile-pref">

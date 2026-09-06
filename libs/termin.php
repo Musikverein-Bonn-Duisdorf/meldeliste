@@ -1,7 +1,7 @@
 <?php
 class Termin
 {
-    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'GuestMusicians' => null, 'Sammlungen' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
+    private $_data = array('Index' => null, 'Datum' => null, 'EndDatum' => null, 'Uhrzeit' => null, 'Uhrzeit2' => null, 'Abfahrt' => null, 'Capacity' => null, 'Vehicle' => 1, 'Uniform' => null, 'Name' => null, 'Auftritt' => null, 'Ort1' => null, 'Ort2' => null, 'Ort3' => null, 'Ort4' => null, 'Beschreibung' => null, 'Shifts' => null, 'open' => 1, 'Wert' => null, 'Children' => null, 'Guests' => null, 'new' => null, 'vName' => null, 'defaultFreeText' => null, 'VisibilitySpec' => null, 'GuestMusicians' => null, 'Sammlungen' => null, 'PostDiscord' => 0, 'Created' => null, 'Updated' => null);
     /** @var array<int,int>|null */
     private $_meldungenCountsByWert = null;
     /** @var array<int,string>|null */
@@ -18,6 +18,7 @@ class Termin
 	    case 'Abfahrt':
         case 'Capacity':
 	    case 'Vehicle':
+	    case 'Uniform':
 	    case 'Name':
 	    case 'Auftritt':
 	    case 'Ort1':
@@ -55,6 +56,10 @@ class Termin
         case 'Capacity':
         case 'PostDiscord':
             $this->_data[$key] = (int)$val;
+            break;
+	    case 'Uniform':
+            $u = (int)$val;
+            $this->_data[$key] = ($u > 0) ? $u : null;
             break;
 	    case 'Datum':
 	    case 'EndDatum':
@@ -108,6 +113,9 @@ class Termin
         }
         if(!empty($GLOBALS['optionsDB']['showVehicle']) && $this->Vehicle != $old->Vehicle) {
             $str.=", Vehicle: ".$old->Vehicle." &rArr; <b>".$this->Vehicle."</b>";
+        }
+        if((int)$this->Uniform !== (int)$old->Uniform) {
+            $str.=", Kleidung: ".(int)$old->Uniform." &rArr; <b>".(int)$this->Uniform."</b>";
         }
         if($this->Name != $old->Name) $str.=", Name: ".$old->Name." &rArr; <b>".$this->Name."</b>";
         if(boolsDiffer($this->Auftritt, $old->Auftritt)) $str.=", Besetzung: ".bool2string($old->Auftritt)." &rArr; <b>".bool2string($this->Auftritt)."</b>";
@@ -305,7 +313,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `GuestMusicians`, `Sammlungen`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, %s, %s, "%d");',
+        $sql = sprintf('INSERT INTO `%sTermine` (`Datum`, `EndDatum`, `Uhrzeit`, `Uhrzeit2`, `Abfahrt`, `Capacity`, `Vehicle`, `Uniform`, `Name`, `Beschreibung`, `Shifts`, `Auftritt`, `Ort1`, `Ort2`, `Ort3`, `Ort4`, `open`, `defaultFreeText`, `VisibilitySpec`, `GuestMusicians`, `Sammlungen`, `PostDiscord`) VALUES ("%s", %s, %s, %s, %s, "%d", "%d", %s, "%s", "%s", "%d", "%d", "%s", "%s", "%s", "%s", "%d", "%s", %s, %s, %s, "%d");',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -314,6 +322,7 @@ class Termin
         $this->Abfahrt == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Abfahrt)."\"",
         $this->Capacity,
         $this->Vehicle,
+        $this->sqlUniformValue(),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
         $this->Shifts,
@@ -518,7 +527,7 @@ class Termin
         else {
             $end = "NULL";
         }
-        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `GuestMusicians` = %s, `Sammlungen` = %s, `PostDiscord` = "%d", `Updated` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
+        $sql = sprintf('UPDATE `%sTermine` SET `Datum` = "%s", `EndDatum` = %s, `Uhrzeit` = %s, `Uhrzeit2` = %s, `Abfahrt` = %s, `Capacity`= "%d", `Vehicle`= "%d", `Uniform`= %s, `Name` = "%s", `Beschreibung` = "%s", `Shifts` = "%d", `Auftritt` = "%d", `Ort1` = "%s", `Ort2` = "%s", `Ort3` = "%s", `Ort4` = "%s", `open` = "%d", `new` = "%d", `defaultFreeText` = "%s", `VisibilitySpec` = %s, `GuestMusicians` = %s, `Sammlungen` = %s, `PostDiscord` = "%d", `Updated` = CURRENT_TIMESTAMP WHERE `Index` = "%d";',
         $GLOBALS['dbprefix'],
         mysqli_real_escape_string($GLOBALS['conn'], $this->Datum),
         $end,
@@ -527,6 +536,7 @@ class Termin
         $this->Abfahrt == '' ? 'NULL': "\"".mysqli_real_escape_string($GLOBALS['conn'], $this->Abfahrt)."\"",
         $this->Capacity,
         $this->Vehicle,
+        $this->sqlUniformValue(),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
         mysqli_real_escape_string($GLOBALS['conn'], $this->Beschreibung),
         $this->Shifts,
@@ -593,6 +603,11 @@ class Termin
             if($key === 'VisibilitySpec' || $key === 'visibilitySpec'
                 || $key === 'GuestMusicians' || $key === 'guestMusicians'
                 || $key === 'Sammlungen' || $key === 'sammlungen') {
+                continue;
+            }
+            if($key === 'Uniform') {
+                $u = (int)$val;
+                $this->_data['Uniform'] = ($u > 0) ? $u : null;
                 continue;
             }
             if(array_key_exists($key, $this->_data)) {
@@ -803,6 +818,48 @@ class Termin
             return 'NULL';
         }
         return '"'.mysqli_real_escape_string($GLOBALS['conn'], json_encode($ids)).'"';
+    }
+
+    /** SQL fragment for Termine.Uniform (NULL when unset). */
+    protected function sqlUniformValue() {
+        $u = (int)$this->Uniform;
+        if($u < 1) {
+            return 'NULL';
+        }
+        return '"'.$u.'"';
+    }
+
+    /**
+     * List/detail thumbnail HTML when clothing category has an image (MELD-234).
+     */
+    public function renderUniformThumbHtml($extraClass = '') {
+        $uid = (int)$this->Uniform;
+        if($uid < 1 || !class_exists('Uniform')) {
+            return '';
+        }
+        $url = Uniform::thumbUrl($uid);
+        if($url === '') {
+            return '';
+        }
+        $u = new Uniform();
+        $u->load_by_id($uid);
+        $alt = htmlspecialchars((string)$u->Name, ENT_QUOTES, 'UTF-8');
+        $cls = 'inv-thumb melde-uniform-thumb';
+        if($extraClass !== '') {
+            $cls .= ' '.htmlspecialchars($extraClass, ENT_QUOTES, 'UTF-8');
+        }
+        return '<img class="'.$cls.'" src="'.htmlspecialchars($url, ENT_QUOTES, 'UTF-8').'" alt="'.$alt.'" title="'.$alt.'" width="56" height="56">';
+    }
+
+    /** Loaded Uniform name for detail display, or ''. */
+    public function getUniformName() {
+        $uid = (int)$this->Uniform;
+        if($uid < 1 || !class_exists('Uniform')) {
+            return '';
+        }
+        $u = new Uniform();
+        $u->load_by_id($uid);
+        return ((int)$u->Index === $uid) ? (string)$u->Name : '';
     }
 
     /** @return list<int> */
@@ -1848,7 +1905,13 @@ class Termin
 
         $name = $this->Name !== null && $this->Name !== '' ? $this->Name : 'Termin';
         $str .= '<div class="melde-main">';
-        $str .= '<div class="melde-title">'.$h($name).'</div>';
+        $uniformThumb = $this->renderUniformThumbHtml();
+        if($uniformThumb !== '') {
+            $str .= '<div class="melde-main-head">'.$uniformThumb.'<div class="melde-title">'.$h($name).'</div></div>';
+        }
+        else {
+            $str .= '<div class="melde-title">'.$h($name).'</div>';
+        }
         $desc = trim((string)$this->Beschreibung);
         if($desc !== '') {
             $str .= '<div class="melde-desc">'.$h($desc).'</div>';

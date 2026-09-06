@@ -2319,6 +2319,17 @@ function VehicleOption($val) {
     }
 }
 
+/** Options for Termine.Uniform select (MELD-234). Empty option = none. */
+function UniformOption($val) {
+    $val = (int)$val;
+    echo '<option value=""'.($val < 1 ? ' selected' : '').'>—</option>'."\n";
+    foreach(Uniform::allOrdered() as $u) {
+        $id = (int)$u->Index;
+        $sel = ($val === $id) ? ' selected' : '';
+        echo '<option value="'.$id.'"'.$sel.'>'.htmlspecialchars((string)$u->Name, ENT_QUOTES, 'UTF-8')."</option>\n";
+    }
+}
+
 /**
  * True if mail body looks like HTML (WYSIWYG) rather than plain text.
  */

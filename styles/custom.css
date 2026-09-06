@@ -5664,6 +5664,29 @@ select.profile-control {
   border-radius: 0.25rem;
 }
 
+.melde-main-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.melde-main-head .melde-title {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.melde-uniform-thumb {
+  flex: 0 0 auto;
+}
+
+.termin-uniform-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
 .melde-row:hover .melde-title {
   text-decoration: underline;
 }
