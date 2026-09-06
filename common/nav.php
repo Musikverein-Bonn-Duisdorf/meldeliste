@@ -174,10 +174,11 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showTermine) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'admincalendar', 'shifts')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'admincalendar', 'shifts', 'uniform-types')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editAppmnts'); ?>">Termine <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newtermin', 'perm_editAppmnts'); ?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
+                <a title="Kleidung" href="uniform-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('uniform-types', 'perm_editAppmnts'); ?>"><i class="fas fa-shirt"></i> Kleidung</a>
                 <a title="Admin-Kalender" href="admin-calendar.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('admincalendar', 'perm_showHiddenAppmnts'); ?>"><i class="fas fa-calendar-week"></i> Admin-Kalender</a>
                 <a title="Archiv: Termine" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('termine-archiv', 'perm_editAppmnts'); ?>"><i class="fas fa-history"></i> Archiv: Termine</a>
               </div>

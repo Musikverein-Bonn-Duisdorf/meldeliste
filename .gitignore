@@ -12,6 +12,8 @@ uploads/**
 !uploads/inventory-docs/.htaccess
 !uploads/inventory-types/
 !uploads/inventory-types/.htaccess
+!uploads/uniform/
+!uploads/uniform/.htaccess
 php.ini
 error-log.php
 .cursor/

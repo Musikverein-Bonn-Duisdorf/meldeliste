@@ -215,6 +215,7 @@
 	"Abfahrt": {"Type": "time", "Null": "YES"},
 	"Capacity": {"Type": "int", "Default": 0},
 	"Vehicle": {"Type": "int", "Default": 1},
+	"Uniform": {"Type": "int", "Null": "YES"},
 	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"Beschreibung": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"Auftritt": {"Type": "tinyint", "Default": 1},
@@ -232,6 +233,13 @@
 	"PostDiscord": {"Type": "tinyint", "Default": 0},
 	"Created": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
 	"Updated": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"}
+    },
+    "Uniform": {
+	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
+	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
+	"Sortierung": {"Type": "int", "Default": 1},
+	"ThumbMale": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"ThumbFemale": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "UserVoice": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

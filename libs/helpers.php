@@ -415,6 +415,51 @@ function mitBorrowerAddressForUser($userId) {
 }
 
 /**
+ * MIT Geschlecht for a Melde user: 'm', 'w', or null (MELD-235 / MIT-21).
+ * Shared DB read only; missing table/column → null.
+ * @param int $userId
+ * @return 'm'|'w'|null
+ */
+function mitGenderForUser($userId) {
+    static $cache = array();
+    $userId = (int)$userId;
+    if($userId < 1) {
+        return null;
+    }
+    if(array_key_exists($userId, $cache)) {
+        return $cache[$userId];
+    }
+    $cache[$userId] = null;
+    if(!mitMemberProfileTableReady()) {
+        return null;
+    }
+    $sql = sprintf(
+        'SELECT `Gender` FROM `mit_MemberProfile` WHERE `User` = %d LIMIT 1;',
+        $userId
+    );
+    try {
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    }
+    catch(Throwable $e) {
+        return null;
+    }
+    if(!$dbr) {
+        // Unknown column / error — treat as unset until MIT-21 is deployed.
+        return null;
+    }
+    $row = mysqli_fetch_assoc($dbr);
+    if(!$row || !isset($row['Gender'])) {
+        return null;
+    }
+    $g = strtolower(trim((string)$row['Gender']));
+    if($g === 'm' || $g === 'w') {
+        $cache[$userId] = $g;
+        return $g;
+    }
+    return null;
+}
+
+/**
  * Prefill loan BorrowerAddress from MIT when empty.
  * @param InventoriesLoan $loan
  * @return bool true if address was set on the loan object
@@ -2316,6 +2361,17 @@ function VehicleOption($val) {
         else {
             echo "<option value=\"".$row['Index']."\">".$row['Name']."</option>\n";
         }
+    }
+}
+
+/** Options for Termine.Uniform select (MELD-234). Empty option = none. */
+function UniformOption($val) {
+    $val = (int)$val;
+    echo '<option value=""'.($val < 1 ? ' selected' : '').'>—</option>'."\n";
+    foreach(Uniform::allOrdered() as $u) {
+        $id = (int)$u->Index;
+        $sel = ($val === $id) ? ' selected' : '';
+        echo '<option value="'.$id.'"'.$sel.'>'.htmlspecialchars((string)$u->Name, ENT_QUOTES, 'UTF-8')."</option>\n";
     }
 }
 
