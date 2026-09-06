@@ -832,8 +832,9 @@ class Termin
     /**
      * List/detail thumbnail HTML when clothing category has an image (MELD-234/235).
      * Uses gender of the list user (getUser / optional override).
+     * @param int $size pixel width/height attributes (CSS may enlarge further)
      */
-    public function renderUniformThumbHtml($extraClass = '', $forUserId = null) {
+    public function renderUniformThumbHtml($extraClass = '', $forUserId = null, $size = 56) {
         $uid = (int)$this->Uniform;
         if($uid < 1 || !class_exists('Uniform')) {
             return '';
@@ -851,7 +852,8 @@ class Termin
         if($extraClass !== '') {
             $cls .= ' '.htmlspecialchars($extraClass, ENT_QUOTES, 'UTF-8');
         }
-        return '<img class="'.$cls.'" src="'.htmlspecialchars($url, ENT_QUOTES, 'UTF-8').'" alt="'.$alt.'" title="'.$alt.'" width="56" height="56">';
+        $px = max(1, (int)$size);
+        return '<img class="'.$cls.'" src="'.htmlspecialchars($url, ENT_QUOTES, 'UTF-8').'" alt="'.$alt.'" title="'.$alt.'" width="'.$px.'" height="'.$px.'">';
     }
 
     /** Loaded Uniform name for detail display, or ''. */
@@ -1903,18 +1905,18 @@ class Termin
 
         $str = '<div id="entry'.$tid.'_user'.$user.'" class="'.implode(' ', $classes).'"'.$styleAttr.' data-termin-id="'.$tid.'" '.$this->getSearchDataAttr().'>';
         $str .= '<div class="'.implode(' ', $rowClasses).'">';
-        $str .= '<div class="melde-date-col">'.$this->makeListDateInfo().'</div>';
+        $uniformThumb = $this->renderUniformThumbHtml();
+        $str .= '<div class="melde-date-col">'.$this->makeListDateInfo();
+        if($uniformThumb !== '') {
+            $str .= $uniformThumb;
+        }
+        $str .= '</div>';
         $str .= '<div class="melde-date-rail" aria-hidden="true"></div>';
 
         $name = $this->Name !== null && $this->Name !== '' ? $this->Name : 'Termin';
+        $str .= '<div class="melde-body">';
         $str .= '<div class="melde-main">';
-        $uniformThumb = $this->renderUniformThumbHtml();
-        if($uniformThumb !== '') {
-            $str .= '<div class="melde-main-head">'.$uniformThumb.'<div class="melde-title">'.$h($name).'</div></div>';
-        }
-        else {
-            $str .= '<div class="melde-title">'.$h($name).'</div>';
-        }
+        $str .= '<div class="melde-title">'.$h($name).'</div>';
         $desc = trim((string)$this->Beschreibung);
         if($desc !== '') {
             $str .= '<div class="melde-desc">'.$h($desc).'</div>';
@@ -1953,6 +1955,7 @@ class Termin
             $str .= $this->renderMeldeResponseBtn($tid, $this->terminListResponseRegisterFilter($user));
         }
         $str .= '</div>'; // melde-actions
+        $str .= '</div>'; // melde-body
         $str .= '</div>'; // melde-row-main
 
         if($this->defaultFreeText) {
@@ -2345,6 +2348,7 @@ class Termin
         $html .= '<div class="melde-row-main">';
         $html .= '<div class="melde-date-col">'.$this->makeListDateInfo().'</div>';
         $html .= '<div class="melde-date-rail" aria-hidden="true"></div>';
+        $html .= '<div class="melde-body">';
         $html .= '<div class="melde-main">';
         $html .= '<div class="melde-title">'.$h($name).'</div>';
         $ort = trim((string)$this->getOrt());
@@ -2353,6 +2357,7 @@ class Termin
         }
         $html .= '</div>';
         $html .= '<div class="melde-actions">'.$actionsHtml.'</div>';
+        $html .= '</div>'; // melde-body
         $html .= '</div>'; // melde-row-main
         if($bodyHtml !== '') {
             $html .= $bodyHtml;

@@ -5581,7 +5581,7 @@ select.profile-control {
   --melde-row-pad-y: 0.85rem;
   --melde-date-rail-inset: 0.4rem;
   display: grid;
-  grid-template-columns: var(--melde-date-col-w) var(--melde-date-rail-w) minmax(0, 1fr) auto;
+  grid-template-columns: var(--melde-date-col-w) var(--melde-date-rail-w) minmax(0, 1fr);
   column-gap: var(--melde-col-gap);
   row-gap: 0.65rem;
   align-items: start;
@@ -5595,8 +5595,9 @@ select.profile-control {
   box-sizing: border-box;
   align-self: start;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  overflow: hidden;
+  gap: 0.4rem;
 }
 
 .melde-date-rail {
@@ -5661,30 +5662,30 @@ select.profile-control {
 
 .melde-main {
   min-width: 0;
+  flex: 1 1 auto;
   border-radius: 0.25rem;
 }
 
-.melde-main-head {
+.melde-body {
   display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
+  justify-content: space-between;
+  gap: 0.55rem 0.75rem;
   min-width: 0;
 }
 
-.melde-main-head .melde-title {
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.melde-uniform-thumb {
+.melde-date-col .melde-uniform-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  max-width: 3.5rem;
   flex: 0 0 auto;
 }
 
 .termin-uniform-detail {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
 .melde-row:hover .melde-title {
@@ -5893,7 +5894,9 @@ select.profile-control {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  align-self: flex-start;
   justify-content: flex-end;
+  flex: 0 0 auto;
   gap: 0.45rem 0.55rem;
   min-width: 0;
   cursor: default;
@@ -6389,9 +6392,12 @@ select.profile-control {
     padding: 0.65rem var(--melde-pad-x);
   }
 
+  .melde-body {
+    flex-wrap: wrap;
+  }
+
   .melde-actions {
-    grid-column: 1 / -1;
-    justify-content: flex-end;
+    margin-left: auto;
   }
 
   .melde-btns {
@@ -6750,6 +6756,14 @@ select.profile-control {
   border-radius: 0.25rem;
   border: 1px solid rgba(0, 0, 0, 0.12);
   pointer-events: none;
+}
+
+.inv-thumb.termin-uniform-thumb--detail {
+  width: min(18rem, 100%);
+  height: auto;
+  max-width: 100%;
+  max-height: none;
+  aspect-ratio: 1;
 }
 
 .inv-type-thumb-cell {

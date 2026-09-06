@@ -83,7 +83,7 @@ if(!empty($GLOBALS['googlemapsapi']) && ($t->Ort1 || $t->Ort2)) {
       </div>
 <?php
 $uniformName = $t->getUniformName();
-$uniformThumb = $t->renderUniformThumbHtml();
+$uniformThumb = $t->renderUniformThumbHtml('termin-uniform-thumb--detail', null, 288);
 if($uniformName !== '' || $uniformThumb !== '') {
 ?>
       <div class="profile-field">
