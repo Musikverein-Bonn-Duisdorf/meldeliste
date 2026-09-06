@@ -834,7 +834,7 @@ class Termin
      * Uses gender of the list user (getUser / optional override).
      * @param int $size pixel width/height attributes (CSS may enlarge further)
      */
-    public function renderUniformThumbHtml($extraClass = '', $forUserId = null, $size = 56) {
+    public function renderUniformThumbHtml($extraClass = '', $forUserId = null, $size = 84) {
         $uid = (int)$this->Uniform;
         if($uid < 1 || !class_exists('Uniform')) {
             return '';
