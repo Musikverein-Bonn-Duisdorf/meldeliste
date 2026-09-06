@@ -5703,8 +5703,8 @@ select.profile-control {
   font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.25;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .melde-desc {
@@ -5716,8 +5716,7 @@ select.profile-control {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .melde-ort {
@@ -5729,8 +5728,7 @@ select.profile-control {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .melde-programm {
@@ -6410,6 +6408,21 @@ select.profile-control {
     padding: 0.65rem var(--melde-pad-x);
   }
 
+  /* Title/desc full width above buttons; Ort only on wider layouts. */
+  .melde-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .melde-actions {
+    align-self: flex-end;
+  }
+
+  .melde-ort {
+    display: none;
+  }
+
   .melde-btns {
     flex: 0 0 auto;
     width: auto;
@@ -6481,12 +6494,6 @@ select.profile-control {
     font-size: 0.78rem;
     line-height: 1.25;
     -webkit-line-clamp: 1;
-  }
-
-  .melde-ort {
-    margin-top: 0.08rem;
-    font-size: 0.75rem;
-    line-height: 1.2;
   }
 
   .melde-actions {
