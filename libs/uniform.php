@@ -1,12 +1,18 @@
 <?php
 /**
- * Clothing / uniform categories for appointments (MELD-234).
+ * Clothing / uniform categories for appointments (MELD-234 / MELD-235).
  */
 class Uniform
 {
-    private $_data = array('Index' => null, 'Name' => null, 'Sortierung' => 1, 'ThumbFile' => null);
+    private $_data = array(
+        'Index' => null,
+        'Name' => null,
+        'Sortierung' => 1,
+        'ThumbMale' => null,
+        'ThumbFemale' => null,
+    );
 
-    /** @var array<int,string> */
+    /** @var array<string,string> cache key "id:m|w|" → url */
     private static $thumbUrlCache = array();
 
     public function __get($key) {
@@ -14,7 +20,8 @@ class Uniform
             case 'Index':
             case 'Name':
             case 'Sortierung':
-            case 'ThumbFile':
+            case 'ThumbMale':
+            case 'ThumbFemale':
                 return $this->_data[$key];
             default:
                 break;
@@ -30,7 +37,8 @@ class Uniform
             case 'Name':
                 $this->_data[$key] = trim((string)$val);
                 break;
-            case 'ThumbFile':
+            case 'ThumbMale':
+            case 'ThumbFemale':
                 $v = trim((string)$val);
                 $this->_data[$key] = ($v === '') ? null : $v;
                 break;
@@ -48,8 +56,8 @@ class Uniform
             if(is_int($key)) {
                 continue;
             }
-            if($key === 'ThumbFile') {
-                $this->ThumbFile = $val;
+            if($key === 'ThumbMale' || $key === 'ThumbFemale') {
+                $this->$key = $val;
             }
             elseif($key === 'Name') {
                 $this->Name = $val;
@@ -103,38 +111,98 @@ class Uniform
         return dirname(__DIR__).'/uploads/uniform/'.(int)$typeId;
     }
 
+    /**
+     * @param mixed $gender
+     * @return 'm'|'w'|null
+     */
+    public static function normalizeGender($gender) {
+        $g = strtolower(trim((string)$gender));
+        if($g === 'm' || $g === 'w') {
+            return $g;
+        }
+        return null;
+    }
+
+    /** @param 'm'|'w' $gender */
+    private static function thumbColumn($gender) {
+        return $gender === 'w' ? 'ThumbFemale' : 'ThumbMale';
+    }
+
     public static function clearThumbUrlCache($typeId = null) {
         if($typeId === null) {
             self::$thumbUrlCache = array();
             return;
         }
-        unset(self::$thumbUrlCache[(int)$typeId]);
+        $prefix = ((int)$typeId).':';
+        foreach(array_keys(self::$thumbUrlCache) as $key) {
+            if(strpos($key, $prefix) === 0) {
+                unset(self::$thumbUrlCache[$key]);
+            }
+        }
+    }
+
+    /**
+     * Which gender image to serve for preferred gender (fallback other → none).
+     * @param mixed $preferredGender 'm'|'w'|null
+     * @return 'm'|'w'|null
+     */
+    public function resolveThumbGender($preferredGender = null) {
+        $pref = self::normalizeGender($preferredGender);
+        $order = array();
+        if($pref !== null) {
+            $order[] = $pref;
+            $order[] = ($pref === 'm') ? 'w' : 'm';
+        }
+        else {
+            $order = array('m', 'w');
+        }
+        foreach($order as $g) {
+            if($this->thumbAbsolutePathForGender($g) !== null) {
+                return $g;
+            }
+        }
+        return null;
     }
 
     /**
      * Public URL for a clothing thumbnail, or '' if none.
+     * @param mixed $preferredGender 'm'|'w'|null
      */
-    public static function thumbUrl($typeId) {
+    public static function thumbUrl($typeId, $preferredGender = null) {
         $typeId = (int)$typeId;
         if($typeId < 1) {
             return '';
         }
-        if(array_key_exists($typeId, self::$thumbUrlCache)) {
-            return self::$thumbUrlCache[$typeId];
+        $pref = self::normalizeGender($preferredGender);
+        $cacheKey = $typeId.':'.($pref === null ? '' : $pref);
+        if(array_key_exists($cacheKey, self::$thumbUrlCache)) {
+            return self::$thumbUrlCache[$cacheKey];
         }
         $t = new self();
         $t->load_by_id($typeId);
         $url = '';
-        if((int)$t->Index && $t->thumbAbsolutePath() !== null) {
-            $url = 'uniform-thumb.php?id='.$typeId;
+        if((int)$t->Index) {
+            $resolved = $t->resolveThumbGender($pref);
+            if($resolved !== null) {
+                $url = 'uniform-thumb.php?id='.$typeId.'&g='.$resolved;
+            }
         }
-        self::$thumbUrlCache[$typeId] = $url;
+        self::$thumbUrlCache[$cacheKey] = $url;
         return $url;
     }
 
-    public function thumbAbsolutePath() {
+    /**
+     * @param 'm'|'w' $gender
+     * @return string|null absolute path
+     */
+    public function thumbAbsolutePathForGender($gender) {
+        $gender = self::normalizeGender($gender);
+        if($gender === null) {
+            return null;
+        }
         $typeId = (int)$this->Index;
-        $stored = trim((string)$this->ThumbFile);
+        $col = self::thumbColumn($gender);
+        $stored = trim((string)$this->$col);
         if($typeId < 1 || $stored === '') {
             return null;
         }
@@ -157,23 +225,35 @@ class Uniform
     }
 
     /**
+     * Path for preferred gender with fallback, or null.
+     * @param mixed $preferredGender
+     */
+    public function thumbAbsolutePath($preferredGender = null) {
+        $g = $this->resolveThumbGender($preferredGender);
+        return $g === null ? null : $this->thumbAbsolutePathForGender($g);
+    }
+
+    /**
      * @param array $file $_FILES entry
+     * @param string $gender 'm'|'w'
      * @return bool
      */
-    public function storeThumb(array $file) {
+    public function storeThumb(array $file, $gender) {
         if(!isset($file['error']) || (int)$file['error'] !== UPLOAD_ERR_OK) {
             return false;
         }
         $tmp = isset($file['tmp_name']) ? (string)$file['tmp_name'] : '';
         $orig = isset($file['name']) ? (string)$file['name'] : 'thumb.png';
-        return $this->storeThumbFromPath($tmp, $orig, true);
+        return $this->storeThumbFromPath($tmp, $orig, true, $gender);
     }
 
     /**
+     * @param string $gender 'm'|'w'
      * @return bool
      */
-    public function storeThumbFromPath($sourcePath, $originalName, $mustBeUpload = false) {
-        if((int)$this->Index < 1) {
+    public function storeThumbFromPath($sourcePath, $originalName, $mustBeUpload = false, $gender = 'm') {
+        $gender = self::normalizeGender($gender);
+        if($gender === null || (int)$this->Index < 1) {
             return false;
         }
         $sourcePath = (string)$sourcePath;
@@ -198,14 +278,15 @@ class Uniform
         if(!is_dir($dir) && !@mkdir($dir, 0775, true)) {
             return false;
         }
-        $name = 'thumb-'.bin2hex(random_bytes(4)).'.'.$ext;
+        $name = 'thumb-'.$gender.'-'.bin2hex(random_bytes(4)).'.'.$ext;
         $target = $dir.DIRECTORY_SEPARATOR.$name;
         $ok = $mustBeUpload ? @move_uploaded_file($sourcePath, $target) : @copy($sourcePath, $target);
         if(!$ok) {
             return false;
         }
-        $old = $this->thumbAbsolutePath();
-        $this->ThumbFile = $name;
+        $col = self::thumbColumn($gender);
+        $old = $this->thumbAbsolutePathForGender($gender);
+        $this->$col = $name;
         if(!$this->save()) {
             @unlink($target);
             return false;
@@ -217,12 +298,17 @@ class Uniform
         return true;
     }
 
-    public function deleteThumb() {
-        if((int)$this->Index < 1) {
+    /**
+     * @param string $gender 'm'|'w'
+     */
+    public function deleteThumb($gender) {
+        $gender = self::normalizeGender($gender);
+        if($gender === null || (int)$this->Index < 1) {
             return false;
         }
-        $path = $this->thumbAbsolutePath();
-        $this->ThumbFile = null;
+        $col = self::thumbColumn($gender);
+        $path = $this->thumbAbsolutePathForGender($gender);
+        $this->$col = null;
         if(!$this->save()) {
             return false;
         }
@@ -230,15 +316,15 @@ class Uniform
             @unlink($path);
         }
         $dir = self::thumbStorageDir((int)$this->Index);
-        if(is_dir($dir)) {
+        if(is_dir($dir) && $this->thumbAbsolutePathForGender('m') === null && $this->thumbAbsolutePathForGender('w') === null) {
             @rmdir($dir);
         }
         self::clearThumbUrlCache((int)$this->Index);
         return true;
     }
 
-    private function sqlThumbFileValue() {
-        $v = trim((string)$this->ThumbFile);
+    private function sqlThumbValue($col) {
+        $v = trim((string)$this->$col);
         if($v === '') {
             return 'NULL';
         }
@@ -257,11 +343,12 @@ class Uniform
 
     protected function insert() {
         $sql = sprintf(
-            'INSERT INTO `%sUniform` (`Name`, `Sortierung`, `ThumbFile`) VALUES ("%s", "%d", %s);',
+            'INSERT INTO `%sUniform` (`Name`, `Sortierung`, `ThumbMale`, `ThumbFemale`) VALUES ("%s", "%d", %s, %s);',
             $GLOBALS['dbprefix'],
             mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
             (int)$this->Sortierung ? (int)$this->Sortierung : 1,
-            $this->sqlThumbFileValue()
+            $this->sqlThumbValue('ThumbMale'),
+            $this->sqlThumbValue('ThumbFemale')
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
         sqlerror();
@@ -274,11 +361,12 @@ class Uniform
 
     protected function update() {
         $sql = sprintf(
-            'UPDATE `%sUniform` SET `Name` = "%s", `Sortierung` = "%d", `ThumbFile` = %s WHERE `Index` = "%d";',
+            'UPDATE `%sUniform` SET `Name` = "%s", `Sortierung` = "%d", `ThumbMale` = %s, `ThumbFemale` = %s WHERE `Index` = "%d";',
             $GLOBALS['dbprefix'],
             mysqli_real_escape_string($GLOBALS['conn'], $this->Name),
             (int)$this->Sortierung,
-            $this->sqlThumbFileValue(),
+            $this->sqlThumbValue('ThumbMale'),
+            $this->sqlThumbValue('ThumbFemale'),
             (int)$this->Index
         );
         $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -291,7 +379,8 @@ class Uniform
             return false;
         }
         $id = (int)$this->Index;
-        $path = $this->thumbAbsolutePath();
+        $pathM = $this->thumbAbsolutePathForGender('m');
+        $pathW = $this->thumbAbsolutePathForGender('w');
         $dir = self::thumbStorageDir($id);
         $sql = sprintf(
             'DELETE FROM `%sUniform` WHERE `Index` = "%d" LIMIT 1;',
@@ -303,8 +392,11 @@ class Uniform
         if(!$dbr) {
             return false;
         }
-        if($path) {
-            @unlink($path);
+        if($pathM) {
+            @unlink($pathM);
+        }
+        if($pathW) {
+            @unlink($pathW);
         }
         if(is_dir($dir)) {
             @rmdir($dir);

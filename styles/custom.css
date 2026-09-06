@@ -6760,6 +6760,28 @@ select.profile-control {
   padding-bottom: 0.35rem;
 }
 
+.uniform-thumb-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.uniform-thumb-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 9rem;
+}
+
+.uniform-thumb-slot-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  opacity: 0.85;
+}
+
 .inv-type-thumb-file {
   max-width: 100%;
   font-size: 0.8rem;

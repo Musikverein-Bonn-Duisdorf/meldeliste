@@ -437,6 +437,7 @@ class DatabaseManager
         $this->processSchema(true, false);
         $this->migrateMailGroupTableToGroup();
         $this->migrateAudienceLegacyColumns();
+        $this->migrateUniformGenderThumbs(true);
         $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
@@ -459,6 +460,7 @@ class DatabaseManager
         $this->processSchema(true, true);
         $this->migrateMailGroupTableToGroup();
         $this->migrateAudienceLegacyColumns();
+        $this->migrateUniformGenderThumbs(true);
         $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
@@ -1095,6 +1097,60 @@ class DatabaseManager
             $escDesc !== '' ? $escDesc : $escParam
         );
         mysqli_query($GLOBALS['conn'], $insert);
+    }
+
+    /**
+     * MELD-235: copy legacy Uniform.ThumbFile into ThumbMale before orphan drop.
+     *
+     * @param bool $apply
+     */
+    private function migrateUniformGenderThumbs($apply) {
+        $uniform = new SQLtable('Uniform');
+        if(!$uniform->exists() || !$uniform->columnExists('ThumbFile')) {
+            return;
+        }
+        if(!$uniform->columnExists('ThumbMale')) {
+            $this->addReport(
+                'column',
+                'Uniform.ThumbMale',
+                'error',
+                'ThumbMale fehlt — ThumbFile-Migration übersprungen'
+            );
+            return;
+        }
+        if(!$apply) {
+            $this->addReport(
+                'data',
+                'Uniform.ThumbFile',
+                'pending',
+                'Legacy-Vorschau nach ThumbMale kopieren'
+            );
+            return;
+        }
+        $sql = sprintf(
+            'UPDATE `%sUniform` SET `ThumbMale` = `ThumbFile`
+             WHERE (`ThumbMale` IS NULL OR `ThumbMale` = \'\')
+               AND `ThumbFile` IS NOT NULL AND `ThumbFile` <> \'\';',
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if(!$dbr) {
+            $this->addReport(
+                'data',
+                'Uniform.ThumbFile',
+                'error',
+                'Kopie nach ThumbMale fehlgeschlagen',
+                mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+            );
+            return;
+        }
+        $n = (int)mysqli_affected_rows($GLOBALS['conn']);
+        $this->addReport(
+            'data',
+            'Uniform.ThumbFile',
+            'ok',
+            $n.' Vorschau(en) nach ThumbMale übernommen'
+        );
     }
 
     /**

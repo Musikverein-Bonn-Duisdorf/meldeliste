@@ -238,7 +238,8 @@
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},
 	"Name": {"Type": "text", "Collation": "utf8mb4_unicode_ci"},
 	"Sortierung": {"Type": "int", "Default": 1},
-	"ThumbFile": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
+	"ThumbMale": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
+	"ThumbFemale": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"}
     },
     "UserVoice": {
 	"Index": {"Type": "int", "Extra": "AUTO_INCREMENT"},

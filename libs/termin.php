@@ -830,14 +830,17 @@ class Termin
     }
 
     /**
-     * List/detail thumbnail HTML when clothing category has an image (MELD-234).
+     * List/detail thumbnail HTML when clothing category has an image (MELD-234/235).
+     * Uses gender of the list user (getUser / optional override).
      */
-    public function renderUniformThumbHtml($extraClass = '') {
+    public function renderUniformThumbHtml($extraClass = '', $forUserId = null) {
         $uid = (int)$this->Uniform;
         if($uid < 1 || !class_exists('Uniform')) {
             return '';
         }
-        $url = Uniform::thumbUrl($uid);
+        $viewer = $forUserId !== null ? (int)$forUserId : (int)$this->getUser();
+        $gender = function_exists('mitGenderForUser') ? mitGenderForUser($viewer) : null;
+        $url = Uniform::thumbUrl($uid, $gender);
         if($url === '') {
             return '';
         }

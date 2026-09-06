@@ -18,6 +18,7 @@
  * v45: one loan contract text for all borrowers (MELD-213)
  * v46: logDebug Config (MELD-230)
  * v47: Uniform + Termine.Uniform (MELD-234)
+ * v48: Uniform ThumbMale/ThumbFemale (MELD-235)
  */
-return 47;
+return 48;
 ?>
