@@ -2,6 +2,16 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-06-542ae (2026-09-06)
+
+- MELD-235: Listen-Thumb größer, Rahmen/Ausrichtung, Buttons oben halten
+- MELD-235: Kleidungs-Thumb in Datums-Spalte, groß im Detail, Buttons oben
+- MELD-235: Kleidung-Thumbnails männlich/weiblich
+- MELD-234: Kleidung-Kategorien mit Thumbnail an Terminen
+- MELD-235: Kleidungs-Thumb Größe und Listen-Layout
+- MELD-235: Kleidungs-Thumb Layout Liste/Detail
+- MELD-234/235: Kleidung-Thumbnails (m/w)
+
 ## 2026-08-29-6cd47 (2026-08-29)
 
 - MELD-232: Safari-URL-Bar-Kompensation nicht in Chrome iOS
