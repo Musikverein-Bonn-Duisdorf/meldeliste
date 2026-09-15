@@ -19,6 +19,8 @@
  * v46: logDebug Config (MELD-230)
  * v47: Uniform + Termine.Uniform (MELD-234)
  * v48: Uniform ThumbMale/ThumbFemale (MELD-235)
+ * v49: CollectionGrant for pinned Sammlungen (MELD-236)
+ * v50: CollectionGrant.Sortierung (MELD-236)
  */
-return 48;
+return 50;
 ?>

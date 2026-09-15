@@ -324,7 +324,7 @@ function refreshMainPageTerminEntries(terminId) {
         return new ActiveXObject('Microsoft.XMLHTTP');
     }
 
-    // Rückmeldungs-Karten (meldungen.php / mein-register.php)
+    // Rückmeldungs-Karten (meldungen.php)
     var responseEl = document.getElementById('responseLine' + terminId);
     if(responseEl) {
         (function(el) {
