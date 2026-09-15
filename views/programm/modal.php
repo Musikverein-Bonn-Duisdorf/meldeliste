@@ -1,7 +1,7 @@
 <?php
 /**
  * Termin-Programm modal: all linked Archiv-Sammlungen + pieces (MELD-197).
- * Expects: $terminId, $terminName, $collections (list of {id,name,items}).
+ * Expects: $terminId, $terminName, $collections (list of {id,name,numbered?,items}).
  */
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -37,6 +37,7 @@ $collections = isset($collections) && is_array($collections) ? $collections : ar
             $colName = 'Sammlung';
         }
         $items = isset($col['items']) && is_array($col['items']) ? $col['items'] : array();
+        $colNumbered = !empty($col['numbered']);
         $itemCount = count($items);
         $headingId = 'programm-col-'.$idx;
 ?>
@@ -47,7 +48,7 @@ $collections = isset($collections) && is_array($collections) ? $collections : ar
         <div class="profile-value">Keine Stücke in dieser Sammlung.</div>
       </div>
 <?php   } else {
-            echo render('sammlung/piece_list', array('items' => $items));
+            echo render('sammlung/piece_list', array('items' => $items, 'numbered' => $colNumbered));
         } ?>
     </section>
 <?php

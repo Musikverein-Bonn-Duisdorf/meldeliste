@@ -515,9 +515,10 @@ function sammlungFoldHtml($collectionId, $name, $opts = array()) {
         ? archivLoadCollectionModalData($collectionId)
         : null;
     $items = ($data && isset($data['items']) && is_array($data['items'])) ? $data['items'] : array();
+    $numbered = $data && !empty($data['numbered']);
     // Same piece markup/CSS as Programm-/Sammlung-Modal (.archiv-piece-modal).
     $inner = count($items)
-        ? render('sammlung/piece_list', array('items' => $items))
+        ? render('sammlung/piece_list', array('items' => $items, 'numbered' => $numbered))
         : '<div class="profile-field"><div class="profile-value">Keine Stücke in dieser Sammlung.</div></div>';
     $body = '<div class="archiv-piece-modal"><div class="archiv-piece-modal-list">'.$inner.'</div></div>';
 

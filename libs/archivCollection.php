@@ -323,6 +323,20 @@ function archivCompositionRecordingColumnReady() {
 }
 
 /**
+ * Whether Collection.Numbered exists (Archiv schema ≥ 18 / ARCHIV-57).
+ * @return bool
+ */
+function archivCollectionNumberedColumnReady() {
+    if(!archivCollectionsReady()) {
+        return false;
+    }
+    $table = archivDbPrefix().'Collection';
+    $dbr = mysqli_query($GLOBALS['conn'], "SHOW COLUMNS FROM `".$table."` LIKE 'Numbered'");
+    sqlerror();
+    return (bool)($dbr && mysqli_fetch_array($dbr));
+}
+
+/**
  * Volume-icon link for a recording URL, or '' when unset.
  * @param string $recordingUrl Raw or absolute URL
  * @return string
@@ -430,7 +444,7 @@ function archivPublisherLabel($name, $href) {
 /**
  * Modal payload: name + ordered pieces with Archiv list meta.
  * @param int $id
- * @return array{id:int,name:string,items:list<array<string,mixed>}|null
+ * @return array{id:int,name:string,numbered:bool,items:list<array<string,mixed>}|null
  */
 function archivLoadCollectionModalData($id) {
     $id = (int)$id;
@@ -438,8 +452,11 @@ function archivLoadCollectionModalData($id) {
         return null;
     }
     $prefix = archivDbPrefix();
+    $numberedReady = archivCollectionNumberedColumnReady();
+    $numberedSelect = $numberedReady ? ', `Numbered`' : '';
     $sql = sprintf(
-        'SELECT `Index`, `Name`, `Archived` FROM `%sCollection` WHERE `Index` = "%d" LIMIT 1;',
+        'SELECT `Index`, `Name`, `Archived`%s FROM `%sCollection` WHERE `Index` = "%d" LIMIT 1;',
+        $numberedSelect,
         $prefix,
         $id
     );
@@ -452,6 +469,7 @@ function archivLoadCollectionModalData($id) {
     if($name === '') {
         $name = 'Sammlung #'.$id;
     }
+    $numbered = $numberedReady && !empty($row['Numbered']);
     $items = array();
     $recordingReady = archivCompositionRecordingColumnReady();
     $recordingSelect = $recordingReady ? ', c.`Recording`' : '';
@@ -534,6 +552,7 @@ function archivLoadCollectionModalData($id) {
     return array(
         'id' => $id,
         'name' => $name,
+        'numbered' => $numbered,
         'items' => $items,
     );
 }
@@ -551,6 +570,7 @@ function archivCollectionModalHtml($id) {
     return render('sammlung/modal', array(
         'collectionId' => $data['id'],
         'collectionName' => $data['name'],
+        'numbered' => !empty($data['numbered']),
         'items' => $data['items'],
     ));
 }
@@ -558,7 +578,7 @@ function archivCollectionModalHtml($id) {
 /**
  * Programm modal payload for a Termin (all linked collections + pieces).
  * @param int $terminId
- * @return array{terminId:int,terminName:string,collections:list<array{id:int,name:string,items:list}>}|null
+ * @return array{terminId:int,terminName:string,collections:list<array{id:int,name:string,numbered:bool,items:list}>}|null
  */
 function archivLoadTerminProgrammModalData($terminId) {
     $terminId = (int)$terminId;
@@ -580,6 +600,7 @@ function archivLoadTerminProgrammModalData($terminId) {
         $collections[] = array(
             'id' => $data['id'],
             'name' => $data['name'],
+            'numbered' => !empty($data['numbered']),
             'items' => $data['items'],
         );
     }

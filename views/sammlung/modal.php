@@ -1,7 +1,7 @@
 <?php
 /**
  * Archiv-Sammlung detail modal (MELD-197).
- * Expects: $collectionId, $collectionName, $items.
+ * Expects: $collectionId, $collectionName, $items; optional $numbered.
  */
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -11,6 +11,7 @@ if($name === '') {
     $name = 'Sammlung';
 }
 $items = isset($items) && is_array($items) ? $items : array();
+$numbered = !empty($numbered);
 $itemCount = count($items);
 ?>
 <div class="profile-shell modal-shell archiv-piece-modal sammlung-modal" data-sammlung-id="<?php echo (int)$collectionId; ?>">
@@ -31,7 +32,7 @@ $itemCount = count($items);
         <div class="profile-value">Keine Stücke in dieser Sammlung.</div>
       </div>
 <?php } else {
-    echo render('sammlung/piece_list', array('items' => $items));
+    echo render('sammlung/piece_list', array('items' => $items, 'numbered' => $numbered));
 } ?>
     </section>
   </div>
