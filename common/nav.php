@@ -7,6 +7,16 @@ $mailUnreadLabel = $mailUnread > 99 ? '99+' : (string)$mailUnread;
 $navUser = new User;
 $navUser->load_by_id($_SESSION['userid']);
 $navHasInventories = $navUser->hasInventories();
+$myCollections = array();
+if(function_exists('archivFeatureEnabled') && archivFeatureEnabled() && class_exists('CollectionGrant')) {
+    try {
+        $myCollections = CollectionGrant::listVisibleToUser((int)$_SESSION['userid']);
+    }
+    catch(Throwable $e) {
+        $myCollections = array();
+    }
+}
+$navHasMyCollections = count($myCollections) > 0;
 $ssoArchiv = (!empty($optionsDB['urlNotenarchiv']) && requirePermission('perm_accessNotenarchiv'))
     ? 'sso.php?redirect='.rawurlencode(trim((string)$optionsDB['urlNotenarchiv']))
     : '';
@@ -71,6 +81,12 @@ if(requirePermission('perm_editConfig')) {
     <a class="app-nav-item <?php getPage('home', 'termine'); ?>" href="<?php echo htmlspecialchars((string)$GLOBALS['optionsDB']['WebSiteURL'], ENT_QUOTES, 'UTF-8'); ?>" title="Termine">
       <i class="far fa-calendar-alt" aria-hidden="true"></i><span class="nav-label">Termine</span>
     </a>
+<?php if(!empty($navHasMyCollections)) { ?>
+    <a class="app-nav-item <?php getPage('meinesammlungen', 'termine'); ?>" href="meine-sammlungen.php" title="Meine Sammlungen">
+      <i class="fas fa-book-open" aria-hidden="true"></i>
+      <span class="nav-label"><span class="nav-label-long">Meine Sammlungen</span><span class="nav-label-short">Sammlungen</span></span>
+    </a>
+<?php } ?>
     <a class="app-nav-item <?php getPage('calendar', 'termine'); ?>" href="calendar.php" title="Kalender">
       <i class="fas fa-calendar" aria-hidden="true"></i><span class="nav-label">Kalender</span>
     </a>
@@ -82,10 +98,6 @@ if(requirePermission('perm_editConfig')) {
               .'</span>';
       }
       ?>
-    </a>
-    <a class="app-nav-item <?php getPage('meinregister', 'register'); ?>" href="mein-register.php" title="Mein Register">
-      <i class="fas fa-users" aria-hidden="true"></i>
-      <span class="nav-label"><span class="nav-label-long">Mein Register</span><span class="nav-label-short">Register</span></span>
     </a>
 <?php if($navHasInventories) { ?>
     <a class="app-nav-item app-nav-item--secondary <?php getPage('myinventories', 'inventar'); ?>" href="myinventories.php" title="Mein Inventar">
@@ -174,13 +186,16 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showTermine) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'admincalendar', 'shifts', 'uniform-types')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('newtermin', 'termine-archiv', 'admincalendar', 'shifts', 'uniform-types', 'sammlungen')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editAppmnts'); ?>">Termine <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
                 <a title="Termin erstellen" href="new-termin.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('newtermin', 'perm_editAppmnts'); ?>"><i class="fas fa-plus-circle"></i> Termin erstellen</a>
                 <a title="Kleidung" href="uniform-types.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('uniform-types', 'perm_editAppmnts'); ?>"><i class="fas fa-shirt"></i> Kleidung</a>
                 <a title="Admin-Kalender" href="admin-calendar.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('admincalendar', 'perm_showHiddenAppmnts'); ?>"><i class="fas fa-calendar-week"></i> Admin-Kalender</a>
                 <a title="Archiv: Termine" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('termine-archiv', 'perm_editAppmnts'); ?>"><i class="fas fa-history"></i> Archiv: Termine</a>
+<?php if(archivFeatureEnabled() && requirePermission('perm_editAppmnts')) { ?>
+                <a title="Sammlungen" href="sammlungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('sammlungen', 'perm_editAppmnts'); ?>"><i class="fas fa-book-open"></i> Sammlungen</a>
+<?php } ?>
               </div>
             </div>
 <?php } ?>

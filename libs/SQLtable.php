@@ -359,9 +359,22 @@ class SQLtable
     }
 
     private function normalizeDefault($value) {
-        if($value === null) return 'NULL';
-        if(is_string($value) && strtoupper($value) === 'CURRENT_TIMESTAMP') return 'CURRENT_TIMESTAMP';
-        return strtoupper((string)$value);
+        if($value === null) {
+            return 'NULL';
+        }
+        $s = strtoupper(trim((string)$value));
+        // Strip optional quotes MySQL sometimes stores around defaults
+        if(strlen($s) >= 2) {
+            $q = $s[0];
+            if(($q === '"' || $q === "'") && substr($s, -1) === $q) {
+                $s = substr($s, 1, -1);
+            }
+        }
+        // MySQL 8 INFORMATION_SCHEMA: current_timestamp() vs CURRENT_TIMESTAMP in DBconfig
+        if($s === 'CURRENT_TIMESTAMP' || $s === 'CURRENT_TIMESTAMP()' || $s === 'NOW()' || $s === 'NOW') {
+            return 'CURRENT_TIMESTAMP';
+        }
+        return $s;
     }
 
     /** @deprecated use modifyColumn */

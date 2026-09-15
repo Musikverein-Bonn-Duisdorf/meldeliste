@@ -7,22 +7,12 @@
  */
 
 $sections = array();
-$yesColor = htmlspecialchars($optionsDB['colorAppmntYes'], ENT_QUOTES, 'UTF-8');
-$noColor = htmlspecialchars($optionsDB['colorAppmntNo'], ENT_QUOTES, 'UTF-8');
-$maybeColor = htmlspecialchars($optionsDB['colorAppmntMaybe'], ENT_QUOTES, 'UTF-8');
 
 $meldeButtons = '
 <table class="help-legend">
 <tr><td class="w3-border w3-border-black w3-center w3-green help-legend-swatch"><b>&#10004;</b></td><td>Komme (ja)</td></tr>
 <tr><td class="w3-border w3-border-black w3-center w3-red help-legend-swatch"><b>&#10008;</b></td><td>Komme nicht (nein)</td></tr>
 <tr><td class="w3-border w3-border-black w3-center w3-blue help-legend-swatch"><b>?</b></td><td>Noch unsicher (vielleicht)</td></tr>
-</table>';
-
-$registerLegend = '
-<table class="help-legend">
-<tr><td class="w3-border w3-border-black '.$yesColor.' help-legend-swatch-wide">Komme</td></tr>
-<tr><td class="w3-border w3-border-black '.$noColor.' help-legend-swatch-wide">Komme nicht</td></tr>
-<tr><td class="w3-border w3-border-black '.$maybeColor.' help-legend-swatch-wide">Bin noch unsicher</td></tr>
 </table>';
 
 $sections[] = array(
@@ -44,7 +34,7 @@ $sections[] = array(
 <li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
 <li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; ausgegraut wie in der Übersicht, wenn du nicht zur Zielgruppe gehörst; bei Schichten erscheinen die einzelnen Schichten mit ihren Zeiten; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details; bei vielen Einträgen am selben Tag öffnet <b>+N</b> die Tagesauswahl); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
-<li><i class="fas fa-users"></i> <b>Mein Register</b> – Rückmeldungen deines Registers (auf Tablet/Smartphone dauerhaft in der unteren Leiste)</li>
+'.((function_exists('archivFeatureEnabled') && archivFeatureEnabled() && class_exists('CollectionGrant') && count(CollectionGrant::listVisibleToUser((int)$_SESSION['userid'])) > 0) ? '<li><i class="fas fa-book-open"></i> <b>Meine Sammlungen</b> – freigeschaltete Notenarchiv-Sammlungen</li>' : '').'
 '.($helpUser->hasInventories() ? '<li><i class="fas fa-shirt"></i> <b>Mein Inventar</b> – dir gehörendes oder an dich ausgeliehenes Inventar</li>' : '').'
 <li><i class="fas fa-user"></i> <b>Mein Profil</b> – eigene Stammdaten und Einstellungen (Desktop in der Seitenleiste, Tablet/Smartphone unter <b>Mehr</b>)</li>
 <li><i class="fas fa-photo-film"></i> <b>Medien</b> – Links zu Aufnahmen und Social Media (konfigurierbar)</li>
@@ -72,22 +62,8 @@ $sections[] = array(
 <p><b>Tipp:</b> Auch „vielleicht“ oder „nein“ sind wertvoll – offene Einträge erschweren die Planung.</p>
 <p>Bei Terminen mit <b>Besetzung</b> kannst du im Termin-Detail ggf. das <b>Instrument für diesen Termin</b> anpassen (z.&nbsp;B. Dirigat übernehmen). Speichern mit dem Speicher-Button neben der Auswahl.</p>
 <p>Ein Klick auf Titel, Beschreibung oder Ort öffnet die Termin-Details (Uhrzeit, Orchesterübersicht, …).</p>
+<p>Das Sprechblasen-Icon neben den Melde-Buttons öffnet die Rückmeldungen (bei Schicht-Terminen pro Schicht). Ohne Recht <b>Rückmeldungen anzeigen</b> siehst du bei Besetzungs-Terminen bzw. Schichten mit Bedarf nur Musiker deines Registers; sonst alle Gemeldeten. Personen hinzufügen oder entfernen nur mit <b>Rückmeldungen bearbeiten</b>.</p>
 <p>Über <i class="fa fa-calendar-plus"></i> kannst du einen Termin als ICS-Datei in deinen Kalender (Google, Outlook, …) importieren. Bei Terminen mit Schichten steht der Button an jeder Schichtzeile und übernimmt Schichtname und -zeit.</p>
-'
-);
-
-$sections[] = array(
-    'id' => 'mein-register',
-    'title' => 'Mein Register',
-    'body' => '
-<p>Unter <b>Mein Register</b> siehst du, wie sich die Musikerinnen und Musiker deines Registers zu Terminen gemeldet haben. Pro Termin: Status-Chips und Namensliste als farbige Personen-Chips (Registerfarbe) nach Zusage, Unsicher und Absage. Klick auf die Zeile öffnet das Detail-Modal.</p>
-<p>In der <b>Terminübersicht</b> (Startseite, Archiv) öffnet das Sprechblasen-Icon neben den Melde-Buttons dasselbe Register-Modal; bei Schicht-Terminen pro Schichtzeile das Schicht-Modal. Ohne Admin-Recht <b>Rückmeldungen anzeigen</b> siehst du bei <b>Besetzungs</b>-Terminen bzw. Schichten mit Bedarf nur Musiker deines Registers; bei Terminen ohne Besetzung und Schichten ohne Bedarf alle Gemeldeten.</p>
-<ul>
-<li>Über die Suchzeile findest du Termine nach Titel, Ort, Datum oder Beschreibung.</li>
-<li>Personen hinzufügen oder entfernen nur mit Recht <b>Rückmeldungen bearbeiten</b> — im Modal.</li>
-</ul>
-'.$registerLegend.'
-<p>So erkennst du schnell Lücken in der Besetzung deines Registers.</p>
 '
 );
 
@@ -186,6 +162,7 @@ $sections[] = array(
 <p>Unter Admin → <b>Termin erstellen</b> legst du neue Termine an. Das Formular ist in Abschnitte gegliedert (Was, Wann, Wo, Optionen): auf dem Smartphone untereinander, auf dem Tablet zweispaltig, am PC als vier Spalten nebeneinander.</p>
 <p>Unter Admin → <b>Kleidung</b> pflegst du Kategorien (z.&nbsp;B. Uniform komplett, nur Weste, weißes Hemd) mit optionalen Vorschaubildern für männlich und weiblich. Am Termin kannst du unter Optionen optional eine Kategorie setzen; in der Übersicht erscheint das Thumbnail unter dem Datum, im Detail vergrößert (Geschlecht aus dem Mitgliederprofil, sonst das andere Bild falls vorhanden).</p>
 <p>Ist ein <b>Notenarchiv</b> angeschlossen, kannst du dem Termin unter <b>Programm</b> eine oder mehrere Archiv-Sammlungen zuordnen (Chip-Eingabe). In der Terminübersicht erscheint der Chip <b>Programm</b>; Klick öffnet die Stückliste wie im Archiv (Cover, Komponist, Arrangeur, Verlag, …). Ist im Archiv beim Stück eine <b>Aufnahme</b>-URL hinterlegt, öffnet das Volume-Symbol rechts in der Zeile die Aufnahme in einem neuen Tab.</p>
+<p>Unter Admin → <b>Sammlungen</b> schaltest du Archiv-Sammlungen global frei (Rollen, Register, Gruppen, Personen, Termin-Teilnehmer). Freigeschaltete Sammlungen erscheinen bei den Betroffenen unter <b>Meine Sammlungen</b>. Am Termin angehängte Sammlungen bleiben davon unabhängig für alle sichtbar, die den Termin sehen.</p>
 <p>Im <b>Kalender</b> kannst du auf eine freie Tagesfläche klicken: Nach Bestätigung öffnet sich das Anlege-Formular mit vorausgefülltem Datum.</p>
 <p>Nach Speichern/Löschen von Terminen oder Schichten &amp; Aufgaben erfolgt ein Redirect (kein erneutes Absenden beim Aktualisieren); Rücksprungziele können über Session-Token (<code>return_token</code>) geführt werden. Beginn- und Endzeit einer Schicht/Aufgabe sind optional.</p>
 <p>Das Flag <b>Besetzung</b> steuert, ob Registeraufschlüsselung und Orchesterdarstellung greifen – für Proben und Auftritte. Veranstaltungen ohne Besetzung (z.&nbsp;B. Grillfest, Radtour) brauchen das nicht (nur Manpower).</p>
@@ -216,7 +193,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_showResponse'),
     'body' => '
 <p>Unter Admin → <b>Meldungen</b> siehst du Rückmeldungen übergreifend; im <b>Archiv</b> vergangene Termine. Beide Listen haben eine Suchzeile (Titel, Ort, Datum, Beschreibung) und dieselben kompakten Terminzeilen wie auf der Startseite (Status-Chips, Register-Zusammenfassung).</p>
-<p>In Termin- und Register-Ansichten (sowie Schicht-Modals bei Schicht-Terminen) kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert als Register-Chips; Namen als Chip öffnen das Personen-Modal nur mit Recht <b>Benutzer anzeigen</b> (oder beim eigenen Profil). Die Orchestergrafik ist im Modal aufklappbar (in der Gesamtansicht standardmäßig offen, in <b>Mein Register</b> zugeklappt), skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
+<p>In Termin-Ansichten (sowie Schicht-Modals bei Schicht-Terminen) kannst du Rückmeldungs-Modals öffnen – Namenslisten nach Status gruppiert als Register-Chips; Namen als Chip öffnen das Personen-Modal nur mit Recht <b>Benutzer anzeigen</b> (oder beim eigenen Profil). Die Orchestergrafik ist im Modal aufklappbar (in der Gesamtansicht standardmäßig offen), skaliert auf die Fensterbreite und zeigt die Besetzung farbig nach Meldestatus (Hover zeigt Name und Status). Mit <b>Nur aktive Besetzung</b> siehst du einen Sitzplan nur mit Zusagen und Unsicheren – ohne Lücken durch Absagen oder fehlende Meldungen.</p>
 '.(requirePermission('perm_editResponse') ? '<p>Das Chip-Feld zum Hinzufügen und Entfernen von Personen in Zusagen, Absagen und Unsicher (Termin- und Schicht-Modals) setzt das Recht <b>Rückmeldungen bearbeiten</b> voraus (nicht nur Meldungen anzeigen). Bei Zusage/Unsicher für einen sonst unsichtbaren Termin wird die Person automatisch in die Sichtbarkeit aufgenommen. Im Orchesterplan per Klick auf einen Kreis den Status durchschalten: (keine Meldung →) Zusage → Absage → unsicher → Zusage …</p>' : '').'
 '
 );

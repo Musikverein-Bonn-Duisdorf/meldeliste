@@ -843,7 +843,9 @@ function adminListPageBegin($kicker, $title, $options = array()) {
     echo '    <div class="app-page-chrome">'."\n";
     echo '    <header class="'.htmlspecialchars($heroCls, ENT_QUOTES, 'UTF-8').'">'."\n";
     echo '      <div class="profile-hero-text">'."\n";
-    echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
+    if(empty($options['hideKicker']) && trim((string)$kicker) !== '') {
+        echo '        <p class="profile-kicker">'.htmlspecialchars((string)$kicker, ENT_QUOTES, 'UTF-8').'</p>'."\n";
+    }
     $titleBase = (string)$title;
     $titleAttrs = '';
     if(isset($options['listCount'])) {
@@ -1030,6 +1032,14 @@ function entityMayOpen($type, $id) {
         return true;
 
     case 'sammlung':
+        if(!function_exists('archivFeatureEnabled') || !archivFeatureEnabled()) {
+            return false;
+        }
+        if(requirePermission('perm_editAppmnts')) {
+            return true;
+        }
+        return class_exists('CollectionGrant') && CollectionGrant::userMayView($uid, $id);
+
     case 'programm':
         return function_exists('archivFeatureEnabled') && archivFeatureEnabled();
 
@@ -2651,7 +2661,6 @@ function allowedReturnUrls() {
     return array(
         'musiker.php',
         'new-musiker.php',
-        'mein-register.php',
         'index.php',
         'termine-archiv.php',
         'user-voice.php',
@@ -2765,7 +2774,6 @@ function pageToReturnUrl($page) {
         'nomitglied' => 'musiker.php',
         'newmusiker' => 'new-musiker.php',
         'register' => 'musiker.php',
-        'meinregister' => 'mein-register.php',
         'user-voice' => 'user-voice.php',
         'groups' => 'groups.php',
         'inventories' => 'inventories.php',

@@ -9,7 +9,7 @@
  *   "users": [id, ...],
  *   "namedGroups": [id, ...],  // named Group rows; not nested inside MemberSpec
  *   "mailGroups": [id, ...],   // legacy alias for namedGroups (still read)
- *   "termine": [id, ...]      // Termin-Teilnehmer (ja+vielleicht); Mail-Verteiler only
+ *   "termine": [id, ...]      // Termin-Teilnehmer (ja+vielleicht); Mail + CollectionGrant
  * }
  */
 class AudienceSpec
@@ -507,7 +507,11 @@ class AudienceSpec
     public static function userMatches($userId, $spec) {
         $userId = (int)$userId;
         if($userId <= 0) return false;
-        $norm = self::normalize($spec, array('allowNamedGroups' => true, 'defaultGroups' => null));
+        $norm = self::normalize($spec, array(
+            'allowNamedGroups' => true,
+            'allowTermine' => true,
+            'defaultGroups' => null,
+        ));
         if(self::isEmpty($norm)) {
             return true;
         }

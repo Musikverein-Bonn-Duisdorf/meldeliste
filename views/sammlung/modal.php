@@ -16,7 +16,6 @@ $itemCount = count($items);
 <div class="profile-shell modal-shell archiv-piece-modal sammlung-modal" data-sammlung-id="<?php echo (int)$collectionId; ?>">
   <header class="profile-hero">
     <div class="profile-hero-text">
-      <p class="profile-kicker">Sammlung</p>
       <h2 class="profile-title"><?php echo $h($name); ?></h2>
     </div>
     <div class="profile-hero-actions">

@@ -2286,13 +2286,6 @@ class Termin
         $str=$str." / ".$this->Capacity;
         return $str;
     }
-    public function printMyResponseLine() {
-        if($this->Shifts) return $this->printShiftResponseLine();
-        $u = new User;
-        $u->load_by_id($_SESSION['userid']);
-        $reg = $this->Auftritt ? $u->getRegister() : 0;
-        return $this->getResponseLine($reg);
-    }
     public function printResponseLine() {
         if($this->Shifts) return $this->printShiftResponseLine();
         return $this->getResponseLine(0);
@@ -2320,7 +2313,7 @@ class Termin
     }
 
     /**
-     * Melde-row shell for Meldungen / Mein Register / Archiv (MELD-149).
+     * Melde-row shell for Meldungen / Archiv (MELD-149).
      * @param string $onclick JS for card click (empty = no row click)
      * @param string $actionsHtml right-side chips / meta
      * @param string $bodyHtml optional content below the main row
@@ -2979,7 +2972,7 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     /**
-     * Read-only chip section (Ja / Nein / Unsicher) for modal and Mein Register.
+     * Read-only chip section (Ja / Nein / Unsicher) for modal and response lists.
      * @param array $entries
      * @param int $wert 1|2|3
      */
@@ -2995,7 +2988,7 @@ ORDER BY `Nachname`, `Vorname`;",
     }
 
     /**
-     * Inline chip preview on Mein Register list rows (register-filtered).
+     * Inline chip preview on response list rows (register-filtered).
      * @param array{whoYes:array,whoNo:array,whoMaybe:array} $lists
      */
     private function renderRegisterResponseChipBodyHtml(array $lists) {

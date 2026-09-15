@@ -111,6 +111,17 @@
   }
 
   var MailRecipientChips = {
+    /**
+     * Independent instance (multiple pickers on one page).
+     * @param {object} opts same as init()
+     * @return {object}
+     */
+    create: function(opts) {
+      var inst = Object.create(this);
+      inst.init(opts);
+      return inst;
+    },
+
     init: function(opts) {
       this.catalog = parseCatalog(opts.catalogEl);
       this.chipsEl = opts.chipsEl;
