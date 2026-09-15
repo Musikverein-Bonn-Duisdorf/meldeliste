@@ -180,6 +180,18 @@ function archivCoverInitials($title) {
     if($title === '') {
         return '—';
     }
+    $lower = function ($s) {
+        return function_exists('mb_strtolower') ? mb_strtolower($s, 'UTF-8') : strtolower($s);
+    };
+    $upper = function ($s) {
+        return function_exists('mb_strtoupper') ? mb_strtoupper($s, 'UTF-8') : strtoupper($s);
+    };
+    $substr = function ($s, $start, $len) {
+        if(function_exists('mb_substr')) {
+            return mb_substr($s, $start, $len, 'UTF-8');
+        }
+        return substr($s, $start, $len);
+    };
     $skip = array(
         'der', 'die', 'das', 'den', 'dem', 'des',
         'ein', 'eine', 'einen', 'einem', 'einer',
@@ -197,13 +209,13 @@ function archivCoverInitials($title) {
         if($plain === null || $plain === '') {
             continue;
         }
-        if(in_array(mb_strtolower($plain, 'UTF-8'), $skip, true)) {
+        if(in_array($lower($plain), $skip, true)) {
             continue;
         }
         if($firstWord === '') {
             $firstWord = $plain;
         }
-        $letters[] = mb_strtoupper(mb_substr($plain, 0, 1, 'UTF-8'), 'UTF-8');
+        $letters[] = $upper($substr($plain, 0, 1));
         if(count($letters) >= 2) {
             break;
         }
@@ -212,10 +224,10 @@ function archivCoverInitials($title) {
         return implode('', $letters);
     }
     if($firstWord !== '') {
-        return mb_strtoupper(mb_substr($firstWord, 0, 2, 'UTF-8'), 'UTF-8');
+        return $upper($substr($firstWord, 0, 2));
     }
     $compact = preg_replace('/\s+/u', '', $title);
-    return mb_strtoupper(mb_substr((string)$compact, 0, 2, 'UTF-8'), 'UTF-8');
+    return $upper($substr((string)$compact, 0, 2));
 }
 
 /**

@@ -7588,7 +7588,11 @@ select.profile-control {
 }
 
 .sammlung-fold-body {
-  padding: 0 0 0.35rem;
+  padding: 0.15rem 0 0.35rem;
+}
+
+.sammlung-fold-body .archiv-piece-modal .piece-row:last-child {
+  margin-bottom: 0;
 }
 
 .sammlung-fold-toolbar {
