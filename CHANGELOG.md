@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-15-a1d8f (2026-09-15)
+
+- MELD-237: Programm-/Sammlung-Modal ohne Client-Cache
+- MELD-237: Programm-Modal ohne Cache
+
 ## 2026-09-15-7fba1 (2026-09-15)
 
 - MELD-237: Sammlungsnummer bei nummerierten Archiv-Sammlungen anzeigen
