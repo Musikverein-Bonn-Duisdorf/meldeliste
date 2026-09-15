@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-15-7fba1 (2026-09-15)
+
+- MELD-237: Sammlungsnummer bei nummerierten Archiv-Sammlungen anzeigen
+- MELD-237: Sammlungsnummer anzeigen
+
 ## 2026-09-15-d041b (2026-09-15)
 
 - MELD-236: Sammlungs-Fold wie Programm-Modal, mbstring-Fallback
