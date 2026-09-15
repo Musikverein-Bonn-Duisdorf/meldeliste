@@ -60,7 +60,9 @@ function openModal(type, id, register) {
 
     var key = type + ':' + id;
     if(register) key += ':' + register;
-    if(modalCache[key]) {
+    // Archiv-Sammlungen ändern sich außerhalb Melde — kein Client-Cache (MELD-237).
+    var skipCache = (type === 'programm' || type === 'sammlung');
+    if(!skipCache && modalCache[key]) {
         content.innerHTML = modalCache[key];
         host.style.display = 'block';
         initLoanUserChipsInModal(content);
@@ -85,7 +87,9 @@ function openModal(type, id, register) {
         if(xhr.readyState !== 4) return;
         if(modalLoadingKey !== key) return;
         if(xhr.status >= 200 && xhr.status < 300 && xhr.responseText) {
-            modalCache[key] = xhr.responseText;
+            if(!skipCache) {
+                modalCache[key] = xhr.responseText;
+            }
             content.innerHTML = xhr.responseText;
             initLoanUserChipsInModal(content);
             initMeldeResponseChipsInModal(content);
