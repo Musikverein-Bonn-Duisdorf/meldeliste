@@ -7,6 +7,9 @@ $sql = array(
 );
 
 $dbprefix = "meldeliste_";
+// Shared-DB prefix of Notenarchiv tables (Collection, Composition, …). Must match Archiv $dbprefix.
+// Dev example: $archivDbPrefix = "archiv-dev_";
+$archivDbPrefix = "archiv_";
 
 $mailconfig = array(
     'server' => "smtp.myprovider.com",
@@ -35,5 +38,6 @@ global $mailconfig;
 global $cronID;
 global $backupToken;
 global $dbprefix;
+global $archivDbPrefix;
 global $googlemapsapi;
 ?>

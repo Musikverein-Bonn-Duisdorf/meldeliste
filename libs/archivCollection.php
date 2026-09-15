@@ -1,11 +1,18 @@
 <?php
 /**
- * Read-only access to Notenarchiv collections (shared DB, prefix archiv_).
+ * Read-only access to Notenarchiv collections (shared DB).
  * MELD-197 — no PHP include from Notenarchiv.
+ * Prefix: $archivDbPrefix in common/config.php (MELD-233); default archiv_.
  */
 
 /** @return string */
 function archivDbPrefix() {
+    if(isset($GLOBALS['archivDbPrefix'])) {
+        $p = trim((string)$GLOBALS['archivDbPrefix']);
+        if($p !== '') {
+            return $p;
+        }
+    }
     return 'archiv_';
 }
 
@@ -15,19 +22,21 @@ function archivDbPrefix() {
  */
 function archivCollectionsReady() {
     static $ready = null;
+    static $readyPrefix = null;
     static $probedMissing = false;
-    if($ready === true) {
+    $prefix = archivDbPrefix();
+    if($ready === true && $readyPrefix === $prefix) {
         return true;
     }
-    if($ready === false && $probedMissing) {
+    if($ready === false && $probedMissing && $readyPrefix === $prefix) {
         $probedMissing = false;
     }
     if(!isset($GLOBALS['conn']) || !($GLOBALS['conn'] instanceof mysqli)) {
         $ready = false;
+        $readyPrefix = $prefix;
         $probedMissing = true;
         return false;
     }
-    $prefix = archivDbPrefix();
     $tables = array(
         $prefix.'Collection',
         $prefix.'CollectionItem',
@@ -40,11 +49,13 @@ function archivCollectionsReady() {
         $dbr = mysqli_query($GLOBALS['conn'], "SHOW TABLES LIKE '".$like."'");
         if(!$dbr || !mysqli_fetch_array($dbr)) {
             $ready = false;
+            $readyPrefix = $prefix;
             $probedMissing = true;
             return false;
         }
     }
     $ready = true;
+    $readyPrefix = $prefix;
     return true;
 }
 
