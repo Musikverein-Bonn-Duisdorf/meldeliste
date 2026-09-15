@@ -2,6 +2,15 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-15-d041b (2026-09-15)
+
+- MELD-236: Sammlungs-Fold wie Programm-Modal, mbstring-Fallback
+- MELD-233: Archiv-DB-Prefix konfigurierbar machen
+- MELD-236: Sammlungen anheften, Freigabe inline, Mein Register entfernen
+- MELD-236: Sammlungs-Fold wie Programm-Modal
+- MELD-233: Archiv-DB-Prefix konfigurierbar
+- MELD-236: Sammlung anheften
+
 ## 2026-09-06-654a9 (2026-09-06)
 
 - MELD-235: Mobile Titel über Buttons, Ort ausblenden
