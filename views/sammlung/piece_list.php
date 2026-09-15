@@ -1,12 +1,13 @@
 <?php
 /**
- * Archiv piece rows (Archiv Composition::printLine parity).
- * Expects: $items (list of piece arrays with coverHtml/meta).
+ * Archiv piece rows (Archiv Collection::printLine / Composition list parity).
+ * Expects: $items; optional $numbered (bool) — show CollectionNumber in filled corner.
  */
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 };
 $items = isset($items) && is_array($items) ? $items : array();
+$numbered = !empty($numbered);
 if(count($items)) {
 foreach($items as $item) {
     $title = isset($item['title']) ? trim((string)$item['title']) : '';
@@ -24,9 +25,14 @@ foreach($items as $item) {
     $year = isset($item['year']) ? trim((string)$item['year']) : '';
     $coverHtml = isset($item['coverHtml']) ? (string)$item['coverHtml'] : '';
     $recordingHtml = isset($item['recordingHtml']) ? (string)$item['recordingHtml'] : '';
+    $num = isset($item['number']) ? trim((string)$item['number']) : '';
+    $showNr = $numbered && $num !== '';
+    $rowClass = 'piece-row list-row'.($showNr ? ' piece-row--numbered' : '');
 ?>
-      <div class="piece-row list-row">
-        <div class="piece-rail" aria-hidden="true"></div>
+      <div class="<?php echo $h($rowClass); ?>">
+<?php if($showNr) { ?>
+        <div class="piece-id"><span class="piece-nr"><?php echo $h($num); ?></span></div>
+<?php } ?>
         <div class="piece-main">
 <?php if($coverHtml !== '') {
     echo $coverHtml;
