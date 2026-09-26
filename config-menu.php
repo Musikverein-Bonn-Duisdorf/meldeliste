@@ -187,10 +187,8 @@ function resetColorScheme() {
 }
 </script>
 <?php
-$configActions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnEdit'].' w3-border" href="welcome-mail.php">Willkommens-Mail</a>';
 adminListPageBegin('System', 'globale Einstellungen', array(
     'permKey' => 'perm_editConfig',
-    'actionsHtml' => $configActions,
 ));
 ?>
 <div class="w3-container w3-card w3-margin-bottom w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
@@ -233,6 +231,15 @@ $activeSchemeName = isset($colorSchemes[$activeSchemeId]['name'])
              onchange="renameColorScheme(this.value)" />
       <button type="button" class="w3-button w3-small <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?>"
               onclick="resetColorScheme()">Schema zurücksetzen</button>
+    </div>
+  </div>
+</div>
+<div class="w3-container w3-card w3-margin w3-padding">
+  <div class="w3-row w3-padding">
+    <div class="w3-col l3 m4 s12"><b>Willkommens-Mail</b></div>
+    <div class="w3-col l5 m4 s12">Betreff, Text und Grußformel für neue Nutzer.</div>
+    <div class="w3-col l4 m4 s12 w3-center">
+      <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?> w3-border" href="welcome-mail.php">Bearbeiten</a>
     </div>
   </div>
 </div>
