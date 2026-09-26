@@ -22,6 +22,7 @@
  * v49: CollectionGrant for pinned Sammlungen (MELD-236)
  * v50: CollectionGrant.Sortierung (MELD-236)
  * v51: Willkommens-Mail Editor Descriptions (MELD-240)
+ * v52: newMailGruss Willkommens-Mail (MELD-240)
  */
-return 51;
+return 52;
 ?>

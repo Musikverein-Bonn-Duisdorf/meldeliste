@@ -265,17 +265,17 @@ class User
         $body = isset($GLOBALS['optionsDB']['newMailText'])
             ? (string)$GLOBALS['optionsDB']['newMailText']
             : '';
-        $greet = isset($GLOBALS['optionsDB']['MailGreetings'])
-            ? (string)$GLOBALS['optionsDB']['MailGreetings']
-            : '';
-        if($greet !== '') {
-            if(function_exists('mailBodyLooksLikeHtml') && mailBodyLooksLikeHtml($body)) {
-                $body .= '<p>'.htmlspecialchars($greet, ENT_QUOTES, 'UTF-8').'</p>';
-            }
-            else {
-                $body .= "\n".$greet;
-            }
+        $gruss = isset($GLOBALS['optionsDB']['newMailGruss'])
+            ? (int)$GLOBALS['optionsDB']['newMailGruss']
+            : 3;
+        if($gruss < 1 || $gruss > 4) {
+            $gruss = 3;
         }
+        $job = new MailJob();
+        $job->BodyText = $body;
+        $job->Gruss = $gruss;
+        $senderName = isset($_SESSION['Vorname']) ? (string)$_SESSION['Vorname'] : '';
+        $body = $job->applyGreeting($senderName);
         $mail->singleUser($this->Index, $subject, $body);
     }
     public function passwd($password) {

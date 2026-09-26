@@ -578,6 +578,12 @@ function getConfigDefaults() {
             'Description' => 'Text der Willkommens-Mail (HTML; Editor: welcome-mail.php)',
         ),
         array(
+            'Parameter' => 'newMailGruss',
+            'Value' => '3',
+            'Type' => 'uint',
+            'Description' => 'Grußformel der Willkommens-Mail (1–4 wie MailJob.Gruss; Editor: welcome-mail.php)',
+        ),
+        array(
             'Parameter' => 'colorSchemeActive',
             'Value' => 'classic',
             'Type' => 'string',

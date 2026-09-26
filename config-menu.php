@@ -254,7 +254,7 @@ while($row = mysqli_fetch_array($dbr)) {
     if($row['Type'] === 'internal' || $row['Parameter'] === 'colorSchemeActive' || $row['Parameter'] === 'colorSchemes') {
         continue;
     }
-    if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText') {
+    if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText' || $row['Parameter'] === 'newMailGruss') {
         continue;
     }
     echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";
