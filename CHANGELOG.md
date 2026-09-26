@@ -2,6 +2,19 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-26-14a83 (2026-09-26)
+
+- MELD-240: Willkommens-Mail unter Farbschema in der Konfiguration
+- MELD-240: Willkommens-Editor wie Mail-Compose inkl. Grußformel
+- MELD-240: Willkommens-Mail-Editor unter Konfiguration
+- MELD-240: Button „Willkommens-Mail senden“ nur mit gültiger Adresse
+- MELD-240: Hilfe-Links von Seiten entfernen
+- MELD-240: Weitere Aktionen als sauberes Dropdown
+- MELD-240: Willkommens-Mail-Button unter Kontakt
+- MELD-240: Willkommens-Mail mit Maileditor speichern und senden
+- MELD-241: Teilnehmer-Chip Ja/Vielleicht mit Inbox-Kanal
+- MELD-240: Willkommens-Mail mit Editor und Versand
+
 ## 2026-09-26-cdb95 (2026-09-26)
 
 - MELD-239: Inaktive mit Ja/Vielleicht in Orchester-Besetzung
