@@ -186,7 +186,13 @@ function resetColorScheme() {
     run();
 }
 </script>
-<?php adminListPageBegin('System', 'globale Einstellungen', array('permKey' => 'perm_editConfig')); ?>
+<?php
+$configActions = '<a class="w3-button '.$GLOBALS['optionsDB']['colorBtnEdit'].' w3-border" href="welcome-mail.php">Willkommens-Mail</a>';
+adminListPageBegin('System', 'globale Einstellungen', array(
+    'permKey' => 'perm_editConfig',
+    'actionsHtml' => $configActions,
+));
+?>
 <div class="w3-container w3-card w3-margin-bottom w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
@@ -249,11 +255,6 @@ while($row = mysqli_fetch_array($dbr)) {
         continue;
     }
     if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText') {
-        echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";
-        echo "<div class=\"w3-col l3 m3 s12\"><b>".$row['Parameter']."</b></div>";
-        echo "<div class=\"w3-col l5 m5 s12\">".$row['Description']."</div>\n";
-        echo "<div class=\"w3-col l4 m4 s12 w3-center\"><a class=\"w3-btn w3-border ".$GLOBALS['optionsDB']['colorBtnEdit']."\" href=\"welcome-mail.php\">Willkommens-Mail</a></div>\n";
-        echo "</div>\n";
         continue;
     }
     echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";

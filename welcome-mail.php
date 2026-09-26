@@ -65,11 +65,10 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
 ?>
 <div class="profile-shell">
   <div class="profile-hero">
-    <p class="profile-kicker">Kommunikation</p>
+    <p class="profile-kicker">Konfiguration</p>
     <h1 class="profile-title">Willkommens-Mail</h1>
     <div class="profile-actions">
-      <a class="w3-btn w3-border w3-mobile" href="config-menu.php">Konfiguration</a>
-      <a class="w3-btn w3-border w3-mobile" href="mail.php">Email versenden</a>
+      <a class="w3-btn w3-border w3-mobile" href="config-menu.php">Zurück</a>
     </div>
   </div>
 
