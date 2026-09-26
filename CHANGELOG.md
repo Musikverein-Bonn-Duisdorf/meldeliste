@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-09-26-cdb95 (2026-09-26)
+
+- MELD-239: Inaktive mit Ja/Vielleicht in Orchester-Besetzung
+- MELD-239: Inaktive mit Ja/Vielleicht in Orchester
+
 ## 2026-09-15-a1d8f (2026-09-15)
 
 - MELD-237: Programm-/Sammlung-Modal ohne Client-Cache
