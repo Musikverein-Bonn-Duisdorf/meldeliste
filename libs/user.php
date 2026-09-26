@@ -259,7 +259,24 @@ class User
     public function newmail() {
         $mail = new Usermail;
         $mail->source = 'welcome';
-        $mail->singleUser($this->Index, $GLOBALS['optionsDB']['newMailSubject'], $GLOBALS['optionsDB']['newMailText']."\n".$GLOBALS['optionsDB']['MailGreetings']);
+        $subject = isset($GLOBALS['optionsDB']['newMailSubject'])
+            ? (string)$GLOBALS['optionsDB']['newMailSubject']
+            : 'Willkommen';
+        $body = isset($GLOBALS['optionsDB']['newMailText'])
+            ? (string)$GLOBALS['optionsDB']['newMailText']
+            : '';
+        $gruss = isset($GLOBALS['optionsDB']['newMailGruss'])
+            ? (int)$GLOBALS['optionsDB']['newMailGruss']
+            : 3;
+        if($gruss < 1 || $gruss > 4) {
+            $gruss = 3;
+        }
+        $job = new MailJob();
+        $job->BodyText = $body;
+        $job->Gruss = $gruss;
+        $senderName = isset($_SESSION['Vorname']) ? (string)$_SESSION['Vorname'] : '';
+        $body = $job->applyGreeting($senderName);
+        $mail->singleUser($this->Index, $subject, $body);
     }
     public function passwd($password) {
         try {

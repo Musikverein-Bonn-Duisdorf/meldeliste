@@ -208,11 +208,11 @@ class AudienceSpec
         }
         $where = array('u.`Deleted` != 1');
         if($requireMail) {
-            $where[] = 'u.`getMail` = 1';
-            $where[] = '(u.`Email` != \'\' OR u.`Email2` != \'\')';
+            // Same channel rule as userBaseWhere (inbox-only ok; SMTP decided in enqueue).
+            $where[] = '(u.`getMail` = 1 OR u.`notifyInbox` = 1)';
         }
         $sql = sprintf(
-            'SELECT u.`Index` FROM `%sMeldungen` m INNER JOIN `%sUser` u ON u.`Index` = m.`User` WHERE m.`Termin` = %d AND m.`Wert` != 2 AND %s;',
+            'SELECT u.`Index` FROM `%sMeldungen` m INNER JOIN `%sUser` u ON u.`Index` = m.`User` WHERE m.`Termin` = %d AND m.`Wert` IN (1, 3) AND %s;',
             $GLOBALS['dbprefix'],
             $GLOBALS['dbprefix'],
             $terminId,

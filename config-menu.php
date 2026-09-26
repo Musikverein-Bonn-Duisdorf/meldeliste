@@ -186,7 +186,11 @@ function resetColorScheme() {
     run();
 }
 </script>
-<?php adminListPageBegin('System', 'globale Einstellungen', array('permKey' => 'perm_editConfig')); ?>
+<?php
+adminListPageBegin('System', 'globale Einstellungen', array(
+    'permKey' => 'perm_editConfig',
+));
+?>
 <div class="w3-container w3-card w3-margin-bottom w3-padding <?php echo $GLOBALS['optionsDB']['colorWarning']; ?>">
   <div class="w3-col l3 m3 s2 w3-center">
     <i class="fas fa-exclamation-triangle"></i>
@@ -230,6 +234,15 @@ $activeSchemeName = isset($colorSchemes[$activeSchemeId]['name'])
     </div>
   </div>
 </div>
+<div class="w3-container w3-card w3-margin w3-padding">
+  <div class="w3-row w3-padding">
+    <div class="w3-col l3 m4 s12"><b>Willkommens-Mail</b></div>
+    <div class="w3-col l5 m4 s12">Betreff, Text und Grußformel für neue Nutzer.</div>
+    <div class="w3-col l4 m4 s12 w3-center">
+      <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?> w3-border" href="welcome-mail.php">Bearbeiten</a>
+    </div>
+  </div>
+</div>
 <form action="config-menu.php" method="POST">
 <?php echo csrf_field(); ?>
 <div class="w3-container w3-padding w3-border-bottom w3-border-black">
@@ -246,6 +259,9 @@ $dbr = mysqli_query($conn, $sql);
 sqlerror();
 while($row = mysqli_fetch_array($dbr)) {
     if($row['Type'] === 'internal' || $row['Parameter'] === 'colorSchemeActive' || $row['Parameter'] === 'colorSchemes') {
+        continue;
+    }
+    if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText' || $row['Parameter'] === 'newMailGruss') {
         continue;
     }
     echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";

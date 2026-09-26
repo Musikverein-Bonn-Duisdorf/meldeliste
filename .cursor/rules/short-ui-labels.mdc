@@ -7,15 +7,15 @@ alwaysApply: true
 
 - Formular-, Nav- und Checkbox-Labels kurz und funktional halten (meist 1–3 Wörter).
 - Keine länglichen Erklärungstexte neben Feldern oder Checkboxen.
-- Details, Beispiele und „wann greift das?“ gehören in `views/help/guide.php` (Anker-Link vom Formular ist ok).
+- Details, Beispiele und „wann greift das?“ gehören in `views/help/guide.php` — **keine** Hilfe-Links auf den Einzelseiten (Nav → Hilfe reicht).
 - `title`/Tooltips nur für Icons oder Aktionen ohne sichtbares Label — nicht als Ersatz für Hilfe-Absätze.
 
 # Keine UI-Instruktionen / Beschreibungstexte
 
 - Keine Sätze wie „Änderungen mit Speichern übernehmen“, „Hier kannst du …“, „Bitte zuerst …“, „Tipp:“, „Hier findest du …“ in Formularen, Titelleisten, Listenköpfen oder neben Buttons.
 - Die Oberfläche soll selbsterklärend durch Labels und Anordnung sein — nicht durch Anleitungsprosa.
-- Erklärungen nur in der Hilfe; optional ein kurzer Anker-Link (z. B. „Hilfe: Benachrichtigungen“), kein Fließtext.
-- Ausnahme: technisch notwendige Inhalte in einem bewusst geöffneten Hilfsdialog (z. B. Kalender-Abo-URLs), weiterhin ohne Belehrungston.
+- Erklärungen nur in der Hilfe (`help.php` über die Nav); keine Anker-Links wie „Hilfe: …“ auf Formular-/Profilseiten.
+- Ausnahme: technisch notwendige Inhalte in einem bewusst geöffneten Hilfsdialog (z. B. Kalender-Abo-URLs), weiterhin ohne Belehrungston und ohne Hilfe-Link.
 
 # Suchfelder
 

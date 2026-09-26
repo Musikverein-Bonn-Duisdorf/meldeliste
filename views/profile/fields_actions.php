@@ -14,12 +14,11 @@ $hasSecondary = $fill && $fullUserEdit;
     <summary>Weitere Aktionen</summary>
     <div class="profile-actions-secondary">
 <?php if($fill && $fullUserEdit) { ?>
-      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="passwd" value="Zufallspasswort">
-      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="newmail" value="Email mit Link">
-      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="deactivate" value="Deaktivieren">
+      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border" type="submit" name="passwd" value="Zufallspasswort">
+      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border" type="submit" name="deactivate" value="Deaktivieren">
 <?php } ?>
 <?php if($fill && $canEditUsers) { ?>
-      <button type="button" class="w3-btn <?php echo htmlspecialchars($btnDelete, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" onclick="document.getElementById('delmodal').style.display='block'">Löschen</button>
+      <button type="button" class="w3-btn <?php echo htmlspecialchars($btnDelete, ENT_QUOTES, 'UTF-8'); ?> w3-border" onclick="document.getElementById('delmodal').style.display='block'">Löschen</button>
 <?php } ?>
     </div>
   </details>
