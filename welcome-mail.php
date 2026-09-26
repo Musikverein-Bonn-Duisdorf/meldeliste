@@ -70,7 +70,6 @@ $btnEdit = $GLOBALS['optionsDB']['colorBtnEdit'];
     <div class="profile-actions">
       <a class="w3-btn w3-border w3-mobile" href="config-menu.php">Konfiguration</a>
       <a class="w3-btn w3-border w3-mobile" href="mail.php">Email versenden</a>
-      <a class="w3-btn w3-border w3-mobile" href="help.php#admin-mail">Hilfe</a>
     </div>
   </div>
 

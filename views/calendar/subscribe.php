@@ -63,7 +63,6 @@ if(!$inModal) {
             class="w3-btn w3-border"
             data-copy-target="<?php echo $uidEsc; ?>-webcal">webcal kopieren</button>
   </div>
-  <p class="profile-inline-link"><a href="help.php#help-kalender-abo">Hilfe: Kalender</a></p>
 </div>
 <script>
 (function () {

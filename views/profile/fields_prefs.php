@@ -50,4 +50,3 @@ $idSuffix = isset($idSuffix) ? (string)$idSuffix : '';
   </div>
 <?php include __DIR__.'/fields_permissions.php'; ?>
 </div>
-<p class="profile-help-link"><a href="help.php#help-profil">Hilfe zu Benachrichtigungen</a></p>
