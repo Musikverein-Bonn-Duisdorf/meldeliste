@@ -27,13 +27,31 @@ function loadOrchestraData($tid) {
         $termin->load_by_id($tid);
         $guestIds = $termin->getGuestMusiciansArray();
     }
-    $guestSql = '';
-    if(count($guestIds)) {
-        $guestSql = ' OR `Index` IN ('.implode(',', array_map('intval', $guestIds)).')';
+    $extraUserIds = array();
+    foreach($guestIds as $gid) {
+        $gid = (int)$gid;
+        if($gid > 0) {
+            $extraUserIds[$gid] = true;
+        }
+    }
+    // MELD-239 / MELD-23: inactive users with Ja/Vielleicht still get a seat.
+    foreach($aMeldungen as $meldung) {
+        $w = (int)$meldung['Wert'];
+        if($w !== 1 && $w !== 3) {
+            continue;
+        }
+        $uid = (int)$meldung['User'];
+        if($uid > 0) {
+            $extraUserIds[$uid] = true;
+        }
+    }
+    $extraSql = '';
+    if(count($extraUserIds)) {
+        $extraSql = ' OR `Index` IN ('.implode(',', array_keys($extraUserIds)).')';
     }
     $sql = sprintf("SELECT * FROM `%sUser` WHERE `Deleted` = 0 AND (`Active` = 1%s) ORDER BY `Nachname`, `Vorname`;",
                    $GLOBALS['dbprefix'],
-                   $guestSql
+                   $extraSql
     );
     $dbUser = mysqli_query($GLOBALS['conn'], $sql);
     if($dbUser) {
