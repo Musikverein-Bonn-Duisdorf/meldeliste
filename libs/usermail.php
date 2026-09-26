@@ -812,7 +812,7 @@ class Usermail {
         if($this->termin) {
             $base = implode(' AND ', $this->mailRecipientBaseWhere());
             $sql = sprintf(
-                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink`, `getMail`, `notifyInbox` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname`, `getMail`, `notifyInbox`, `Deleted` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` != 2 AND %s;",
+                "SELECT `uIndex` AS `Index`, `Vorname`, `Nachname`, `Email`, `Email2`, `activeLink`, `getMail`, `notifyInbox` FROM `%sMeldungen` INNER JOIN (SELECT `Index` AS `uIndex`, `Vorname`, `activeLink`, `Email`, `Email2`, `Nachname`, `getMail`, `notifyInbox`, `Deleted` FROM `%sUser`) `%sUser` ON `uIndex` = `User` WHERE `Termin` = '%d' AND `Wert` IN (1, 3) AND %s;",
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
                 $GLOBALS['dbprefix'],
