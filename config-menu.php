@@ -248,6 +248,14 @@ while($row = mysqli_fetch_array($dbr)) {
     if($row['Type'] === 'internal' || $row['Parameter'] === 'colorSchemeActive' || $row['Parameter'] === 'colorSchemes') {
         continue;
     }
+    if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText') {
+        echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";
+        echo "<div class=\"w3-col l3 m3 s12\"><b>".$row['Parameter']."</b></div>";
+        echo "<div class=\"w3-col l5 m5 s12\">".$row['Description']."</div>\n";
+        echo "<div class=\"w3-col l4 m4 s12 w3-center\"><a class=\"w3-btn w3-border ".$GLOBALS['optionsDB']['colorBtnEdit']."\" href=\"welcome-mail.php\">Willkommens-Mail</a></div>\n";
+        echo "</div>\n";
+        continue;
+    }
     echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";
     echo "<div class=\"w3-col l3 m3 s12\"><b>".$row['Parameter']."</b></div><div class=\"w3-col l5 m5 s12\">".$row['Description']."</div>\n";
     switch($row['Type']) {

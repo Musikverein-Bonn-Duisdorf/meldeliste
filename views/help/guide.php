@@ -204,6 +204,7 @@ $sections[] = array(
     'visible' => isAdmin() && requirePermission('perm_sendEmail'),
     'body' => '
 <p>Unter Admin → <b>Email versenden</b> erstellst du Nachrichten an Verteiler oder einzelne Empfänger.</p>
+<p>Unter Admin → System → <b>Willkommens-Mail</b> legst du Betreff und Text (Maileditor) fest. Vom User-Profil sendest du diese Vorlage mit <b>Willkommens-Mail</b> an die Person (Warteschlange).</p>
 <p>Unter Admin → <b>Gruppen</b> legst du wiederverwendbare Gruppen an. <b>Mitglieder</b> sind die Union aus Rollen, Registern und einzelnen Personen (z.&nbsp;B. Posaunen + Schlagwerk + Klarinetten + einzelne Personen). Diese Gruppen kannst du beim Mailversand und bei der Termin-Sichtbarkeit als Chip auswählen. Unter <b>Vererbte Rechte</b> kannst du einer Gruppe Rechte setzen (z.&nbsp;B. „Versteckte Termine“ für den Vorstand) – alle Mitglieder erhalten diese zusätzlich zu ihren persönlichen. Einzelne Personen kannst du den Gruppen auch direkt im Profil (Anlegen/Bearbeiten) zuordnen.</p>
 <p>Beim Mailversand kannst du Chips für Rollen, Gruppen, Register, Personen und <b>Teilnehmer</b> (ja/vielleicht) zukünftiger Termine wählen. Über <b>Email an Teilnehmer</b> am Termin wird der passende Teilnehmer-Chip vorausgewählt. Mails werden in einer Warteschlange verarbeitet; den Versandstatus siehst du in der Admin-Ansicht (<b>Versendet</b> nur bei erfolgreichem SMTP; Fehler und teilweise fehlgeschlagene Jobs werden dort mitgezählt). Bei versendeten Mails siehst du den gewählten <b>Verteiler</b> sowie die Liste der einzelnen Empfänger. Empfänger finden die Nachricht unter <b>Meine Nachrichten</b> (auch wenn der E-Mail-Versand fehlgeschlagen ist, sofern die Inbox aktiv war). Die Übersicht lädt lange Listen beim Scrollen nach; die Suchleiste filtert nach Betreff, Absender, Status oder ID. Ausgehende HTML-Mails nutzen das Layout der Meldeliste (Titelleiste mit Logo).</p>
 <p>Falls Discord angebunden ist, kann der Versand optional auch dort veröffentlicht werden (nur bei konfiguriertem Webhook).</p>
@@ -253,6 +254,7 @@ $sections[] = array(
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
 <li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, Default-Sichtbarkeit neuer Termine (<code>defaultTerminVisibility</code>), Leih- und Rückgabetexte (<code>loanText</code>, <code>loanReturnText</code>; Leerzeile = Absatz; Platzhalter <code>{org}</code> <code>{start}</code> <code>{duration}</code> <code>{returnDue}</code> <code>{fee}</code> <code>{kaution}</code>), …; Änderungen erscheinen im Log</li>
+<li><b>Willkommens-Mail</b> – Betreff und Text im Maileditor; Versand vom User-Profil</li>
 <li><b>Plattform / SSO</b> – <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> setzen die Modul-Ziele (Hosts daraus sind für SSO automatisch erlaubt); <code>ssoRedirectAllowlist</code> nur für Extra-Hosts. Nav-Links erscheinen bei gesetzter URL und dem Recht <b>Notenarchiv</b> bzw. <b>Mitglieder</b></li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '

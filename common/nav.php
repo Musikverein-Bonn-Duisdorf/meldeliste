@@ -244,7 +244,7 @@ if(requirePermission('perm_editConfig')) {
             </div>
 <?php } ?>
 <?php if($showSystem) { ?>
-            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('permissions', 'config', 'evaluate', 'log', 'backup', 'updater')); ?>">
+            <div class="w3-dropdown-hover w3-mobile admin-nav-group<?php echo adminNavGroupActiveClass(array('permissions', 'config', 'welcome-mail', 'evaluate', 'log', 'backup', 'updater')); ?>">
               <button type="button" class="w3-button w3-mobile w3-block w3-left-align <?php echo adminNavPermClass('perm_editConfig'); ?>">System <i class="fas fa-caret-right admin-nav-caret"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4 <?php echo $navAdminColor; ?> w3-mobile">
 <?php if(requirePermission('perm_editPermissions')) { ?>
@@ -252,6 +252,7 @@ if(requirePermission('perm_editConfig')) {
 <?php } ?>
 <?php if(requirePermission('perm_editConfig')) { ?>
                 <a title="Konfiguration" href="config-menu.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('config', 'perm_editConfig'); ?>"><i class="fas fa-cogs"></i> Konfiguration</a>
+                <a title="Willkommens-Mail" href="welcome-mail.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('welcome-mail', 'perm_editConfig'); ?>"><i class="fas fa-envelope-open-text"></i> Willkommens-Mail</a>
 <?php } ?>
 <?php if(requirePermission('perm_showLog')) { ?>
                 <a title="Statistik" href="evaluate.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('evaluate', 'perm_showLog'); ?>"><i class="fas fa-chart-pie"></i> Statistik</a>

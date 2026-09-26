@@ -207,7 +207,7 @@ function handleUserFormPost($options = array()) {
             $n = new User;
             $n->load_by_id($userId);
             $n->newmail();
-            $result['successMessage'] = 'Email mit Link versendet.';
+            $result['successMessage'] = 'Willkommens-Mail in die Warteschlange gestellt.';
         }
         catch(Throwable $e) {
             $logentry = new Log;

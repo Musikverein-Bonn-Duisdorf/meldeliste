@@ -15,7 +15,7 @@ $hasSecondary = $fill && $fullUserEdit;
     <div class="profile-actions-secondary">
 <?php if($fill && $fullUserEdit) { ?>
       <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="passwd" value="Zufallspasswort">
-      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="newmail" value="Email mit Link">
+      <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="newmail" value="Willkommens-Mail">
       <input class="w3-btn <?php echo htmlspecialchars($btnSubmit, ENT_QUOTES, 'UTF-8'); ?> w3-border w3-mobile" type="submit" name="deactivate" value="Deaktivieren">
 <?php } ?>
 <?php if($fill && $canEditUsers) { ?>
