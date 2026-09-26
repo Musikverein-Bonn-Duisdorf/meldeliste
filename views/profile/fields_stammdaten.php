@@ -25,6 +25,7 @@
 <label class="w3-text-gray">neues Passwort wiederholen (optional)</label>
 <input class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="pw2" type="password" placeholder="*****" autocomplete="new-password">
 <?php } ?>
+<?php include __DIR__.'/fields_welcome_mail.php'; ?>
 <label>Instrument</label>
 <select class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?> w3-margin-bottom w3-mobile" name="Instrument" <?php echo $disabled; ?>>
 <?php
