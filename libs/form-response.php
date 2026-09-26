@@ -206,6 +206,21 @@ function handleUserFormPost($options = array()) {
             }
             $n = new User;
             $n->load_by_id($userId);
+            $hasEmail = false;
+            foreach(array((string)$n->Email, (string)$n->Email2) as $addr) {
+                $addr = trim($addr);
+                if($addr !== '' && filter_var($addr, FILTER_VALIDATE_EMAIL)) {
+                    $hasEmail = true;
+                    break;
+                }
+            }
+            if(!$hasEmail) {
+                $result['flash'] = array(
+                    'type' => 'error',
+                    'message' => 'Keine gültige E-Mail-Adresse.',
+                );
+                return $result;
+            }
             $n->newmail();
             $result['successMessage'] = 'Willkommens-Mail in die Warteschlange gestellt.';
         }
