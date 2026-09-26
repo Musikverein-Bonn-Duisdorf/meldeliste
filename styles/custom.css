@@ -5382,10 +5382,19 @@ select.profile-control {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.85rem;
+  position: relative;
+}
+
+.profile-actions-primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .profile-actions-primary .w3-btn,
-.profile-actions-secondary .w3-btn {
+.profile-actions-secondary .w3-btn,
+.profile-actions-secondary .w3-button {
   margin: 0;
 }
 
@@ -5395,27 +5404,117 @@ select.profile-control {
 }
 
 .profile-actions-more {
-  display: inline-block;
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
 }
 
 .profile-actions-more > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 0.25rem;
+  background: #f7f7f7;
+  color: #222;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.25;
+  opacity: 1;
+  white-space: nowrap;
   cursor: pointer;
   list-style: none;
-  font-size: 0.9rem;
-  opacity: 0.8;
   user-select: none;
-  white-space: nowrap;
 }
 
 .profile-actions-more > summary::-webkit-details-marker {
   display: none;
 }
 
+.profile-actions-more > summary::after {
+  content: "▾";
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.profile-actions-more[open] > summary {
+  background: #eee;
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
 .profile-actions-secondary {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 6;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.45rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 12rem;
+  max-width: min(18rem, 90vw);
+  margin: 0;
+  padding: 0.4rem;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 0.35rem;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+}
+
+.profile-actions-secondary .w3-btn,
+.profile-actions-secondary .w3-button,
+.profile-actions-secondary a.w3-btn,
+.profile-actions-secondary input.w3-btn {
+  display: block;
+  width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  text-align: left;
+  white-space: normal;
+}
+
+@media (max-width: 600px) {
+  .profile-hero-actions .profile-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-actions-more {
+    width: 100%;
+  }
+
+  .profile-actions-more > summary {
+    display: flex;
+    width: 100%;
+  }
+
+  .profile-actions-more > summary::after {
+    margin-left: auto;
+  }
+
+  .profile-actions-secondary {
+    position: static;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    margin-top: 0.35rem;
+    box-shadow: none;
+  }
+
+  .profile-actions-secondary .w3-btn,
+  .profile-actions-secondary .w3-button,
+  .profile-actions-secondary a.w3-btn,
+  .profile-actions-secondary input.w3-btn {
+    text-align: center;
+  }
 }
 
 .profile-extras {
