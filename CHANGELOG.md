@@ -2,6 +2,13 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-04-95e6f (2026-10-04)
+
+- MELD-242: UI-Bezeichnung Sammlungen → Noten
+- MELD-243: Proxy-Link Meldungen über Meldequote in Profil-Modal und -Edit
+- MELD-242: Sammlungen → Noten (UI)
+- MELD-243: Proxy-Link Meldungen im User-Profil
+
 ## 2026-09-26-14a83 (2026-09-26)
 
 - MELD-240: Willkommens-Mail unter Farbschema in der Konfiguration
