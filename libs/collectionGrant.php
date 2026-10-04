@@ -429,7 +429,7 @@ class CollectionGrant
             $cid = (int)$g->Collection;
             $name = function_exists('archivCollectionName') ? archivCollectionName($cid) : '';
             if($name === '') {
-                $name = 'Sammlung #'.$cid;
+                $name = 'Noten #'.$cid;
             }
             $out[] = array(
                 'id' => $cid,
@@ -463,7 +463,7 @@ class CollectionGrant
         }
         foreach(archivListCollectionsForSelect() as $item) {
             $id = (int)$item['id'];
-            $name = isset($item['name']) ? (string)$item['name'] : ('Sammlung #'.$id);
+            $name = isset($item['name']) ? (string)$item['name'] : ('Noten #'.$id);
             $grant = isset($byCollection[$id]) ? $byCollection[$id] : null;
             $accessHtml = '<span class="w3-text-gray">—</span>';
             if($grant && $grant->hasAccess()) {
@@ -503,7 +503,7 @@ function sammlungFoldHtml($collectionId, $name, $opts = array()) {
     $collectionId = (int)$collectionId;
     $name = trim((string)$name);
     if($name === '') {
-        $name = 'Sammlung #'.$collectionId;
+        $name = 'Noten #'.$collectionId;
     }
     $h = function ($s) {
         return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -519,7 +519,7 @@ function sammlungFoldHtml($collectionId, $name, $opts = array()) {
     // Same piece markup/CSS as Programm-/Sammlung-Modal (.archiv-piece-modal).
     $inner = count($items)
         ? render('sammlung/piece_list', array('items' => $items, 'numbered' => $numbered))
-        : '<div class="profile-field"><div class="profile-value">Keine Stücke in dieser Sammlung.</div></div>';
+        : '<div class="profile-field"><div class="profile-value">Keine Stücke.</div></div>';
     $body = '<div class="archiv-piece-modal"><div class="archiv-piece-modal-list">'.$inner.'</div></div>';
 
     $html = '<div class="sammlung-fold-wrap" data-collection="'.$collectionId.'">';

@@ -27,14 +27,14 @@ $collections = isset($collections) && is_array($collections) ? $collections : ar
 <?php if(!count($collections)) { ?>
     <section class="profile-col archiv-piece-modal-list">
       <div class="profile-field">
-        <div class="profile-value">Keine Sammlungen verknüpft.</div>
+        <div class="profile-value">Keine Noten verknüpft.</div>
       </div>
     </section>
 <?php } else {
     foreach($collections as $idx => $col) {
         $colName = isset($col['name']) ? trim((string)$col['name']) : '';
         if($colName === '') {
-            $colName = 'Sammlung';
+            $colName = 'Noten';
         }
         $items = isset($col['items']) && is_array($col['items']) ? $col['items'] : array();
         $colNumbered = !empty($col['numbered']);
@@ -45,7 +45,7 @@ $collections = isset($collections) && is_array($collections) ? $collections : ar
       <h3 id="<?php echo $h($headingId); ?>" class="profile-col-title"><?php echo $h($colName); ?></h3>
 <?php   if(!$itemCount) { ?>
       <div class="profile-field">
-        <div class="profile-value">Keine Stücke in dieser Sammlung.</div>
+        <div class="profile-value">Keine Stücke.</div>
       </div>
 <?php   } else {
             echo render('sammlung/piece_list', array('items' => $items, 'numbered' => $colNumbered));

@@ -112,7 +112,7 @@ function archivListCollectionsForSelect() {
             continue;
         }
         if($name === '') {
-            $name = 'Sammlung #'.$id;
+            $name = 'Noten #'.$id;
         }
         $out[] = array('id' => $id, 'name' => $name);
     }
@@ -140,7 +140,7 @@ function archivCollectionName($id) {
         return '';
     }
     $name = trim((string)$row['Name']);
-    return $name !== '' ? $name : ('Sammlung #'.$id);
+    return $name !== '' ? $name : ('Noten #'.$id);
 }
 
 /**
@@ -467,7 +467,7 @@ function archivLoadCollectionModalData($id) {
     }
     $name = trim((string)$row['Name']);
     if($name === '') {
-        $name = 'Sammlung #'.$id;
+        $name = 'Noten #'.$id;
     }
     $numbered = $numberedReady && !empty($row['Numbered']);
     $items = array();

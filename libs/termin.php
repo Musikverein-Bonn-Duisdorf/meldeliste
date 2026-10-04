@@ -143,7 +143,7 @@ class Termin
         sort($oldSammlungen);
         sort($newSammlungen);
         if($oldSammlungen !== $newSammlungen) {
-            $str.=", Sammlungen: ".count($oldSammlungen)." &rArr; <b>".count($newSammlungen)."</b>";
+            $str.=", Noten: ".count($oldSammlungen)." &rArr; <b>".count($newSammlungen)."</b>";
         }
         if(boolsDiffer($this->PostDiscord, $old->PostDiscord)) {
             $str.=", Discord: ".bool2string($old->PostDiscord)." &rArr; <b>".bool2string($this->PostDiscord)."</b>";

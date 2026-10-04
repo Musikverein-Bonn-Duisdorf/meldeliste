@@ -71,7 +71,7 @@
       for(var i = 0; i < this.catalog.length; i++) {
         if(this.catalog[i].id === id) return this.catalog[i].label;
       }
-      return 'Sammlung #' + id;
+      return 'Noten #' + id;
     },
 
     render: function() {

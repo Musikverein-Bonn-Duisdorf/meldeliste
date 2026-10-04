@@ -82,9 +82,9 @@ if(requirePermission('perm_editConfig')) {
       <i class="far fa-calendar-alt" aria-hidden="true"></i><span class="nav-label">Termine</span>
     </a>
 <?php if(!empty($navHasMyCollections)) { ?>
-    <a class="app-nav-item <?php getPage('meinesammlungen', 'termine'); ?>" href="meine-sammlungen.php" title="Meine Sammlungen">
+    <a class="app-nav-item <?php getPage('meinesammlungen', 'termine'); ?>" href="meine-sammlungen.php" title="Meine Noten">
       <i class="fas fa-book-open" aria-hidden="true"></i>
-      <span class="nav-label"><span class="nav-label-long">Meine Sammlungen</span><span class="nav-label-short">Sammlungen</span></span>
+      <span class="nav-label"><span class="nav-label-long">Meine Noten</span><span class="nav-label-short">Noten</span></span>
     </a>
 <?php } ?>
     <a class="app-nav-item <?php getPage('calendar', 'termine'); ?>" href="calendar.php" title="Kalender">
@@ -194,7 +194,7 @@ if(requirePermission('perm_editConfig')) {
                 <a title="Admin-Kalender" href="admin-calendar.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('admincalendar', 'perm_showHiddenAppmnts'); ?>"><i class="fas fa-calendar-week"></i> Admin-Kalender</a>
                 <a title="Archiv: Termine" href="termine-archiv.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('termine-archiv', 'perm_editAppmnts'); ?>"><i class="fas fa-history"></i> Archiv: Termine</a>
 <?php if(archivFeatureEnabled() && requirePermission('perm_editAppmnts')) { ?>
-                <a title="Sammlungen" href="sammlungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('sammlungen', 'perm_editAppmnts'); ?>"><i class="fas fa-book-open"></i> Sammlungen</a>
+                <a title="Noten" href="sammlungen.php" class="w3-bar-item w3-button w3-mobile <?php getAdminPagePerm('sammlungen', 'perm_editAppmnts'); ?>"><i class="fas fa-book-open"></i> Noten</a>
 <?php } ?>
               </div>
             </div>

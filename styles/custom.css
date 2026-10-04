@@ -543,7 +543,7 @@ a.app-titlebar-logo {
   }
 
   .app-nav-primary {
-    /* Kern-Buttons: Termine, Kalender, Nachrichten (+ optional Meine Sammlungen; Mehr separat) */
+    /* Kern-Buttons: Termine, Kalender, Nachrichten (+ optional Meine Noten; Mehr separat) */
     flex: 3 1 0;
     flex-direction: row;
     align-items: stretch;
