@@ -24,6 +24,7 @@ if(!$showMetaDetails) {
   <span class="profile-label">Anwesenheit</span>
   <div class="profile-value"><?php echo germanDate($n->getLastVisit(), 1); ?></div>
 </div>
+<?php echo userMeldungenProxyFieldHtml((int)$n->Index); ?>
 <div class="profile-field">
   <span class="profile-label">Meldequote</span>
   <div class="profile-value"><?php echo (float)$n->getMeldeQuote() * 100; ?> %</div>

@@ -125,6 +125,7 @@ $loanedChips = isset($inventoryChips['loaned']) && is_array($inventoryChips['loa
         <span class="profile-label">Anwesenheit</span>
         <div class="profile-value"><?php echo germanDate($user->getLastVisit(), 1); ?></div>
       </div>
+<?php echo userMeldungenProxyFieldHtml((int)$user->Index); ?>
       <div class="profile-field">
         <span class="profile-label">Meldequote</span>
         <div class="profile-value"><?php echo (float)$user->getMeldeQuote()*100; ?> %</div>

@@ -2167,6 +2167,32 @@ function requirePermission($perm) {
 }
 
 /**
+ * Profile field: link to another user's Terminliste (proxy / im Auftrag). MELD-243.
+ * Empty when no perm_editResponse or target is self.
+ *
+ * @param int $userId
+ * @return string
+ */
+function userMeldungenProxyFieldHtml($userId) {
+    $userId = (int)$userId;
+    $sessionUser = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    if($userId < 1 || $sessionUser < 1 || $userId === $sessionUser || !requirePermission('perm_editResponse')) {
+        return '';
+    }
+    $btn = isset($GLOBALS['optionsDB']['colorBtnEdit'])
+        ? (string)$GLOBALS['optionsDB']['colorBtnEdit']
+        : 'w3-blue';
+    return '<div class="profile-field">'
+        .'<span class="profile-label">Meldungen</span>'
+        .'<div class="profile-value">'
+        .'<form action="index.php" method="post" class="profile-meldungen-proxy">'
+        .'<button type="submit" class="w3-btn w3-border '.$btn.'" name="proxy" value="'.$userId.'">Meldungen</button>'
+        .'</form>'
+        .'</div>'
+        .'</div>';
+}
+
+/**
  * Deny page access with header/nav (if not yet rendered), warning panel, footer, then exit.
  * @param string $message Plain-text warning shown to the user
  */
