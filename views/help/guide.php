@@ -184,6 +184,7 @@ $sections[] = array(
 <li>Instrument für den Termin ggf. für diese Person setzen</li>
 </ol>
 <p>Solange du im Auftrag arbeitest, beziehen sich Meldungen und Instrument-Änderungen auf die ausgewählte Person, nicht auf dich. Die Terminliste aktualisiert den Status der Proxy-Person sofort nach dem Melden.</p>
+<p>Im Personen-Modal und beim Bearbeiten eines anderen Users findest du unter <b>Meldungen</b> (über der Meldequote) denselben Shortcut zur Terminliste dieser Person.</p>
 '
 );
 
