@@ -65,11 +65,11 @@ foreach($rows as $row) {
         $known[$tid] = true;
     }
 }
-adminListPageBegin('', 'Sammlungen', array('hideKicker' => true));
+adminListPageBegin('', 'Noten', array('hideKicker' => true));
 ?>
 
 <?php if(!$n) { ?>
-  <div class="mail-list-item"><div class="mail-list-primary">Keine Sammlungen.</div></div>
+  <div class="mail-list-item"><div class="mail-list-primary">Keine Noten.</div></div>
 <?php } else { ?>
   <div class="sammlung-fold-list">
 <?php

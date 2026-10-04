@@ -146,7 +146,7 @@ case 'mail':
 case 'sammlung':
     if(!function_exists('archivFeatureEnabled') || !archivFeatureEnabled()) {
         http_response_code(404);
-        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Sammlung</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Notenarchiv ist nicht angeschlossen.</p></div>';
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Noten</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Notenarchiv ist nicht angeschlossen.</p></div>';
         exit;
     }
     $uid = (int)$_SESSION['userid'];
@@ -154,13 +154,13 @@ case 'sammlung':
         || (class_exists('CollectionGrant') && CollectionGrant::userMayView($uid, $id));
     if(!$mayOpen) {
         http_response_code(403);
-        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Sammlung</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Keine Berechtigung.</p></div>';
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Noten</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Keine Berechtigung.</p></div>';
         exit;
     }
     $html = archivCollectionModalHtml($id);
     if($html === '') {
         http_response_code(404);
-        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Sammlung</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Sammlung nicht gefunden.</p></div>';
+        echo '<div class="profile-shell modal-shell"><header class="profile-hero"><h2 class="profile-title">Noten</h2><button type="button" class="modal-close w3-button" onclick="closeModal()" aria-label="Schließen">&times;</button></header><p class="profile-value">Nicht gefunden.</p></div>';
         exit;
     }
     echo $html;

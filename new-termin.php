@@ -117,7 +117,7 @@ if($fill && $n) {
         <span class="profile-label">Programm</span>
         <div class="termin-visibility-box w3-padding w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>">
           <div id="terminSammlungChips" class="mail-recipient-chips" aria-live="polite"></div>
-          <input type="text" id="terminSammlungInput" class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Sammlung…" autocomplete="off">
+          <input type="text" id="terminSammlungInput" class="w3-input w3-border <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Noten…" autocomplete="off">
           <div id="terminSammlungSuggest" class="mail-recipient-suggest" hidden></div>
           <input type="hidden" name="Sammlungen" id="terminSammlungen" value="<?php
             echo htmlspecialchars(json_encode($selectedSammlungen), ENT_QUOTES, 'UTF-8');

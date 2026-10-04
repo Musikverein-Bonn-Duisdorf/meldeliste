@@ -8,7 +8,7 @@ $h = function ($s) {
 };
 $name = trim((string)$collectionName);
 if($name === '') {
-    $name = 'Sammlung';
+    $name = 'Noten';
 }
 $items = isset($items) && is_array($items) ? $items : array();
 $numbered = !empty($numbered);
@@ -29,7 +29,7 @@ $itemCount = count($items);
       <h3 id="sammlung-modal-inhalt" class="profile-col-title">Stücke</h3>
 <?php if(!$itemCount) { ?>
       <div class="profile-field">
-        <div class="profile-value">Keine Stücke in dieser Sammlung.</div>
+        <div class="profile-value">Keine Stücke.</div>
       </div>
 <?php } else {
     echo render('sammlung/piece_list', array('items' => $items, 'numbered' => $numbered));
