@@ -406,6 +406,9 @@ class MailJob
     public function applyGreeting($vornameSession = '') {
         $body = (string)$this->BodyText;
         $gruss = (int)$this->Gruss;
+        if($gruss === 0) {
+            return $body;
+        }
         $asHtml = function_exists('mailBodyLooksLikeHtml') && mailBodyLooksLikeHtml($body);
         $suffix = '';
         if($asHtml) {
@@ -490,6 +493,9 @@ class MailJob
      */
     public function plainGreetingSuffix($vornameSession = '') {
         $gruss = (int)$this->Gruss;
+        if($gruss === 0) {
+            return '';
+        }
         if($gruss === 1) {
             return "\n\nViele Grüße\n".$vornameSession;
         }

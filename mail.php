@@ -390,6 +390,7 @@ window.syncDiscordDefault = function() {};
 
     <textarea id="mail-body" rows="12" cols="50" class="w3-input w3-border <?php echo $GLOBALS['optionsDB']['colorInputBackground']; ?> w3-mobile" name="Text" placeholder="Hier Emailtext einfügen"><?php echo htmlspecialchars($textRaw, ENT_QUOTES, 'UTF-8'); ?></textarea>
     <select class="w3-select w3-margin-bottom" name="gruss">
+      <option value="0" <?php if($gruss==0) echo "selected"; ?>>Keine</option>
       <option value="1" <?php if($gruss==1) echo "selected"; ?>>Viele Grüße, <?php echo htmlspecialchars($_SESSION['Vorname'], ENT_QUOTES, 'UTF-8'); ?></option>
       <option value="2" <?php if($gruss==2) echo "selected"; ?>>Viele Grüße, der Vorstand</option>
       <option value="3" <?php if($gruss==3) echo "selected"; ?>>Viele Grüße, <?php echo htmlspecialchars($GLOBALS['optionsDB']['MailGreetings'], ENT_QUOTES, 'UTF-8'); ?></option>

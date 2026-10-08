@@ -268,7 +268,7 @@ class User
         $gruss = isset($GLOBALS['optionsDB']['newMailGruss'])
             ? (int)$GLOBALS['optionsDB']['newMailGruss']
             : 3;
-        if($gruss < 1 || $gruss > 4) {
+        if($gruss < 0 || $gruss > 4) {
             $gruss = 3;
         }
         $job = new MailJob();
