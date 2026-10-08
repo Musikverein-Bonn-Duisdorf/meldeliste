@@ -286,9 +286,12 @@ foreach($sections as $section) {
     $visible[] = $section;
 }
 ?>
-<p class="w3-margin-bottom">
-  <a href="https://play.google.com/store/apps/details?id=com.musikverein.meldelistemusik&amp;pcampaignid=web_share" target="_blank" rel="noopener noreferrer">Android-App</a>
-</p>
+<?php
+$androidAppPromo = function_exists('androidAppPromoHtml') ? androidAppPromoHtml() : '';
+if($androidAppPromo !== '') {
+    echo $androidAppPromo;
+}
+?>
 <nav class="help-toc w3-card w3-padding w3-margin-bottom" aria-label="Inhalt">
   <h3 class="w3-margin-top">Inhalt</h3>
   <ol class="help-toc-list">

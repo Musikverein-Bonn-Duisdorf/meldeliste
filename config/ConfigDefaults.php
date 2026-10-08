@@ -434,6 +434,12 @@ function getConfigDefaults() {
             'Description' => 'Medien: Audio-URL (leer = ausgeblendet)',
         ),
         array(
+            'Parameter' => 'urlAndroidApp',
+            'Value' => 'https://play.google.com/store/apps/details?id=com.musikverein.meldelistemusik&pcampaignid=web_share',
+            'Type' => 'string',
+            'Description' => 'Link zur Android-App (Play Store o. Ä.; leer = Promo in der Hilfe ausgeblendet)',
+        ),
+        array(
             'Parameter' => 'AdminEmail',
             'Value' => 'meldeliste@musikverein-bonn-duisdorf.de',
             'Type' => 'string',
