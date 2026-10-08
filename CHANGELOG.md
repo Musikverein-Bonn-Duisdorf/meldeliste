@@ -2,6 +2,17 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-08-dfdad (2026-10-08)
+
+- MELD-246: Hi-res Logo.png für App-Promo-Icon
+- MELD-246: App-Promo-Icon aus MasterPageIcon nehmen
+- MELD-246: App-Promo-Karte mit Play-Badge, konfigurierbar
+- MELD-246: Play-Store-Link zur Android-App oben in der Hilfe
+- MELD-247: Grußformel-Option „Keine“ im Mail-Dropdown
+- MELD-246: App-Promo-Karte mit Play-Badge
+- MELD-246: Play-Store-Link in der Hilfe
+- MELD-247: Grußformel-Option Keine
+
 ## 2026-10-04-95e6f (2026-10-04)
 
 - MELD-242: UI-Bezeichnung Sammlungen → Noten
