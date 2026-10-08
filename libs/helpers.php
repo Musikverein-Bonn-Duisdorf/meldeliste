@@ -2193,11 +2193,11 @@ function androidAppPromoHtml() {
         return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
     };
     $icon = '';
-    if(!empty($GLOBALS['optionsDB']['favicon'])) {
-        $icon = trim((string)$GLOBALS['optionsDB']['favicon']);
+    if(!empty($GLOBALS['optionsDB']['MasterPageIcon'])) {
+        $icon = trim((string)$GLOBALS['optionsDB']['MasterPageIcon']);
     }
-    if($icon === '' && !empty($GLOBALS['optionsDB']['WebSiteIcon'])) {
-        $icon = trim((string)$GLOBALS['optionsDB']['WebSiteIcon']);
+    if($icon === '' && !empty($GLOBALS['optionsDB']['favicon'])) {
+        $icon = trim((string)$GLOBALS['optionsDB']['favicon']);
     }
     if($icon === '') {
         $icon = 'imgs/MVDLogo32x32.png';
