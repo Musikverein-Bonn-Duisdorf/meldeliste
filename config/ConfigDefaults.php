@@ -581,7 +581,7 @@ function getConfigDefaults() {
             'Parameter' => 'newMailGruss',
             'Value' => '3',
             'Type' => 'uint',
-            'Description' => 'Grußformel der Willkommens-Mail (1–4 wie MailJob.Gruss; Editor: welcome-mail.php)',
+            'Description' => 'Grußformel der Willkommens-Mail (0–4 wie MailJob.Gruss; 0=Keine; Editor: welcome-mail.php)',
         ),
         array(
             'Parameter' => 'colorSchemeActive',
