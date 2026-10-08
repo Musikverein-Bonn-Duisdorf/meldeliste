@@ -2167,6 +2167,55 @@ function requirePermission($perm) {
 }
 
 /**
+ * Configured Android-App store URL (MELD-246). Empty = promo hidden.
+ *
+ * @return string
+ */
+function androidAppStoreUrl() {
+    if(!isset($GLOBALS['optionsDB']['urlAndroidApp'])) {
+        return '';
+    }
+    return trim((string)$GLOBALS['optionsDB']['urlAndroidApp']);
+}
+
+/**
+ * Help promo card for the Android app (optional via urlAndroidApp).
+ * Uses the official Google Play badge (no Play Store listing iframe exists).
+ *
+ * @return string HTML or empty
+ */
+function androidAppPromoHtml() {
+    $url = androidAppStoreUrl();
+    if($url === '') {
+        return '';
+    }
+    $h = function ($s) {
+        return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+    };
+    $icon = '';
+    if(!empty($GLOBALS['optionsDB']['favicon'])) {
+        $icon = trim((string)$GLOBALS['optionsDB']['favicon']);
+    }
+    if($icon === '' && !empty($GLOBALS['optionsDB']['WebSiteIcon'])) {
+        $icon = trim((string)$GLOBALS['optionsDB']['WebSiteIcon']);
+    }
+    if($icon === '') {
+        $icon = 'imgs/MVDLogo32x32.png';
+    }
+    // Official localized badge (Google-hosted); not a store-listing preview/iframe.
+    $badge = 'https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png';
+    $html = '<a class="help-app-promo" href="'.$h($url).'" target="_blank" rel="noopener noreferrer">';
+    $html .= '<span class="help-app-promo-icon" aria-hidden="true"><img src="'.$h($icon).'" alt="" width="56" height="56"></span>';
+    $html .= '<span class="help-app-promo-text">';
+    $html .= '<span class="help-app-promo-title">Meldeliste</span>';
+    $html .= '<span class="help-app-promo-sub">Android-App</span>';
+    $html .= '</span>';
+    $html .= '<img class="help-app-promo-badge" src="'.$h($badge).'" alt="Jetzt bei Google Play" height="48">';
+    $html .= '</a>';
+    return $html;
+}
+
+/**
  * Profile field: link to another user's Terminliste (proxy / im Auftrag). MELD-243.
  * Empty when no perm_editResponse or target is self.
  *
