@@ -2579,7 +2579,9 @@ function sanitizeMailHtmlStyleAttr($style) {
         'width' => true,
         'height' => true,
         'padding' => true,
+        'margin' => true,
         'margin-left' => true,
+        'margin-right' => true,
         'vertical-align' => true,
         'line-height' => true,
     );
@@ -2627,10 +2629,24 @@ function sanitizeMailHtmlStyleAttr($style) {
                 continue;
             }
         }
-        elseif($prop === 'border' || $prop === 'padding' || $prop === 'margin-left' || $prop === 'width' || $prop === 'height' || $prop === 'line-height') {
+        elseif($prop === 'border') {
             if(!preg_match('/^[\d.]+\s*(px|pt|em|rem|%)?(\s+solid\s+(#[0-9a-f]{3,8}|[a-z]+))?$/i', $val)
                 && !preg_match('/^[\d.]+(px|pt|em|rem|%)$/i', $val)
                 && !preg_match('/^\d+(\s+\d+){0,3}$/', $val)) {
+                continue;
+            }
+        }
+        elseif($prop === 'padding' || $prop === 'margin' || $prop === 'margin-left' || $prop === 'margin-right') {
+            // 1–4 lengths, e.g. "16px" or "12px 16px" (mail banners)
+            if(!preg_match('/^[\d.]+(px|pt|em|rem|%)(\s+[\d.]+(px|pt|em|rem|%)){0,3}$/i', $val)
+                && !preg_match('/^\d+(\s+\d+){0,3}$/', $val)
+                && !preg_match('/^0$/i', $val)) {
+                continue;
+            }
+        }
+        elseif($prop === 'width' || $prop === 'height' || $prop === 'line-height') {
+            if(!preg_match('/^[\d.]+(px|pt|em|rem|%)$/i', $val)
+                && !preg_match('/^\d+$/', $val)) {
                 continue;
             }
         }
