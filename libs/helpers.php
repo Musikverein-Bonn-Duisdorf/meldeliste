@@ -2192,15 +2192,19 @@ function androidAppPromoHtml() {
     $h = function ($s) {
         return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
     };
-    $icon = '';
-    if(!empty($GLOBALS['optionsDB']['MasterPageIcon'])) {
-        $icon = trim((string)$GLOBALS['optionsDB']['MasterPageIcon']);
-    }
-    if($icon === '' && !empty($GLOBALS['optionsDB']['favicon'])) {
-        $icon = trim((string)$GLOBALS['optionsDB']['favicon']);
-    }
-    if($icon === '') {
-        $icon = 'imgs/MVDLogo32x32.png';
+    // Prefer hi-res club logo (320²); MasterPageIcon/favicon are often 32² and look pixelated at 56px.
+    $icon = 'imgs/Logo.png';
+    if(!is_file(__DIR__.'/../'.$icon)) {
+        $icon = '';
+        if(!empty($GLOBALS['optionsDB']['MasterPageIcon'])) {
+            $icon = trim((string)$GLOBALS['optionsDB']['MasterPageIcon']);
+        }
+        if($icon === '' && !empty($GLOBALS['optionsDB']['favicon'])) {
+            $icon = trim((string)$GLOBALS['optionsDB']['favicon']);
+        }
+        if($icon === '') {
+            $icon = 'imgs/MVDLogo32x32.png';
+        }
     }
     // Official localized badge (Google-hosted); not a store-listing preview/iframe.
     $badge = 'https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png';
