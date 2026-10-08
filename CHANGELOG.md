@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-08-9e60e (2026-10-08)
+
+- MELD-246: img in Mail-HTML erlauben (App-Banner in Willkommens-Mail)
+- MELD-246: img in Mail-HTML für App-Banner
+
 ## 2026-10-08-dfdad (2026-10-08)
 
 - MELD-246: Hi-res Logo.png für App-Promo-Icon
