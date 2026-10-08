@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-08-93ee7 (2026-10-08)
+
+- MELD-246: Mehrwertiges padding/margin in Mail-HTML erlauben
+- MELD-246: Mail-padding für App-Banner
+
 ## 2026-10-08-9e60e (2026-10-08)
 
 - MELD-246: img in Mail-HTML erlauben (App-Banner in Willkommens-Mail)
