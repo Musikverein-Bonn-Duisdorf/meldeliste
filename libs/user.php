@@ -1,7 +1,7 @@
 <?php
 class User
 {
-    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Active' => 1, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'Deleted' => null, 'DeletedOn' => null);
+    private $_data = array('Index' => null, 'Nachname' => null, 'Vorname' => null, 'login' => null, 'Passhash' => null, 'activeLink' => null, 'Active' => 1, 'Instrument' => null, 'iName' => null, 'Email' => null, 'Email2' => null, 'getMail' => null, 'notifyInbox' => null, 'notifyAppMail' => null, 'notifyAppTerminNew' => null, 'notifyAppTerminChange' => null, 'notifyAppTerminSoon' => null, 'Admin' => null, 'singleUsePW' => null, 'RegisterLead' => null, 'LastLogin' => null, 'Joined' => null, 'introAckVersion' => 0, 'changelogAckVersion' => 0, 'Deleted' => null, 'DeletedOn' => null);
     public function __get($key) {
         switch($key) {
 	    case 'Index':
@@ -26,6 +26,8 @@ class User
         case 'RegisterLead':
         case 'LastLogin':
         case 'Joined':
+        case 'introAckVersion':
+        case 'changelogAckVersion':
         case 'Deleted':
         case 'DeletedOn':
             return $this->_data[$key];
@@ -53,6 +55,8 @@ class User
 	    case 'Admin':
 	    case 'singleUsePW':
 	    case 'RegisterLead':
+	    case 'introAckVersion':
+	    case 'changelogAckVersion':
 	    case 'Deleted':
             $this->_data[$key] = (int)$val;
             break;
