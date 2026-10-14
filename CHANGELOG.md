@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-14-a12b0 (2026-10-14)
+
+- MELD-251: Log-Level-Mehrfachfilter serverseitig, Auswahl am Benutzerkonto
+
 ## 2026-10-14-48500 (2026-10-14)
 
 - MELD-249: Updater repariert DB nach Pull trotz Opcache
