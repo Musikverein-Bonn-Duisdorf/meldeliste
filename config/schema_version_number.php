@@ -28,6 +28,7 @@
  * v55: userLoginsBackfilled in ConfigDefaults (MELD-248)
  * v56: Intro einmalig vs Changelog republish (MELD-249)
  * v57: Updater: Opcache + Repair nach Pull (MELD-249)
+ * v58: User.logFilterLevels (MELD-251)
  */
-return 57;
+return 58;
 ?>

@@ -7449,6 +7449,57 @@ select.profile-control {
   background: #6b7280;
 }
 
+/* MELD-251: level filter bar (reuse inv-sort-bar + log-type colors when active) */
+.log-level-filters {
+  margin: 0.35rem 0 0.65rem;
+  clear: both;
+}
+.log-level-filters .log-level-chip {
+  border-radius: 999px;
+  font-size: clamp(0.72rem, 0.65rem + 0.35vw, 0.85rem);
+  padding: 0.28rem 0.65rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  opacity: 0.55;
+}
+.log-level-filters .log-level-chip.is-active {
+  opacity: 1;
+  color: #fff;
+  border-color: transparent;
+  filter: none;
+}
+.log-level-filters .log-level-chip.log-type-chip--warning.is-active {
+  color: #1a1a1a;
+}
+.log-level-filters .log-level-chip.log-type-chip--fatal.is-active {
+  background: #7f1d1d;
+}
+.log-level-filters .log-level-chip.log-type-chip--error.is-active {
+  background: #f44336;
+}
+.log-level-filters .log-level-chip.log-type-chip--warning.is-active {
+  background: #f59e0b;
+}
+.log-level-filters .log-level-chip.log-type-chip--db-delete.is-active {
+  background: #b91c1c;
+}
+.log-level-filters .log-level-chip.log-type-chip--db-insert.is-active {
+  background: #16a34a;
+}
+.log-level-filters .log-level-chip.log-type-chip--db-update.is-active {
+  background: #2563eb;
+}
+.log-level-filters .log-level-chip.log-type-chip--email.is-active {
+  background: #7c3aed;
+}
+.log-level-filters .log-level-chip.log-type-chip--info.is-active {
+  background: #0284c7;
+}
+.log-level-filters .log-level-chip.log-type-chip--debug.is-active {
+  background: #64748b;
+}
+
 .log-message .log-melde-chip {
   font-style: normal;
 }

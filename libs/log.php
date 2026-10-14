@@ -264,24 +264,33 @@ class Log
 };
 
 /**
- * Live-Poll HTML for the log page (MELD-160 / MELD-165).
+ * Live-Poll HTML for the log page (MELD-160 / MELD-165 / MELD-251).
  * Returns newer rows (Index > $maxIndex) in batches of up to logListChunkSize
  * (newest first), or the same top row when its Timestamp was bumped by Log
  * dedupe (identical Type+Message+User → UPDATE Timestamp only).
  *
  * @param int $limit 0 = configured logListChunkSize (clamped via listChunkLogLimit)
+ * @param list<int>|null $types null = default (INFO/DEBUG off); empty = nothing
  * @return string HTML of one or more log rows, or empty string
  */
-function logPollNextHtml($maxIndex, $topTimestamp = '', $limit = 0) {
+function logPollNextHtml($maxIndex, $topTimestamp = '', $limit = 0, $types = null) {
     $maxIndex = (int)$maxIndex;
     if($maxIndex < 1) {
         return '';
     }
     $limit = listChunkLogLimit($limit);
+    $typeIds = function_exists('listChunkLogResolveTypes')
+        ? listChunkLogResolveTypes($types)
+        : array(0, 1, 2, 3, 4, 5, 6);
+    if($typeIds === array()) {
+        return '';
+    }
+    $typeIn = implode(',', array_map('intval', $typeIds));
     $sql = sprintf(
-        'SELECT `Index` FROM `%sLog` WHERE `Index` > %d ORDER BY `Index` ASC LIMIT %d;',
+        'SELECT `Index` FROM `%sLog` WHERE `Index` > %d AND `Type` IN (%s) ORDER BY `Index` ASC LIMIT %d;',
         $GLOBALS['dbprefix'],
         $maxIndex,
+        $typeIn,
         $limit
     );
     $dbr = mysqli_query($GLOBALS['conn'], $sql);
@@ -314,6 +323,9 @@ function logPollNextHtml($maxIndex, $topTimestamp = '', $limit = 0) {
     $M = new Log;
     $M->load_by_id($maxIndex);
     if($M->Index < 1) {
+        return '';
+    }
+    if(!in_array((int)$M->Type, $typeIds, true)) {
         return '';
     }
     $serverTs = (string)$M->Timestamp;

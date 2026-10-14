@@ -87,6 +87,145 @@ function listChunkLogSearchTokens($q) {
 }
 
 /**
+ * Default visible Log.Type ids (INFO=7 and DEBUG=8 off). MELD-251
+ * @return list<int>
+ */
+function listChunkLogDefaultTypes() {
+    return array(0, 1, 2, 3, 4, 5, 6);
+}
+
+/**
+ * All Log.Type ids (0 FATAL … 8 DEBUG).
+ * @return list<int>
+ */
+function listChunkLogAllTypes() {
+    return array(0, 1, 2, 3, 4, 5, 6, 7, 8);
+}
+
+/**
+ * Normalize a list of type ids to unique ints in 0–8 (order preserved).
+ * @param mixed $types
+ * @return list<int>
+ */
+function listChunkLogNormalizeTypes($types) {
+    if(!is_array($types)) {
+        return array();
+    }
+    $out = array();
+    $seen = array();
+    foreach($types as $t) {
+        if(!is_numeric($t)) {
+            continue;
+        }
+        $id = (int)$t;
+        if($id < 0 || $id > 8 || isset($seen[$id])) {
+            continue;
+        }
+        $seen[$id] = true;
+        $out[] = $id;
+    }
+    return $out;
+}
+
+/**
+ * Parse levels query param ("0,1,2" or array). Missing/null → null (use default).
+ * Empty string → empty list (show nothing).
+ *
+ * @param mixed $raw
+ * @return list<int>|null
+ */
+function listChunkLogParseLevelsParam($raw) {
+    if($raw === null) {
+        return null;
+    }
+    if(is_array($raw)) {
+        return listChunkLogNormalizeTypes($raw);
+    }
+    $raw = trim((string)$raw);
+    if($raw === '') {
+        return array();
+    }
+    $parts = preg_split('/\s*,\s*/', $raw, -1, PREG_SPLIT_NO_EMPTY);
+    return listChunkLogNormalizeTypes(is_array($parts) ? $parts : array());
+}
+
+/**
+ * Resolve types for a query: null → default allowlist (INFO/DEBUG off).
+ * @param list<int>|null $types
+ * @return list<int>
+ */
+function listChunkLogResolveTypes($types) {
+    if($types === null) {
+        return listChunkLogDefaultTypes();
+    }
+    return listChunkLogNormalizeTypes($types);
+}
+
+/**
+ * Persist chosen levels in PHP session + User.logFilterLevels (MELD-251).
+ * null ignored; empty array = remember "show none" (DB empty string, not NULL).
+ * @param list<int>|null $types
+ */
+function listChunkLogRememberTypes($types) {
+    if($types === null) {
+        return;
+    }
+    $types = listChunkLogNormalizeTypes($types);
+    $csv = implode(',', $types);
+    $_SESSION['logFilterLevels'] = $csv;
+
+    $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    if($uid < 1 || !isset($GLOBALS['conn'], $GLOBALS['dbprefix'])) {
+        return;
+    }
+    $sql = sprintf(
+        'UPDATE `%sUser` SET `logFilterLevels` = "%s" WHERE `Index` = %d;',
+        $GLOBALS['dbprefix'],
+        mysqli_real_escape_string($GLOBALS['conn'], $csv),
+        $uid
+    );
+    mysqli_query($GLOBALS['conn'], $sql);
+}
+
+/**
+ * Stored preference: session cache, else User.logFilterLevels.
+ * null = never saved (factory default). Empty list = user chose "show none".
+ * @return list<int>|null
+ */
+function listChunkLogStoredTypes() {
+    if(array_key_exists('logFilterLevels', $_SESSION)) {
+        return listChunkLogParseLevelsParam((string)$_SESSION['logFilterLevels']);
+    }
+
+    $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    if($uid < 1 || !isset($GLOBALS['conn'], $GLOBALS['dbprefix'])) {
+        return null;
+    }
+    $sql = sprintf(
+        'SELECT `logFilterLevels` FROM `%sUser` WHERE `Index` = %d LIMIT 1;',
+        $GLOBALS['dbprefix'],
+        $uid
+    );
+    $dbr = mysqli_query($GLOBALS['conn'], $sql);
+    $row = $dbr ? mysqli_fetch_assoc($dbr) : null;
+    if(!is_array($row) || !array_key_exists('logFilterLevels', $row) || $row['logFilterLevels'] === null) {
+        return null;
+    }
+    $csv = (string)$row['logFilterLevels'];
+    $_SESSION['logFilterLevels'] = $csv;
+    return listChunkLogParseLevelsParam($csv);
+}
+
+/**
+ * Types for the log page: stored preference or factory default.
+ * @return list<int>
+ */
+function listChunkLogPreferredTypes() {
+    $stored = listChunkLogStoredTypes();
+    return listChunkLogResolveTypes($stored);
+}
+
+/**
  * Map free-text search to Log.Type ids when the query looks like a type chip label.
  * @return int[]
  */
@@ -113,6 +252,7 @@ function listChunkLogTypeIdsForQuery($q) {
         5 => 'DB UPDATE',
         6 => 'EMAIL',
         7 => 'INFO',
+        8 => 'DEBUG',
     );
     $ids = array();
     foreach($labels as $id => $label) {
@@ -150,30 +290,33 @@ function listChunkLogTokenSqlCondition(array $token) {
  * @param int $beforeIndex
  * @param int $limit
  * @param string $q Server-side search; whitespace tokens are AND (MELD-179)
+ * @param list<int>|null $types null = default (INFO/DEBUG off); empty = no rows
  * @return array{html:string,nextCursor:string,hasMore:bool}
  */
-function listChunkLog($beforeIndex, $limit, $q = '') {
+function listChunkLog($beforeIndex, $limit, $q = '', $types = null) {
     $limit = listChunkLogLimit($limit);
     $beforeIndex = (int)$beforeIndex;
     $tokens = listChunkLogSearchTokens($q);
     $prefix = $GLOBALS['dbprefix'];
+    $typeIds = listChunkLogResolveTypes($types);
+    if($typeIds === array()) {
+        return array(
+            'html' => '',
+            'nextCursor' => (string)$beforeIndex,
+            'hasMore' => false,
+        );
+    }
+    $typeIn = implode(',', array_map('intval', $typeIds));
 
     if(!$tokens) {
-        if($beforeIndex > 0) {
-            $sql = sprintf(
-                'SELECT `Index` FROM `%sLog` WHERE `Index` < %d ORDER BY `Index` DESC LIMIT %d;',
-                $prefix,
-                $beforeIndex,
-                $limit + 1
-            );
-        }
-        else {
-            $sql = sprintf(
-                'SELECT `Index` FROM `%sLog` ORDER BY `Index` DESC LIMIT %d;',
-                $prefix,
-                $limit + 1
-            );
-        }
+        $whereIdx = $beforeIndex > 0 ? ('`Index` < '.(int)$beforeIndex.' AND ') : '';
+        $sql = sprintf(
+            'SELECT `Index` FROM `%sLog` WHERE %s`Type` IN (%s) ORDER BY `Index` DESC LIMIT %d;',
+            $prefix,
+            $whereIdx,
+            $typeIn,
+            $limit + 1
+        );
     }
     else {
         $tokenSql = array();
@@ -185,12 +328,13 @@ function listChunkLog($beforeIndex, $limit, $q = '') {
         $sql = sprintf(
             'SELECT l.`Index` FROM `%sLog` l'
             .' LEFT JOIN `%sUser` u ON u.`Index` = l.`User`'
-            .' WHERE %s%s'
+            .' WHERE %s%s AND l.`Type` IN (%s)'
             .' ORDER BY l.`Index` DESC LIMIT %d;',
             $prefix,
             $prefix,
             $whereIdx,
             $whereSearch,
+            $typeIn,
             $limit + 1
         );
     }

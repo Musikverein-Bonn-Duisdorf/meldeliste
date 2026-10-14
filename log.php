@@ -8,10 +8,26 @@ if(!requirePermission("perm_showLog")) {
     denyAccess();
 }
 
-// Buffer chunk build so any echo cannot appear above the search field
 $logChunkLimit = listChunkLogConfiguredLimit();
+$logActiveTypes = listChunkLogPreferredTypes();
+$logActiveSet = array_fill_keys($logActiveTypes, true);
+$logLevelsAttr = implode(',', $logActiveTypes);
+
+$logLevelDefs = array(
+    array(0, 'FATAL', 'fatal'),
+    array(1, 'ERROR', 'error'),
+    array(2, 'WARNING', 'warning'),
+    array(3, 'DB DELETE', 'db-delete'),
+    array(4, 'DB INSERT', 'db-insert'),
+    array(5, 'DB UPDATE', 'db-update'),
+    array(6, 'EMAIL', 'email'),
+    array(7, 'INFO', 'info'),
+    array(8, 'DEBUG', 'debug'),
+);
+
+// Buffer chunk build so any echo cannot appear above the search field
 ob_start();
-$chunk = listChunkLog(0, $logChunkLimit);
+$chunk = listChunkLog(0, $logChunkLimit, '', $logActiveTypes);
 $leak = ob_get_clean();
 if($leak !== false && $leak !== '') {
     $chunk['html'] = $leak.$chunk['html'];
@@ -21,9 +37,32 @@ if($leak !== false && $leak !== '') {
 adminListPageBegin('System', 'Log');
 adminListSearchField('Log durchsuchen…');
 ?>
+<div id="logLevelFilters" class="inv-sort-bar log-level-filters" role="group" aria-label="Log-Level">
+  <div class="inv-sort-bar-filters">
+<?php foreach($logLevelDefs as $def) {
+    list($id, $label, $mod) = $def;
+    $on = isset($logActiveSet[$id]);
+    $cls = 'inv-sort-chip inv-filter-chip log-level-chip log-type-chip log-type-chip--'.$mod
+        .($on ? ' is-active' : '');
+?>
+    <button type="button"
+            class="<?php echo htmlspecialchars($cls, ENT_QUOTES, 'UTF-8'); ?>"
+            data-log-level="<?php echo (int)$id; ?>"
+            aria-pressed="<?php echo $on ? 'true' : 'false'; ?>"><?php
+        echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+    ?></button>
+<?php } ?>
+  </div>
+</div>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>
-<?php echo listChunkRenderSentinel('log', $chunk['nextCursor'], $chunk['hasMore'], 'filterLog', ' data-limit="'.(int)$logChunkLimit.'" data-server-q="1"'); ?>
+<?php echo listChunkRenderSentinel(
+    'log',
+    $chunk['nextCursor'],
+    $chunk['hasMore'],
+    'filterLog',
+    ' data-limit="'.(int)$logChunkLimit.'" data-server-q="1" data-levels="'.htmlspecialchars($logLevelsAttr, ENT_QUOTES, 'UTF-8').'"'
+); ?>
 </div>
 <?php adminListPageEnd(); ?>
 <script>
@@ -59,11 +98,23 @@ function getLogPollLimit() {
     return n > 0 ? n : 0;
 }
 
+function getLogPollLevels() {
+    var sentinel = document.getElementById("listSentinel");
+    if(sentinel && sentinel.hasAttribute("data-levels")) {
+        return sentinel.getAttribute("data-levels") || "";
+    }
+    if(typeof window.logLevelFilterSelected === "function") {
+        return window.logLevelFilterSelected().join(",");
+    }
+    return "0,1,2,3,4,5,6";
+}
+
 function getLog() {
     var maxIndex = getLogMaxIndex();
     if(!(maxIndex > 0)) return;
     var topTimestamp = getLogTopTimestamp();
     var limit = getLogPollLimit();
+    var levels = getLogPollLevels();
 
     var xmlhttp;
     if (window.XMLHttpRequest) {
@@ -118,7 +169,8 @@ function getLog() {
     }
     var body = "maxIndex="+encodeURIComponent(maxIndex)
         +"&topTimestamp="+encodeURIComponent(topTimestamp)
-        +"&limit="+encodeURIComponent(limit);
+        +"&limit="+encodeURIComponent(limit)
+        +"&levels="+encodeURIComponent(levels);
     xmlhttp.open("POST", "getLog.php", true);
     xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xmlhttp.send(body);
@@ -127,6 +179,7 @@ var interval = setInterval(getLog, 1000);
 </script>
 
 <script src="js/filterLog.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
+<script src="js/logLevelFilter.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 <script src="js/infiniteScroll.js?<?php echo $GLOBALS['version']['Hash']; ?>"></script>
 
 <?php

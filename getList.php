@@ -31,7 +31,14 @@ case 'log':
         $limit = listChunkLogConfiguredLimit();
     }
     $q = isset($_GET['q']) ? (string)$_GET['q'] : '';
-    $result = listChunkLog($cursor !== '' ? (int)$cursor : 0, $limit, $q);
+    if(array_key_exists('levels', $_GET)) {
+        $levels = listChunkLogParseLevelsParam($_GET['levels']);
+        listChunkLogRememberTypes($levels);
+    }
+    else {
+        $levels = listChunkLogStoredTypes();
+    }
+    $result = listChunkLog($cursor !== '' ? (int)$cursor : 0, $limit, $q, $levels);
     break;
 
 case 'termine':
