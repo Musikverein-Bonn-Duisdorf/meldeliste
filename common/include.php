@@ -21,6 +21,7 @@ include "libs/log.php";
 include "libs/discord.php";
 include "libs/div.php";
 include "libs/user.php";
+include "libs/userLogin.php";
 include "libs/permissions.php";
 include "libs/SQLtable.php";
 include "libs/DatabaseManager.php";

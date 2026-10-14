@@ -15,7 +15,7 @@
 <?php if($edit != 2 || !empty($adminUserEdit)) { ?>
 <div class="profile-field">
   <label class="profile-label" for="profile-login">Login</label>
-  <input id="profile-login" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="login" type="text" placeholder="optional" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
+  <input id="profile-login" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="login" type="text" autocomplete="username" spellcheck="false" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->login, ENT_QUOTES, 'UTF-8').'"'; ?> <?php echo $disabled; ?>>
 </div>
 <?php } elseif($fill) { ?>
 <div class="profile-field">

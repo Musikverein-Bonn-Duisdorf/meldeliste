@@ -23,6 +23,7 @@
  * v50: CollectionGrant.Sortierung (MELD-236)
  * v51: Willkommens-Mail Editor Descriptions (MELD-240)
  * v52: newMailGruss Willkommens-Mail (MELD-240)
+ * v53: User.login Backfill (MELD-248)
  */
-return 52;
+return 53;
 ?>
