@@ -50,9 +50,18 @@ if($gitAction === 'update' || isset($_POST['pull'])) {
         $logentry->info('<b>Software Update</b> from version <b>'.$pullOutput['vCurrent'].'</b> to <b>'.$pullOutput['vNew'].'</b>');
     }
 
-    // After pull: resolve DB schema if outdated (re-read version file from disk)
+    // After pull: drop opcache for schema/defaults, then repair when code changed
+    // or schema is behind. Always-repair-on-update avoids SchemaVersion bumping
+    // while stale ConfigDefaults skipped new parameters (MELD-249).
+    if(function_exists('meldeInvalidateSchemaOpcache')) {
+        meldeInvalidateSchemaOpcache();
+    }
+    elseif(function_exists('getExpectedSchemaVersion')) {
+        getExpectedSchemaVersion(true);
+    }
     $postPullMgr = new DatabaseManager();
-    if($postPullMgr->isSchemaOutdated(true)) {
+    $needRepair = !empty($pullOutput['updated']) || $postPullMgr->isSchemaOutdated(true);
+    if($needRepair) {
         require_once __DIR__.'/dbintegrity.php';
         try {
             ob_start();
@@ -153,8 +162,8 @@ adminListPageBegin('System', 'Updater', array('permKey' => 'perm_editConfig'));
   </div>
   <div class="w3-padding">
     <p>„Auf Updates prüfen“ holt den Remote-Stand und zeigt, ob Commits verfügbar sind.
-      „Update durchführen“ zieht die Änderungen und repariert die Datenbank bei veraltetem Schema automatisch.
-      Datenbank prüfen/reparieren kann unabhängig davon ausgeführt werden.</p>
+      „Update durchführen“ zieht die Änderungen und repariert die Datenbank danach automatisch
+      (bei neuem Code oder veraltetem Schema). Datenbank prüfen/reparieren geht auch getrennt.</p>
   </div>
   <div class="w3-padding updater-actions">
     <form action="updater.php" method="post">

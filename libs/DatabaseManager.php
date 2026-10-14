@@ -485,6 +485,9 @@ class DatabaseManager
         if(!function_exists('getExpectedSchemaVersion')) {
             require_once dirname(__DIR__).'/config/SchemaVersion.php';
         }
+        if($forceReload && function_exists('meldeInvalidateSchemaOpcache')) {
+            meldeInvalidateSchemaOpcache();
+        }
         return (int)call_user_func('getExpectedSchemaVersion', $forceReload);
     }
 
