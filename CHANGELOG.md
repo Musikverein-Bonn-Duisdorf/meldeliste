@@ -2,6 +2,11 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-14-99151 (2026-10-14)
+
+- MELD-248: Login automatisch vergeben, prüfen und backfillen
+- MELD-248: Jedem User einen Login zuweisen
+
 ## 2026-10-08-93ee7 (2026-10-08)
 
 - MELD-246: Mehrwertiges padding/margin in Mail-HTML erlauben
