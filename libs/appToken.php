@@ -22,6 +22,15 @@ function establishSessionFromUserRow($row, $via = 'Password') {
     $_SESSION['Nachname'] = $row['Nachname'];
     $_SESSION['username'] = $row['Vorname']." ".$row['Nachname'];
     $_SESSION['singleUsePW'] = (bool)$row['singleUsePW'];
+    // MELD-251: hydrate log level filter from User row when present
+    if(array_key_exists('logFilterLevels', $row)) {
+        if($row['logFilterLevels'] === null) {
+            unset($_SESSION['logFilterLevels']);
+        }
+        else {
+            $_SESSION['logFilterLevels'] = (string)$row['logFilterLevels'];
+        }
+    }
     $logentry = new Log;
     $logentry->info("Login via ".$via.".");
     recordLogin();

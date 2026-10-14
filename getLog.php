@@ -27,5 +27,14 @@ if($topTimestamp === null) {
 $limit = meldeRequest('limit');
 $limit = ($limit !== null && is_numeric($limit)) ? (int)$limit : 0;
 
-echo logPollNextHtml((int)$maxIndex, (string)$topTimestamp, $limit);
+$levelsRaw = meldeRequest('levels');
+if($levelsRaw !== null) {
+    $levels = listChunkLogParseLevelsParam($levelsRaw);
+    listChunkLogRememberTypes($levels);
+}
+else {
+    $levels = listChunkLogStoredTypes();
+}
+
+echo logPollNextHtml((int)$maxIndex, (string)$topTimestamp, $limit, $levels);
 ?>

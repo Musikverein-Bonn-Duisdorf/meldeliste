@@ -279,6 +279,10 @@
         if(sentinel.getAttribute('data-server-q') === '1') {
             var q = filterQuery();
             if(q !== '') url += '&q=' + encodeURIComponent(q);
+            // MELD-251: Log level multi-select (comma-separated Type ids)
+            if(sentinel.hasAttribute('data-levels')) {
+                url += '&levels=' + encodeURIComponent(sentinel.getAttribute('data-levels') || '');
+            }
         }
         return url;
     }

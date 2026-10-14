@@ -281,6 +281,7 @@
 	"Joined": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
 	"introAckVersion": {"Type": "int", "Default": 0},
 	"changelogAckVersion": {"Type": "int", "Default": 0},
+	"logFilterLevels": {"Type": "text", "Null": "YES", "Collation": "utf8mb4_unicode_ci"},
 	"Deleted": {"Type": "int", "Default": 0},
 	"DeletedOn": {"Type": "timestamp", "Null": "YES"}
     },
