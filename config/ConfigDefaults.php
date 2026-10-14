@@ -590,6 +590,30 @@ function getConfigDefaults() {
             'Description' => 'Grußformel der Willkommens-Mail (0–4 wie MailJob.Gruss; 0=Keine; Editor: welcome-mail.php)',
         ),
         array(
+            'Parameter' => 'introPages',
+            'Value' => '',
+            'Type' => 'text',
+            'Description' => 'Einführungs-Seiten JSON (Editor: intro-editor.php)',
+        ),
+        array(
+            'Parameter' => 'introVersion',
+            'Value' => '1',
+            'Type' => 'uint',
+            'Description' => 'Intro aktiv ab Version ≥1; Anzeige nur einmal pro User (Editor: intro-editor.php)',
+        ),
+        array(
+            'Parameter' => 'changelogPages',
+            'Value' => '',
+            'Type' => 'text',
+            'Description' => 'Changelog-Seiten JSON (Editor: intro-editor.php)',
+        ),
+        array(
+            'Parameter' => 'changelogVersion',
+            'Value' => '0',
+            'Type' => 'uint',
+            'Description' => 'Changelog-Version; erneute Anzeige bei jedem Veröffentlichen (Editor: intro-editor.php)',
+        ),
+        array(
             'Parameter' => 'colorSchemeActive',
             'Value' => 'classic',
             'Type' => 'string',
@@ -612,6 +636,12 @@ function getConfigDefaults() {
             'Value' => '0',
             'Type' => 'bool',
             'Description' => 'Termine.published nach VisibilitySpec (Alle User) migriert',
+        ),
+        array(
+            'Parameter' => 'userLoginsBackfilled',
+            'Value' => '0',
+            'Type' => 'bool',
+            'Description' => 'Leere User.login nach Schema vergeben (MELD-248)',
         ),
         array(
             'Parameter' => 'logListChunkSize',

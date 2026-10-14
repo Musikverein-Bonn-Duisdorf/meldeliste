@@ -94,6 +94,7 @@ $sections[] = array(
     'title' => 'Mein Profil',
     'body' => '
 <p>Unter <b>Mein Profil</b> pflegst du deine Kontaktdaten, E-Mail-Adressen und weitere Angaben für den Melde-Betrieb.</p>
+<p>Beim ersten Login (und bei veröffentlichten Änderungen) erscheint ein kurzer Dialog zur Meldeliste. Mit <b>×</b> schließt du ihn für diese Sitzung; ohne Bestätigung erscheint er beim nächsten Login erneut. Nach „gelesen und verstanden“ kommt er nicht wieder.</p>
 <p>Dein <b>Login</b> (Benutzername) siehst du hier nur lesend; ändern kann ihn nur, wer <b>Benutzer bearbeiten</b> hat. Beim Anlegen wird er automatisch aus Vor- und Nachname gebildet (mindestens 5 Zeichen, a–z und 0–9). Ein Standard-Passwort wird nicht gesetzt.</p>
 <p>Halte insbesondere E-Mail und Instrument aktuell – davon hängen Benachrichtigungen und die Orchesterdarstellung ab. <b>Geburtstag, Telefon, Anschrift und Vereinsmitgliedschaft</b> pflegst du in der <b>Mitgliederverwaltung</b> (vollständige Stammdaten). Ohne das Recht <b>Benutzer bearbeiten</b> sind Name, Instrument, Gruppen und Rechte hier nur lesbar bzw. nicht änderbar; mit diesem Recht kannst du dein Melde-Subset unter <b>Mein Profil</b> genauso bearbeiten wie in der User-Verwaltung.</p>
 <p><b>Benachrichtigungen</b> (unabhängig wählbar):</p>
@@ -255,7 +256,7 @@ $sections[] = array(
 <li><b>Berechtigungen</b> – Matrix aller User (Autosave); persönliche Rechte sind editierbar; Haken mit gestricheltem Rahmen kommen nur über eine Gruppe und lassen sich hier nicht entfernen; Klick auf den Namen öffnet das User-Modal; Rechte auch beim Anlegen/Bearbeiten unter Musiker</li>
 ' : '').'
 '.(requirePermission('perm_editConfig') ? '
-<li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, Default-Sichtbarkeit neuer Termine (<code>defaultTerminVisibility</code>), Leih- und Rückgabetexte (<code>loanText</code>, <code>loanReturnText</code>; Leerzeile = Absatz; Platzhalter <code>{org}</code> <code>{start}</code> <code>{duration}</code> <code>{returnDue}</code> <code>{fee}</code> <code>{kaution}</code>), …; Änderungen erscheinen im Log. Unter Farbschema den Block <b>Willkommens-Mail</b> → <b>Bearbeiten</b> für die Willkommensvorlage</li>
+<li><b>Konfiguration</b> – Farben, Texte, Feature-Schalter, Webhooks, Default-Sichtbarkeit neuer Termine (<code>defaultTerminVisibility</code>), Leih- und Rückgabetexte (<code>loanText</code>, <code>loanReturnText</code>; Leerzeile = Absatz; Platzhalter <code>{org}</code> <code>{start}</code> <code>{duration}</code> <code>{returnDue}</code> <code>{fee}</code> <code>{kaution}</code>), …; Änderungen erscheinen im Log. Unter Farbschema die Blöcke <b>Willkommens-Mail</b> und <b>Einführung / Changelog</b> → <b>Bearbeiten</b> (Platzhalter <code>{Vorname}</code>; Einführung nur einmal pro User bis zur Bestätigung, spätere Textänderungen nicht erneut; Changelog bei jedem <b>Veröffentlichen</b> wieder bis zur Bestätigung)</li>
 <li><b>Plattform / SSO</b> – <code>urlNotenarchiv</code> und <code>urlMitgliederverwaltung</code> setzen die Modul-Ziele (Hosts daraus sind für SSO automatisch erlaubt); <code>ssoRedirectAllowlist</code> nur für Extra-Hosts. Nav-Links erscheinen bei gesetzter URL und dem Recht <b>Notenarchiv</b> bzw. <b>Mitglieder</b></li>
 ' : '').'
 '.(requirePermission('perm_showLog') ? '

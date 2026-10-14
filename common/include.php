@@ -61,4 +61,5 @@ include "libs/ssoRedirect.php";
 include "libs/userVoice.php";
 include "libs/archivCollection.php";
 include "libs/collectionGrant.php";
+include "libs/intro.php";
 ?>

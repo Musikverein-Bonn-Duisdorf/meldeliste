@@ -279,6 +279,8 @@
 	"RegisterLead": {"Type": "int", "Default": 0},
 	"LastLogin": {"Type": "timestamp", "Null": "YES"},
 	"Joined": {"Type": "timestamp", "Default": "CURRENT_TIMESTAMP", "Extra": "DEFAULT_GENERATED"},
+	"introAckVersion": {"Type": "int", "Default": 0},
+	"changelogAckVersion": {"Type": "int", "Default": 0},
 	"Deleted": {"Type": "int", "Default": 0},
 	"DeletedOn": {"Type": "timestamp", "Null": "YES"}
     },

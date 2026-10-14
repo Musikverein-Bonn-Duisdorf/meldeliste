@@ -24,6 +24,9 @@
  * v51: Willkommens-Mail Editor Descriptions (MELD-240)
  * v52: newMailGruss Willkommens-Mail (MELD-240)
  * v53: User.login Backfill (MELD-248)
+ * v54: Intro/Changelog Ack + Config (MELD-249)
+ * v55: userLoginsBackfilled in ConfigDefaults (MELD-248)
+ * v56: Intro einmalig vs Changelog republish (MELD-249)
  */
-return 53;
+return 56;
 ?>

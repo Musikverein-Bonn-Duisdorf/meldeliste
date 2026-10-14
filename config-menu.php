@@ -243,6 +243,15 @@ $activeSchemeName = isset($colorSchemes[$activeSchemeId]['name'])
     </div>
   </div>
 </div>
+<div class="w3-container w3-card w3-margin w3-padding">
+  <div class="w3-row w3-padding">
+    <div class="w3-col l3 m4 s12"><b>Einführung / Changelog</b></div>
+    <div class="w3-col l5 m4 s12">Mehrseitige Einführung und Änderungsdialoge.</div>
+    <div class="w3-col l4 m4 s12 w3-center">
+      <a class="w3-button <?php echo $GLOBALS['optionsDB']['colorBtnEdit']; ?> w3-border" href="intro-editor.php">Bearbeiten</a>
+    </div>
+  </div>
+</div>
 <form action="config-menu.php" method="POST">
 <?php echo csrf_field(); ?>
 <div class="w3-container w3-padding w3-border-bottom w3-border-black">
@@ -261,7 +270,9 @@ while($row = mysqli_fetch_array($dbr)) {
     if($row['Type'] === 'internal' || $row['Parameter'] === 'colorSchemeActive' || $row['Parameter'] === 'colorSchemes') {
         continue;
     }
-    if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText' || $row['Parameter'] === 'newMailGruss') {
+    if($row['Parameter'] === 'newMailSubject' || $row['Parameter'] === 'newMailText' || $row['Parameter'] === 'newMailGruss'
+        || $row['Parameter'] === 'introPages' || $row['Parameter'] === 'introVersion'
+        || $row['Parameter'] === 'changelogPages' || $row['Parameter'] === 'changelogVersion') {
         continue;
     }
     echo "<div class=\"w3-container w3-padding w3-border-bottom w3-boder-black ".$GLOBALS['optionsDB']['HoverEffect']."\">\n";

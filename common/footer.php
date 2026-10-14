@@ -1,6 +1,17 @@
 </div><!-- .app-main -->
 </div><!-- .app-shell -->
 <?php
+/* MELD-249: queue intro/changelog before deferred flush (outside .app-main). */
+if(function_exists('loggedIn') && loggedIn() && empty($_SESSION['singleUsePW'])
+    && class_exists('Intro') && function_exists('csrf_token')) {
+    $uid = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : 0;
+    $introKind = Intro::pendingKindForUser($uid);
+    if($introKind) {
+        $introPages = Intro::pagesForKind($introKind);
+        $introCsrf = csrf_token();
+        include __DIR__.'/../views/intro/modal.php';
+    }
+}
 /* Page-local modals must live outside .app-main (overflow/z-index stacking). */
 if(!empty($GLOBALS['mlDeferredPageModals'])) {
     echo $GLOBALS['mlDeferredPageModals'];
