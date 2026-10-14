@@ -2,6 +2,13 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-14-48500 (2026-10-14)
+
+- MELD-249: Updater repariert DB nach Pull trotz Opcache
+- MELD-249: Einführung und Changelog-Modal mit Editor
+- MELD-249: Updater Repair nach Pull trotz Opcache
+- MELD-249: Einführung und Changelog-Modal
+
 ## 2026-10-14-99151 (2026-10-14)
 
 - MELD-248: Login automatisch vergeben, prüfen und backfillen
