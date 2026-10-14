@@ -438,6 +438,7 @@ class DatabaseManager
         $this->migrateMailGroupTableToGroup();
         $this->migrateAudienceLegacyColumns();
         $this->migrateUniformGenderThumbs(true);
+        $this->migrateMissingUserLogins();
         $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
@@ -461,6 +462,7 @@ class DatabaseManager
         $this->migrateMailGroupTableToGroup();
         $this->migrateAudienceLegacyColumns();
         $this->migrateUniformGenderThumbs(true);
+        $this->migrateMissingUserLogins();
         $this->pruneObsoleteSchema(true);
         $this->checkConfigDefaults(true);
         $this->ensureDefaultVehicle();
@@ -1033,6 +1035,90 @@ class DatabaseManager
                     $this->addReport('data', 'MailJob.RecipientSpec', 'ok', 'RecipientSpec bereits migriert');
                 }
             }
+        }
+    }
+
+    /**
+     * MELD-248: assign login for non-deleted users with empty login.
+     */
+    private function migrateMissingUserLogins() {
+        if(!class_exists('UserLogin')) {
+            require_once dirname(__DIR__).'/libs/userLogin.php';
+        }
+
+        $flag = 'userLoginsBackfilled';
+        $userTable = new SQLtable('User');
+        if(!$userTable->exists() || !$userTable->columnExists('login')) {
+            return;
+        }
+        if($this->getConfigFlag($flag)) {
+            $this->addReport('data', 'User.login', 'ok', 'Logins bereits backfilled (MELD-248)');
+            return;
+        }
+
+        $sql = sprintf(
+            'SELECT `Index`, `Vorname`, `Nachname` FROM `%sUser`
+             WHERE `Deleted` != 1 AND (`login` IS NULL OR `login` = \'\');',
+            $GLOBALS['dbprefix']
+        );
+        $dbr = mysqli_query($GLOBALS['conn'], $sql);
+        if(!$dbr) {
+            $this->addReport(
+                'data',
+                'User.login',
+                'error',
+                'Login-Backfill konnte User nicht lesen',
+                mysqli_errno($GLOBALS['conn']).': '.mysqli_error($GLOBALS['conn'])
+            );
+            return;
+        }
+
+        $filled = 0;
+        $errors = 0;
+        while($row = mysqli_fetch_array($dbr, MYSQLI_ASSOC)) {
+            $id = (int)$row['Index'];
+            $login = UserLogin::suggestLogin(
+                isset($row['Vorname']) ? (string)$row['Vorname'] : '',
+                isset($row['Nachname']) ? (string)$row['Nachname'] : '',
+                $id
+            );
+            if($login === '') {
+                $errors++;
+                continue;
+            }
+            $update = sprintf(
+                'UPDATE `%sUser` SET `login` = "%s" WHERE `Index` = %d AND (`login` IS NULL OR `login` = \'\');',
+                $GLOBALS['dbprefix'],
+                mysqli_real_escape_string($GLOBALS['conn'], $login),
+                $id
+            );
+            if(!mysqli_query($GLOBALS['conn'], $update)) {
+                $errors++;
+                continue;
+            }
+            if(mysqli_affected_rows($GLOBALS['conn']) > 0) {
+                $filled++;
+            }
+        }
+
+        if($errors === 0) {
+            $this->setConfigFlag($flag, true, 'User.login Backfill (MELD-248) erledigt');
+            $this->addReport(
+                'data',
+                'User.login',
+                'ok',
+                $filled > 0
+                    ? sprintf('Login-Backfill: %d User ergänzt (MELD-248)', $filled)
+                    : 'Login-Backfill: keine leeren Logins (MELD-248)'
+            );
+        }
+        else {
+            $this->addReport(
+                'data',
+                'User.login',
+                'error',
+                sprintf('Login-Backfill teilweise fehlgeschlagen (%d Fehler, %d ok)', $errors, $filled)
+            );
         }
     }
 

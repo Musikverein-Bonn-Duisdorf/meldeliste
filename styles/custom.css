@@ -5355,6 +5355,11 @@ select.profile-control {
   margin-bottom: 0 !important;
 }
 
+#profile-login:invalid,
+#profile-login[aria-invalid="true"] {
+  border-color: #c62828 !important;
+}
+
 .profile-group-picker {
   position: relative;
   padding: 0.45rem 0.55rem 0.55rem;

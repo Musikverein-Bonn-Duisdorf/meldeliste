@@ -158,6 +158,9 @@ if(!empty($_GET['return_to'])) {
 </div>
 <script src="js/qrcode.min.js"></script>
 <script src="js/profile-layout.js"></script>
+<?php if($canEditUsers) { ?>
+<script src="<?php echo assetUrl('js/loginCheck.js'); ?>"></script>
+<?php } ?>
 <?php if($fill && $canEditUsers) {
     $delName = htmlspecialchars(trim($n->Vorname.' '.$n->Nachname), ENT_QUOTES, 'UTF-8');
     $inventoryBlocksDelete = $n->hasInventories();

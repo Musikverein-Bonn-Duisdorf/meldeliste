@@ -32,9 +32,11 @@ function handleUserFormPost($options = array()) {
         try {
             $n = new User;
             $id = isset($_POST['Index']) ? (int)$_POST['Index'] : 0;
+            $previousLogin = '';
             if($allowNewUser) {
                 if($id > 0) {
                     $n->load_by_id($id);
+                    $previousLogin = (string)$n->login;
                 }
                 $n->fill_from_array($_POST);
                 if($id < 1) {
@@ -53,6 +55,21 @@ function handleUserFormPost($options = array()) {
                         return $result;
                     }
                 }
+                $loginResolved = UserLogin::resolveForSave(
+                    isset($_POST['login']) ? (string)$_POST['login'] : '',
+                    (string)$n->Vorname,
+                    (string)$n->Nachname,
+                    $id > 0 ? $id : 0,
+                    $id > 0 ? $previousLogin : null
+                );
+                if(empty($loginResolved['ok'])) {
+                    $result['flash'] = array(
+                        'type' => 'error',
+                        'message' => isset($loginResolved['error']) ? $loginResolved['error'] : 'Login ungültig.',
+                    );
+                    return $result;
+                }
+                $n->login = $loginResolved['login'];
                 if((int)$n->Active === 0) {
                     $n->applyGuestMusicianDefaults();
                 }
@@ -66,7 +83,23 @@ function handleUserFormPost($options = array()) {
             }
             else {
                 $n->load_by_id($_POST['Index']);
+                $previousLogin = (string)$n->login;
                 $n->fill_from_array($_POST);
+                $loginResolved = UserLogin::resolveForSave(
+                    isset($_POST['login']) ? (string)$_POST['login'] : '',
+                    (string)$n->Vorname,
+                    (string)$n->Nachname,
+                    (int)$n->Index,
+                    $previousLogin
+                );
+                if(empty($loginResolved['ok'])) {
+                    $result['flash'] = array(
+                        'type' => 'error',
+                        'message' => isset($loginResolved['error']) ? $loginResolved['error'] : 'Login ungültig.',
+                    );
+                    return $result;
+                }
+                $n->login = $loginResolved['login'];
                 if((int)$n->Active === 0) {
                     $n->applyGuestMusicianDefaults();
                 }
