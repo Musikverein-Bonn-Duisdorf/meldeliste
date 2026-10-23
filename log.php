@@ -34,8 +34,7 @@ if($leak !== false && $leak !== '') {
 }
 ?>
 <?php
-adminListPageBegin('System', 'Log');
-adminListSearchField('Log durchsuchen…');
+ob_start();
 ?>
 <div id="logLevelFilters" class="inv-sort-bar log-level-filters" role="group" aria-label="Log-Level">
   <div class="inv-sort-bar-filters">
@@ -54,6 +53,13 @@ adminListSearchField('Log durchsuchen…');
 <?php } ?>
   </div>
 </div>
+<?php
+$logLevelFiltersHtml = ob_get_clean();
+adminListPageBegin('System', 'Log');
+adminListSearchField('Log durchsuchen…', array(
+    'afterSearchHtml' => $logLevelFiltersHtml,
+));
+?>
 <div id="Liste" style="clear:both;">
 <?php echo $chunk['html']; ?>
 <?php echo listChunkRenderSentinel(

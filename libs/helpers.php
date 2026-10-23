@@ -921,7 +921,8 @@ function adminListPageEnd() {
  * Search field styled like profile controls (keeps #filterString for existing JS).
  * Kein sichtbares Label — nur Placeholder (+ aria-label). Siehe .cursor/rules/short-ui-labels.mdc
  * @param string $placeholder
- * @param array $options id, onkeyup, extraHtml (label wird ignoriert / nur für aria)
+ * @param array $options id, onkeyup, extraHtml (label wird ignoriert / nur für aria),
+ *                       afterSearchHtml (HTML im Chrome unter der Suche, vor Body; MELD-252)
  */
 function adminListSearchField($placeholder, $options = array()) {
     $id = isset($options['id']) ? (string)$options['id'] : 'filterString';
@@ -936,6 +937,7 @@ function adminListSearchField($placeholder, $options = array()) {
     if($pre !== '') {
         echo $pre;
     }
+    $afterSearch = isset($options['afterSearchHtml']) ? (string)$options['afterSearchHtml'] : '';
     echo '    <div class="admin-list-toolbar">'."\n";
     echo '      <div class="profile-field admin-list-search">'."\n";
     echo '        <input type="search" id="'.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').'"'
@@ -952,6 +954,10 @@ function adminListSearchField($placeholder, $options = array()) {
         echo '      <div class="admin-list-toolbar-extra">'.$extra.'</div>'."\n";
     }
     echo '    </div>'."\n";
+    /* MELD-252: optional chrome content under search (e.g. Log level chips) so fade sits below */
+    if($afterSearch !== '') {
+        echo $afterSearch;
+    }
     adminListChromeClose(false);
 }
 
