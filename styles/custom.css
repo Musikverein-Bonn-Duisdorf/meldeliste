@@ -432,6 +432,7 @@ a.app-titlebar-logo {
   position: relative;
   z-index: 6;
   padding-bottom: 0;
+  background: #fff;
 }
 
 /* Inhalt scrollt unter die Suche und fadet aus (schmale Zone) */
@@ -7449,10 +7450,15 @@ select.profile-control {
   background: #6b7280;
 }
 
-/* MELD-251: level filter bar (reuse inv-sort-bar + log-type colors when active) */
-.log-level-filters {
-  margin: 0.35rem 0 0.65rem;
+/* MELD-251/252: level chips in page chrome so .app-page-chrome::after fade sits below */
+.app-page-chrome > .log-level-filters.inv-sort-bar {
+  margin: 0.35rem 1.25rem 0.5rem;
   clear: both;
+  position: static;
+  top: auto;
+  z-index: auto;
+  background: #fff;
+  padding: 0.15rem 0 0.35rem;
 }
 .log-level-filters .log-level-chip {
   border-radius: 999px;
