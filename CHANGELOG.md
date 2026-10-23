@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-10-23-90b9c (2026-10-23)
+
+- MELD-252: Log-Level-Filter in Page-Chrome, Fade unter den Chips
+
 ## 2026-10-14-a12b0 (2026-10-14)
 
 - MELD-251: Log-Level-Mehrfachfilter serverseitig, Auswahl am Benutzerkonto
@@ -9,49 +13,49 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-10-14-48500 (2026-10-14)
 
 - MELD-249: Updater repariert DB nach Pull trotz Opcache
-- MELD-249: Einführung und Changelog-Modal mit Editor
+- MELD-249: EinfÃ¼hrung und Changelog-Modal mit Editor
 - MELD-249: Updater Repair nach Pull trotz Opcache
-- MELD-249: Einführung und Changelog-Modal
+- MELD-249: EinfÃ¼hrung und Changelog-Modal
 
 ## 2026-10-14-99151 (2026-10-14)
 
-- MELD-248: Login automatisch vergeben, prüfen und backfillen
+- MELD-248: Login automatisch vergeben, prÃ¼fen und backfillen
 - MELD-248: Jedem User einen Login zuweisen
 
 ## 2026-10-08-93ee7 (2026-10-08)
 
 - MELD-246: Mehrwertiges padding/margin in Mail-HTML erlauben
-- MELD-246: Mail-padding für App-Banner
+- MELD-246: Mail-padding fÃ¼r App-Banner
 
 ## 2026-10-08-9e60e (2026-10-08)
 
 - MELD-246: img in Mail-HTML erlauben (App-Banner in Willkommens-Mail)
-- MELD-246: img in Mail-HTML für App-Banner
+- MELD-246: img in Mail-HTML fÃ¼r App-Banner
 
 ## 2026-10-08-dfdad (2026-10-08)
 
-- MELD-246: Hi-res Logo.png für App-Promo-Icon
+- MELD-246: Hi-res Logo.png fÃ¼r App-Promo-Icon
 - MELD-246: App-Promo-Icon aus MasterPageIcon nehmen
 - MELD-246: App-Promo-Karte mit Play-Badge, konfigurierbar
 - MELD-246: Play-Store-Link zur Android-App oben in der Hilfe
-- MELD-247: Grußformel-Option „Keine“ im Mail-Dropdown
+- MELD-247: GruÃŸformel-Option â€žKeineâ€œ im Mail-Dropdown
 - MELD-246: App-Promo-Karte mit Play-Badge
 - MELD-246: Play-Store-Link in der Hilfe
-- MELD-247: Grußformel-Option Keine
+- MELD-247: GruÃŸformel-Option Keine
 
 ## 2026-10-04-95e6f (2026-10-04)
 
-- MELD-242: UI-Bezeichnung Sammlungen → Noten
-- MELD-243: Proxy-Link Meldungen über Meldequote in Profil-Modal und -Edit
-- MELD-242: Sammlungen → Noten (UI)
+- MELD-242: UI-Bezeichnung Sammlungen â†’ Noten
+- MELD-243: Proxy-Link Meldungen Ã¼ber Meldequote in Profil-Modal und -Edit
+- MELD-242: Sammlungen â†’ Noten (UI)
 - MELD-243: Proxy-Link Meldungen im User-Profil
 
 ## 2026-09-26-14a83 (2026-09-26)
 
 - MELD-240: Willkommens-Mail unter Farbschema in der Konfiguration
-- MELD-240: Willkommens-Editor wie Mail-Compose inkl. Grußformel
+- MELD-240: Willkommens-Editor wie Mail-Compose inkl. GruÃŸformel
 - MELD-240: Willkommens-Mail-Editor unter Konfiguration
-- MELD-240: Button „Willkommens-Mail senden“ nur mit gültiger Adresse
+- MELD-240: Button â€žWillkommens-Mail sendenâ€œ nur mit gÃ¼ltiger Adresse
 - MELD-240: Hilfe-Links von Seiten entfernen
 - MELD-240: Weitere Aktionen als sauberes Dropdown
 - MELD-240: Willkommens-Mail-Button unter Kontakt
@@ -85,28 +89,28 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-09-06-654a9 (2026-09-06)
 
-- MELD-235: Mobile Titel über Buttons, Ort ausblenden
-- MELD-235: Mobile Titel über Melde-Buttons
+- MELD-235: Mobile Titel Ã¼ber Buttons, Ort ausblenden
+- MELD-235: Mobile Titel Ã¼ber Melde-Buttons
 
 ## 2026-09-06-542ae (2026-09-06)
 
-- MELD-235: Listen-Thumb größer, Rahmen/Ausrichtung, Buttons oben halten
-- MELD-235: Kleidungs-Thumb in Datums-Spalte, groß im Detail, Buttons oben
-- MELD-235: Kleidung-Thumbnails männlich/weiblich
+- MELD-235: Listen-Thumb grÃ¶ÃŸer, Rahmen/Ausrichtung, Buttons oben halten
+- MELD-235: Kleidungs-Thumb in Datums-Spalte, groÃŸ im Detail, Buttons oben
+- MELD-235: Kleidung-Thumbnails mÃ¤nnlich/weiblich
 - MELD-234: Kleidung-Kategorien mit Thumbnail an Terminen
-- MELD-235: Kleidungs-Thumb Größe und Listen-Layout
+- MELD-235: Kleidungs-Thumb GrÃ¶ÃŸe und Listen-Layout
 - MELD-235: Kleidungs-Thumb Layout Liste/Detail
 - MELD-234/235: Kleidung-Thumbnails (m/w)
 
 ## 2026-08-29-6cd47 (2026-08-29)
 
 - MELD-232: Safari-URL-Bar-Kompensation nicht in Chrome iOS
-- MELD-232: Chrome iPhone weiße Fläche unter App-Nav
+- MELD-232: Chrome iPhone weiÃŸe FlÃ¤che unter App-Nav
 
 ## 2026-08-29-e4cd6 (2026-08-29)
 
-- MELD-229: Aufnahme als Volume rechts in der Programm-Stückzeile
-- MELD-229: Aufnahme als Volume rechts in der Stückzeile
+- MELD-229: Aufnahme als Volume rechts in der Programm-StÃ¼ckzeile
+- MELD-229: Aufnahme als Volume rechts in der StÃ¼ckzeile
 
 ## 2026-08-29-5a6ec (2026-08-29)
 
@@ -120,23 +124,23 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-29-9e55b (2026-08-29)
 
-- MELD-229: Play-Overlay für Archiv-Aufnahme in Programm-Modals
+- MELD-229: Play-Overlay fÃ¼r Archiv-Aufnahme in Programm-Modals
 - MELD-224: Safari-Chrome nur per ios-webkit-nav-Klasse
 - MELD-224: Safari-Chrome-Kompensation nur auf iOS WebKit
 - MELD-224: Admin im Mehr-Panel auf Safari wieder erreichbar
-- MELD-224: Safari-URL-Leiste über Bottom-Nav zuverlässig ausgleichen
-- MELD-186: Admin-Kalender unter Admin → Termine
-- MELD-228: Inventar-Löschen per Confirm-Modal und AJAX
-- MELD-224: Weißer Streifen unter Nav in Chrome beheben
+- MELD-224: Safari-URL-Leiste Ã¼ber Bottom-Nav zuverlÃ¤ssig ausgleichen
+- MELD-186: Admin-Kalender unter Admin â†’ Termine
+- MELD-228: Inventar-LÃ¶schen per Confirm-Modal und AJAX
+- MELD-224: WeiÃŸer Streifen unter Nav in Chrome beheben
 - MELD-224: Safari-Chrome-Fix nur auf iOS
 - MELD-224: Safari-URL-Leiste verdeckt Bottom-Nav nicht mehr
 
 ## 2026-08-22-46a9f (2026-08-22)
 
 - MELD-134: Login ohne Unterscheidung nach Active-Status.
-- MELD-134: E-Mail-Kanal für Gastmusiker beibehalten.
+- MELD-134: E-Mail-Kanal fÃ¼r Gastmusiker beibehalten.
 - MELD-134: Login ohne Unterscheidung nach Active-Status
-- MELD-134: E-Mail-Kanal für Gastmusiker beibehalten
+- MELD-134: E-Mail-Kanal fÃ¼r Gastmusiker beibehalten
 
 ## 2026-08-22-d7478 (2026-08-22)
 
@@ -145,35 +149,35 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-22-a3a7d (2026-08-22)
 
-- MELD-170: Terminliste – Melde-Modal ohne Register-Filter bei perm_showResponse.
-- MELD-170: Hotfix – Melde-Modal Terminliste ohne Register-Filter für Admins
+- MELD-170: Terminliste â€“ Melde-Modal ohne Register-Filter bei perm_showResponse.
+- MELD-170: Hotfix â€“ Melde-Modal Terminliste ohne Register-Filter fÃ¼r Admins
 
 ## 2026-08-22-3c38e (2026-08-22)
 
-- MELD-170: Terminliste und Schichten – Register-Filter nur bei Besetzung.
+- MELD-170: Terminliste und Schichten â€“ Register-Filter nur bei Besetzung.
 - MELD-170: Register-Filter nur bei Besetzungs-Terminen und -Schichten.
-- MELD-170: Rückmeldungen ohne Admin-Recht auf eigenes Register beschränken.
-- MELD-170: Rückmeldungs-Button in Terminliste für alle Nutzer.
-- MELD-170/175: Chip-Rückmeldungen für Schichten, Register und Rechte.
-- MELD-170: Meldungen in Terminübersicht und Chip-Bearbeitung (MELD-175)
-- MELD-170: Terminliste – Register-Filter nur bei Besetzung
+- MELD-170: RÃ¼ckmeldungen ohne Admin-Recht auf eigenes Register beschrÃ¤nken.
+- MELD-170: RÃ¼ckmeldungs-Button in Terminliste fÃ¼r alle Nutzer.
+- MELD-170/175: Chip-RÃ¼ckmeldungen fÃ¼r Schichten, Register und Rechte.
+- MELD-170: Meldungen in TerminÃ¼bersicht und Chip-Bearbeitung (MELD-175)
+- MELD-170: Terminliste â€“ Register-Filter nur bei Besetzung
 - MELD-170: Register-Filter nur bei Besetzungs-Terminen und -Schichten
-- MELD-170: Rückmeldungen ohne Admin-Recht nur eigenes Register
-- MELD-170: Rückmeldungs-Button in Terminliste für alle Nutzer
+- MELD-170: RÃ¼ckmeldungen ohne Admin-Recht nur eigenes Register
+- MELD-170: RÃ¼ckmeldungs-Button in Terminliste fÃ¼r alle Nutzer
 
 ## 2026-08-22-c55b5 (2026-08-22)
 
-- MELD-219: alink an Dokument-Streams für externes PDF-Öffnen
-- MELD-219: alink für Dokument-Streams (Android PDF)
+- MELD-219: alink an Dokument-Streams fÃ¼r externes PDF-Ã–ffnen
+- MELD-219: alink fÃ¼r Dokument-Streams (Android PDF)
 
 ## 2026-08-22-988ce (2026-08-22)
 
-- MELD-219: Dokumente und Scans in App-Viewer mit Chrome öffnen
+- MELD-219: Dokumente und Scans in App-Viewer mit Chrome Ã¶ffnen
 - MELD-219: Dokument-Viewer und Login-next (217/218)
 
 ## 2026-08-18-b9760 (2026-08-18)
 
-- MELD-213: Erinnerung auch nach Speichern/gelöschter Vereinsunterschrift neu senden
+- MELD-213: Erinnerung auch nach Speichern/gelÃ¶schter Vereinsunterschrift neu senden
 - MELD-213: Erinnerung nach Workflow-Neustart erneut senden
 
 ## 2026-08-18-6a308 (2026-08-18)
@@ -183,7 +187,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-08-18-e5ae6 (2026-08-18)
 
 - MELD-210: CLI-Restore nicht an sqlerror-Doppeldefinition scheitern
-- MELD-210: Restore nicht über uploads-Symlink, Prefix im ZIP-Namen
+- MELD-210: Restore nicht Ã¼ber uploads-Symlink, Prefix im ZIP-Namen
 - MELD-210: Backup-ZIP um hochgeladene Dateien unter uploads/ erweitern
 
 ## 2026-08-18-d9c78 (2026-08-18)
@@ -192,25 +196,25 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-18-828fc (2026-08-18)
 
-- MELD-215: Mein Inventar blendet Preise und fremde Leihen für Entleiher aus
+- MELD-215: Mein Inventar blendet Preise und fremde Leihen fÃ¼r Entleiher aus
 - MELD-214: HTML-Mails im Meldeliste-Layout
-- MELD-213: Ein Vertragstext, Rückgabefrist und Workflow-Neustart
+- MELD-213: Ein Vertragstext, RÃ¼ckgabefrist und Workflow-Neustart
 - MELD-213: Signatur-Popup darf das Formularlayout nicht verbiegen
-- MELD-213: Leih- und Rückgabetexte auf drei Konfig-Felder
+- MELD-213: Leih- und RÃ¼ckgabetexte auf drei Konfig-Felder
 - MELD-213: Leihvertrag-Texte als Konfig und Unterschrift an Entleiher
 
 ## 2026-08-18-c0577 (2026-08-18)
 
-- MELD-201: Inventar-Zeile nach Modal-Änderungen, Rückgabe-Rechte, Confirm-Overlay
-- MELD-201: Inventar-Reload, Rückgabe-Rechte, Confirm-Overlay
+- MELD-201: Inventar-Zeile nach Modal-Ã„nderungen, RÃ¼ckgabe-Rechte, Confirm-Overlay
+- MELD-201: Inventar-Reload, RÃ¼ckgabe-Rechte, Confirm-Overlay
 
 ## 2026-08-18-4b110 (2026-08-18)
 
-- MELD-201: Digitale Unterschrift für Leihvertrag und Rückgabe
+- MELD-201: Digitale Unterschrift fÃ¼r Leihvertrag und RÃ¼ckgabe
 
 ## 2026-08-17-c6c7f (2026-08-17)
 
-- MELD-211: Inventar-Meta mit Label über dem Wert
+- MELD-211: Inventar-Meta mit Label Ã¼ber dem Wert
 - MELD-212: VERSION-Sync nach Release ohne zweites PHPUnit
 
 ## 2026-08-17-de34f (2026-08-17)
@@ -223,35 +227,35 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-17-1171b (2026-08-17)
 
-- MELD-207: Inventar-Thumbnails vollständig einpassen
+- MELD-207: Inventar-Thumbnails vollstÃ¤ndig einpassen
 - MELD-204: Ausleihe-Chip in der Inventarliste lesbar halten
-- MELD-202: Schema v41 für defaultTerminVisibility
-- MELD-206: Default-Thumbnails für Inventar-Typen und Foto-Lightbox
+- MELD-202: Schema v41 fÃ¼r defaultTerminVisibility
+- MELD-206: Default-Thumbnails fÃ¼r Inventar-Typen und Foto-Lightbox
 - MELD-195: Leihvertrag Bildschirm und Druck auf 10pt
-- MELD-202: Rollenmodell für Sichtbarkeit, Config-Default und Discord
+- MELD-202: Rollenmodell fÃ¼r Sichtbarkeit, Config-Default und Discord
 - MELD-204: Ausleihe-Chip in der Inventarliste lesbar
 - MELD-202: Rollenmodell Sichtbarkeit, Default und Discord
-- MELD-195: Leihvertrag Schriftgröße 10pt
+- MELD-195: Leihvertrag SchriftgrÃ¶ÃŸe 10pt
 - MELD-206: Inventar-Typ-Thumbnails und Foto-Lightbox
 
 ## 2026-08-17-be158 (2026-08-17)
 
 - MELD-205: Inventar-Dokumente und Fotos
-- MELD-205: Primärfoto für die Listen-Vorschau wählen
+- MELD-205: PrimÃ¤rfoto fÃ¼r die Listen-Vorschau wÃ¤hlen
 - MELD-205: Beendete Leihen im Modal zugeklappt
-- MELD-205: Inventar-Fotos aus MELD-191 übernehmen
+- MELD-205: Inventar-Fotos aus MELD-191 Ã¼bernehmen
 - MELD-205: Dokumente nur mit Notiz, ohne Typ-Auswahl
-- MELD-205: Dokumente an Inventar anhängen (PDF und Bild)
+- MELD-205: Dokumente an Inventar anhÃ¤ngen (PDF und Bild)
 - MELD-203: Ausgegraute Termine auch in Kalender und webcal zeigen
-- MELD-191: optionale Inventar-Fotos mit Thumbnail und Blättern
+- MELD-191: optionale Inventar-Fotos mit Thumbnail und BlÃ¤ttern
 
 ## 2026-08-16-54607 (2026-08-16)
 
-- MELD-200: Gescannte Verträge im neuen Tab öffnen
+- MELD-200: Gescannte VertrÃ¤ge im neuen Tab Ã¶ffnen
 
 ## 2026-08-16-e4e01 (2026-08-16)
 
-- MELD-198: Leihe-Adresse aus MIT vorausfüllen
+- MELD-198: Leihe-Adresse aus MIT vorausfÃ¼llen
 - MELD-199: Leihe-Person per Chip-Suche statt Dropdown
 
 ## 2026-08-16-31846 (2026-08-16)
@@ -265,11 +269,11 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-16-a8bf2 (2026-08-16)
 
-- MELD-196: Leihe über Formular starten, Felder editierbar
+- MELD-196: Leihe Ã¼ber Formular starten, Felder editierbar
 
 ## 2026-08-16-5db4e (2026-08-16)
 
-- MELD-194: Nav-Label Mitgliederverwaltung als „Mitglieder“
+- MELD-194: Nav-Label Mitgliederverwaltung als â€žMitgliederâ€œ
 - MELD-194: Nav-Label Mitglieder statt Mitgliederverw.
 
 ## 2026-08-15-17137 (2026-08-15)
@@ -287,11 +291,11 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-15-77de6 (2026-08-15)
 
-- docs: UI-SHELL-Vertrag als Master für Sibling-Module
+- docs: UI-SHELL-Vertrag als Master fÃ¼r Sibling-Module
 
 ## 2026-08-15-2f653 (2026-08-15)
 
-- MELD-171: Notenarchiv-/MIT-Rechte und SSO-Allowlist über Modul-URLs
+- MELD-171: Notenarchiv-/MIT-Rechte und SSO-Allowlist Ã¼ber Modul-URLs
 - MELD-171: Notenarchiv-/MIT-Rechte und SSO-Allowlist
 
 ## 2026-08-15-34918 (2026-08-15)
@@ -316,7 +320,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-15-fc427 (2026-08-15)
 
-- MELD-188: Leihvertrag nachträglich editieren, Scan löschen
+- MELD-188: Leihvertrag nachtrÃ¤glich editieren, Scan lÃ¶schen
 - MELD-188: Leihvertrag anpassen
 
 ## 2026-08-15-db592 (2026-08-15)
@@ -326,7 +330,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-15-9913e (2026-08-15)
 
-- MELD-167: klickbare Entity-Chips für User, Termin, Inventar und Email
+- MELD-167: klickbare Entity-Chips fÃ¼r User, Termin, Inventar und Email
 - MELD-167: klickbare Entity-Chips (User, Termin, Inventar, Email)
 
 ## 2026-08-15-7007f (2026-08-15)
@@ -350,19 +354,19 @@ Automatisch aus Git-Release-Commits erzeugt.
 - MELD-181: Adresse statt Mitgliedsnummer-Freifeld
 - MELD-181: Leihe im Modal asynchron speichern
 - MELD-181: Scan-Buttons in Leihe und Formular gruppieren
-- MELD-181: Rückgabe-Checkliste online abhakbar und speicherbar
-- MELD-181: Kein Unterstrich bei online befüllten Feldern
-- MELD-181: Mehr Platz für Ort/Datum und Unterschrift
+- MELD-181: RÃ¼ckgabe-Checkliste online abhakbar und speicherbar
+- MELD-181: Kein Unterstrich bei online befÃ¼llten Feldern
+- MELD-181: Mehr Platz fÃ¼r Ort/Datum und Unterschrift
 - MELD-181: Zweispaltiges Leihgut auch im Druck
 - MELD-181: Druck = Vorschau, eine A4-Seite, ohne Tabellenrahmen
 - MELD-181: Horizontale Tabellenlinien im Leihgut entfernt
 - MELD-181: Leihgut-Tabelle, Blocksatz und Druck = Vorschau
 - MELD-181: Leihvertrag Optik, Fettdruck und editierbare Felder
 - MELD-181: Decimal-Typvergleich ohne Precision-Mismatch
-- MELD-181: Leihgebühr, Entleiher-UX und Formularlayout
+- MELD-181: LeihgebÃ¼hr, Entleiher-UX und Formularlayout
 - MELD-181: Leihformular kompakter, ohne Titel- und Typ-Redundanz
-- MELD-181: Leih- und Rückgabeformular für jedes Inventar
-- MELD-181: Leih- und Rückgabeformular
+- MELD-181: Leih- und RÃ¼ckgabeformular fÃ¼r jedes Inventar
+- MELD-181: Leih- und RÃ¼ckgabeformular
 
 ## 2026-08-08-2e811 (2026-08-08)
 
@@ -397,9 +401,9 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-08-08-f2a08 (2026-08-08)
 
-- MELD-180: ICS-Download als GET-Link für Android WebView
-- MELD-173: Tablet-Layout — untere Nav bis 992px, dichtere Breakpoints
-- MELD-173: Tablet-Layout — untere Nav bis 992px
+- MELD-180: ICS-Download als GET-Link fÃ¼r Android WebView
+- MELD-173: Tablet-Layout â€” untere Nav bis 992px, dichtere Breakpoints
+- MELD-173: Tablet-Layout â€” untere Nav bis 992px
 
 ## 2026-08-08-920a8 (2026-08-08)
 
@@ -419,17 +423,17 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-24-3c6ef (2026-07-24)
 
-- MELD-159: Orphan-Tabellen und Config unter DB-Präfix bereinigen
+- MELD-159: Orphan-Tabellen und Config unter DB-PrÃ¤fix bereinigen
 
 ## 2026-07-24-c659e (2026-07-24)
 
-- MELD-161: Sticky Tabellenköpfe mit deckendem Hintergrund
+- MELD-161: Sticky TabellenkÃ¶pfe mit deckendem Hintergrund
 - MELD-161: Statistik-Tabellen-Grid von Filter trennen
 - MELD-161: Statistik-Filter aus Tabellen-Grid herausnehmen
 - MELD-161: Anker-Navigation in Statistik entfernen
-- MELD-161: Gemeinsamer Chip-Filter für Ranking und Inaktive
+- MELD-161: Gemeinsamer Chip-Filter fÃ¼r Ranking und Inaktive
 - MELD-161: Inaktive in Statistik nach Personenkreis filtern
-- MELD-161: Statistik Chip-Filter für Ranking und Inaktive
+- MELD-161: Statistik Chip-Filter fÃ¼r Ranking und Inaktive
 
 ## 2026-07-24-4942d (2026-07-24)
 
@@ -438,9 +442,9 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-24-3c672 (2026-07-24)
 
-- MELD-163: Schema-Version 25 für showConductor-Cleanup
+- MELD-163: Schema-Version 25 fÃ¼r showConductor-Cleanup
 - MELD-163: Dirigent immer in Meldungsliste; showConductor entfernen
-- MELD-163: Schema-Version 25 für Config-Cleanup
+- MELD-163: Schema-Version 25 fÃ¼r Config-Cleanup
 - MELD-163: Dirigent immer in Meldungsliste
 
 ## 2026-07-24-9cebd (2026-07-24)
@@ -455,14 +459,14 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-23-a0884 (2026-07-23)
 
-- MELD-154: Modal-Header Bearbeiten und Weitere Aktionen nicht überlappen
+- MELD-154: Modal-Header Bearbeiten und Weitere Aktionen nicht Ã¼berlappen
 - MELD-153: Terminliste bei im Auftrag melden korrekt aktualisieren
-- MELD-152: zukünftige Meldungen bei Nutzer-Löschung, Inventar-Prüfung
+- MELD-152: zukÃ¼nftige Meldungen bei Nutzer-LÃ¶schung, Inventar-PrÃ¼fung
 - MELD-153 / MELD-154: Auftrag-Liste und Modal-Aktionen
 
 ## 2026-07-23-84775 (2026-07-23)
 
-- MELD-149: Meldungen-Übersicht und Modal in melde-row-Optik
+- MELD-149: Meldungen-Ãœbersicht und Modal in melde-row-Optik
 
 ## 2026-07-23-3b1dd (2026-07-23)
 
@@ -484,9 +488,9 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-23-52bf1 (2026-07-23)
 
-- MELD-151: SMTP-Versand und Fehlerzählung im Mail-Menü
+- MELD-151: SMTP-Versand und FehlerzÃ¤hlung im Mail-MenÃ¼
 - MELD-146: Flash-Banner als schwebende Toasts
-- MELD-151: SMTP-Versand und Fehlerzählung
+- MELD-151: SMTP-Versand und FehlerzÃ¤hlung
 
 ## 2026-07-23-cce09 (2026-07-23)
 
@@ -495,39 +499,39 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-07-23-c35f4 (2026-07-23)
 
 - MELD-145: Mein Inventar Nav/Leihe und Listen-Layout polarisieren
-- MELD-147: Kalender-Abo-Modal volle Breite und Admin-Menü aktiv offen
-- MELD-147: Kalender-Abo-Modal polish und Meldezeilen-Opazität korrigieren
-- MELD-147: Overlay-Kollisionen beheben und Termin-Löschen modernisieren
-- MELD-145: Einheitliche Melde-Buttons und Kapazität links davon
+- MELD-147: Kalender-Abo-Modal volle Breite und Admin-MenÃ¼ aktiv offen
+- MELD-147: Kalender-Abo-Modal polish und Meldezeilen-OpazitÃ¤t korrigieren
+- MELD-147: Overlay-Kollisionen beheben und Termin-LÃ¶schen modernisieren
+- MELD-145: Einheitliche Melde-Buttons und KapazitÃ¤t links davon
 - MELD-145: Mein Inventar Card-Layout, Versichert-Filter und Modal-Fixes
 - MELD-141: Kompaktes Wochentags-Datum und klickbare Meldezeilen
-- MELD-139: App-Nav links/unten, Listen-Chrome und einheitliche Seitenköpfe
+- MELD-139: App-Nav links/unten, Listen-Chrome und einheitliche SeitenkÃ¶pfe
 - MELD-143: Mit User-Bearbeiten-Recht volles Speichern unter Mein Profil
 - MELD-137: sichere Group-Migration, vererbte Rechte in UI, Hilfe statt Intros
 - MELD-138: Alle Admin-Nav-Seiten auf Listen-Layout und Hero-Farben
-- MELD-138: Rechte-Farben auch für Termin-/Admin-Formulare
-- MELD-138: Admin-Überschriften in Rechte-Farben
+- MELD-138: Rechte-Farben auch fÃ¼r Termin-/Admin-Formulare
+- MELD-138: Admin-Ãœberschriften in Rechte-Farben
 - MELD-137: MailGroup in Group umbenennen
-- MELD-137: Rechte-Vererbung über Gruppen
-- MELD-138: Admin-Listen-Überschriften mit colorTitleBar
+- MELD-137: Rechte-Vererbung Ã¼ber Gruppen
+- MELD-138: Admin-Listen-Ãœberschriften mit colorTitleBar
 - MELD-136: Register-Rechte, Admin-Listen-Shell und Permission-Gates
 - MELD-134: Aushilfe entfernen, Admin-Nav und DB-Bericht
-- MELD-134: Gastmusiker über Active=0 und Termin-GuestMusicians
+- MELD-134: Gastmusiker Ã¼ber Active=0 und Termin-GuestMusicians
 - MELD-135: Poll-Termine nach Created sortieren
 - MELD-135: merge origin/dev for pre-push tests
-- MELD-135: Email-Verteiler-Chips für Termin-Teilnehmer
+- MELD-135: Email-Verteiler-Chips fÃ¼r Termin-Teilnehmer
 - MELD-125: Rechte als Chip-Picker beim User anlegen/bearbeiten
-- MELD-125: Profil-Shell für Inventar-/Kalender-/Schicht-Modals
-- MELD-125: Profil-Shell-UI für User- und Termin-Modals
-- MELD-125: Profil-Gruppen, Auto-Zugehörigkeit, Defaults und Update-Logs
-- MELD-125: Profil-Layout und Benachrichtigungs-Kanäle (MVP)
+- MELD-125: Profil-Shell fÃ¼r Inventar-/Kalender-/Schicht-Modals
+- MELD-125: Profil-Shell-UI fÃ¼r User- und Termin-Modals
+- MELD-125: Profil-Gruppen, Auto-ZugehÃ¶rigkeit, Defaults und Update-Logs
+- MELD-125: Profil-Layout und Benachrichtigungs-KanÃ¤le (MVP)
 - MELD-145: Mein Inventar Nav, Leihe und Listen-Layout
-- MELD-147: Kalender-Abo Desktop-Layout und Admin-Menü offen halten
-- MELD-147: Kalender-Abo-Modal und Meldezeilen-Opazität
-- MELD-147: Overlay-Kollisionen und Termin-Löschen-Modal
-- MELD-145: Einheitliche Melde-Buttons und Kapazität links
-- MELD-141: Wochentag abkürzen und Meldezeilen neu
-- MELD-139: Navigationsleiste links / unten + einheitliche Seitenköpfe
+- MELD-147: Kalender-Abo Desktop-Layout und Admin-MenÃ¼ offen halten
+- MELD-147: Kalender-Abo-Modal und Meldezeilen-OpazitÃ¤t
+- MELD-147: Overlay-Kollisionen und Termin-LÃ¶schen-Modal
+- MELD-145: Einheitliche Melde-Buttons und KapazitÃ¤t links
+- MELD-141: Wochentag abkÃ¼rzen und Meldezeilen neu
+- MELD-139: Navigationsleiste links / unten + einheitliche SeitenkÃ¶pfe
 - MELD-143: Mein Profil mit User-Bearbeiten-Recht voll editierbar
 - MELD-137: Gruppen-Rechte und Group-Migration
 - MELD-136: Register-Rechte und Admin-Listen-Shell
@@ -543,7 +547,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-07-22-f2a51 (2026-07-22)
 
 - MELD-9: Toolbar-Layout und Europe/Berlin in der App
-- MELD-9: Kalender-Aktionsbuttons linksbündig
+- MELD-9: Kalender-Aktionsbuttons linksbÃ¼ndig
 - MELD-9: Druck zeigt alle kommenden Termine
 - MELD-9: Kalender-Abo als Modal, Toolbar mit Abstand
 - MELD-9: Info-Toggle nach Panel binden, runde Icon-Buttons
@@ -551,33 +555,33 @@ Automatisch aus Git-Release-Commits erzeugt.
 - MELD-9: Druckbarer Terminkalender als Tabelle
 - MELD-127: On-Demand-Kalenderabo (Konzertmeister-Stil)
 - MELD-126: Kalender-Pfeile umdrehen, schmalere Step-Buttons
-- MELD-126: Freie Kalenderfläche legt Termin mit Datum an (Admin)
-- MELD-126: Monat und Jahr einzeln wählen und inkrementieren
+- MELD-126: Freie KalenderflÃ¤che legt Termin mit Datum an (Admin)
+- MELD-126: Monat und Jahr einzeln wÃ¤hlen und inkrementieren
 - MELD-126: Wochenenden im Monatsraster leicht schattieren
 - MELD-126: Zwischen-Modal mit Meldeabfrage und Weitere Optionen
 - MELD-126: Kalender-Legende entfernen
-- MELD-126: Monats-Kalenderansicht ohne externe Abhängigkeiten
+- MELD-126: Monats-Kalenderansicht ohne externe AbhÃ¤ngigkeiten
 - MELD-9: Druckbarer Terminkalender
 - MELD-127: On-Demand-Kalenderabo
 - MELD-126: Monats-Kalenderansicht
 
 ## 2026-07-22-ed678 (2026-07-22)
 
-- MELD-132: Backup-Größe im Log human-readable (B/KB/MB)
+- MELD-132: Backup-GrÃ¶ÃŸe im Log human-readable (B/KB/MB)
 - MELD-132: Log-Eintrag bei Backup-Download (Info/Fehler)
-- MELD-132: Backup-Größe im Log human-readable
+- MELD-132: Backup-GrÃ¶ÃŸe im Log human-readable
 
 ## 2026-07-22-cab05 (2026-07-22)
 
-- MELD-57: Return-Token und PRG für Termine/Schichten/Mail
+- MELD-57: Return-Token und PRG fÃ¼r Termine/Schichten/Mail
 
 ## 2026-07-22-97850 (2026-07-22)
 
-- MELD-131: Remote-Backup über eigenes backupToken
+- MELD-131: Remote-Backup Ã¼ber eigenes backupToken
 
 ## 2026-07-22-53410 (2026-07-22)
 
-- MELD-130: Leihe löschen und Leihen-UI neu aufbauen
+- MELD-130: Leihe lÃ¶schen und Leihen-UI neu aufbauen
 
 ## 2026-07-22-93920 (2026-07-22)
 
@@ -592,12 +596,12 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-21-f4036 (2026-07-21)
 
-- MELD-128: Orchester-Test-User nur für Admins (Web)
-- MELD-128: Orchester-Test-User admin-geschützt
+- MELD-128: Orchester-Test-User nur fÃ¼r Admins (Web)
+- MELD-128: Orchester-Test-User admin-geschÃ¼tzt
 
 ## 2026-07-21-30be4 (2026-07-21)
 
-- MELD-124: Besitzer-Wording auf Eigentümer ändern
+- MELD-124: Besitzer-Wording auf EigentÃ¼mer Ã¤ndern
 
 ## 2026-07-20-1d8ee (2026-07-20)
 
@@ -638,12 +642,12 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-07-18-adf8c (2026-07-18)
 
 - MELD-103: align Status/Aktion columns in mail list grids
-- MELD-103: Mailübersicht Status/Aktion-Spalten ausrichten
+- MELD-103: MailÃ¼bersicht Status/Aktion-Spalten ausrichten
 
 ## 2026-07-18-eacd2 (2026-07-18)
 
 - MELD-102: keep mailGroups when applying default draft recipients
-- MELD-102: Mail-Entwurf behält Gruppen-Empfänger
+- MELD-102: Mail-Entwurf behÃ¤lt Gruppen-EmpfÃ¤nger
 
 ## 2026-07-18-d3dd3 (2026-07-18)
 
@@ -659,14 +663,14 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 - MELD-61: remove Discord checkbox hint on termin form
 - MELD-61: Discord for termines only if Alle User or PostDiscord checkbox
-- MELD-61: unify role group labels (Alle … capitalization)
+- MELD-61: unify role group labels (Alle â€¦ capitalization)
 - MELD-61: recover VisibilitySpec migration when published already dropped
 - MELD-61: profile membership, logging, modal chips, drop legacy columns
-- MELD-61: remove sichtbar-für explanatory UI strings
+- MELD-61: remove sichtbar-fÃ¼r explanatory UI strings
 - MELD-61: empty visibility means hidden (showHidden only)
 - MELD-61: drop sichtbar checkbox; always publish, chips only
 - MELD-61: save groups before HTML output so redirect works
-- MELD-61: rename Empfängergruppen UI to Gruppen
+- MELD-61: rename EmpfÃ¤ngergruppen UI to Gruppen
 - MELD-61: default termin visibility to Alle User
 - MELD-61: load AudienceSpec before mail helpers
 - MELD-61: named recipient groups and termin visibility chips
@@ -676,7 +680,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-07-18-6f040 (2026-07-18)
 
 - MELD-98: paint unanswered orchestra seats opaque white
-- MELD-98: Weiße Kreise in der Orchesteransicht
+- MELD-98: WeiÃŸe Kreise in der Orchesteransicht
 
 ## 2026-07-18-633dd (2026-07-18)
 
@@ -688,8 +692,8 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-18-25865 (2026-07-18)
 
-- MELD-95: searchable Termine and Rückmeldungen lists
-- MELD-95: Termine und Rückmeldungen durchsuchbar
+- MELD-95: searchable Termine and RÃ¼ckmeldungen lists
+- MELD-95: Termine und RÃ¼ckmeldungen durchsuchbar
 
 ## 2026-07-18-dfa1d (2026-07-18)
 
@@ -723,7 +727,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-18-7bfe4 (2026-07-18)
 
-- Fix: meldungen.php crasht bei Schichten — fehlende Tabelle AushilfenShift
+- Fix: meldungen.php crasht bei Schichten â€” fehlende Tabelle AushilfenShift
 - Fix: Schicht-Meldungen DOM-Replace und Kartenfarbe
 
 ## 2026-07-18-ec116 (2026-07-18)
@@ -732,11 +736,11 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-18-786b4 (2026-07-18)
 
-- MELD-88: Spalten in Versicherungsübersicht per Checkbox wählbar
+- MELD-88: Spalten in VersicherungsÃ¼bersicht per Checkbox wÃ¤hlbar
 
 ## 2026-07-18-3b5b8 (2026-07-18)
 
-- MELD-88: Druck-/PDF-Übersicht für Instrumentenversicherung
+- MELD-88: Druck-/PDF-Ãœbersicht fÃ¼r Instrumentenversicherung
 
 ## 2026-07-18-71bb9: (2026-07-18)
 
@@ -748,29 +752,29 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-18-fb78d (2026-07-18)
 
-- MELD-62: Rückmeldungs-Auswertung ohne N+1-Abfragen
-- MELD-62: Auswertung Rückmeldungen optimieren
+- MELD-62: RÃ¼ckmeldungs-Auswertung ohne N+1-Abfragen
+- MELD-62: Auswertung RÃ¼ckmeldungen optimieren
 
 ## 2026-07-18-fa3a4 (2026-07-18)
 
-- MELD-60: Empfänger-Chips automatisch im Entwurf speichern
-- MELD-60: Erklärtext bei Empfänger-Chips entfernen
+- MELD-60: EmpfÃ¤nger-Chips automatisch im Entwurf speichern
+- MELD-60: ErklÃ¤rtext bei EmpfÃ¤nger-Chips entfernen
 - MELD-60: Versand nur an Mailverteiler mit E-Mail-Adresse
-- MELD-60: Styles für Empfängeranzahl
-- MELD-60: Empfängeranzahl dynamisch zur Chip-Auswahl anzeigen
-- MELD-60: Alle Musiker bei neuen/leeren Entwürfen vorauswählen
-- MELD-60: Gruppe „alle Nicht-Mitglieder“ ergänzen
-- MELD-60: Gruppen wie Register/Personen als Chips wählbar
-- MELD-60: Empfänger nach User und E-Mail deduplizieren
-- MELD-60: Empfänger nur noch Chip-Modell mit dynamischen Gruppen
+- MELD-60: Styles fÃ¼r EmpfÃ¤ngeranzahl
+- MELD-60: EmpfÃ¤ngeranzahl dynamisch zur Chip-Auswahl anzeigen
+- MELD-60: Alle Musiker bei neuen/leeren EntwÃ¼rfen vorauswÃ¤hlen
+- MELD-60: Gruppe â€žalle Nicht-Mitgliederâ€œ ergÃ¤nzen
+- MELD-60: Gruppen wie Register/Personen als Chips wÃ¤hlbar
+- MELD-60: EmpfÃ¤nger nach User und E-Mail deduplizieren
+- MELD-60: EmpfÃ¤nger nur noch Chip-Modell mit dynamischen Gruppen
 - MELD-60: POC dynamischer Mail-Verteiler mit Register-/User-Chips
 - MELD-60: dynamischer Email-Verteiler
 
 ## 2026-07-18-bd064 (2026-07-18)
 
-- fix: Absage wieder halbtransparent, Schrift weiß und deckend
-- fix: Absage-Sitze deckend rot mit weißer Schrift testen
-- fix: Orchester-Sitzkürzel bei Absage/unsicher lesbar halten
+- fix: Absage wieder halbtransparent, Schrift weiÃŸ und deckend
+- fix: Absage-Sitze deckend rot mit weiÃŸer Schrift testen
+- fix: Orchester-SitzkÃ¼rzel bei Absage/unsicher lesbar halten
 
 ## 2026-07-18-c7933 (2026-07-18)
 
@@ -789,21 +793,21 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-18-7943e (2026-07-18)
 
-- MELD-64: Besetzung live aktualisieren, Sitzreihenfolge stabil, „nicht gemeldet“ entfernt
-- MELD-64: Info-Sheet-Buttons wie Termin-Melde, Register-Bögen konfigurierbar, Modal-Titel-Abstand
+- MELD-64: Besetzung live aktualisieren, Sitzreihenfolge stabil, â€žnicht gemeldetâ€œ entfernt
+- MELD-64: Info-Sheet-Buttons wie Termin-Melde, Register-BÃ¶gen konfigurierbar, Modal-Titel-Abstand
 - MELD-64: Datum/Uhrzeit im Meldungs-Modal-Titel; Info-Sheet-Klicks reparieren
-- MELD-64: Long-Press-Info-Sheet auf Smartphone zuverlässiger machen
-- MELD-64: Register-Bänder, Info-Sheet, Zoom und Tooltips
+- MELD-64: Long-Press-Info-Sheet auf Smartphone zuverlÃ¤ssiger machen
+- MELD-64: Register-BÃ¤nder, Info-Sheet, Zoom und Tooltips
 - MELD-64: SVG-Text mit dominant-baseline mittig setzen
 - MELD-64: Schrift in Orchester-Kreisen vertikal zentrieren
 - MELD-64: Orchester-viewBox an Sitze anpassen, Zoom deckeln
-- MELD-64: Orchester wieder ~1000px, ohne Zoom bei wenigen Plätzen
+- MELD-64: Orchester wieder ~1000px, ohne Zoom bei wenigen PlÃ¤tzen
 - MELD-64: Orchester-SVG skalieren, klickbar und performanter
 
 ## 2026-07-18-1d665 (2026-07-18)
 
 - MELD-84: Redirect-Stub und Legacy-Meldungs-POST entfernen
-- MELD-84: Home und Termine zu einer Terminliste zusammenführen
+- MELD-84: Home und Termine zu einer Terminliste zusammenfÃ¼hren
 
 ## 2026-07-18-a5462 (2026-07-18)
 
@@ -812,18 +816,18 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-18-eecda (2026-07-18)
 
-- MELD-83: Aktive Besetzung als gedrängter Sitzplan ohne Lücken
+- MELD-83: Aktive Besetzung als gedrÃ¤ngter Sitzplan ohne LÃ¼cken
 - MELD-83: Hinweis ja/vielleicht am Besetzung-Toggle entfernen
-- MELD-83: Umschalter für aktive Besetzung in der Orchesteransicht
+- MELD-83: Umschalter fÃ¼r aktive Besetzung in der Orchesteransicht
 
 ## 2026-07-18-9cc8d (2026-07-18)
 
 - MELD-80: Formular-Spalten am PC und Checkbox-Ausrichtung
 - MELD-80: Termin-/Schicht-Formular sektioniert und responsive
 - MELD-80: Checkbox-Layout in Termin-Formularen neu ordnen
-- MELD-80: Orchester in Rückmeldungen nur bei Besetzung
-- MELD-80: Besetzung-Hilfetext kürzen
-- MELD-80: Flag „Auftritt“ als „Besetzung“ beschriften
+- MELD-80: Orchester in RÃ¼ckmeldungen nur bei Besetzung
+- MELD-80: Besetzung-Hilfetext kÃ¼rzen
+- MELD-80: Flag â€žAuftrittâ€œ als â€žBesetzungâ€œ beschriften
 
 ## 2026-07-18-522c8 (2026-07-18)
 
@@ -837,30 +841,30 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-07-18-47d71 (2026-07-18)
 
 - MELD-79: Fester Dirigent als Fallback wenn niemand aktiv dirigiert
-- MELD-79: Instrument-Änderung im Auftrag auf Proxy-Person speichern
+- MELD-79: Instrument-Ã„nderung im Auftrag auf Proxy-Person speichern
 - MELD-79: Dirigentenplatz nur bei ja/vielleicht belegen
-- MELD-79: Dynamischer Dirigent in Orchester-Übersicht
+- MELD-79: Dynamischer Dirigent in Orchester-Ãœbersicht
 
 ## 2026-07-18-62313 (2026-07-18)
 
-- MELD-77: Bool-Vergleich in UPDATE-Logs (Auftritt nein⇒nein)
-- MELD-77: INSERT-Logs nur befüllte Felder, UPDATE nur Diffs
+- MELD-77: Bool-Vergleich in UPDATE-Logs (Auftritt neinâ‡’nein)
+- MELD-77: INSERT-Logs nur befÃ¼llte Felder, UPDATE nur Diffs
 - MELD-77: INSERT/UPDATE-Logs verschlanken; Bool-Vergleich Auftritt
 
 ## 2026-07-18-d2e13 (2026-07-18)
 
 - MELD-75/76: Inventar-Modal-Speichern auch auf myinventories.php
 - MELD-75/76: Inventar-Modal speichert auf aktueller Seite (insurance.php)
-- MELD-75: Versichert-Checkbox ohne redundantes „ja“-Label
-- MELD-75/76: Versicherungsliste öffnet Inventar-Modal via openModal
-- MELD-75/76: Versicherungsliste öffnet Inventar-Modal; Speichern bleibt auf aktuelle Seite
+- MELD-75: Versichert-Checkbox ohne redundantes â€žjaâ€œ-Label
+- MELD-75/76: Versicherungsliste Ã¶ffnet Inventar-Modal via openModal
+- MELD-75/76: Versicherungsliste Ã¶ffnet Inventar-Modal; Speichern bleibt auf aktuelle Seite
 
 ## 2026-07-18-7f431 (2026-07-18)
 
-- MELD-74: Updater nur über perm_editConfig absichern
-- MELD-74: Updater-Zugang über Berechtigungen statt User.Admin
-- MELD-73: Insert-Log nur mit befüllten Feldern
-- MELD-73/74: Config-gated Log-Felder und Updater mit Prüfen/Update
+- MELD-74: Updater nur Ã¼ber perm_editConfig absichern
+- MELD-74: Updater-Zugang Ã¼ber Berechtigungen statt User.Admin
+- MELD-73: Insert-Log nur mit befÃ¼llten Feldern
+- MELD-73/74: Config-gated Log-Felder und Updater mit PrÃ¼fen/Update
 
 ## 2026-07-18-5aebb (2026-07-18)
 
@@ -868,7 +872,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 - MELD-72: Discord-Webhook-URL nicht mehr im App-Log
 - MELD-72: Discord-Checkbox in mail.php nur bei konfiguriertem Webhook
 - MELD-71/72: Discord-Skip nicht loggen, nur echte Fehler
-- MELD-71/72: Discord ohne Webhook still überspringen, Fehler nur loggen
+- MELD-71/72: Discord ohne Webhook still Ã¼berspringen, Fehler nur loggen
 
 ## 2026-07-18-2a4ed (2026-07-18)
 
@@ -884,7 +888,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-17-6301e (2026-07-17)
 
-- MELD-68: Rückmeldungs-Modal ohne perm_showResponse freigeben
+- MELD-68: RÃ¼ckmeldungs-Modal ohne perm_showResponse freigeben
 
 ## 2026-07-17-1ff0a (2026-07-17)
 
@@ -892,9 +896,9 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-17-432a0 (2026-07-17)
 
-- MELD-59: Listenfilter wieder funktionsfähig machen
+- MELD-59: Listenfilter wieder funktionsfÃ¤hig machen
 - MELD-59: Inventar- und Versicherungslisten mobil stapeln
-- MELD-59: Email-Ansicht für mobile Screens nutzbar machen
+- MELD-59: Email-Ansicht fÃ¼r mobile Screens nutzbar machen
 
 ## 2026-07-17-04d1a (2026-07-17)
 
@@ -902,10 +906,10 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-17-ca03c (2026-07-17)
 
-- MELD-44: Beim Email-Kopieren Grußformel nicht mitübernehmen
-- MELD-44: Fett-Markierung **…** in Discord-Konverter nicht mehr entfernen
-- MELD-44: HTML-Mails für Discord in Markdown/Klartext umwandeln
-- MELD-44: Doppelte Grußformel im Discord-Post vermeiden
+- MELD-44: Beim Email-Kopieren GruÃŸformel nicht mitÃ¼bernehmen
+- MELD-44: Fett-Markierung **â€¦** in Discord-Konverter nicht mehr entfernen
+- MELD-44: HTML-Mails fÃ¼r Discord in Markdown/Klartext umwandeln
+- MELD-44: Doppelte GruÃŸformel im Discord-Post vermeiden
 - MELD-44: Emails optional auf Discord posten
 
 ## 2026-07-17-4de70 (2026-07-17)
@@ -918,7 +922,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2026-07-17-aaa97 (2026-07-17)
 
-- MELD-18: Aushilfen auf derselben Seite löschbar machen
+- MELD-18: Aushilfen auf derselben Seite lÃ¶schbar machen
 
 ## 2026-07-17-eeab9 (2026-07-17)
 
@@ -928,18 +932,18 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 - MELD-15: Mein Profil bleibt auf Bearbeitungsseite
 - MELD-15: Zufallspasswort-Generierung nach Redirect-Fix
-- MELD-15: Form-Submit redirect zurück zur Ausgangsseite
+- MELD-15: Form-Submit redirect zurÃ¼ck zur Ausgangsseite
 
 ## 2026-07-17-7d41a (2026-07-17)
 
 - MELD-46: Anhang-Label ohne Email-ID-Hinweis
-- MELD-46: Mail-Hinweise weiter kürzen
-- MELD-46: Erklärende Hinweistexte in der Mail-UI entfernen
-- MELD-46: Mail-Tabellen auf utf8mb4 für WYSIWYG-Sonderzeichen
+- MELD-46: Mail-Hinweise weiter kÃ¼rzen
+- MELD-46: ErklÃ¤rende Hinweistexte in der Mail-UI entfernen
+- MELD-46: Mail-Tabellen auf utf8mb4 fÃ¼r WYSIWYG-Sonderzeichen
 - MELD-46: Editor um Tabelle, Zitat, Suche und Quellcode erweitern
 - MELD-46: Email-Formular und Editor-Toolbar verbreitern
-- MELD-46: WYSIWYG um Farbe, Schriftgröße und Ausrichtung erweitern
-- MELD-46: TinyMCE-WYSIWYG für Email-Texte (self-hosted)
+- MELD-46: WYSIWYG um Farbe, SchriftgrÃ¶ÃŸe und Ausrichtung erweitern
+- MELD-46: TinyMCE-WYSIWYG fÃ¼r Email-Texte (self-hosted)
 
 ## 2026-07-17-df200 (2026-07-17)
 
@@ -948,27 +952,27 @@ Automatisch aus Git-Release-Commits erzeugt.
 ## 2026-07-17-54f94 (2026-07-17)
 
 - MELD-58: Nested-Admin-Nav Position, Breite und Hover fixen
-- MELD-58: Admin-Nav in Untermenü-Gruppen gliedern
+- MELD-58: Admin-Nav in UntermenÃ¼-Gruppen gliedern
 
 ## 2026-07-17-fc3ce (2026-07-17)
 
-- MELD-34: Doppelversand und Live-Status zuverlässig machen
+- MELD-34: Doppelversand und Live-Status zuverlÃ¤ssig machen
 - MELD-34: Einheitliche Zeitstempel in Admin- und Nutzer-Ansicht
 - MELD-34: Doppelversand durch parallele Queue-Worker verhindern
-- MELD-34: Live-Status für laufenden Mailversand in der Admin-Ansicht
+- MELD-34: Live-Status fÃ¼r laufenden Mailversand in der Admin-Ansicht
 - MELD-34: HTML in Mailvorschau und Detailansichten wieder rendern
 - MELD-34: Gesendete Mails in der Admin-Ansicht lesbar
-- MELD-34: Ausführlicheres Queue-Logging und Recovery für sending
-- MELD-34: Nutzer-Posteingang, Abbrechen/Löschen und Queue-Logging
-- MELD-34: Email-Übersicht mit Status und Entwurf-Kopie
+- MELD-34: AusfÃ¼hrlicheres Queue-Logging und Recovery fÃ¼r sending
+- MELD-34: Nutzer-Posteingang, Abbrechen/LÃ¶schen und Queue-Logging
+- MELD-34: Email-Ãœbersicht mit Status und Entwurf-Kopie
 - MELD-34: Doppel-Include von include.php verhindern
 - MELD-34: Redirects in mail.php vor HTML-Ausgabe
 - MELD-34: MailJob/MailOutbox-Schema bei Bedarf anlegen
-- MELD-34: Email-Queue mit Entwürfen und Historie
+- MELD-34: Email-Queue mit EntwÃ¼rfen und Historie
 
 ## 2026-07-16-9d555 (2026-07-16)
 
-- MELD-37: Konfigänderungen im App-Log sichtbar machen
+- MELD-37: KonfigÃ¤nderungen im App-Log sichtbar machen
 
 ## 2026-07-16-7323f (2026-07-16)
 
@@ -978,20 +982,20 @@ Automatisch aus Git-Release-Commits erzeugt.
 - MELD-54: negativer Indent in Inventar-Modals vermeiden
 - MELD-54: Inventar-Modal-Typ auf inventar umbenennen
 - MELD-54: Inventar-Modal robuster machen
-- MELD-54: load_by_id-Prüfung korrigieren
+- MELD-54: load_by_id-PrÃ¼fung korrigieren
 - MELD-54: Listen-Modals per AJAX nachladen
 - MELD-53: Schema Klassisch an Live-Farben anpassen
 - MELD-53: Farbschema-Wechsel wendet Farben wieder an
 - MELD-53: sqlerror-Doppeldefinition im Apply-Script vermeiden
-- MELD-53: Schemata vollständig mit Markenkit-Farben füllen
-- MELD-53: fünf editierbare Farbschemata mit Auswahl in der Config
+- MELD-53: Schemata vollstÃ¤ndig mit Markenkit-Farben fÃ¼llen
+- MELD-53: fÃ¼nf editierbare Farbschemata mit Auswahl in der Config
 - MELD-53: Default-Farbschema auf Vereins-Markenkit
-- MELD-52: Farben frei wählbar per Hex-Color-Picker
+- MELD-52: Farben frei wÃ¤hlbar per Hex-Color-Picker
 - MELD-50: Passwort setzen + Mail-Fehler gezielt behandeln
-- MELD-47: Log-Einträge mit fett hervorgehobenen Werten vereinheitlichen.
+- MELD-47: Log-EintrÃ¤ge mit fett hervorgehobenen Werten vereinheitlichen.
 - MELD-47: Instrumente in Inventar vereinheitlichen und Anzeige vereinfachen.
 - MELD-47: Inventarnummern pro Typ mit Prefix und Seed-Daten.
-- MELD-29: konsistente DB-Erstellung, Prüfung und Reparatur.
+- MELD-29: konsistente DB-Erstellung, PrÃ¼fung und Reparatur.
 - MELD-29: Automatische Datenbankgenerierung und Update
 
 ## 2025-01-02-59539 (2025-01-02)
@@ -1144,7 +1148,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 - MELD-17 adding Aushilfe Log to termin modal
 - MELD-16 removing class User and Termin
 - MELD-19-Benutzer-sind-nicht-bearbeitbar
-- MELD-2 MELD-3 Aushilfen und Musiker werden jetzt mit korrektem Instru…
+- MELD-2 MELD-3 Aushilfen und Musiker werden jetzt mit korrektem Instruâ€¦
 - MELD-17-Aushilfe-From-in-Termin-Detail-hat-Layout-Fehler
 - MELD-16-user.php-class-rufen-Termin-und-User-in-getChanges-auf
 
@@ -1226,7 +1230,7 @@ Automatisch aus Git-Release-Commits erzeugt.
 - fixing instrument option not working
 - fixing missing $ in aushilfen class
 - aushilfen only for auftritt via index-modal
-- aushilfen für termine und schichten
+- aushilfen fÃ¼r termine und schichten
 - fixed orchestra
 - aushilfen class declared
 
@@ -1317,15 +1321,15 @@ Automatisch aus Git-Release-Commits erzeugt.
 
 ## 2020-10-11-198c7 (2020-10-11)
 
-- shifts jetzt mit 2-3 buttons je nach Kapazität
-- Archiv für vergangene Meldungen
+- shifts jetzt mit 2-3 buttons je nach KapazitÃ¤t
+- Archiv fÃ¼r vergangene Meldungen
 - bugfix, missing crontime and date in sendnewappmnts
 - test bar group width
-- barchart für statistik
+- barchart fÃ¼r statistik
 - update log format meldung
 - html-Emailvorschau
 - covid-meldung beim einloggen
-- bugfix anzeige kapazität
-- kapazität für termine
-- instrument wählbar
+- bugfix anzeige kapazitÃ¤t
+- kapazitÃ¤t fÃ¼r termine
+- instrument wÃ¤hlbar
 - schichten erstellen und bearbeiten
