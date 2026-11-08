@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-11-08-05270 (2026-11-08)
+
+- MELD-254: Label Zusatzangabe/Freitext zu Abfrage
+
 ## 2026-11-08-29b7d (2026-11-08)
 
 - MELD-253: Termine am selben Tag nach Beginn sortieren
