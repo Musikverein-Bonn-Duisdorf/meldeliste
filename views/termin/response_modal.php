@@ -4,7 +4,8 @@
  * Expects: $terminId, $filterRegister, $terminName, $showOrchestra,
  * $orchestraFull, $orchestraActive, $showChildrenHeader, $showGuestsHeader,
  * $whoYesHtml, $whoMaybeHtml, $whoNoHtml, $countYes, $countMaybe, $countNo,
- * $canEditResponse (optional), $userCatalogJson (optional)
+ * $canEditResponse (optional), $userCatalogJson (optional),
+ * $abfrageText (optional; MELD-255 Frage-Label der Abfrage)
  */
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -15,6 +16,7 @@ $countNo = isset($countNo) ? (int)$countNo : 0;
 $canEditResponse = !empty($canEditResponse);
 $userCatalogJson = isset($userCatalogJson) ? (string)$userCatalogJson : '[]';
 $filterRegister = isset($filterRegister) ? (int)$filterRegister : 0;
+$abfrageText = isset($abfrageText) ? trim((string)$abfrageText) : '';
 $yesColor = $GLOBALS['optionsDB']['colorBtnYes'];
 $maybeColor = $GLOBALS['optionsDB']['colorBtnMaybe'];
 $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
@@ -62,6 +64,12 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
 <?php } ?>
 
   <div class="melde-response-modal-lists">
+<?php if($abfrageText !== '') { ?>
+    <div class="melde-response-abfrage" aria-label="Abfrage">
+      <span class="melde-response-abfrage-label">Abfrage</span>
+      <p class="melde-response-abfrage-text"><?php echo $h($abfrageText); ?></p>
+    </div>
+<?php } ?>
     <section class="melde-response-section" aria-labelledby="resp-yes">
       <h3 id="resp-yes" class="melde-response-section-title">
         <span>Zusagen</span>

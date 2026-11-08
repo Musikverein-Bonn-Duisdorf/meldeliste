@@ -4583,6 +4583,35 @@ body.loan-form-sign-open {
   opacity: 0.8;
 }
 
+/* MELD-255: Abfrage-Frage über den Zusagen */
+.melde-response-abfrage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  margin: 0 0 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.melde-response-abfrage-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.melde-response-abfrage-text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
 .melde-response-list {
   display: grid;
   gap: 0.35rem;

@@ -3200,6 +3200,9 @@ ORDER BY `Nachname`, `Vorname`;",
             'orchestraActive' => $orchestraActive,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
+            'abfrageText' => ($this->defaultFreeText !== null && trim((string)$this->defaultFreeText) !== '')
+                ? trim((string)$this->defaultFreeText)
+                : '',
             'whoYesHtml' => $whoYesHtml,
             'whoMaybeHtml' => $whoMaybeHtml,
             'whoNoHtml' => $whoNoHtml,
