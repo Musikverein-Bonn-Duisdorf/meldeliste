@@ -6388,15 +6388,30 @@ select.profile-control {
 
 .melde-response-chip-abfrage {
   display: block;
+  box-sizing: border-box;
   max-width: 100%;
   padding: 0.12rem 0.4rem;
+  border: 1px solid #c9b87a;
   border-radius: 0.2rem;
-  background: rgba(0, 0, 0, 0.06);
+  background: #f7f3e3;
   font-size: 0.78rem;
   line-height: 1.25;
   word-break: break-word;
   white-space: normal;
-  opacity: 0.92;
+  color: #111;
+}
+
+/* Same register tint as person chip (var inherited from unit) */
+.melde-response-chip-unit--register .melde-response-chip-abfrage {
+  background-color: var(--melde-chip-reg);
+  border-color: var(--melde-chip-reg);
+}
+
+@supports (background: color-mix(in srgb, red 50%, white)) {
+  .melde-response-chip-unit--register .melde-response-chip-abfrage {
+    background-color: color-mix(in srgb, var(--melde-chip-reg) 42%, white);
+    border-color: color-mix(in srgb, var(--melde-chip-reg) 55%, #ccc);
+  }
 }
 
 .melde-response-readonly-section .melde-response-readonly-chip,
@@ -6451,8 +6466,11 @@ select.profile-control {
   white-space: nowrap;
 }
 
-.melde-response-editable-chip--register {
+.melde-response-chip-unit--register {
   --melde-chip-reg: transparent;
+}
+
+.melde-response-editable-chip--register {
   background-color: var(--melde-chip-reg);
   border-color: var(--melde-chip-reg);
   color: #111;

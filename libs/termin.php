@@ -2918,21 +2918,26 @@ ORDER BY `Nachname`, `Vorname`;",
         return $title;
     }
 
+    /**
+     * @return array{0:string,1:string,2:string} chipCls, unitCls, unitStyle
+     */
     private function responseChipAttrsFromEntry(array $entry, callable $h) {
         $regHex = '';
         if(!empty($entry['registerColor']) && function_exists('normalizeHexColor')) {
             $regHex = normalizeHexColor($entry['registerColor']);
         }
         $chipCls = 'mail-recipient-chip';
-        $chipStyle = '';
+        $unitCls = 'melde-response-chip-unit';
+        $unitStyle = '';
         if($regHex !== '') {
             $chipCls .= ' melde-response-editable-chip--register';
-            $chipStyle = ' style="--melde-chip-reg:'.$h($regHex).'"';
+            $unitCls .= ' melde-response-chip-unit--register';
+            $unitStyle = ' style="--melde-chip-reg:'.$h($regHex).'"';
         }
         else {
             $chipCls .= ' mail-recipient-chip--user';
         }
-        return array($chipCls, $chipStyle);
+        return array($chipCls, $unitCls, $unitStyle);
     }
 
     /** Visible Abfrage line under a response chip (MELD-255). */
@@ -2950,7 +2955,7 @@ ORDER BY `Nachname`, `Vorname`;",
         }
         $name = isset($entry['name']) ? (string)$entry['name'] : '';
         $title = $this->responseChipTitleFromEntry($entry, $name);
-        list($chipCls, $chipStyle) = $this->responseChipAttrsFromEntry($entry, $h);
+        list($chipCls, $unitCls, $unitStyle) = $this->responseChipAttrsFromEntry($entry, $h);
         $chipCls .= ' melde-response-readonly-chip';
         $mayOpen = function_exists('entityMayOpen') && entityMayOpen('user', $userId);
         if($mayOpen) {
@@ -2958,12 +2963,12 @@ ORDER BY `Nachname`, `Vorname`;",
         }
         $titleAttr = $title !== $name ? ' title="'.$h($title).'"' : '';
         $abfrage = $this->responseChipAbfrageHtml($entry, $h);
-        $html = '<span class="melde-response-chip-unit" role="listitem">';
+        $html = '<span class="'.$unitCls.'" role="listitem"'.$unitStyle.'>';
         $html .= '<span class="'.$chipCls.'"';
         if($mayOpen) {
             $html .= ' tabindex="0" data-entity-type="user" data-entity-id="'.$userId.'"';
         }
-        $html .= $chipStyle.$titleAttr.'>';
+        $html .= $titleAttr.'>';
         $html .= '<span>'.$h($name).'</span>';
         $html .= '</span>';
         $html .= $abfrage;
@@ -3040,13 +3045,13 @@ ORDER BY `Nachname`, `Vorname`;",
         }
         $name = isset($entry['name']) ? (string)$entry['name'] : '';
         $title = $this->responseChipTitleFromEntry($entry, $name);
-        list($chipCls, $chipStyle) = $this->responseChipAttrsFromEntry($entry, $h);
+        list($chipCls, $unitCls, $unitStyle) = $this->responseChipAttrsFromEntry($entry, $h);
         $chipCls .= ' melde-response-editable-chip';
         $titleAttr = $title !== $name ? ' title="'.$h($title).'"' : '';
         $abfrage = $this->responseChipAbfrageHtml($entry, $h);
-        $html = '<span class="melde-response-chip-unit" role="listitem">';
+        $html = '<span class="'.$unitCls.'" role="listitem"'.$unitStyle.'>';
         $html .= '<span class="'.$chipCls.'"'
-            .' data-user-id="'.$userId.'" data-melde-wert="'.(int)$wert.'"'.$chipStyle.$titleAttr.'>';
+            .' data-user-id="'.$userId.'" data-melde-wert="'.(int)$wert.'"'.$titleAttr.'>';
         $html .= '<span>'.$h($name).'</span>';
         $html .= '<button type="button" class="mail-recipient-chip-remove" aria-label="Entfernen">&times;</button>';
         $html .= '</span>';
@@ -3195,7 +3200,6 @@ ORDER BY `Nachname`, `Vorname`;",
             'orchestraActive' => $orchestraActive,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
-            'showFreeTextHint' => ($this->defaultFreeText !== null && trim((string)$this->defaultFreeText) !== ''),
             'whoYesHtml' => $whoYesHtml,
             'whoMaybeHtml' => $whoMaybeHtml,
             'whoNoHtml' => $whoNoHtml,
