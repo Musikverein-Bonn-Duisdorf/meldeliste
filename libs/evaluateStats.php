@@ -64,7 +64,7 @@ function evaluateAttendanceSeries($days, $besetzungOnly = false) {
         .' LEFT JOIN `%sMeldungen` `m` ON `m`.`Termin` = `t`.`Index`'
         .' WHERE %s'
         .' GROUP BY `t`.`Index`, `t`.`Datum`'
-        .' ORDER BY `t`.`Datum` ASC, `t`.`Index` ASC;',
+        .' ORDER BY `t`.`Datum` ASC, COALESCE(`t`.`Uhrzeit`, \'00:00:00\') ASC, `t`.`Index` ASC;',
         $prefix,
         $prefix,
         $window

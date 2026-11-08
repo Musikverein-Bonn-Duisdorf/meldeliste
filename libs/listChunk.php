@@ -371,9 +371,94 @@ function listChunkLog($beforeIndex, $limit, $q = '', $types = null) {
 }
 
 /**
+ * Normalize Termin.Uhrzeit for sort/cursor (MELD-253). Empty/NULL → 00:00:00.
+ * @param mixed $uhrzeit
+ * @return string HH:MM:SS
+ */
+function listChunkTerminSortTime($uhrzeit) {
+    $t = trim((string)$uhrzeit);
+    if($t === '') {
+        return '00:00:00';
+    }
+    if(preg_match('/^\d{1,2}:\d{2}(:\d{2})?$/', $t)) {
+        $parts = explode(':', $t);
+        $h = str_pad((string)((int)$parts[0]), 2, '0', STR_PAD_LEFT);
+        $m = str_pad((string)((int)$parts[1]), 2, '0', STR_PAD_LEFT);
+        $s = isset($parts[2]) ? str_pad((string)((int)$parts[2]), 2, '0', STR_PAD_LEFT) : '00';
+        return $h.':'.$m.':'.$s;
+    }
+    return '00:00:00';
+}
+
+/**
+ * Parse termin list cursor: "datum|uhrzeit|id" (uhrzeit may be empty).
+ * Legacy "datum|id" kept (uhrzeit treated as empty).
+ * @return array{0:string,1:string,2:int} datum, sort-time HH:MM:SS, id
+ */
+function listChunkParseTerminCursor($cursor) {
+    $cursorDatum = '';
+    $cursorZeit = '00:00:00';
+    $cursorId = 0;
+    if($cursor === '' || strpos($cursor, '|') === false) {
+        return array($cursorDatum, $cursorZeit, $cursorId);
+    }
+    $parts = explode('|', $cursor);
+    if(count($parts) >= 3) {
+        $cursorDatum = (string)$parts[0];
+        $cursorZeit = listChunkTerminSortTime($parts[1]);
+        $cursorId = (int)$parts[2];
+    }
+    else {
+        $cursorDatum = (string)$parts[0];
+        $cursorZeit = '00:00:00';
+        $cursorId = (int)$parts[1];
+    }
+    return array($cursorDatum, $cursorZeit, $cursorId);
+}
+
+/**
+ * SQL predicate for rows after/before cursor in Datum+Uhrzeit+Index order (MELD-253).
+ * @param string $mode 'future'|'past'
+ * @param string $cursorDatum Y-m-d
+ * @param string $cursorZeit HH:MM:SS (already normalized)
+ * @param int $cursorId
+ * @return string SQL fragment (no leading AND), values escaped
+ */
+function listChunkTermineCursorSql($mode, $cursorDatum, $cursorZeit, $cursorId) {
+    $d = mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum);
+    $z = mysqli_real_escape_string($GLOBALS['conn'], $cursorZeit);
+    $id = (int)$cursorId;
+    $zeitExpr = "COALESCE(`Uhrzeit`, '00:00:00')";
+    if($mode === 'past') {
+        return sprintf(
+            '((`Datum` < "%s") OR (`Datum` = "%s" AND %s < "%s") OR (`Datum` = "%s" AND %s = "%s" AND `Index` < %d))',
+            $d,
+            $d,
+            $zeitExpr,
+            $z,
+            $d,
+            $zeitExpr,
+            $z,
+            $id
+        );
+    }
+    return sprintf(
+        '((`Datum` > "%s") OR (`Datum` = "%s" AND %s > "%s") OR (`Datum` = "%s" AND %s = "%s" AND `Index` > %d))',
+        $d,
+        $d,
+        $zeitExpr,
+        $z,
+        $d,
+        $zeitExpr,
+        $z,
+        $id
+    );
+}
+
+/**
  * @param string $mode 'future'|'past'
  * @param string $render 'basic'|'response'
- * @param string $cursor "datum|id" or empty for start
+ * @param string $cursor "datum|uhrzeit|id" or legacy "datum|id" or empty for start
  */
 function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
     $limit = listChunkLimit($limit);
@@ -383,13 +468,7 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
         $userId = (int)$_SESSION['userid'];
     }
 
-    $cursorDatum = '';
-    $cursorId = 0;
-    if($cursor !== '' && strpos($cursor, '|') !== false) {
-        $parts = explode('|', $cursor, 2);
-        $cursorDatum = $parts[0];
-        $cursorId = (int)$parts[1];
-    }
+    list($cursorDatum, $cursorZeit, $cursorId) = listChunkParseTerminCursor($cursor);
 
     $html = '';
     $emitted = 0;
@@ -397,26 +476,29 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
     $hasMore = false;
     $batch = max($limit * 3, 50);
     $safety = 0;
+    $order = ($mode === 'past')
+        ? 'ORDER BY `Datum` DESC, COALESCE(`Uhrzeit`, \'00:00:00\') DESC, `Index` DESC'
+        : 'ORDER BY `Datum` ASC, COALESCE(`Uhrzeit`, \'00:00:00\') ASC, `Index` ASC';
 
     while($emitted < $limit && $safety < 20) {
         $safety++;
         if($mode === 'past') {
             if($cursorDatum !== '') {
                 $sql = sprintf(
-                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` <= "%s" AND ((`Datum` < "%s") OR (`Datum` = "%s" AND `Index` < %d)) ORDER BY `Datum` DESC, `Index` DESC LIMIT %d;',
+                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` <= "%s" AND %s %s LIMIT %d;',
                     $GLOBALS['dbprefix'],
                     mysqli_real_escape_string($GLOBALS['conn'], $now),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    $cursorId,
+                    listChunkTermineCursorSql('past', $cursorDatum, $cursorZeit, $cursorId),
+                    $order,
                     $batch
                 );
             }
             else {
                 $sql = sprintf(
-                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` <= "%s" ORDER BY `Datum` DESC, `Index` DESC LIMIT %d;',
+                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` <= "%s" %s LIMIT %d;',
                     $GLOBALS['dbprefix'],
                     mysqli_real_escape_string($GLOBALS['conn'], $now),
+                    $order,
                     $batch
                 );
             }
@@ -424,20 +506,20 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
         else {
             if($cursorDatum !== '') {
                 $sql = sprintf(
-                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` >= "%s" AND ((`Datum` > "%s") OR (`Datum` = "%s" AND `Index` > %d)) ORDER BY `Datum` ASC, `Index` ASC LIMIT %d;',
+                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` >= "%s" AND %s %s LIMIT %d;',
                     $GLOBALS['dbprefix'],
                     mysqli_real_escape_string($GLOBALS['conn'], $now),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    $cursorId,
+                    listChunkTermineCursorSql('future', $cursorDatum, $cursorZeit, $cursorId),
+                    $order,
                     $batch
                 );
             }
             else {
                 $sql = sprintf(
-                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum` ASC, `Index` ASC LIMIT %d;',
+                    'SELECT `Index`, `Datum`, `Uhrzeit` FROM `%sTermine` WHERE `Datum` >= "%s" %s LIMIT %d;',
                     $GLOBALS['dbprefix'],
                     mysqli_real_escape_string($GLOBALS['conn'], $now),
+                    $order,
                     $batch
                 );
             }
@@ -459,8 +541,10 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
         $batchHadVisible = false;
         foreach($rows as $row) {
             $cursorDatum = $row['Datum'];
+            $cursorZeit = listChunkTerminSortTime(isset($row['Uhrzeit']) ? $row['Uhrzeit'] : '');
             $cursorId = (int)$row['Index'];
-            $nextCursor = $cursorDatum.'|'.$cursorId;
+            $rawZeit = isset($row['Uhrzeit']) && $row['Uhrzeit'] !== null ? (string)$row['Uhrzeit'] : '';
+            $nextCursor = $cursorDatum.'|'.$rawZeit.'|'.$cursorId;
 
             $M = new Termin;
             $M->load_by_id($cursorId);
@@ -498,22 +582,18 @@ function listChunkTermine($mode, $render, $cursor, $limit, $userId = 0) {
             // Check if anything remains after cursor
             if($mode === 'past') {
                 $check = sprintf(
-                    'SELECT `Index` FROM `%sTermine` WHERE `Datum` <= "%s" AND ((`Datum` < "%s") OR (`Datum` = "%s" AND `Index` < %d)) LIMIT 1;',
+                    'SELECT `Index` FROM `%sTermine` WHERE `Datum` <= "%s" AND %s LIMIT 1;',
                     $GLOBALS['dbprefix'],
                     mysqli_real_escape_string($GLOBALS['conn'], $now),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    $cursorId
+                    listChunkTermineCursorSql('past', $cursorDatum, $cursorZeit, $cursorId)
                 );
             }
             else {
                 $check = sprintf(
-                    'SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND ((`Datum` > "%s") OR (`Datum` = "%s" AND `Index` > %d)) LIMIT 1;',
+                    'SELECT `Index` FROM `%sTermine` WHERE `Datum` >= "%s" AND %s LIMIT 1;',
                     $GLOBALS['dbprefix'],
                     mysqli_real_escape_string($GLOBALS['conn'], $now),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    mysqli_real_escape_string($GLOBALS['conn'], $cursorDatum),
-                    $cursorId
+                    listChunkTermineCursorSql('future', $cursorDatum, $cursorZeit, $cursorId)
                 );
             }
             $cdb = mysqli_query($GLOBALS['conn'], $check);
