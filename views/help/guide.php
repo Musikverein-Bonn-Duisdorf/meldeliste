@@ -31,7 +31,7 @@ $sections[] = array(
     'body' => '
 <p>Auf dem Desktop steht die Navigation links (Icons mit Beschriftung). Auf Tablet und Smartphone unten; unter <b>Mehr</b> findest du weitere Einträge (u.&nbsp;a. Mein Profil), Admin und Ausloggen.</p>
 <ul class="help-list">
-<li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine und schnelles Melden</li>
+<li><i class="far fa-calendar-alt"></i> <b>Termine</b> – bevorstehende Termine (am selben Tag nach Beginn) und schnelles Melden</li>
 <li><i class="fas fa-calendar"></i> <b>Kalender</b> – Monatsübersicht der für dich sichtbaren Termine (Farbe = deine Meldung; ausgegraut wie in der Übersicht, wenn du nicht zur Zielgruppe gehörst; bei Schichten erscheinen die einzelnen Schichten mit ihren Zeiten; Klick öffnet Meldeabfrage, „Weitere Optionen“ die Details; bei vielen Einträgen am selben Tag öffnet <b>+N</b> die Tagesauswahl); Info-Button für Abo-Link, Drucken für alle kommenden Termine als Tabelle</li>
 <li><i class="fas fa-envelope"></i> <b>Meine Nachrichten</b> – empfangene Mails aus der Meldeliste (Badge bei ungelesenen)</li>
 '.((function_exists('archivFeatureEnabled') && archivFeatureEnabled() && class_exists('CollectionGrant') && count(CollectionGrant::listVisibleToUser((int)$_SESSION['userid'])) > 0) ? '<li><i class="fas fa-book-open"></i> <b>Meine Noten</b> – freigeschaltete Noten aus dem Notenarchiv</li>' : '').'

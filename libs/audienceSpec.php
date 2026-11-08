@@ -1055,7 +1055,7 @@ class AudienceSpec
         if($includeTermine) {
             $today = date('Y-m-d');
             $sqlTerm = sprintf(
-                'SELECT `Index`, `Name`, `Datum` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, `Name` LIMIT 200;',
+                'SELECT `Index`, `Name`, `Datum` FROM `%sTermine` WHERE `Datum` >= "%s" ORDER BY `Datum`, COALESCE(`Uhrzeit`, \'00:00:00\'), `Name` LIMIT 200;',
                 $GLOBALS['dbprefix'],
                 mysqli_real_escape_string($GLOBALS['conn'], $today)
             );
