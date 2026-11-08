@@ -2,6 +2,15 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-11-08-cb27e (2026-11-08)
+
+- MELD-255: Abfrage-Frage im Meldungen-Modal anzeigen
+- MELD-255: Abfrage-Meta in Chip-Farbe, Hinweis entfernen
+- MELD-255: Abfrage-Antworten in Rueckmeldung sichtbar
+- MELD-255: Abfrage-Frage im Meldungen-Modal
+- MELD-255: Abfrage-Meta Chip-Farbe, Hinweis weg
+- MELD-255: Abfrage in Rueckmeldung sichtbar
+
 ## 2026-11-08-05270 (2026-11-08)
 
 - MELD-254: Label Zusatzangabe/Freitext zu Abfrage
