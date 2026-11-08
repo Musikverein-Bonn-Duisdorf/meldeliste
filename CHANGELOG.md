@@ -2,6 +2,10 @@
 
 Automatisch aus Git-Release-Commits erzeugt.
 
+## 2026-11-08-29b7d (2026-11-08)
+
+- MELD-253: Termine am selben Tag nach Beginn sortieren
+
 ## 2026-10-23-90b9c (2026-10-23)
 
 - MELD-252: Log-Level-Filter in Page-Chrome, Fade unter den Chips
