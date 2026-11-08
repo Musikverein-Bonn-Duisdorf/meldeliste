@@ -6370,10 +6370,33 @@ select.profile-control {
 .melde-response-readonly-chips {
   display: flex;
   flex-flow: row wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.35rem;
   margin: 0;
   min-height: 0;
+}
+
+/* MELD-255: chip + optional Abfrage under name */
+.melde-response-chip-unit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  max-width: min(100%, 16rem);
+  min-width: 0;
+}
+
+.melde-response-chip-abfrage {
+  display: block;
+  max-width: 100%;
+  padding: 0.12rem 0.4rem;
+  border-radius: 0.2rem;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 0.78rem;
+  line-height: 1.25;
+  word-break: break-word;
+  white-space: normal;
+  opacity: 0.92;
 }
 
 .melde-response-readonly-section .melde-response-readonly-chip,
@@ -6416,7 +6439,7 @@ select.profile-control {
 .melde-response-editable-chips {
   display: flex;
   flex-flow: row wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.35rem;
   margin: 0;
   min-height: 0;

@@ -2715,7 +2715,8 @@ ORDER BY `Nachname`, `Vorname`;",
         if($GLOBALS['optionsDB']['showGuestOption'] && $bus) {
             $entry['guests'] = ($wert == 2) ? false : (int)$guests;
         }
-        if(($wert == 1 || $wert == 3) && $this->defaultFreeText && isAdmin() && $userId) {
+        /* MELD-255: Abfrage für alle sichtbar, die die Rückmeldung sehen (nicht nur Admin-Tooltip) */
+        if(($wert == 1 || $wert == 3) && $this->defaultFreeText && $userId) {
             $map = $this->getFreeTextByUser();
             $uid = (int)$userId;
             if(isset($map[$uid]) && $map[$uid] !== '') {
@@ -2934,6 +2935,14 @@ ORDER BY `Nachname`, `Vorname`;",
         return array($chipCls, $chipStyle);
     }
 
+    /** Visible Abfrage line under a response chip (MELD-255). */
+    private function responseChipAbfrageHtml(array $entry, callable $h) {
+        if(!isset($entry['freeText']) || $entry['freeText'] === null || (string)$entry['freeText'] === '') {
+            return '';
+        }
+        return '<span class="melde-response-chip-abfrage">'.$h((string)$entry['freeText']).'</span>';
+    }
+
     private function renderReadOnlyResponseChipHtml(array $entry, callable $h) {
         $userId = isset($entry['userId']) ? (int)$entry['userId'] : 0;
         if($userId < 1) {
@@ -2948,12 +2957,16 @@ ORDER BY `Nachname`, `Vorname`;",
             $chipCls .= ' entity-open';
         }
         $titleAttr = $title !== $name ? ' title="'.$h($title).'"' : '';
-        $html = '<span class="'.$chipCls.'" role="listitem"';
+        $abfrage = $this->responseChipAbfrageHtml($entry, $h);
+        $html = '<span class="melde-response-chip-unit" role="listitem">';
+        $html .= '<span class="'.$chipCls.'"';
         if($mayOpen) {
             $html .= ' tabindex="0" data-entity-type="user" data-entity-id="'.$userId.'"';
         }
         $html .= $chipStyle.$titleAttr.'>';
         $html .= '<span>'.$h($name).'</span>';
+        $html .= '</span>';
+        $html .= $abfrage;
         $html .= '</span>';
         return $html;
     }
@@ -3030,10 +3043,14 @@ ORDER BY `Nachname`, `Vorname`;",
         list($chipCls, $chipStyle) = $this->responseChipAttrsFromEntry($entry, $h);
         $chipCls .= ' melde-response-editable-chip';
         $titleAttr = $title !== $name ? ' title="'.$h($title).'"' : '';
-        $html = '<span class="'.$chipCls.'" role="listitem"'
+        $abfrage = $this->responseChipAbfrageHtml($entry, $h);
+        $html = '<span class="melde-response-chip-unit" role="listitem">';
+        $html .= '<span class="'.$chipCls.'"'
             .' data-user-id="'.$userId.'" data-melde-wert="'.(int)$wert.'"'.$chipStyle.$titleAttr.'>';
         $html .= '<span>'.$h($name).'</span>';
         $html .= '<button type="button" class="mail-recipient-chip-remove" aria-label="Entfernen">&times;</button>';
+        $html .= '</span>';
+        $html .= $abfrage;
         $html .= '</span>';
         return $html;
     }
@@ -3178,6 +3195,7 @@ ORDER BY `Nachname`, `Vorname`;",
             'orchestraActive' => $orchestraActive,
             'showChildrenHeader' => ($GLOBALS['optionsDB']['showChildOption'] && $bus),
             'showGuestsHeader' => ($GLOBALS['optionsDB']['showGuestOption'] && $bus),
+            'showFreeTextHint' => ($this->defaultFreeText !== null && trim((string)$this->defaultFreeText) !== ''),
             'whoYesHtml' => $whoYesHtml,
             'whoMaybeHtml' => $whoMaybeHtml,
             'whoNoHtml' => $whoNoHtml,

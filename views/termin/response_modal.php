@@ -4,7 +4,8 @@
  * Expects: $terminId, $filterRegister, $terminName, $showOrchestra,
  * $orchestraFull, $orchestraActive, $showChildrenHeader, $showGuestsHeader,
  * $whoYesHtml, $whoMaybeHtml, $whoNoHtml, $countYes, $countMaybe, $countNo,
- * $canEditResponse (optional), $userCatalogJson (optional)
+ * $canEditResponse (optional), $userCatalogJson (optional),
+ * $showFreeTextHint (optional; MELD-255 Abfrage)
  */
 $h = function ($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -15,6 +16,7 @@ $countNo = isset($countNo) ? (int)$countNo : 0;
 $canEditResponse = !empty($canEditResponse);
 $userCatalogJson = isset($userCatalogJson) ? (string)$userCatalogJson : '[]';
 $filterRegister = isset($filterRegister) ? (int)$filterRegister : 0;
+$showFreeTextHint = !empty($showFreeTextHint);
 $yesColor = $GLOBALS['optionsDB']['colorBtnYes'];
 $maybeColor = $GLOBALS['optionsDB']['colorBtnMaybe'];
 $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
@@ -67,12 +69,13 @@ $noColor = $GLOBALS['optionsDB']['colorBtnNo'];
         <span>Zusagen</span>
         <span class="melde-response-chip <?php echo $h($yesColor); ?>">&#10004; <?php echo $countYes; ?></span>
       </h3>
-<?php if($showChildrenHeader || $showGuestsHeader) { ?>
+<?php if($showChildrenHeader || $showGuestsHeader || $showFreeTextHint) { ?>
       <p class="melde-response-section-hint">
 <?php
     $hints = array();
     if($showChildrenHeader) $hints[] = 'Kinder';
     if($showGuestsHeader) $hints[] = 'Gäste';
+    if($showFreeTextHint) $hints[] = 'Abfrage';
     echo $h(implode(' · ', $hints).' erscheinen als Zusatz bei der Person');
 ?>
       </p>
