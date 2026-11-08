@@ -242,7 +242,7 @@ if($fill && $n && (int)$n->Index > 0 && !empty($GLOBALS['googlemapsapi']) && ($n
         </div>
       </div>
       <div class="profile-field">
-          <label class="profile-label" for="termin-freetext">Freitext</label>
+          <label class="profile-label" for="termin-freetext">Abfrage</label>
           <input id="termin-freetext" class="w3-input w3-border profile-control <?php echo htmlspecialchars($inputBg, ENT_QUOTES, 'UTF-8'); ?>" name="defaultFreeText" type="text" <?php if($fill) echo 'value="'.htmlspecialchars((string)$n->defaultFreeText, ENT_QUOTES, 'UTF-8').'"'; ?>>
       </div>
       <div class="profile-prefs profile-prefs--grid termin-opts">

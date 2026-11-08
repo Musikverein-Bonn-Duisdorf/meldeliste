@@ -1964,7 +1964,7 @@ class Termin
             $ftVal = $ft->Text ? $h($ft->Text) : '';
             $ph = $h($this->defaultFreeText);
             $str .= '<div class="melde-extra melde-freetext" data-melde-stop>';
-            $str .= '<label class="melde-extra-label" for="FreeText'.$tid.'">Zusatzangabe</label>';
+            $str .= '<label class="melde-extra-label" for="FreeText'.$tid.'">Abfrage</label>';
             $str .= '<input type="text" id="FreeText'.$tid.'" name="AppmntFreeTextResponse" class="w3-input w3-border melde-freetext-input '.$GLOBALS['optionsDB']['colorInputBackground'].'" placeholder="'.$ph.'" value="'.$ftVal.'">';
             $str .= '<button type="button" class="w3-btn w3-border w3-border-black '.$GLOBALS['optionsDB']['colorBtnSubmit'].'" onclick="meldeFT('.$user.', '.$tid.')"><b>speichern</b></button>';
             $str .= '</div>';
